@@ -1,0 +1,218 @@
+# Travix – AI-Powered Travel Platform
+
+## Project Summary
+
+Travix is an intelligent travel platform that serves as a personal AI travel advisor — from initial inspiration to end-to-end booking. The app combines conversational AI planning, real-time offer search, interactive trip management, and on-trip support into a single, cohesive experience.
+
+---
+
+## Problem Statement
+
+Travel planning today is fragmented across dozens of websites, apps, and services. Travelers must manually compare flights, trains, hotels, activities, and car rentals — often losing track of options, budgets, and preferences. Existing tools either focus on a single booking category or lack the intelligence to adapt to a traveler's real wishes.
+
+Travix solves this by providing a single AI-powered assistant that understands natural language, respects user preferences strictly, searches for real data, and manages the entire trip lifecycle.
+
+---
+
+## Target Audience
+
+- Leisure travelers (couples, families, solo) who want a personalized, stress-free planning experience
+- Users who value transparency (real offers, no fabricated data)
+- Travelers who want to resume interrupted planning sessions at any time
+
+---
+
+## Core Principles
+
+1. **User wishes are sacred** — If a user says "train to Paris," Travix shows only trains, never flights. Budget, dates, transport mode, and accommodation type are always respected.
+2. **No fabricated data** — Travix uses live internet search to find real hotels, flights, trains, and activities. If no results exist, Travix says so honestly.
+3. **Conversational, step-by-step** — The AI asks one question at a time, never overwhelming the user with multiple simultaneous questions.
+4. **Never lose work** — Interrupted planning sessions are auto-saved as drafts with full chat history.
+5. **Everything is interactive** — Every trip component (flight, hotel, train, activity) is clickable and editable through the AI chat.
+
+---
+
+## Key Features
+
+### 1. AI Travel Advisor (KI-Chat)
+- Messenger-style chat interface with animated Travix avatar (states: greeting, thinking, writing, searching, happy, error)
+- One-question-at-a-time dialogue flow for trip planning
+- Strict transport mode enforcement (train → trains only, flight → flights only, bus/ferry/car rental equally strict)
+- Real data search via `add_context_from_internet` — no fabricated offers, hotels, or train connections
+- Voice input (browser TTS) and text-to-speech output
+- Quick reply suggestions based on context
+- Trip summary card with inline "save & view" action
+
+### 2. Real Hotel Search
+- Searches multiple real hotels (minimum 3) with full details:
+  - Hotel name, star rating, user rating, number of reviews
+  - Price per night + total price
+  - Location, distance to station/airport
+  - Room categories, breakfast included
+  - Amenities, cancellation policy
+  - Multiple images (Unsplash)
+  - Direct booking URL
+- Hotels displayed as comparable cards; user selects one → auto-integrated into trip
+
+### 3. Real Train/Bus/Ferry Search
+- Echte Verbindungen with:
+  - Departure/arrival stations, times, duration
+  - Transfers, operator/bahnunternehmen
+  - Price, available classes, baggage info
+- If no connection found → honest message + alternatives
+
+### 4. Interactive Trip Plan (BuchungsSeite)
+- Dynamic, not static — every component is clickable
+- Sections: Flights ✈️, Trains 🚆, Hotels 🏨, Car Rentals 🚗, Activities 🎟️
+- Empty sections show "Noch kein Hotel ausgewählt" with a "+ Suchen" button → opens KI-Chat with context
+- Each item has a "Beim Anbieter buchen" (book at provider) button
+- Manual edit mode (add/remove activities, adjust prices)
+- Total cost breakdown (transport, accommodation, activities, car)
+- Real-time cost recalculation when items are added/removed
+
+### 5. Trip Checklist (13-Point)
+- Interactive checklist covering: outbound flight, return flight, accommodation, activities, car rental, restaurants, insurance, travel documents, packing, airport transfer, and more
+- Auto-detects completion status from trip data (e.g., hotel exists → "accommodation" marked done)
+- Each checklist item is clickable → opens KI-Chat to plan that specific component
+- "Mit Travix weiterplanen" button for full trip editing
+
+### 6. Auto-Save & Drafts (Reiseentwürfe)
+- Chat history + trip data auto-saved to Trip entity on session interruption (page leave, app close)
+- Drafts page shows:
+  - Trip destination, image, budget, dates
+  - Progress bar (%) based on completed planning components
+  - Status badges (🚆 Zug ✓ / 🏨 Hotel offen / 🎟️ Aktivitäten offen)
+  - "Planung fortsetzen" button → resumes KI-Chat with full history at the exact point of interruption
+- Drafts can be paused, duplicated, finalized, or deleted
+
+### 7. Holiday Mode (Urlaubsmodus)
+- Real-time, on-trip AI support
+- Photo/image analysis — user uploads a photo (e.g., restaurant menu, landmark, sign) and Travix analyzes it with InvokeLLM vision
+- Context-aware assistance based on the active trip
+- Daily itinerary display and quick actions
+
+### 8. Deal Finder Agent
+- Autonomous AI agent with web search capabilities
+- Finds deals on flights, hotels, and packages
+- WhatsApp/Telegram channel support
+
+### 9. Flight Search (Duffel Integration)
+- Flight search wizard integrated into KI-Chat flow
+- IATA code resolution for origin/destination
+- Passenger details (ages, cabin class, one-way/round-trip)
+- Selected flight auto-integrated into trip plan
+- *Note: Full Duffel backend integration requires Builder+ subscription*
+
+### 10. Trip Management
+- **Reiseentwürfe** (drafts): interrupted/paused planning sessions
+- **Meine Reisen** (booked): confirmed trips
+- **Warenkorb** (cart): centralized booking cart with grouped summaries and real-time totals
+- **Dashboard**: overview of trips, budgets, favorites, loyalty points
+- **Favoriten**: saved destinations
+- **Preisalarme**: price alerts for destinations
+- **Reisekalender**: trip calendar view
+- **Reisebudget**: budget breakdown with charts
+- **Kartenansicht**: interactive map (Leaflet) with trip markers
+- **Aktivitäten**: aggregated activity view across all trips
+
+### 11. User Account
+- Profile with travel preferences (styles, budget, dietary, home airport)
+- Travix Premium subscription tier
+- Rewards/loyalty program
+- Settings & help pages
+- Row-level security on all user-specific entities (Trip, Cart, Favorite, PriceAlert, SavedOffer)
+
+---
+
+## Technical Architecture
+
+### Frontend
+- **React + Vite + Tailwind CSS**
+- **shadcn/ui** component library
+- **Framer Motion** for animations
+- **Recharts** for budget charts
+- **React-Leaflet** for maps
+- **lucide-react** for icons
+- Design system: Sora (heading/display) + Inter (body), navy/teal/gold color palette
+
+### Backend
+- **Base44 BaaS** (auth, database, hosting)
+- **Entities**: Trip, Cart, SavedOffer, PriceAlert, Favorite, User (built-in)
+- **Row-Level Security (RLS)**: All user-specific entities enforce `created_by_id: {{user.id}}` on create/read/update/delete
+- **AI Integration**: `InvokeLLM` with `gemini_3_flash` model + `add_context_from_internet` for real-time web search
+- **File handling**: UploadFile, UploadPrivateFile, CreateFileSignedUrl
+- **TTS/STT**: GenerateSpeech, TranscribeAudio, browser SpeechSynthesis API
+
+### AI Logic
+- LLM prompt enforces: transport mode strictness, real data search (no fabrication), one-question-at-a-time flow, full hotel/train schemas
+- JSON schema (`FULL_TRIP_SCHEMA`) defines structured response: reply text, trip object (with offers, transport, accommodation, itinerary, total_cost, pre_trip), and flight_search parameters
+- Auto-save: chat history persisted to Trip entity on component unmount via refs + cleanup useEffect
+
+### Pages
+| Route | Page | Purpose |
+|-------|------|---------|
+| `/` | Home | Landing page with hero, chat planner, destinations, offers |
+| `/ki-chat` | KiChat | AI travel advisor chat |
+| `/reise-planen` | ReiseSuche | Trip planning search |
+| `/flugsuche` | Flugsuche | Flight search |
+| `/buchung` | BuchungsSeite | Interactive trip plan with booking |
+| `/urlaubsmodus` | Urlaubsmodus | On-trip AI support |
+| `/dashboard` | Dashboard | Overview |
+| `/entwuerfe` | Reiseentwuerfe | Draft trip plans |
+| `/meine-reisen` | MeineReisen | Booked trips |
+| `/warenkorb` | Warenkorb | Cart |
+| `/angebote` | Angebote | Saved offers |
+| `/favoriten` | Favoriten | Favorites |
+| `/preisalarme` | Preisalarme | Price alerts |
+| `/kalender` | Reisekalender | Calendar |
+| `/budget` | Reisebudget | Budget |
+| `/aktivitaeten` | Aktivitaeten | Activities |
+| `/karte` | Kartenansicht | Map |
+| `/deal-finder` | DealFinderChat | Deal finder agent |
+| `/premium` | Premium | Subscription |
+| `/profil` | Profil | Profile |
+| `/einstellungen` | Einstellungen | Settings |
+| `/hilfe` | Hilfe | Help |
+
+---
+
+## Data Model
+
+### Trip Entity (core)
+- `title`, `destination`, `country`, `summary`, `image_url`
+- `budget`, `currency`, `duration_days`, `travelers`, `start_month`, `start_date`, `end_date`
+- `highlights[]`, `transport[]`, `accommodation{}`, `itinerary[]`
+- `offers{}` — flights, hotels, trains, buses, ferries, car_rentals, activities, departure, reasoning
+- `total_cost{}`, `pre_trip{}`
+- `checklist{}` — enabled[], completed[]
+- `chat_history[]` — full conversation for session resume
+- `status` — draft | paused | planned | booked
+- RLS: `created_by_id: {{user.id}}` on all operations
+
+### Other Entities
+- **Cart** — booking cart items (flight, hotel, activity, transport, insurance)
+- **SavedOffer** — saved travel offers
+- **PriceAlert** — price monitoring alerts
+- **Favorite** — saved destinations
+
+---
+
+## Known Limitations & Future Work
+
+1. **Direct booking** — Currently redirects to provider websites; in-app booking is in development
+2. **Duffel flight API** — Backend function drafted but requires Builder+ subscription for deployment
+3. **Background processing** — Long-running searches can't continue in the background without backend functions (Builder+)
+4. **Push notifications** — Not yet supported; next-best alternative is in-app notification on app reopen
+
+---
+
+## Design Language
+
+- **Colors**: Navy `#0A2342`, Teal `#00C2A8`, Gold `#F4B400`, Slate neutrals
+- **Fonts**: Sora (headings/display), Inter (body)
+- **Style**: Clean, modern, premium travel aesthetic with glassmorphism accents, rounded corners, soft shadows
+- **Responsive**: Full mobile + desktop support with collapsible sidebar navigation
+
+---
+
+*© 2026 Travix – Das intelligenteste digitale Reisebüro.*
