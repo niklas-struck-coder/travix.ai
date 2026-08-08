@@ -5,18 +5,31 @@ import { ChatMessage } from '@/components/chat/ChatMessage'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { QuickReplies } from '@/components/chat/QuickReplies'
 import { TripSummaryCard } from '@/components/chat/TripSummaryCard'
+import { HotelResults } from '@/components/search/HotelResults'
 import { Button } from '@/components/ui/button'
 import { useChat } from '@/hooks/useChat'
 import { isSpeechSynthesisSupported } from '@/lib/ai/speech'
+import { hasTripData } from '@/lib/trip/tripStorage'
 
 export function KiChat() {
   const [speechEnabled, setSpeechEnabled] = useState(false)
-  const { messages, trip, quickReplies, avatarState, isThinking, sendMessage, resetChat } = useChat(speechEnabled)
+  const {
+    messages,
+    trip,
+    quickReplies,
+    avatarState,
+    isThinking,
+    stayOffers,
+    stayLoading,
+    sendMessage,
+    selectHotel,
+    resetChat,
+  } = useChat(speechEnabled)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, isThinking])
+  }, [messages, isThinking, stayOffers, stayLoading])
 
   const handleQuickReply = (option: string) => {
     if (option === 'Neue Reise planen') {
@@ -25,8 +38,6 @@ export function KiChat() {
     }
     sendMessage(option)
   }
-
-  const hasTripData = Object.values(trip).some(Boolean)
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-2xl border border-border bg-card lg:h-[calc(100vh-7rem)]">
@@ -68,7 +79,11 @@ export function KiChat() {
           </div>
         )}
 
-        {hasTripData && <TripSummaryCard trip={trip} />}
+        {(stayLoading || stayOffers) && (
+          <HotelResults offers={stayOffers} loading={stayLoading} onSelect={selectHotel} />
+        )}
+
+        {hasTripData(trip) && <TripSummaryCard trip={trip} />}
       </div>
 
       <div className="flex flex-col gap-3 px-4 pt-2">

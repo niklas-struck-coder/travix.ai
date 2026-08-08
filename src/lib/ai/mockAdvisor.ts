@@ -37,6 +37,7 @@ export const emptyTrip: TripDraft = {
   transportMode: null,
   budget: null,
   dates: null,
+  activities: [],
   accommodation: null,
 }
 
@@ -47,6 +48,7 @@ export function getGreeting(): AdvisorReply {
     avatarState: 'greeting',
     quickReplies: ['Lissabon', 'Kyoto', 'Kapstadt', 'Überrasch mich'],
     trip: emptyTrip,
+    nextField: 'destination',
   }
 }
 
@@ -60,6 +62,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       avatarState: 'happy',
       quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre'],
       trip: next,
+      nextField: 'transportMode',
     }
   }
 
@@ -71,6 +74,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
         avatarState: 'thinking',
         quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre', 'Mietwagen'],
         trip: next,
+        nextField: 'transportMode',
       }
     }
     next.transportMode = mode
@@ -79,6 +83,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       avatarState: 'writing',
       quickReplies: ['Nächstes Wochenende', 'In 2 Wochen', 'Im Sommer'],
       trip: next,
+      nextField: 'dates',
     }
   }
 
@@ -89,26 +94,29 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       avatarState: 'writing',
       quickReplies: ['bis 500 €', 'bis 1.000 €', 'bis 2.000 €'],
       trip: next,
+      nextField: 'budget',
     }
   }
 
   if (!next.budget) {
     next.budget = userMessage
     return {
-      content: 'Danke! Und wie soll die Unterkunft sein — Hotel, Ferienwohnung oder Hostel?',
-      avatarState: 'writing',
+      content: `Danke! Ich suche jetzt nach echten Unterkünften in ${next.destination} — wähle direkt eine aus, oder beschreibe, was du suchst.`,
+      avatarState: 'searching',
       quickReplies: ['Hotel', 'Ferienwohnung', 'Hostel'],
       trip: next,
+      nextField: 'accommodation',
     }
   }
 
   if (!next.accommodation) {
     next.accommodation = userMessage
     return {
-      content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen und Unterkünften für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
+      content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
       avatarState: 'searching',
       quickReplies: [],
       trip: next,
+      nextField: null,
     }
   }
 
@@ -118,5 +126,6 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
     avatarState: 'happy',
     quickReplies: ['Neue Reise planen'],
     trip: next,
+    nextField: null,
   }
 }

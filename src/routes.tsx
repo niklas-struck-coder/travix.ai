@@ -2,10 +2,14 @@ import { Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { Home } from '@/pages/Home'
 import { KiChat } from '@/pages/KiChat'
+import { Flugsuche } from '@/pages/Flugsuche'
+import { MeineReisen } from '@/pages/MeineReisen'
+import { Buchung } from '@/pages/Buchung'
+import { Urlaubsmodus } from '@/pages/Urlaubsmodus'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
-import { allNavItems } from '@/lib/nav-config'
+import { allRoutes } from '@/lib/nav-config'
 
-const builtRoutes = new Set(['/', '/ki-chat'])
+const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/meine-reisen', '/buchung', '/urlaubsmodus'])
 
 export function AppRoutes() {
   return (
@@ -13,7 +17,11 @@ export function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/ki-chat" element={<KiChat />} />
-        {allNavItems
+        <Route path="/flugsuche" element={<Flugsuche />} />
+        <Route path="/meine-reisen" element={<MeineReisen />} />
+        <Route path="/buchung" element={<Buchung />} />
+        <Route path="/urlaubsmodus" element={<Urlaubsmodus />} />
+        {allRoutes
           .filter((item) => !builtRoutes.has(item.path))
           .map((item) => (
             <Route

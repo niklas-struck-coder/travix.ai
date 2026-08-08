@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils'
 interface ChatInputProps {
   onSend: (message: string) => void
   disabled?: boolean
+  placeholder?: string
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Traumreise…' }: ChatInputProps) {
   const [value, setValue] = useState('')
   const [listening, setListening] = useState(false)
 
@@ -51,7 +52,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         onKeyDown={(event) => {
           if (event.key === 'Enter') handleSend()
         }}
-        placeholder="Beschreibe deine Traumreise…"
+        placeholder={placeholder}
         disabled={disabled}
         className="flex-1"
       />
