@@ -152,7 +152,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 3.4 Create `PageHeader.tsx` reusable component with title, breadcrumbs, and actions
   - [x] 3.5 Create placeholder page components for all routes (empty shells with page title) — shared `PlaceholderPage.tsx` driven by `nav-config.ts`, not one file per route
   - [x] 3.6 Implement responsive breakpoints: sidebar visible on desktop, mobile nav on small screens
-  - [ ] 3.7 Add Framer Motion page transition animations between routes
+  - [x] 3.7 Add Framer Motion page transition animations between routes
   - [x] 3.8 Build Home page (`/`) with hero section, chat planner entry point, and featured destinations grid
 
 - [ ] 4.0 KI-Chat & AI engine — Chat UI, avatar, InvokeLLM, FULL_TRIP_SCHEMA, auto-save
