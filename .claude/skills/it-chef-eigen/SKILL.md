@@ -67,13 +67,15 @@ statt zu raten.
 ## Autonomer Tagesmodus (geplanter Cloud-Lauf, ohne Ni live dabei)
 Läuft täglich automatisch als eigenständiger Cloud-Agent — frischer,
 isolierter Checkout des Repos, niemand da, der live Rückfragen
-beantwortet. Ni sieht das Ergebnis lieber sofort live und ändert danach
-selbst, was ihm nicht passt, statt vorher jeden Branch einzeln
-freizugeben — deshalb geht die Arbeit **direkt auf `main`**, nicht auf
-einen Zwischenbranch. Die Sorgfalt kommt stattdessen davor, nicht danach.
+beantwortet. Deshalb gelten striktere Regeln als im normalen Gespräch mit
+Ni:
 
-1. **Direkt auf `main` arbeiten** (frischer Checkout ist ohnehin schon
-   `main`). Kein Zwischenbranch, kein Warten auf manuellen Merge.
+1. **Nie auf `main` arbeiten.** Checke den Branch `it-chef/auto` aus (neu
+   anlegen, falls er nicht existiert, basierend auf dem aktuellen `main`).
+   Falls er schon existiert und offene Änderungen von einem vorherigen Lauf
+   hat, dort weiterarbeiten oder frischen Stand von `main` reinmergen —
+   `main` bleibt so oder so unberührt. Ein separater Freigabe-Chef-Skill
+   prüft diesen Branch unabhängig und mergt ihn bei bestandener Prüfung.
 2. **Einen einzigen Punkt aussuchen**, nicht mehrere gleichzeitig. Schau in
    `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` nach dem nächsten
    offenen, eindeutig umsetzbaren Punkt. Er zählt nur als "sicher genug für
@@ -91,19 +93,20 @@ einen Zwischenbranch. Die Sorgfalt kommt stattdessen davor, nicht danach.
    erfinden**. Stattdessen im Bericht (siehe unten) genau das offen legen
    — "heute nichts gefunden, das sicher genug für einen autonomen Lauf
    ist" ist ein völlig legitimes Ergebnis.
-3. **Umsetzen und verifizieren, bevor irgendwas nach `main` geht**: Weil
-   direkt auf `main` gepusht wird, MUSS Typecheck, Lint und Tests grün
-   sein, bevor committed/gepusht wird — sonst ist die Live-Version kaputt,
-   und niemand fängt das vorher ab. Bei rotem Ergebnis: nicht committen,
-   nicht pushen, stattdessen im Bericht erklären, woran es lag.
-4. **Committen und auf `main` pushen.** Aktualisiere dabei auch die
-   Checkbox in `tasks/tasks-prd-travix-platform.md` bzw. den Status in
-   `ZEITPLAN.md` und committe/push das mit demselben Commit.
+3. **Umsetzen** mit demselben Qualitätsanspruch wie im Gespräch mit Ni:
+   Typecheck, Lint, Tests müssen grün sein, bevor der Punkt als erledigt
+   gilt.
+4. **Committen und auf `it-chef/auto` pushen** (nur diesen Branch — die
+   Cloud-Sandbox wird nach dem Lauf verworfen, ohne Push wäre die Arbeit
+   sonst weg). Niemals nach `main` pushen, niemals nach `main` mergen,
+   niemals eine PR öffnen — das macht der Freigabe-Chef-Skill nach eigener
+   Prüfung. Aktualisiere dabei auch die Checkbox in
+   `tasks/tasks-prd-travix-platform.md` bzw. den Status in `ZEITPLAN.md`
+   und committe/push das mit.
 5. **Kurzer Bericht am Ende** (als Ergänzung in `it-chef-auto-log.md` im
    Projektordner — anlegen, falls sie noch nicht existiert): was wurde
    gemacht, was geprüft, welcher Commit, und falls nichts gemacht wurde:
-   warum nicht. Keine Erfolgsmeldung an Ni schicken für Routine-Läufe —
-   nur informieren, wenn etwas seine Aufmerksamkeit braucht.
+   warum nicht.
 
 ## Warum das wichtig ist
 Ni hat daneben einen zweiten, plattform-verwalteten IT-Chef-Skill, den er
