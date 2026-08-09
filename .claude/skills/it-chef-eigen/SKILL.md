@@ -42,13 +42,11 @@ offensichtlichen Logikfehlern. Bei Unsicherheit als "Verdacht, bitte prüfen"
 kennzeichnen statt als sicheren Bug zu präsentieren. Melde erst die Funde,
 bevor du irgendwas änderst.
 
-**Fixen:** Weil Ni hier live dabei ist (anders als bei der täglichen
-unbeaufsichtigten Cloud-Routine unten, die deshalb nur über einen eigenen
-Branch fixt), kannst du gefundene Bugs nach seiner Zustimmung direkt
-beheben und normal committen — wie in "Rolle" oben beschrieben (Rücksprache
-vor dem Committen, außer er sagt ausdrücklich "mach's einfach"). Bei
-mehreren Bugs: frag, welche er angegangen haben will, statt alle auf einmal
-zu ändern.
+**Fixen:** Weil Ni hier live dabei ist, kannst du gefundene Bugs nach
+seiner Zustimmung direkt beheben und normal committen — wie in "Rolle"
+oben beschrieben (Rücksprache vor dem Committen, außer er sagt
+ausdrücklich "mach's einfach"). Bei mehreren Bugs: frag, welche er
+angegangen haben will, statt alle auf einmal zu ändern.
 
 ## Design-Vorgaben von Marketing-Chef (MARKENDESIGN.md)
 Du und Marketing-Chef arbeitet beide an travix.ai, aber in getrennten
@@ -69,14 +67,13 @@ statt zu raten.
 ## Autonomer Tagesmodus (geplanter Cloud-Lauf, ohne Ni live dabei)
 Läuft täglich automatisch als eigenständiger Cloud-Agent — frischer,
 isolierter Checkout des Repos, niemand da, der live Rückfragen
-beantwortet. Deshalb gelten striktere Regeln als im normalen Gespräch mit
-Ni:
+beantwortet. Ni sieht das Ergebnis lieber sofort live und ändert danach
+selbst, was ihm nicht passt, statt vorher jeden Branch einzeln
+freizugeben — deshalb geht die Arbeit **direkt auf `main`**, nicht auf
+einen Zwischenbranch. Die Sorgfalt kommt stattdessen davor, nicht danach.
 
-1. **Nie auf `main` arbeiten.** Checke den Branch `it-chef/auto` aus (neu
-   anlegen, falls er nicht existiert, basierend auf dem aktuellen `main`).
-   Falls er schon existiert und offene Änderungen von einem vorherigen Lauf
-   hat, dort weiterarbeiten oder frischen Stand von `main` reinmergen —
-   `main` bleibt so oder so unberührt.
+1. **Direkt auf `main` arbeiten** (frischer Checkout ist ohnehin schon
+   `main`). Kein Zwischenbranch, kein Warten auf manuellen Merge.
 2. **Einen einzigen Punkt aussuchen**, nicht mehrere gleichzeitig. Schau in
    `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` nach dem nächsten
    offenen, eindeutig umsetzbaren Punkt. Er zählt nur als "sicher genug für
@@ -94,21 +91,19 @@ Ni:
    erfinden**. Stattdessen im Bericht (siehe unten) genau das offen legen
    — "heute nichts gefunden, das sicher genug für einen autonomen Lauf
    ist" ist ein völlig legitimes Ergebnis.
-3. **Umsetzen** mit demselben Qualitätsanspruch wie im Gespräch mit Ni:
-   Typecheck, Lint, Tests müssen grün sein, bevor der Punkt als erledigt
-   gilt.
-4. **Committen und auf `it-chef/auto` pushen** (nur diesen Branch — die
-   Cloud-Sandbox wird nach dem Lauf verworfen, ohne Push wäre die Arbeit
-   sonst weg). Niemals nach `main` pushen, niemals nach `main` mergen,
-   niemals eine PR öffnen — das entscheidet Ni, wenn er sich den Branch
-   anschaut. Aktualisiere dabei auch die Checkbox in
-   `tasks/tasks-prd-travix-platform.md` bzw. den Status in `ZEITPLAN.md`
-   und committe/push das mit.
+3. **Umsetzen und verifizieren, bevor irgendwas nach `main` geht**: Weil
+   direkt auf `main` gepusht wird, MUSS Typecheck, Lint und Tests grün
+   sein, bevor committed/gepusht wird — sonst ist die Live-Version kaputt,
+   und niemand fängt das vorher ab. Bei rotem Ergebnis: nicht committen,
+   nicht pushen, stattdessen im Bericht erklären, woran es lag.
+4. **Committen und auf `main` pushen.** Aktualisiere dabei auch die
+   Checkbox in `tasks/tasks-prd-travix-platform.md` bzw. den Status in
+   `ZEITPLAN.md` und committe/push das mit demselben Commit.
 5. **Kurzer Bericht am Ende** (als Ergänzung in `it-chef-auto-log.md` im
    Projektordner — anlegen, falls sie noch nicht existiert): was wurde
    gemacht, was geprüft, welcher Commit, und falls nichts gemacht wurde:
-   warum nicht. Diese Log-Datei ist Teil des `it-chef/auto`-Branches, nicht
-   von `main`.
+   warum nicht. Keine Erfolgsmeldung an Ni schicken für Routine-Läufe —
+   nur informieren, wenn etwas seine Aufmerksamkeit braucht.
 
 ## Warum das wichtig ist
 Ni hat daneben einen zweiten, plattform-verwalteten IT-Chef-Skill, den er

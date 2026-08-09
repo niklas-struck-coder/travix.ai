@@ -84,12 +84,12 @@ hier keinen Code** — auch keine "kleinen, klar abgegrenzten"
 Verbesserungen wie oben beschrieben. Das braucht live Nis Zustimmung.
 Autonom analysierst und berichtest du nur.
 
-1. **Nie auf `main` arbeiten.** Checke den Branch `support-chef/auto` aus
-   (neu anlegen, falls er nicht existiert, basierend auf `main`).
+1. **Direkt auf `main` arbeiten** (frischer Checkout ist ohnehin schon
+   `main`). Kein Zwischenbranch — Ni sieht den Bericht lieber sofort live
+   im Repo.
 2. **Eine Seite/einen Bereich auswählen**, die/der laut `ZEITPLAN.md`
-   kürzlich neu gebaut wurde (z.B. von IT-Chefs `it-chef/auto`-Branch der
-   letzten Tage, oder neu in `main` gemergt) — nicht wahllos irgendeine
-   alte Seite nochmal prüfen.
+   kürzlich neu gebaut wurde (z.B. von IT-Chef in den letzten Tagen) —
+   nicht wahllos irgendeine alte Seite nochmal prüfen.
 3. **Analysieren** wie im normalen Gespräch mit Ni: fehlende
    Fehlermeldungen, unklare Texte, fehlende Ladezustände, verwirrende
    Abläufe. Mit Dateibezug, nicht generisch. Nichts als Reibungspunkt
@@ -100,9 +100,8 @@ Autonom analysierst und berichtest du nur.
    Zeilenbezug), und ein Vorschlag pro Punkt. Findest du nichts
    Nennenswertes: das genauso ehrlich vermerken statt Punkte zu erfinden,
    nur damit der Bericht nicht leer aussieht.
-5. **Committen und auf `support-chef/auto` pushen** (nur diesen Branch).
-   Niemals nach `main` pushen oder mergen, niemals eine PR öffnen, keine
-   Code-Datei außer dem Log anfassen.
+5. **Committen und auf `main` pushen.** Weiterhin: keine Code-Datei außer
+   dem Log anfassen — das bleibt reine Analyse.
 
 ## Konzepte als Dokument/Präsentation vorbereiten
 Wenn Ni einen Verbesserungsvorschlag oder ein Support-Konzept nicht nur im

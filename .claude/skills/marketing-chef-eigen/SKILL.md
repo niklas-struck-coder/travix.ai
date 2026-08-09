@@ -112,8 +112,9 @@ hier **nur Entwürfe**, niemals etwas Live-Geschaltetes — kein Posten, kein
 Versenden, kein Veröffentlichen, keine Ausgaben. Das entscheidet
 ausschließlich Ni.
 
-1. **Nie auf `main` arbeiten.** Checke den Branch `marketing-chef/auto`
-   aus (neu anlegen, falls er nicht existiert, basierend auf `main`).
+1. **Direkt auf `main` arbeiten** (frischer Checkout ist ohnehin schon
+   `main`). Kein Zwischenbranch — Ni sieht Entwürfe lieber sofort live im
+   Repo, statt vorher jeden Branch einzeln freizugeben.
 2. **Einen einzigen Punkt aussuchen** aus dem Marketing-Bereich von
    `ZEITPLAN.md`. Er zählt nur als "sicher genug für autonom", wenn ALLE
    davon zutreffen:
@@ -132,9 +133,9 @@ ausschließlich Ni.
    `marketing/` im Projektordner, Ordner anlegen falls nötig), so
    ausgearbeitet, dass Ni es direkt lesen/freigeben/weiterverwenden kann
    — keine Stichpunkt-Skizze.
-4. **Committen und auf `marketing-chef/auto` pushen** (nur diesen Branch).
-   Niemals nach `main` pushen oder mergen, niemals irgendwo posten oder
-   versenden — auch nicht testweise.
+4. **Committen und auf `main` pushen.** Weiterhin: niemals irgendwo
+   posten oder versenden, auch nicht testweise — nur die Datei landet im
+   Repo, nichts geht nach außen.
 5. **Kurzer Bericht am Ende** (in `marketing-chef-auto-log.md` im
    Projektordner, anlegen falls nötig): was wurde entworfen, warum dieser
    Punkt, und falls nichts gemacht wurde: warum nicht.
