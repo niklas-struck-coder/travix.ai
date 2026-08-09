@@ -1,21 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-07 (KW 32)
+**Datum:** 2026-08-09
 
-## Was ist seit dem letzten Eintrag passiert?
+## Was ist seit dem letzten Eintrag (2026-08-07) passiert?
 
-Das ist mein erster Eintrag hier, es gibt also noch keinen Vergleich. Kurzer Stand: In den letzten 14 Tagen kamen laut `git log` keine neuen Feature-Commits dazu (nur der IT-Chef-Bericht und ein Status-Snapshot für die PA-Website) — der nutzbare Flow ist weiterhin Start → KI-Chat → (toter Link zum Reiseplan). Ich habe mir die Chat-Logik, die Navigation und die Platzhalterseiten aus Nutzersicht angeschaut.
-
-**Wichtiger Hinweis:** Es ist noch kein Analytics-Connector angebunden. Alles unten basiert auf Code/Doku-Lektüre, nicht auf echten Nutzerdaten — keine Absprungraten o.ä., die ich hier nenne, sind gemessen.
+Einiges! Seit meinem letzten Bericht ist die echte Flug- und Hotelsuche über
+Duffel dazugekommen (`/flugsuche`), der Reiseplan auf `/buchung` lebt jetzt
+wirklich (der tote Link von letztem Mal ist behoben), es gibt einen neuen
+Urlaubsmodus mit KI-Concierge-Chat sowie eine "Meine Reisen"-Seite. Die
+Navigation wurde außerdem spürbar aufgeräumt: Statt ~20 verlockenden
+Menüpunkten, die alle auf dieselbe Platzhalterseite führten, zeigt die
+Seitenleiste jetzt größtenteils echte, funktionierende Seiten.
 
 ## Meine Vorschläge
 
-1. **Das Nav-Menü verspricht mehr, als die App aktuell hält.** `src/lib/nav-config.ts` listet ~20 Menüpunkte mit sehr konkreten, verlockenden Texten ("Flüge vergleichen und buchen", "Automatische Angebotssuche", "Kostenübersicht und Auswertungen"). Klickt man drauf, landet man auf der immer gleichen `PlaceholderPage.tsx` mit dem Satz "wird als Nächstes gebaut". Für Nutzer:innen fühlt sich das nicht wie "im Aufbau", sondern wie "kaputt" an — vor allem, weil es keinen Weg zurück zum einzig funktionierenden Pfad (KI-Chat) gibt. Mein Vorschlag: entweder die Platzhalter-Menüpunkte vorerst ausblenden/als "bald verfügbar" kennzeichnen, oder die Platzhalterseite mit einem klaren CTA zurück zum Chat versehen.
+1. **"Meine Reisen" zeigt erfundene Reisen, ohne das zu kennzeichnen.** Auf
+   `/meine-reisen` (`src/pages/MeineReisen.tsx:19-22`) erscheinen zwei fest
+   einprogrammierte Trips ("Lissabon", "Kyoto") als wären es echte,
+   gebuchte Reisen — inklusive Status "Bevorstehend" und Button
+   "Urlaubsmodus aktivieren". Der Code selbst kommentiert das ehrlich als
+   Demo-Daten, aber im UI steht nirgends ein Hinweis wie "Beispielreise".
+   Für jemanden, der die App zum ersten Mal öffnet, sieht das aus wie eine
+   Reise, die er selbst gebucht hat — das kann zu echter Verwirrung führen
+   ("Wann habe ich das gebucht?"). Mein Vorschlag: entweder klar als
+   Beispiel kennzeichnen, oder die Seite leer lassen, bis echte Buchungen
+   angebunden sind.
 
-2. **Der Such-Schritt im Chat wirkt wie eingefroren.** In `src/lib/ai/mockAdvisor.ts:108` sagt Travix: "Ich suche jetzt nach echten … Verbindungen und Unterkünften … sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir." Das klingt nach einem laufenden, asynchronen Vorgang — real passiert aber nichts von selbst (kein Ladeindikator, kein Timer), die `quickReplies` sind leer (`src/lib/ai/mockAdvisor.ts:110`), und es geht erst weiter, wenn die Person selbst noch eine Nachricht tippt. Wer nicht weiß, dass er aktiv weitertippen muss, wartet vermutlich einfach — und denkt, die Suche hängt. Ein kurzer Hinweis ("Schreib mir kurz, wenn du bereit bist" o.ä.) oder ein automatischer Fortschritt nach ein paar Sekunden würde das auflösen.
+2. **Der Weg zurück fehlt weiterhin bei den verbliebenen Platzhalterseiten.**
+   Die Navigation ist deutlich besser geworden, aber `/entwuerfe`,
+   `/warenkorb`, `/profil`, `/einstellungen` und `/hilfe` stehen weiterhin
+   fest in der permanenten Seitenleiste (`src/lib/nav-config.ts:53-69`) und
+   landen alle auf derselben `PlaceholderPage.tsx:16-18` mit "wird als
+   Nächstes gebaut" — ohne Button oder Link zurück zum funktionierenden
+   Chat. Das war schon mein Punkt vom letzten Mal, jetzt eben nur noch für
+   5 statt 20 Menüpunkte. Ein kleiner "Zurück zum KI-Chat"-Button auf der
+   Platzhalterseite würde die Sackgasse auflösen.
 
-3. **Chat-Abschluss führt aktuell in eine Sackgasse — genau im emotional wichtigsten Moment.** Nachdem jemand alle Fragen beantwortet hat, endet der Chat mit "Dein Reiseplan steht! Öffne den Reiseplan …", der Button verlinkt aber auf `/buchung`, was nur die leere `PlaceholderPage` zeigt (IT-Chef hat das technisch schon aufgenommen). Aus Support-Sicht ist das der Punkt, an dem am meisten Vertrauen verspielt wird: Leute investieren 5 Antworten in ihre Traumreise und werden dann mit einer leeren Seite "belohnt". Bis die echte Reiseplan-Seite steht, würde ich hier zumindest eine ehrliche Zwischenmeldung zeigen (z. B. "Dein Reiseplan wird gerade gebaut, wir melden uns") statt der generischen Platzhalter-Formulierung.
+3. **Mikrofon-Fehler sind immer noch unsichtbar.** In `src/lib/ai/speech.ts:47`
+   steht weiterhin `recognition.onerror = onEnd` — verweigert jemand die
+   Mikrofon-Berechtigung, verschwindet nur stillschweigend der
+   "Aufnahme läuft"-Zustand in `ChatInput.tsx`, ohne jede Erklärung. Das
+   ist seit meinem letzten Bericht unverändert offen geblieben.
 
-4. **Mikrofon-Fehler bleiben unsichtbar.** In `src/lib/ai/speech.ts:47` ist `recognition.onerror = onEnd` — verweigert jemand die Mikrofon-Berechtigung oder gibt es ein Aufnahmeproblem, verschwindet einfach nur der "Aufnahme läuft"-Zustand in `ChatInput.tsx`, ohne jede Erklärung. Wer nicht weiß, warum die Spracheingabe nichts aufgenommen hat, probiert es vermutlich mehrfach erfolglos. Eine kurze Fehlermeldung ("Mikrofon-Zugriff nicht möglich — bitte Berechtigung prüfen") würde unnötige Verwirrung und Support-Anfragen vermeiden.
+4. **Flugsuche verlangt IATA-Codes, ohne beim Eintippen zu helfen.** In
+   `src/components/search/FlightWizard.tsx:62-82` müssen Nutzer:innen den
+   3-Buchstaben-Flughafencode selbst kennen (z. B. "BER" für Berlin) — es
+   gibt weder eine Autovervollständigung nach Stadtnamen noch eine
+   Fehlermeldung, wenn ein ungültiger Code eingegeben wird (z. B. "Berlin"
+   wird beim Tippen einfach stumm auf "Ber" abgeschnitten). Der
+   "Flüge suchen"-Button bleibt dann einfach deaktiviert, ohne zu sagen,
+   warum. Gerade weil die Suche jetzt echte Ergebnisse liefert, würde eine
+   Orts-Autovervollständigung hier viel Frust vermeiden.
 
-_Letztes Update: 2026-08-07_
+_Letztes Update: 2026-08-09_
