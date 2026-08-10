@@ -7,12 +7,13 @@ import { KiChat } from '@/pages/KiChat'
 import { Flugsuche } from '@/pages/Flugsuche'
 import { Hotelsuche } from '@/pages/Hotelsuche'
 import { MeineReisen } from '@/pages/MeineReisen'
+import { Reiseentwuerfe } from '@/pages/Reiseentwuerfe'
 import { Buchung } from '@/pages/Buchung'
 import { Urlaubsmodus } from '@/pages/Urlaubsmodus'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
 
-const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/hotelsuche', '/meine-reisen', '/buchung', '/urlaubsmodus'])
+const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/hotelsuche', '/meine-reisen', '/buchung', '/urlaubsmodus', '/entwuerfe'])
 
 export function AppRoutes() {
   const location = useLocation()
@@ -26,6 +27,7 @@ export function AppRoutes() {
           <Route path="/flugsuche" element={<PageTransition><Flugsuche /></PageTransition>} />
           <Route path="/hotelsuche" element={<PageTransition><Hotelsuche /></PageTransition>} />
           <Route path="/meine-reisen" element={<PageTransition><MeineReisen /></PageTransition>} />
+          <Route path="/entwuerfe" element={<PageTransition><Reiseentwuerfe /></PageTransition>} />
           <Route path="/buchung" element={<PageTransition><Buchung /></PageTransition>} />
           <Route path="/urlaubsmodus" element={<PageTransition><Urlaubsmodus /></PageTransition>} />
           {allRoutes

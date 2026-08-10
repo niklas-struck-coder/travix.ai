@@ -306,3 +306,64 @@ Begründung oben.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-10 (fünfter Lauf)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf dem Stand von
+`origin/main` (kein Nachziehen nötig). `main` selbst wurde nicht
+angerührt.
+
+**Ausgewählter Punkt:** Task 7.2 aus `tasks/tasks-prd-travix-platform.md`
+— "Build Reiseentwuerfe page (`/entwuerfe`) with draft cards showing
+destination, image, budget, dates, progress bar, status badges". Laut
+`ZEITPLAN.md` direkte Fortsetzung von 7.1 (`calculateProgress.ts`, aus
+dem vierten Lauf heute), das dort explizit als "noch in keine Seite
+eingebunden, 7.2 ist der erste vorgesehene Verbraucher" markiert war.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — die Route `/entwuerfe` existiert bereits als
+Platzhalter in `nav-config.ts`/`routes.tsx`, `MeineReisen.tsx` (Task 7.5,
+bereits umgesetzt) liefert ein exaktes, bereits etabliertes Muster für
+genau diesen Fall (Demo-Datenliste statt echter Backend-Anbindung,
+Gradient statt echtem Bild) — keine offene Produkt-/Architekturentscheidung
+nötig, nur das bestehende Muster übertragen. Klar genug beschrieben (exakte
+Feldliste in der Aufgabe: destination, image, budget, dates, progress bar,
+status badges). Ergebnis objektiv prüfbar über Typecheck/Lint/Tests/Build.
+
+Andere Punkte geprüft und verworfen: 7.3 (Pause/Duplizieren/Abschließen/
+Löschen) und 7.4 (echte Wiederaufnahme mit Chat-Historie) bauen inhaltlich
+auf 7.2 auf und wurden bewusst als eigene, spätere Punkte stehen gelassen,
+statt sie hier mit zu erledigen (ein Punkt pro Lauf). 7.6-7.15 sind eigene,
+in sich abgeschlossene Seiten ohne diese direkte Abhängigkeit zu 7.1 — 7.2
+war der eindeutigste nächste Schritt.
+
+**Umgesetzt:**
+- Neue Seite `src/pages/Reiseentwuerfe.tsx` — Aufbau 1:1 analog zu
+  `MeineReisen.tsx` (Grid aus Karten, Gradient-Platzhalter statt Bild,
+  Badge für Status), ergänzt um echten Fortschrittsbalken
+  (`components/ui/progress.tsx`) auf Basis von `calculateProgress` (7.1)
+  aus zwei Demo-`TripDraft`-Objekten. "Planung fortsetzen"-Button verlinkt
+  auf `/ki-chat` (keine echte Wiederaufnahme-Logik — das ist 7.4, ein
+  eigener offener Punkt).
+- `src/routes.tsx`: `/entwuerfe` von der generierten Platzhalter-Route auf
+  die neue `Reiseentwuerfe`-Komponente umgestellt (analog zu den anderen
+  bereits gebauten Seiten in `builtRoutes`).
+- Neuer Test `src/pages/Reiseentwuerfe.test.tsx` (analog zu
+  `Home.test.tsx`): prüft, dass beide Demo-Entwürfe mit korrektem
+  Fortschrittswert (60 %, 20 %) und Status-Badge gerendert werden.
+- Checkbox 7.2 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum Umfang; 7.3 und 7.4 dort als
+  eigene offene Punkte ergänzt (vorher nur zusammengefasst als "7.2, 7.3,
+  7.4").
+
+**Geprüft:**
+- `npm run build` (tsc -b + vite build) → grün (nach frischem
+  `npm install`, `node_modules` fehlt im frischen Checkout jedes Mal).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx`
+  (react-refresh, nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 10/10 Tests grün (9 bestehende Tests + 1 neuer
+  Test mit 6 Assertions für `Reiseentwuerfe`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

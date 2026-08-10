@@ -201,7 +201,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
 
 - [ ] 7.0 Trip lifecycle pages — Drafts, booked trips, cart, dashboard, calendar, budget, map, favorites, alerts
   - [x] 7.1 Implement `calculateProgress.ts` for draft progress percentage based on completed components — counts the 5 sections shown on the Reiseplan (transport, dates, budget, accommodation, activities); not yet used by any page (7.2 draft cards are the first consumer, still open)
-  - [ ] 7.2 Build Reiseentwuerfe page (`/entwuerfe`) with draft cards showing destination, image, budget, dates, progress bar, status badges
+  - [x] 7.2 Build Reiseentwuerfe page (`/entwuerfe`) with draft cards showing destination, image, budget, dates, progress bar, status badges — demo data (gradient placeholder, 2 drafts) analog zu `MeineReisen.tsx`, Fortschritt über `calculateProgress` (7.1); "Planung fortsetzen" verlinkt auf `/ki-chat` (7.4, echte Wiederaufnahme mit Chat-Historie, bleibt eigener offener Punkt), pause/duplicate/finalize/delete (7.3) ebenfalls eigener offener Punkt
   - [ ] 7.3 Implement draft actions: pause, duplicate, finalize, delete
   - [ ] 7.4 Implement "Planung fortsetzen" — resume KI-Chat with full history at interruption point
   - [ ] 7.5 Build MeineReisen page (`/meine-reisen`) for booked/confirmed trips

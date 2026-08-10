@@ -84,7 +84,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [x] 7.1 `calculateProgress.ts` — vorgezogen vom autonomen IT-Chef-Lauf am
   10.08., da Sprint 1 an blockierten/Produktentscheidungs-Punkten hing;
   reine Berechnungsfunktion, noch nicht in eine Seite eingebunden
-- [ ] 7.2, 7.3, 7.4 Reiseentwürfe mit echtem Fortschritt + "Planung fortsetzen"
+- [x] 7.2 `Reiseentwuerfe.tsx` (`/entwuerfe`) — Entwurfskarten mit
+  Demo-Daten (analog `MeineReisen.tsx`), echtem Fortschrittsbalken über
+  `calculateProgress` (7.1); 7.3 (Pause/Duplizieren/Abschließen/Löschen)
+  und 7.4 (echte Wiederaufnahme mit Chat-Historie) bleiben eigene offene
+  Punkte, "Planung fortsetzen" verlinkt vorerst nur auf `/ki-chat`
+- [ ] 7.3 Entwurfs-Aktionen: pausieren, duplizieren, abschließen, löschen
+- [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
+  Unterbrechungspunkt fortsetzen
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
 - [ ] 7.7 Dashboard
 - [ ] 7.8 Angebote, 7.9 Favoriten, 7.10 Preisalarme
