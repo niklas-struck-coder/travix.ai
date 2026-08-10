@@ -118,7 +118,8 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 ## Marketing (Marketing-Chef)
 
 ### Sprint 1 (KW33, 11.-17. Aug)
-- [ ] Positionierung & Zielgruppen final festlegen
+- [x] Positionierung & Zielgruppen final festlegen (von Ni am 10.08.
+  bestätigt, siehe `MARKENDESIGN.md`)
 
 ### Sprint 2 (KW34, 18.-24. Aug)
 - [ ] Landingpage/Warteliste live (unabhängig vom Hauptprodukt umsetzbar)

@@ -6,7 +6,7 @@ können. **Marketing-Chef pflegt diese Datei** (Markenstimme, Positionierung,
 Design-Vorgaben) — **IT-Chef liest sie vor jeder UI-/Design-Arbeit** und
 hält sich daran, statt eigene Stil-Entscheidungen zu treffen.
 
-Zuletzt aktualisiert: 2026-08-09 von Marketing-Chef
+Zuletzt aktualisiert: 2026-08-10 von Marketing-Chef
 
 ## Positionierung
 
@@ -33,16 +33,26 @@ Falsches anzunehmen"). Das sollte sich in JEDER Kommunikation zeigen:
 keine Rabatt-Countdown-Ästhetik, keine "Nur noch heute"-Sprache, auch
 nicht in Marketing-Kampagnen später.
 
-## Zielgruppe (vorläufig, keine echten Nutzerdaten vorhanden)
-Es gibt noch keine echte Nutzerforschung — travix.ai ist Pre-Launch.
-Das Produkt selbst gibt aber einen Hinweis: der KI-Chat ersetzt bewusst
-komplexe Multi-Filter-Suchformulare durch ein Gespräch. Das deutet auf
-eine Zielgruppe, die von klassischen Reiseportalen (zu viele Filter, zu
-viele Tabs offen, Preisangst durch künstliche Verknappung) genervt ist,
-statt Reiseplanung als Hobby zu lieben. Vorläufige Persona: **"Die
-erschöpfte Planerin"** — will eine gute Reise, keine Nebenbeschäftigung
-als Reise-Rechercheurin. Sobald echte Nutzerdaten da sind, hier
-korrigieren statt daran festhalten.
+## Zielgruppe (von Ni am 10.08.2026 bestätigt)
+**Basis-Segment:** Freizeitreisende — Paare, Familien, Solo-Reisende —
+die stressfreie, unterbrechbare Planung wollen und Transparenz schätzen
+(echte Angebote statt erfundener Daten/Countdown-Panik). Die drei
+Segmente werden bewusst NICHT in getrennte Personas mit eigenen
+Painpoints aufgesplittet, sondern über ein gemeinsames Leitbild
+angesprochen.
+
+**Leitbild-Persona: "Die erschöpfte Planerin."** Will eine gute Reise,
+keine Nebenbeschäftigung als Reise-Rechercheurin. Genervt von
+klassischen Portalen: zu viele Filter, zu viele offene Tabs, künstliche
+Preisangst. Bevorzugt ein Gespräch ("was willst du?") statt ein
+Formular — das spiegelt sich direkt im Produkt (KI-Chat statt
+Multi-Filter-Suchmaske).
+
+**Ehrlicher Hinweis:** Das ist weiterhin eine Arbeitshypothese aus dem
+Produktdesign selbst, keine echte Nutzerforschung — es gibt noch keine
+Nutzerdaten. Bestätigt heißt hier: als Grundlage für Content/Positionierung
+freigegeben, nicht "durch Daten bewiesen". Sobald echte Nutzerdaten/Feedback
+da sind, hier prüfen und bei Bedarf korrigieren.
 
 ## Markenstimme
 - **Per du**, direkt, warm — nie steif oder corporate.
