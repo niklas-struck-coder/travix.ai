@@ -1,54 +1,66 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-09
+**Datum:** 2026-08-10
 
-## Was ist seit dem letzten Eintrag (2026-08-07) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-09) passiert?
 
-Seitdem sind mehrere Commits dazugekommen: echte Flug- und Hotelsuche über
-Duffel (inkl. Dev-Server-Proxy, der den API-Key serverseitig hält), ein
-funktionierendes Reiseplan-Grundgerüst auf `/buchung` (der vorher gemeldete
-tote Link ist damit behoben — die Seite zeigt jetzt den echten Trip-Stand
-mit editierbaren Sektionen), ein Urlaubsmodus mit KI-Concierge-Chat, Seiten-
-übergangsanimationen sowie `ZEITPLAN.md` und `MARKENDESIGN.md` als neue
-Koordinationsdokumente. Parallel läuft inzwischen auch ein automatisierter
-Tagesarbeits-Workflow auf einem eigenen Branch (`it-chef/auto`).
+Seitdem kam vor allem die Flugauswahl dazu: Auf `/flugsuche` gibt es jetzt
+einen "Auswählen"-Button auf den Flugkarten, der den Flug direkt in den
+bestehenden Reiseplan übernimmt (analog zur Hotelsuche), inklusive eines
+neuen `updateStoredTrip()`-Helfers in `tripStorage.ts`. Parallel wurden
+Karten- und Listenkomponenten für Zug-/Bus-/Fährverbindungen gebaut
+(`TrainCard.tsx`, `TrainResults.tsx`) — technisch sauber, aber noch in
+keine Seite eingebunden, für Nutzer:innen also noch nicht sichtbar. Dazu
+kamen sanfte Seitenübergangs-Animationen (`PageTransition.tsx`). Der
+Support-Chef-Auto-Lauf hat die neue Flugsuche unabhängig geprüft und dabei
+einen Reibungspunkt gefunden, den ich unten als Fix umgesetzt habe.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-- **[PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)** (Branch `it-chef-autofix/unhandled-stay-search-promise-2026-08-09`):
-  In `src/hooks/useChat.ts` fehlte ein `.catch()` bei der Unterkunftssuche
-  (`searchStays(...).then(...)`). Bei einem Promise-Reject wäre der
-  Ladezustand ("Travix sucht echte Unterkünfte …") für immer hängen
-  geblieben, ohne dass der Nutzer je eine Antwort sieht. Der Fix ergänzt
-  eine Fehlerbehandlung, die den Ladezustand zurücksetzt und stattdessen
-  "keine Ergebnisse" anzeigt — gleiches Verhalten wie im bereits
-  vorhandenen, intern abgefangenen Fehlerfall.
+- **[PR #2](https://github.com/niklas-struck-coder/travix.ai/pull/2)** (Branch `it-chef-autofix/flugsuche-missing-search-reset-2026-08-10`):
+  In `src/pages/Flugsuche.tsx` setzte `handleSearch` beim Start einer neuen
+  Suche `loading`, `errors` und `selectedOfferId` zurück, aber nicht
+  `offers`. Die alten Ergebniskarten blieben deshalb sichtbar stehen,
+  während die neue Anfrage lief — die Seite wirkte, als hätte der Klick
+  auf "Flüge suchen" nicht funktioniert. Der Fix ergänzt `setOffers(null)`
+  an derselben Stelle, genau nach dem bereits vorhandenen Reset-Muster.
+  Eine Zeile, isoliert, sehr sicher.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-- **Verdacht, bitte prüfen:** Die Feldnamen der Duffel-Stays-Response in
-  `src/lib/duffel/client.ts` (`mapStayResult`) sind laut Code-Kommentar
-  ungetestet, weil bisher kein echter API-Key zur Verfügung stand. Die
-  defensive Behandlung (optional chaining, Fallback-Feldnamen) verhindert
-  einen Absturz, aber die Felder sollten gegen eine echte Antwort geprüft
-  werden, sobald ein Key verfügbar ist — sonst zeigt die Suche im
-  Zweifel leere oder falsch zugeordnete Werte an, ohne dass es auffällt.
+- **Rohe, englische Duffel-Fehlermeldungen im UI.** `src/lib/duffel/client.ts`
+  reicht `json?.errors` von der Duffel-API unverändert durch,
+  `Flugsuche.tsx` zeigt `error.message` 1:1 an. Das sind englische,
+  API-nahe Meldungen (z. B. zu `slices`/`passengers`), die nicht zum sonst
+  durchgängig freundlichen Deutsch der App passen. Kein automatischer Fix,
+  weil eine sinnvolle Lösung eine Übersetzungstabelle für die häufigsten
+  Fehlercodes braucht — das ist eine Abwägung, keine Ein-Zeilen-Korrektur.
+- **Mikrofon-Fehler bleiben unsichtbar.** `src/lib/ai/speech.ts:47`
+  (`recognition.onerror = onEnd`) behandelt einen Fehler genauso wie ein
+  normales Aufnahmeende — verweigert jemand die Mikrofon-Berechtigung,
+  verschwindet die "Aufnahme läuft"-Anzeige kommentarlos, ohne dass die
+  Nutzerin erfährt, warum. Kein automatischer Fix, weil die richtige
+  Lösung eine UI-Entscheidung braucht (Toast? Inline-Hinweis?), die über
+  die Speech-Datei selbst hinausgeht.
+- **IATA-Code-Eingabe ohne Erklärung.** `FlightWizard.tsx` verlangt einen
+  exakten 3-stelligen Flughafencode in reinen Textfeldern; unter 3 Zeichen
+  bleibt der Such-Button einfach deaktiviert, ohne Hinweistext, warum. Kein
+  akuter Absturz-Bug, aber ein stiller Stolperstein — daher hier nur
+  gemeldet, nicht automatisch gefixt (Hinweistext wäre klein, aber
+  Formulierung/Platzierung ist eine UX-Entscheidung).
 
 ## Weitere Vorschläge
 
-1. **Testabdeckung ausbauen.** Es existiert weiterhin nur eine Testdatei
-   (`src/pages/Home.test.tsx`). Die zentrale Chat-Logik (`mockAdvisor.ts`,
-   `useChat.ts`) und der Duffel-Client (`src/lib/duffel/client.ts`) haben
-   trotz ihrer Bedeutung keine Tests — sinnvoll vor allem, bevor
-   `mockAdvisor.ts` durch die echte LLM-Anbindung ersetzt wird.
-2. **Sprint 1 aus `ZEITPLAN.md`: echte LLM-Anbindung (4.1–4.3).**
-   `FULL_TRIP_SCHEMA`, System-Prompts und ein echter `invokeLLM.ts`-Wrapper
-   fehlen noch — aktuell läuft der Chat komplett auf dem Mock-Advisor.
-   Größter nächster fachlicher Schritt laut Zeitplan.
-3. **`tsconfig.app.json`: `baseUrl` ist als deprecated markiert (TS5101).**
-   Kein akuter Bug, aber für zukünftige TypeScript-Versionen relevant —
-   entweder `ignoreDeprecations` setzen oder die Pfad-Alias-Strategie
-   überdenken. Kleine, aber Konfigurationsänderung, daher hier nur als
-   Vorschlag und nicht automatisch umgesetzt.
+1. **Zug/Bus/Fähre-Komponenten anbinden.** `TrainCard.tsx`/`TrainResults.tsx`
+   sind fertig gebaut, aber in keinem Nutzerpfad erreichbar. Größter
+   nächster sichtbarer Gewinn, da die Arbeit sonst brachliegt.
+2. **Testabdeckung ausbauen.** Es existieren weiterhin nur zwei Testdateien
+   (`Home.test.tsx`, `tripStorage.test.ts`). Die zentrale Chat-Logik
+   (`mockAdvisor.ts`, `useChat.ts`) und der Duffel-Client haben trotz ihrer
+   Bedeutung keine Tests — sinnvoll vor allem, bevor `mockAdvisor.ts` durch
+   die echte LLM-Anbindung ersetzt wird.
+3. **Sprint 1 aus `ZEITPLAN.md`: echte LLM-Anbindung.** Der Chat läuft
+   weiterhin komplett auf dem Mock-Advisor. Größter nächster fachlicher
+   Schritt laut Zeitplan.
 
-_Letztes Update: 2026-08-09_
+_Letztes Update: 2026-08-10_
