@@ -1,6 +1,7 @@
-import { Plane, ArrowRight, Clock } from 'lucide-react'
+import { Plane, ArrowRight, Clock, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { FlightOffer } from '@/types/duffel'
 
 function formatTime(isoString: string) {
@@ -15,7 +16,13 @@ function formatDuration(isoDuration: string) {
   return [hours && `${hours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
 }
 
-export function FlightCard({ offer }: { offer: FlightOffer }) {
+interface FlightCardProps {
+  offer: FlightOffer
+  onSelect?: (offer: FlightOffer) => void
+  selected?: boolean
+}
+
+export function FlightCard({ offer, onSelect, selected }: FlightCardProps) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-4 px-5 py-4">
@@ -53,6 +60,22 @@ export function FlightCard({ offer }: { offer: FlightOffer }) {
             {offer.totalAmount} {offer.totalCurrency}
           </span>
         </div>
+        {onSelect && (
+          <Button
+            size="sm"
+            onClick={() => onSelect(offer)}
+            disabled={selected}
+            className="w-fit self-end bg-teal text-navy hover:bg-teal/90"
+          >
+            {selected ? (
+              <>
+                <Check /> Ausgewählt
+              </>
+            ) : (
+              'Auswählen'
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

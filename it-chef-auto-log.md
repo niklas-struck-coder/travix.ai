@@ -147,3 +147,79 @@ Komponente zu ergänzen — 5.5 war der eindeutigere, risikoärmere Punkt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-10 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag einen Commit hinter `origin/main`
+("Fold Social Media and Canva design briefs into Marketing-Chef", betrifft
+nur `.claude/skills/marketing-chef-eigen/SKILL.md`, keine Berührung mit
+IT-Themen). Sauber gemerged, keine Konflikte. `main` selbst wurde nicht
+angerührt.
+
+**Ausgewählter Punkt:** Task 5.11 aus `tasks/tasks-prd-travix-platform.md`
+— "Wire flight selection to auto-integrate into trip transport section".
+Laut `ZEITPLAN.md` der letzte noch offene Sprint-1-Punkt, nachdem 5.4/5.5
+in den vorherigen beiden Läufen heute erledigt wurden. Im zweiten Lauf
+heute noch bewusst zurückgestellt ("weniger klar abgegrenzt"), deshalb
+vor der Umsetzung genauer geprüft, ob und wie es sich eng genug fassen
+lässt.
+
+**Warum sicher genug (mit bewusst eng gefasstem Scope):** Kein Bezug zu
+Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung. Die Aufgabe selbst ("Flugauswahl
+integriert sich automatisch in die Trip-Transport-Sektion") lässt aber
+mehrere Interpretationen zu, wie eng oder weit das gefasst werden soll —
+z.B. ein neues Trip-Datenfeld für Flugdetails (Route/Preis) einführen,
+die Reisedaten-Konversation im Chat um einen echten Flugsuche-Schritt
+(inkl. Abflughafen-Frage, die es bisher gar nicht gibt) erweitern, oder
+sich strikt an das bestehende Schema halten. Um innerhalb der Kriterien
+zu bleiben ("keine Interpretation über die Aufgabenliste hinaus"), wurde
+bewusst die engste, im bestehenden Schema bereits abgedeckte Auslegung
+gewählt: die "Trip-Transport-Sektion" existiert schon heute in
+`Buchung.tsx` als Anzeige von `trip.transportMode` — die Flugauswahl
+integriert sich dort, indem sie dieses bereits vorhandene Feld setzt,
+exakt nach demselben Muster, das für die Hotelauswahl (5.3,
+`HotelCard.tsx`/`selectHotel`) schon etabliert ist. Keine neuen
+Datenfelder, keine neue Chat-Konversationslogik — dadurch bleibt der
+Punkt objektiv prüfbar (Typecheck/Lint/Tests) statt eine Produkt-
+Entscheidung über den Umfang der Flugintegration vorwegzunehmen.
+
+Andere Sprint-1-Punkte weiterhin geprüft und verworfen: 4.1-4.3 nach wie
+vor als "blocked on Base44/Gemini credentials" markiert, Backend-
+Entscheidung nach wie vor als Produktentscheidung markiert.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: neue Funktion `updateStoredTrip(patch)`
+  — lädt den gespeicherten Chat-Zustand, merged ein Partial<TripDraft>
+  hinein und schreibt zurück; gibt `null` zurück (ohne etwas zu
+  schreiben), wenn noch gar keine Reise begonnen wurde, statt eine neue
+  Reise zu erfinden.
+- `src/components/search/FlightCard.tsx`: optionaler `onSelect`-Prop und
+  "Auswählen"-Button ergänzt, 1:1 nach dem bestehenden Muster von
+  `HotelCard.tsx` (inkl. "Ausgewählt"-Zustand mit Häkchen-Icon nach
+  Auswahl).
+- `src/pages/Flugsuche.tsx`: Auswahl eines Flugangebots ruft
+  `updateStoredTrip({ transportMode: 'flight' })` auf und zeigt ehrlich
+  an, was passiert ist — entweder Bestätigung mit Link zum Reiseplan
+  (`/buchung`), oder (falls keine aktive Reiseplanung existiert) einen
+  Hinweis mit Link zum KI-Chat, statt stillschweigend nichts zu tun.
+  Formulierung an den Ton aus `MARKENDESIGN.md` angelehnt (ehrlich,
+  ruhig, kein "Jetzt buchen!!").
+- Neuer Test `src/lib/trip/tripStorage.test.ts` (3 Fälle: kein aktiver
+  Trip → `null` und keine Schreiboperation; Patch wird korrekt gemerged;
+  Nachrichten/Quick-Replies bleiben unangetastet).
+- Checkbox 5.11 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum bewusst engen Scope.
+
+**Geprüft:**
+- `npm run build` (tsc -b + vite build) → grün (nach frischem
+  `npm install`, siehe Hinweis vom 09.08. — `node_modules` fehlt im
+  frischen Checkout jedes Mal).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx`
+  (react-refresh, nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 4/4 Tests grün (1 bestehender Test +
+  3 neue Tests für `updateStoredTrip`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -17,6 +17,21 @@ export function loadStoredChat(): StoredChatState | null {
   }
 }
 
+/**
+ * Merges a partial trip update (e.g. a flight selected outside the chat, on
+ * the standalone Flugsuche page) into the currently stored trip. No-op if no
+ * trip has been started yet — there's nothing to integrate the selection
+ * into, and this function must not fabricate a new trip on its own.
+ */
+export function updateStoredTrip(patch: Partial<TripDraft>): StoredChatState | null {
+  const stored = loadStoredChat()
+  if (!stored) return null
+
+  const updated: StoredChatState = { ...stored, trip: { ...stored.trip, ...patch } }
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(updated))
+  return updated
+}
+
 // activities is a list (not a slot-filling field), so it's excluded from
 // the completeness/emptiness checks below — an empty array is falsy here,
 // not truthy like Boolean([]) would normally treat it.

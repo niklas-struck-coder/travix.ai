@@ -35,12 +35,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   nicht nach `main` gemerged)
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.)
-- 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9) und Hotelsuche (5.1-5.3, 5.6)
-  fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre: 5.4
-  (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
+- 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
+  5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
+  5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
   IT-Chef-Lauf auf Branch `it-chef/auto` erledigt, aber noch nicht in
-  den KI-Chat eingebunden (5.7 offen); 5.11 (Flugauswahl ins Trip-Objekt
-  integrieren) offen; 5.10 (Backend-Stub)
+  den KI-Chat eingebunden (5.7 offen); 5.10 (Backend-Stub)
   anders gelöst über Vite-Proxy statt Base44
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), aber Kostenübersicht (6.6, 6.7), Checkliste
@@ -62,7 +61,13 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   eingebunden (5.7 offen)
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
-- [ ] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren
+- [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —
+  `FlightCard.tsx` hat jetzt einen "Auswählen"-Button (analog zu
+  `HotelCard.tsx`), Auswahl auf der eigenständigen `/flugsuche`-Seite
+  schreibt `transportMode: 'flight'` in den bestehenden Trip via neuer
+  `updateStoredTrip()`-Funktion in `tripStorage.ts`; kein neues Datenfeld
+  für Flugdetails (Route/Preis) eingeführt, das wäre über die
+  Aufgabenbeschreibung hinausgegangen
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.6 `CostBreakdown.tsx` — echte Kostenübersicht nach Kategorie

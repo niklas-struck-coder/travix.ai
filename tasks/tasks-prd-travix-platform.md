@@ -182,7 +182,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 5.8 Build `FlightWizard.tsx` with IATA code inputs, passenger details, cabin class, one-way/round-trip toggle
   - [ ] 5.9 Create Flugsuche page (`/flugsuche`) hosting the flight wizard
   - [ ] 5.10 Implement Duffel API backend function stub (ready for Builder+ deployment)
-  - [ ] 5.11 Wire flight selection to auto-integrate into trip transport section
+  - [x] 5.11 Wire flight selection to auto-integrate into trip transport section
 
 - [ ] 6.0 Interactive trip plan — BuchungsSeite, checklist, cost breakdown, provider links
   - [ ] 6.1 Build `TripSection.tsx` wrapper for Flights, Trains, Hotels, Car Rentals, Activities sections
