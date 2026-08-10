@@ -98,10 +98,15 @@ export function useChat(speechEnabled: boolean) {
             checkOutDate,
             rooms: 1,
             guests: 1,
-          }).then((result) => {
-            setStayOffers(result.offers)
-            setStayLoading(false)
           })
+            .then((result) => {
+              setStayOffers(result.offers)
+              setStayLoading(false)
+            })
+            .catch(() => {
+              setStayOffers([])
+              setStayLoading(false)
+            })
         }
       }
     }, 700)

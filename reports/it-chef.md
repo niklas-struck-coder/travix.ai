@@ -1,21 +1,54 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-07 (KW 32)
+**Datum:** 2026-08-09
 
-## Was ist passiert?
+## Was ist seit dem letzten Eintrag (2026-08-07) passiert?
 
-Dies ist der erste Eintrag dieser Datei. Laut `git log` gibt es bisher zwei Commits: das initiale Scaffolding (Vite + React + TypeScript + Tailwind + shadcn/ui, Routing, KI-Chat-Prototyp mit Mock-Advisor) sowie einen Commit mit einer öffentlichen Projektstatus-Momentaufnahme für die PA-Website. In den letzten 14 Tagen keine weiteren Commits. Laut `tasks/tasks-prd-travix-platform.md` sind Projekt-Scaffolding (1.0), Grundlayout/Navigation (3.0) und der KI-Chat mit Mock-Advisor (4.0) weitgehend fertig; Base44-Anbindung (2.0), echte Suchmodule (5.0), interaktiver Reiseplan (6.0) sowie die meisten Lifecycle-Seiten (7.0/8.0) sind noch offen.
+Seitdem sind mehrere Commits dazugekommen: echte Flug- und Hotelsuche über
+Duffel (inkl. Dev-Server-Proxy, der den API-Key serverseitig hält), ein
+funktionierendes Reiseplan-Grundgerüst auf `/buchung` (der vorher gemeldete
+tote Link ist damit behoben — die Seite zeigt jetzt den echten Trip-Stand
+mit editierbaren Sektionen), ein Urlaubsmodus mit KI-Concierge-Chat, Seiten-
+übergangsanimationen sowie `ZEITPLAN.md` und `MARKENDESIGN.md` als neue
+Koordinationsdokumente. Parallel läuft inzwischen auch ein automatisierter
+Tagesarbeits-Workflow auf einem eigenen Branch (`it-chef/auto`).
 
-## Vorschläge für die nächsten Schritte
+## Automatisch gefixt (PR wartet auf Review)
 
-1. **Base44-Anbindung starten (Task 2.0).** Aktuell existiert kein `src/lib/base44/`-Ordner, kein Auth, keine Entity-Persistenz. Der Chat speichert Trip-Daten bislang nur im `localStorage` (`src/hooks/useChat.ts:59`). Ohne Base44-Client und Trip-Entity ist jeder nachgelagerte Schritt (Speichern, Buchungsseite, Dashboard) blockiert — das ist aktuell die größte Bremse für den Fortschritt.
+- **[PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)** (Branch `it-chef-autofix/unhandled-stay-search-promise-2026-08-09`):
+  In `src/hooks/useChat.ts` fehlte ein `.catch()` bei der Unterkunftssuche
+  (`searchStays(...).then(...)`). Bei einem Promise-Reject wäre der
+  Ladezustand ("Travix sucht echte Unterkünfte …") für immer hängen
+  geblieben, ohne dass der Nutzer je eine Antwort sieht. Der Fix ergänzt
+  eine Fehlerbehandlung, die den Ladezustand zurücksetzt und stattdessen
+  "keine Ergebnisse" anzeigt — gleiches Verhalten wie im bereits
+  vorhandenen, intern abgefangenen Fehlerfall.
 
-2. **Toten Link nach Chat-Abschluss beheben.** `TripSummaryCard.tsx:51` verlinkt den Button "Speichern & ansehen" auf `/buchung`. Diese Route ist laut `src/routes.tsx:8` nicht in `builtRoutes` enthalten und zeigt daher nur eine generische, leere `PlaceholderPage`. Nutzer, die den Chat erfolgreich durchlaufen, landen also auf einer leeren Seite ohne ihren geplanten Trip — größte sichtbare Lücke im aktuell nutzbaren Flow.
+## Gefundene Bugs (nicht automatisch gefixt)
 
-3. **Reiseplan-Logik nachziehen (Task 6.0), damit `/buchung` etwas zeigt.** `TripPlanPage.tsx`, `CostBreakdown.tsx`, `ChecklistPanel.tsx` sowie die Hilfsfunktionen `calculateCosts.ts` und `checklistRules.ts` existieren noch nicht in `src/`. Das hängt direkt mit Punkt 2 zusammen: Der Link zu funktionieren zu lassen bringt wenig, solange die Zielseite keine echte Funktionalität hat.
+- **Verdacht, bitte prüfen:** Die Feldnamen der Duffel-Stays-Response in
+  `src/lib/duffel/client.ts` (`mapStayResult`) sind laut Code-Kommentar
+  ungetestet, weil bisher kein echter API-Key zur Verfügung stand. Die
+  defensive Behandlung (optional chaining, Fallback-Feldnamen) verhindert
+  einen Absturz, aber die Felder sollten gegen eine echte Antwort geprüft
+  werden, sobald ein Key verfügbar ist — sonst zeigt die Suche im
+  Zweifel leere oder falsch zugeordnete Werte an, ohne dass es auffällt.
 
-4. **Testabdeckung ausbauen.** Bisher gibt es nur eine Testdatei (`src/pages/Home.test.tsx`). Die Kernlogik des Chats (`src/lib/ai/mockAdvisor.ts`, `src/hooks/useChat.ts`) hat trotz zentraler Bedeutung für den aktuell einzigen funktionierenden Flow keine Tests — sinnvoll, bevor hier später der echte LLM-Aufruf eingebaut wird (Task 4.1–4.3).
+## Weitere Vorschläge
 
-Jeder dieser Vorschläge wird erst nach Nis Freigabe (per Claude Code) umgesetzt — von hier aus werden keine Code-Änderungen vorgenommen.
+1. **Testabdeckung ausbauen.** Es existiert weiterhin nur eine Testdatei
+   (`src/pages/Home.test.tsx`). Die zentrale Chat-Logik (`mockAdvisor.ts`,
+   `useChat.ts`) und der Duffel-Client (`src/lib/duffel/client.ts`) haben
+   trotz ihrer Bedeutung keine Tests — sinnvoll vor allem, bevor
+   `mockAdvisor.ts` durch die echte LLM-Anbindung ersetzt wird.
+2. **Sprint 1 aus `ZEITPLAN.md`: echte LLM-Anbindung (4.1–4.3).**
+   `FULL_TRIP_SCHEMA`, System-Prompts und ein echter `invokeLLM.ts`-Wrapper
+   fehlen noch — aktuell läuft der Chat komplett auf dem Mock-Advisor.
+   Größter nächster fachlicher Schritt laut Zeitplan.
+3. **`tsconfig.app.json`: `baseUrl` ist als deprecated markiert (TS5101).**
+   Kein akuter Bug, aber für zukünftige TypeScript-Versionen relevant —
+   entweder `ignoreDeprecations` setzen oder die Pfad-Alias-Strategie
+   überdenken. Kleine, aber Konfigurationsänderung, daher hier nur als
+   Vorschlag und nicht automatisch umgesetzt.
 
-_Letztes Update: 2026-08-07_
+_Letztes Update: 2026-08-09_

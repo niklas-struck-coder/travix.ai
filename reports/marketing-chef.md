@@ -1,19 +1,65 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-07 (KW 32)
+**Datum:** 2026-08-09
 
-## Was ist passiert?
+## Was ist seit dem letzten Eintrag (2026-08-07) passiert?
 
-Erster Eintrag dieser Datei. Der Blick ins Repo zeigt: Travix ist aktuell ein Frontend-Prototyp — Landingpage, KI-Chat mit Mock-Advisor, Grundnavigation. Laut IT-Chef-Bericht (KW32) fehlt noch die Backend-Anbindung (Base44), der Buchungs-Flow ist ein toter Link, echte Suchergebnisse gibt's noch nicht. Heißt für Marketing: Es gibt weder echten Traffic noch Nutzerzahlen, auf die ich mich beziehen könnte — deshalb hier keine erfundenen Metriken, sondern Positionierungsarbeit für die Phase vor dem echten Launch.
+Seit dem letzten Bericht hat sich am Produkt einiges getan, auch wenn wir
+immer noch klar in der Pre-Launch-Phase sind (kein echter Traffic, keine
+Kampagnen, keine Nutzerzahlen):
+
+- **Flugsuche ist jetzt echt.** Der Chat liefert nicht mehr nur
+  Mock-Antworten, sondern ist an die Duffel-API angebunden und wurde mit
+  echten Testdaten live getestet. Hotelsuche über Duffel Stays ist im Code
+  verdrahtet, wartet aber noch auf die Freischaltung des Accounts.
+- **Neue Reiseplan-/Buchungsseite** mit editierbaren Abschnitten ist da.
+- **Neuer Urlaubsmodus**: ein On-Trip-Concierge-Chat, der während der
+  Reise Fragen zu Währung, Notfällen etc. beantwortet.
+- **IT-Chef hat zwei Bugs im Buchungsbereich behoben** (toter
+  `/buchung`-Link, hängender Ladezustand bei der Unterkunftssuche) — PR
+  #1 wartet noch auf Review.
+- `ZEITPLAN.md` wurde zum vollen Fahrplan mit Ziel-Release **1. Dezember
+  2026** ausgebaut. Für Marketing steht dort Sprint 1 (KW33, ab 11. Aug):
+  "Positionierung & Zielgruppen final festlegen" — startet also nächste
+  Woche, nicht rückwirkend erledigt.
+
+Kurz: Die Suche ist zum ersten Mal "echt" statt reiner Fassade — das
+ändert, was wir ehrlich zeigen können.
 
 ## Vorschläge
 
-1. **Kernbotschaft schärfen: "Travix lügt nicht."** Das stärkste Differenzierungsmerkmal laut Produktprinzipien ist "keine erfundenen Daten" + "Nutzerwunsch ist heilig" (z. B. Zug bleibt Zug, nie Flug). Große OTAs verkaufen "mehr Optionen" — Travix kann als Gegenpol positioniert werden: "Wir zeigen dir nur, was wirklich existiert, und nur, was du willst." Das ist eine Botschaft, die schon jetzt kommuniziert werden kann, unabhängig vom Backend-Status.
+1. **Content-Moment "Keine Fake-Ergebnisse mehr" nutzen, sobald PR #1
+   gemerged ist.** Die Kernbotschaft aus dem letzten Bericht ("Travix lügt
+   nicht") war bisher nur eine Behauptung — jetzt gibt es echte
+   Flugsuch-Ergebnisse (Duffel-Testdaten) dahinter. Ein kurzes
+   Screen-Recording des Chat-zu-Ergebnis-Flows wäre der erste Beleg für
+   diese Positionierung, statt nur Chat-UI zu zeigen. Wichtig: erst
+   posten/zeigen, wenn der hängende Ladezustand-Fix (PR #1) live ist,
+   sonst zeigt die Demo genau den Bug, den wir gerade beheben.
 
-2. **Warteliste statt Werbedruck.** Solange Buchungsflow und echte Suche fehlen, wäre eine Performance-Kampagne verschwendetes Geld — die Landingpage kann aber schon jetzt eine "Früher Zugang"-Warteliste sammeln (E-Mail-Capture mit 1-2 Sätzen zur Vision). Das baut Anticipation auf, ohne Nutzer auf eine unfertige Buchungsstrecke zu schicken.
+2. **Urlaubsmodus als eigenständiges Differenzierungsmerkmal
+   positionieren.** Ein KI-Concierge, der *während* der Reise weiterhilft
+   (Währung, Notfall-Infos), ist ein Feature, das klassische Buchungs­
+   portale nicht bieten — die hören nach dem Kauf auf zu existieren. Das
+   passt zur Content-Linie "Reise-Planung, die mitdenkt" aus dem letzten
+   Bericht, nur jetzt mit echtem Feature statt Idee: "Travix bucht nicht
+   nur, Travix bleibt dabei." Eignet sich für einen kurzen Erklär-Post,
+   sobald genug vom Urlaubsmodus steht, um ihn glaubhaft zu zeigen.
 
-3. **Content-Linie "Ehrliche KI-Reiseplanung".** Kurze Social-/Blog-Beiträge, die das Prinzip "Reise ist ein Wunsch, kein Formular" erklären — z. B. anhand des One-Question-at-a-Time-Chatflows. Zielgruppe: Leute, die von OTA-Overload genervt sind (Paare/Familien, die "einfach mal jemandem ihre Reise erzählen" wollen statt 15 Filter zu setzen). Das lässt sich schon mit dem aktuellen Chat-Prototyp als Screenshot/GIF zeigen.
+3. **Sprint 1 aus `ZEITPLAN.md` aktiv angehen: Zielgruppen final
+   festlegen.** `Marketing-Chef-Konzept.md` nennt bereits eine
+   Arbeitshypothese (Paare/Familien/Solo-Reisende, die Transparenz und
+   unterbrechbare Planung schätzen). Bevor wir tiefer in Content/Kampagnen
+   investieren, braucht das eine bewusste Entscheidung von dir statt
+   stillschweigender Fortführung — schlage vor, das in einem kurzen
+   Gespräch festzuzurren, damit Content- und spätere Kampagnenarbeit
+   (Sprint 3+) darauf aufbauen kann.
 
-4. **"Nie wieder von vorne anfangen"-Botschaft für die Reiseentwürfe-Funktion.** Das automatische Speichern unterbrochener Planungen (Reiseentwürfe) ist ein konkretes, fühlbares Nutzenversprechen gegen die Frustration von "Tab zu, alles weg". Sobald diese Funktion technisch steht, eignet sie sich gut für eine kurze Erklär-Content-Serie ("Reise-Planung, die mitdenkt") — aktuell als Ideen-Merkposten, da noch kein Live-Feature zum Zeigen.
+4. **Landingpage/Warteliste (Sprint 2, ab KW34) im Blick behalten.**
+   Noch nicht dran laut Zeitplan, aber jetzt, wo echte Suche existiert,
+   lohnt es sich, die Warteliste-Idee aus dem letzten Bericht um einen
+   Satz zu schärfen: nicht nur "früher Zugang", sondern konkret an die
+   echte Flugsuche anknüpfen ("sei dabei, wenn aus Testdaten echte
+   Buchungen werden").
 
-_Letztes Update: 2026-08-07_
+_Letztes Update: 2026-08-09_
