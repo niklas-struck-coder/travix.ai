@@ -175,7 +175,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 5.1 Build `HotelCard.tsx` displaying all required fields (name, stars, rating, price, amenities, images, booking URL)
   - [ ] 5.2 Build `HotelResults.tsx` grid showing minimum 3 comparable hotel cards
   - [ ] 5.3 Implement hotel selection flow — selecting a card auto-integrates into trip accommodation
-  - [ ] 5.4 Build `TrainCard.tsx` with departure/arrival, times, duration, transfers, operator, price, classes
+  - [x] 5.4 Build `TrainCard.tsx` with departure/arrival, times, duration, transfers, operator, price, classes
   - [ ] 5.5 Build `TrainResults.tsx` list view for train/bus/ferry connections
   - [ ] 5.6 Build `NoResultsMessage.tsx` with honest messaging and alternative suggestions
   - [ ] 5.7 Integrate hotel and train search results into KI-Chat response rendering

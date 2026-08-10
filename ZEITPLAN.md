@@ -36,9 +36,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.)
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9) und Hotelsuche (5.1-5.3, 5.6)
-  fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre (5.4,
-  5.5) komplett offen; 5.11 (Flugauswahl ins Trip-Objekt integrieren)
-  offen; 5.10 (Backend-Stub) anders gelöst über Vite-Proxy statt Base44
+  fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre: 5.4
+  (`TrainCard.tsx`) heute vom autonomen IT-Chef-Lauf auf Branch
+  `it-chef/auto` erledigt, 5.5 (`TrainResults.tsx`) noch offen; 5.11
+  (Flugauswahl ins Trip-Objekt integrieren) offen; 5.10 (Backend-Stub)
+  anders gelöst über Vite-Proxy statt Base44
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), aber Kostenübersicht (6.6, 6.7), Checkliste
   (6.8-6.10) und manueller Bearbeitungsmodus (6.12) fehlen noch
@@ -54,7 +56,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 4.1 `FULL_TRIP_SCHEMA` in `src/lib/ai/schemas.ts`
 - [ ] 4.2 System-Prompts in `src/lib/ai/prompts.ts`
 - [ ] 4.3 Echter `invokeLLM.ts`-Wrapper — ersetzt `mockAdvisor.ts`
-- [ ] 5.4 `TrainCard.tsx` (Zug/Bus/Fähre-Verbindung)
+- [x] 5.4 `TrainCard.tsx` (Zug/Bus/Fähre-Verbindung) — Kartenkomponente steht,
+  inkl. `src/types/trains.ts` (`TrainOffer`); noch nicht in `TrainResults.tsx`
+  oder KI-Chat eingebunden (5.5, 5.7 offen)
 - [ ] 5.5 `TrainResults.tsx`
 - [ ] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren
 
