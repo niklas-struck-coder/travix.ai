@@ -223,3 +223,86 @@ Entscheidung nach wie vor als Produktentscheidung markiert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-10 (vierter Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag mehrere Commits hinter `origin/main`
+zurück — u. a. der gemergte PR `it-chef/reiseplan-bearbeiten-flug-hotel-suche-2026-08-10`
+(echte Flug-/Hotelsuche direkt im KI-Chat, `KiChat.tsx`/`useChat.ts`
+erweitert) und der gemergte Autofix-PR (fehlender Ergebnis-Reset bei neuer
+Flugsuche). Sauberer Fast-Forward-Merge, keine Konflikte. `main` selbst
+wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Task 7.1 aus `tasks/tasks-prd-travix-platform.md`
+— `calculateProgress.ts` für die Fortschritts-Prozentangabe eines
+Reiseentwurfs, basierend auf abgeschlossenen Planungs-Bausteinen.
+
+**Warum sicher genug (mit Begründung, warum nicht Sprint 1):** Zuerst
+Sprint 1 erneut durchgeprüft, da dort laut `ZEITPLAN.md` eigentlich als
+Nächstes gearbeitet werden sollte:
+- 4.1-4.3 (KI-Schema/Prompts/`invokeLLM.ts`) weiterhin explizit "blocked
+  on Base44/Gemini credentials" in der Aufgabendatei — nicht objektiv
+  umsetzbar/prüfbar ohne echte Zugangsdaten.
+- Backend-Entscheidung weiterhin als Produktentscheidung markiert.
+- 5.7 ("Integrate hotel and train search results into KI-Chat") ist für
+  Hotels durch den zwischenzeitlich gemergten PR bereits erledigt; für
+  Zug/Bus/Fähre (`TrainCard.tsx`/`TrainResults.tsx`, aus den vorherigen
+  beiden Läufen heute) gibt es aber keine echte Such-API — anders als bei
+  Duffel für Flüge/Hotels existiert keine Zug-Datenquelle. Eine Anbindung
+  würde entweder erfundene Daten zeigen (widerspricht der in der App
+  durchgängig betonten "nie erfunden"-Ehrlichkeit, siehe Begrüßungstext
+  im Chat) oder eine echte Datenquelle/Architekturentscheidung
+  voraussetzen — beides nicht autonom sicher.
+
+Daraufhin Sprint 2 geprüft: 6.6 `CostBreakdown.tsx` und 6.7
+`calculateCosts.ts` brauchen Kostendaten pro Kategorie (Transport,
+Unterkunft, Mietwagen) — `TripDraft` (`src/types/chat.ts`) speichert für
+Transport und Unterkunft aber bewusst keine Preise (siehe Scope-Begründung
+zu 5.11 im Lauf davor), nur `activities` hat ein Preisfeld. Das Datenmodell
+dafür zu erweitern wäre eine Architekturentscheidung, keine reine
+Umsetzung. 6.8 `ChecklistPanel.tsx`/6.9 `checklistRules.ts` verlangen laut
+PRD (`tasks/prd-travix-platform.md`, FR-501) eine 13-Punkte-Checkliste,
+nennt aber nur 10 konkrete Punkte plus "additional planning items" — die
+restlichen 3 Punkte wären erfunden, keine reine Umsetzung der
+Aufgabenbeschreibung. Beide daher verworfen.
+
+Task 7.1 (Sprint 3) dagegen erfüllt alle vier Kriterien: kein Bezug zu
+Auth, Zahlungen, Nutzerdaten oder rechtlichen Texten; keine offene
+Produkt-/Architekturentscheidung; klar genug beschrieben (reine
+Berechnungsfunktion auf Basis der bereits bestehenden `TripDraft`-Felder,
+kein neues Datenmodell nötig); Ergebnis objektiv prüfbar über Unit-Tests.
+Bewusst außerhalb der Sprint-Reihenfolge vorgezogen, weil in Sprint 1 und
+2 kein Punkt mehr übrig war, der alle vier Kriterien erfüllt — siehe
+Begründung oben.
+
+**Umgesetzt:**
+- Neue Datei `src/lib/trip/calculateProgress.ts` — `calculateProgress(trip)`
+  gibt einen Prozentwert (0-100) zurück, basierend auf den 5 Bausteinen,
+  die auch auf der Reiseplan-Seite (`Buchung.tsx`) als eigene Sektionen
+  angezeigt werden: Transport, Reisedaten, Budget, Unterkunft, Aktivitäten
+  (`activities` zählt als erledigt, wenn die Liste nicht leer ist).
+  `destination` bewusst nicht mitgezählt — auf `Buchung.tsx` ist es der
+  Seitentitel, keine eigene Sektion, analog zur bestehenden
+  `hasTripData()`/`isTripComplete()`-Konvention in `tripStorage.ts`, die
+  ebenfalls zwischen `activities` und den übrigen Feldern unterscheidet.
+  Noch in keine Seite eingebunden — 7.2 (Reiseentwürfe-Seite) ist der
+  erste vorgesehene Verbraucher und bleibt ein eigener, offener Punkt.
+- Neuer Test `src/lib/trip/calculateProgress.test.ts` (5 Fälle: leerer
+  Trip → 0 %, teilweise gefüllt → anteiliger Wert, `activities` zählt als
+  eigener Baustein, `destination` wird nicht mitgezählt, alle 5 Bausteine
+  gefüllt → 100 %).
+- Checkbox 7.1 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum bewusst vorgezogenen Umfang und
+  dass die Seiten-Einbindung (7.2) separat offen bleibt.
+
+**Geprüft:**
+- `npm run build` (tsc -b + vite build) → grün (nach frischem
+  `npm install`, `node_modules` fehlt im frischen Checkout jedes Mal).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx`
+  (react-refresh, nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 9/9 Tests grün (4 bestehende Tests + 5 neue
+  Tests für `calculateProgress`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

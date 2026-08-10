@@ -45,8 +45,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (6.1-6.5, 6.11, 6.13), aber Kostenübersicht (6.6, 6.7), Checkliste
   (6.8-6.10) und manueller Bearbeitungsmodus (6.12) fehlen noch
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
-- 🟡 Phase 7 Trip-Lifecycle — nur Meine-Reisen mit Demo-Daten (7.5) steht,
-  Rest (7.1-7.4, 7.6-7.15) komplett offen
+- 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5) steht;
+  `calculateProgress.ts` (7.1) vom autonomen IT-Chef-Lauf ergänzt, aber
+  noch in keiner Seite verwendet (7.2 Entwürfe-Seite ist der erste
+  vorgesehene Verbraucher, weiterhin offen); Rest (7.2-7.4, 7.6-7.15)
+  komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -78,7 +81,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
-- [ ] 7.1 `calculateProgress.ts`
+- [x] 7.1 `calculateProgress.ts` — vorgezogen vom autonomen IT-Chef-Lauf am
+  10.08., da Sprint 1 an blockierten/Produktentscheidungs-Punkten hing;
+  reine Berechnungsfunktion, noch nicht in eine Seite eingebunden
 - [ ] 7.2, 7.3, 7.4 Reiseentwürfe mit echtem Fortschritt + "Planung fortsetzen"
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
 - [ ] 7.7 Dashboard
