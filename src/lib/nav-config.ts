@@ -2,6 +2,7 @@ import {
   Home,
   MessageCircle,
   Plane,
+  BedDouble,
   ClipboardList,
   FileClock,
   Luggage,
@@ -48,6 +49,7 @@ export const navGroups: NavGroup[] = [
       { path: '/', label: 'Start', description: 'Übersicht und Reiseinspiration', icon: Home },
       { path: '/ki-chat', label: 'KI-Chat', description: 'Dein persönlicher Reiseberater', icon: MessageCircle },
       { path: '/flugsuche', label: 'Flugsuche', description: 'Flüge vergleichen und buchen', icon: Plane },
+      { path: '/hotelsuche', label: 'Hotelsuche', description: 'Unterkünfte vergleichen und buchen', icon: BedDouble },
     ],
   },
   {

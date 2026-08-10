@@ -24,7 +24,7 @@ const transportLabelsDe: Record<TransportMode, string> = {
   car: 'Mietwagen',
 }
 
-function detectTransportMode(text: string): TransportMode | null {
+export function detectTransportMode(text: string): TransportMode | null {
   const lower = text.toLowerCase()
   for (const [mode, keywords] of Object.entries(transportKeywords) as [TransportMode, string[]][]) {
     if (keywords.some((keyword) => lower.includes(keyword))) return mode

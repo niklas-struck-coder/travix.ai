@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { RotateCcw, Volume2, VolumeX } from 'lucide-react'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
 import { ChatMessage } from '@/components/chat/ChatMessage'
@@ -6,10 +7,14 @@ import { ChatInput } from '@/components/chat/ChatInput'
 import { QuickReplies } from '@/components/chat/QuickReplies'
 import { TripSummaryCard } from '@/components/chat/TripSummaryCard'
 import { HotelResults } from '@/components/search/HotelResults'
+import { FlightResults } from '@/components/search/FlightResults'
 import { Button } from '@/components/ui/button'
 import { useChat } from '@/hooks/useChat'
 import { isSpeechSynthesisSupported } from '@/lib/ai/speech'
 import { hasTripData } from '@/lib/trip/tripStorage'
+import type { EditableTripField } from '@/types/chat'
+
+const editableFields: EditableTripField[] = ['transportMode', 'dates', 'budget', 'accommodation']
 
 export function KiChat() {
   const [speechEnabled, setSpeechEnabled] = useState(false)
@@ -21,15 +26,38 @@ export function KiChat() {
     isThinking,
     stayOffers,
     stayLoading,
+    flightOffers,
+    flightErrors,
+    flightLoading,
     sendMessage,
     selectHotel,
+    selectFlight,
     resetChat,
+    startEdit,
   } = useChat(speechEnabled)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const editHandled = useRef(false)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, isThinking, stayOffers, stayLoading])
+  }, [messages, isThinking, stayOffers, stayLoading, flightOffers, flightLoading])
+
+  // Coming from a Reiseplan "Bearbeiten" button (?edit=accommodation etc.) —
+  // jump straight into re-collecting that one field instead of making the
+  // user click through the whole chat again. Waits for the stored trip to
+  // finish loading (hasTripData is false on the very first render) before
+  // firing, and only fires once per visit.
+  useEffect(() => {
+    const editParam = searchParams.get('edit')
+    if (!editParam || editHandled.current) return
+    if (!editableFields.includes(editParam as EditableTripField)) return
+    if (!hasTripData(trip)) return
+
+    editHandled.current = true
+    startEdit(editParam as EditableTripField)
+    setSearchParams({}, { replace: true })
+  }, [searchParams, trip, startEdit, setSearchParams])
 
   const handleQuickReply = (option: string) => {
     if (option === 'Neue Reise planen') {
@@ -81,6 +109,10 @@ export function KiChat() {
 
         {(stayLoading || stayOffers) && (
           <HotelResults offers={stayOffers} loading={stayLoading} onSelect={selectHotel} />
+        )}
+
+        {(flightLoading || flightOffers) && (
+          <FlightResults offers={flightOffers} errors={flightErrors} loading={flightLoading} onSelect={selectFlight} />
         )}
 
         {hasTripData(trip) && <TripSummaryCard trip={trip} />}

@@ -5,13 +5,14 @@ import { PageTransition } from '@/components/layout/PageTransition'
 import { Home } from '@/pages/Home'
 import { KiChat } from '@/pages/KiChat'
 import { Flugsuche } from '@/pages/Flugsuche'
+import { Hotelsuche } from '@/pages/Hotelsuche'
 import { MeineReisen } from '@/pages/MeineReisen'
 import { Buchung } from '@/pages/Buchung'
 import { Urlaubsmodus } from '@/pages/Urlaubsmodus'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
 
-const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/meine-reisen', '/buchung', '/urlaubsmodus'])
+const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/hotelsuche', '/meine-reisen', '/buchung', '/urlaubsmodus'])
 
 export function AppRoutes() {
   const location = useLocation()
@@ -23,6 +24,7 @@ export function AppRoutes() {
           <Route path="/" element={<PageTransition><Home /></PageTransition>} />
           <Route path="/ki-chat" element={<PageTransition><KiChat /></PageTransition>} />
           <Route path="/flugsuche" element={<PageTransition><Flugsuche /></PageTransition>} />
+          <Route path="/hotelsuche" element={<PageTransition><Hotelsuche /></PageTransition>} />
           <Route path="/meine-reisen" element={<PageTransition><MeineReisen /></PageTransition>} />
           <Route path="/buchung" element={<PageTransition><Buchung /></PageTransition>} />
           <Route path="/urlaubsmodus" element={<PageTransition><Urlaubsmodus /></PageTransition>} />
