@@ -48,6 +48,12 @@ einen Reibungspunkt gefunden, den ich unten als Fix umgesetzt habe.
   akuter Absturz-Bug, aber ein stiller Stolperstein — daher hier nur
   gemeldet, nicht automatisch gefixt (Hinweistext wäre klein, aber
   Formulierung/Platzierung ist eine UX-Entscheidung).
+- **Weiterhin offen: Duffel-Stays-Feldnamen ungetestet.** `mapStayResult` in
+  `src/lib/duffel/client.ts` rät bei den Feldnamen der Stays-Response
+  weiterhin defensiv (Fallbacks, optional chaining), weil bisher kein
+  echter API-Key zum Testen vorlag. Kein Absturzrisiko, aber im Zweifel
+  leere oder falsch zugeordnete Werte, ohne dass es auffällt — sollte
+  gegen eine echte Antwort geprüft werden, sobald ein Key verfügbar ist.
 
 ## Weitere Vorschläge
 
