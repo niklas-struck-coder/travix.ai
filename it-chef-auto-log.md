@@ -96,3 +96,54 @@ ohnehin als Produktentscheidung markiert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-10 (zweiter Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag einen Commit hinter `origin/main`
+(„Add Finance-Chef skill and BUDGET.md", betrifft nur `BUDGET.md`, keine
+Berührung mit IT-Themen). Sauber gemerged, keine Konflikte. `main`
+selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Task 5.5 aus `tasks/tasks-prd-travix-platform.md`
+— "Build `TrainResults.tsx` list view for train/bus/ferry connections".
+Laut `ZEITPLAN.md` Sprint 1 offen, direkte Fortsetzung von 5.4
+(`TrainCard.tsx`), das im ersten Lauf heute bereits fertiggestellt wurde.
+
+**Warum sicher genug:** Reine UI-Listenkomponente, kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung — Struktur ergibt sich eindeutig aus der
+bereits bestehenden Schwesterkomponente `HotelResults.tsx` (gleiches
+Loading-/Empty-/Grid-Pattern, hier als vertikale Liste statt Grid, weil
+Zug-/Bus-/Fährkarten breiter sind als Hotelkarten mit Bild). Klar genug
+beschrieben, Ergebnis objektiv prüfbar über Typecheck/Lint/Tests/Build.
+
+Andere Sprint-1-Punkte weiterhin geprüft und verworfen: 4.1-4.3 nach wie
+vor als "blocked on Base44/Gemini credentials" markiert, Backend-
+Entscheidung nach wie vor als Produktentscheidung markiert. 5.11
+(Flugauswahl ins Trip-Transport-Objekt integrieren) wäre grundsätzlich
+denkbar gewesen, aber weniger klar abgegrenzt als 5.5 und würde
+bestehenden Flugsuche-Code anfassen statt eine neue, isolierte
+Komponente zu ergänzen — 5.5 war der eindeutigere, risikoärmere Punkt.
+
+**Umgesetzt:**
+- Neue Komponente `src/components/search/TrainResults.tsx` — Aufbau
+  1:1 analog zu `HotelResults.tsx` (Loading-Zustand mit
+  `TravixAvatar`, `NoResultsMessage` bei leerem Ergebnis, Framer-Motion-
+  Fade-In), aber `flex flex-col` statt `grid` für die Listenansicht.
+  Rendert `TrainCard` pro Angebot. Noch nicht in den KI-Chat oder eine
+  Seite eingebunden (5.7 ist ein eigener, noch offener Punkt).
+- Checkbox 5.5 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum Umfang.
+
+**Geprüft:**
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx`
+  (react-refresh, nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 1/1 Tests grün (kein bestehender Test für
+  Ergebnislisten wie `HotelResults.tsx` vorhanden, an dem sich ein neuer
+  Test hätte orientieren können; Task-Datei verlangt für 5.5 keinen
+  eigenen Unit-Test).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
