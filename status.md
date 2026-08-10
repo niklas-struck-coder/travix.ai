@@ -4,20 +4,22 @@ _Diese Datei wird unregelmäßig manuell aktualisiert und dient Lina (der PA-Web
 als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstand._
 
 **Was travix.ai ist:** Eine KI-gestützte Reiseplattform mit Chat-Assistent
-("KI-Concierge"), Flugsuche, Buchung und Reiseverwaltung.
+("KI-Concierge"), Flug-, Hotel- und Bahn/Bus/Fähre-Suche, Buchung und Reiseverwaltung.
 
 **Aktuell in Arbeit:**
-- Flugsuche & Hotelsuche über externe Buchungs-API
-- Trip-/Reiseplan-Verwaltung ("Meine Reisen") inkl. neuem "Holiday Mode"
+- Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
+- Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration
 - KI-Concierge-Chat (Konversations-UI, Sprachfunktionen)
-- Marken-/Design-Richtlinien für einheitliches UI
+- Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
+  eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-07):**
-- Flug-/Hotelsuche, Reiseplan-Logik und Holiday Mode neu hinzugekommen
-- Automatisierter Arbeits-Workflow fürs Projekt eingerichtet
-- Marken-Design-Guidelines (Positionierung, Seitenvorgaben) ausgearbeitet
-- Projekt-Zeitplan/Roadmap-Dokument erweitert
+**Seit letztem Update (2026-08-09):**
+- Flugauswahl in den Reiseplan integriert; Kartenansicht & Liste für Zug/Bus/Fähre neu
+- Marketing: Content-Plan (Themen, Formate, Kanäle) entworfen
+- Support: UX-Analyse zur Flugsuche — Ladezustand fehlt teils, Fehlermeldungen noch
+  technisch, Zug/Bus/Fähre in der Oberfläche noch nicht sichtbar
+- Autonome Arbeitsstände wurden geprüft und eigenständig nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-09_
+_Letztes Update: 2026-08-10_
