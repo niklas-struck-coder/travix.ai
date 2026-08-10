@@ -20,6 +20,7 @@ export function Flugsuche() {
     setLoading(true)
     setErrors([])
     setSelectedOfferId(null)
+    setOffers(null)
     const result = await searchFlights(params)
     setOffers(result.offers)
     setErrors(result.errors)
