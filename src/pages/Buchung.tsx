@@ -1,10 +1,35 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, CalendarDays, Wallet, BedDouble, Ticket, Sun, MessageCircle, Pencil, Plane, Train, Bus, Ship, Car } from 'lucide-react'
+import {
+  MapPin,
+  CalendarDays,
+  Wallet,
+  BedDouble,
+  Ticket,
+  Sun,
+  MessageCircle,
+  Pencil,
+  Plane,
+  Train,
+  Bus,
+  Ship,
+  Car,
+  Sparkles,
+  SquarePen,
+} from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { loadStoredChat, isTripComplete, hasTripData } from '@/lib/trip/tripStorage'
 import type { TransportMode } from '@/types/chat'
 
@@ -24,14 +49,23 @@ const transportLabels: Record<TransportMode, string> = {
   car: 'Mietwagen',
 }
 
+interface EditChoice {
+  aiHref: string
+  manualHref: string
+  manualLabel: string
+}
+
 interface SectionProps {
   icon: typeof Plane
   title: string
   value: string | null
   emptyLabel: string
+  editHref: string
+  /** When set, "Bearbeiten" opens a dialog to pick KI-Chat vs. the manual search page, instead of linking straight to editHref. */
+  editChoice?: EditChoice
 }
 
-function Section({ icon: Icon, title, value, emptyLabel }: SectionProps) {
+function Section({ icon: Icon, title, value, emptyLabel, editHref, editChoice }: SectionProps) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-2 px-5 py-4">
@@ -40,13 +74,48 @@ function Section({ icon: Icon, title, value, emptyLabel }: SectionProps) {
             <Icon className="size-4 text-teal" />
             {title}
           </div>
-          {value && (
-            <Button asChild size="icon" variant="ghost" className="size-6 text-muted-foreground hover:text-foreground">
-              <Link to="/ki-chat" aria-label={`${title} bearbeiten`} title={`${title} bearbeiten`}>
-                <Pencil className="size-3.5" />
-              </Link>
-            </Button>
-          )}
+          {value &&
+            (editChoice ? (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-6 text-muted-foreground hover:text-foreground"
+                    aria-label={`${title} bearbeiten`}
+                    title={`${title} bearbeiten`}
+                  >
+                    <Pencil className="size-3.5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{title} bearbeiten</DialogTitle>
+                    <DialogDescription>Wie möchtest du weitermachen?</DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button asChild variant="outline">
+                      <Link to={editChoice.manualHref}>
+                        <SquarePen className="size-4" />
+                        {editChoice.manualLabel}
+                      </Link>
+                    </Button>
+                    <Button asChild className="bg-teal text-navy hover:bg-teal/90">
+                      <Link to={editChoice.aiHref}>
+                        <Sparkles className="size-4" />
+                        Mit KI planen
+                      </Link>
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Button asChild size="icon" variant="ghost" className="size-6 text-muted-foreground hover:text-foreground">
+                <Link to={editHref} aria-label={`${title} bearbeiten`} title={`${title} bearbeiten`}>
+                  <Pencil className="size-3.5" />
+                </Link>
+              </Button>
+            ))}
         </div>
         {value ? (
           <p className="font-heading text-lg font-semibold text-foreground">{value}</p>
@@ -88,6 +157,20 @@ export function Buchung() {
 
   const complete = isTripComplete(trip)
   const TransportIcon = trip.transportMode ? transportIcons[trip.transportMode] : Plane
+  // Flug ist der einzige Transportmodus mit eigener Such-/Auswahlseite — dort
+  // lässt "Bearbeiten" zwischen KI-Chat und manueller Suche wählen. Die
+  // anderen Modi (Zug/Bus/Fähre/Auto) haben noch keine eigene Suchseite,
+  // dafür geht "Bearbeiten" direkt in den Chat.
+  const transportEditHref = '/ki-chat?edit=transportMode'
+  const transportEditChoice =
+    trip.transportMode === 'flight'
+      ? { aiHref: '/ki-chat?edit=transportMode', manualHref: '/flugsuche', manualLabel: 'Manuell suchen' }
+      : undefined
+  const accommodationEditChoice = {
+    aiHref: '/ki-chat?edit=accommodation',
+    manualHref: '/hotelsuche',
+    manualLabel: 'Manuell suchen',
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -118,16 +201,38 @@ export function Buchung() {
           title="Transport"
           value={trip.transportMode ? transportLabels[trip.transportMode] : null}
           emptyLabel="Noch kein Transport ausgewählt"
+          editHref={transportEditHref}
+          editChoice={transportEditChoice}
         />
-        <Section icon={CalendarDays} title="Reisedaten" value={trip.dates} emptyLabel="Noch keine Daten gewählt" />
-        <Section icon={Wallet} title="Budget" value={trip.budget} emptyLabel="Noch kein Budget angegeben" />
+        <Section
+          icon={CalendarDays}
+          title="Reisedaten"
+          value={trip.dates}
+          emptyLabel="Noch keine Daten gewählt"
+          editHref="/ki-chat?edit=dates"
+        />
+        <Section
+          icon={Wallet}
+          title="Budget"
+          value={trip.budget}
+          emptyLabel="Noch kein Budget angegeben"
+          editHref="/ki-chat?edit=budget"
+        />
         <Section
           icon={BedDouble}
           title="Unterkunft"
           value={trip.accommodation}
           emptyLabel="Noch keine Unterkunft ausgewählt"
+          editHref="/ki-chat?edit=accommodation"
+          editChoice={accommodationEditChoice}
         />
-        <Section icon={Ticket} title="Aktivitäten" value={null} emptyLabel="Noch keine Aktivitäten geplant" />
+        <Section
+          icon={Ticket}
+          title="Aktivitäten"
+          value={null}
+          emptyLabel="Noch keine Aktivitäten geplant"
+          editHref="/ki-chat"
+        />
       </div>
 
       {complete && (
