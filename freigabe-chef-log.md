@@ -83,3 +83,38 @@ UX-Analyse zur Flugsuche, kein Code):
 - Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
 
 **Ergebnis:** Passt → nach `main` gemerged (`--no-ff`, gepusht).
+
+## 2026-08-10, Live-Session-Check (auf Nis Wunsch)
+
+**Geprüfter Branch:** `it-chef/reiseplan-bearbeiten-flug-hotel-suche-2026-08-10`
+— aus einer Live-Session mit Ni entstanden (kein Auto-Lauf), enthält:
+feldbezogene "Bearbeiten"-Buttons auf der Buchungsseite (`?edit=<feld>`),
+Dialog-Wahl "Mit KI planen"/"Manuell suchen" für Transport und Unterkunft,
+echte Duffel-Flugsuche im KI-Chat beim Bearbeiten des Transportmittels
+(fragt nach Startflughafen, zeigt echte Angebote), neue Seite
+`/hotelsuche` für die manuelle Hotelsuche.
+
+**Unabhängige Prüfung** (Branch ausgecheckt, `npm install`, `npx tsc -b`,
+`npx eslint .`, `npx vitest run` selbst ausgeführt): alle drei grün, 0
+Lint-Fehler (nur die 3 bekannten vorbestehenden Warnings), 4/4 Tests.
+
+**Scope-Check:** Diff (10 Dateien: `KiChat.tsx`, `useChat.ts`,
+`mockAdvisor.ts`, `nav-config.ts`, `Buchung.tsx`, `Hotelsuche.tsx`,
+`FlightResults.tsx`, `HotelWizard.tsx`, `routes.tsx`, `types/stays.ts`)
+deckt sich mit der Commit-Beschreibung, kein Bezug zu Auth, Zahlungen
+oder rechtlichen Texten. Ton/Fehlermeldungen gegen `MARKENDESIGN.md`
+geprüft — ehrlich, konkret, keine künstliche Dringlichkeit (z.B. "Ich
+möchte dein Transportmittel nicht falsch verstehen" reproduziert wörtlich
+das in `MARKENDESIGN.md` genannte Beispiel), Fehler-Rot konsistent mit
+bereits bestehendem Muster in `Flugsuche.tsx`.
+
+**Ergebnis:** Passt → nach `main` gemerged (`--no-ff`, gepusht).
+
+**Zusätzlich geprüft:** Zwei Autofix-Branches vom heutigen IT-Chef-Lauf
+(`it-chef-autofix/flugsuche-missing-search-reset-2026-08-10` und
+`it-chef-autofix/flugsuche-stale-results-2026-08-10`) — Diff-Vergleich
+ergab **identische** Änderungen (derselbe Einzeiler `setOffers(null)` in
+`Flugsuche.tsx`, offenbar zwei unabhängige Läufe auf denselben Punkt
+gestoßen). Nur `flugsuche-missing-search-reset` gemerged (unabhängig
+verifiziert, grün), `flugsuche-stale-results` bewusst nicht zusätzlich
+gemergt, um ein Duplikat zu vermeiden — kann verworfen werden.
