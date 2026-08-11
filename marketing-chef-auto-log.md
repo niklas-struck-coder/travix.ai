@@ -4,6 +4,50 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-11
+
+**Ausgewählter Punkt:** Sprint 3 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Erste Content-Stücke produzieren (Blog/Social)", der zweite,
+zurückgestellte Punkt aus dem gestrigen Content-Plan-Lauf.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument mit
+Post-/Blog-Texten, kein Live-Vorgang — nichts wird gepostet, kein Kanal
+angelegt, kein Link auf eine nicht existierende Warteliste. Keine
+erfundenen Kennzahlen (keine Follower-/Reichweitenzahlen, keine
+Ersparnis-Angaben). Klar genug beschrieben und direkt auf
+`marketing/content-plan.md` (Woche 1, Post A + Post B) aufbauend, keine
+offene Positionierungs-Grundsatzfrage — Positionierung, Zielgruppe und
+Markenstimme sind bereits in `MARKENDESIGN.md` festgehalten und wurden
+hier nur angewendet, nicht neu entschieden.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+Stand `ffc7d62` (Content-Plan vom 10.08.) hängengeblieben, dessen Inhalt
+laut `origin/main`-Historie (`ca5b107`) bereits nach `main` gemerged
+wurde — der Branch war also nur noch veraltet, nicht mehr in Arbeit.
+Neu von aktuellem `origin/main` (`4c253a9`, inkl. der neuesten IT-Chef-
+Arbeit zu 7.1/7.2/7.14) aus angelegt, wie in den Session-Regeln für
+bereits gemergte Branches vorgesehen.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2, weiterhin offen laut
+  `ZEITPLAN.md`) — ausdrücklich ein Live-Vorgang, fällt unter das Verbot.
+
+**Umgesetzt:**
+- Neue Datei `marketing/content-stuecke-woche1.md` — konkrete,
+  copy-paste-fertige Entwürfe für Woche 1 aus dem Redaktionsplan: Post A
+  (Vorstellung/Build-in-public) und Post B (Reise-Planungs-Frust), je in
+  LinkedIn- und Instagram-Fassung (Bild-/Reel-Idee + Hashtags), plus ein
+  Blog-Stück (~350 Wörter, "Warum wir keine Countdown-Timer bauen") zu
+  Säule 1 (Ehrlichkeit als Feature) mit einem wörtlichen Zitat aus
+  `src/lib/ai/mockAdvisor.ts` (Zeile 115, vorher im Code geprüft) statt
+  einer erfundenen Markenaussage.
+
+**Geprüft:** Kein Code geändert, daher kein Build/Lint/Test nötig — reine
+Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-10
 
 **Ausgewählter Punkt:** Sprint 3 aus `ZEITPLAN.md`, Marketing-Bereich —
