@@ -605,3 +605,86 @@ erfüllt. Keine Code-Änderung in diesem dritten Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-11 (vierter Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag hinter `origin/main` zurück (Freigabe-
+Chef-Merge von Support-Chef/Marketing-Chef sowie ein eigenständiger
+IT-Chef-PR `it-chef/karte-chat-profil-2026-08-11`, der `Kartenansicht.tsx`
+mit dem echten im KI-Chat geplanten Ziel verbindet, plus die zugehörigen
+Tagesberichte). Sauberer Merge, keine Konflikte. `main` selbst wurde nicht
+angerührt.
+
+**Ausgewählter Punkt:** Task 7.9 aus `tasks/tasks-prd-travix-platform.md`
+— "Build Favoriten page (`/favoriten`) for saved destinations (Favorite
+entity)".
+
+**Warum sicher genug (inkl. Abweichung von der Einschätzung des zweiten/
+dritten Laufs heute):** Die früheren beiden Läufe heute hatten 7.9
+pauschal zusammen mit 7.3/7.4/7.6/7.8/7.10 als "braucht echte
+Mehrfach-Entwürfe- bzw. Entity-Persistenz, das ist eine
+Architekturentscheidung" verworfen. Bei genauerer Einzelprüfung ist das
+für 7.9 anders als für die übrigen: 7.3 (pausieren/duplizieren/
+abschließen/löschen) und 7.4 (Wiederaufnahme mit Chat-Historie) sind
+Aktionen, die *ohne* echte Persistenz sinnlos/unehrlich wären (ein
+"Löschen"-Button, der nichts dauerhaft löscht, wäre eine Fake-Funktion —
+widerspricht der App-eigenen "nichts wird erfunden"-Haltung). 7.6
+(Warenkorb) und 7.10 (Preisalarme) brauchen echte Preisdaten
+(Kategorie-Kosten bzw. Vergleich mit einem aktuellen Preis), die im
+Datenmodell fehlen — dieselbe Blockade wie 6.6/6.7. Die Favoriten-Seite
+dagegen ist strukturell identisch zu den bereits akzeptierten Seiten
+`MeineReisen.tsx` (7.5), `Reiseentwuerfe.tsx` (7.2) und `Kartenansicht.tsx`
+(7.14): eine reine Anzeige-/Auswahl-Seite mit Demo-Daten statt echter
+Backend-Anbindung, bei der weder Preisdaten noch Cross-Session-Persistenz
+nötig sind, damit die Seite ihren Zweck erfüllt (Ziele anzeigen,
+entfernen können). Das Favorite-Entity-Schema selbst (destination,
+country, image_url, notes) ist zudem eindeutig benannt, anders als z.B.
+das unstrukturierte `offer_data`-Feld von SavedOffer (7.8). Damit erfüllt
+7.9 alle vier Kriterien: kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten; keine offene Architekturentscheidung (etabliertes
+Demo-Daten-Muster wird nur übertragen); klar genug beschrieben; Ergebnis
+objektiv prüfbar über Typecheck/Lint/Tests.
+
+Andere Punkte weiterhin aus denselben, im dritten Lauf ausführlich
+dokumentierten Gründen verworfen: 4.1-4.3 (blocked on credentials),
+Backend-Entscheidung (Produktentscheidung), 5.7 (keine Zug/Bus/Fähre-
+Datenquelle), 6.6-6.9/6.12 (fehlende Preisfelder bzw. unvollständige
+13-Punkte-Spezifikation), 7.3/7.4/7.6/7.8/7.10 (s.o.), 7.11/7.12 (fehlende
+Kalender-Bibliothek bzw. Preisfelder), 7.13 (keine echten Aktivitäten-Daten
+vorhanden), 7.15 (unklare Abgrenzung zur Startseite), 8.x (Backend-/
+Produktentscheidungen oder unspezifiziert).
+
+**Umgesetzt:**
+- Neue Seite `src/pages/Favoriten.tsx` — Karten-Grid analog zu
+  `MeineReisen.tsx`/`Reiseentwuerfe.tsx` (Gradient-Platzhalter statt
+  echtem Bild), mit Ziel, Land und Notiz pro Favorit. Herz-Button pro
+  Karte entfernt den Favoriten aus dem (rein lokalen) State — keine echte
+  Speicherung, das folgt mit dem Favorite-Entity nach der Backend-
+  Entscheidung. Zwei Demo-Favoriten (Kapstadt, Reykjavik) — bewusst aus
+  dem bereits bestehenden Inspirations-Set in `Home.tsx` übernommen
+  (gleiche Namen/Gradients) statt neue Ziele zu erfinden. Sobald alle
+  entfernt sind, ermutigender Leerzustand nach dem in `MARKENDESIGN.md`
+  vorgegebenen Muster (kurzer freundlicher Satz + klarer nächster Schritt
+  als Button zur Startseite), analog zum bestehenden Leerzustand auf
+  `Buchung.tsx`.
+- `src/routes.tsx`: `/favoriten` von der generierten Platzhalter-Route auf
+  die neue `Favoriten`-Komponente umgestellt.
+- Neuer Test `src/pages/Favoriten.test.tsx`: prüft, dass beide Demo-
+  Favoriten mit Ziel/Land gerendert werden, und dass das Entfernen beider
+  Herz-Buttons zum ermutigenden Leerzustand führt.
+- Checkbox 7.9 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum Umfang; 7.8/7.10 aus der
+  bisherigen Sammel-Zeile herausgelöst und bleiben eigene offene Punkte.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlt jedes Mal).
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh,
+  nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 15/15 Tests grün (13 bestehende Tests + 2 neue
+  Tests für `Favoriten`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

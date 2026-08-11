@@ -208,7 +208,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 7.6 Build Warenkorb page (`/warenkorb`) with grouped cart items and real-time totals
   - [ ] 7.7 Build Dashboard page (`/dashboard`) with trips overview, budgets, favorites, loyalty points
   - [ ] 7.8 Build Angebote page (`/angebote`) for saved travel offers (SavedOffer entity)
-  - [ ] 7.9 Build Favoriten page (`/favoriten`) for saved destinations (Favorite entity)
+  - [x] 7.9 Build Favoriten page (`/favoriten`) for saved destinations (Favorite entity) — demo data (`initialFavorites` in `Favoriten.tsx`) until the real Favorite entity exists, same placeholder pattern as `MeineReisen.tsx`/`Reiseentwuerfe.tsx`; encouraging empty state per `MARKENDESIGN.md`
   - [ ] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity)
   - [ ] 7.11 Build Reisekalender page (`/kalender`) with calendar view of all trips
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts

@@ -48,8 +48,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
   Kartenansicht (7.14) zeigt seit 11.08. den echten im KI-Chat geplanten
-  Trip statt Demo-Koordinaten; Rest (7.3, 7.4, 7.6-7.13, 7.15) komplett
-  offen
+  Trip statt Demo-Koordinaten; Favoriten-Seite (7.9) seit 11.08. mit
+  Demo-Zielen und funktionierendem Entfernen-Button; Rest (7.3, 7.4, 7.6,
+  7.7, 7.8, 7.10-7.13, 7.15) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -94,7 +95,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Unterbrechungspunkt fortsetzen
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
 - [ ] 7.7 Dashboard
-- [ ] 7.8 Angebote, 7.9 Favoriten, 7.10 Preisalarme
+- [ ] 7.8 Angebote, 7.10 Preisalarme
+- [x] 7.9 `Favoriten.tsx` (`/favoriten`) — vom autonomen IT-Chef-Lauf am 11.08.
+  gebaut: Karten-Grid mit Ziel/Land/Notiz, Herz-Button zum Entfernen (rein
+  lokaler State, noch keine echte Speicherung), ermutigender Leerzustand
+  laut `MARKENDESIGN.md`, sobald alle entfernt sind. Demo-Ziele (Kapstadt,
+  Reykjavik) aus dem bestehenden Inspirations-Set von `Home.tsx`
+  übernommen statt neu erfunden. Echte Persistenz folgt mit dem Favorite-
+  Entity, sobald die Backend-Entscheidung gefallen ist
 - [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts)
 - [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte, seit
   11.08. mit dem echten im KI-Chat geplanten Reiseziel verbunden statt
