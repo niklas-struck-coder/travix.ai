@@ -21,6 +21,7 @@ export function Hotelsuche() {
     setLoading(true)
     setErrors([])
     setSelectedOfferId(null)
+    setOffers(null)
     const result = await searchStays(params)
     setOffers(result.offers)
     setErrors(result.errors)
