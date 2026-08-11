@@ -688,3 +688,55 @@ Produktentscheidungen oder unspezifiziert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-11 (fünfter Lauf)
+
+**Vorbereitung:** `it-chef/auto` (Remote) lag bereits auf dem aktuellen
+`main`-Stand (`fb8572d`, inkl. Support-Chef/Marketing-Chef-Berichten vom
+11.08.) — kein Merge nötig, `main` wurde nicht angerührt. Auf den
+bestehenden Branch aufgesetzt statt ihn frisch von `main` neu anzulegen,
+da er offene, noch nicht von Freigabe-Chef geprüfte Arbeit vom vierten
+Lauf heute enthielt (7.9 Favoriten-Seite).
+
+**Eigene Prüfung der Aufgabenliste:** Unabhängig noch einmal `ZEITPLAN.md`
+und `tasks/tasks-prd-travix-platform.md` durchgesehen, ohne die
+Begründungen der vorherigen drei Läufe heute vorauszusetzen. Bin dabei
+eigenständig ebenfalls bei Task 7.9 (Favoriten-Seite) als einzigem Punkt
+gelandet, der alle vier Sicherheitskriterien erfüllt — der ist auf diesem
+Branch aber bereits vom vierten Lauf heute umgesetzt (`src/pages/Favoriten.tsx`,
+Route, Test, Checkbox-Updates). Keine Dopplung nötig.
+
+Die übrigen offenen Punkte wurden erneut einzeln geprüft und scheitern
+weiterhin an denselben Blockern wie in den Log-Einträgen der Läufe 2-4
+heute ausführlich dokumentiert: 4.1-4.3 (blocked on Base44/Gemini-
+Credentials), Backend-Entscheidung (Produktentscheidung), 5.7 (keine
+Zug/Bus/Fähre-Datenquelle vorhanden, Duffel deckt nur Flug/Hotel ab),
+6.6-6.9/6.12 (kein Preisfeld im `TripDraft`-Datenmodell bzw.
+13-Punkte-Checkliste in der PRD nicht vollständig benannt — "additional
+planning items" bräuchte eigene Annahmen), 7.3/7.4 (Aktionen wie "Löschen"
+ohne echte Persistenz wären eine Fake-Funktion, widerspricht der
+"nichts wird erfunden"-Markenhaltung), 7.6/7.8/7.10 (fehlende Preis- bzw.
+unstrukturierte Angebotsdaten), 7.7 Dashboard (aggregiert Budget- und
+Loyalty-Daten, die es beide noch nicht gibt), 7.11/7.12 (fehlende
+Kalender-Bibliothek bzw. Preisfelder — Bibliothekswahl wäre eine
+Architekturentscheidung), 7.13 (bräuchte Multi-Trip-Aggregation, die es
+noch nicht gibt — nur ein aktiver Trip wird aktuell gespeichert), 7.15
+(Abgrenzung zur Startseite nicht eindeutig genug beschrieben), 8.x
+(Backend-/Produktentscheidungen, unspezifiziert, oder Zahlungs-/
+Auth-nah).
+
+Damit bleibt auch im fünften Lauf heute kein neuer, noch nicht
+umgesetzter Punkt übrig, der alle vier Kriterien erfüllt. Keine
+Code-Änderung in diesem Lauf.
+
+**Geprüft (Branch-Gesundheit, ohne Code-Änderung):**
+- `npm install` → sauber, 647 Pakete (frischer Checkout).
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen oder einen vorherigen Lauf verursacht).
+- `npm run test` (vitest) → 15/15 Tests grün, unverändert seit dem
+  vierten Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
