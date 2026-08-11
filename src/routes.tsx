@@ -10,10 +10,21 @@ import { MeineReisen } from '@/pages/MeineReisen'
 import { Reiseentwuerfe } from '@/pages/Reiseentwuerfe'
 import { Buchung } from '@/pages/Buchung'
 import { Urlaubsmodus } from '@/pages/Urlaubsmodus'
+import { Kartenansicht } from '@/pages/Kartenansicht'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
 
-const builtRoutes = new Set(['/', '/ki-chat', '/flugsuche', '/hotelsuche', '/meine-reisen', '/buchung', '/urlaubsmodus', '/entwuerfe'])
+const builtRoutes = new Set([
+  '/',
+  '/ki-chat',
+  '/flugsuche',
+  '/hotelsuche',
+  '/meine-reisen',
+  '/buchung',
+  '/urlaubsmodus',
+  '/entwuerfe',
+  '/karte',
+])
 
 export function AppRoutes() {
   const location = useLocation()
@@ -30,6 +41,7 @@ export function AppRoutes() {
           <Route path="/entwuerfe" element={<PageTransition><Reiseentwuerfe /></PageTransition>} />
           <Route path="/buchung" element={<PageTransition><Buchung /></PageTransition>} />
           <Route path="/urlaubsmodus" element={<PageTransition><Urlaubsmodus /></PageTransition>} />
+          <Route path="/karte" element={<PageTransition><Kartenansicht /></PageTransition>} />
           {allRoutes
             .filter((item) => !builtRoutes.has(item.path))
             .map((item) => (

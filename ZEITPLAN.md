@@ -45,11 +45,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (6.1-6.5, 6.11, 6.13), aber Kostenübersicht (6.6, 6.7), Checkliste
   (6.8-6.10) und manueller Bearbeitungsmodus (6.12) fehlen noch
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
-- 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5) steht;
-  `calculateProgress.ts` (7.1) vom autonomen IT-Chef-Lauf ergänzt, aber
-  noch in keiner Seite verwendet (7.2 Entwürfe-Seite ist der erste
-  vorgesehene Verbraucher, weiterhin offen); Rest (7.2-7.4, 7.6-7.15)
-  komplett offen
+- 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
+  `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
+  Kartenansicht (7.14) vom autonomen IT-Chef-Lauf am 11.08. ergänzt
+  (React-Leaflet mit Demo-Koordinaten für dieselben zwei Demo-Reiseziele
+  wie auf den anderen Trip-Lifecycle-Seiten); Rest (7.3, 7.4, 7.6-7.13,
+  7.15) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -95,7 +96,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
 - [ ] 7.7 Dashboard
 - [ ] 7.8 Angebote, 7.9 Favoriten, 7.10 Preisalarme
-- [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts), 7.14 Kartenansicht (React-Leaflet)
+- [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts)
+- [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte mit
+  Teal-Markern für dieselben zwei Demo-Reiseziele wie auf den anderen
+  Trip-Lifecycle-Seiten (Lissabon, Kyoto), platziert an ihren echten
+  Koordinaten; zusätzlich eine textliche Liste darunter, da Kartenmarker
+  allein für Screenreader nicht zugänglich sind. Kartenbasis dezent/hell
+  (CartoDB Positron) statt der bunteren Standard-OSM-Kacheln, gemäß
+  Design-Vorgabe in `MARKENDESIGN.md` ("dezente, nicht zu bunte
+  Kartenbasis")
 - [ ] 7.13 Aktivitäten, 7.15 ReiseSuche
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)

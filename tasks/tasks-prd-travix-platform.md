@@ -213,7 +213,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 7.11 Build Reisekalender page (`/kalender`) with calendar view of all trips
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts
   - [ ] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips
-  - [ ] 7.14 Build Kartenansicht page (`/karte`) with React-Leaflet map and trip destination markers
+  - [x] 7.14 Build Kartenansicht page (`/karte`) with React-Leaflet map and trip destination markers
   - [ ] 7.15 Build ReiseSuche page (`/reise-planen`) as trip planning search entry point
 
 - [ ] 8.0 Holiday mode, deal finder, account — Urlaubsmodus, DealFinderChat, profile, Premium, settings

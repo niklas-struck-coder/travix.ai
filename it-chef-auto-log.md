@@ -367,3 +367,95 @@ war der eindeutigste nächste Schritt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-11
+
+**Vorbereitung:** `it-chef/auto` war auf dem Stand der fünf Läufe vom
+10.08. `main` hatte einen neuen Commit (Marketing-Chef: Zielgruppe von Ni
+bestätigt, `MARKENDESIGN.md`/`ZEITPLAN.md`), sauber ohne Konflikte
+gemergt. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Task 7.14 aus `tasks/tasks-prd-travix-platform.md`
+— "Build Kartenansicht page (`/karte`) with React-Leaflet map and trip
+destination markers".
+
+**Warum sicher genug:** Zuerst den bisherigen Rest von Sprint 1-3 erneut
+durchgeprüft:
+- 4.1-4.3 weiterhin "blocked on Base44/Gemini credentials", Backend-
+  Entscheidung weiterhin Produktentscheidung.
+- 6.6/6.7/6.8/6.9 weiterhin verworfen aus denselben Gründen wie im vierten
+  Lauf am 10.08. (fehlende Preisfelder im Datenmodell bzw. unvollständige
+  PRD-Checklisten-Spezifikation, beides keine reine Umsetzung).
+- 6.12 `EditMode.tsx` geprüft: "manuelles Hinzufügen/Entfernen, Preis-
+  anpassung" für Aktivitäten — an sich möglich (`activities` hat als
+  einziges Feld einen Preis), aber ohne 6.6/6.7 (Kostenübersicht) fehlt
+  der Kontext, in dem Preisanpassungen sichtbar/sinnvoll geprüft werden
+  könnten; zurückgestellt zugunsten eines eigenständigeren Punkts.
+- 7.3 (Entwurfs-Aktionen: pausieren/duplizieren/abschließen/löschen)
+  geprüft: `Reiseentwuerfe.tsx` nutzt hartcodierte Demo-Daten, keine
+  echte Mehrfach-Entwürfe-Persistenz (`tripStorage.ts` hält nur einen
+  einzigen aktiven Trip). Echte Aktionen bräuchten ein echtes
+  Mehrfach-Entwürfe-Datenmodell (Base44 Trip-Entity mit Status-Feld,
+  siehe PRD FR-605/FR-606) — das wäre eine Architekturentscheidung, keine
+  reine Umsetzung. Verworfen.
+- 7.7 Dashboard geprüft: aggregiert laut Aufgabe "trips overview, budgets,
+  favorites, loyalty points" — Budget-Daten (6.6/6.7) und Favoriten (7.9)
+  existieren noch nicht, Loyalty-Punkte sind ein eigener, komplett
+  unspezifizierter späterer Punkt (8.12). Zu viele Abhängigkeiten auf
+  noch nicht existierende Bausteine, würde erfundene Platzhalterdaten für
+  Konzepte brauchen, die noch nirgends im Code definiert sind. Verworfen.
+- 7.12 Reisebudget (Recharts) geprüft: bräuchte dieselben fehlenden
+  Preisfelder wie 6.6/6.7 — derselbe Grund, verworfen.
+- 7.11 Reisekalender geprüft: "calendar view of all trips" ist ohne
+  Kalender-Bibliothek im Projekt (keine wie `react-big-calendar` oder
+  `date-fns` installiert) und ohne genauere Spezifikation, wie ein
+  Kalender-Layout aussehen soll, zu interpretationsoffen für einen
+  autonomen Lauf. Zurückgestellt.
+- 7.14 Kartenansicht erfüllt dagegen alle vier Kriterien: kein Bezug zu
+  Auth, Zahlungen, Nutzerdaten oder rechtlichen Texten; keine offene
+  Architekturentscheidung — `leaflet`, `react-leaflet` und `@types/leaflet`
+  sind bereits in `package.json` installiert (vermutlich beim
+  Scaffolding für genau diesen PRD-Punkt vorgesehen), keine neue
+  Abhängigkeit nötig; klar genug beschrieben (Bibliothek und Ziel
+  "trip destination markers" sind in der Aufgabe selbst benannt, und
+  `MARKENDESIGN.md` hat sogar schon eine konkrete Design-Vorgabe für
+  diese Seite: "Marker/Highlights in Teal oder Gold auf einer dezenten,
+  nicht zu bunten Kartenbasis", Navy nicht als Flächenfarbe); Ergebnis
+  objektiv prüfbar über Typecheck/Lint/Tests/Build.
+
+**Umgesetzt:**
+- Neue Seite `src/pages/Kartenansicht.tsx` — React-Leaflet-Karte
+  (`MapContainer`/`TileLayer`/`Marker`/`Popup`) mit denselben zwei
+  Demo-Reisezielen wie `MeineReisen.tsx`/`Reiseentwuerfe.tsx` (Lissabon,
+  Kyoto), platziert an ihren echten, öffentlich bekannten Koordinaten
+  (keine erfundenen Daten). Marker als eigenes teal-farbenes `DivIcon`
+  (umgeht zugleich das bekannte Bundler-Problem mit Leaflets
+  Standard-Marker-Bildern) statt Navy, gemäß Design-Vorgabe. Kartenbasis
+  CartoDB Positron (hell/dezent) statt der bunteren Standard-OSM-Kacheln,
+  ebenfalls gemäß Design-Vorgabe ("nicht zu bunte Kartenbasis"). Unter
+  der Karte zusätzlich dieselbe Ziel-Information als Karten-Liste
+  (analog `MeineReisen.tsx`), da Kartenmarker allein für Screenreader
+  nicht zugänglich sind — kein Ersatz für die Karte, sondern Ergänzung.
+- `src/routes.tsx`: `/karte` von der generierten Platzhalter-Route auf
+  die neue `Kartenansicht`-Komponente umgestellt.
+- Neuer Test `src/pages/Kartenansicht.test.tsx` (analog zu
+  `Reiseentwuerfe.test.tsx`): prüft Seitentitel und dass beide
+  Demo-Reiseziele in der Liste erscheinen. Bewusst nicht auf
+  Leaflet-interne Karten-Interaktion getestet (Popup-Öffnen, Zoom) — das
+  wäre brüchig unter jsdom und die zugängliche Liste deckt den
+  Kerninhalt bereits ab.
+- Checkbox 7.14 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, inkl. Notiz zum Umfang; 7.11/7.12 aus der
+  bisherigen Sammel-Zeile herausgelöst und bleiben eigene offene Punkte.
+
+**Geprüft:**
+- `npm run build` (tsc -b + vite build) → grün (nach frischem
+  `npm install`, `node_modules` fehlt im frischen Checkout jedes Mal).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie
+  bisher in `src/components/ui/{badge,button,tabs}.tsx`
+  (react-refresh, nicht durch diesen Change verursacht).
+- `npm run test` (vitest) → 11/11 Tests grün (10 bestehende Tests + 1
+  neuer Test für `Kartenansicht`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
