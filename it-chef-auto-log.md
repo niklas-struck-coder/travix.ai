@@ -550,3 +550,58 @@ Statt etwas zu erfinden: keine Code-Änderung in diesem zweiten Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-11 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` war bereits vollständig in `main`
+gemerged (Freigabe-Chef, siehe `main`-Commit `4c253a9`). Seit dem
+zweiten Lauf von heute kamen auf `main` nur Marketing-Chef-,
+Support-Chef- und Freigabe-Chef-Commits dazu (Content-Stücke Woche 1,
+UX-Analyse Kartenansicht, deren Merge-Log) — keine Änderung an
+`src/`, `ZEITPLAN.md` oder `tasks/tasks-prd-travix-platform.md`. Damit
+ist die Ausgangslage für den Programmierungs-Bereich identisch zum
+zweiten Lauf.
+
+**Ergebnis: kein zusätzlicher sicherer Punkt gefunden.** Eigenständig
+(ohne den Log-Eintrag des zweiten Laufs vorher zu lesen) dieselbe Prüfung
+durchgeführt für die vordersten offenen Punkte und zu denselben
+Kernblockaden gekommen, die der zweite Lauf ausführlich dokumentiert:
+
+- **4.1-4.3:** weiterhin "blocked on Base44/Gemini credentials" laut
+  Aufgabenliste selbst.
+- **5.7** (Zug/Bus/Fähre-Ergebnisse in KI-Chat einbinden): verifiziert,
+  dass `TrainCard.tsx`/`TrainResults.tsx` fertig gebaut, aber im
+  gesamten Code keine echte oder simulierte Datenquelle für
+  Zug/Bus/Fähre existiert (kein `searchTrains` in
+  `src/lib/duffel/client.ts`, keine Nutzung von `TrainResults` außerhalb
+  seiner eigenen Datei) — anders als bei Flug/Hotel mit echten
+  Duffel-Testdaten. Jede Umsetzung bräuchte entweder erfundene Daten
+  oder eine Architekturentscheidung zur Datenquelle. Verworfen.
+- **6.6/6.7** (CostBreakdown/calculateCosts): verifiziert, dass
+  `TripDraft` (`src/types/chat.ts`) keine Preisfelder für Transport oder
+  Unterkunft hat — `selectHotel`/`selectFlight` in `src/hooks/useChat.ts`
+  verwerfen den gewählten Preis (`offer.totalAmount`) aktuell, statt ihn
+  zu speichern. Eine "echte Kostenübersicht nach Kategorie" bräuchte
+  außerdem eine Kategorie "Auto" (Mietwagen), für die es im Produkt noch
+  gar keine Such-/Auswahlfunktion gibt — reine Erfindung. Verworfen.
+- **6.8/6.9** (Checkliste): FR-501 zählt nur 10 der 13 Punkte konkret auf
+  ("... and more") — welche 3 weiteren gemeint sind, wäre Interpretation
+  über die Aufgabenbeschreibung hinaus. Verworfen.
+- Weitere Sprint-3/4-Punkte (7.x/8.x) nicht erneut einzeln geprüft, da
+  laut Merge-Diff keine relevante Code-/Spezifikationsänderung seit dem
+  zweiten Lauf vorlag, der sie bereits einzeln mit Begründung verworfen
+  hat (siehe Eintrag oben).
+
+Damit bleibt heute weiterhin kein Punkt übrig, der alle vier Kriterien
+erfüllt. Keine Code-Änderung in diesem dritten Lauf.
+
+**Geprüft (Branch-Gesundheit, ohne Code-Änderung):**
+- `npm install` → sauber, 647 Pakete.
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 11/11 Tests grün, unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
