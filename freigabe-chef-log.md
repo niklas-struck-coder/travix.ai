@@ -118,3 +118,43 @@ ergab **identische** Änderungen (derselbe Einzeiler `setOffers(null)` in
 gestoßen). Nur `flugsuche-missing-search-reset` gemerged (unabhängig
 verifiziert, grün), `flugsuche-stale-results` bewusst nicht zusätzlich
 gemergt, um ein Duplikat zu vermeiden — kann verworfen werden.
+
+## 2026-08-11, früher Nacht-Check (autonomer Lauf, ohne Ni)
+
+**Geprüfter Branch:** `it-chef/auto`, Stand nach zwei Läufen vom 11.08.
+(erster Lauf: 7.14 Kartenansicht; zweiter Lauf: kein weiterer sicherer
+Punkt gefunden, keine Code-Änderung). Enthielt gegenüber `main` insgesamt
+5 Commits / 3 inhaltliche Punkte aus den Läufen vom 10.–11.08.: 7.1
+`calculateProgress.ts`, 7.2 `Reiseentwuerfe.tsx` (`/entwuerfe`), 7.14
+`Kartenansicht.tsx` (`/karte`, React-Leaflet).
+
+**Unabhängige Prüfung** (Branch ausgecheckt, frisches `npm install`, dann
+`npx tsc -b`, `npx eslint .`, `npx vitest run` selbst ausgeführt, nicht
+nur den Log-Eintrag geglaubt): alle drei grün — `tsc -b` ohne Ausgabe,
+`eslint .` 0 Fehler (nur die 3 bekannten vorbestehenden
+`react-refresh`-Warnings in `badge.tsx`/`button.tsx`/`tabs.tsx`),
+`vitest run` 11/11 Tests grün (5 Testdateien) — deckt sich mit dem, was
+`it-chef-auto-log.md` behauptet.
+
+**Scope-Check:** Diff (10 Dateien: `ZEITPLAN.md`, `it-chef-auto-log.md`,
+`calculateProgress.ts`/`.test.ts`, `Kartenansicht.tsx`/`.test.tsx`,
+`Reiseentwuerfe.tsx`/`.test.tsx`, `routes.tsx`,
+`tasks-prd-travix-platform.md`) deckt sich mit den drei beschriebenen
+Punkten, kein Bezug zu Auth, Zahlungen, Nutzerdaten oder rechtlichen
+Texten. Demo-Daten (`Reiseentwuerfe.tsx`, `Kartenansicht.tsx`) sind klar
+als Platzhalter erkennbar und explizit kommentiert (analog bestehendem
+Muster in `MeineReisen.tsx`), keine erfundenen Kennzahlen als echt
+dargestellt. `Kartenansicht.tsx` gegen `MARKENDESIGN.md` geprüft: Teal-
+Marker auf heller/dezenter Kartenbasis (CartoDB Positron statt bunter
+Standard-OSM-Kacheln) — Vorgabe in `MARKENDESIGN.md:101-102`
+("Marker/Highlights in Teal oder Gold auf einer dezenten, nicht zu
+bunten Kartenbasis") stimmt wörtlich.
+
+**Ergebnis:** Passt → nach `main` gemerged (Fast-Forward, da `it-chef/auto`
+bereits den vollen `main`-Stand enthielt und dahinter lag; kein
+Merge-Commit nötig), gepusht (`341bac4..8759330`).
+
+**Marketing-Chef/Support-Chef:** `marketing-chef/auto` und
+`support-chef/auto` hatten zu diesem frühen Zeitpunkt beide 0 neue
+Commits gegenüber `main` (deren nächster Lauf ist erst um 6 Uhr) — wie im
+Auftrag vorgesehen bei diesem Lauf nicht weiter geprüft.
