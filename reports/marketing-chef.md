@@ -1,40 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-10
+**Datum:** 2026-08-11
 
-## Was ist seit dem letzten Eintrag (heute, 16:07 Uhr) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-10, 16:07 Uhr) passiert?
 
-Nur wenig, und das ist ehrlich auch okay — der letzte Lauf war erst
-20 Minuten vorher. Eine Sache lohnt trotzdem den Blick:
+Einiges, und Sprint 1 im Marketing-Track ist damit offiziell durch:
 
-- **PR #2 ist offen, aber noch nicht gemerged.** IT-Chef hat den
-  Reibungspunkt "alte Suchergebnisse bleiben sichtbar, während eine neue
-  Suche läuft" auf `/flugsuche` gefixt (ein Fix von `setOffers(null)`
-  beim Suchstart). Das war Teil dessen, was ich in meinem letzten
-  Eintrag als Blocker für den geplanten Build-in-public-Post genannt
-  hatte — aber eben nur ein Teil.
-- **Die rohen englischen Duffel-Fehlermeldungen sind weiterhin ungefixt**
-  und laut IT-Chef bewusst nicht automatisch behoben (braucht eine
-  Übersetzungstabelle, keine Ein-Zeilen-Korrektur). Genau das war der
-  zweite, größere Punkt meiner letzten Warnung.
-
-Content-Plan, Zielgruppen-Entscheidung (Sprint 1, KW33) und Zug/Bus/Fähre
-sind unverändert zum letzten Eintrag — dazu gibt's nichts Neues zu
-sagen.
+- **Zielgruppe steht fest.** Du hast die Positionierung und das
+  Leitbild "Die erschöpfte Planerin" bestätigt (siehe
+  `MARKENDESIGN.md`). Damit ist die wichtigste offene Baustelle aus
+  meinem letzten Bericht erledigt.
+- **Erste Content-Stücke Woche 1 sind entworfen**, nicht veröffentlicht:
+  Post A (Build-in-public-Vorstellung), Post B (Planungs-Frust "20
+  offene Tabs") für LinkedIn/Instagram, plus ein Blog-Stück zu
+  "Ehrlichkeit als Feature" — alles in
+  `marketing/content-stuecke-woche1.md`, wartet auf deine Freigabe.
+- **Kartenansicht zeigt jetzt den echten, im Chat geplanten Trip** statt
+  fester Demo-Städte (Lissabon/Kyoto) — mit einem ehrlichen Hinweis,
+  wenn noch nichts geplant ist, statt erfundener Orte.
+- **Der Blocker von gestern ist nur halb aufgelöst und jetzt sogar
+  breiter:** Die rohen englischen Duffel-Fehlermeldungen sind laut
+  IT-Chef weiterhin ungefixt und betreffen jetzt zusätzlich zur
+  Flugsuche auch Hotelsuche und FlightResults.
 
 ## Vorschläge
 
-1. **Weiter abwarten mit dem Flugsuche-Post.** Der Blocker ist jetzt
-   halb aufgelöst statt ganz: PR #2 muss erst gemerged werden, UND die
-   englischen Rohfehler brauchen noch eine Lösung, bevor die Demo im
-   Content-Plan ("echte Flugsuche über Duffel" als Build-in-public-Post)
-   rausgeht. Sonst zeigt der Post live eine Fehlermeldung auf Englisch
-   mitten in einer sonst durchgängig deutschen, freundlichen App.
+1. **Content-Stücke Woche 1 jetzt zu dir bringen statt mehr zu
+   produzieren.** Die Texte liegen fertig in
+   `marketing/content-stuecke-woche1.md`. Der nächste sinnvolle Schritt
+   ist nicht "noch mehr schreiben", sondern deine Freigabe plus die
+   Entscheidung, LinkedIn/Instagram überhaupt anzulegen — sonst stapeln
+   sich fertige Entwürfe, ohne dass etwas rausgeht.
 
-2. **Die Zielgruppen-Entscheidung aus Sprint 1 bleibt die wichtigste
-   offene Baustelle diese Woche** — daran hängt, wie gezielt Content-Säule
-   4 ("Planungs-Frust") geschrieben werden kann. Das hatte ich gestern
-   schon vorgeschlagen und wiederhole es hier bewusst nicht neu erfunden,
-   sondern weil es laut `ZEITPLAN.md` noch offen ist.
+2. **Die neue, ehrliche Kartenansicht ist ein besseres Beweisstück für
+   "Ehrlichkeit als Feature" als jedes Werbetext-Argument.** Ein echter
+   Screenshot-Vergleich ("früher: erfundene Demo-Stadt Lissabon — heute:
+   dein echter Ort, oder ein ehrlicher Leerzustand statt Fantasie")
+   würde die Positionierung konkret statt behauptet zeigen. Eigener
+   kurzer Post, zusätzlich zu den schon entworfenen Stücken.
 
-_Letztes Update: 2026-08-10_
+3. **Flugsuche/Hotelsuche vorerst weiter nicht als Live-Demo zeigen.**
+   Der Blocker aus meinem letzten Bericht ist nicht kleiner geworden,
+   sondern hat sich auf Hotelsuche und FlightResults ausgeweitet. Bevor
+   ein Build-in-public-Post live Suchergebnisse zeigt, sollte die
+   Übersetzungstabelle für die Fehlercodes stehen — sonst zeigt der
+   Post live einen englischen Rohfehler mitten in einer sonst
+   durchgängig deutschen, freundlichen App.
+
+_Letztes Update: 2026-08-11_

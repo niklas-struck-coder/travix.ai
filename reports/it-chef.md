@@ -1,72 +1,70 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-10
+**Datum:** 2026-08-11
 
-## Was ist seit dem letzten Eintrag (2026-08-09) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-10) passiert?
 
-Seitdem kam vor allem die Flugauswahl dazu: Auf `/flugsuche` gibt es jetzt
-einen "Auswählen"-Button auf den Flugkarten, der den Flug direkt in den
-bestehenden Reiseplan übernimmt (analog zur Hotelsuche), inklusive eines
-neuen `updateStoredTrip()`-Helfers in `tripStorage.ts`. Parallel wurden
-Karten- und Listenkomponenten für Zug-/Bus-/Fährverbindungen gebaut
-(`TrainCard.tsx`, `TrainResults.tsx`) — technisch sauber, aber noch in
-keine Seite eingebunden, für Nutzer:innen also noch nicht sichtbar. Dazu
-kamen sanfte Seitenübergangs-Animationen (`PageTransition.tsx`). Der
-Support-Chef-Auto-Lauf hat die neue Flugsuche unabhängig geprüft und dabei
-einen Reibungspunkt gefunden, den ich unten als Fix umgesetzt habe.
+Einiges: Auf `/buchung` sind die "Bearbeiten"-Buttons jetzt feldbezogen (springen
+per `?edit=<feld>` direkt in den passenden Chat-Schritt) und bieten bei
+Transport/Unterkunft eine Wahl zwischen "Mit KI planen" und "Manuell suchen".
+Beim Bearbeiten des Transportmittels auf "Flug" fragt der Chat jetzt nach dem
+Startflughafen und sucht wirklich über die Duffel-API. Dazu kam eine neue
+Seite `/hotelsuche` für die manuelle Unterkunftssuche, analog zur Flugsuche.
+Die Kartenansicht zeigt inzwischen den echten, im Chat gespeicherten
+Reiseort statt fester Demo-Ziele (Lissabon/Kyoto), mit ehrlichem
+Hinweiszustand, wenn noch keine Reise geplant ist oder die Koordinaten
+fehlen. PR #2 (Flugsuche-Ladezustand) wurde in der Zwischenzeit gemergt.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-- **[PR #2](https://github.com/niklas-struck-coder/travix.ai/pull/2)** (Branch `it-chef-autofix/flugsuche-missing-search-reset-2026-08-10`):
-  In `src/pages/Flugsuche.tsx` setzte `handleSearch` beim Start einer neuen
+- **[PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)** (Branch `it-chef-autofix/hotelsuche-missing-offers-reset-2026-08-11`):
+  In `src/pages/Hotelsuche.tsx` setzte `handleSearch` beim Start einer neuen
   Suche `loading`, `errors` und `selectedOfferId` zurück, aber nicht
   `offers`. Die alten Ergebniskarten blieben deshalb sichtbar stehen,
-  während die neue Anfrage lief — die Seite wirkte, als hätte der Klick
-  auf "Flüge suchen" nicht funktioniert. Der Fix ergänzt `setOffers(null)`
-  an derselben Stelle, genau nach dem bereits vorhandenen Reset-Muster.
-  Eine Zeile, isoliert, sehr sicher.
+  während die neue Anfrage lief — exakt derselbe Bug, der am 2026-08-10
+  schon einmal in `Flugsuche.tsx` gefunden und gefixt wurde (dort inzwischen
+  gemergt), nur eben in der neu gebauten Hotelsuche-Seite erneut aufgetreten.
+  Der Fix ergänzt `setOffers(null)` an derselben Stelle. Eine Zeile,
+  isoliert, sehr sicher.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-- **Rohe, englische Duffel-Fehlermeldungen im UI.** `src/lib/duffel/client.ts`
-  reicht `json?.errors` von der Duffel-API unverändert durch,
-  `Flugsuche.tsx` zeigt `error.message` 1:1 an. Das sind englische,
-  API-nahe Meldungen (z. B. zu `slices`/`passengers`), die nicht zum sonst
-  durchgängig freundlichen Deutsch der App passen. Kein automatischer Fix,
-  weil eine sinnvolle Lösung eine Übersetzungstabelle für die häufigsten
-  Fehlercodes braucht — das ist eine Abwägung, keine Ein-Zeilen-Korrektur.
-- **Mikrofon-Fehler bleiben unsichtbar.** `src/lib/ai/speech.ts:47`
-  (`recognition.onerror = onEnd`) behandelt einen Fehler genauso wie ein
-  normales Aufnahmeende — verweigert jemand die Mikrofon-Berechtigung,
-  verschwindet die "Aufnahme läuft"-Anzeige kommentarlos, ohne dass die
-  Nutzerin erfährt, warum. Kein automatischer Fix, weil die richtige
-  Lösung eine UI-Entscheidung braucht (Toast? Inline-Hinweis?), die über
-  die Speech-Datei selbst hinausgeht.
-- **IATA-Code-Eingabe ohne Erklärung.** `FlightWizard.tsx` verlangt einen
-  exakten 3-stelligen Flughafencode in reinen Textfeldern; unter 3 Zeichen
-  bleibt der Such-Button einfach deaktiviert, ohne Hinweistext, warum. Kein
-  akuter Absturz-Bug, aber ein stiller Stolperstein — daher hier nur
-  gemeldet, nicht automatisch gefixt (Hinweistext wäre klein, aber
-  Formulierung/Platzierung ist eine UX-Entscheidung).
-- **Weiterhin offen: Duffel-Stays-Feldnamen ungetestet.** `mapStayResult` in
-  `src/lib/duffel/client.ts` rät bei den Feldnamen der Stays-Response
-  weiterhin defensiv (Fallbacks, optional chaining), weil bisher kein
-  echter API-Key zum Testen vorlag. Kein Absturzrisiko, aber im Zweifel
-  leere oder falsch zugeordnete Werte, ohne dass es auffällt — sollte
-  gegen eine echte Antwort geprüft werden, sobald ein Key verfügbar ist.
+- **Ausgewählter Flug wird im Reiseplan nicht sichtbar.** Bei der
+  Unterkunft landet der ausgewählte Name (`offer.accommodationName`) über
+  `sendMessage`/`updateStoredTrip` im Reiseplan und erscheint dort als Wert.
+  Bei einem ausgewählten Flug (egal ob im Chat über `selectFlight` in
+  `useChat.ts` oder manuell über `handleSelect` in `Flugsuche.tsx`) wird nur
+  `transportMode: 'flight'` gespeichert — Route und Preis gehen verloren.
+  `Buchung.tsx`/`TripSummaryCard.tsx` zeigen deshalb immer nur das generische
+  Label "Flug", nie, welcher Flug konkret gewählt wurde. Kein automatischer
+  Fix, weil dafür ein neues Feld im `TripDraft`-Typ nötig wäre — das ist
+  eine kleine Erweiterung, aber keine Ein-Zeilen-Korrektur.
+- **Rohe, englische Duffel-Fehlermeldungen im UI.** Weiterhin offen:
+  `src/lib/duffel/client.ts` reicht `json?.errors` unverändert durch,
+  betrifft jetzt auch `Hotelsuche.tsx` und `FlightResults.tsx` zusätzlich zu
+  `Flugsuche.tsx`. Braucht eine Übersetzungstabelle für die häufigsten
+  Fehlercodes, keine Ein-Zeilen-Korrektur.
+- **Mikrofon-Fehler bleiben unsichtbar.** Weiterhin offen:
+  `src/lib/ai/speech.ts:47` (`recognition.onerror = onEnd`) behandelt einen
+  Fehler wie ein normales Aufnahmeende, ohne Hinweis an die Nutzerin. Braucht
+  eine UI-Entscheidung (Toast? Inline-Hinweis?).
+- **IATA-Code-Eingabe ohne Erklärung.** Weiterhin offen in
+  `FlightWizard.tsx`: unter 3 Zeichen bleibt der Such-Button deaktiviert,
+  ohne Hinweistext, warum.
+- **Duffel-Stays-Feldnamen weiterhin ungetestet.** `mapStayResult` in
+  `src/lib/duffel/client.ts` rät bei den Feldnamen der Stays-Response nach
+  wie vor defensiv (Fallbacks, optional chaining) — noch kein echter API-Key
+  zum Verifizieren.
 
 ## Weitere Vorschläge
 
 1. **Zug/Bus/Fähre-Komponenten anbinden.** `TrainCard.tsx`/`TrainResults.tsx`
-   sind fertig gebaut, aber in keinem Nutzerpfad erreichbar. Größter
-   nächster sichtbarer Gewinn, da die Arbeit sonst brachliegt.
-2. **Testabdeckung ausbauen.** Es existieren weiterhin nur zwei Testdateien
-   (`Home.test.tsx`, `tripStorage.test.ts`). Die zentrale Chat-Logik
-   (`mockAdvisor.ts`, `useChat.ts`) und der Duffel-Client haben trotz ihrer
-   Bedeutung keine Tests — sinnvoll vor allem, bevor `mockAdvisor.ts` durch
-   die echte LLM-Anbindung ersetzt wird.
+   sind fertig gebaut, aber weiterhin in keinem Nutzerpfad erreichbar.
+2. **Testabdeckung ausbauen.** Die zentrale Chat-Logik (`useChat.ts`,
+   `mockAdvisor.ts`) und der Duffel-Client haben trotz ihrer Bedeutung und
+   wachsender Komplexität (Edit-Flow, Flugsuche im Chat) weiterhin keine
+   Tests.
 3. **Sprint 1 aus `ZEITPLAN.md`: echte LLM-Anbindung.** Der Chat läuft
-   weiterhin komplett auf dem Mock-Advisor. Größter nächster fachlicher
-   Schritt laut Zeitplan.
+   weiterhin komplett auf dem Mock-Advisor.
 
-_Letztes Update: 2026-08-10_
+_Letztes Update: 2026-08-11_
