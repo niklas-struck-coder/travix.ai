@@ -47,10 +47,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
-  Kartenansicht (7.14) vom autonomen IT-Chef-Lauf am 11.08. ergänzt
-  (React-Leaflet mit Demo-Koordinaten für dieselben zwei Demo-Reiseziele
-  wie auf den anderen Trip-Lifecycle-Seiten); Rest (7.3, 7.4, 7.6-7.13,
-  7.15) komplett offen
+  Kartenansicht (7.14) zeigt seit 11.08. den echten im KI-Chat geplanten
+  Trip statt Demo-Koordinaten; Rest (7.3, 7.4, 7.6-7.13, 7.15) komplett
+  offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -97,13 +96,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 7.7 Dashboard
 - [ ] 7.8 Angebote, 7.9 Favoriten, 7.10 Preisalarme
 - [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts)
-- [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte mit
-  Teal-Markern für dieselben zwei Demo-Reiseziele wie auf den anderen
-  Trip-Lifecycle-Seiten (Lissabon, Kyoto), platziert an ihren echten
-  Koordinaten; zusätzlich eine textliche Liste darunter, da Kartenmarker
-  allein für Screenreader nicht zugänglich sind. Kartenbasis dezent/hell
-  (CartoDB Positron) statt der bunteren Standard-OSM-Kacheln, gemäß
-  Design-Vorgabe in `MARKENDESIGN.md` ("dezente, nicht zu bunte
+- [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte, seit
+  11.08. mit dem echten im KI-Chat geplanten Reiseziel verbunden statt
+  fester Demo-Orte: zeigt den Teal-Marker für das im Chat gespeicherte
+  Ziel (über dieselbe kuratierte Koordinatenliste, die auch die echte
+  Duffel-Suche nutzt), sonst einen ehrlichen Leer-/Hinweiszustand statt
+  erfundener Orte. Zusätzlich eine textliche Liste darunter, da
+  Kartenmarker allein für Screenreader nicht zugänglich sind. Kartenbasis
+  dezent/hell (CartoDB Positron) statt der bunteren Standard-OSM-Kacheln,
+  gemäß Design-Vorgabe in `MARKENDESIGN.md` ("dezente, nicht zu bunte
   Kartenbasis")
 - [ ] 7.13 Aktivitäten, 7.15 ReiseSuche
 
