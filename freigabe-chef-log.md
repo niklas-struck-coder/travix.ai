@@ -158,3 +158,55 @@ Merge-Commit nötig), gepusht (`341bac4..8759330`).
 `support-chef/auto` hatten zu diesem frühen Zeitpunkt beide 0 neue
 Commits gegenüber `main` (deren nächster Lauf ist erst um 6 Uhr) — wie im
 Auftrag vorgesehen bei diesem Lauf nicht weiter geprüft.
+
+## 2026-08-11, Tages-Check (autonomer Lauf, ohne Ni)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (der frühe Nacht-Check heute
+  hatte bereits alles gemerged, siehe oben). Nichts Neues, daher keine
+  erneute Prüfung nötig.
+- `marketing-chef/auto` — 1 Commit vor `main`.
+- `support-chef/auto` — 1 Commit vor `main`.
+
+**Prüfung `marketing-chef/auto`** (Diff: `marketing-chef-auto-log.md`,
+neue Datei `marketing/content-stuecke-woche1.md`, kein Code):
+- Reine Copy-Paste-Entwürfe (Post A/B in LinkedIn- + Instagram-Fassung,
+  ein Blog-Stück), kein Hinweis auf tatsächliches
+  Posten/Veröffentlichen — explizit als Entwurf markiert, wartet auf Nis
+  Freigabe.
+- Keine erfundenen Kennzahlen: Hashtags ausdrücklich als "nicht belegt
+  durch Performance-Daten" gekennzeichnet, keine Follower-/Reichweiten-
+  /Ersparnis-Zahlen. Kein CTA zu einer Warteliste (die laut `ZEITPLAN.md`
+  noch nicht live ist).
+- Wörtliches Zitat im Blog-Stück ("Ich suche jetzt nach echten
+  Verbindungen — sobald ich etwas Verifiziertes gefunden habe, zeige ich
+  es dir. Nichts wird erfunden.") gegen `src/lib/ai/mockAdvisor.ts`
+  geprüft — Kernsatz stimmt wortwörtlich (Zeile 115 im Branch-Stand;
+  Blog-Text lässt nur die dynamischen Platzhalter `{label}`/
+  `{destination}` sinnvoll weg), keine erfundene Markenaussage.
+- Baut nachvollziehbar auf `marketing/content-plan.md` (Woche 1, Post A +
+  Post B) auf, löst dessen offen gelassenen Punkt ein, keine
+  stillschweigende neue Positionierungs-Entscheidung.
+- Vollständiger, kohärenter Text, keine bloße Stichpunkt-Skizze.
+- Kein Code geändert → kein Build/Lint/Test nötig.
+
+**Ergebnis:** Passt → nach `main` gemerged (Fast-Forward, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+UX-Analyse zur Kartenansicht `/karte`, kein Code):
+- Alle drei genannten Reibungspunkte im Code auf `main` nachverfolgt und
+  im Kern bestätigt:
+  - `Kartenansicht.tsx:40` (`MapContainer center={[20, 20]} zoom={2}`,
+    kein `fitBounds` auf die tatsächlichen Marker) — stimmt.
+  - `Kartenansicht.tsx:47` (`<Popup>{d.destination}</Popup>` ohne Datum,
+    während die Liste darunter das Datum zeigt) — stimmt.
+  - Karten in der Liste (`:57-67`, `Card`/`CardContent`) ohne Link/Button
+    — stimmt, im Vergleich zu `MeineReisen.tsx` (`Link to="/urlaubsmodus"`
+    ab Zeile 49) nachvollziehbar als Bruch im Muster beschrieben.
+  - Zeilenangaben im Log leicht abweichend von der exakten Fundstelle
+    (z. B. „56-69" vs. tatsächlich 57-67), aber inhaltlich und in der
+    Größenordnung korrekt — kein erfundener Befund.
+- Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+
+**Ergebnis:** Passt → nach `main` gemerged (Merge-Commit, gepusht,
+`4c253a9..073eee8`).
