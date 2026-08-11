@@ -423,7 +423,7 @@ durchgeprüft:
   nicht zu bunten Kartenbasis", Navy nicht als Flächenfarbe); Ergebnis
   objektiv prüfbar über Typecheck/Lint/Tests/Build.
 
-**Umgesetzt:**
+**Umgesetzt (erster Lauf):**
 - Neue Seite `src/pages/Kartenansicht.tsx` — React-Leaflet-Karte
   (`MapContainer`/`TileLayer`/`Marker`/`Popup`) mit denselben zwei
   Demo-Reisezielen wie `MeineReisen.tsx`/`Reiseentwuerfe.tsx` (Lissabon,
@@ -459,3 +459,94 @@ durchgeprüft:
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-11 (zweiter Lauf)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf dem Stand des ersten
+Laufs von heute (7.14). `main` hatte seitdem keine neuen Commits — nichts
+zu mergen, `main` wurde nicht angerührt.
+
+**Ergebnis: kein zusätzlicher sicherer Punkt gefunden.** Systematisch
+alle noch offenen Punkte aus `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+gegen die vier Sicherheitskriterien geprüft, inklusive der volleren
+Spezifikation in `Travix md`:
+
+- **Sprint 1 (4.1-4.3):** weiterhin explizit "blocked on Base44/Gemini
+  credentials" in der Aufgabenliste selbst vermerkt. Backend-Entscheidung
+  weiterhin offene Produktentscheidung.
+- **5.7** Zug/Bus/Fähre-Suchergebnisse in den KI-Chat einbinden:
+  `TrainCard.tsx`/`TrainResults.tsx` (5.4/5.5) sind fertig gebaut, aber
+  es gibt im gesamten Code keine echte oder simulierte Datenquelle für
+  Zug/Bus/Fähre-Verbindungen (kein `searchTrains`, kein Mock, anders als
+  bei Flügen/Hotels mit echten Duffel-Testdaten). Ohne Datenquelle wäre
+  jede "Integration" entweder erfundene Daten (verstößt gegen das
+  "keine Fabrikation"-Prinzip, das `mockConcierge.ts` explizit befolgt)
+  oder nur ein weiterer Hinweistext ohne echten Mehrwert — beides keine
+  reine Umsetzung des Punkts. Braucht eine Architekturentscheidung
+  (welcher Anbieter/welche Mock-Strategie für Bahn/Bus/Fähre). Verworfen.
+- **6.6/6.7/6.8/6.9/6.12:** aus denselben Gründen wie in den Läufen vom
+  10.08. weiterhin verworfen — `TripDraft` hat keine Preisfelder für
+  Transport/Unterkunft, und die 13-Punkte-Checkliste ist auch in der
+  volleren Spezifikation (`Travix md`, Abschnitt "5. Trip Checklist")
+  weiterhin nur mit 10 von 13 Punkten benannt ("... and more").
+- **6.1-6.5, 6.11, 6.13:** bereits umgesetzt — `src/pages/Buchung.tsx`
+  hat alle editierbaren Sektionen, "+ Suchen"-Buttons, Klick-zum-
+  Bearbeiten und den "Mit Travix weiterplanen"-Button bereits, nur unter
+  anderen Dateinamen als in der Aufgabenliste benannt (eine Datei statt
+  `TripSection.tsx`/`TripItem.tsx`/`EmptySection.tsx`/`TripPlanPage.tsx`).
+  Checkbox war lediglich veraltet, kein neuer Umsetzungspunkt.
+- **7.3/7.4/7.6/7.8/7.9/7.10:** brauchen alle eine echte
+  Mehrfach-Entwürfe- bzw. Entity-Persistenz (Base44 Trip-Status, Cart,
+  SavedOffer, Favorite, PriceAlert), die noch nicht existiert — dieselbe
+  Architekturentscheidung wie beim vierten Lauf vom 10.08. bei 7.3
+  begründet. Verworfen.
+- **7.11/7.12:** weiterhin verworfen (keine Kalender-Bibliothek installiert
+  bzw. fehlende Preisfelder), wie im Lauf vom 10.08.
+- **7.13** Aktivitäten-Seite: `TripDraft.activities` wird im Mock-Advisor
+  nie befüllt (`mockAdvisor.ts:40` setzt es fest auf `[]`) — es gibt
+  aktuell keinen Chat-Schritt, der Aktivitäten sammelt. Eine "aggregierte"
+  Ansicht hätte also nichts Echtes zu aggregieren und bräuchte erfundene
+  Platzhalterdaten. Verworfen.
+- **7.15** ReiseSuche: laut Kommentar in `src/lib/nav-config.ts:44`
+  bewusst nicht in der Sidebar, weil "der KI-Chat diesen Job schon
+  abdeckt" — unklar, was die Seite von der bereits fertigen Startseite
+  (3.8, Hero mit Chat-Einstieg) inhaltlich unterscheiden soll, ohne das
+  selbst zu entscheiden. Zurückgestellt.
+- **8.2-8.7:** brauchen echte KI-Vision/Websuche-Backends, die nicht
+  existieren (dieselbe Blockade wie 4.1-4.3).
+- **8.4** Quick-Action-Buttons (Restaurant/Übersetzung/Route): geprüft,
+  aber `mockConcierge.ts` liefert bewusst nur drei geprüfte
+  Demo-Antworten (Währung, Notruf, Begrüßung) gerade *weil* Aussagen zu
+  Restaurants/Übersetzungen ohne echte Datenquelle Fabrikation wären
+  (Kommentar im Code). Verworfen.
+- **8.8** Profil-Seite: "travel preferences (styles, budget, dietary,
+  home airport)" — auch in der volleren Spezifikation (`Travix md`,
+  Abschnitt "11. User Account") wird "styles" nirgends mit konkreten
+  Kategorien definiert. Welche Reisestil-Optionen es gibt, wäre reine
+  Erfindung. Verworfen.
+- **8.9/8.12** Premium/Rewards: Abo-Stufen bzw. Punkte-Logik sind nirgends
+  im Repo definiert — Produktentscheidung. Verworfen.
+- **8.10** Einstellungen: Aufgabentext nennt nur "app preferences" ohne
+  jede konkrete Angabe, welche Einstellungen gemeint sind — mehr
+  Interpretationsspielraum als selbst die unvollständige
+  Checklisten-Spezifikation (6.8). Verworfen.
+- **8.11** Hilfe/FAQ: laut `ZEITPLAN.md` (Support-Chef Sprint 2) sind die
+  FAQ-Inhalte selbst noch nicht erarbeitet — ohne echten Inhalt bräuchte
+  eine Hilfe-Seite erfundene FAQ-Texte. Verworfen.
+- **Aus IT-Chefs eigenem Bericht (`reports/it-chef.md`, 2026-08-10)
+  gemeldete Bugs erneut geprüft:** rohe Duffel-Fehlermeldungen und
+  stille Mikrofon-Fehler sind dort selbst schon als "braucht eine
+  UI-Entscheidung" markiert; der IATA-Hinweistext ist dort ausdrücklich
+  als "Formulierung/Platzierung ist eine UX-Entscheidung" eingestuft —
+  alle drei damit für den autonomen Modus nicht sicher genug. Verworfen.
+
+Damit bleibt heute kein Punkt übrig, der alle vier Kriterien erfüllt.
+Statt etwas zu erfinden: keine Code-Änderung in diesem zweiten Lauf.
+
+**Geprüft (Branch-Gesundheit, ohne Code-Änderung):**
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings.
+- `npm run test` → 11/11 Tests grün, unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
