@@ -740,3 +740,88 @@ Code-Änderung in diesem Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-12
+
+**Vorbereitung:** `it-chef/auto` (Remote) war bereits auf dem aktuellen
+`main`-Stand aufgesetzt und lag sogar vier Commits davor (7.9
+Favoriten-Seite vom vierten Lauf des 11.08. sowie der Log-Eintrag des
+fünften Laufs, beide noch nicht von Freigabe-Chef nach `main` gemerged).
+`main` selbst hatte seit `fb8572d` (11.08.) keine neuen Commits — nichts
+zu mergen, `main` wurde nicht angerührt, auf dem bestehenden
+`it-chef/auto`-Stand weitergearbeitet.
+
+**Eigene Prüfung der Aufgabenliste:** Alle noch offenen Punkte in
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` unabhängig
+durchgesehen. Für die bereits in den fünf Läufen vom 10./11.08.
+ausführlich dokumentierten Blocker (4.1-4.3 Credentials, Backend-
+Entscheidung, 5.7 keine Zug/Bus/Fähre-Datenquelle, 6.6-6.9/6.12 fehlende
+Preisfelder/unvollständige Checklisten-Spezifikation, 7.3/7.4/7.6/7.7/
+7.8/7.10/7.11/7.12/7.13/7.15, 8.x Backend-/Produktentscheidungen oder
+unspezifiziert) hat sich nichts geändert — keine neuen Credentials in
+`.env.example`, kein neues Package in `package.json`, keine
+Spezifikationsänderung. Diese Punkte bleiben aus denselben, bereits
+dokumentierten Gründen verworfen.
+
+**Ausgewählter Punkt:** Kein neuer Implementierungspunkt, aber eine
+bisher übersehene Diskrepanz gefunden: Die Checkboxen für 5.1, 5.2, 5.3,
+5.6, 5.8, 5.9 in `tasks/tasks-prd-travix-platform.md` standen noch auf
+`[ ]`, obwohl `ZEITPLAN.md` diese Punkte selbst schon länger als "fertig"
+zusammenfasst (Zeile "Flugsuche (5.8, 5.9, 5.11) und Hotelsuche
+(5.1-5.3, 5.6) fertig"). Jeden einzeln gegen den tatsächlichen Code
+verifiziert statt der Zusammenfassung blind zu vertrauen:
+
+- **5.1** `HotelCard.tsx` (`src/components/search/HotelCard.tsx`):
+  zeigt Name, Bewertung, Adresse, Preis, Bild — alle Felder, die
+  `StayOffer` (`src/types/stays.ts`) tatsächlich von der echten Duffel-
+  Stays-Testdatenquelle liefert. `stars`, `amenities` und eine
+  Buchungs-URL existieren auf `StayOffer` nicht und wurden bewusst nicht
+  hinzuerfunden — dieselbe "keine Fabrikation"-Regel, die bereits bei
+  `TrainCard`/`FlightCard` gilt.
+- **5.2** `HotelResults.tsx`: Grid-Komponente existiert und wird in
+  `KiChat.tsx` für die Inline-Ergebnisse im Chat verwendet; die
+  eigenständige `/hotelsuche`-Seite rendert ein äquivalentes Grid direkt.
+- **5.3** Auswahl-Flow: `selectHotel` in `useChat.ts` (Chat-Pfad) und
+  `updateStoredTrip` in `Hotelsuche.tsx` (Standalone-Seiten-Pfad) beide
+  verifiziert — Auswahl übernimmt die Unterkunft in den Trip.
+- **5.6** `NoResultsMessage.tsx`: verifiziert in 5 Stellen eingebunden
+  (`HotelResults`, `FlightResults`, `TrainResults`, `Flugsuche.tsx`,
+  `Hotelsuche.tsx`).
+- **5.8/5.9** `FlightWizard.tsx` (IATA-Felder, Passagiere, Kabinenklasse,
+  Hin-/Rückflug-Umschalter) und `Flugsuche.tsx` (hostet den Wizard,
+  zeigt Ergebnisse, Fehler, Auswahl-Bestätigung) beide vollständig
+  verifiziert.
+
+Alle sechs Punkte damit tatsächlich umgesetzt und objektiv nachprüfbar
+— keine neue Interpretation oder Annahme nötig, nur eine Verifikation
+von bereits existierendem Code gegen den bereits existierenden
+Aufgabentext. Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten; keine offene Architekturentscheidung. Damit sicher
+genug für den autonomen Modus, auch wenn es sich um eine reine
+Dokumentations-/Checklisten-Korrektur statt einer Code-Änderung handelt.
+
+**Abgrenzung zu früheren Läufen:** Der zweite/dritte Lauf vom 11.08.
+hatte eine ähnliche Diskrepanz bei 6.1-6.5/6.11/6.13 bereits bemerkt,
+sie aber ausdrücklich als "kein neuer Umsetzungspunkt" eingestuft und
+die Checkbox dort bewusst nicht korrigiert. Die heutigen Punkte
+(5.1-5.3/5.6/5.8/5.9) waren bislang noch von keinem Lauf einzeln
+gegengeprüft und korrigiert worden — die Korrektur hier schließt genau
+diese Lücke, damit künftige Läufe nicht wieder dieselben bereits
+fertigen Punkte als "offen" listen und erneut Zeit mit ihrer Prüfung
+verbrauchen. `tasks/tasks-prd-travix-platform.md:175-177,180,182-183`
+aktualisiert; `ZEITPLAN.md` war in der Zusammenfassung bereits korrekt
+und brauchte keine Änderung. **5.7** (Zug/Bus/Fähre-Ergebnisse in den
+Chat einbinden) bleibt bewusst offen, da nur die Hotel/Flug-Hälfte
+fertig ist — der Zug/Bus/Fähre-Teil weiterhin ohne Datenquelle blockiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout).
+- `npm run build` (tsc -b + vite build) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 15/15 Tests grün, unverändert (reine
+  Dokumentationsänderung, keine test-relevanten Code-Änderungen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
