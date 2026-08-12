@@ -1,4 +1,5 @@
 import type { AdvisorReply, TransportMode, TripDraft } from '@/types/chat'
+import { knownDestinations } from '@/types/stays'
 
 /**
  * Local stand-in for the real AI engine (Base44 InvokeLLM + gemini_3_flash +
@@ -56,9 +57,16 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
   const next = { ...trip }
 
   if (!next.destination) {
-    next.destination = userMessage
+    // "Überrasch mich" is a greeting quick-reply, not a real place name — pick
+    // one of the curated destinations instead of using it as literal text,
+    // which would otherwise become an unmatchable "destination" downstream.
+    const destination =
+      userMessage === 'Überrasch mich'
+        ? knownDestinations[Math.floor(Math.random() * knownDestinations.length)].name
+        : userMessage
+    next.destination = destination
     return {
-      content: `${userMessage} klingt nach einer großartigen Idee! Wie möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?`,
+      content: `${destination} klingt nach einer großartigen Idee! Wie möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?`,
       avatarState: 'happy',
       quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre'],
       trip: next,
