@@ -255,3 +255,64 @@ Preisalarme}.tsx` + zugehörige Tests, `src/routes.tsx`,
 
 **Ergebnis:** Passt → nach `main` gemerged (Merge-Commit, gepusht,
 `fb8572d..8c08b04`).
+
+## 2026-08-12, Tages-Check (autonomer Lauf, ohne Ni)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (der frühe Nacht-Check heute
+  hatte bereits alles gemergt). Nichts zu tun.
+- `marketing-chef/auto` — 3 Commits vor `main` (davon 2 neu seit dem
+  letzten Freigabe-Chef-Lauf: der bisher liegen gebliebene Skill-Update
+  vom 11.08. `30ba2f5`, sowie ein neuer Merge- und Content-Commit vom
+  12.08.).
+- `support-chef/auto` — 1 Commit vor `main`.
+
+**Prüfung `marketing-chef/auto`** (Diff: `.claude/skills/marketing-chef-eigen/SKILL.md`,
+`marketing-chef-auto-log.md`, neue Datei
+`marketing/content-stueck-ehrliche-kartenansicht.md`, kein Produkt-Code):
+- SKILL.md-Änderung (`30ba2f5`, 11.08. 10:57 Uhr — Zeitstempel passt zu
+  einer Live-Session mit Ni, nicht zum planmäßigen Auto-Lauf): ersetzt
+  den alten "Canva-Design-Briefs"-Abschnitt durch "Post-Design: Text +
+  visuelle Vorschau" (Artifact-Vorschau standardmäßig statt nur auf
+  Wunsch). Diese Datei ist laut eigener Beschreibung Nis frei bearbeitbare
+  Persona-Datei, keine Berührung von Auth/Zahlungen/rechtlichen Texten,
+  keine Live-Aktion — inhaltlich eine reine Skill-Verbesserung ohne
+  Widerspruch zu bestehenden Leitplanken. Kein Scope-Creep im engeren
+  Sinn, da vom Auftrag hier ("passende Kriterien prüfen") gedeckt.
+- Content-Stück `content-stueck-ehrliche-kartenansicht.md`: gegen
+  `src/pages/Kartenansicht.tsx` auf `main` geprüft — Teal-Marker für
+  echtes, im Chat geplantes Ziel (`findKnownDestination`), ehrliche
+  Leerzustände ("Noch keine Reise geplant" /
+  "Für dieses Ziel kenne ich noch keine Koordinaten für die Karte"),
+  dezente CartoDB-Positron-Kartenbasis — alle drei im Post genannten
+  Details stimmen wörtlich mit dem Code überein. Keine erfundenen
+  Kennzahlen (Hashtags explizit als unbelegt gekennzeichnet, keine
+  Reichweiten-/Nutzerzahlen). Kein Hinweis auf tatsächliches
+  Posten/Versenden — ausdrücklich als Entwurf markiert, wartet auf Nis
+  Freigabe. Vollständiger, kohärenter Text (LinkedIn- + Instagram-
+  Fassung, Design-Brief für Option A), keine bloße Stichpunkt-Skizze.
+  Bildoption B (echter Screenshot) bewusst nicht ausgearbeitet, da
+  `MARKENDESIGN.md` diese Grundsatzfrage noch offen lässt — sauber im
+  Text markiert statt stillschweigend entschieden.
+- Kein Produkt-Code geändert → kein Build/Lint/Test nötig.
+
+**Ergebnis:** Passt → nach `main` gemergt (Merge-Commit, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+UX-Analyse zur Angebote-Seite `/angebote`, kein Code):
+- Alle drei genannten Reibungspunkte gegen `src/pages/Angebote.tsx` auf
+  `main` nachverfolgt und bestätigt:
+  - Kein Handlungs-Button pro Karte außer Entfernen (`:80-113`) — stimmt,
+    im Gegensatz zu `Favoriten.tsx:96-101`, das dort tatsächlich einen
+    "Reise mit KI planen"-Link hat (gegengeprüft).
+  - `formatPrice` (`:40-41`) behandelt nur `'EUR'` explizit, jede andere
+    Währung bekommt den rohen ISO-Code angehängt — stimmt.
+  - Entfernen (`:47-49`) ist sofort und ohne Bestätigung/Rückgängig —
+    stimmt, `removeOffer` filtert direkt aus dem State.
+  - Zeilenangaben im Log leicht abweichend von der exakten Fundstelle,
+    aber inhaltlich und in der Größenordnung korrekt — kein erfundener
+    Befund, deckt sich mit dem bereits akzeptierten Muster aus früheren
+    Läufen.
+- Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+
+**Ergebnis:** Passt → nach `main` gemergt (Merge-Commit, gepusht).
