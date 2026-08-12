@@ -172,15 +172,15 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 4.14 Wire KiChat page (`/ki-chat`) with trip creation on first message and trip loading for resume
 
 - [ ] 5.0 Real search modules — Hotel cards, train/bus/ferry search, Duffel flight wizard stub
-  - [ ] 5.1 Build `HotelCard.tsx` displaying all required fields (name, stars, rating, price, amenities, images, booking URL)
-  - [ ] 5.2 Build `HotelResults.tsx` grid showing minimum 3 comparable hotel cards
-  - [ ] 5.3 Implement hotel selection flow — selecting a card auto-integrates into trip accommodation
+  - [x] 5.1 Build `HotelCard.tsx` displaying all required fields (name, stars, rating, price, amenities, images, booking URL) — implemented with the fields the real Duffel Stays test data actually provides (name, guest rating, address, price, image); no `stars`/`amenities`/booking-URL fields exist on `StayOffer` (`src/types/stays.ts`), so none were added — same "don't fabricate data" rule already applied to `TrainCard`/`FlightCard`
+  - [x] 5.2 Build `HotelResults.tsx` grid showing minimum 3 comparable hotel cards — grid component built and used for inline results inside `KiChat.tsx`; the standalone `/hotelsuche` page renders its own equivalent grid directly (see 5.9-analog note in `Flugsuche.tsx`)
+  - [x] 5.3 Implement hotel selection flow — selecting a card auto-integrates into trip accommodation — `selectHotel` in `useChat.ts` (chat flow) and `updateStoredTrip` in `Hotelsuche.tsx` (standalone page) both wired
   - [x] 5.4 Build `TrainCard.tsx` with departure/arrival, times, duration, transfers, operator, price, classes
   - [x] 5.5 Build `TrainResults.tsx` list view for train/bus/ferry connections
-  - [ ] 5.6 Build `NoResultsMessage.tsx` with honest messaging and alternative suggestions
+  - [x] 5.6 Build `NoResultsMessage.tsx` with honest messaging and alternative suggestions — used in `HotelResults`, `FlightResults`, `TrainResults`, `Flugsuche.tsx`, `Hotelsuche.tsx`
   - [ ] 5.7 Integrate hotel and train search results into KI-Chat response rendering
-  - [ ] 5.8 Build `FlightWizard.tsx` with IATA code inputs, passenger details, cabin class, one-way/round-trip toggle
-  - [ ] 5.9 Create Flugsuche page (`/flugsuche`) hosting the flight wizard
+  - [x] 5.8 Build `FlightWizard.tsx` with IATA code inputs, passenger details, cabin class, one-way/round-trip toggle
+  - [x] 5.9 Create Flugsuche page (`/flugsuche`) hosting the flight wizard
   - [ ] 5.10 Implement Duffel API backend function stub (ready for Builder+ deployment)
   - [x] 5.11 Wire flight selection to auto-integrate into trip transport section
 
@@ -207,9 +207,9 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 7.5 Build MeineReisen page (`/meine-reisen`) for booked/confirmed trips
   - [ ] 7.6 Build Warenkorb page (`/warenkorb`) with grouped cart items and real-time totals
   - [ ] 7.7 Build Dashboard page (`/dashboard`) with trips overview, budgets, favorites, loyalty points
-  - [ ] 7.8 Build Angebote page (`/angebote`) for saved travel offers (SavedOffer entity)
-  - [ ] 7.9 Build Favoriten page (`/favoriten`) for saved destinations (Favorite entity)
-  - [ ] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity)
+  - [x] 7.8 Build Angebote page (`/angebote`) for saved travel offers (SavedOffer entity) — demo data (`initialOffers` in `Angebote.tsx`) until the real SavedOffer entity exists, same placeholder pattern as `Favoriten.tsx`/`Preisalarme.tsx`; `offer_data` is unstructured in the PRD schema, so a short summary string is used per offer instead of inventing a fuller shape (e.g. full flight segments); encouraging empty state per `MARKENDESIGN.md`
+  - [x] 7.9 Build Favoriten page (`/favoriten`) for saved destinations (Favorite entity) — demo data (`initialFavorites` in `Favoriten.tsx`) until the real Favorite entity exists, same placeholder pattern as `MeineReisen.tsx`/`Reiseentwuerfe.tsx`; encouraging empty state per `MARKENDESIGN.md`
+  - [x] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity) — demo data (`initialAlerts` in `Preisalarme.tsx`) until the real PriceAlert entity exists, same placeholder pattern as `Favoriten.tsx`; price-change wording and empty state follow `MARKENDESIGN.md` ("sachlich" statt Dringlichkeit)
   - [ ] 7.11 Build Reisekalender page (`/kalender`) with calendar view of all trips
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts
   - [ ] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips
