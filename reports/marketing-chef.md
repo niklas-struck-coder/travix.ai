@@ -1,50 +1,45 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-11
+**Datum:** 2026-08-12
 
-## Was ist seit dem letzten Eintrag (2026-08-10, 16:07 Uhr) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-11) passiert?
 
-Einiges, und Sprint 1 im Marketing-Track ist damit offiziell durch:
+Nicht viel Neues auf der Positionierungs-Ebene, aber ein konkreter
+Fortschritt bei der Umsetzung:
 
-- **Zielgruppe steht fest.** Du hast die Positionierung und das
-  Leitbild "Die erschöpfte Planerin" bestätigt (siehe
-  `MARKENDESIGN.md`). Damit ist die wichtigste offene Baustelle aus
-  meinem letzten Bericht erledigt.
-- **Erste Content-Stücke Woche 1 sind entworfen**, nicht veröffentlicht:
-  Post A (Build-in-public-Vorstellung), Post B (Planungs-Frust "20
-  offene Tabs") für LinkedIn/Instagram, plus ein Blog-Stück zu
-  "Ehrlichkeit als Feature" — alles in
-  `marketing/content-stuecke-woche1.md`, wartet auf deine Freigabe.
-- **Kartenansicht zeigt jetzt den echten, im Chat geplanten Trip** statt
-  fester Demo-Städte (Lissabon/Kyoto) — mit einem ehrlichen Hinweis,
-  wenn noch nichts geplant ist, statt erfundener Orte.
-- **Der Blocker von gestern ist nur halb aufgelöst und jetzt sogar
-  breiter:** Die rohen englischen Duffel-Fehlermeldungen sind laut
-  IT-Chef weiterhin ungefixt und betreffen jetzt zusätzlich zur
-  Flugsuche auch Hotelsuche und FlightResults.
+- **Mein eigener Vorschlag von gestern ist bereits als Entwurf fertig.**
+  Der Auto-Lauf hat den Screenshot-Vergleich zur ehrlichen Kartenansicht
+  geschrieben (`marketing/content-stueck-ehrliche-kartenansicht.md`) —
+  "echtes Ziel statt Fantasie-Stadt, ehrlicher Leerzustand statt
+  Demo-Ort". Liegt jetzt neben den Woche-1-Stücken bereit für deine
+  Freigabe.
+- **Der Rohfehler-Blocker steht immer noch.** Laut IT-Chef ist
+  `src/lib/duffel/client.ts` weiterhin ungefixt — Flug-/Hotelsuche
+  bleiben damit weiter ungeeignet für Live-Content.
+- **Drei neue Seiten dazugekommen** (Angebote, Favoriten, Preisalarme),
+  aber alle mit Demo-Daten befüllt — noch nichts, das sich als "echtes"
+  Feature zeigen lässt.
+- Nebenbei ein sympathischer Bugfix (PR #5, noch offen): Der
+  Begrüßungs-Button "Überrasch mich" wurde bisher wörtlich als
+  Reiseziel übernommen, statt eines der acht Ziele zu wählen.
 
 ## Vorschläge
 
-1. **Content-Stücke Woche 1 jetzt zu dir bringen statt mehr zu
-   produzieren.** Die Texte liegen fertig in
-   `marketing/content-stuecke-woche1.md`. Der nächste sinnvolle Schritt
-   ist nicht "noch mehr schreiben", sondern deine Freigabe plus die
-   Entscheidung, LinkedIn/Instagram überhaupt anzulegen — sonst stapeln
-   sich fertige Entwürfe, ohne dass etwas rausgeht.
+1. **Jetzt bündeln und dir zur Freigabe bringen, nicht weiterschreiben.**
+   Du hast inzwischen drei fertige Text-Stücke liegen (Woche-1-Post A/B,
+   Blog-Stück, Kartenansicht-Vergleich) plus die offene
+   Kanal-Entscheidung (LinkedIn/Instagram anlegen oder nicht). Das ist
+   der eigentliche Engpass gerade — nicht fehlender Content.
 
-2. **Die neue, ehrliche Kartenansicht ist ein besseres Beweisstück für
-   "Ehrlichkeit als Feature" als jedes Werbetext-Argument.** Ein echter
-   Screenshot-Vergleich ("früher: erfundene Demo-Stadt Lissabon — heute:
-   dein echter Ort, oder ein ehrlicher Leerzustand statt Fantasie")
-   würde die Positionierung konkret statt behauptet zeigen. Eigener
-   kurzer Post, zusätzlich zu den schon entworfenen Stücken.
+2. **"Überrasch mich"-Bugfix als spätere Content-Idee vormerken, aber
+   noch nicht nutzen.** Sobald PR #5 gemerged ist, wäre "wir haben
+   unseren eigenen Lieblings-Button getestet und den Fehler selbst
+   gefunden, bevor du ihn gesehen hast" ein sehr konkretes, sympathisches
+   Beispiel für Sorgfalt statt Perfektions-Fassade — passt zur
+   "Ehrlichkeit als Feature"-Linie, ohne einen fremden Fehler zu zeigen.
 
-3. **Flugsuche/Hotelsuche vorerst weiter nicht als Live-Demo zeigen.**
-   Der Blocker aus meinem letzten Bericht ist nicht kleiner geworden,
-   sondern hat sich auf Hotelsuche und FlightResults ausgeweitet. Bevor
-   ein Build-in-public-Post live Suchergebnisse zeigt, sollte die
-   Übersetzungstabelle für die Fehlercodes stehen — sonst zeigt der
-   Post live einen englischen Rohfehler mitten in einer sonst
-   durchgängig deutschen, freundlichen App.
+3. **Flug-/Hotelsuche weiterhin nicht live zeigen.** Unverändert zu
+   gestern: solange die englischen Duffel-Rohfehler nicht übersetzt
+   sind, würde ein Live-Demo-Post an genau dieser Stelle brechen.
 
-_Letztes Update: 2026-08-11_
+_Letztes Update: 2026-08-12_
