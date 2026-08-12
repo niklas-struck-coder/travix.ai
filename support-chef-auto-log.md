@@ -145,3 +145,78 @@ also weniger Kontext als jemand, der nur die Liste liest.
 Da `destinations` aktuell fest im Code steht (zwei Demo-Ziele, siehe
 `:19-22`) und nie leer ist, wurde ein Leerzustand ("keine Reiseziele")
 nicht geprüft — dafür gibt es aktuell keinen erreichbaren Zustand.
+
+---
+
+## 2026-08-12 — Angebote (`/angebote`)
+
+**Geprüfter Bereich:** Die Angebote-Seite, laut `ZEITPLAN.md` heute Nacht
+(Aufgabe 7.8) vom autonomen IT-Chef-Lauf gebaut und bereits nach `main`
+gemergt (Commit `de79e51`, gemerged in `8c08b04`):
+
+- `src/pages/Angebote.tsx`
+- `src/pages/Angebote.test.tsx`
+- `src/routes.tsx` (Route `/angebote`), `src/lib/nav-config.ts` (Navigation)
+
+Zum Vergleich herangezogen: `src/pages/Favoriten.tsx` und
+`src/pages/Preisalarme.tsx` — beide laut `ZEITPLAN.md` nach demselben
+Karten-Grid-Muster gebaut wie `Angebote.tsx`.
+
+### Reibungspunkte
+
+**1. Angebots-Karten haben keinen Handlungs-Button — nur Entfernen**
+`src/pages/Angebote.tsx:80-113`: Jede Karte zeigt Typ, Ziel, Zusammenfassung
+und Preis, aber die einzige Interaktion ist der Entfernen-Button (`X`,
+Zeile 97-106). Anders als bei `Favoriten.tsx:96-101`, wo jede Karte einen
+"Reise mit KI planen"-Button (`Link to="/ki-chat"`) hat, gibt es hier
+keinen Weg, ein gespeichertes Angebot weiterzuverfolgen — nur wieder zu
+löschen. Für eine Seite, deren Zweck laut Leerzustand
+(`Angebote.tsx:60-62`: "Finde Flüge oder Unterkünfte und speichere sie
+hier, um sie später wiederzufinden") gerade das Wiederfinden und
+Weiterverfolgen ist, fehlt der naheliegendste nächste Schritt. Das bricht
+mit dem Muster, das `Favoriten.tsx` für dieselbe Karten-Grid-Struktur
+bereits etabliert hat.
+
+*Vorschlag:* Analog zu `Favoriten.tsx:96-101` einen Button/Link pro
+Karte ergänzen (z. B. "Weiter planen" → `/ki-chat`, oder je nach
+`offerType` gezielt zu `/flugsuche` bzw. einer künftigen Hotelsuche-Seite),
+solange es noch keine eigene Detail-/Buchungsseite pro Angebot gibt.
+
+**2. `formatPrice` zeigt bei anderen Währungen als EUR nur den rohen
+Code statt eines Symbols**
+`src/pages/Angebote.tsx:42-44`: Die Funktion prüft nur explizit auf
+`'EUR'` (`€`) und gibt für jede andere Währung den rohen ISO-Code
+zurück, z. B. `"610 USD"` statt `"$610"` oder `"610 US$"`. Mit den
+aktuellen zwei Demo-Angeboten (beide EUR) fällt das nicht auf, aber
+sobald echte Duffel-Angebote in Fremdwährung gespeichert werden (wie es
+laut `ZEITPLAN.md` bei der echten Flug-/Hotelsuche bereits vorkommt),
+wirkt die Preisanzeige technischer und weniger vertrauenswürdig als der
+Rest der App.
+
+*Vorschlag:* Auf eine kleine Währungs-Symbol-Tabelle erweitern (EUR,
+USD, GBP als nächstwahrscheinlichste) oder — robuster — `Intl.NumberFormat`
+mit `style: 'currency'` verwenden, das Locale und Symbol automatisch
+korrekt kombiniert.
+
+**3. Entfernen ist sofort und endgültig, ohne Rückfrage oder Rückgängig-Option**
+`src/pages/Angebote.tsx:49-51`: Ein Klick auf den `X`-Button entfernt das
+Angebot sofort aus dem State — kein Bestätigungsdialog, kein
+"Rückgängig"-Hinweis (z. B. per Toast). Dasselbe Muster gibt es zwar
+auch bei `Favoriten.tsx` und `Preisalarme.tsx`, aber bei gespeicherten
+Angeboten mit konkretem Preis ist ein versehentlicher Klick (gerade auf
+Mobilgeräten, wo Karten dichter beieinander liegen) potenziell teurer
+rückgängig zu machen — die Nutzerin muss das Angebot erneut suchen und
+den ursprünglichen Preis unter Umständen nicht mehr finden.
+
+*Vorschlag:* Kurzfristig zumindest ein kurzes "Rückgängig"-Toast nach
+dem Entfernen (z. B. 5 Sekunden Zeitfenster), das den State
+zurücksetzt — kein vollständiger Bestätigungsdialog nötig, der bei einer
+reinen Merkliste eher Reibung erzeugen würde.
+
+### Nicht geprüft
+`Preisalarme.tsx` wurde nur zum Mustervergleich herangezogen, nicht
+eigenständig neu geprüft — es war laut Log bereits Teil des Vergleichs
+in einem früheren Durchlauf nicht enthalten, aber selbst kein heute neu
+gebauter Bereich (gebaut am 12.08., aber vor `Angebote.tsx`, siehe
+Commit-Zeitstempel `db7fb94` vs. `de79e51`). Eine eigene Prüfung von
+`Preisalarme.tsx` steht für einen künftigen Lauf noch aus.
