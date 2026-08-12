@@ -1,52 +1,51 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-11
+**Datum:** 2026-08-12
 
-## Was ist seit dem letzten Eintrag (2026-08-10) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-11) passiert?
 
-Einiges: Der Ladezustand-Bug bei der Flugsuche, den ich letztes Mal gemeldet
-hatte, ist behoben. Auf der Buchungsseite (`/buchung`) gibt es jetzt bei
-Transport und Unterkunft einen "Bearbeiten"-Button, der dich fragen lässt,
-ob du mit der KI weiterplanen oder manuell suchen möchtest — eine schöne,
-klare Wahl. Dazu wurde die echte Flug- und Hotelsuche direkt in den KI-Chat
-eingebaut (nicht mehr nur auf den eigenständigen Suchseiten), und die
-Hotelsuche selbst hat jetzt auch einen sauberen Ladezustand. Die
-Kartenansicht (`/karte`) zeigt seit heute dein echtes, im Chat geplantes
-Reiseziel statt fester Demo-Orte.
+Ein produktiver Tag: Drei neue Seiten sind dazugekommen —
+`/angebote`, `/favoriten` und `/preisalarme` — alle nach demselben
+Karten-Grid-Muster gebaut. Zwei kleinere Bugs wurden automatisch
+gefixt (der "Überrasch mich"-Button übernahm sich selbst wörtlich als
+Reiseziel; ungeschützte `localStorage`-Schreibzugriffe hätten die App
+im Fehlerfall abstürzen lassen können) — beide warten noch auf Review,
+sind aber inhaltlich in Ordnung. Dabei ist außerdem ein neuer, für
+Nutzer:innen unsichtbarer Bug aufgefallen (siehe Punkt 1 unten). Die
+rohen Duffel-Fehlermeldungen und der stille Mikrofon-Fehler aus früheren
+Berichten sind weiterhin offen.
 
 ## Meine Vorschläge
 
-1. **Das Problem mit den rohen Duffel-Fehlermeldungen habe ich schon einmal
-   gemeldet — jetzt ist es an zwei weiteren Stellen aufgetaucht statt
-   behoben zu werden.** In `src/pages/Hotelsuche.tsx:24` und neu auch in
-   `src/components/search/FlightResults.tsx:29` (dem Fehlerblock der neuen
-   Flugsuche direkt im KI-Chat) wird `error.message` unverändert angezeigt —
-   Duffel liefert diese Meldungen laut `src/lib/duffel/client.ts:15-24` roh
-   und auf Englisch. Was letztes Mal ein einzelner Fleck war, ist jetzt ein
-   Muster: Jede neue Suchoberfläche kopiert denselben unübersetzten
-   Fehlertext. Eine einzige, zentrale Übersetzungsfunktion für die
-   häufigsten Duffel-Fehlercodes (mit rohem Text nur als Fallback) würde das
-   an allen drei Stellen auf einmal beheben, statt es ein viertes Mal
-   nachzuziehen.
+1. **Automatische Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar
+   hängen.** In `src/hooks/useChat.ts:151` wird der Avatar beim Bearbeiten
+   der Unterkunft immer auf "sucht" gesetzt — aber die eigentliche Suche
+   (`:154-176`) startet nur, wenn `findKnownDestination` das Reiseziel
+   erkennt (aktuell nur 8 kuratierte Städte). Bei jedem anderen Ziel bleibt
+   der Avatar einfach auf "sucht" stehen, ohne dass je eine Nachricht kommt
+   — die Nutzerin wartet auf etwas, das nie passiert. Der parallele
+   Flug-Zweig (`:204-213`) macht es besser vor: Dort gibt es bei
+   unbekanntem Ziel einen klaren Hinweistext ("kenne ich noch keinen
+   Flughafen … nutze dafür kurz die manuelle Suche"). Am einfachsten:
+   denselben Hinweis-Zweig für die Unterkunftssuche ergänzen.
 
-2. **Kartenansicht-Popup zeigt weiterhin nur den Ortsnamen, nicht das
-   Reisedatum.** Auch nach der heutigen Umstellung auf echte Trip-Daten
-   (`src/pages/Kartenansicht.tsx`) enthält das Popup beim Anklicken des
-   Markers nur `{known.name}` — die Karte darunter zeigt das Reisedatum
-   zusätzlich an. Wer über die Karte selbst navigiert, sieht also weniger
-   Kontext als beim Blick auf die Liste direkt daneben. Kleine Ergänzung:
-   `{trip?.dates}` mit ins Popup aufnehmen, dann zeigen beide Ansichten
-   denselben Stand.
+2. **Bei Preisalarmen fehlt ausgerechnet dann ein Handlungs-Button, wenn
+   das Ziel erreicht ist.** `src/pages/Preisalarme.tsx:104` zeigt zwar das
+   Abzeichen "Ziel erreicht", aber die Karte hat außer dem
+   Entfernen-Button (`:88-97`) keine Möglichkeit weiterzumachen — genau in
+   dem Moment, in dem die Nutzerin am ehesten buchen will. `Favoriten.tsx`
+   löst das für dieselbe Karten-Struktur bereits sauber mit einem "Reise
+   mit KI planen"-Button (`:96-101`); dasselbe Muster würde hier gut
+   passen, besonders bei erreichtem Ziel.
 
-3. **Weiterhin offen aus dem letzten Bericht: Mikrofon-Fehler bleiben
-   unsichtbar.** `src/lib/ai/speech.ts:47` (`recognition.onerror = onEnd`)
-   ist unverändert — verweigert jemand die Mikrofon-Berechtigung, verschwindet
-   die "Aufnahme läuft"-Anzeige kommentarlos, ohne Hinweis, was passiert ist.
+3. **Weiterhin offen: rohe, englische Duffel-Fehlermeldungen im UI.**
+   Unverändert seit den letzten Berichten — `src/lib/duffel/client.ts`
+   reicht Fehler weiter unübersetzt durch. Kein neuer Fund, nur zur
+   Erinnerung, da es der größte einzelne Vertrauens-Reibungspunkt bleibt.
 
-4. **Zug/Bus/Fähre bleiben für Nutzer:innen weiterhin unsichtbar.**
-   `TrainCard.tsx`/`TrainResults.tsx` existieren nach wie vor, sind aber in
-   keinen erreichbaren Nutzerpfad eingebunden. Kein akuter Reibungspunkt,
-   aber unverändert seit letztem Bericht — nur zur Erinnerung, falls das aus
-   dem Blick gerät.
+4. **Weiterhin offen: Mikrofon-Fehler bleiben unsichtbar.**
+   `src/lib/ai/speech.ts:47` behandelt eine verweigerte
+   Mikrofon-Berechtigung weiterhin wie ein normales Aufnahmeende — die
+   "Aufnahme läuft"-Anzeige verschwindet kommentarlos.
 
-_Letztes Update: 2026-08-11_
+_Letztes Update: 2026-08-12_
