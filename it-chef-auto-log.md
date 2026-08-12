@@ -825,3 +825,92 @@ fertig ist — der Zug/Bus/Fähre-Teil weiterhin ohne Datenquelle blockiert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-12 (zweiter Lauf)
+
+**Hinweis zur Ausgangslage:** Dieser Lauf startete nur ca. 54 Minuten
+nach dem vorherigen (00:11 UTC → 01:05 UTC) — offenbar eine zweite
+Auslösung des Tages, nicht der reguläre nächste Tag. `main` hatte in der
+Zwischenzeit keine neuen Commits; `it-chef/auto` war unverändert beim
+Stand des ersten Laufs (`7caa3ed`). Trotzdem regulär als eigener,
+einzelner Durchlauf behandelt, wie in der Skill-Datei vorgeschrieben.
+
+**Ausgewählter Punkt:** 7.10 `Preisalarme.tsx` (`/preisalarme`) aus
+`tasks/tasks-prd-travix-platform.md` — Preisüberwachungs-Alarme
+(PriceAlert entity). Nächster offener, unblockierter Punkt aus Sprint 3
+in `ZEITPLAN.md`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung — folgt exakt demselben, bereits etablierten
+Muster wie 7.9 `Favoriten.tsx` (Kartenliste mit Demo-Daten, `useState`,
+Entfernen-Button, ermutigender Leer-Zustand), keine neue Abhängigkeit
+nötig. Klar genug beschrieben, und `MARKENDESIGN.md` enthält sogar
+explizite Vorgaben für genau diese Seite: Leer-Zustand nach dem
+Reiseplan-Vorbild ("ermutigend... nie ein trockenes 'Keine Daten
+vorhanden'") sowie der Abschnitt "Warenkorb/Preisalarme" (keine
+künstliche Dringlichkeit à la "Preis steigt bald!", stattdessen sachlich
+"Preis hat sich seit deiner letzten Ansicht geändert: X € statt Y €" —
+Wortlaut direkt übernommen). Objektiv prüfbar über Build/Lint/Tests plus
+die neue Route.
+
+**Andere geprüfte, aber verworfene Kandidaten:**
+- **7.13 Aktivitäten** (aggregierte Aktivitäten über alle Reisen):
+  verworfen. `TripActivity[]` wird im gesamten Code nirgends befüllt
+  (`mockAdvisor.ts` setzt immer `activities: []`, auch die Demo-Entwürfe
+  in `Reiseentwuerfe.tsx` haben leere Arrays) — im Gegensatz zu 7.9/7.10
+  gäbe es hier keine reale Quelle zum Aggregieren, sondern es müssten
+  komplett erfundene Aktivitätsnamen/-preise für eine "Aggregation"
+  erfunden werden, die es so nicht gibt. Das geht über eine reine
+  Demo-Entität (wie bei Favoriten/Preisalarmen) hinaus und wäre eher
+  Interpretation/Erfindung von Produktinhalt als Umsetzung eines klar
+  beschriebenen Punkts.
+- **7.11 Reisekalender:** verworfen. Keine Kalender-Bibliothek im Projekt
+  vorhanden (`package.json` enthält weder `react-day-picker` noch
+  `date-fns` o.ä.), Hinzufügen einer neuen Abhängigkeit im autonomen
+  Modus vermieden.
+- **7.12 Reisebudget (Recharts):** verworfen, obwohl `recharts` bereits
+  installiert ist — der Punkt hängt an einer echten Kostenaufschlüsselung
+  (6.6 `CostBreakdown.tsx`, 6.7 `calculateCosts.ts`), die selbst noch
+  offen ist; ein Diagramm ohne echte Kostendaten wäre wieder erfundener
+  Inhalt statt Umsetzung des beschriebenen Punkts.
+- **7.8 Angebote:** ebenfalls sicher genug gewesen (identisches Muster zu
+  7.9/7.10), aber nur ein Punkt pro Lauf — 7.10 gewählt, weil
+  `MARKENDESIGN.md` dafür die konkreteste, direkt zitierbare
+  Design-Vorgabe liefert.
+
+**Umsetzung:**
+- `src/pages/Preisalarme.tsx` neu — Kartenliste mit zwei Demo-Alarmen
+  (`initialAlerts`), Zielpreis-Badge in Teal bei erreichtem Ziel (keine
+  Signalfarbe wie Rot, passend zur "niemals Rot"-Vorgabe für
+  Dashboard-Kennzahlen), sachlicher Preisänderungs-Hinweis nur wenn sich
+  der Preis wirklich geändert hat, Entfernen-Button pro Alarm, Leer-
+  Zustand mit Link zu `/ki-chat`.
+- `src/routes.tsx` — Route `/preisalarme` registriert, aus der
+  automatischen Platzhalter-Liste (`allRoutes`) entfernt (Eintrag stand
+  schon in `src/lib/nav-config.ts`, keine Änderung dort nötig).
+- `src/pages/Preisalarme.test.tsx` neu — Rendering der Demo-Alarme,
+  Zielpreis-Badge, Preisänderungs-Hinweis, sowie Entfernen bis zum
+  Leer-Zustand (analog `Favoriten.test.tsx`).
+- `tasks/tasks-prd-travix-platform.md:212` — 7.10 auf `[x]` gesetzt, mit
+  Hinweis auf Demo-Daten-Muster.
+- `ZEITPLAN.md` — Sprint-3-Abschnitt um 7.10 ergänzt (analog zu den
+  bestehenden 7.2/7.9/7.14-Einträgen).
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout; ein erster
+  Versuch schlug mit einem transienten `ETXTBSY`-Fehler beim
+  esbuild-Postinstall fehl, zweiter Versuch sauber — `package-lock.json`
+  danach unverändert committet, da eine zweite, funktionsfremde
+  npm-Version nur Metadaten wie `libc`-Felder entfernt hatte; dieser Diff
+  wurde verworfen, nicht committet).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen TypeScript-
+  Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 17/17 Tests grün (15 vorher + 2 neue für
+  `Preisalarme.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

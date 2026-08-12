@@ -209,7 +209,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 7.7 Build Dashboard page (`/dashboard`) with trips overview, budgets, favorites, loyalty points
   - [ ] 7.8 Build Angebote page (`/angebote`) for saved travel offers (SavedOffer entity)
   - [x] 7.9 Build Favoriten page (`/favoriten`) for saved destinations (Favorite entity) — demo data (`initialFavorites` in `Favoriten.tsx`) until the real Favorite entity exists, same placeholder pattern as `MeineReisen.tsx`/`Reiseentwuerfe.tsx`; encouraging empty state per `MARKENDESIGN.md`
-  - [ ] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity)
+  - [x] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity) — demo data (`initialAlerts` in `Preisalarme.tsx`) until the real PriceAlert entity exists, same placeholder pattern as `Favoriten.tsx`; price-change wording and empty state follow `MARKENDESIGN.md` ("sachlich" statt Dringlichkeit)
   - [ ] 7.11 Build Reisekalender page (`/kalender`) with calendar view of all trips
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts
   - [ ] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips

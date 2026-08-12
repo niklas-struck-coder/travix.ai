@@ -90,6 +90,10 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `calculateProgress` (7.1); 7.3 (Pause/Duplizieren/Abschließen/Löschen)
   und 7.4 (echte Wiederaufnahme mit Chat-Historie) bleiben eigene offene
   Punkte, "Planung fortsetzen" verlinkt vorerst nur auf `/ki-chat`
+- [x] 7.10 `Preisalarme.tsx` (`/preisalarme`) — Kartenliste mit
+  Demo-Preisalarmen (analog `Favoriten.tsx`), Zielpreis-Badge und
+  sachlicher Preisänderungs-Hinweis statt künstlicher Dringlichkeit,
+  ermutigender Leer-Zustand nach `MARKENDESIGN.md`
 - [ ] 7.3 Entwurfs-Aktionen: pausieren, duplizieren, abschließen, löschen
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen

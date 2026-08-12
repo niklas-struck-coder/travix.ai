@@ -12,6 +12,7 @@ import { Buchung } from '@/pages/Buchung'
 import { Urlaubsmodus } from '@/pages/Urlaubsmodus'
 import { Kartenansicht } from '@/pages/Kartenansicht'
 import { Favoriten } from '@/pages/Favoriten'
+import { Preisalarme } from '@/pages/Preisalarme'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
 
@@ -26,6 +27,7 @@ const builtRoutes = new Set([
   '/entwuerfe',
   '/karte',
   '/favoriten',
+  '/preisalarme',
 ])
 
 export function AppRoutes() {
@@ -45,6 +47,7 @@ export function AppRoutes() {
           <Route path="/urlaubsmodus" element={<PageTransition><Urlaubsmodus /></PageTransition>} />
           <Route path="/karte" element={<PageTransition><Kartenansicht /></PageTransition>} />
           <Route path="/favoriten" element={<PageTransition><Favoriten /></PageTransition>} />
+          <Route path="/preisalarme" element={<PageTransition><Preisalarme /></PageTransition>} />
           {allRoutes
             .filter((item) => !builtRoutes.has(item.path))
             .map((item) => (
