@@ -210,3 +210,48 @@ UX-Analyse zur Kartenansicht `/karte`, kein Code):
 
 **Ergebnis:** Passt → nach `main` gemerged (Merge-Commit, gepusht,
 `4c253a9..073eee8`).
+
+## 2026-08-12, früher Nacht-Check (autonomer Lauf, ohne Ni)
+
+Fokus laut Auftrag: `it-chef/auto`, da IT-Chef zwischen 0 und 4 Uhr
+mehrfach gelaufen ist. `marketing-chef/auto`/`support-chef/auto` nur kurz
+mitgeprüft, falls schon neue Commits von heute da sind (die laufen
+regulär erst um 6 Uhr, separater späterer Lauf).
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 7 Commits vor `main` (0 dahinter), davon 3 heute
+  zwischen 00:11 und 02:10 Uhr (Punkte 7.8 Angebote, 7.10 Preisalarme,
+  Checkboxen-Korrektur 5.1/5.2/5.3/5.6/5.8/5.9; der Rest waren bereits
+  bekannte, bisher ungemergte Läufe vom 11.08. inkl. 7.9 Favoriten).
+- `marketing-chef/auto` — 1 Commit vor `main`, aber vom 2026-08-11
+  10:57 Uhr — nicht von heute. Wie im Auftrag vorgesehen bei diesem
+  frühen Lauf nicht geprüft, bleibt für den 6-Uhr-Lauf liegen.
+- `support-chef/auto` — 0 Commits vor `main`. Nichts zu tun.
+
+**Prüfung `it-chef/auto`** (Diff: `src/pages/{Angebote,Favoriten,
+Preisalarme}.tsx` + zugehörige Tests, `src/routes.tsx`,
+`tasks/tasks-prd-travix-platform.md`, `ZEITPLAN.md`,
+`it-chef-auto-log.md`):
+- Scope passt zu den Log-Einträgen der drei heutigen Läufe — keine
+  Berührung von Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten (per Grep über den vollen Diff gegengeprüft, nur Erwähnungen in
+  Kommentaren/Log-Text, kein Code).
+- Neue Seiten folgen erkennbar demselben, bereits akzeptierten Muster
+  (Kartenliste, lokaler State, Entfernen-Button, ermutigender
+  Leer-Zustand). `Preisalarme.tsx` stichprobenartig gegen
+  `MARKENDESIGN.md` geprüft: Leer-Zustand-Wortlaut und der sachliche
+  Preisänderungs-Hinweis ("Preis hat sich seit deiner letzten Ansicht
+  geändert: X € statt Y €" statt künstlicher Dringlichkeit) stimmen
+  wörtlich mit der Vorgabe überein.
+- **Unabhängig verifiziert** (nicht nur Log geglaubt, selbst
+  ausgeführt): `npm install` sauber (647 Pakete), `npx tsc -b` grün,
+  `npx eslint .` 0 Fehler/3 vorbestehende Warnings (dieselben wie im
+  Log), `npx vitest run` 19/19 Tests grün. Deckt sich mit den
+  Eigenangaben in `it-chef-auto-log.md`.
+- Einzige Auffälligkeit: `npm install` hatte lokal `package-lock.json`
+  um `libc`-Metadatenfelder verändert (dieselbe transiente
+  npm-Versions-Eigenart, die IT-Chef im Log für den zweiten Lauf schon
+  beschrieben hatte) — verworfen statt committet, kein Teil des Merges.
+
+**Ergebnis:** Passt → nach `main` gemerged (Merge-Commit, gepusht,
+`fb8572d..8c08b04`).
