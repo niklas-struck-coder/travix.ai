@@ -48,9 +48,10 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
   Kartenansicht (7.14) zeigt seit 11.08. den echten im KI-Chat geplanten
-  Trip statt Demo-Koordinaten; Favoriten-Seite (7.9) seit 11.08. mit
-  Demo-Zielen und funktionierendem Entfernen-Button; Rest (7.3, 7.4, 7.6,
-  7.7, 7.8, 7.10-7.13, 7.15) komplett offen
+  Trip statt Demo-Koordinaten; Favoriten-Seite (7.9) seit 11.08. und
+  Preisalarme-Seite (7.10) sowie Angebote-Seite (7.8) seit 12.08. mit
+  Demo-Daten und funktionierendem Entfernen-Button; Rest (7.3, 7.4, 7.6,
+  7.7, 7.11-7.13, 7.15) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -99,7 +100,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Unterbrechungspunkt fortsetzen
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
 - [ ] 7.7 Dashboard
-- [ ] 7.8 Angebote, 7.10 Preisalarme
+- [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
+  (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
+  Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz
+  (SavedOffer.offer_data ist im PRD-Schema unstrukturiert), Preis,
+  Entfernen-Button, ermutigender Leer-Zustand nach `MARKENDESIGN.md`
 - [x] 7.9 `Favoriten.tsx` (`/favoriten`) — vom autonomen IT-Chef-Lauf am 11.08.
   gebaut: Karten-Grid mit Ziel/Land/Notiz, Herz-Button zum Entfernen (rein
   lokaler State, noch keine echte Speicherung), ermutigender Leerzustand

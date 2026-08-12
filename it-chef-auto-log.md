@@ -914,3 +914,92 @@ die neue Route.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-12 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` (Remote) war bereits auf dem Stand des
+zweiten Laufs von heute (7.10 Preisalarme). `main` hatte seitdem keine
+neuen Commits (letzter `main`-Stand weiterhin `fb8572d`) — nichts zu
+mergen, `main` wurde nicht angerührt, auf dem bestehenden
+`it-chef/auto`-Stand weitergearbeitet.
+
+**Ausgewählter Punkt:** Task 7.8 aus `tasks/tasks-prd-travix-platform.md`
+— "Build Angebote page (`/angebote`) for saved travel offers (SavedOffer
+entity)". Im zweiten Lauf von heute bereits als grundsätzlich sicher
+genug eingestuft, aber bewusst zugunsten von 7.10 zurückgestellt (ein
+Punkt pro Lauf, `MARKENDESIGN.md` hatte für 7.10 die konkreter zitierbare
+Vorgabe). Vor der Umsetzung diese frühere Einschätzung unabhängig
+gegengeprüft statt sie blind zu übernehmen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+folgt strukturell demselben, bereits etablierten Muster wie 7.9
+(`Favoriten.tsx`) und 7.10 (`Preisalarme.tsx`): Kartenliste mit
+Demo-Daten, Entfernen-Button, ermutigender Leer-Zustand. Route `/angebote`
+existierte bereits als generierte Platzhalter-Route in `nav-config.ts`.
+Einziger Unterschied zu 7.9/7.10: Das SavedOffer-Schema selbst
+(`offer_type, offer_data, destination`, siehe `tasks/prd-travix-platform.md:271`
+und `Travix md:194`) lässt `offer_data` bewusst unstrukturiert — anders
+als z.B. `Favorite` (`destination, country, image_url, notes`, klar
+benannte Felder). Um innerhalb der Kriterien zu bleiben ("keine
+Interpretation über die Aufgabenbeschreibung hinaus"), wurde geprüft, ob
+sich `offer_data` ohne Erfindung eines vollen Datensatzes (z.B. komplette
+`FlightOffer`-Segmente mit Fluggesellschaft/IATA-Codes/Zeiten, wie sie
+`FlightCard.tsx`/`HotelCard.tsx` für echte Suchergebnisse rendern) sicher
+abbilden lässt. Ergebnis: `offer_data` als kurze, menschenlesbare
+Zusammenfassung (`summary`-Feld) statt als vollständig nachgebildeter
+Such-API-Datensatz — das bleibt auf demselben, bereits akzeptierten
+Erfindungsgrad wie die einfachen Demo-Felder von `Favoriten.tsx`
+(Ziel/Land/Notiz) und `Preisalarme.tsx` (Route/Preis als String), statt
+in die Kategorie "erfundene Suchergebnis-Daten" zu fallen, die für 5.7
+(Zug/Bus/Fähre-Integration ohne echte Datenquelle) bereits mehrfach
+ausdrücklich verworfen wurde. Klar genug beschrieben, Ergebnis objektiv
+prüfbar über Typecheck/Lint/Tests/Build.
+
+Andere Punkte weiterhin aus denselben, in den Läufen vom 10./11./12.08.
+ausführlich dokumentierten Gründen verworfen: 4.1-4.3 (blocked on
+Base44/Gemini-Credentials), Backend-Entscheidung (Produktentscheidung),
+5.7 (keine Zug/Bus/Fähre-Datenquelle), 6.6-6.9/6.12 (fehlende Preisfelder
+im `TripDraft`-Datenmodell bzw. unvollständige 13-Punkte-Spezifikation),
+7.3/7.4 (Aktionen wie "Löschen" ohne echte Persistenz wären eine
+Fake-Funktion), 7.6/7.7 (fehlende Preis- bzw. Budget-/Loyalty-Daten),
+7.11/7.12 (fehlende Kalender-Bibliothek bzw. Preisfelder), 7.13 (keine
+echten Aktivitäten-Daten vorhanden — anders als bei SavedOffer gibt es
+hier nicht einmal ein einfaches, im PRD benanntes Kernfeld-Set), 7.15
+(unklare Abgrenzung zur Startseite), 8.x (Backend-/Produktentscheidungen
+oder unspezifiziert).
+
+**Umgesetzt:**
+- Neue Seite `src/pages/Angebote.tsx` — Karten-Grid analog zu
+  `Favoriten.tsx`/`Preisalarme.tsx`: Typ-Badge (Flug/Unterkunft mit
+  Plane-/Hotel-Icon), Ziel, kurze Zusammenfassung (`summary`, steht für
+  das unstrukturierte `offer_data`-Feld), Preis, Entfernen-Button (rein
+  lokaler State, keine echte Speicherung — folgt mit dem SavedOffer-Entity
+  nach der Backend-Entscheidung), ermutigender Leerzustand nach
+  `MARKENDESIGN.md`-Muster mit Link zum KI-Chat. Zwei Demo-Angebote
+  (Flug Berlin→Lissabon, Hotel in Kyoto) — bewusst dieselben Ziele wie in
+  `MeineReisen.tsx`/`Reiseentwuerfe.tsx` statt neue Ziele zu erfinden.
+- `src/routes.tsx` — Route `/angebote` registriert (aus der generierten
+  Platzhalter-Liste entfernt, Eintrag stand schon in `nav-config.ts`).
+- Neuer Test `src/pages/Angebote.test.tsx` (analog zu
+  `Preisalarme.test.tsx`): Rendering beider Demo-Angebote mit Typ-Badge,
+  Ziel, Zusammenfassung und Preis, sowie Entfernen bis zum Leerzustand.
+- `tasks/tasks-prd-travix-platform.md:210` — 7.8 auf `[x]` gesetzt, mit
+  Hinweis auf Demo-Daten-Muster und die bewusste `offer_data`-Auslegung.
+- `ZEITPLAN.md` — Sprint-3-Abschnitt um 7.8 ergänzt (analog zu 7.9/7.10);
+  die veraltete Sammel-Zeile "7.8 Angebote, 7.10 Preisalarme" (7.10 dort
+  fälschlich noch als offen gelistet, obwohl im zweiten Lauf heute bereits
+  erledigt) korrigiert; Ist-Stand-Zusammenfassung oben aktualisiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen TypeScript-
+  Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 19/19 Tests grün (17 vorher + 2 neue für
+  `Angebote.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
