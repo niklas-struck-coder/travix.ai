@@ -9,19 +9,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
 - Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Kartenansicht der Reiseziele (React-Leaflet), jetzt an echten Chat-Trip angebunden
+- Neue Seiten: Angebote, Favoriten, Preisalarme
+- Kartenansicht der Reiseziele (React-Leaflet), an echten Chat-Trip angebunden
 - KI-Concierge-Chat (Konversations-UI, Sprachfunktionen)
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-10):**
-- Kartenansicht zeigt jetzt echte Trip-Orte aus dem KI-Chat statt Demo-Daten
-- Reiseentwürfe-Karten mit Fortschrittsbalken ergänzt
-- Marketing: erste Content-Stücke für Woche 1 (Blog/Social) entworfen, Zielgruppe
-  final bestätigt
-- Support: UX-Analyse zur Kartenansicht durchgeführt
-- Autonome Arbeitsstände wurden geprüft und eigenständig nach main gemergt
+**Seit letztem Update (2026-08-11):**
+- IT: Angebote-, Favoriten- und Preisalarme-Seite gebaut, mehrere Checkbox-Korrekturen
+- Freigabe-Chef hat diese Arbeitsstände geprüft (Build/Lint/Tests grün) und gemergt
+- Marketing: neues Content-Stück zur Kartenansicht entworfen
+- Support: UX-Analyse zur neuen Angebote-Seite durchgeführt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-11_
+_Letztes Update: 2026-08-12_
