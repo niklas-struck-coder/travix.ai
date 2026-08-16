@@ -50,8 +50,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Kartenansicht (7.14) zeigt seit 11.08. den echten im KI-Chat geplanten
   Trip statt Demo-Koordinaten; Favoriten-Seite (7.9) seit 11.08. und
   Preisalarme-Seite (7.10) sowie Angebote-Seite (7.8) seit 12.08. mit
-  Demo-Daten und funktionierendem Entfernen-Button; Rest (7.3, 7.4, 7.6,
-  7.7, 7.11-7.13, 7.15) komplett offen
+  Demo-Daten und funktionierendem Entfernen-Button; 7.3 (Entwurfs-Aktionen
+  pausieren/duplizieren/abschließen/löschen) seit 16.08. ebenfalls fertig;
+  Rest (7.4, 7.6, 7.7, 7.11-7.13, 7.15) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -88,14 +89,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   reine Berechnungsfunktion, noch nicht in eine Seite eingebunden
 - [x] 7.2 `Reiseentwuerfe.tsx` (`/entwuerfe`) — Entwurfskarten mit
   Demo-Daten (analog `MeineReisen.tsx`), echtem Fortschrittsbalken über
-  `calculateProgress` (7.1); 7.3 (Pause/Duplizieren/Abschließen/Löschen)
-  und 7.4 (echte Wiederaufnahme mit Chat-Historie) bleiben eigene offene
-  Punkte, "Planung fortsetzen" verlinkt vorerst nur auf `/ki-chat`
+  `calculateProgress` (7.1); 7.4 (echte Wiederaufnahme mit Chat-Historie)
+  bleibt eigener offener Punkt, "Planung fortsetzen" verlinkt vorerst nur
+  auf `/ki-chat`
 - [x] 7.10 `Preisalarme.tsx` (`/preisalarme`) — Kartenliste mit
   Demo-Preisalarmen (analog `Favoriten.tsx`), Zielpreis-Badge und
   sachlicher Preisänderungs-Hinweis statt künstlicher Dringlichkeit,
   ermutigender Leer-Zustand nach `MARKENDESIGN.md`
-- [ ] 7.3 Entwurfs-Aktionen: pausieren, duplizieren, abschließen, löschen
+- [x] 7.3 Entwurfs-Aktionen: pausieren, duplizieren, abschließen, löschen —
+  vom autonomen IT-Chef-Lauf am 16.08. direkt in `Reiseentwuerfe.tsx`
+  ergänzt (lokaler Demo-State, gleiches Muster wie der Entfernen-Button
+  bei Favoriten/Preisalarme/Angebote). "Abschließen" setzt nur einen
+  lokalen Status ("Abgeschlossen"), verschiebt den Entwurf nicht nach
+  `MeineReisen.tsx` — dafür fehlt noch echte, geteilte Trip-Speicherung
+  (hängt an der offenen Backend-Entscheidung)
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen
 - [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)

@@ -1003,3 +1003,73 @@ oder unspezifiziert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-16
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (12.08., dort
+via Freigabe-Chef nach `main` gemergt) nicht mehr aktualisiert worden.
+Frischer `origin/main` (Stand 16.08., u.a. Marketing-/Support-Chef-Berichte)
+per Fast-Forward in `it-chef/auto` übernommen — kein Konflikt, `main`
+selbst nicht angerührt.
+
+**Ausgewählter Punkt:** Task 7.3 aus `tasks/tasks-prd-travix-platform.md`
+— "Implement draft actions: pause, duplicate, finalize, delete". Laut
+`ZEITPLAN.md` Sprint 3 offen, direkt anschließend an das bereits fertige
+7.2 (`Reiseentwuerfe.tsx`).
+
+**Warum sicher genug:** Reine UI-Interaktion auf bereits vorhandenen
+Demo-Entwürfen (lokaler Component-State), kein Bezug zu Auth, Zahlungen,
+echten Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — alle vier Aktionen (pausieren, duplizieren,
+abschließen, löschen) waren bereits explizit in der Aufgabenbeschreibung
+benannt, keine Interpretation über den Wortlaut hinaus. Ergebnis objektiv
+prüfbar über Typecheck/Lint/Tests plus neue gezielte Tests pro Aktion.
+
+**Umgesetzt:**
+- `src/pages/Reiseentwuerfe.tsx` — Demo-Entwürfe von einer festen Liste in
+  lokalen State (`useState`) überführt; vier Handler ergänzt:
+  - `togglePause` — wechselt zwischen `in_progress`/`paused`.
+  - `finalizeDraft` — setzt Status `finalized` ("Abgeschlossen"), blendet
+    danach Pause- und Abschließen-Button für diese Karte aus.
+  - `duplicateDraft` — fügt direkt nach dem Original eine Kopie mit neuer
+    `crypto.randomUUID()`-ID und Status `in_progress` ein.
+  - `deleteDraft` — entfernt die Karte; bei leerer Liste erscheint ein
+    ermutigender Leerzustand nach `MARKENDESIGN.md` (Muster wie bei
+    `Favoriten.tsx`), Button führt zu `/ki-chat`.
+  Icon-Buttons je Aktion (Pause/Play, Copy, CheckCircle2, Trash2 aus
+  `lucide-react`, bereits Dependency) neben dem bestehenden "Planung
+  fortsetzen"-Button, mit `aria-label`/`title` pro Karte.
+  **Bewusst nicht umgesetzt:** "Abschließen" verschiebt den Entwurf nicht
+  wirklich nach `MeineReisen.tsx` — dafür gibt es noch keine echte,
+  geteilte Trip-Speicherung (nur `tripStorage.ts` für den einen aktiven
+  Chat-Trip); das wäre Persistenz-Arbeit, die an der offenen
+  Backend-Entscheidung hängt und über die Aufgabenbeschreibung
+  hinausgegangen wäre. Stattdessen bleibt es bei einem sichtbaren
+  Status-Wechsel auf derselben Seite.
+- `src/pages/Reiseentwuerfe.test.tsx` — vier neue Tests: Pause/Fortsetzen-
+  Toggle, Abschließen (inkl. verschwindender Buttons), Duplizieren,
+  Löschen bis zum Leerzustand.
+- `tasks/tasks-prd-travix-platform.md:205` — 7.3 auf `[x]` gesetzt, mit
+  Hinweis auf das lokale Muster und die bewusst ausgelassene
+  Cross-Page-Persistenz.
+- `ZEITPLAN.md` — Sprint-3-Eintrag 7.3 auf erledigt gesetzt, 7.2-Notiz
+  bereinigt (verwies noch auf offenes 7.3), Ist-Stand-Zusammenfassung oben
+  aktualisiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout); dabei
+  entstandene, inhaltlich irrelevante `package-lock.json`-Diffs (nur
+  `libc`-Metadaten-Normalisierung durch abweichende npm-Version) wieder
+  verworfen, bevor committet wurde.
+- `npx tsc -b` → grün, keine neuen TypeScript-Fehler.
+- `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npx vitest run` → 23/23 Tests grün (19 vorher + 4 neue in
+  `Reiseentwuerfe.test.tsx`, je einer pro Aktion).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Fehler
+  (vorbestehende Chunk-Size-Warnung unverändert, nicht durch diesen
+  Change verursacht).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
