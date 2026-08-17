@@ -316,3 +316,44 @@ UX-Analyse zur Angebote-Seite `/angebote`, kein Code):
 - Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
 
 **Ergebnis:** Passt → nach `main` gemergt (Merge-Commit, gepusht).
+
+## 2026-08-17, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 4 Commits vor `main` (Task 7.3 Entwurfs-Aktionen,
+  6.12 `EditMode.tsx`, 7.5 Checkbox-Korrektur `MeineReisen.tsx` + Test,
+  7.13 `Aktivitaeten.tsx`).
+- `marketing-chef/auto` — 0 Commits vor `main`, noch nichts Neues von
+  heute. Ignoriert wie vorgesehen (läuft erst um 6 Uhr, separater
+  Freigabe-Chef-Lauf später).
+- `support-chef/auto` — 0 Commits vor `main`, noch nichts Neues von
+  heute. Ignoriert wie vorgesehen.
+
+**Unabhängige Prüfung `it-chef/auto`** (eigenen Branch `origin/it-chef/auto`
+ausgecheckt, frisch `npm install`, danach selbst ausgeführt statt nur
+dem Log zu glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur die 3 bekannten vorbestehenden Warnings
+  in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht
+  durch diesen Branch verursacht).
+- `npx vitest run` → 35/35 Tests grün (12 Testdateien, inkl. neuer
+  `EditMode.test.tsx`, `Aktivitaeten.test.tsx`, `Buchung.test.tsx`,
+  `MeineReisen.test.tsx`).
+
+**Scope-Check:** Diff (`ZEITPLAN.md`, `it-chef-auto-log.md`,
+`EditMode.{tsx,test.tsx}`, `Aktivitaeten.{tsx,test.tsx}`,
+`Buchung.{tsx,test.tsx}`, `MeineReisen.test.tsx`,
+`Reiseentwuerfe.{tsx,test.tsx}`, `routes.tsx`,
+`tasks-prd-travix-platform.md`) deckt sich exakt mit den vier im
+`it-chef-auto-log.md` beschriebenen Punkten — kein Scope-Creep. Grep auf
+Auth/Login/Token/Payment/Zahlung/Kreditkarte/AGB/Datenschutz im Diff
+ergab keinen Treffer. UI-Elemente (Farben navy/teal, Leerzustand-Muster,
+Icon-Buttons) fügen sich in bestehende Komponenten und in `MARKENDESIGN.md`
+ein. `TripDraft`-Persistenz bei 6.12 über bestehendes `updateStoredTrip()`
+gelöst, keine neue Architekturentscheidung. `ZEITPLAN.md`/Task-Checkboxen
+korrekt aktualisiert, Begründungen für zurückgestellte Punkte (4.1-4.3,
+6.6-6.9, 5.7, 6.2/6.1 Teilgruppe usw.) nachvollziehbar und konsistent mit
+früheren Läufen.
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `5c46d98..33f5153`, gepusht).
