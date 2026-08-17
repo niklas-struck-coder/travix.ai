@@ -1,13 +1,32 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-16
+**Datum:** 2026-08-17
 
-## Was ist seit dem letzten Eintrag (2026-08-12) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-16) passiert?
 
-Im Code hat sich nichts getan — laut Git-Log ist `main` seit dem 2026-08-12
-unverändert (nur die Berichte von Support-, Marketing- und IT-Chef sowie ein
-allgemeines Status-Update kamen seitdem dazu). Die vier offenen PRs aus den
-letzten Läufen warten weiterhin auf Nis Review:
+Seit dem letzten Bericht ist neuer Code auf `main` gelandet (über das
+`it-chef/auto`-Feature-Programm, per Freigabe-Chef gemergt): Entwurfs-Aktionen
+auf Reiseentwürfe (pausieren/fortsetzen/duplizieren/abschließen/löschen),
+manuelles Hinzufügen/Entfernen/Preisanpassen von Aktivitäten über einen neuen
+`EditMode`-Dialog, eine neue Seite "Aktivitäten" mit aggregierter Ansicht über
+alle Reisen sowie eine kleine Checkbox-Korrektur auf "Meine Reisen". Alle
+neuen/eigenen Dateien sind mit Tests abgedeckt.
+
+Diesen Lauf habe ich gezielt auf den seit gestern neu hinzugekommenen bzw.
+geänderten Code konzentriert (`EditMode.tsx`, `Aktivitaeten.tsx`,
+`Buchung.tsx`, `Reiseentwuerfe.tsx`, `routes.tsx`) und Datei für Datei
+gelesen statt nur zu grep'en: Routing/Nav-Konfiguration für die neue
+Aktivitäten-Seite ist konsistent verdrahtet, Preis-Handling in `EditMode`
+passt zum `TripActivity`-Typ, `duplicateDraft`/`togglePause`/`finalizeDraft`
+in `Reiseentwuerfe.tsx` haben keine Off-by-one- oder Zustandsfehler. Auch
+kontrolliert: die zwei zuvor gemeldeten Muster (unbehandelte Promise-Rejects
+bei der Flug-/Unterkunftssuche in `useChat.ts`) sind inzwischen bereits im
+Code selbst mit `.catch()` abgesichert — nur die vier `localStorage`-Schreib-
+zugriffe in `useChat.ts`/`tripStorage.ts` sind weiterhin ungeschützt, das
+deckt aber exakt PR #6 (siehe unten) bereits ab.
+
+Die vier PRs aus früheren Läufen sind weiterhin unverändert offen und warten
+auf Nis Review:
 [PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
 (hängender Ladezustand bei Unterkunftssuche),
 [PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
@@ -15,13 +34,7 @@ letzten Läufen warten weiterhin auf Nis Review:
 [PR #5](https://github.com/niklas-struck-coder/travix.ai/pull/5)
 ("Überrasch mich" als Reiseziel) und
 [PR #6](https://github.com/niklas-struck-coder/travix.ai/pull/6)
-(ungeschützte `localStorage`-Schreibzugriffe im Chat). Da kein neuer Code
-dazukam, habe ich diesen Lauf genutzt, um Bereiche gezielt zu durchsuchen,
-die in den letzten Berichten noch nicht im Detail geprüft wurden: die drei
-neuen Seiten Angebote/Favoriten/Preisalarme, Flug-/Hotel-Suchformulare,
-Reiseplan, Kartenansicht, Chat-Eingabe, Reiseentwürfe/Meine Reisen,
-Navigation (Sidebar/MobileNav) und den Urlaubsmodus-Concierge. Dabei kein
-neuer, sicher genug für einen Auto-Fix eingeschätzter Bug gefunden.
+(ungeschützte `localStorage`-Schreibzugriffe im Chat).
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -32,17 +45,20 @@ genug für einen automatischen Fix war. Die vier PRs aus früheren Läufen
 ## Gefundene Bugs (nicht automatisch gefixt)
 
 Keine neuen. Aus früheren Läufen weiterhin offen und unverändert im Code
-(die Fixes für die ersten beiden liegen bereits auf PR #6 bzw. sind unten
-gelistet):
+(die ersten beiden liegen bereits als Fix auf PR #1 bzw. #6):
 
 - **Automatische Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar
   hängen.** `useChat.ts` (`startEdit`- und `sendMessage`-Zweig für
-  Unterkunft) startet die Suche nur bei einem der 8 kuratierten Ziele —
-  bei jedem anderen Ziel sagt die KI "ich suche jetzt …", aber es passiert
+  Unterkunft) startet die Suche nur bei einem der kuratierten Ziele — bei
+  jedem anderen Ziel sagt die KI "ich suche jetzt …", aber es passiert
   nichts, ohne Hinweis. Der parallele Flug-Zweig hat bereits eine
   Hinweismeldung für diesen Fall, der Unterkunfts-Zweig nicht. Kein
   Auto-Fix, weil unklar ist, welcher Text/welche Weiterleitung gewünscht
   ist — UX-Entscheidung.
+- **Ungeschützte `localStorage`-Schreibzugriffe.** `useChat.ts` (Persistenz-
+  Effect, `beforeunload`-Handler, `resetChat`) und `tripStorage.ts`
+  (`updateStoredTrip`) schreiben weiterhin ohne try/catch — der Fix dafür
+  liegt bereits fertig auf PR #6, wartet nur noch auf Merge.
 - **Rohe, englische Duffel-Fehlermeldungen im UI.** `src/lib/duffel/client.ts`
   reicht `json?.errors` unverändert durch. Braucht eine Übersetzungstabelle
   für die häufigsten Fehlercodes, keine Ein-Zeilen-Korrektur.
@@ -65,11 +81,12 @@ gelistet):
 1. **Offene Auto-Fix-PRs mergen.** Vier PRs (#1, #4, #5, #6) liegen bereit
    und ungefährlich auf GitHub, warten aber schon seit Tagen auf Review —
    das ist der größte Hebel gerade, noch vor neuem Code.
-2. **Zug/Bus/Fähre-Komponenten anbinden.** `TrainCard.tsx`/`TrainResults.tsx`
-   sind fertig gebaut, aber weiterhin in keinem Nutzerpfad erreichbar
-   (fehlende echte Datenquelle).
-3. **Testabdeckung ausbauen.** `useChat.ts` und `mockAdvisor.ts` — die
-   zentrale Chat-Logik — haben trotz wachsender Komplexität weiterhin
-   keine Tests.
+2. **Aktivitäten-Seite an echte Reisedaten anbinden.** Die neue Seite
+   `Aktivitaeten.tsx` zeigt bewusst nur hartcodierte Demo-Aktivitäten (wie
+   Angebote/Preisalarme) — sobald es eine echte Mehrfach-Reisen-Ablage
+   gibt, sollte sie die tatsächlich geplanten Aktivitäten aggregieren.
+3. **Testabdeckung für `useChat.ts`/`mockAdvisor.ts` ausbauen.** Die
+   zentrale Chat-Logik hat trotz wachsender Komplexität weiterhin keine
+   Tests.
 
-_Letztes Update: 2026-08-16_
+_Letztes Update: 2026-08-17_
