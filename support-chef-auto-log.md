@@ -220,3 +220,76 @@ in einem früheren Durchlauf nicht enthalten, aber selbst kein heute neu
 gebauter Bereich (gebaut am 12.08., aber vor `Angebote.tsx`, siehe
 Commit-Zeitstempel `db7fb94` vs. `de79e51`). Eine eigene Prüfung von
 `Preisalarme.tsx` steht für einen künftigen Lauf noch aus.
+
+---
+
+## 2026-08-17 — Aktivitäten (`/aktivitaeten`)
+
+**Geprüfter Bereich:** Die neue Aktivitäten-Seite, laut `ZEITPLAN.md`
+heute Nacht (Aufgabe 7.13) vom autonomen IT-Chef-Lauf gebaut und bereits
+nach `main` gemergt (Commit `33f5153`, gemerged in `35b2cdc`):
+
+- `src/pages/Aktivitaeten.tsx`
+- `src/pages/Aktivitaeten.test.tsx`
+- `src/routes.tsx` (Route `/aktivitaeten`), `src/lib/nav-config.ts` (Navigation)
+
+Zum Vergleich herangezogen: `src/pages/Favoriten.tsx` (etabliertes
+Karten-Grid-Muster mit Handlungs-Button pro Karte) sowie
+`src/components/trip/EditMode.tsx` (die andere, am selben Tag gebaute
+Aktivitäten-Funktion, Aufgabe 6.12).
+
+### Reibungspunkte
+
+**1. Aktivitäten hier sind komplett getrennt von den echten, im
+Buchungs-Editiermodus verwalteten Aktivitäten**
+`src/pages/Aktivitaeten.tsx:19-24` hält seine eigene, fest im Code
+stehende `initialActivities`-Liste (vier Demo-Einträge). Am selben Tag
+wurde aber `src/components/trip/EditMode.tsx` gebaut (Aufgabe 6.12), mit
+dem Nutzer:innen in `Buchung.tsx` echte Aktivitäten zu ihrer laufenden
+Reise hinzufügen, entfernen und im Preis anpassen können — gespeichert
+über `updateStoredTrip()` im tatsächlichen Trip (`TripActivity[]`, siehe
+`src/types/chat.ts:12-16`). Beide Datenquellen berühren sich nirgends:
+Wer in der Buchung eine Aktivität hinzufügt, sieht sie auf
+`/aktivitaeten` nicht auftauchen; wer auf `/aktivitaeten` eine
+Demo-Aktivität entfernt, ändert nichts an der echten Reise. Für eine
+Seite, die sich laut Navigation (`src/lib/nav-config.ts:84`) als "Alle
+geplanten Aktivitäten" präsentiert, ist das ein Widerspruch zwischen
+Versprechen und Inhalt, der bei echten Nutzerdaten sofort auffallen
+würde.
+
+*Vorschlag:* Sobald `/aktivitaeten` an echte Trip-Daten angebunden wird,
+dieselbe `TripActivity[]`-Quelle verwenden wie `EditMode.tsx`
+(aggregiert über alle im `tripStorage` gespeicherten Trips), statt einer
+eigenen, unabhängigen Demo-Liste.
+
+**2. Keine Handlungsmöglichkeit pro Karte — nur Entfernen**
+`src/pages/Aktivitaeten.tsx:70-83`: Jede Karte zeigt Ziel-Badge, Name und
+optionalen Preis, aber die einzige Interaktion ist der Entfernen-Button
+(`X`, Zeile 76-84). Anders als bei `Favoriten.tsx:96-101`, wo jede Karte
+einen "Reise mit KI planen"-Button (`Link to="/ki-chat"`) hat, gibt es
+hier keinen Weg, von einer Aktivität aus zur zugehörigen Reise oder zum
+Weiterplanen zu kommen — dasselbe Muster, das bereits am 12.08. bei
+`Angebote.tsx` aufgefallen ist und sich hier wiederholt.
+
+*Vorschlag:* Analog zu `Favoriten.tsx` einen Button/Link pro Karte
+ergänzen (z. B. zur zugehörigen Reise oder zu `/ki-chat`), solange es
+noch keine eigene Detailseite pro Aktivität gibt.
+
+**3. Ziel-Badge ist reiner Text ohne Verknüpfung zur Reise**
+`src/pages/Aktivitaeten.tsx:73`: Der `Badge` mit dem Reiseziel (z. B.
+"Lissabon") ist nicht klickbar — anders als der Rest der Karte keine
+Möglichkeit, von der Aktivität aus zur zugehörigen Reise zu
+springen. Bei aktuell zwei Zielen fällt das kaum auf, aber sobald echte
+Nutzer:innen Aktivitäten über mehrere Reisen hinweg sammeln, fehlt der
+naheliegendste Filter- bzw. Navigationspfad ("zeig mir die ganze
+Lissabon-Reise").
+
+*Vorschlag:* Badge als Link auf die zugehörige Reise (z. B.
+`/meine-reisen` oder künftig eine Detailseite pro Reise) umsetzen,
+sobald Aktivitäten wirklich einer Reise zugeordnet sind (siehe Punkt 1).
+
+### Nicht geprüft
+`EditMode.tsx` selbst (Aufgabe 6.12) wurde nur zum Vergleich
+herangezogen, nicht eigenständig als UX-Fläche geprüft — das steht für
+einen künftigen Lauf noch aus, ebenso wie die am selben Tag gebauten
+Entwurfs-Aktionen (7.3, `Reiseentwuerfe.tsx`).
