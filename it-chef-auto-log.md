@@ -1434,3 +1434,105 @@ Lint/Tests plus eigene Unit-Tests für die neue reine Kalenderlogik.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-17 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) enthielt bereits Commit
+`51eab69` (7.11 Kalender, dritter Lauf) über `main` hinaus — keine
+Merge-Konflikte, `main`..`it-chef/auto` divergierte nicht, daher direkt
+auf dem Branch weitergearbeitet statt neu von `main` anzulegen (Regel 1).
+
+**Ausgewählter Punkt:** Task **7.6** aus `tasks/tasks-prd-travix-platform.md`
+— "Build Warenkorb page (`/warenkorb`) with grouped cart items and
+real-time totals" (FR-1001/FR-1002 im PRD). Vor der Wahl geprüft und
+verworfen:
+- 4.1-4.3 (KI-Wrapper) — weiterhin explizit auf Base44/Gemini-Credentials
+  blockiert.
+- 6.6/6.7/7.12 (Kostenübersicht/Budget) — `TripDraft` hat weiterhin keine
+  Preisfelder für Transport/Unterkunft.
+- 6.8/6.9 (Checkliste) — gleicher Grund wie im dritten Lauf dokumentiert:
+  FR-501 nennt nur 10 konkrete Kategorien plus den vagen Sammelbegriff
+  "additional planning items" für 13 Punkte, und für die meisten
+  benannten Kategorien fehlt in `TripDraft` jedes Datenfeld für die von
+  FR-502 geforderte Auto-Erkennung. Weiterhin offen.
+- 7.7 (Dashboard) — FR-903 nennt "Loyalty Points", ein Feature, das
+  nirgends im Code existiert (Premium/Rewards sind eigene, noch offene
+  Punkte 8.9/8.12); ohne erfundene Annahme über Loyalty-Daten nicht
+  sauber umsetzbar.
+- 7.15 (ReiseSuche) — FR-902 beschreibt nur "trip planning search page"
+  ohne Felder/Verhalten, zu vage ohne Annahmen zu füllen.
+- 7.6 selbst wurde im dritten Lauf kurz als "bräuchte ein Datenmodell,
+  das es noch nicht gibt" verworfen — bei genauerer Prüfung trifft das
+  nicht zu: FR-1001/1002 sind genauso konkret spezifiziert wie bei
+  `Angebote.tsx`/`Preisalarme.tsx`/`Aktivitaeten.tsx` (Cart-Entity nicht
+  vorhanden, aber genau wie SavedOffer/PriceAlert/Favorite bei jenen
+  Seiten über denselben Demo-State-Platzhalter lösbar, kein neues
+  Datenmodell in `TripDraft` selbst nötig). `MARKENDESIGN.md` nennt
+  "Warenkorb/Preisalarme" sogar explizit als bereits vorgesehene Seite
+  mit eigener Preis-Tonalitätsvorgabe. Damit heute doch umgesetzt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, echten Zahlungen (NG-01
+schließt In-App-Bezahlung ohnehin aus), echten Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig.
+Klar genug beschrieben durch FR-1001/1002 (Positionstypen, Gruppierung,
+Echtzeit-Summen) plus vorhandenen `nav-config.ts`-Eintrag. Ergebnis
+objektiv prüfbar über Typecheck/Lint/Tests plus neue Unit-Tests für die
+Summenlogik.
+
+**Umgesetzt:**
+- Neue reine Hilfsfunktionen `src/lib/trip/cartTotals.ts`:
+  `groupCartItems` (gruppiert Positionen nach Typ in fester Reihenfolge
+  Flug/Unterkunft/Transport/Aktivität/Versicherung, lässt leere Gruppen
+  weg, berechnet je Gruppe eine Zwischensumme) und `calculateCartTotal`
+  (Summe über beliebige Positionsliste) — reine Funktionen ohne
+  UI-Abhängigkeit, analog zu `calculateProgress.ts`/`calendarUtils.ts`.
+- Neuer Test `src/lib/trip/cartTotals.test.ts` (7 Fälle: leerer
+  Warenkorb, Summenbildung, Gruppierung inkl. Reihenfolge, Auslassen
+  leerer Gruppen, mehrere Positionen desselben Typs in einer Gruppe).
+- Neue Seite `src/pages/Warenkorb.tsx` — Positionen nach Typ gruppiert
+  mit Icon/Label/Zwischensumme pro Gruppe, Entfernen-Button pro Position
+  (gleiches Muster wie Angebote/Preisalarme/Aktivitäten), Gesamtsumme in
+  einer hervorgehobenen Karte am Ende, die bei jedem Entfernen sofort neu
+  berechnet wird (Echtzeit-Summen laut FR-1001 über normalen React-State,
+  keine künstliche Verzögerung). Fünf Demo-Positionen über die zwei
+  Demo-Reisen aus `MeineReisen.tsx` (Lissabon, Kyoto) verteilt (Flug,
+  Unterkunft, Bahnticket, Aktivität, Reiseversicherung). Sachliche
+  Preisdarstellung ohne künstliche Dringlichkeit gemäß
+  `MARKENDESIGN.md`-Vorgabe für Warenkorb/Preisalarme, ermutigender
+  Leer-Zustand nach demselben Muster. Bewusst kein Buchungs-/
+  Bezahl-Button — das wäre Task 6.2 ("Beim Anbieter buchen"), ein eigener
+  offener Punkt, und laut PRD NG-01 ohnehin außerhalb des Scopes (keine
+  In-App-Buchung). Rein lokaler Demo-State, noch keine echte
+  Warenkorb-Speicherung (Cart-Entity hängt an der offenen
+  Backend-Entscheidung, gleiche Grenze wie bei allen anderen
+  Demo-Daten-Seiten).
+- `src/routes.tsx` — Import + Route `/warenkorb` ergänzt, zu
+  `builtRoutes` hinzugefügt (Route existierte vorher nur als generischer
+  Placeholder über `nav-config.ts`, Sidebar-Eintrag war schon vorhanden).
+- `tasks/tasks-prd-travix-platform.md:208` — 7.6 auf `[x]` gesetzt.
+- `ZEITPLAN.md` — 7.6 in Sprint 3 aus der offenen Sammelzeile in einen
+  eigenen erledigten Eintrag verschoben, Ist-Stand-Zusammenfassung für
+  Phase 7 aktualisiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlte); dabei entstandene, inhaltlich irrelevante
+  `package-lock.json`-Diffs (nur `libc`-Metadaten-Normalisierung durch
+  abweichende npm-Version, wie in früheren Läufen) wieder verworfen,
+  bevor committet wurde.
+- `npm run build` (`tsc -b && vite build`) → grün, keine TypeScript-Fehler,
+  Build erfolgreich.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 49/49 Tests grün (42 vorher + 7 neue in
+  `cartTotals.test.ts`).
+- `npx vite preview` lokal gestartet, `/warenkorb` liefert HTTP 200. Kein
+  Playwright im Projekt vorhanden — wie im dritten Lauf auf einen echten
+  Browser-Screenshot verzichtet, statt eine neue Test-Abhängigkeit nur
+  dafür einzuführen; Absicherung stattdessen über Typecheck/Build/Lint/
+  Unit-Tests und Code-Review gegen die bestehenden Muster (`Angebote.tsx`,
+  `Preisalarme.tsx`, `Aktivitaeten.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

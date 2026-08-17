@@ -55,7 +55,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   pausieren/duplizieren/abschließen/löschen) seit 16.08. ebenfalls fertig;
   Aktivitäten-Seite (7.13) seit 17.08. ebenfalls mit Demo-Daten und
   Entfernen-Button fertig; Kalender-Seite (7.11) seit 17.08. ebenfalls mit
-  Demo-Daten fertig; Rest (7.4, 7.6, 7.7, 7.12, 7.15) komplett offen
+  Demo-Daten fertig; Warenkorb-Seite (7.6) seit 17.08. ebenfalls mit
+  Demo-Daten und gruppierten Positionen fertig; Rest (7.4, 7.7, 7.12, 7.15)
+  komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -116,7 +118,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (hängt an der offenen Backend-Entscheidung)
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen
-- [ ] 7.6 Warenkorb — echte Funktionalität (bisher nur Platzhalter-Route)
+- [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
+  17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
+  Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
+  eine Zwischensumme, unten eine Gesamtsumme; beides über reine
+  Hilfsfunktionen in `src/lib/trip/cartTotals.ts` berechnet (mit
+  Unit-Tests), sodass Entfernen einer Position Zwischen- und Gesamtsumme
+  sofort neu berechnet ("real-time totals" laut FR-1001). Demo-Positionen
+  über die zwei Demo-Reisen aus `MeineReisen.tsx` (Lissabon, Kyoto) verteilt,
+  gleiches Muster wie bei Angebote/Preisalarme/Aktivitäten. Sachliche
+  Preisdarstellung ohne künstliche Dringlichkeit gemäß der
+  `MARKENDESIGN.md`-Vorgabe für Warenkorb/Preisalarme. Kein
+  Buchungs-/Bezahl-Button (das wäre 6.2 "Beim Anbieter buchen", eigener
+  offener Punkt, und ohnehin außerhalb des Scopes laut PRD NG-01). Rein
+  lokaler Demo-State, noch keine echte Warenkorb-Speicherung (Cart-Entity
+  hängt an der offenen Backend-Entscheidung)
 - [ ] 7.7 Dashboard
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
