@@ -1173,3 +1173,104 @@ prüfbar über Typecheck/Lint/Tests plus neue gezielte Tests pro Aktion.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-17 (zweiter Lauf)
+
+**Vorbereitung:** `it-chef/auto` (Remote) war bereits auf dem Stand des
+ersten Laufs von heute (6.12 `EditMode.tsx`, `42f5f41`) — dieser Lauf
+startete offenbar als zweite Auslösung desselben Tages. `main` hatte
+seitdem keine neuen Commits (weiterhin `5c46d98`) — nichts zu mergen,
+`main` wurde nicht angerührt, auf dem bestehenden `it-chef/auto`-Stand
+weitergearbeitet.
+
+**Eigene Prüfung der Aufgabenliste:** Alle noch offenen Punkte in
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` unabhängig
+durchgesehen. Für die ausführlich dokumentierten Kernblocker hat sich
+seit dem letzten Lauf nichts geändert: 4.1-4.3 (blocked on Base44/Gemini-
+Credentials), Backend-Entscheidung (Produktentscheidung), 5.7 (weiterhin
+keine echte oder simulierte Zug/Bus/Fähre-Datenquelle im Code), 6.6-6.9
+(weiterhin keine Preisfelder für Transport/Unterkunft in `TripDraft`,
+13-Punkte-Checkliste weiterhin nur mit 10 Punkten spezifiziert), 6.10
+(hängt an der noch fehlenden Checkliste 6.8/6.9), 7.4/7.6/7.7/7.11-7.13/
+7.15 sowie 8.x aus den in den Läufen vom 10./11./12.08. ausführlich
+dokumentierten Gründen (fehlende Persistenz/Preisdaten/Bibliothek bzw.
+Produkt-/Architekturentscheidungen).
+
+Gezielt zwei zusätzliche Kandidaten neu geprüft, die in früheren Läufen
+nicht abschließend entschieden wurden:
+- **5.10** (Duffel-API-Backend-Stub, "ready for Builder+ deployment"):
+  `vite-plugins/duffel-proxy.ts` existiert und funktioniert, ist aber ein
+  reines Dev-/Preview-Server-Middleware (`configureServer`/
+  `configurePreviewServer`) — kein deploybarer Serverless-Function-Stub
+  für eine echte Produktionsumgebung. `ZEITPLAN.md` selbst nennt das
+  ehrlich "anders gelöst über Vite-Proxy statt Base44", nicht "erledigt".
+  Die Aufgabe als erfüllt abzuhaken wäre daher ungenau — verworfen, keine
+  Checkbox-Änderung.
+- **6.1-6.5/6.11/6.13** (TripSection/TripItem/EmptySection/TripPlanPage/
+  click-to-edit/"Mit Travix weiterplanen"/BuchungsSeite): `Buchung.tsx`
+  gelesen und gegen jeden Einzelpunkt geprüft. 6.4 (Seite komplett
+  zusammengesetzt), 6.11 ("Mit Travix weiterplanen"-Button) und 6.5
+  (Bearbeiten-Stift öffnet KI-Chat mit Kontext per Query-Param) passen.
+  Aber **6.2** ("TripItem.tsx mit 'Beim Anbieter buchen'-Button, öffnet
+  Provider-URL") ist tatsächlich nicht umgesetzt — `Buchung.tsx` hat keine
+  Buchungs-Links zu externen Anbietern, weil `TripDraft` keine
+  Provider-URL speichert (dieselbe Datenmodell-Lücke wie bei den
+  Preisfeldern). 6.1 (Wrapper explizit für "Flights, Trains, Hotels, Car
+  Rentals" als getrennte Sektionen) trifft ebenfalls nicht exakt zu — die
+  echte Seite hat eine zusammengefasste "Transport"-Sektion für
+  Flug/Zug/Bus/Fähre/Auto statt vier getrennter Sektionen. Weil einzelne
+  Punkte in dieser Gruppe klar nicht erfüllt sind, wäre ein pauschales
+  Abhaken der ganzen Gruppe (wie es der zweite Lauf vom 11.08. schon
+  einmal erwogen, aber bewusst nicht gemacht hatte) ungenau — verworfen,
+  keine Checkbox-Änderung an dieser Gruppe.
+
+**Ausgewählter Punkt:** Keine neue Code-Funktionalität, aber eine
+bisher übersehene Checkbox-Diskrepanz gefunden und behoben — dieselbe Art
+von Lücke, die der Lauf vom 12.08. für 5.1-5.3/5.6/5.8/5.9 bereits
+geschlossen hatte: Task **7.5** ("Build MeineReisen page (`/meine-reisen`)
+for booked/confirmed trips") stand noch auf `[ ]`, obwohl
+`src/pages/MeineReisen.tsx` bereits vollständig existiert und in
+`routes.tsx`/`nav-config.ts` eingebunden ist — `ZEITPLAN.md` selbst listet
+"Meine-Reisen mit Demo-Daten (7.5)" bereits in der Ist-Stand-
+Zusammenfassung als fertig.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung — reine Verifikation von bereits existierendem
+Code gegen den bereits existierenden Aufgabentext, keine neue
+Interpretation nötig: `MeineReisen.tsx` zeigt zwei Demo-Reisen
+(Lissabon/bevorstehend, Kyoto/abgeschlossen) mit Ziel, Datum und
+Status-Badge — deckt sich 1:1 mit "booked/confirmed trips". Ergebnis
+objektiv prüfbar; anders als beim 12.08.-Vorbild (dort nur
+Dokumentationskorrektur ohne neuen Test) wurde hier zusätzlich der bisher
+fehlende Test ergänzt, damit die Korrektur nicht nur auf manueller
+Code-Lektüre beruht.
+
+**Umgesetzt:**
+- Neuer Test `src/pages/MeineReisen.test.tsx` (2 Fälle: beide Demo-Reisen
+  mit Ziel/Datum/Status-Badge werden gerendert; "Urlaubsmodus
+  aktivieren"-Link erscheint nur bei der bevorstehenden, nicht bei der
+  abgeschlossenen Reise) — analog zu `Favoriten.test.tsx`.
+- `tasks/tasks-prd-travix-platform.md:207` — 7.5 auf `[x]` gesetzt, mit
+  Hinweis, dass es sich um eine reine Checkbox-Korrektur (plus Test)
+  ohne Code-Änderung an `MeineReisen.tsx` selbst handelt.
+- `ZEITPLAN.md` unverändert gelassen — die Ist-Stand-Zusammenfassung
+  nannte 7.5 bereits korrekt als fertig, keine Korrektur nötig.
+
+**Geprüft:**
+- `npm install` → sauber, 170 Pakete (frischer Checkout); dabei
+  entstandene, inhaltlich irrelevante `package-lock.json`-Diffs (nur
+  `libc`-Metadaten-Normalisierung durch abweichende npm-Version, wie in
+  früheren Läufen) wieder verworfen, bevor committet wurde.
+- `npx tsc -b` → grün, keine neuen TypeScript-Fehler.
+- `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npx vitest run` → 33/33 Tests grün (31 vorher + 2 neue in
+  `MeineReisen.test.tsx`).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Fehler
+  (vorbestehende Chunk-Size-Warnung unverändert, nicht durch diesen
+  Change verursacht).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
