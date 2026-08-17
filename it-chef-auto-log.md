@@ -1274,3 +1274,62 @@ Code-Lektüre beruht.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-17
+
+**Ausgewählter Punkt:** Task **7.13** aus `tasks/tasks-prd-travix-platform.md`
+— "Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities
+across all trips". Nächster offener, eindeutig umsetzbarer Punkt laut
+`ZEITPLAN.md`; 4.1-4.3 (KI-Wrapper) sind explizit auf Base44/Gemini-
+Credentials blockiert, 6.6/6.7/7.12 (Kostenübersicht/Budget) sind
+faktisch blockiert, weil `TripDraft` (`src/types/chat.ts`) noch keine
+Preisfelder für Transport/Unterkunft hat (nur `TripActivity.price`
+existiert) — das wurde im Code geprüft, nicht nur vermutet.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig. Klar beschrieben und durch drei
+existierende Vorbilder (`Angebote.tsx`, `Favoriten.tsx`,
+`Preisalarme.tsx`) eindeutig vorgegebenes Muster — keine Interpretation
+über den Aufgabentext hinaus nötig. Ergebnis objektiv prüfbar
+(Typecheck/Lint/Tests).
+
+**Umgesetzt:**
+- Neue Seite `src/pages/Aktivitaeten.tsx` — Kartenliste mit über die
+  zwei Demo-Reisen aus `MeineReisen.tsx` (Lissabon, Kyoto) aggregierten
+  Demo-Aktivitäten (`initialActivities`), Ziel-Badge pro Karte,
+  optionalem Preis (analog `TripActivity.price`, das ebenfalls `null`
+  erlaubt), funktionierendem Entfernen-Button und ermutigendem
+  Leer-Zustand nach `MARKENDESIGN.md` — gleiches Muster wie
+  `Angebote.tsx`/`Preisalarme.tsx`.
+- Neuer Test `src/pages/Aktivitaeten.test.tsx` (2 Fälle: Karten mit
+  Ziel-Badge/Name/Preis werden gerendert; Entfernen-Button funktioniert,
+  Leer-Zustand erscheint nach Entfernen aller Aktivitäten) — analog zu
+  `Angebote.test.tsx`.
+- `src/routes.tsx` — Import + Route `/aktivitaeten` ergänzt, zu
+  `builtRoutes` hinzugefügt (Route existierte vorher nur als generischer
+  Placeholder über `nav-config.ts`).
+- `tasks/tasks-prd-travix-platform.md:215` — 7.13 auf `[x]` gesetzt.
+- `ZEITPLAN.md` — 7.13 in Sprint 3 von offen auf erledigt verschoben
+  (eigener Eintrag statt der bisherigen Sammelzeile mit 7.15), Ist-Stand-
+  Zusammenfassung für Phase 7 aktualisiert, Hinweis bei 7.11/7.12 ergänzt,
+  dass beide vermutlich an derselben fehlenden `TripDraft`-Preisfeld-Lücke
+  hängen wie 6.6/6.7 (nicht als erledigt/blockiert-Status geändert, nur
+  als Beobachtung vermerkt, damit ein künftiger Lauf nicht erneut
+  denselben Weg prüfen muss).
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlte); dabei entstandene, inhaltlich irrelevante
+  `package-lock.json`-Diffs (nur `libc`-Metadaten-Normalisierung durch
+  abweichende npm-Version, wie in früheren Läufen) wieder verworfen,
+  bevor committet wurde.
+- `npx tsc -b` → grün, keine TypeScript-Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 35/35 Tests grün (33 vorher + 2 neue in
+  `Aktivitaeten.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

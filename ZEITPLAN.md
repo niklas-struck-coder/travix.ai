@@ -53,7 +53,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Preisalarme-Seite (7.10) sowie Angebote-Seite (7.8) seit 12.08. mit
   Demo-Daten und funktionierendem Entfernen-Button; 7.3 (Entwurfs-Aktionen
   pausieren/duplizieren/abschließen/löschen) seit 16.08. ebenfalls fertig;
-  Rest (7.4, 7.6, 7.7, 7.11-7.13, 7.15) komplett offen
+  Aktivitäten-Seite (7.13) seit 17.08. ebenfalls mit Demo-Daten und
+  Entfernen-Button fertig; Rest (7.4, 7.6, 7.7, 7.11, 7.12, 7.15) komplett
+  offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -128,7 +130,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Reykjavik) aus dem bestehenden Inspirations-Set von `Home.tsx`
   übernommen statt neu erfunden. Echte Persistenz folgt mit dem Favorite-
   Entity, sobald die Backend-Entscheidung gefallen ist
-- [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts)
+- [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts) — beide vermutlich
+  blockiert bis `TripDraft` echte Preisfelder für Transport/Unterkunft hat
+  (gleicher Grund wie bei 6.6/6.7, siehe oben)
 - [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte, seit
   11.08. mit dem echten im KI-Chat geplanten Reiseziel verbunden statt
   fester Demo-Orte: zeigt den Teal-Marker für das im Chat gespeicherte
@@ -139,7 +143,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   dezent/hell (CartoDB Positron) statt der bunteren Standard-OSM-Kacheln,
   gemäß Design-Vorgabe in `MARKENDESIGN.md` ("dezente, nicht zu bunte
   Kartenbasis")
-- [ ] 7.13 Aktivitäten, 7.15 ReiseSuche
+- [x] 7.13 `Aktivitaeten.tsx` (`/aktivitaeten`) — vom autonomen IT-Chef-Lauf
+  am 17.08. gebaut: Kartenliste mit über die zwei Demo-Reisen aus
+  `MeineReisen.tsx` (Lissabon, Kyoto) aggregierten Aktivitäten,
+  Ziel-Badge pro Karte, optionalem Preis (analog `TripActivity.price`),
+  funktionierendem Entfernen-Button (gleiches Muster wie bei
+  Angebote/Favoriten/Preisalarme), ermutigender Leer-Zustand laut
+  `MARKENDESIGN.md`. Rein lokaler Demo-State, noch keine echte
+  geteilte Aktivitäten-Speicherung über Trips hinweg
+- [ ] 7.15 ReiseSuche
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse

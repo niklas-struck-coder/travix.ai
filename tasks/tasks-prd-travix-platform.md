@@ -212,7 +212,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 7.10 Build Preisalarme page (`/preisalarme`) for price monitoring alerts (PriceAlert entity) — demo data (`initialAlerts` in `Preisalarme.tsx`) until the real PriceAlert entity exists, same placeholder pattern as `Favoriten.tsx`; price-change wording and empty state follow `MARKENDESIGN.md` ("sachlich" statt Dringlichkeit)
   - [ ] 7.11 Build Reisekalender page (`/kalender`) with calendar view of all trips
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts
-  - [ ] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips
+  - [x] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips — demo data (`initialActivities` in `Aktivitaeten.tsx`) aggregated from the two demo trips in `MeineReisen.tsx` (Lissabon, Kyoto), same placeholder pattern as `Angebote.tsx`/`Preisalarme.tsx`; destination badge per activity, optional price (mirrors `TripActivity.price`), working remove button, encouraging empty state per `MARKENDESIGN.md`
   - [x] 7.14 Build Kartenansicht page (`/karte`) with React-Leaflet map and trip destination markers
   - [ ] 7.15 Build ReiseSuche page (`/reise-planen`) as trip planning search entry point
 
