@@ -4,6 +4,82 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-17
+
+**Ausgewählter Punkt:** Sprint 3/4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"laufende Content-Produktion", Säule 3 (Build in public), nach dem
+Redaktionsplan-Muster aus `content-plan.md` Woche 3 Post A ("Einblick in
+einen konkreten Baustein ... nur posten, sobald der jeweilige Stand
+wirklich erreicht ist"). Konkreter Anlass: 6.12 `EditMode.tsx`
+(Aktivitäten in der Buchungsseite manuell hinzufügen/entfernen,
+Preisanpassung, echt gespeichert über `updateStoredTrip()`) wurde laut
+`ZEITPLAN.md` heute (17.08.) fertig.
+
+**Warum sicher genug:** Reines Entwurfsdokument, kein Live-Vorgang — kein
+Post geht raus, kein Kanal wird angelegt. Keine erfundenen Kennzahlen.
+Klar genug beschrieben: die zugrunde liegende Funktionalität ist im Code
+nachprüfbar (siehe unten), keine offene Positionierungs-Grundsatzfrage —
+Positionierung und Markenstimme kommen unverändert aus `MARKENDESIGN.md`.
+
+**Abwägung vor der Auswahl:** `reports/marketing-chef.md` (2026-08-16)
+empfahl explizit, erstmal die drei bereits fertigen, unangetasteten
+Text-Stücke sichten/freigeben zu lassen statt weiterzuschreiben ("Der
+Engpass ist unverändert: Freigabe, nicht neue Ideen"). Dieser Rat bleibt
+grundsätzlich richtig — aber seit diesem Bericht ist am 17.08. echter
+neuer Produktfortschritt dazugekommen (6.12 EditMode, 7.3
+Entwurfs-Aktionen, 7.13 Aktivitäten-Seite), den `content-plan.md`
+ausdrücklich als zeitkritisch behandelt: Build-in-public-Content soll
+nah am tatsächlichen Fortschritt gepostet werden, nicht verzögert
+nachgeholt werden, sonst verliert er seinen "gerade passiert"-Charakter.
+Deshalb hier bewusst EIN einzelnes, klar abgegrenztes neues Stück
+(EditMode) statt gar nichts — nicht als Widerspruch zum Rat vom 16.08.,
+sondern als der eine Punkt, bei dem "jetzt schreiben" sich klar
+begründen lässt. Die grundsätzliche Freigabe-Empfehlung für die
+bestehenden Stücke gilt unverändert und wird hier nicht wiederholt
+erledigt.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- 7.3 (Entwurfs-Aktionen) und 7.13 (Aktivitäten-Seite) als eigene
+  Content-Stücke — beide grundsätzlich ebenfalls sicher genug, aber
+  bewusst nicht zusätzlich ausgearbeitet, um bei "ein einziger sicherer
+  Punkt" zu bleiben und nicht noch mehr unbenutzte Entwürfe zu stapeln,
+  siehe Abwägung oben. Bleiben als Kandidaten für einen der nächsten
+  Läufe vorgemerkt, falls sie bis dahin noch nicht durch andere Content-
+  Stücke abgedeckt sind.
+- Kampagnen-Konzepte für Ads (Sprint 5) — zeitlich weiterhin nicht dran,
+  Sprint 3/4 laufen laut `ZEITPLAN.md` vor Sprint 5.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/components/trip/EditMode.tsx` vollständig gelesen sowie die
+Einbindung in `src/pages/Buchung.tsx` (Import, `updateStoredTrip`-Aufruf,
+JSX-Einbindung) — echte Speicherung über `updateStoredTrip()` bestätigt,
+nicht bloß Demo-State wie bei anderen kürzlich gebauten Seiten (Favoriten/
+Preisalarme/Angebote). Farbwerte erneut gegen `src/lib/design-tokens.ts`
+abgeglichen.
+
+**Umgesetzt:**
+- Neue Datei `marketing/content-stueck-aktivitaeten-bearbeiten.md` — Post
+  in LinkedIn- und Instagram-Fassung (Säule 2+3), plus Canva-Design-Brief
+  für eine sofort umsetzbare, abstrakte Text-Grafik (Option A, gleiches
+  Muster wie beim letzten Content-Stück). Echter Screenshot (Option B)
+  bewusst nicht ausgearbeitet, aus demselben Grund wie beim
+  Kartenansicht-Stück: `MARKENDESIGN.md` markiert die
+  Bildsprachen-Grundsatzfrage weiterhin als offen.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand)
+war bereits vollständig in `main` gemerged (Freigabe-Chef-Log vom 17.08.
+bestätigt das) — laut Regel für bereits gemergte Branches neu von
+aktuellem `origin/main` (`35b2cdc`) aus angelegt, statt auf dem alten
+Stand weiterzuarbeiten.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-12
 
 **Ausgewählter Punkt:** Kein neuer Sprint-Punkt aus `ZEITPLAN.md`, sondern
