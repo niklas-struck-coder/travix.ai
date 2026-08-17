@@ -42,8 +42,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   den KI-Chat eingebunden (5.7 offen); 5.10 (Backend-Stub)
   anders gelöst über Vite-Proxy statt Base44
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
-  (6.1-6.5, 6.11, 6.13), aber Kostenübersicht (6.6, 6.7), Checkliste
-  (6.8-6.10) und manueller Bearbeitungsmodus (6.12) fehlen noch
+  (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
+  (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
+  Checkliste (6.8-6.10) fehlen noch
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
@@ -80,7 +81,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
 - [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
 - [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
-- [ ] 6.12 `EditMode.tsx` — manuelles Hinzufügen/Entfernen, Preisanpassung
+- [x] 6.12 `EditMode.tsx` — vom autonomen IT-Chef-Lauf am 17.08. umgesetzt:
+  Dialog zum manuellen Hinzufügen/Entfernen von Aktivitäten und
+  Preisanpassung, direkt in die "Aktivitäten"-Sektion von `Buchung.tsx`
+  eingebaut. Bewusst ohne Kostenübersicht nach Kategorie (das bleiben 6.6/
+  6.7) — nur der `activities`-Teil, für den `TripDraft` bereits ein
+  Preisfeld hat. Änderungen werden über die bestehende
+  `updateStoredTrip()`-Funktion echt gespeichert (kein Demo-State wie bei
+  7.3), da für den einen aktiven Chat-Trip bereits echte Speicherung
+  existiert.
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)

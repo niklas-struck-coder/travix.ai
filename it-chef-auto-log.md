@@ -689,6 +689,106 @@ Produktentscheidungen oder unspezifiziert).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
 
+## 2026-08-17
+
+**Vorbereitung:** `it-chef/auto` war bereits auf dem Stand von
+`origin/main` (`5c46d98`, u.a. Support-/Marketing-/IT-Chef-Berichte vom
+16.08.) — kein Merge nötig. `main` selbst wurde nicht angerührt. Auf dem
+bestehenden `it-chef/auto`-Stand weitergearbeitet (enthält bereits 7.3 aus
+dem Lauf vom 16.08., noch nicht von Freigabe-Chef geprüft).
+
+**Ausgewählter Punkt:** Task 6.12 aus `tasks/tasks-prd-travix-platform.md`
+— "Build `EditMode.tsx` for manual add/remove activities and price
+adjustments". Laut `ZEITPLAN.md` Sprint 2 offen.
+
+**Warum sicher genug (inkl. Abweichung von der Einschätzung früherer
+Läufe):** Zuerst den gesamten Rest von Sprint 1-4 erneut durchgeprüft, da
+seit dem 12.08. kein neuer Code auf `main` gelandet ist und die
+Blockaden aus den ausführlichen Prüfungen der Läufe vom 10./11./12.08.
+weiterhin gelten:
+- 4.1-4.3 weiterhin "blocked on Base44/Gemini credentials", Backend-
+  Entscheidung weiterhin Produktentscheidung.
+- 5.7 weiterhin ohne echte Zug/Bus/Fähre-Datenquelle.
+- 6.6/6.7 (CostBreakdown/calculateCosts) weiterhin verworfen — `TripDraft`
+  hat nach wie vor keine Preisfelder für Transport/Unterkunft, das wäre
+  eine Datenmodell-/Architekturentscheidung.
+- 6.8/6.9 (Checkliste) weiterhin verworfen — FR-501 benennt weiterhin nur
+  10 von 13 Punkten konkret ("... and more"), Rest wäre Erfindung.
+- 7.4 ("Planung fortsetzen" mit voller Chat-Historie) neu geprüft: laut
+  FR-604 soll der KI-Chat "at the exact point of interruption" fortgesetzt
+  werden. `tripStorage.ts` speichert aber nur einen einzigen aktiven Trip
+  (`CHAT_STORAGE_KEY`, ein globaler Schlüssel) inkl. Nachrichten — es gibt
+  keine Mehrfach-Entwürfe-Speicherung mit je eigener Chat-Historie, und
+  `Reiseentwuerfe.tsx` selbst nutzt weiterhin nur lokale Demo-Karten ohne
+  echte Verknüpfung zu gespeicherten Chats. Eine "echte" Umsetzung bräuchte
+  ein Mehrfach-Session-Datenmodell — Architekturentscheidung, verworfen.
+- 7.6/7.7/7.11-7.13/7.15 weiterhin aus den in den Läufen vom 10./11.08.
+  dokumentierten Gründen verworfen (fehlende Preisfelder, fehlende
+  Kalender-Bibliothek, fehlende Multi-Trip-/Aktivitäten-Daten, unklare
+  Abgrenzung zur Startseite). 8.x weiterhin Backend-/Produktentscheidungen
+  oder unspezifiziert.
+
+6.12 (EditMode.tsx) wurde in den Läufen vom 10./11.08. nur zurückgestellt
+("ohne 6.6/6.7 fehlt der Kontext, in dem Preisanpassungen sichtbar/
+sinnvoll geprüft werden könnten"), nie endgültig als unsicher eingestuft —
+anders als z.B. 6.6/6.7 selbst. Bei erneuter, engerer Prüfung: `TripActivity`
+(`src/types/chat.ts`) hat bereits `id`, `name` und `price` — die Aufgabe
+"manual add/remove activities and price adjustments" deckt sich exakt mit
+diesen drei Feldern, ohne dass eine Kategorie-Kostenübersicht (6.6/6.7)
+Voraussetzung wäre. Damit erfüllt 6.12 alle vier Kriterien: kein Bezug zu
+Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten; keine offene
+Architekturentscheidung (Datenfelder existieren bereits, `updateStoredTrip()`
+für die Persistenz ebenfalls); klar genug beschrieben (Wortlaut deckt sich
+1:1 mit dem bestehenden `TripActivity`-Schema); Ergebnis objektiv prüfbar
+über Typecheck/Lint/Tests/Build.
+
+**Umgesetzt:**
+- Neue Komponente `src/components/trip/EditMode.tsx` — Dialog (Radix
+  `Dialog`, analog zum bestehenden Bearbeiten-Dialog-Muster in
+  `Buchung.tsx`) mit: Liste der vorhandenen Aktivitäten inkl. editierbarem
+  Preisfeld pro Zeile, Entfernen-Button pro Zeile, sowie einem Formular
+  (Name + optionaler Preis) zum Hinzufügen einer neuen Aktivität
+  (`crypto.randomUUID()` für die ID, analog zu `duplicateDraft` in
+  `Reiseentwuerfe.tsx`).
+- `src/pages/Buchung.tsx` — "Aktivitäten"-Sektion von der generischen
+  `Section`-Komponente (die nur einen einzelnen Wert kennt) auf eine
+  eigene Karte umgestellt, die die echte Anzahl geplanter Aktivitäten
+  zeigt (statt bisher fest `value={null}`) und den Bearbeiten-Stift zum
+  Öffnen von `EditMode` nutzt — auch im leeren Zustand sichtbar, damit
+  Aktivitäten auch ohne vorhandene Einträge manuell angelegt werden
+  können. Änderungen fließen über die bestehende `updateStoredTrip()`
+  zurück in den echten, gespeicherten Trip (kein reiner Demo-State wie bei
+  7.3 — hier existiert für den einen aktiven Chat-Trip bereits echte
+  `localStorage`-Persistenz).
+- Neue Tests `src/components/trip/EditMode.test.tsx` (5 Fälle: Leerzustand,
+  Hinzufügen mit Name+Preis, kein Hinzufügen ohne Namen, Entfernen,
+  Preisänderung) und `src/pages/Buchung.test.tsx` (3 Fälle: Leerzustand in
+  der Sektion, Hinzufügen spiegelt sich in Sektion und `localStorage`
+  wider, Entfernen führt zurück in den Leerzustand).
+- `tasks/tasks-prd-travix-platform.md:199` — 6.12 auf `[x]` gesetzt, mit
+  Hinweis auf den bewusst engen Scope (nur Aktivitäten, keine
+  Kategorie-Kostenübersicht).
+- `ZEITPLAN.md` — Sprint-2-Eintrag 6.12 auf erledigt gesetzt,
+  Ist-Stand-Zusammenfassung zu Phase 6 aktualisiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout); dabei
+  entstandene, inhaltlich irrelevante `package-lock.json`-Diffs (nur
+  `libc`-Metadaten-Normalisierung durch abweichende npm-Version, wie in
+  früheren Läufen) wieder verworfen, bevor committet wurde.
+- `npx tsc -b` → grün, keine neuen TypeScript-Fehler.
+- `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht durch
+  diesen Lauf verursacht).
+- `npx vitest run` → 31/31 Tests grün (23 vorher + 5 neue in
+  `EditMode.test.tsx` + 3 neue in `Buchung.test.tsx`).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Fehler
+  (vorbestehende Chunk-Size-Warnung unverändert, nicht durch diesen Change
+  verursacht).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
 ## 2026-08-11 (fünfter Lauf)
 
 **Vorbereitung:** `it-chef/auto` (Remote) lag bereits auf dem aktuellen

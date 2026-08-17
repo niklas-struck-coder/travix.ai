@@ -30,8 +30,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { loadStoredChat, isTripComplete, hasTripData } from '@/lib/trip/tripStorage'
-import type { TransportMode } from '@/types/chat'
+import { EditMode } from '@/components/trip/EditMode'
+import { loadStoredChat, updateStoredTrip, isTripComplete, hasTripData } from '@/lib/trip/tripStorage'
+import type { TransportMode, TripActivity } from '@/types/chat'
 
 const transportIcons: Record<TransportMode, typeof Plane> = {
   flight: Plane,
@@ -133,8 +134,13 @@ function Section({ icon: Icon, title, value, emptyLabel, editHref, editChoice }:
 }
 
 export function Buchung() {
-  const [stored] = useState(() => loadStoredChat())
+  const [stored, setStored] = useState(() => loadStoredChat())
   const trip = stored?.trip ?? null
+
+  function handleActivitiesChange(activities: TripActivity[]) {
+    const updated = updateStoredTrip({ activities })
+    if (updated) setStored(updated)
+  }
 
   if (!trip || !hasTripData(trip)) {
     return (
@@ -226,13 +232,39 @@ export function Buchung() {
           editHref="/ki-chat?edit=accommodation"
           editChoice={accommodationEditChoice}
         />
-        <Section
-          icon={Ticket}
-          title="Aktivitäten"
-          value={null}
-          emptyLabel="Noch keine Aktivitäten geplant"
-          editHref="/ki-chat"
-        />
+        <Card>
+          <CardContent className="flex flex-col gap-2 px-5 py-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <Ticket className="size-4 text-teal" />
+                Aktivitäten
+              </div>
+              <EditMode activities={trip.activities} onChange={handleActivitiesChange}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-6 text-muted-foreground hover:text-foreground"
+                  aria-label="Aktivitäten bearbeiten"
+                  title="Aktivitäten bearbeiten"
+                >
+                  <Pencil className="size-3.5" />
+                </Button>
+              </EditMode>
+            </div>
+            {trip.activities.length > 0 ? (
+              <p className="font-heading text-lg font-semibold text-foreground">
+                {trip.activities.length} {trip.activities.length === 1 ? 'Aktivität geplant' : 'Aktivitäten geplant'}
+              </p>
+            ) : (
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">Noch keine Aktivitäten geplant</p>
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/ki-chat">+ Suchen</Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {complete && (
