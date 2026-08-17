@@ -9,18 +9,20 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
 - Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Seiten Angebote, Favoriten, Preisalarme (inkl. Tests)
+- Neue Seite "Aktivitäten" (aggregierte Aktivitäten über alle Reisen)
+- EditMode für Reiseentwürfe: Aktivitäten manuell hinzufügen/entfernen, Preisanpassung
+- Entwurfs-Aktionen (pausieren/duplizieren/abschließen/löschen)
 - Kartenansicht der Reiseziele (React-Leaflet), an echten Chat-Trip angebunden
 - KI-Concierge-Chat (Konversations-UI, Sprachfunktionen)
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-12):**
-- Keine neuen Commits im Repo — laut Git-Log der letzten Tage ist main unverändert
-  seit dem 2026-08-12 (Support-, Marketing- und IT-Chef-Berichte von diesem Tag)
-- Hinweis: Dieser Agent sieht nur, was tatsächlich auf GitHub gepusht wurde —
-  etwaige lokale, nicht gepushte Arbeit auf Nis Rechner ist hier nicht erfasst
+**Seit letztem Update (2026-08-16):**
+- Neue Seite Aktivitäten (mit Tests) sowie EditMode-Komponente für Reiseentwürfe
+- Entwurfs-Aktionen und ein Checkbox-Fix in den Reise-Übersichten
+- UX-Analyse zur neuen Aktivitäten-Seite sowie ein passendes Marketing-Content-Stück
+  wurden erstellt und über den Freigabe-Chef nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-16_
+_Letztes Update: 2026-08-17_
