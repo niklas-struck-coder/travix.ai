@@ -357,3 +357,54 @@ früheren Läufen.
 
 **Ergebnis:** Alles grün und stimmig → nach `main` gemerged
 (Fast-Forward `5c46d98..33f5153`, gepusht).
+
+## 2026-08-17, weiterer Check (Tageslauf)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Check von
+  heute Nacht gemergt, nichts Neues seither). Nichts zu tun.
+- `marketing-chef/auto` — 1 Commit vor `main` (Content-Stück
+  "Aktivitäten bearbeiten", Säule 2+3, zu 6.12 `EditMode.tsx`).
+- `support-chef/auto` — 1 Commit vor `main` (UX-Analyse zur neuen
+  Aktivitäten-Seite `/aktivitaeten`, Aufgabe 7.13).
+
+**Prüfung `marketing-chef/auto`** (Diff: `marketing-chef-auto-log.md`,
+neue Datei `marketing/content-stueck-aktivitaeten-bearbeiten.md`):
+- Alle im Text behaupteten Code-Fakten gegen `main` nachgeprüft:
+  `EditMode.tsx` erlaubt tatsächlich Hinzufügen/Entfernen/Preisanpassung
+  von Aktivitäten (`addActivity`/`removeActivity`/`updatePrice`), echt
+  gespeichert über `updateStoredTrip()` in `Buchung.tsx` (nicht nur
+  Demo-State) — stimmt. Leerzustand-Text "Noch keine Aktivitäten
+  hinzugefügt." wörtlich im Code vorhanden. Farbwerte Navy `#0A2342` /
+  Teal `#00C2A8` stimmen mit `design-tokens.ts` überein. `Plus`-Icon aus
+  `lucide-react` tatsächlich verwendet.
+- Keine erfundenen Kennzahlen (Hashtags explizit als unbelegt markiert,
+  keine Reichweiten-/Nutzerzahlen). Kein Hinweis auf tatsächliches
+  Posten — ausdrücklich als Entwurf markiert, wartet auf Freigabe.
+  Vollständiger, kohärenter Text (LinkedIn- + Instagram-Fassung,
+  Canva-Design-Brief), keine bloße Stichpunkt-Skizze.
+- Kein Produkt-Code geändert → kein Build/Lint/Test nötig.
+
+**Ergebnis:** Passt → nach `main` gemergt (Fast-Forward
+`35b2cdc..38462fe`, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+UX-Analyse zur Aktivitäten-Seite `/aktivitaeten`):
+- Alle drei genannten Reibungspunkte gegen `src/pages/Aktivitaeten.tsx`
+  auf `main` nachvollzogen und bestätigt:
+  - `initialActivities` (`:19-25`) ist tatsächlich eine fest im Code
+    stehende Demo-Liste, komplett getrennt von den echten, über
+    `EditMode.tsx`/`updateStoredTrip()` verwalteten Aktivitäten — stimmt,
+    beide Datenquellen berühren sich nicht.
+  - Einzige Karten-Interaktion ist der Entfernen-Button (`X`, `:76-84`),
+    kein weiterer Handlungs-Button wie bei `Favoriten.tsx` ("Reise mit
+    KI planen"-Link, dort bestätigt vorhanden) — stimmt.
+  - Ziel-`Badge` (`:73`) ist reiner Text, kein Link zur zugehörigen
+    Reise — stimmt, im Gegensatz zu anderen Karten-Elementen.
+  - `nav-config.ts:84` Label "Alle geplanten Aktivitäten" wörtlich
+    bestätigt. Zeilenangaben insgesamt korrekt bzw. im nachvollziehbaren
+    Bereich, kein erfundener Befund.
+- Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+
+**Ergebnis:** Passt → nach `main` gemergt (Merge-Commit `24a53fe`,
+gepusht).
