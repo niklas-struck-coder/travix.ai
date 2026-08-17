@@ -54,8 +54,8 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Demo-Daten und funktionierendem Entfernen-Button; 7.3 (Entwurfs-Aktionen
   pausieren/duplizieren/abschließen/löschen) seit 16.08. ebenfalls fertig;
   Aktivitäten-Seite (7.13) seit 17.08. ebenfalls mit Demo-Daten und
-  Entfernen-Button fertig; Rest (7.4, 7.6, 7.7, 7.11, 7.12, 7.15) komplett
-  offen
+  Entfernen-Button fertig; Kalender-Seite (7.11) seit 17.08. ebenfalls mit
+  Demo-Daten fertig; Rest (7.4, 7.6, 7.7, 7.12, 7.15) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -130,9 +130,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Reykjavik) aus dem bestehenden Inspirations-Set von `Home.tsx`
   übernommen statt neu erfunden. Echte Persistenz folgt mit dem Favorite-
   Entity, sobald die Backend-Entscheidung gefallen ist
-- [ ] 7.11 Reisekalender, 7.12 Reisebudget (Recharts) — beide vermutlich
-  blockiert bis `TripDraft` echte Preisfelder für Transport/Unterkunft hat
-  (gleicher Grund wie bei 6.6/6.7, siehe oben)
+- [x] 7.11 `Kalender.tsx` (`/kalender`) — vom autonomen IT-Chef-Lauf am 17.08.
+  gebaut: Monats-Kalenderraster (`calculateProgress.ts`-artige reine
+  Hilfsfunktionen in `src/lib/trip/calendarUtils.ts`, mit Unit-Tests) plus
+  Monatsnavigation, dieselben zwei Demo-Reisen wie `MeineReisen.tsx`
+  (Lissabon, Kyoto) jetzt zusätzlich mit strukturiertem Datumsbereich statt
+  nur Anzeige-Text, damit sie sich im Raster platzieren lassen. Zellen mit
+  Reise farblich markiert, zusätzlich eine textliche Liste darunter (analog
+  `Kartenansicht.tsx`), da Kalenderzellen allein für Screenreader nicht
+  zugänglich sind. Keine neue Abhängigkeit (kein Kalender-Package),
+  ermutigender Leer-Zustand laut `MARKENDESIGN.md` als Fallback vorhanden,
+  auch wenn er mit den festen Demo-Daten aktuell nicht greift. Rein
+  lokaler Demo-State, noch keine echte geteilte Reise-Speicherung
+- [ ] 7.12 Reisebudget (Recharts) — weiterhin blockiert, `TripDraft` hat
+  keine echten Preisfelder für Transport/Unterkunft (gleicher Grund wie
+  bei 6.6/6.7, siehe oben)
 - [x] 7.14 `Kartenansicht.tsx` (`/karte`) — React-Leaflet-Karte, seit
   11.08. mit dem echten im KI-Chat geplanten Reiseziel verbunden statt
   fester Demo-Orte: zeigt den Teal-Marker für das im Chat gespeicherte

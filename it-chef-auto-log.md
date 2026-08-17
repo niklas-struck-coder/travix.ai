@@ -1333,3 +1333,104 @@ existierende Vorbilder (`Angebote.tsx`, `Favoriten.tsx`,
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-17 (dritter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war seit dem letzten Freigabe-Chef-Merge
+vollständig in `main` aufgegangen — keine offenen Änderungen von einem
+vorherigen Lauf. Branch frisch von `origin/main` neu angelegt, wie in
+Regel 1 vorgesehen.
+
+**Ausgewählter Punkt:** Task **7.11** aus `tasks/tasks-prd-travix-platform.md`
+— "Build Reisekalender page (`/kalender`) with calendar view of all
+trips". Nächster offener, eindeutig umsetzbarer Punkt in Sprint 3 laut
+`ZEITPLAN.md`. Vor der Wahl geprüft und verworfen:
+- 4.1-4.3 (KI-Wrapper) — explizit auf Base44/Gemini-Credentials blockiert.
+- 6.6/6.7/7.12 (Kostenübersicht/Budget) — `TripDraft` hat keine
+  Preisfelder für Transport/Unterkunft, siehe frühere Läufe.
+- 6.8/6.9 (Checkliste) — FR-501 im PRD nennt nur 11 konkrete Punkte für
+  eine "13-Punkte-Checkliste" (10 benannte Kategorien + der Sammelbegriff
+  "additional planning items"); für die meisten dieser Kategorien (Auto-
+  vermietung, Restaurants, Versicherung, Reisedokumente, Packen,
+  Flughafentransfer) existiert in `TripDraft` kein einziges Datenfeld,
+  das FR-502 ("auto-detect completion from trip data") umsetzen könnte.
+  Um trotzdem 13 sinnvolle Punkte samt Erkennungslogik zu bauen, hätte
+  ich neue Datenfelder oder eine Zuordnung erfinden müssen, die im
+  Aufgabentext nicht steht — das verletzt Kriterium 3 (keine Interpretation
+  über die Aufgabenliste hinaus). Deshalb heute nicht angefasst; bleibt
+  offen für einen Lauf, sobald mehr Trip-Daten existieren oder Ni die
+  genaue 13er-Liste festlegt.
+- 7.6/7.7/7.15 (Warenkorb/Dashboard/ReiseSuche) — jeweils zu vage
+  beschrieben ("Dashboard mit ... Loyalty Points" — Loyalty-Feature
+  existiert noch gar nicht; "ReiseSuche als Einstiegspunkt" — Felder/
+  Verhalten nicht festgelegt) bzw. bräuchten ein Datenmodell (Warenkorb),
+  das es noch nicht gibt.
+
+7.11 blieb als einziger Punkt übrig, der mit den vorhandenen Demo-Trips
+(Lissabon/Kyoto, gleiche Daten wie `MeineReisen.tsx`) ohne neue
+Datenfelder oder neue Abhängigkeiten sauber umsetzbar war.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — die Kalenderraster-Darstellung ist eine
+reine Implementierungsentscheidung, kein neues UI-Paradigma, das Ni
+festlegen müsste (kein neues Package eingeführt). Klar genug beschrieben
+(Aufgabentext + `nav-config.ts`-Eintrag "Reisekalender" / "Alle Reisen im
+Kalender" grenzen den Umfang ein) und mit `MARKENDESIGN.md`-Vorgabe für
+den Leer-Zustand abgeglichen. Ergebnis objektiv prüfbar über Typecheck/
+Lint/Tests plus eigene Unit-Tests für die neue reine Kalenderlogik.
+
+**Umgesetzt:**
+- Neue reine Hilfsfunktionen `src/lib/trip/calendarUtils.ts`:
+  `getMonthGridDays` (42-Zellen-Monatsraster, Montag-Start),
+  `getTripsForDay` (Reisen für ein ISO-Datum), `formatMonthLabel`
+  (deutscher Monatsname + Jahr) — reine Funktionen ohne UI-Abhängigkeit,
+  analog zu `calculateProgress.ts`.
+- Neuer Test `src/lib/trip/calendarUtils.test.ts` (7 Fälle: Rastergrenzen
+  inkl. Wochenüberlauf in den Vor-/Folgemonat, Anzahl Tage im Zielmonat,
+  Inklusiv-Grenzen bei `getTripsForDay`, Monatsnamen) — Testdaten gegen
+  echte Kalenderfakten für September/März 2026 geprüft, nicht nur gegen
+  die eigene Implementierung.
+- Neue Seite `src/pages/Kalender.tsx` — Monatsraster mit
+  Vor-/Zurück-Navigation und "Heute"-Button, Reise-Zellen farblich
+  markiert (Teal), heutiges Datum mit Gold-Rahmen hervorgehoben, plus
+  textliche Liste der Reisen darunter (analog `Kartenansicht.tsx`, da
+  Kalenderzellen allein für Screenreader nicht zugänglich sind).
+  Dieselben zwei Demo-Reisen wie `MeineReisen.tsx` (Lissabon, Kyoto),
+  jetzt zusätzlich mit strukturiertem ISO-Datumsbereich statt nur
+  Anzeige-Text, damit sie sich im Raster platzieren lassen — keine neue
+  Abhängigkeit (kein Kalender-Package), ermutigender Leer-Zustand nach
+  `MARKENDESIGN.md` als Fallback vorhanden (greift mit den festen
+  Demo-Daten aktuell nicht). Rein lokaler Demo-State, noch keine echte
+  geteilte Reise-Speicherung.
+- `src/routes.tsx` — Import + Route `/kalender` ergänzt, zu
+  `builtRoutes` hinzugefügt (Route existierte vorher nur als generischer
+  Placeholder über `nav-config.ts`).
+- `tasks/tasks-prd-travix-platform.md:213` — 7.11 auf `[x]` gesetzt.
+- `ZEITPLAN.md` — 7.11 in Sprint 3 von der bisherigen Sammelzeile mit
+  7.12 in einen eigenen erledigten Eintrag verschoben, 7.12 bleibt offen
+  mit unverändertem Blockiert-Hinweis, Ist-Stand-Zusammenfassung für
+  Phase 7 aktualisiert.
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlte); dabei entstandene, inhaltlich irrelevante
+  `package-lock.json`-Diffs (nur `libc`-Metadaten-Normalisierung durch
+  abweichende npm-Version, wie in früheren Läufen) wieder verworfen,
+  bevor committet wurde.
+- `npm run build` (`tsc -b && vite build`) → grün, keine TypeScript-Fehler,
+  Build erfolgreich.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npm run test` (vitest) → 42/42 Tests grün (35 vorher + 7 neue in
+  `calendarUtils.test.ts`).
+- `npm run dev` lokal gestartet, `/kalender` liefert HTTP 200. Kein
+  Playwright im Projekt vorhanden — auf einen echten Browser-Screenshot
+  zur visuellen Prüfung habe ich deshalb verzichtet, statt eine neue
+  Test-Abhängigkeit nur dafür einzuführen; Absicherung stattdessen über
+  Typecheck/Build/Lint/Unit-Tests und Code-Review gegen die bestehenden
+  Muster (`Kartenansicht.tsx`, `Angebote.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

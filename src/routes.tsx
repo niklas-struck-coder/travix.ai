@@ -15,6 +15,7 @@ import { Favoriten } from '@/pages/Favoriten'
 import { Preisalarme } from '@/pages/Preisalarme'
 import { Angebote } from '@/pages/Angebote'
 import { Aktivitaeten } from '@/pages/Aktivitaeten'
+import { Kalender } from '@/pages/Kalender'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
 
@@ -32,6 +33,7 @@ const builtRoutes = new Set([
   '/preisalarme',
   '/angebote',
   '/aktivitaeten',
+  '/kalender',
 ])
 
 export function AppRoutes() {
@@ -54,6 +56,7 @@ export function AppRoutes() {
           <Route path="/preisalarme" element={<PageTransition><Preisalarme /></PageTransition>} />
           <Route path="/angebote" element={<PageTransition><Angebote /></PageTransition>} />
           <Route path="/aktivitaeten" element={<PageTransition><Aktivitaeten /></PageTransition>} />
+          <Route path="/kalender" element={<PageTransition><Kalender /></PageTransition>} />
           {allRoutes
             .filter((item) => !builtRoutes.has(item.path))
             .map((item) => (
