@@ -4,6 +4,78 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-18
+
+**Ausgewählter Punkt:** Sprint 3/4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"laufende Content-Produktion", Säule 1 (Ehrlichkeit als Feature), nach
+dem Redaktionsplan-Muster aus `content-plan.md` Woche 3 Post A ("Einblick
+in einen konkreten Baustein ... nur posten, sobald der jeweilige Stand
+wirklich erreicht ist"). Konkreter Anlass: 7.6 `Warenkorb.tsx`
+(gruppierter Warenkorb mit bei jeder Änderung echt neu berechneten
+Zwischen-/Gesamtsummen) wurde laut `ZEITPLAN.md` am 17.08. fertig.
+
+**Warum sicher genug:** Reines Entwurfsdokument, kein Live-Vorgang — kein
+Post geht raus, kein Kanal wird angelegt. Keine erfundenen Kennzahlen.
+Klar genug beschrieben: die zugrunde liegende Funktionalität ist im Code
+nachprüfbar (siehe unten), keine offene Positionierungs-Grundsatzfrage —
+Positionierung und Markenstimme kommen unverändert aus `MARKENDESIGN.md`,
+das für Warenkorb/Preisalarme sogar eine wörtlich passende Design-Vorgabe
+enthält (keine künstliche Dringlichkeit, Preise sachlich zeigen).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- 7.11 `Kalender.tsx` (Monatskalender mit Demo-Reisen) — laut
+  `ZEITPLAN.md` ebenfalls seit 17.08. fertig und grundsätzlich genauso
+  sicher genug, aber bewusst nicht zusätzlich ausgearbeitet, um bei "ein
+  einziger sicherer Punkt" zu bleiben (siehe Abwägung im 17.08.-Eintrag
+  unten). Warenkorb gewählt, weil `MARKENDESIGN.md` dafür eine explizite,
+  bisher noch nie in einem Content-Stück verwendete Design-Vorgabe
+  enthält (Warenkorb/Preisalarme-Abschnitt) — Kalender bleibt als
+  Kandidat für einen der nächsten Läufe vorgemerkt.
+- 6.1/6.3/6.4/6.5/6.11/6.13 (stale Checkbox-Korrekturen vom 18.08.,
+  IT-Chef dritter/zweiter Lauf) — kein "gerade passiert"-Charakter, da
+  dabei kein neuer Code entstanden ist, nur bereits vorhandene
+  Funktionalität als fertig markiert wurde. Passt nicht zu
+  Build-in-public-Content, der echten Fortschritt zeigen soll.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- Kampagnen-Konzepte für Ads (Sprint 5) — zeitlich weiterhin nicht dran,
+  Sprint 3/4 laufen laut `ZEITPLAN.md` vor Sprint 5.
+- Freigabe der drei liegenden, bereits fertigen Text-Stücke — kein Punkt,
+  den der autonome Lauf selbst entscheiden kann (das ist Nis Freigabe,
+  siehe `reports/marketing-chef.md` vom 16.08.), taucht hier nur als
+  Kontext auf, nicht als gewählter Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/pages/Warenkorb.tsx` und `src/lib/trip/cartTotals.ts` vollständig
+gelesen — echte Neuberechnung von Zwischen-/Gesamtsumme aus den aktuell
+vorhandenen Positionen bestätigt (`groupCartItems`, `calculateCartTotal`,
+mit Unit-Tests in `cartTotals.test.ts`), kein separates, potenziell
+veraltetes Summenfeld. Bestätigt: kein Buchungs-/Bezahl-Button vorhanden
+(6.2 bleibt offen), daher im Post nicht fälschlich mitbeworben.
+`MARKENDESIGN.md` erneut auf die Warenkorb/Preisalarme-Design-Vorgabe
+sowie Farbwerte in `src/lib/design-tokens.ts` abgeglichen.
+
+**Umgesetzt:**
+- Neue Datei `marketing/content-stueck-warenkorb-echte-summen.md` — Post
+  in LinkedIn- und Instagram-Fassung (Säule 1), plus Canva-Design-Brief
+  für eine sofort umsetzbare, abstrakte Text-Grafik (Option A, gleiches
+  Muster wie bei den letzten Content-Stücken). Echter Screenshot
+  (Option B) bewusst nicht ausgearbeitet, aus demselben Grund wie bei
+  den vorherigen Stücken: `MARKENDESIGN.md` markiert die
+  Bildsprachen-Grundsatzfrage weiterhin als offen.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `38462fe`) war bereits vollständig in `main` gemerged (13 Commits
+Rückstand gegenüber `origin/main`) — laut Regel für bereits gemergte
+Branches neu von aktuellem `origin/main` (`cdf8ba8`) aus angelegt, statt
+auf dem alten Stand weiterzuarbeiten.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-17
 
 **Ausgewählter Punkt:** Sprint 3/4 aus `ZEITPLAN.md`, Marketing-Bereich —
