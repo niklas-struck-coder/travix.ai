@@ -1711,3 +1711,61 @@ statt der Behauptung blind zu vertrauen.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-18 (dritter Lauf)
+
+**Ausgangslage:** Branch `it-chef/auto` existierte bereits remote und
+enthielt bereits alle Commits von `main` (Freigabe-Chef hatte den vorigen
+Lauf schon gemerged) plus vier weitere, noch nicht gemergte Commits
+(6.4/6.5, 6.11/6.13, 7.6, 7.11). Direkt auf diesem Branch weitergearbeitet,
+kein Merge von `main` nötig.
+
+**Ausgewählter Punkt:** Tasks 6.1 (`TripSection.tsx`-Wrapper) und 6.3
+(`EmptySection.tsx` mit "+ Suchen") aus
+`tasks/tasks-prd-travix-platform.md`, Sprint 2 laut `ZEITPLAN.md`.
+
+**Warum sicher genug:** Beim Code-Review von `src/pages/Buchung.tsx`
+zeigte sich, dass die inline `Section`-Komponente dort bereits exakt das
+leistet, was 6.1 und 6.3 verlangen (Titel/Icon/Wert/Bearbeiten-Aktion je
+Sektion, plus "+ Suchen"-Button im Leerzustand, verlinkt auf `/ki-chat`)
+— nur eben als eine gemeinsame inline Komponente statt zweier separater
+Dateien `src/components/trip/TripSection.tsx`/`EmptySection.tsx`. Gleiches
+Divergenz-Muster wie schon bei 3.5 (`PlaceholderPage.tsx` statt
+Datei-pro-Route) und bei den bereits vorher korrigierten stale Checkboxen
+(6.4, 6.5, 6.11, 6.13, 7.5). Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Recht, keine offene Produktentscheidung, klar durch Codevergleich mit der
+Aufgabenbeschreibung verifizierbar, Ergebnis objektiv über Tests prüfbar.
+6.2 (`TripItem.tsx` mit "Beim Anbieter buchen") dagegen bewusst NICHT
+angefasst: dafür fehlen echte Item-/Provider-URL-Felder auf `TripDraft`
+(gleiche Lücke wie die fehlenden Kostenfelder bei 6.6/6.7/6.12) — das wäre
+eine Dateninteraktion/Annahme über die reine Checkbox-Korrektur hinaus,
+also nicht im heutigen sicheren Rahmen.
+
+**Umgesetzt:**
+- Keine Code-Änderung an `Buchung.tsx` selbst.
+- Neue Test-Assertion in `src/pages/Buchung.test.tsx`: prüft, dass bei
+  einer Reise ohne Transport/Reisedaten/Budget/Unterkunft alle vier
+  Leerzustands-Texte erscheinen und genau 5 "+ Suchen"-Links (inkl.
+  Aktivitäten) allesamt auf `/ki-chat` zeigen — vorher war nur der
+  Leerzustands-Text bei Aktivitäten getestet, nicht der Link selbst bei
+  den anderen Sektionen.
+- Checkboxen 6.1 und 6.3 in `tasks/tasks-prd-travix-platform.md` auf
+  erledigt gesetzt, mit Begründung; 6.2 explizit mit Begründung offen
+  gelassen.
+- `ZEITPLAN.md` Sprint 2 entsprechend aktualisiert (6.1/6.3 als erledigt
+  vermerkt, 6.2 als weiterhin offen mit Grund ergänzt).
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlte); entstandene, inhaltlich irrelevante `package-lock.json`-
+  `libc`-Metadaten-Diffs wieder verworfen vor dem Commit (gleiches Muster
+  wie in allen vorherigen Läufen).
+- `npx tsc -b` → grün, keine TypeScript-Fehler.
+- `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npx vitest run` → 55/55 Tests grün (54 vorher + 1 neue Assertion in
+  `Buchung.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

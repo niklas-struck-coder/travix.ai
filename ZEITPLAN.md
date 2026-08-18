@@ -81,10 +81,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Aufgabenbeschreibung hinausgegangen
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
+- [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,
+  da `TripDraft` noch keine Item-/Provider-URL-Felder hat (gleiche Lücke
+  wie die fehlenden Kostenfelder bei 6.6/6.7/6.12)
 - [ ] 6.6 `CostBreakdown.tsx` — echte Kostenübersicht nach Kategorie
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
 - [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
 - [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
+- [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
+  am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
+  als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/
+  Wert/Bearbeiten-Aktion plus "+ Suchen"-Button im Leerzustand, verlinkt auf
+  `/ki-chat`), gleiches Divergenz-Muster wie `PlaceholderPage.tsx` bei 3.5.
+  Keine Code-Änderung, nur die Checkboxen plus eine neue Test-Assertion in
+  `Buchung.test.tsx`, die bisher ungeprüfte "+ Suchen"-Links für alle fünf
+  leeren Sektionen abdeckt.
 - [x] 6.4 `Buchung.tsx` komplett zusammengesetzt (alle Sektionen klickbar) —
   vom autonomen IT-Chef-Lauf am 18.08. (zweiter Lauf) als stale Checkbox
   erkannt: Transport/Reisedaten/Budget/Unterkunft/Aktivitäten sind bereits

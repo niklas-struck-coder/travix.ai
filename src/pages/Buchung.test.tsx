@@ -123,6 +123,24 @@ describe('Buchung – Aktivitäten', () => {
     expect(screen.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
   })
 
+  it('shows a "+ Suchen" action linking to /ki-chat for every empty section (Transport, Reisedaten, Budget, Unterkunft, Aktivitäten)', () => {
+    seedStoredChat()
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Noch kein Transport ausgewählt')).toBeInTheDocument()
+    expect(screen.getByText('Noch keine Daten gewählt')).toBeInTheDocument()
+    expect(screen.getByText('Noch kein Budget angegeben')).toBeInTheDocument()
+    expect(screen.getByText('Noch keine Unterkunft ausgewählt')).toBeInTheDocument()
+
+    const searchLinks = screen.getAllByRole('link', { name: '+ Suchen' })
+    expect(searchLinks).toHaveLength(5)
+    searchLinks.forEach((link) => expect(link).toHaveAttribute('href', '/ki-chat'))
+  })
+
   it('adds an activity via EditMode and reflects it in the section and localStorage', () => {
     seedStoredChat()
     render(
