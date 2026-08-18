@@ -1,32 +1,34 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-17
+**Datum:** 2026-08-18
 
-## Was ist seit dem letzten Eintrag (2026-08-16) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-17) passiert?
 
-Seit dem letzten Bericht ist neuer Code auf `main` gelandet (über das
-`it-chef/auto`-Feature-Programm, per Freigabe-Chef gemergt): Entwurfs-Aktionen
-auf Reiseentwürfe (pausieren/fortsetzen/duplizieren/abschließen/löschen),
-manuelles Hinzufügen/Entfernen/Preisanpassen von Aktivitäten über einen neuen
-`EditMode`-Dialog, eine neue Seite "Aktivitäten" mit aggregierter Ansicht über
-alle Reisen sowie eine kleine Checkbox-Korrektur auf "Meine Reisen". Alle
-neuen/eigenen Dateien sind mit Tests abgedeckt.
+Seit gestern sind zwei neue Seiten über das `it-chef/auto`-Feature-Programm
+(per Freigabe-Chef geprüft und gemergt) auf `main` gelandet: `Kalender.tsx`
+(Reisekalender mit Monatsraster, Wochenstart Montag, farbig markierten
+Reise-Tagen plus barrierefreier Textliste darunter) und `Warenkorb.tsx`
+(nach Leistungsart gruppierter Warenkorb mit Live-Summen). Dazu kamen zwei
+neue, reine Hilfsmodule (`calendarUtils.ts`, `cartTotals.ts`) samt Tests
+sowie ein Bugfix an Marketing-Chef-Content zu echten Warenkorb-Summen.
 
-Diesen Lauf habe ich gezielt auf den seit gestern neu hinzugekommenen bzw.
-geänderten Code konzentriert (`EditMode.tsx`, `Aktivitaeten.tsx`,
-`Buchung.tsx`, `Reiseentwuerfe.tsx`, `routes.tsx`) und Datei für Datei
-gelesen statt nur zu grep'en: Routing/Nav-Konfiguration für die neue
-Aktivitäten-Seite ist konsistent verdrahtet, Preis-Handling in `EditMode`
-passt zum `TripActivity`-Typ, `duplicateDraft`/`togglePause`/`finalizeDraft`
-in `Reiseentwuerfe.tsx` haben keine Off-by-one- oder Zustandsfehler. Auch
-kontrolliert: die zwei zuvor gemeldeten Muster (unbehandelte Promise-Rejects
-bei der Flug-/Unterkunftssuche in `useChat.ts`) sind inzwischen bereits im
-Code selbst mit `.catch()` abgesichert — nur die vier `localStorage`-Schreib-
-zugriffe in `useChat.ts`/`tripStorage.ts` sind weiterhin ungeschützt, das
-deckt aber exakt PR #6 (siehe unten) bereits ab.
+Diesen Lauf habe ich gezielt auf den seit gestern neuen/geänderten Code
+konzentriert und Datei für Datei gelesen statt nur zu grep'en:
+`calendarUtils.ts` (Monatsraster-Berechnung, Wochenstart, Datumsvergleich
+für Reise-Zuordnung), `Kalender.tsx` (Monatsnavigation, Heute-Markierung),
+`cartTotals.ts` (Gruppierung nach Typ, Summenbildung) und `Warenkorb.tsx`
+(Leerzustand, Entfernen-Aktion, Summenanzeige). Kein Bug gefunden — die
+Monatsnavigation ist bei Jahreswechsel korrekt (Dezember→Januar und
+umgekehrt), die Bereichsprüfung für Reisetage ist inklusiv auf beiden
+Seiten korrekt, und beide neuen Seiten sind mit sinnvollen Tests
+abgedeckt. Auch erneut kontrolliert: die zuvor gemeldeten Muster
+(Mikrofon-Fehler in `speech.ts`, rohe Duffel-Fehlermeldungen, fehlende
+IATA-Hinweise in `FlightWizard.tsx`, verlorene Flugdetails in
+`Buchung.tsx`) sind unverändert im Code — keine neuen, aber auch keine
+neu behobenen.
 
-Die vier PRs aus früheren Läufen sind weiterhin unverändert offen und warten
-auf Nis Review:
+Die vier PRs aus früheren Läufen sind weiterhin unverändert offen und
+warten auf Nis Review:
 [PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
 (hängender Ladezustand bei Unterkunftssuche),
 [PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
@@ -51,14 +53,11 @@ Keine neuen. Aus früheren Läufen weiterhin offen und unverändert im Code
   hängen.** `useChat.ts` (`startEdit`- und `sendMessage`-Zweig für
   Unterkunft) startet die Suche nur bei einem der kuratierten Ziele — bei
   jedem anderen Ziel sagt die KI "ich suche jetzt …", aber es passiert
-  nichts, ohne Hinweis. Der parallele Flug-Zweig hat bereits eine
-  Hinweismeldung für diesen Fall, der Unterkunfts-Zweig nicht. Kein
-  Auto-Fix, weil unklar ist, welcher Text/welche Weiterleitung gewünscht
-  ist — UX-Entscheidung.
-- **Ungeschützte `localStorage`-Schreibzugriffe.** `useChat.ts` (Persistenz-
-  Effect, `beforeunload`-Handler, `resetChat`) und `tripStorage.ts`
-  (`updateStoredTrip`) schreiben weiterhin ohne try/catch — der Fix dafür
-  liegt bereits fertig auf PR #6, wartet nur noch auf Merge.
+  nichts, ohne Hinweis. Kein Auto-Fix, weil unklar ist, welcher
+  Text/welche Weiterleitung gewünscht ist — UX-Entscheidung.
+- **Ungeschützte `localStorage`-Schreibzugriffe.** `useChat.ts` und
+  `tripStorage.ts` schreiben weiterhin ohne try/catch — der Fix liegt
+  bereits fertig auf PR #6, wartet nur noch auf Merge.
 - **Rohe, englische Duffel-Fehlermeldungen im UI.** `src/lib/duffel/client.ts`
   reicht `json?.errors` unverändert durch. Braucht eine Übersetzungstabelle
   für die häufigsten Fehlercodes, keine Ein-Zeilen-Korrektur.
@@ -79,14 +78,16 @@ Keine neuen. Aus früheren Läufen weiterhin offen und unverändert im Code
 ## Weitere Vorschläge
 
 1. **Offene Auto-Fix-PRs mergen.** Vier PRs (#1, #4, #5, #6) liegen bereit
-   und ungefährlich auf GitHub, warten aber schon seit Tagen auf Review —
-   das ist der größte Hebel gerade, noch vor neuem Code.
-2. **Aktivitäten-Seite an echte Reisedaten anbinden.** Die neue Seite
-   `Aktivitaeten.tsx` zeigt bewusst nur hartcodierte Demo-Aktivitäten (wie
-   Angebote/Preisalarme) — sobald es eine echte Mehrfach-Reisen-Ablage
-   gibt, sollte sie die tatsächlich geplanten Aktivitäten aggregieren.
+   und ungefährlich auf GitHub, warten aber schon über eine Woche auf
+   Review — das ist weiterhin der größte Hebel gerade, noch vor neuem Code.
+2. **Demo-Daten in `Kalender.tsx`/`Warenkorb.tsx` an echte Reise-/
+   Cart-Daten anbinden.** Beide neuen Seiten zeigen bewusst nur
+   hartcodierte Demo-Werte (gleiches Muster wie schon bei
+   `Aktivitaeten.tsx`, `Angebote.tsx`, `Preisalarme.tsx`) — sobald es
+   eine echte Mehrfach-Reisen-Ablage und ein Cart-Entity gibt, sollten
+   sie darauf umgestellt werden.
 3. **Testabdeckung für `useChat.ts`/`mockAdvisor.ts` ausbauen.** Die
    zentrale Chat-Logik hat trotz wachsender Komplexität weiterhin keine
    Tests.
 
-_Letztes Update: 2026-08-17_
+_Letztes Update: 2026-08-18_
