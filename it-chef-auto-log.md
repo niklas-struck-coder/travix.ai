@@ -1625,3 +1625,89 @@ blind zu vertrauen.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-18 (zweiter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) enthielt bereits Commit
+`fd91b91` (6.11/6.13 stale Checkboxen, erster Lauf heute) über `main`
+hinaus — keine Merge-Konflikte, `main`..`it-chef/auto` divergierte nicht
+weiter, daher direkt auf dem Branch weitergearbeitet statt neu von `main`
+anzulegen (Regel 1).
+
+**Ausgewählter Punkt:** Zwei weitere stale Checkboxen in
+`tasks/tasks-prd-travix-platform.md` korrigiert: **6.4** ("Assemble
+`TripPlanPage.tsx`/BuchungsSeite mit allen Sektionen, jede Komponente
+klickbar") und **6.5** ("Implement click-to-edit — Klick auf ein
+Trip-Item öffnet KI-Chat mit vorgeladenem Kontext"). Vor der Wahl den
+Rest der Liste erneut durchgeprüft und verworfen:
+- 4.1-4.3 (KI-Wrapper) — weiterhin auf Base44/Gemini-Credentials
+  blockiert.
+- 5.7 (Zug/Bus/Fähre in KI-Chat) — weiterhin keine echte Datenquelle.
+- 6.6/6.7/7.12 (Kostenübersicht/Budget) — `TripDraft` hat weiterhin keine
+  Preisfelder für Transport/Unterkunft.
+- 6.8/6.9 (Checkliste) — weiterhin nur 10 von 13 PRD-Kategorien konkret
+  benannt, für die meisten fehlt zudem jedes Datenfeld in `TripDraft`.
+- 6.2 ("Beim Anbieter buchen") — kein `providerUrl`-Feld vorhanden.
+- 7.4 ("Planung fortsetzen" mit echter Chat-Historie) — per Explore-Agent
+  heute erneut unabhängig verifiziert: `tripStorage.ts` hat nach wie vor
+  nur einen einzigen globalen `localStorage`-Slot
+  (`travix.ki-chat.draft`) ohne Id-Konzept, `Reiseentwuerfe.tsx` zeigt
+  weiterhin rein hartcodierte Demo-Entwürfe ohne Verknüpfung dazu. Eine
+  echte Umsetzung bräuchte Id-basierte Mehrfach-Speicherung (neues
+  Trip-/Draft-Datenmodell, `useChat`/Routing-Änderungen) —
+  Architekturentscheidung, nicht autonom lösbar.
+- 7.7 (Dashboard) — Loyalty Points existieren nirgends im Code.
+- 7.15 (ReiseSuche) — weiterhin zu vage beschrieben.
+
+Beim erneuten Durchgehen von `Buchung.tsx` (im Rahmen der 7.4-Prüfung)
+fiel auf, dass die Seite bereits alle fünf Trip-Sektionen
+(Transport/Reisedaten/Budget/Unterkunft/Aktivitäten) mit funktionierendem
+"Bearbeiten"-Stift zusammensetzt (6.4) und jeder Stift tatsächlich auf
+`/ki-chat?edit=<feld>` verlinkt — `KiChat.tsx` liest den `edit`-Query-
+Parameter über `useSearchParams` aus und `useChat.ts` lädt darüber
+(`editPrompts`) den passenden Prompt vor (6.5). Beide Checkboxen standen
+noch auf `[ ]`, obwohl die Funktionalität bereits vollständig existiert —
+dieselbe Art Lücke wie bei 6.11/6.13/7.5 in früheren Läufen. Diese
+Korrektur wurde als der heutige "eine Punkt" gewählt statt sie beiläufig
+mitzuziehen, aus demselben Grund wie beim 6.11/6.13-Lauf: eine unbelegte
+Checkbox-Korrektur ohne Testabsicherung wäre selbst ein Risiko.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine Produkt-/Architekturentscheidung — reine
+Bestandsaufnahme von bereits existierendem, funktionierendem Code gegen
+den exakten Wortlaut der Aufgabenbeschreibung, mit Code-Lektüre
+(`Buchung.tsx`, `KiChat.tsx`, `useChat.ts`) statt bloßer Vermutung
+verifiziert. Objektiv geprüft und zusätzlich per neuen Tests abgesichert
+statt der Behauptung blind zu vertrauen.
+
+**Umgesetzt:**
+- `tasks/tasks-prd-travix-platform.md` — 6.4 und 6.5 auf `[x]` gesetzt,
+  mit Begründung (kein Code nötig, nur Checkbox + Tests).
+- `ZEITPLAN.md` — 6.4 und 6.5 als eigene erledigte Einträge in Sprint 2
+  ergänzt (vor dem bestehenden 6.11-Eintrag).
+- `src/pages/Buchung.test.tsx` — vier neue Test-Fälle: (1) alle fünf
+  Sektionen rendern für einen gefüllten Trip (6.4), (2) Reisedaten/Budget-
+  Bearbeiten-Links zeigen auf `/ki-chat?edit=dates` bzw.
+  `/ki-chat?edit=budget` (6.5, direkter Link-Fall), (3) Transport-
+  Bearbeiten-Link zeigt auf `/ki-chat?edit=transportMode` für einen
+  Modus ohne eigene Suchseite (6.5, direkter Link-Fall), (4) Unterkunft-
+  Bearbeiten öffnet den Dialog, dessen "Mit KI planen"-Link auf
+  `/ki-chat?edit=accommodation` zeigt (6.5, Dialog-Fall).
+
+**Geprüft:**
+- `npm install` → sauber, 647 Pakete (frischer Checkout, `node_modules`
+  fehlte); entstandene, inhaltlich irrelevante `package-lock.json`-
+  `libc`-Metadaten-Diffs wieder verworfen vor dem Commit (gleiches Muster
+  wie in allen vorherigen Läufen).
+- `npx tsc -b` → grün, keine TypeScript-Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh, nicht
+  durch diesen Lauf verursacht).
+- `npx vitest run` → 54/54 Tests grün (50 vorher + 4 neue in
+  `Buchung.test.tsx`).
+- `npm run build` (`tsc -b && vite build`) → grün, keine neuen
+  TypeScript-Fehler (einzige Warnung: bereits vorbestehende
+  Chunk-Size-Warnung, nicht durch diesen Lauf verursacht).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

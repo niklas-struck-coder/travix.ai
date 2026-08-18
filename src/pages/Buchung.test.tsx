@@ -32,6 +32,79 @@ describe('Buchung – Grundgerüst', () => {
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/ki-chat')
   })
+
+  it('renders every trip section (Transport, Reisedaten, Budget, Unterkunft, Aktivitäten) for a filled trip', () => {
+    seedStoredChat({
+      transportMode: 'train',
+      dates: '12.–19. Sept.',
+      budget: '1.500 €',
+      accommodation: 'Hotel Lissabon',
+      activities: [{ id: '1', name: 'Museum', price: '10 €' }],
+    })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Transport')).toBeInTheDocument()
+    expect(screen.getByText('Zug')).toBeInTheDocument()
+    expect(screen.getByText('Reisedaten')).toBeInTheDocument()
+    expect(screen.getByText('12.–19. Sept.')).toBeInTheDocument()
+    expect(screen.getByText('Budget')).toBeInTheDocument()
+    expect(screen.getByText('1.500 €')).toBeInTheDocument()
+    expect(screen.getByText('Unterkunft')).toBeInTheDocument()
+    expect(screen.getByText('Hotel Lissabon')).toBeInTheDocument()
+    expect(screen.getByText('Aktivitäten')).toBeInTheDocument()
+    expect(screen.getByText('1 Aktivität geplant')).toBeInTheDocument()
+  })
+
+  it('click-to-edit: Bearbeiten on Reisedaten/Budget links straight to KI-Chat with the field pre-loaded via ?edit=', () => {
+    seedStoredChat({ dates: '12.–19. Sept.', budget: '1.500 €' })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: 'Reisedaten bearbeiten' })).toHaveAttribute(
+      'href',
+      '/ki-chat?edit=dates',
+    )
+    expect(screen.getByRole('link', { name: 'Budget bearbeiten' })).toHaveAttribute(
+      'href',
+      '/ki-chat?edit=budget',
+    )
+  })
+
+  it('click-to-edit: Bearbeiten on Transport links straight to KI-Chat when there is no dedicated search page for the mode', () => {
+    seedStoredChat({ transportMode: 'train' })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: 'Transport bearbeiten' })).toHaveAttribute(
+      'href',
+      '/ki-chat?edit=transportMode',
+    )
+  })
+
+  it('click-to-edit: Bearbeiten on Unterkunft offers "Mit KI planen", which pre-loads the accommodation context in KI-Chat', () => {
+    seedStoredChat({ accommodation: 'Hotel Lissabon' })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Unterkunft bearbeiten' }))
+    expect(screen.getByRole('link', { name: /Mit KI planen/ })).toHaveAttribute(
+      'href',
+      '/ki-chat?edit=accommodation',
+    )
+  })
 })
 
 describe('Buchung – Aktivitäten', () => {

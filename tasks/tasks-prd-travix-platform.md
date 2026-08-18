@@ -188,8 +188,8 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 6.1 Build `TripSection.tsx` wrapper for Flights, Trains, Hotels, Car Rentals, Activities sections
   - [ ] 6.2 Build `TripItem.tsx` with item details and "Beim Anbieter buchen" button (opens provider URL)
   - [ ] 6.3 Build `EmptySection.tsx` with placeholder text and "+ Suchen" button linking to KI-Chat with context
-  - [ ] 6.4 Assemble `TripPlanPage.tsx` (BuchungsSeite) with all sections, making every component clickable
-  - [ ] 6.5 Implement click-to-edit — clicking any trip item opens KI-Chat with pre-loaded context
+  - [x] 6.4 Assemble `TripPlanPage.tsx` (BuchungsSeite) with all sections, making every component clickable — `src/pages/Buchung.tsx` already assembles Transport/Reisedaten/Budget/Unterkunft/Aktivitäten sections, each with a "Bearbeiten" pencil; checkbox was stale, same kind of gap as 7.5/6.11/6.13, no code change needed
+  - [x] 6.5 Implement click-to-edit — clicking any trip item opens KI-Chat with pre-loaded context — each section's edit control links to `/ki-chat?edit=<field>` (or, for Transport/Unterkunft, a dialog offering that link alongside the manual search page), and `KiChat.tsx`/`useChat.ts` genuinely read the `edit` query param and pre-load the matching prompt (`editPrompts`); checkbox was stale, no code change needed
   - [ ] 6.6 Build `CostBreakdown.tsx` with real-time totals by category (transport, accommodation, activities, car)
   - [ ] 6.7 Implement `calculateCosts.ts` logic for real-time recalculation on item add/remove
   - [ ] 6.8 Build `ChecklistPanel.tsx` with 13 checklist items (outbound/return flight, accommodation, activities, etc.)

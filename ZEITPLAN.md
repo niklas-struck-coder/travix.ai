@@ -85,6 +85,17 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
 - [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
 - [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
+- [x] 6.4 `Buchung.tsx` komplett zusammengesetzt (alle Sektionen klickbar) —
+  vom autonomen IT-Chef-Lauf am 18.08. (zweiter Lauf) als stale Checkbox
+  erkannt: Transport/Reisedaten/Budget/Unterkunft/Aktivitäten sind bereits
+  alle als eigene, bearbeitbare Sektionen vorhanden. Keine Code-Änderung,
+  nur die Checkbox plus vier neue Test-Assertions in `Buchung.test.tsx`.
+- [x] 6.5 Klick-zum-Bearbeiten (KI-Chat mit vorgeladenem Kontext) — ebenfalls
+  vom autonomen IT-Chef-Lauf am 18.08. (zweiter Lauf) als stale Checkbox
+  erkannt und verifiziert: die "Bearbeiten"-Stifte verlinken auf
+  `/ki-chat?edit=<feld>`, und `KiChat.tsx`/`useChat.ts` lesen diesen
+  Query-Parameter tatsächlich aus und laden den passenden Prompt vor
+  (`editPrompts`). Keine Code-Änderung, nur die Checkbox plus Tests.
 - [x] 6.11 "Mit Travix weiterplanen"-Button — vom autonomen IT-Chef-Lauf am
   18.08. als stale Checkbox erkannt: Button existiert bereits in
   `Buchung.tsx`s `PageHeader`-Actions (Link zu `/ki-chat`), gleiche Art
