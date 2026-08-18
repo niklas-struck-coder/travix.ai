@@ -1,53 +1,48 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-17
+**Datum:** 2026-08-18
 
-## Was ist seit dem letzten Eintrag (2026-08-16) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-17) passiert?
 
-Diesmal hat sich einiges bewegt — anders als in den letzten Läufen. Auf
-`main` ist neuer Code gelandet: `EditMode.tsx` (Aktivitäten einer
-Buchung manuell hinzufügen/entfernen/im Preis anpassen, **echt
-gespeichert** über `updateStoredTrip()`), eine neue Seite "Aktivitäten"
-mit aggregierter Ansicht über alle Reisen, Entwurfs-Aktionen
-(pausieren/duplizieren/abschließen/löschen) auf `Reiseentwuerfe.tsx`
-sowie eine kleine Checkbox-Korrektur.
+Zwei neue Seiten sind auf `main` gelandet: `Warenkorb.tsx` (Positionen
+nach Leistungsart gruppiert, Zwischen- und Gesamtsumme werden bei jeder
+Änderung aus den echten Positionen neu berechnet, kein separates
+Summenfeld) und `Kalender.tsx` (Reisekalender mit Monatsraster). Der
+Warenkorb ist damit das nächste Feature, das wirklich echt rechnet —
+mein eigener autonomer Lauf hat dazu bereits ein Content-Stück
+("Echte Zahlen, keine Show") vorbereitet, das heute vom Freigabe-Chef
+geprüft und nach `main` gemergt wurde. Der Kalender dagegen läuft noch
+komplett auf zwei fest eingebauten Demo-Reisen (kein echter
+Reise-Speicher dahinter) — dafür also bewusst noch kein Content, aus
+demselben Grund wie zuletzt bei den Entwurfs-Aktionen.
 
-Mein eigener autonomer Tageslauf heute hat das bereits aufgegriffen: ein
-fertiges Content-Stück ("Deine Reise ist keine Einbahnstraße", LinkedIn +
-Instagram + Canva-Brief) zu `EditMode.tsx` liegt in
-`marketing/content-stueck-aktivitaeten-bearbeiten.md` und wartet auf
-deine Freigabe — bewusst nur zu diesem einen Baustein, weil er als
-einziger der neuen Features wirklich echt gespeichert wird.
-
-Wichtig für die Einordnung: Die neue Aktivitäten-Seite und die
-Entwurfs-Aktionen (pausieren/duplizieren/…) laufen aktuell noch auf
-Demo-State (`useState` mit Platzhalter-Daten, kein echtes Backend) —
-genau wie Favoriten/Preisalarme/Angebote vorher schon. Für Content heißt
-das: noch nicht als "live" bewerben, sonst bricht das Ehrlichkeits-
-Versprechen an der ersten Neuladen-Aktion.
-
-Unverändert offen: die vier PRs (#1, #4, #5, #6) warten weiter auf
-Review, und in `marketing/` stapeln sich jetzt vier fertige, ungeprüfte
-Entwürfe (Woche-1-Post A/B, Blog-Stück, Kartenansicht, jetzt plus
-Aktivitäten bearbeiten).
+Wichtig zur Einordnung: "vom Freigabe-Chef geprüft und gemergt" heißt
+nur, dass der Textentwurf sauber und wahrheitsgetreu zum Code ist —
+nicht, dass er schon irgendwo veröffentlicht wurde. In `marketing/`
+liegen inzwischen fünf fertige Entwürfe (Content-Plan, Woche-1-Posts,
+Kartenansicht, Aktivitäten bearbeiten, jetzt Warenkorb), von denen laut
+bisherigem Stand noch keiner tatsächlich live geschaltet ist.
 
 ## Vorschläge
 
-1. **Freigabe-Stau ist jetzt das dringendste Thema.** Vier fertige
-   Text-Stücke liegen in `marketing/` bereit, keins ist bislang
-   freigegeben oder verworfen. Bevor mehr entsteht, lohnt sich ein
-   kurzer Sichtungs-Durchgang — sonst schreiben wir munter weiter an
-   einem Stapel, den niemand nutzt.
-2. **"Echt gespeichert" als eigene Botschaft schärfen.** Der EditMode-
-   Fund zeigt einen Unterschied, der sich als Content-Linie eignet:
-   travix unterscheidet inzwischen sichtbar zwischen "das speichern wir
-   wirklich" (Aktivitäten in der Buchung) und "das ist noch Demo"
-   (Favoriten, Preisalarme, Entwurfs-Aktionen). Ein kurzes,
-   selbstironisches Stück genau über diese Unterscheidung würde die
-   "Ehrlichkeit als Feature"-Linie greifbarer machen als jedes
-   einzelne Feature-Update für sich.
-3. **Entwurfs-Aktionen (pausieren/duplizieren/…) als Idee vormerken,
-   noch nicht schreiben.** Inhaltlich passt das gut zu "Reise-Planung
-   darf unterbrechbar sein" — aber solange es Demo-State ist, wäre ein
-   Post darüber ein Versprechen, das beim Neuladen bricht. Sobald echte
-   Speicherung nachgezogen wird, ist das Material fertig im Kopf.
+1. **Entwurfs-Stapel gegen echtes Publizieren abgleichen.** Fünf
+   Text-Stücke sind fertig und technisch geprüft, aber der eigentliche
+   Schritt "posten" fehlt offenbar noch komplett. Bevor weitere Stücke
+   entstehen, lohnt sich ein kurzer Ni-Durchgang: welche drei, vier
+   Sätze reichen, um die ersten zwei Posts (z. B. Kartenansicht +
+   Warenkorb) diese Woche wirklich rauszuschicken? Sonst wächst der
+   Stapel schneller als die Reichweite.
+2. **"Was ist echt, was ist Demo" als eigenes Format statt Randnotiz.**
+   Mittlerweile gibt es genug Beispiele (Warenkorb echt, EditMode echt,
+   Kalender & Entwurfs-Aktionen Demo), um daraus eine kleine,
+   wiederkehrende Content-Reihe zu machen — z. B. ein kurzer
+   Monats-Statusbeitrag "Was diesen Monat wirklich gespeichert wird".
+   Macht die Ehrlichkeits-Positionierung greifbarer als einzelne
+   Feature-Posts und braucht keine neuen Zahlen, nur den bestehenden
+   Code-Stand.
+3. **Kalender als Content-Idee vormerken, nicht schreiben.** Der
+   Monatsraster-Kalender ist optisch ein gutes Bild für "Reise-Planung
+   auf einen Blick" — aber erst posten, sobald er an echte
+   Reise-Daten hängt, sonst bricht das Ehrlichkeits-Versprechen beim
+   ersten Neuladen. Als Idee im Kopf behalten für den Moment, wo der
+   echte Reise-Speicher kommt.
