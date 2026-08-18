@@ -448,3 +448,50 @@ gepusht).
 
 **Ergebnis:** Alles grün und stimmig → nach `main` gemergt (Fast-Forward
 `30feaef..2e079ae`, gepusht).
+
+## 2026-08-18, Tageslauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Check heute
+  gemergt, s. o.). Nichts zu tun.
+- `marketing-chef/auto` — 1 Commit vor `main` (`b331888`, Content-Stück
+  "Echte Zahlen, keine Show").
+- `support-chef/auto` — 1 Commit vor `main` (`9d58c7e`, UX-Analyse
+  `EditMode.tsx`).
+
+**Prüfung `marketing-chef/auto`:**
+- Diff: nur `marketing-chef-auto-log.md` und neue Datei
+  `marketing/content-stueck-warenkorb-echte-summen.md`. Kein Code
+  betroffen.
+- Faktencheck gegen Code: die im Entwurf behaupteten Eigenschaften von
+  `Warenkorb.tsx`/`cartTotals.ts` (Gruppierung nach Typ,
+  `groupCartItems`/`calculateCartTotal` berechnen Summen live neu, kein
+  Buchungs-/Bezahl-Button) stimmen mit dem tatsächlichen Code auf `main`
+  überein.
+- Keine erfundenen Kennzahlen/Nutzerzahlen/Ergebnisse gefunden. Klar als
+  Entwurf markiert ("wartet auf Nis Freigabe", "kein Post ... wurde oder
+  wird automatisch veröffentlicht"), kein Hinweis auf tatsächliches
+  Posten. Text vollständig ausformuliert (LinkedIn + Instagram + Canva-
+  Brief), keine bloße Stichpunkt-Skizze.
+- **Ergebnis:** Passt → nach `main` gemergt (`582e392`).
+
+**Prüfung `support-chef/auto`:**
+- Diff: nur `support-chef-auto-log.md` (neuer Abschnitt zu
+  `EditMode.tsx`, dem Aktivitäten-Bearbeiten-Dialog aus Aufgabe 6.12).
+  Achtung: ein reiner Zwei-Baum-Diff `main..support-chef/auto` zeigte
+  zunächst fälschlich große Löschungen (u. a. `Warenkorb.tsx`,
+  `Kalender.tsx`, `routes.tsx`), weil der Branch vor den seither auf
+  `main` gelandeten IT-Chef-Commits erstellt wurde. Per Test-Merge lokal
+  verifiziert, dass ein echter 3-Wege-Merge sauber ist und ausschließlich
+  `support-chef-auto-log.md` ändert — keine Löschungen. So auch gemergt.
+- Stichprobe der drei genannten Reibungspunkte gegen den Code geprüft:
+  Datei-/Zeilenangaben zu `EditMode.tsx` (Enter-Taste ohne Wirkung im
+  "Neue Aktivität"-Feld, sofortiges/endgültiges Löschen ohne Rückgängig,
+  Preisfeld ohne Formatvorgabe) sowie die Querverweise auf `Buchung.tsx`
+  (`handleActivitiesChange`) und `Angebote.tsx` (`removeOffer`) stimmen
+  mit dem tatsächlichen Code überein, keine Anzeichen für Erfundenes.
+- **Ergebnis:** Passt → nach `main` gemergt (`d77a2ef`).
+
+**Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
+support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
+(kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit).
