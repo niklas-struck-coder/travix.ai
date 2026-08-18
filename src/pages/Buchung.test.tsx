@@ -15,6 +15,25 @@ function seedStoredChat(overrides: Partial<StoredChatState['trip']> = {}) {
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
 }
 
+describe('Buchung – Grundgerüst', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('shows the "Mit Travix weiterplanen" button linking to /ki-chat for an active trip', () => {
+    seedStoredChat()
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    const link = screen.getByRole('link', { name: /Mit Travix weiterplanen/ })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/ki-chat')
+  })
+})
+
 describe('Buchung – Aktivitäten', () => {
   beforeEach(() => {
     localStorage.clear()

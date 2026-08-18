@@ -85,6 +85,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
 - [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
 - [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
+- [x] 6.11 "Mit Travix weiterplanen"-Button — vom autonomen IT-Chef-Lauf am
+  18.08. als stale Checkbox erkannt: Button existiert bereits in
+  `Buchung.tsx`s `PageHeader`-Actions (Link zu `/ki-chat`), gleiche Art
+  Lücke wie bei 7.5 `MeineReisen.tsx`. Keine Code-Änderung, nur die
+  Checkbox plus eine fehlende Test-Assertion in `Buchung.test.tsx` ergänzt.
+- [x] 6.13 `BuchungsSeite` (`/buchung`) — ebenfalls stale Checkbox: die Seite
+  (`src/pages/Buchung.tsx`) war bereits vollständig gebaut, in
+  `routes.tsx` verdrahtet und lädt echte Trip-Daten über
+  `loadStoredChat()`. Gleiche Korrektur wie bei 6.11 oben.
 - [x] 6.12 `EditMode.tsx` — vom autonomen IT-Chef-Lauf am 17.08. umgesetzt:
   Dialog zum manuellen Hinzufügen/Entfernen von Aktivitäten und
   Preisanpassung, direkt in die "Aktivitäten"-Sektion von `Buchung.tsx`

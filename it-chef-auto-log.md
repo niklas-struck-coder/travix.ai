@@ -1536,3 +1536,92 @@ Summenlogik.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-18
+
+**Ausgangslage:** `it-chef/auto` (origin) enthielt bereits die Commits
+`51eab69` (7.11 Kalender) und `39142a8` (7.6 Warenkorb) über `main`
+hinaus — keine Merge-Konflikte, `main`..`it-chef/auto` divergierte nicht,
+daher direkt auf dem Branch weitergearbeitet statt neu von `main`
+anzulegen (Regel 1).
+
+**Ausgewählter Punkt:** Keine neue Feature-Implementierung, sondern zwei
+stale Checkboxen in `tasks/tasks-prd-travix-platform.md` korrigiert:
+**6.11** ("Mit Travix weiterplanen"-Button) und **6.13** (BuchungsSeite
+`/buchung` mit echten Trip-Daten verdrahtet). Vor der Wahl geprüft und
+verworfen:
+- 4.1-4.3 (KI-Wrapper) — weiterhin auf Base44/Gemini-Credentials blockiert.
+- 6.6/6.7/7.12 (Kostenübersicht/Budget) — `TripDraft` hat weiterhin keine
+  Preisfelder für Transport/Unterkunft.
+- 6.8/6.9 (Checkliste) — erneut geprüft, gleicher Befund wie im dritten/
+  vierten Lauf: `TripDraft` hat für die meisten der 13 PRD-Kategorien
+  (Versicherung, Reisedokumente, Gepäck, Flughafentransfer, Restaurants,
+  Mietwagen) überhaupt kein Datenfeld. Eine ehrliche Umsetzung nur der
+  vorhandenen ~5 Felder wäre inhaltlich eine Kopie von
+  `calculateProgress.ts` (7.1) unter neuem Namen und würde entweder neue
+  Datenfelder erfinden oder eine Produktentscheidung treffen, welche der
+  13 Punkte stillschweigend wegfallen — beides verstößt gegen Kriterium 3
+  ("keine Interpretation über die Aufgabenliste hinaus"). Weiterhin offen.
+- 7.4 ("Planung fortsetzen" mit echter Chat-Historie) — `tripStorage.ts`
+  hat nur einen einzigen globalen localStorage-Slot ohne Trip-ID-Konzept,
+  `Reiseentwuerfe.tsx` zeigt zwei rein hartcodierte Demo-Entwürfe. Eine
+  echte "Wiederaufnahme mit voller Historie pro Entwurf" setzt
+  ID-basierte Mehrfach-Speicherung voraus, die es nicht gibt — anders als
+  bei 7.6/7.8/7.9/7.10/7.13 lässt sich das nicht über denselben
+  Demo-State-Platzhalter lösen, weil hier die Historie selbst (nicht nur
+  Anzeige-Daten) pro Entwurf existieren müsste. Architekturentscheidung,
+  nicht autonom lösbar.
+- 7.7 (Dashboard) — FR-903 nennt "Loyalty Points", nirgends im Code
+  vorhanden (8.9/8.12 offen). Weiterhin verworfen.
+- 7.15 (ReiseSuche) — FR-902 bleibt ohne Felder/Verhalten beschrieben, zu
+  vage. Weiterhin verworfen.
+- 6.2 ("Beim Anbieter buchen") — `TripActivity` hat kein
+  `providerUrl`-Feld, keine echten Provider-Links vorhanden; ein
+  Platzhalter-Link wäre erfunden. Weiterhin verworfen.
+
+Bei der Prüfung dieser Kandidaten fiel auf, dass `Buchung.tsx` (die
+BuchungsSeite) bereits vollständig existiert, unter `/buchung` verdrahtet
+ist und einen "Mit Travix weiterplanen"-Button enthält — beides exakt das,
+was 6.13 und 6.11 verlangen. Die Checkboxen dafür waren nie gesetzt worden
+(gleiche Art Lücke wie bei 7.5 `MeineReisen.tsx` im ersten Lauf). Diese
+Korrektur wurde als der heutige "eine Punkt" gewählt statt sie stillschweigend
+nebenbei mitzuziehen, weil eine unbelegte Checkbox-Korrektur ohne
+zusätzliche Testabsicherung selbst ein Risiko wäre (könnte auf einer
+falschen Annahme beruhen).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine Produkt-/Architekturentscheidung — reine
+Bestandsaufnahme von bereits existierendem, funktionierendem Code gegen
+den exakten Wortlaut der Aufgabenbeschreibung. Objektiv geprüft: Route
+`/buchung` in `routes.tsx` bestätigt, Button-Text/Link in `Buchung.tsx`
+bestätigt, zusätzlich per neuem Test abgesichert statt der Behauptung
+blind zu vertrauen.
+
+**Umgesetzt:**
+- `tasks/tasks-prd-travix-platform.md` — 6.11 und 6.13 auf `[x]` gesetzt,
+  mit Begründung (Datei/Zeile, kein Code nötig).
+- `ZEITPLAN.md` — 6.11 und 6.13 in Sprint 2 von der reinen
+  Ist-Stand-Erwähnung in eigene erledigte Einträge verschoben.
+- `src/pages/Buchung.test.tsx` — neue Test-Suite "Buchung – Grundgerüst"
+  mit einer Assertion, dass der "Mit Travix weiterplanen"-Link bei einer
+  aktiven Reise gerendert wird und auf `/ki-chat` zeigt (bisher gab es
+  keinen Test, der diesen Button oder die `/buchung`-Route überhaupt
+  berührt hätte — die Checkbox-Korrektur stützte sich vorher rein auf
+  Code-Lesen).
+
+**Geprüft:**
+- `npm install` → sauber (frischer Checkout, `node_modules` fehlte);
+  entstandene, inhaltlich irrelevante `package-lock.json`-`libc`-Metadaten-
+  Diffs wieder verworfen vor dem Commit (gleiches Muster wie in allen
+  vorherigen Läufen).
+- `npx tsc -b` und `npm run build` (`tsc -b && vite build`) → beide grün,
+  keine TypeScript-Fehler, Build erfolgreich (einzige Warnung: bereits
+  vorbestehende Chunk-Size-Warnung, nicht durch diesen Lauf verursacht).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, react-refresh).
+- `npm run test` (vitest) → 50/50 Tests grün (49 vorher + 1 neuer Test in
+  `Buchung.test.tsx`).
+- `npx vite preview` lokal gestartet, `/buchung` liefert HTTP 200.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -195,9 +195,9 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 6.8 Build `ChecklistPanel.tsx` with 13 checklist items (outbound/return flight, accommodation, activities, etc.)
   - [ ] 6.9 Implement `checklistRules.ts` for auto-detecting completion from trip data
   - [ ] 6.10 Wire checklist items to open KI-Chat for planning that specific component
-  - [ ] 6.11 Add "Mit Travix weiterplanen" button for full trip editing via chat
+  - [x] 6.11 Add "Mit Travix weiterplanen" button for full trip editing via chat — already present in `Buchung.tsx`'s `PageHeader` actions, linking to `/ki-chat`; checkbox was stale (same kind of gap as 7.5 `MeineReisen`), only the checkbox plus a missing test assertion were added
   - [x] 6.12 Build `EditMode.tsx` for manual add/remove activities and price adjustments — dialog in `src/components/trip/EditMode.tsx`, wired into the "Aktivitäten" section on `Buchung.tsx`; add/remove/price-edit persist via the existing `updateStoredTrip()` (`tripStorage.ts`), no new data field needed since `TripActivity` already has `name`/`price`. Scoped to activities only, without a category cost summary — that's 6.6/6.7 (`CostBreakdown.tsx`/`calculateCosts.ts`), still blocked because `TripDraft` has no price field for transport/accommodation yet
-  - [ ] 6.13 Create BuchungsSeite page (`/buchung`) wired to active trip data
+  - [x] 6.13 Create BuchungsSeite page (`/buchung`) wired to active trip data — `src/pages/Buchung.tsx` was already built and wired into `routes.tsx` (`/buchung`), loading the real trip via `loadStoredChat()`; checkbox was stale, same kind of gap as 7.5 `MeineReisen`, no code change needed
 
 - [ ] 7.0 Trip lifecycle pages — Drafts, booked trips, cart, dashboard, calendar, budget, map, favorites, alerts
   - [x] 7.1 Implement `calculateProgress.ts` for draft progress percentage based on completed components — counts the 5 sections shown on the Reiseplan (transport, dates, budget, accommodation, activities); not yet used by any page (7.2 draft cards are the first consumer, still open)
