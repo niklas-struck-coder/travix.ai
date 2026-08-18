@@ -408,3 +408,43 @@ UX-Analyse zur Aktivitäten-Seite `/aktivitaeten`):
 
 **Ergebnis:** Passt → nach `main` gemergt (Merge-Commit `24a53fe`,
 gepusht).
+
+## 2026-08-18, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (51eab69 7.11 Kalender, 39142a8
+  7.6 Warenkorb, fd91b91 6.11/6.13 stale Checkboxen, 400d133 6.4/6.5
+  stale Checkboxen, 2e079ae 6.1/6.3 stale Checkboxen — jeweils eigener
+  Lauf laut `it-chef-auto-log.md`, letzter davon heute 02:08 Uhr).
+- `marketing-chef/auto` — 0 Commits vor `main`. Nichts zu tun, wie
+  erwartet (läuft erst um 6 Uhr).
+- `support-chef/auto` — 0 Commits vor `main`. Nichts zu tun, wie
+  erwartet (läuft erst um 6 Uhr).
+
+**Prüfung `it-chef/auto`:**
+- Diff-Umfang gegen `main` nachvollzogen: zwei neue Seiten
+  (`Kalender.tsx`, `Warenkorb.tsx`) mit reinen Hilfsfunktionen
+  (`calendarUtils.ts`, `cartTotals.ts`) samt eigenen Unit-Tests, drei
+  Checkbox-/Log-only-Commits (6.1/6.3, 6.4/6.5, 6.11/6.13) mit neuen
+  Testfällen in `Buchung.test.tsx` statt Produktcode-Änderung, plus
+  Routing-Eintrag für die zwei neuen Seiten und entsprechende
+  `ZEITPLAN.md`/Task-Checkbox-Aktualisierungen. Kein Bezug zu
+  Auth/Zahlungen/rechtlichen Texten in irgendeinem der fünf Commits.
+- **Unabhängig selbst verifiziert** (nicht nur Log-Eintrag geglaubt):
+  `npm install` sauber (frischer Checkout), danach `npx tsc -b` → grün,
+  `npx eslint .` → 0 Fehler (dieselben 3 vorbestehenden
+  react-refresh-Warnings), `npx vitest run` → 55/55 Tests grün. Alle drei
+  Ergebnisse decken sich exakt mit den Behauptungen in
+  `it-chef-auto-log.md`.
+- Scope-Check: jeder Commit bleibt beim jeweils beschriebenen einen
+  Punkt, kein erkennbarer Scope-Creep. Die drei
+  Checkbox-Korrektur-Commits sind durch neue, vorher fehlende Tests
+  belegt statt einer unbelegten Behauptung.
+- Design-Check: `Kalender.tsx`/`Warenkorb.tsx` folgen `MARKENDESIGN.md`
+  — ermutigender Leer-Zustand ("Noch keine Reise geplant" /
+  "Reise mit KI planen", wie auf der Reiseplan-Seite vorgegeben) und in
+  `Warenkorb.tsx` keine künstliche Dringlichkeitssprache bei der
+  Preisdarstellung.
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemergt (Fast-Forward
+`30feaef..2e079ae`, gepusht).
