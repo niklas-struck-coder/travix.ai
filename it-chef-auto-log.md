@@ -1769,3 +1769,110 @@ also nicht im heutigen sicheren Rahmen.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-18 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) war vollständig in `main`
+gemerged (Freigabe-Chef hatte alle drei vorherigen Läufe von heute schon
+abgenommen), keine Divergenz zwischen den Branches. Branch daher gemäß
+Regel 1 frisch von `origin/main` neu angelegt statt auf altem Stand
+weiterzumachen.
+
+**Ergebnis: kein Punkt umgesetzt.** Alle verbleibenden offenen Checkboxen
+in `tasks/tasks-prd-travix-platform.md` durchgegangen (nicht nur die in
+`ZEITPLAN.md` gelisteten) und einzeln gegen die vier Sicherheitskriterien
+geprüft — keiner erfüllt alle vier:
+
+- **2.x Auth/Backend** — weiterhin blockiert von der offenen
+  Backend-Entscheidung (Base44 vs. Alternative), explizit Ni vorbehalten.
+- **4.1-4.3 KI-Wrapper** (`FULL_TRIP_SCHEMA`, System-Prompts,
+  `invokeLLM.ts`) — weiterhin auf Base44/Gemini-Credentials blockiert.
+- **5.7** (Zug/Bus/Fähre-Ergebnisse in KI-Chat integrieren) — verifiziert:
+  `src/lib/duffel/client.ts` hat nur `searchFlights`/`searchStays`, keine
+  Zug-Suchfunktion; `TrainCard.tsx`/`TrainResults.tsx` (5.4/5.5) sind reine
+  UI-Komponenten ohne jede Datenquelle. Eine Umsetzung bräuchte entweder
+  eine echte Rail-API-Anbindung (nicht vorhanden, vermutlich weitere
+  Credentials wie bei 5.10) oder erfundene Zugangebote — letzteres verstößt
+  direkt gegen das im Produkt selbst verankerte Prinzip "echte Angebote,
+  nie erfunden" (`mockAdvisor.ts`-Begrüßungstext). Bestätigt weiterhin
+  keine echte Datenquelle, wie schon im zweiten Lauf heute festgestellt.
+- **6.2** ("Beim Anbieter buchen") — weiterhin kein
+  Item-/Provider-URL-Feld auf `TripDraft`.
+- **6.6/6.7/7.12** (Kostenübersicht, `calculateCosts.ts`, Reisebudget) —
+  `TripDraft` hat weiterhin nur ein einzelnes Freitext-`budget`-Feld,
+  keine echten Preisfelder pro Kategorie (Transport/Unterkunft/Auto) für
+  eine Neuberechnung.
+- **6.8/6.9/6.10** (13-Punkte-Checkliste) — erneut geprüft: FR-501 nennt
+  konkret nur 10 Kategorien (Hin-/Rückflug, Unterkunft, Aktivitäten,
+  Mietwagen, Restaurants, Versicherung, Reisedokumente, Packen,
+  Flughafentransfer) und fasst den Rest vage als "additional planning
+  items" zusammen — welche drei weiteren der genannten 13 das sein
+  sollen, steht nirgends. Zusätzlich hat `TripDraft` für die meisten
+  dieser Kategorien (Restaurants, Versicherung, Dokumente, Packen,
+  Transfer) überhaupt kein Datenfeld, sodass FR-502 (Auto-Erkennung aus
+  Trip-Daten) für die Mehrheit der Punkte gar nicht erfüllbar wäre, ohne
+  entweder das Schema zu erweitern oder Erledigt-Status frei zu erfinden.
+  Beides ginge über die reine Aufgabenbeschreibung hinaus.
+- **7.4** ("Planung fortsetzen" mit echter Chat-Historie) — `tripStorage.ts`
+  hat weiterhin nur einen einzigen globalen `localStorage`-Slot ohne
+  Id-Konzept; eine echte Umsetzung bräuchte ein Id-basiertes
+  Mehrfach-Trip-Datenmodell — Architekturentscheidung, nicht autonom
+  lösbar.
+- **7.7 Dashboard** — FR-903 fordert "trips overview, budgets, favorites,
+  and loyalty points". Trips/Favoriten ließen sich aus bestehenden
+  Demo-Daten (`MeineReisen.tsx`, `Favoriten.tsx`) zusammenstellen, aber
+  "budgets" (keine echten Preisfelder, s.o. 6.6/6.7) und "loyalty points"
+  (Konzept existiert im Code nirgends, ist explizit eigener, noch offener
+  Punkt 8.12) gibt es in keiner Form im Codebase — würde erfundene Daten
+  für zwei der vier geforderten Dashboard-Bereiche brauchen.
+- **7.15 ReiseSuche** (`/reise-planen`) — FR-902 beschreibt nur "a trip
+  planning search page", ohne jede Angabe zu Feldern/Verhalten; würde ein
+  komplett neues UI-Konzept erfordern, das nirgends spezifiziert ist.
+- **8.1-8.4, 8.6** (Urlaubsmodus-Ausbau, Foto-Vision, Quick Actions,
+  Deal-Ergebnis-Anzeige) — hängen an 4.3 (echter `invokeLLM.ts`) bzw. an
+  8.5 (Deal-Finder-Agent), beides blockiert/noch nicht gebaut.
+- **8.5 DealFinderChat** — "autonomous AI agent with web search" ist ein
+  komplett neues KI-Feature, kein "klar abgegrenzter Punkt", und hängt
+  ebenfalls an der Backend-/KI-Entscheidung.
+- **8.7** (WhatsApp/Telegram-Architektur-Stub) — hängt von
+  Drittanbieter-API-Setup ab, laut PRD selbst als externe Abhängigkeit
+  markiert.
+- **8.8 Profil** — FR-102 steht im PRD-Abschnitt "FR-1xx: Authentication &
+  User Profile" und betrifft Reisepräferenzen des Nutzers (Reisestile,
+  Budget, Ernährung, Heimatflughafen) — fällt unter das
+  Auth/Nutzerdaten-Ausschlusskriterium, auch als reine Demo-Version.
+- **8.9 Premium** — explizit blockiert durch offene Produktentscheidung
+  (OQ-03, Preismodell/Funktionsumfang).
+- **8.10 Einstellungen** — FR-103 nennt nur "app preferences and
+  notification settings" ohne jede konkrete Angabe, welche Einstellungen
+  das sein sollen; welche Optionen es geben soll wäre reine Erfindung.
+- **8.11 Hilfe** — FAQ-Inhalte sind laut `ZEITPLAN.md` explizit noch
+  offener Punkt beim Support-Chef ("Abstimmung mit IT-Chef zu Umsetzung"),
+  existieren also noch nirgends — die Seite jetzt mit erfundenen FAQ-Texten
+  zu bauen wäre reine Annahme.
+- **8.12 Loyalty/Rewards** — gleiche Lücke wie bei 7.7: kein Datenmodell,
+  keine Vorgabe zu Punkteregeln irgendwo im Repo.
+- **8.13 Unit-Tests für calculateCosts/checklistRules** — hängt an den
+  oben blockierten 6.7/6.9, es gibt noch keine Implementierung zum Testen.
+
+Kein neuer Stale-Checkbox-Fall gefunden (alle bereits fertigen
+Sektionen/Seiten aus `Buchung.tsx` und den Trip-Lifecycle-Seiten wurden in
+den drei vorherigen Läufen von heute bereits abgeglichen).
+
+**Warum nichts umgesetzt wurde:** Jeder verbleibende offene Punkt reißt
+mindestens eines der vier Sicherheitskriterien aus der Skill-Datei — echte
+Datenlücke im Schema (6.2/6.6/6.7/6.8/6.9/7.12/8.13), fehlende reale
+Datenquelle bei gleichzeitigem Erfindungsverbot (5.7), offene
+Architektur-/Produktentscheidung (2.x/4.x/7.4/7.7-teilweise/8.9), Auth-/
+Nutzerdatenbezug (8.8), oder eine Beschreibung, die zu vage ist, um ohne
+eigene Annahmen umsetzbar zu sein (6.8-6.10/7.15/8.10/8.11). Lieber nichts
+erfinden als einen dieser Punkte auf eigene Faust füllen.
+
+**Umgesetzt:** Nichts am Produktcode. Nur dieser Log-Eintrag.
+
+**Geprüft:** Kein Code geändert, daher kein Typecheck/Lint/Test-Lauf
+nötig — Repo-Zustand entspricht 1:1 `origin/main` plus diesem
+Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
