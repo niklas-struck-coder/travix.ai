@@ -9,20 +9,22 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
 - Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Neue Seite "Aktivitäten" (aggregierte Aktivitäten über alle Reisen)
-- EditMode für Reiseentwürfe: Aktivitäten manuell hinzufügen/entfernen, Preisanpassung
-- Entwurfs-Aktionen (pausieren/duplizieren/abschließen/löschen)
+- Neue Seite "Aktivitäten" (aggregierte Aktivitäten über alle Reisen) mit EditMode
+- Neue Seite "Kalender" (Reisekalender mit Monatsraster)
+- Neue Seite "Warenkorb" (gruppierter Warenkorb mit Echtzeit-Summen)
 - Kartenansicht der Reiseziele (React-Leaflet), an echten Chat-Trip angebunden
 - KI-Concierge-Chat (Konversations-UI, Sprachfunktionen)
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-16):**
-- Neue Seite Aktivitäten (mit Tests) sowie EditMode-Komponente für Reiseentwürfe
-- Entwurfs-Aktionen und ein Checkbox-Fix in den Reise-Übersichten
-- UX-Analyse zur neuen Aktivitäten-Seite sowie ein passendes Marketing-Content-Stück
-  wurden erstellt und über den Freigabe-Chef nach main gemergt
+**Seit letztem Update (2026-08-17):**
+- Neue Seiten Kalender und Warenkorb sowie ausgebauter EditMode (Aktivitäten
+  manuell hinzufügen/entfernen, Preisanpassung) inkl. Tests
+- Diverse Checkbox-Korrekturen in den Reise-Übersichten (bereits erledigte
+  Punkte als solche markiert)
+- Passendes Marketing-Content-Stück sowie UX-Prüfung zum EditMode wurden
+  erstellt und über den Freigabe-Chef nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-17_
+_Letztes Update: 2026-08-18_
