@@ -293,3 +293,72 @@ sobald Aktivitäten wirklich einer Reise zugeordnet sind (siehe Punkt 1).
 herangezogen, nicht eigenständig als UX-Fläche geprüft — das steht für
 einen künftigen Lauf noch aus, ebenso wie die am selben Tag gebauten
 Entwurfs-Aktionen (7.3, `Reiseentwuerfe.tsx`).
+
+---
+
+## 2026-08-18 — Aktivitäten-Bearbeiten-Dialog (`EditMode.tsx`)
+
+**Geprüfter Bereich:** `src/components/trip/EditMode.tsx` (Aufgabe 6.12,
+am 17.08. vom autonomen IT-Chef-Lauf gebaut), inklusive seiner Einbindung
+in `src/pages/Buchung.tsx:242-252` (`handleActivitiesChange`,
+`src/pages/Buchung.tsx:140-143`). Im letzten Lauf (17.08., Aktivitäten-
+Seite) als noch offen vermerkt — dieser Lauf holt das nach. Zum Vergleich
+herangezogen: `src/pages/Angebote.tsx:49-51` (dort bereits als
+Reibungspunkt "Entfernen ist sofort und endgültig" dokumentiert, 12.08.).
+
+### Reibungspunkte
+
+**1. Enter-Taste im "Neue Aktivität"-Feld tut nichts**
+`src/components/trip/EditMode.tsx:89-111`: Die Eingabefelder für Name und
+Preis stehen in einem reinen `<div>`, nicht in einem `<form>`, und haben
+keinen `onKeyDown`-Handler. Wer nach dem Ausfüllen des Namensfelds
+gewohnheitsmäßig Enter drückt (das naheliegendste Verhalten bei einem
+kleinen Formular in einem Dialog), löst nichts aus — `addActivity()` wird
+ausschließlich durch den kleinen "+"-Icon-Button (Zeile 108-110)
+angestoßen. Das fällt besonders auf, weil der Dialog selbst über Escape
+schließbar ist, Enter im Eingabefeld aber keine entsprechende Wirkung hat.
+
+*Vorschlag:* `onKeyDown`-Handler auf dem Namensfeld ergänzen, der bei
+Enter `addActivity()` aufruft (analog zu vielen anderen kleinen
+"Hinzufügen"-Formularen), oder die beiden Felder in ein `<form
+onSubmit={...}>` mit `event.preventDefault()` einbetten.
+
+**2. Entfernen ist sofort, endgültig und wird sofort in die echte Reise
+gespeichert — ohne Bestätigung oder Rückgängig-Option**
+`src/components/trip/EditMode.tsx:76-83`: Ein Klick auf den
+`Trash2`-Button entfernt die Aktivität sofort aus dem `activities`-Array
+und ruft über `onChange` direkt `handleActivitiesChange` in
+`Buchung.tsx:140-143` auf, was wiederum `updateStoredTrip()` aufruft —
+die Änderung ist augenblicklich dauerhaft im gespeicherten Trip
+verankert, kein Zwischenzustand. Das gleiche grundsätzliche Muster wurde
+bereits am 12.08. bei `Angebote.tsx:49-51` bemängelt, ist hier aber
+gewichtiger: Bei Angeboten geht nur ein gemerkter Vorschlag verloren, den
+man erneut suchen kann. Hier geht eine bereits geplante, ggf. mit Preis
+versehene Aktivität der tatsächlichen Reise verloren — ein
+Wiederherstellen bedeutet, sich an Name und Preis zu erinnern und beides
+manuell neu einzutippen.
+
+*Vorschlag:* Mindestens ein kurzes "Rückgängig"-Toast nach dem Entfernen
+(analog zum Vorschlag bei `Angebote.tsx`), hier aber mit höherer
+Priorität, da der Datenverlust für Nutzer:innen konkreter ist als bei
+einer reinen Merkliste.
+
+**3. Preisfeld ist reiner Freitext ohne Währungseinheit oder Format-Hinweis**
+`src/components/trip/EditMode.tsx:69-75` und `:100-106`: Sowohl das
+Preisfeld pro bestehender Aktivität als auch das Feld für eine neue
+Aktivität sind einfache Text-`Input`s mit Platzhaltern ("Preis" bzw.
+"optional") ohne Währungssymbol, Formatierung oder Validierung — es lässt
+sich buchstäblich beliebiger Text eingeben, nicht nur Zahlen. Die
+Kostenübersicht der Buchungsseite (6.6/6.7, laut `ZEITPLAN.md` noch
+offen) wird auf diesen Werten aufbauen müssen; ohne ein einheitliches
+Format wird eine spätere Summierung fehleranfällig.
+
+*Vorschlag:* Zumindest `inputMode="decimal"` und ein sichtbares
+Währungssymbol (z. B. "€" als Präfix/Suffix im Feld) ergänzen, auch ohne
+volle Validierung — das macht die Eingabe für Nutzer:innen eindeutiger
+und bereitet 6.6/6.7 vor.
+
+### Nicht geprüft
+Die Kostenübersicht selbst (6.6/6.7) existiert noch nicht und konnte
+daher nicht mitgeprüft werden. `Reiseentwuerfe.tsx` (7.3) bleibt weiterhin
+für einen künftigen Lauf offen.
