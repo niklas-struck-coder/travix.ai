@@ -495,3 +495,49 @@ gepusht).
 **Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
 support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
 (kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit).
+
+## 2026-08-19, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (ee32a5d dritter Lauf: stale
+  Checkbox 5.10, 0be928a zweiter Lauf: stale Checkbox 3.0, 12ac025
+  erster Lauf: kein sicherer Punkt gefunden, 3896ecd/c21fb1b vierter/
+  fünfter Lauf von gestern: ebenfalls kein sicherer Punkt gefunden).
+- `marketing-chef/auto` — 0 Commits vor `main`. Wie erwartet ignoriert
+  (läuft erst um 6 Uhr, kein neuer Commit von heute).
+- `support-chef/auto` — 0 Commits vor `main`. Wie erwartet ignoriert
+  (läuft erst um 6 Uhr, kein neuer Commit von heute).
+
+**Prüfung `it-chef/auto`:**
+- Diff-Umfang gegen `main`: ausschließlich `it-chef-auto-log.md` (neue
+  Log-Einträge der letzten 5 Läufe) und zwei Checkbox-Korrekturen in
+  `tasks/tasks-prd-travix-platform.md` (3.0 Core layout & navigation,
+  5.10 Duffel-Backend-Stub). Kein Produktcode geändert, kein Bezug zu
+  Auth/Zahlungen/rechtlichen Texten.
+- **Unabhängig selbst verifiziert** (nicht nur Log-Eintrag geglaubt):
+  `npm install` sauber (frischer Checkout), danach `npx tsc -b` → grün,
+  `npx eslint .` → 0 Fehler (dieselben 3 vorbestehenden
+  react-refresh-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`),
+  `npx vitest run` → 55/55 Tests grün (14 Testdateien). Deckt sich exakt
+  mit den Behauptungen in `it-chef-auto-log.md`.
+- Faktencheck der beiden Checkbox-Behauptungen gegen den echten Code
+  (nicht blind der Doku vertraut): alle acht Unterpunkte 3.1-3.8 sind
+  tatsächlich `[x]` und die zugehörigen Dateien existieren
+  (`AppShell.tsx`, `Sidebar.tsx`, `MobileNav.tsx`, `PageHeader.tsx`,
+  `PlaceholderPage.tsx`, `PageTransition.tsx`, `Home.tsx` — liegen unter
+  `src/components/layout/` bzw. `src/pages/`). Für 5.10:
+  `vite-plugins/duffel-proxy.ts` existiert, ist in `vite.config.ts`
+  eingebunden, und `src/lib/duffel/client.ts` ruft ausschließlich den
+  eigenen `/api/duffel/*`-Proxy auf statt direkt `api.duffel.com` —
+  Behauptung "Key erreicht Browser nie" stimmt mit dem Code überein.
+- Scope-Check: reine Doku-/Checkbox-Korrekturen, kein Scope-Creep, kein
+  UI/Design betroffen (daher kein `MARKENDESIGN.md`-Abgleich nötig).
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemergt (Fast-Forward
+`60064f3..ee32a5d`, gepusht). Lokal durch `npm install` erzeugte
+`package-lock.json`-Diff verworfen, bevor gemergt/gepusht wurde (kein
+Teil des eigentlichen Branch-Inhalts).
+
+**Zusammenfassung:** `it-chef/auto` gemergt, keine Probleme gefunden.
+`marketing-chef/auto`/`support-chef/auto` planmäßig noch ohne neue
+Commits — folgt beim 6-Uhr-Lauf. Ni-Info nicht nötig.
