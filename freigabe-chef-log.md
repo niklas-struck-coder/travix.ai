@@ -541,3 +541,66 @@ Teil des eigentlichen Branch-Inhalts).
 **Zusammenfassung:** `it-chef/auto` gemergt, keine Probleme gefunden.
 `marketing-chef/auto`/`support-chef/auto` planmäßig noch ohne neue
 Commits — folgt beim 6-Uhr-Lauf. Ni-Info nicht nötig.
+
+## 2026-08-19, Tageslauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Nacht-Check
+  heute gemergt, s. o.). Nichts zu tun.
+- `marketing-chef/auto` — 1 Commit vor `main` (`d72d141`, neues Format
+  "Was wird gerade wirklich gespeichert?", August-Ausgabe).
+- `support-chef/auto` — 1 Commit vor `main` (`5d59e7d`, UX-Analyse
+  `Reiseentwuerfe.tsx`, 7.3 Entwurfs-Aktionen).
+
+**Prüfung `marketing-chef/auto`:**
+- Diff: nur `marketing-chef-auto-log.md` und neue Datei
+  `marketing/content-format-was-wird-gespeichert.md`. Kein Code
+  betroffen.
+- Faktencheck gegen den echten Code (nicht nur dem Log geglaubt): alle
+  neun im Entwurf geprüften Seiten selbst nachvollzogen —
+  `EditMode.tsx` selbst ruft `updateStoredTrip` zwar nicht direkt auf,
+  aber der `onChange`-Callback aus `Buchung.tsx`
+  (`handleActivitiesChange`, Zeile 140-142) tut es, Behauptung stimmt
+  im Ergebnis. `Warenkorb.tsx`/`cartTotals.ts`: `groupCartItems`/
+  `calculateCartTotal` berechnen die Summen live aus den vorhandenen
+  Positionen, bestätigt. `Kartenansicht.tsx`: nutzt den echten
+  `trip.destination` aus `loadStoredChat()`, ehrlicher Leerzustand
+  ("Noch keine Reise geplant" / "kenne noch keine Koordinaten"),
+  bestätigt. Die sechs als "Demo" gelisteten Seiten (`Kalender.tsx`,
+  `Aktivitaeten.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`,
+  `Angebote.tsx`, `Reiseentwuerfe.tsx`) rufen tatsächlich alle kein
+  `updateStoredTrip` auf, nur lokaler `useState`. Design-Token-Farben
+  (`#0A2342`/`#00C2A8`, Sora/Inter) stimmen mit
+  `src/lib/design-tokens.ts` überein.
+- Keine erfundenen Kennzahlen/Nutzerzahlen/Ergebnisse gefunden. Klar als
+  Entwurf markiert ("wartet auf Nis Freigabe", "Kein Post daraus wurde
+  oder wird automatisch veröffentlicht"), kein CTA zu einer nicht
+  existierenden Warteliste. Text vollständig ausformuliert (LinkedIn +
+  Instagram + Canva-Brief), keine bloße Stichpunkt-Skizze.
+- **Ergebnis:** Passt → nach `main` gemergt, Fast-Forward
+  (`3d4eb4b..d72d141`).
+
+**Prüfung `support-chef/auto`:**
+- Diff: nur `support-chef-auto-log.md` (neuer Abschnitt zu
+  `Reiseentwuerfe.tsx`, Aufgabe 7.3 Entwurfs-Aktionen). Reine Analyse,
+  kein Code geändert — kein Build/Lint/Test nötig.
+- Datei selbst vollständig gelesen und alle drei genannten
+  Reibungspunkte gegen den Code geprüft: (1) sofortiges/endgültiges
+  Löschen ohne Bestätigung — `deleteDraft` Zeile 90-92, Trash2-Button
+  Zeile 191-200, Zeilenangaben stimmen. (2) "Planung fortsetzen"-Button
+  bleibt auch bei abgeschlossenem Status stehen — Button (Zeile 154-156)
+  liegt tatsächlich außerhalb der `status !== 'finalized'`-Bedingungen,
+  die die anderen Buttons einschränken, stimmt. (3) Duplizierte Karte
+  ohne Kennzeichnung — `duplicateDraft` Zeile 80-88 übernimmt Ziel/
+  Fortschritt/Status 1:1, per Test (`Reiseentwuerfe.test.tsx`, Zeilen
+  bestätigt) als Ist-Zustand belegt. Keine Anzeichen für Erfundenes,
+  Branch hing dabei auf einem Vorstand von `main` (vor dem Marketing-
+  Merge oben) — echter 3-Wege-Merge lokal geprüft, ändert wie erwartet
+  ausschließlich `support-chef-auto-log.md`.
+- **Ergebnis:** Passt → nach `main` gemergt (Merge-Commit `c999465`,
+  da der Branch inzwischen von `main` divergiert war und kein
+  Fast-Forward mehr möglich war).
+
+**Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
+support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
+(kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit).
