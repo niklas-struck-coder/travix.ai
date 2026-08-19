@@ -362,3 +362,77 @@ und bereitet 6.6/6.7 vor.
 Die Kostenübersicht selbst (6.6/6.7) existiert noch nicht und konnte
 daher nicht mitgeprüft werden. `Reiseentwuerfe.tsx` (7.3) bleibt weiterhin
 für einen künftigen Lauf offen.
+
+---
+
+## 2026-08-19 — Entwurfs-Aktionen (`Reiseentwuerfe.tsx`)
+
+**Geprüfter Bereich:** `src/pages/Reiseentwuerfe.tsx` (`/entwuerfe`),
+Aufgabe 7.3 "Entwurfs-Aktionen: pausieren, duplizieren, abschließen,
+löschen" — laut `ZEITPLAN.md` am 16.08. vom autonomen IT-Chef-Lauf
+gebaut und bereits nach `main` gemergt, seither in keinem früheren
+Support-Chef-Lauf eigenständig geprüft (im Eintrag vom 18.08. als offen
+vermerkt). Heutiger IT-Chef-Auto-Lauf (`ee32a5d`, `0be928a`) hat nur
+stale Checkboxen korrigiert, keinen neuen Code gebaut — deshalb dieser
+Bereich statt eines "heute neu gebauten". Zum Vergleich herangezogen:
+`src/components/trip/EditMode.tsx` (bereits am 18.08. geprüft, gleiches
+Muster bei sofortigem, unbestätigtem Löschen).
+
+### Reibungspunkte
+
+**1. Löschen ist sofort und endgültig, ohne Bestätigung oder Rückgängig**
+`src/pages/Reiseentwuerfe.tsx:90-92` (`deleteDraft`) entfernt den Entwurf
+direkt aus dem State, ausgelöst über den `Trash2`-Button in Zeile
+191-200 — kein Bestätigungsdialog, kein Rückgängig-Toast. Anders als bei
+`Angebote.tsx` (12.08. bereits bemängelt) oder `EditMode.tsx` (18.08.)
+ist hier der Verlust potenziell größer: Der Lissabon-Demo-Entwurf hat
+bereits Transportmittel, Budget und Reisedatum ausgefüllt (60 %
+Fortschritt laut `calculateProgress`), das ist reale Planungsarbeit, die
+ohne Rückfrage weg ist. Dasselbe grundsätzliche Muster wiederholt sich
+damit zum dritten Mal an drei verschiedenen Stellen im Code.
+
+*Vorschlag:* Wie bei den vorherigen Funden — mindestens ein
+"Rückgängig"-Toast nach dem Löschen. Da sich das Muster jetzt an
+mehreren Stellen wiederholt (Angebote, EditMode, hier), könnte sich ein
+gemeinsamer kleiner Hook/Komponente (z. B. `useUndoableRemove`) lohnen,
+statt es dreimal einzeln nachzurüsten.
+
+**2. "Planung fortsetzen" bleibt auch bei abgeschlossenen Entwürfen stehen**
+`src/pages/Reiseentwuerfe.tsx:154-156`: Der "Planung fortsetzen"-Button
+wird unabhängig vom Status gerendert — auch nachdem `finalizeDraft`
+(Zeile 74-78) den Status auf "Abgeschlossen" gesetzt hat (Badge-Label in
+Zeile 23, `statusLabels.finalized`). Der Button verlinkt immer nur auf
+`/ki-chat` ohne jeden Kontext zum Entwurf. Laut `ZEITPLAN.md` (Sprint 3,
+7.3) verschiebt "Abschließen" den Entwurf bewusst noch nicht nach
+`MeineReisen.tsx` — für Nutzer:innen sieht ein abgeschlossener Entwurf
+also weiterhin wie ein aktiver aus, mit einem Button, der zur Planung
+"fortsetzen" einlädt, obwohl sie laut Badge bereits fertig ist. Das
+widerspricht sich sichtbar auf derselben Karte.
+
+*Vorschlag:* Für `status === 'finalized'` den Button-Text/-Ziel anpassen
+(z. B. "Reise ansehen" statt "Planung fortsetzen", sobald es eine
+Zielseite dafür gibt) oder ihn zumindest deaktivieren/ausblenden, bis
+abgeschlossene Entwürfe wirklich irgendwo landen.
+
+**3. Duplizierte Karte ist von der Originalkarte nicht unterscheidbar**
+`src/pages/Reiseentwuerfe.tsx:80-88` (`duplicateDraft`) übernimmt
+Ziel, Farbverlauf und Trip-Daten 1:1 in die Kopie, nur die `id` ist neu.
+Beide Karten zeigen danach identischen Namen ("Lissabon"), identischen
+Fortschritt (60 %) und identischen Status ("In Bearbeitung") direkt
+nebeneinander im Grid (Zeile 117-206) — ohne Kennzeichnung wie "Kopie"
+oder Zeitstempel und ohne jede Rückmeldung (kein Toast, kein
+Hervorheben, kein Scrollen zur neuen Karte), dass überhaupt etwas
+passiert ist. Der zugehörige Test (`Reiseentwuerfe.test.tsx:51-61`)
+bestätigt genau dieses Verhalten als Ist-Zustand. Bei zwei Karten fällt
+das kaum auf, bei mehreren duplizierten Entwürfen wird schwer
+erkennbar, welche Karte die neue ist und welche das Original.
+
+*Vorschlag:* Der Kopie einen sichtbaren Zusatz geben (z. B. "Lissabon
+(Kopie)") und/oder kurz zur neuen Karte scrollen bzw. sie kurz
+hervorheben, damit die Aktion spürbar eine Wirkung hatte.
+
+### Nicht geprüft
+Die Vergleichsstelle `EditMode.tsx` wurde nur zum Musterabgleich
+herangezogen, nicht erneut vollständig geprüft (bereits am 18.08.
+behandelt). `Preisalarme.tsx` bleibt weiterhin für einen künftigen Lauf
+offen (seit dem Eintrag vom 12.08. unerledigt).
