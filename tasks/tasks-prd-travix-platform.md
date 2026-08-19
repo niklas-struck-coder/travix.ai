@@ -145,7 +145,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 2.9 Create auth context/provider for app-wide user state
   - [ ] 2.10 Add protected route wrapper that redirects unauthenticated users
 
-- [ ] 3.0 Core layout & navigation — Sidebar, route shells, responsive shell
+- [x] 3.0 Core layout & navigation — Sidebar, route shells, responsive shell
   - [x] 3.1 Create `AppShell.tsx` layout wrapper with sidebar + main content area
   - [x] 3.2 Create `Sidebar.tsx` with navigation links for all 20+ routes and collapsible behavior
   - [x] 3.3 Create `MobileNav.tsx` with hamburger menu / bottom nav for mobile

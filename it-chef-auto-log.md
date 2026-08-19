@@ -1954,3 +1954,61 @@ Log-Einträgen auf diesem Branch.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-19 (zweiter Lauf)
+
+**Ausgangslage:** `origin/main` weiterhin unverändert auf `60064f3`.
+`origin/it-chef/auto` lag exakt auf `main` plus den Log-Commits der
+vorherigen sechs Läufe; kein Merge nötig.
+
+**Erneut alle offenen Punkte einzeln durchgegangen** (nicht nur den
+Stichproben-Abgleich des ersten Laufs von heute wiederholt), inklusive
+8.8 (Profil-Seite): `nav-config.ts` gruppiert `/profil` unter "Konto"
+zusammen mit `/einstellungen`, und der Task-Titel selbst heißt "Profil"
+— auch wenn 8.8 im Wortlaut nur Reisepräferenzen (Stile, Budget,
+Ernährung, Heimatflughafen) nennt, ist eine Konto-/Profil-Seite inhaltlich
+an das noch nicht begonnene Auth/Nutzerkonten-Fundament (Phase 2)
+gekoppelt — anders als Favoriten/Preisalarme/Angebote, die reine
+Reise-Inhalte ohne Kontobezug sind. Einschätzung des ersten Laufs von
+heute bestätigt: 8.8 bleibt zu nah an "Nutzerdaten/Auth" für einen
+autonomen Punkt.
+
+**Diesmal gefunden: eine echte stale Checkbox.** Task-Header `3.0 Core
+layout & navigation` in `tasks/tasks-prd-travix-platform.md` war weiterhin
+unmarkiert (`[ ]`), obwohl alle acht Unterpunkte 3.1-3.8 seit Langem
+`[x]` sind. Jeden Unterpunkt gegen den echten Code verifiziert statt der
+Checkbox blind zu vertrauen:
+- 3.1 `AppShell.tsx` — Sidebar + Hauptbereich-Wrapper, vorhanden.
+- 3.2 `Sidebar.tsx` — Navigationslinks aus `nav-config.ts`, `hidden … lg:flex`.
+- 3.3 `MobileNav.tsx` — mobile Kopfleiste, `lg:hidden`.
+- 3.4 `PageHeader.tsx` — Titel/Beschreibung/Actions, wird von praktisch
+  jeder Seite verwendet.
+- 3.5 `PlaceholderPage.tsx` — generischer Platzhalter, von `routes.tsx`
+  für alle noch nicht gebauten Routen aus `allRoutes` gerendert.
+- 3.6 Responsive Breakpoints — bestätigt über die `lg:flex`/`lg:hidden`-
+  Klassen in Sidebar/MobileNav oben.
+- 3.7 `PageTransition.tsx` — Framer-Motion-Ein-/Ausblendung, in
+  `routes.tsx` um jede Route gelegt.
+- 3.8 `Home.tsx` — existiert, vollständig gebaut.
+
+Auch `ZEITPLAN.md` markiert Phase 3 im Ist-Stand-Absatz bereits als
+✅ fertig — nur die Checkbox in der Task-Datei war zurückgeblieben,
+gleiches Muster wie bei 6.1/6.4/6.5/6.11/6.13/7.5 in den Läufen zuvor.
+Erfüllt alle vier Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/
+Rechtsbezug, keine offene Produktentscheidung, eindeutig (reine
+Verifikation gegen bestehenden Code, keine neue Interpretation), objektiv
+prüfbar (Datei-Existenz plus Typecheck/Lint/Tests).
+
+**Umgesetzt:** Nur die Checkbox `- [ ] 3.0 Core layout & navigation` auf
+`- [x] 3.0 Core layout & navigation` in
+`tasks/tasks-prd-travix-platform.md` gesetzt. Kein Produktcode geändert
+— `ZEITPLAN.md` war bereits konsistent, keine Änderung dort nötig.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte),
+danach `npm run build` (tsc -b + vite build) grün, `npm run lint` grün
+(0 Fehler, nur 3 vorbestehende Warnungen in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx`, nicht durch diese Änderung verursacht), `npm run test` grün
+(14 Testdateien, 55 Tests).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
