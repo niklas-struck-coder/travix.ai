@@ -2012,3 +2012,66 @@ danach `npm run build` (tsc -b + vite build) grün, `npm run lint` grün
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-19 (dritter Lauf)
+
+**Ausgangslage:** `origin/main` weiterhin unverändert auf `60064f3`.
+`origin/it-chef/auto` lag exakt auf `main` plus den Log-Commits der
+vorherigen sieben Läufe (inkl. der Checkbox-Korrektur 3.0 aus dem zweiten
+Lauf von heute); kein Merge nötig, Branch unverändert übernommen.
+
+**Diesmal gefunden: eine weitere stale Checkbox.** Task `5.10 Implement
+Duffel API backend function stub (ready for Builder+ deployment)` in
+`tasks/tasks-prd-travix-platform.md` war noch unmarkiert (`[ ]`), obwohl
+die funktionale Entsprechung längst existiert und sogar schon in
+`ZEITPLAN.md`s Ist-Stand-Absatz dokumentiert ist ("5.10 (Backend-Stub)
+anders gelöst über Vite-Proxy statt Base44"). Gegen den echten Code
+verifiziert statt der Doku blind zu vertrauen:
+- `vite-plugins/duffel-proxy.ts` — Vite-Dev-/Preview-Server-Middleware,
+  hängt sich unter `/api/duffel/*` ein, hängt den geheimen
+  `DUFFEL_API_KEY` serverseitig als `Authorization`-Header an und
+  reicht die Anfrage an `api.duffel.com` durch — der Schlüssel erreicht
+  den Browser nie. Sauberer Fehlerfall, falls der Key fehlt (500 mit
+  klarer Meldung statt stillem Fehlschlag).
+- `src/lib/duffel/client.ts` — ruft ausschließlich diesen eigenen Proxy
+  auf (`/api/duffel${path}`), nie direkt `api.duffel.com`.
+- `vite.config.ts` bindet `duffelProxyPlugin` bereits ein.
+
+Das ist funktional exakt das, was 5.10 verlangt (Backend-seitiger Stub,
+der den Duffel-Key server-side hält, bereit für echten Traffic) — nur
+über einen anderen Mechanismus als das im Aufgabentext genannte
+Base44/Builder+ ("ready for Builder+ deployment"), weil die
+Backend-Entscheidung (Base44 vs. Alternative) laut `ZEITPLAN.md`
+weiterhin offen ist und der Vite-Proxy die einzige bereits *umgesetzte*
+Lösung für "Key nie im Browser" ist. Erfüllt alle vier Sicherheitskriterien:
+kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug; keine neue offene
+Produkt-/Architekturentscheidung (die Lösung steht schon im Code und ist
+in `ZEITPLAN.md` bereits als Fakt dokumentiert, nicht neu getroffen);
+eindeutig (reine Verifikation gegen bestehenden Code, keine neue
+Interpretation); objektiv prüfbar (Datei-Existenz, Verdrahtung in
+`vite.config.ts`, Typecheck/Lint/Tests).
+
+Andere offene Punkte stichprobenartig gegen die ausführlichen
+Begründungen der Läufe vom 18./19.08. gegengeprüft (2.x, 4.1-4.3, 5.7,
+6.2/6.6-6.10, 7.4/7.7/7.12/7.15, 8.x) — keine Codeänderung seit der
+letzten Prüfung, alle Blockaden (offene Backend-/Produktentscheidung,
+fehlende Credentials, fehlende echte Datenquelle bei gleichzeitigem
+Erfindungsverbot, fehlende Preisfelder im Schema, Auth-/Nutzerdatenbezug,
+zu vage Beschreibung) bestehen unverändert fort. Kein weiterer
+Stale-Checkbox-Fund.
+
+**Umgesetzt:** Nur die Checkbox `- [ ] 5.10 …` auf `- [x] 5.10 …` in
+`tasks/tasks-prd-travix-platform.md` gesetzt, mit Begründung zum
+abweichenden Umsetzungsweg direkt in der Zeile. Kein Produktcode
+geändert — `ZEITPLAN.md` war zu diesem Punkt bereits konsistent
+("anders gelöst"), keine Änderung dort nötig.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte,
+647 Pakete), danach `npm run build` (tsc -b + vite build) grün, `npm run
+lint` grün (0 Fehler, dieselben 3 vorbestehenden Warnungen in
+`ui/badge.tsx`/`button.tsx`/`tabs.tsx`, react-refresh, nicht durch diese
+Änderung verursacht), `npm run test` grün (14 Testdateien, 55 Tests,
+unverändert — reine Doku-/Checkbox-Änderung ohne neuen Testbedarf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

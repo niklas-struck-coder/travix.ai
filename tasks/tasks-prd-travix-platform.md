@@ -181,7 +181,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 5.7 Integrate hotel and train search results into KI-Chat response rendering
   - [x] 5.8 Build `FlightWizard.tsx` with IATA code inputs, passenger details, cabin class, one-way/round-trip toggle
   - [x] 5.9 Create Flugsuche page (`/flugsuche`) hosting the flight wizard
-  - [ ] 5.10 Implement Duffel API backend function stub (ready for Builder+ deployment)
+  - [x] 5.10 Implement Duffel API backend function stub (ready for Builder+ deployment) — solved differently than specified: no Base44/Builder+ function, instead a dev-server middleware (`vite-plugins/duffel-proxy.ts`, wired in `vite.config.ts`) that attaches the secret `DUFFEL_API_KEY` server-side and forwards `/api/duffel/*` requests to `api.duffel.com`, so the key never reaches the browser — `src/lib/duffel/client.ts` already calls only this proxy. `ZEITPLAN.md`'s Ist-Stand paragraph already documented this as "anders gelöst über Vite-Proxy statt Base44"; only the checkbox here was stale, same pattern as 3.0/6.1/6.4/6.5/6.11/6.13/7.5.
   - [x] 5.11 Wire flight selection to auto-integrate into trip transport section
 
 - [ ] 6.0 Interactive trip plan — BuchungsSeite, checklist, cost breakdown, provider links
