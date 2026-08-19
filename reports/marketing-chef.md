@@ -1,48 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-18
+**Datum:** 2026-08-19
 
-## Was ist seit dem letzten Eintrag (2026-08-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-18) passiert?
 
-Zwei neue Seiten sind auf `main` gelandet: `Warenkorb.tsx` (Positionen
-nach Leistungsart gruppiert, Zwischen- und Gesamtsumme werden bei jeder
-Änderung aus den echten Positionen neu berechnet, kein separates
-Summenfeld) und `Kalender.tsx` (Reisekalender mit Monatsraster). Der
-Warenkorb ist damit das nächste Feature, das wirklich echt rechnet —
-mein eigener autonomer Lauf hat dazu bereits ein Content-Stück
-("Echte Zahlen, keine Show") vorbereitet, das heute vom Freigabe-Chef
-geprüft und nach `main` gemergt wurde. Der Kalender dagegen läuft noch
-komplett auf zwei fest eingebauten Demo-Reisen (kein echter
-Reise-Speicher dahinter) — dafür also bewusst noch kein Content, aus
-demselben Grund wie zuletzt bei den Entwurfs-Aktionen.
+Kein neues Feature im `src/`-Code seit gestern — die IT-Chef-Auto-Läufe
+haben nur veraltete Checkboxen in der Aufgabenliste korrigiert. Mein
+eigener autonomer Lauf hat dafür die im letzten Bericht vorgeschlagene
+Idee umgesetzt: ein neues, wiederkehrendes Content-Format "Was wird
+gerade wirklich gespeichert?" (August-Ausgabe) liegt jetzt fertig und
+geprüft in `marketing/`. Der Entwurfs-Stapel ist damit auf sechs fertige
+Stücke gewachsen — weiterhin ist laut bisherigem Stand keines davon
+tatsächlich veröffentlicht.
 
-Wichtig zur Einordnung: "vom Freigabe-Chef geprüft und gemergt" heißt
-nur, dass der Textentwurf sauber und wahrheitsgetreu zum Code ist —
-nicht, dass er schon irgendwo veröffentlicht wurde. In `marketing/`
-liegen inzwischen fünf fertige Entwürfe (Content-Plan, Woche-1-Posts,
-Kartenansicht, Aktivitäten bearbeiten, jetzt Warenkorb), von denen laut
-bisherigem Stand noch keiner tatsächlich live geschaltet ist.
+Wichtiger als das neue Content-Stück ist ein Fund des IT-Chefs von heute:
+Im normalen Chat-Einstieg kündigt die KI wörtlich an, jetzt nach "echten
+Flug-Verbindungen" zu suchen — die Suche startet aber technisch nie
+(`useChat.ts`/`mockAdvisor.ts`, `nextField: null` wird nicht behandelt).
+Kein Ladezustand, kein Fehler, einfach Stille, bis der Bot beim nächsten
+Klick direkt zu "Dein Reiseplan steht!" springt. Das ist kein Marketing-
+Thema im Sinne von "Content dazu schreiben", sondern eine Warnung: genau
+an dieser Stelle würde jede Werbeaussage über "echte KI-Flugsuche" gerade
+nicht stimmen.
 
 ## Vorschläge
 
-1. **Entwurfs-Stapel gegen echtes Publizieren abgleichen.** Fünf
-   Text-Stücke sind fertig und technisch geprüft, aber der eigentliche
-   Schritt "posten" fehlt offenbar noch komplett. Bevor weitere Stücke
-   entstehen, lohnt sich ein kurzer Ni-Durchgang: welche drei, vier
-   Sätze reichen, um die ersten zwei Posts (z. B. Kartenansicht +
-   Warenkorb) diese Woche wirklich rauszuschicken? Sonst wächst der
-   Stapel schneller als die Reichweite.
-2. **"Was ist echt, was ist Demo" als eigenes Format statt Randnotiz.**
-   Mittlerweile gibt es genug Beispiele (Warenkorb echt, EditMode echt,
-   Kalender & Entwurfs-Aktionen Demo), um daraus eine kleine,
-   wiederkehrende Content-Reihe zu machen — z. B. ein kurzer
-   Monats-Statusbeitrag "Was diesen Monat wirklich gespeichert wird".
-   Macht die Ehrlichkeits-Positionierung greifbarer als einzelne
-   Feature-Posts und braucht keine neuen Zahlen, nur den bestehenden
-   Code-Stand.
-3. **Kalender als Content-Idee vormerken, nicht schreiben.** Der
-   Monatsraster-Kalender ist optisch ein gutes Bild für "Reise-Planung
-   auf einen Blick" — aber erst posten, sobald er an echte
-   Reise-Daten hängt, sonst bricht das Ehrlichkeits-Versprechen beim
-   ersten Neuladen. Als Idee im Kopf behalten für den Moment, wo der
-   echte Reise-Speicher kommt.
+1. **Veröffentlichen jetzt wirklich anschieben, nicht noch ein Stück
+   schreiben.** Sechs fertige, geprüfte Texte liegen in `marketing/`,
+   keiner ist live — das ist jetzt der dritte Bericht in Folge mit
+   diesem Befund. Konkret: derzeit keine neuen Content-Stücke in
+   Auftrag geben, sondern mit dir klären, welche zwei der sechs
+   (Vorschlag: Kartenansicht + Warenkorb, weil beide an echte Daten
+   angebunden sind) diese Woche tatsächlich rausgehen — sonst wird der
+   Stapel zur Karteileiche.
+
+2. **Flugsuche-Chat-Bug: bis zum Fix keine Werbeaussagen dazu.** Sobald
+   dieser Bug (siehe oben) durch den IT-Chef behoben ist, wäre er
+   selbst eine gute, ehrliche Content-Idee für das neue "Was wird
+   gerade wirklich gespeichert"-Format — als Beispiel dafür, dass
+   still hängende KI-Antworten aktiv gesucht und gefixt werden. Bis
+   dahin: kein Post, keine Aussage, die suggeriert, die KI-Flugsuche im
+   Chat funktioniere bereits durchgängig.
+
+3. **Warenkorb-Content zurückhalten, bis "Jetzt buchen" existiert.**
+   Laut Support-Chef-Befund von gestern endet der Warenkorb aktuell in
+   einer reinen Summenanzeige ohne Weiterbuchen-Möglichkeit. Bevor ein
+   Warenkorb-Post rausgeht (siehe Vorschlag 1), lohnt sich ein Blick,
+   ob dieser fehlende nächste Schritt bis dahin geschlossen ist — sonst
+   bewirbt der Post eine Sackgasse.
