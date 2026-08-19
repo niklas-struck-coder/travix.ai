@@ -1,31 +1,22 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-18
+**Datum:** 2026-08-19
 
-## Was ist seit dem letzten Eintrag (2026-08-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-18) passiert?
 
-Seit gestern sind zwei neue Seiten über das `it-chef/auto`-Feature-Programm
-(per Freigabe-Chef geprüft und gemergt) auf `main` gelandet: `Kalender.tsx`
-(Reisekalender mit Monatsraster, Wochenstart Montag, farbig markierten
-Reise-Tagen plus barrierefreier Textliste darunter) und `Warenkorb.tsx`
-(nach Leistungsart gruppierter Warenkorb mit Live-Summen). Dazu kamen zwei
-neue, reine Hilfsmodule (`calendarUtils.ts`, `cartTotals.ts`) samt Tests
-sowie ein Bugfix an Marketing-Chef-Content zu echten Warenkorb-Summen.
-
-Diesen Lauf habe ich gezielt auf den seit gestern neuen/geänderten Code
-konzentriert und Datei für Datei gelesen statt nur zu grep'en:
-`calendarUtils.ts` (Monatsraster-Berechnung, Wochenstart, Datumsvergleich
-für Reise-Zuordnung), `Kalender.tsx` (Monatsnavigation, Heute-Markierung),
-`cartTotals.ts` (Gruppierung nach Typ, Summenbildung) und `Warenkorb.tsx`
-(Leerzustand, Entfernen-Aktion, Summenanzeige). Kein Bug gefunden — die
-Monatsnavigation ist bei Jahreswechsel korrekt (Dezember→Januar und
-umgekehrt), die Bereichsprüfung für Reisetage ist inklusiv auf beiden
-Seiten korrekt, und beide neuen Seiten sind mit sinnvollen Tests
-abgedeckt. Auch erneut kontrolliert: die zuvor gemeldeten Muster
-(Mikrofon-Fehler in `speech.ts`, rohe Duffel-Fehlermeldungen, fehlende
-IATA-Hinweise in `FlightWizard.tsx`, verlorene Flugdetails in
-`Buchung.tsx`) sind unverändert im Code — keine neuen, aber auch keine
-neu behobenen.
+Seit gestern lief parallel das `it-chef/auto`-Feature-Programm weiter
+(mehrere Läufe, per Freigabe-Chef geprüft und gemergt) — dabei ging es vor
+allem um veraltete Checkbox-Markierungen in der Aufgabenliste, keine neuen
+Seiten oder Logik. Für diesen Bug-Hunt-Lauf habe ich stattdessen gezielt
+Dateien gelesen, die in bisherigen Läufen noch nicht Zeile für Zeile
+geprüft wurden: `MeineReisen.tsx`, `Reiseentwuerfe.tsx`, `Favoriten.tsx`,
+`Preisalarme.tsx`, `Angebote.tsx`, `Kartenansicht.tsx`, `Urlaubsmodus.tsx`,
+`KiChat.tsx`, alle `src/lib/trip/*`- und `src/hooks/*`-Module sowie die
+Chat-Komponenten (`EditMode.tsx`, `ChatInput.tsx`, `FlightWizard.tsx`,
+`HotelWizard.tsx` u.a.). Dabei ist ein neuer, klarer Bug aufgefallen (siehe
+unten) — alles andere ist sauber: Routen lösen korrekt auf, Datums-/
+Bereichslogik stimmt, Demo-Daten-Seiten sind bewusst statisch und
+dokumentiert.
 
 Die vier PRs aus früheren Läufen sind weiterhin unverändert offen und
 warten auf Nis Review:
@@ -37,17 +28,46 @@ warten auf Nis Review:
 ("Überrasch mich" als Reiseziel) und
 [PR #6](https://github.com/niklas-struck-coder/travix.ai/pull/6)
 (ungeschützte `localStorage`-Schreibzugriffe im Chat).
+Zwei ältere Vorschläge (PR #2, #3, Flugsuche-Ladezustand) wurden von Ni
+inzwischen geschlossen, ohne gemergt zu werden — das ist seine bewusste
+Entscheidung, kein offener Punkt mehr.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine — dieser Lauf hat keinen neuen Bug gefunden, bei dem ich mir sicher
-genug für einen automatischen Fix war. Die vier PRs aus früheren Läufen
-(siehe oben) sind weiterhin offen und warten auf Merge.
+Keine — der neue Fund unten ist real und ich bin mir sicher, dass er ein
+Bug ist, aber der Fix selbst ist keine Kleinigkeit (siehe Begründung) und
+deshalb nur gemeldet, nicht automatisch umgesetzt. Die vier PRs aus
+früheren Läufen (siehe oben) sind weiterhin offen und warten auf Merge.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine neuen. Aus früheren Läufen weiterhin offen und unverändert im Code
-(die ersten beiden liegen bereits als Fix auf PR #1 bzw. #6):
+**Neu — Flug-/Transportsuche im normalen Chat-Ablauf startet nie.**
+`src/hooks/useChat.ts` (`sendMessage`, ab Zeile 276) und
+`src/lib/ai/mockAdvisor.ts` (Zeile 112–120): Sobald die Nutzerin im
+Standard-Chat-Ablauf (Ziel → Verkehrsmittel → Termine → Budget →
+Unterkunft) die letzte Frage zur Unterkunft beantwortet, sagt der Bot
+wörtlich "Ich suche jetzt nach echten Flug-Verbindungen für Lissabon —
+sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir." Aber
+`sendMessage` reagiert nur auf `nextField === 'accommodation'` (Zeile 285)
+und startet dort die Unterkunftssuche; für den `nextField: null`-Zustand,
+den `mockAdvisor.ts` an genau dieser Stelle zurückgibt, gibt es keinen
+Zweig. `searchFlights`/`runFlightSearch` wird im ganzen Hook nur über den
+`awaitingFlightOrigin`-Pfad aufgerufen, der ausschließlich über "Bearbeiten"
+auf der Buchungsseite (nicht im normalen Chat-Einstieg) erreichbar ist und
+zusätzlich eine IATA-Code-Eingabe voraussetzt. Ergebnis: Die KI kündigt für
+jedes Ziel und jedes Verkehrsmittel eine echte Suche an, die nie startet —
+keine Ladeanzeige, kein Ergebnis, kein Fehler, einfach nichts. Erst bei der
+nächsten Nutzer-Nachricht springt der Bot direkt zu "Dein Reiseplan steht!".
+Sehr sicher, dass das ein Bug ist (per Code-Verfolgung aller
+`searchFlights`-Aufrufer verifiziert) — aber kein Auto-Fix, weil eine
+echte Flugsuche an dieser Stelle einen Abflughafen (IATA-Code) braucht, den
+der lineare Ablauf bisher gar nicht abfragt. Der Fix ist damit eine
+UX-Entscheidung (neue Frage nach Abflughafen einbauen? Ankündigungstext
+weglassen, bis das existiert? Direkt auf den "Bearbeiten"-Pfad verweisen?),
+keine Ein-Zeilen-Korrektur.
+
+Weiterhin offen aus früheren Läufen, unverändert im Code (die ersten beiden
+liegen bereits als fertiger Fix auf PR #1 bzw. #6):
 
 - **Automatische Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar
   hängen.** `useChat.ts` (`startEdit`- und `sendMessage`-Zweig für
@@ -80,14 +100,13 @@ Keine neuen. Aus früheren Läufen weiterhin offen und unverändert im Code
 1. **Offene Auto-Fix-PRs mergen.** Vier PRs (#1, #4, #5, #6) liegen bereit
    und ungefährlich auf GitHub, warten aber schon über eine Woche auf
    Review — das ist weiterhin der größte Hebel gerade, noch vor neuem Code.
-2. **Demo-Daten in `Kalender.tsx`/`Warenkorb.tsx` an echte Reise-/
-   Cart-Daten anbinden.** Beide neuen Seiten zeigen bewusst nur
-   hartcodierte Demo-Werte (gleiches Muster wie schon bei
-   `Aktivitaeten.tsx`, `Angebote.tsx`, `Preisalarme.tsx`) — sobald es
-   eine echte Mehrfach-Reisen-Ablage und ein Cart-Entity gibt, sollten
-   sie darauf umgestellt werden.
+2. **Entscheidung zum neuen Flugsuche-Fund treffen.** Der Bug oben
+   (angekündigte, aber nie startende Transportsuche im Haupt-Chat-Ablauf)
+   betrifft den zentralen Verkaufspfad der App — lohnt sich, bewusst zu
+   entscheiden, wie die fehlende Abflughafen-Abfrage gelöst werden soll,
+   statt es bei weiteren Läufen nur erneut zu melden.
 3. **Testabdeckung für `useChat.ts`/`mockAdvisor.ts` ausbauen.** Die
    zentrale Chat-Logik hat trotz wachsender Komplexität weiterhin keine
-   Tests.
+   Tests — hätte den obigen Bug vermutlich schon früher sichtbar gemacht.
 
-_Letztes Update: 2026-08-18_
+_Letztes Update: 2026-08-19_
