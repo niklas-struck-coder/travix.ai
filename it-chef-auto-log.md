@@ -2075,3 +2075,76 @@ unverändert — reine Doku-/Checkbox-Änderung ohne neuen Testbedarf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-19 (vierter Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag exakt auf `main` (Stand
+`24230b7`, per Fast-Forward-Merge übernommen, kein Konflikt). `main` war
+seit dem dritten Lauf von heute um drei Commits gewachsen: ein neuer
+IT-Chef-Bericht (`reports/it-chef.md`) mit einem frisch gemeldeten Bug
+sowie die üblichen Marketing-/Support-Chef-Berichte.
+
+**Geprüft und kein sicherer Punkt gefunden.** Vollständigen Durchlauf
+durch `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` gemacht:
+
+- **Neuer Fund aus `reports/it-chef.md` (heute):** Im normalen
+  Chat-Ablauf (`useChat.ts`, `sendMessage`) startet die angekündigte
+  Flug-/Transportsuche nie, weil für `nextField === null` (den Zustand,
+  den `mockAdvisor.ts` nach der letzten Frage zurückgibt) kein Zweig
+  existiert — `searchFlights` wird sonst nur über den
+  `awaitingFlightOrigin`-Pfad (Bearbeiten-Modus, braucht IATA-Code)
+  aufgerufen. Real und im zentralen Verkaufspfad, aber laut dem Bericht
+  selbst kein Ein-Zeilen-Fix: der lineare Chat-Ablauf fragt aktuell nie
+  nach einem Abflughafen, den eine echte Flugsuche braucht. Der Fix
+  hängt an einer UX-Entscheidung (neue Frage einbauen? Ankündigungstext
+  weglassen? auf den Bearbeiten-Pfad verweisen?) — genau das Kriterium
+  "keine offene Produkt-/UX-Entscheidung, die eigentlich Ni treffen
+  sollte" greift hier, also nicht autonom angefasst.
+- **4.1-4.3** weiterhin blockiert auf Base44/Gemini-Credentials.
+- **6.2, 6.6, 6.7, 7.12** (Buchungsposten-Provider-Link, Kostenübersicht,
+  Budget-Seite) brauchen echte Preisfelder pro Kategorie
+  (Transport/Unterkunft/Auto) in `TripDraft` — die gibt es aktuell nicht
+  (nur ein freies `budget: string | null` und ein Preisfeld pro
+  Aktivität). Das neu einzuführen wäre selbst eine Datenmodell-
+  Entscheidung, nicht bloß Umsetzung eines klar beschriebenen Punkts.
+- **6.8/6.9** (13-Punkte-Checkliste) — PRD (`prd-travix-platform.md`,
+  FR-501) nennt nur 10 konkrete Punkte plus vage "additional planning
+  items"; die fehlenden ~3 Punkte müsste ich selbst erfinden, verletzt
+  das Klarheits-Kriterium.
+- **5.7** (Zug/Bus/Fähre-Ergebnisse in den KI-Chat einbinden) — Hotel-Teil
+  ist laut 5.2-Notiz schon erledigt, aber für Zug/Bus/Fähre existiert gar
+  keine Datenquelle: `TrainCard.tsx`/`TrainResults.tsx` sind komplett
+  unverdrahtet, kein `searchTrains`-Äquivalent zu `searchFlights`/
+  `searchStays` in `src/lib/duffel/client.ts` (Duffel bietet keine
+  Zugsuche). Woher die Daten kämen, wäre selbst eine Entscheidung.
+- **7.7 Dashboard, 7.15 ReiseSuche** — Aufgabenbeschreibung zu vage
+  ("trips overview, budgets, favorites, loyalty points" /
+  "trip planning search entry point") für eine interpretationsfreie
+  Umsetzung; 7.7 hängt zusätzlich an denselben fehlenden Preisfeldern
+  wie oben.
+- **8.x** (Urlaubsmodus-Erweiterungen, Deal Finder, Profil, Premium,
+  Einstellungen, Hilfe) — großteils vage Seiten-Layouts oder an offene
+  Backend-/Produktentscheidungen gekoppelt (Fotos/Vision, Loyalty,
+  Premium-Tarife).
+- **2.x** (Auth) — explizit ausgeschlossen laut Sicherheitskriterien.
+- Stichprobe auf weitere stale Checkboxen: `tasks/tasks-prd-travix-platform.md`
+  komplett gegen den tatsächlichen Code-Stand durchgesehen (Phasen 1/3/4
+  Kopfzeilen, alle Datei-Listen) — keine Abweichung zwischen `[x]`-Status
+  und Code gefunden, keine TODO/FIXME-Marker im Quellcode.
+
+Kein Punkt erfüllt heute alle vier Sicherheitskriterien gleichzeitig —
+in Übereinstimmung mit der Einschätzung aus dem dritten Lauf von heute
+und dem aktuellen `reports/it-chef.md`, das den einzigen neuen Fund
+(Flugsuche-Bug) selbst ausdrücklich als UX-Entscheidung statt Auto-Fix
+einstuft.
+
+**Umgesetzt:** Nichts am Code oder an den Aufgabenlisten geändert — nur
+dieser Log-Eintrag. `main` bleibt unberührt, `it-chef/auto` bleibt auf
+dem gemergten `main`-Stand plus diesem einen Log-Commit.
+
+**Geprüft:** Kein Code geändert, daher kein erneuter Typecheck/Lint/Test-
+Lauf nötig (letzter bekannter grüner Stand: dritter Lauf von heute, siehe
+oben).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
