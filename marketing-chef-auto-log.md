@@ -4,6 +4,88 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-19
+
+**Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Laufende Content-Produktion" — konkret Vorschlag 2 aus
+`reports/marketing-chef.md` (2026-08-18): das eigene, wiederkehrende
+Format "Was ist echt, was ist Demo" statt eines weiteren
+Einzel-Feature-Posts.
+
+**Warum dieser Punkt statt eines neuen Einzel-Feature-Stücks:** Seit dem
+letzten Lauf (18.08.) ist auf `main` kein neues Feature fertig geworden
+— die IT-Chef-Läufe vom 19.08. (siehe `it-chef-auto-log.md`/Git-Historie)
+haben ausschließlich bereits vorhandene Funktionalität als stale
+Checkboxen korrigiert (3.0, 5.10), keinen neuen Code gebaut. Es gab also
+keinen "gerade passiert"-Anlass für ein weiteres Feature-Stück nach dem
+bisherigen Muster. Gleichzeitig warnte der Bericht vom 18.08. ausdrücklich
+davor, den Entwurfs-Stapel (fünf fertige, noch unveröffentlichte Stücke)
+einfach weiter wachsen zu lassen, und schlug stattdessen konkret ein
+neues, andersartiges Format vor: einen monatlichen Status-Post "Was
+diesen Monat wirklich gespeichert wird". Das trifft beide Punkte: kein
+sechstes Einzel-Feature-Stück, sondern die Umsetzung eines bereits
+geprüften, eigenständigen Vorschlags.
+
+**Warum sicher genug:** Reines Entwurfsdokument (Format-Definition +
+erste Ausgabe), kein Live-Vorgang — kein Post geht raus, kein Kanal wird
+angelegt. Keine erfundenen Kennzahlen — das Format braucht bewusst keine
+Reichweiten-/Nutzerzahlen, nur den nachprüfbaren Code-Stand. Keine offene
+Positionierungs-Grundsatzfrage: wendet die in `MARKENDESIGN.md`
+festgelegte Positionierung nur an, entscheidet sie nicht neu; die
+Bildsprachen-Frage bleibt wie in allen bisherigen Stücken bewusst offen.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein weiteres Einzel-Feature-Content-Stück nach altem Muster — kein
+  neues Feature seit 18.08. fertig (siehe oben), daher kein
+  "gerade passiert"-Anlass; hätte den vom Bericht explizit kritisierten
+  wachsenden Freigabe-Stapel nur vergrößert.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- Kampagnen-Konzepte für Ads (Sprint 5) — zeitlich weiterhin nicht dran,
+  Sprint 3/4 laufen laut `ZEITPLAN.md` vor Sprint 5.
+- Vorschlag 1 aus demselben Bericht (Entwurfs-Stapel gegen echtes
+  Publizieren abgleichen, Ni-Durchgang) — das ist explizit Nis
+  Freigabe-Entscheidung, keine, die der autonome Lauf selbst treffen
+  oder vorwegnehmen kann.
+- Vorschlag 3 (Kalender-Content) — laut Bericht bewusst zurückgestellt,
+  bis der Kalender an echte Reise-Daten hängt; unverändert seit 18.08.,
+  also weiterhin nicht fällig.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):** Real-vs-
+Demo-Status für alle acht in der Ausgabe genannten Seiten frisch im Code
+gegengeprüft (`grep` auf `updateStoredTrip`/`useState` in
+`Warenkorb.tsx`, `EditMode.tsx`, `Kalender.tsx`, `Aktivitaeten.tsx`,
+`Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+`Reiseentwuerfe.tsx`) statt nur `ZEITPLAN.md`-Prosa zu übernehmen —
+bestätigt: `EditMode.tsx` speichert echt über `updateStoredTrip()`, alle
+sechs "Demo"-Seiten haben ausschließlich lokalen `useState`-Demo-State
+ohne Aufruf einer Persistenz-Funktion. `Kartenansicht.tsx`- und
+Warenkorb-Summen-Status aus vorherigen Läufen (11.08./18.08., bereits im
+Code geprüft) unverändert übernommen, da seither kein Code an diesen
+Stellen geändert wurde. Farbwerte erneut gegen
+`src/lib/design-tokens.ts` abgeglichen.
+
+**Umgesetzt:**
+- Neue Datei `marketing/content-format-was-wird-gespeichert.md` —
+  Definition eines neuen, monatlich wiederkehrenden Formats plus erste
+  Ausgabe (August 2026) mit LinkedIn- und Instagram-Fassung sowie
+  Canva-Design-Brief für eine sofort umsetzbare, abstrakte
+  Zwei-Spalten-Grafik (Option A). Kein echter Screenshot, aus demselben
+  Grund wie bei allen bisherigen Stücken: `MARKENDESIGN.md` markiert die
+  Bildsprachen-Grundsatzfrage weiterhin als offen.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `b331888`) war bereits vollständig in `main` gemerged (laut
+`git merge-base --is-ancestor`) — laut Regel für bereits gemergte
+Branches neu von aktuellem `origin/main` (`3d4eb4b`) aus angelegt, statt
+auf dem alten Stand weiterzuarbeiten.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-18
 
 **Ausgewählter Punkt:** Sprint 3/4 aus `ZEITPLAN.md`, Marketing-Bereich —
