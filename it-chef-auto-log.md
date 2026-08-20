@@ -2502,3 +2502,67 @@ vorherigen Läufen) wurde verworfen statt committet.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20 (fünfter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war ein Commit vor `origin/main`
+identisch, plus den vierten Lauf von heute (8.8 Profil-Seite) obendrauf,
+noch nicht vom Freigabe-Chef gemergt. Auf diesem Stand weitergearbeitet
+(`git checkout -B it-chef/auto origin/it-chef/auto`), `main` selbst nicht
+angefasst.
+
+**Erster Versuch, dann zurückgenommen:** 7.15 `ReiseSuche.tsx`
+(`/reise-planen`) implementiert — zwei Karten zu den bestehenden
+manuellen Suchflüssen (Flugsuche, Hotelsuche) plus ein KI-Chat-Hinweis
+für alles andere, gestützt auf den bereits in `Home.tsx` vorhandenen
+"Selbst durchsuchen"-Button und den `nav-config.ts`-Eintrag. Typecheck/
+Lint/Tests liefen grün. Beim Schreiben des Berichts fiel aber auf: der
+**vierte Lauf von heute** hatte genau diesen Punkt bereits geprüft und
+bewusst verworfen ("7.15 ReiseSuche mit nur einem Satz Spezifikation
+(FR-902) und keiner erkennbaren Abgrenzung zur Startseite — zu unklar
+für einen autonomen Lauf ohne Rückfrage"). Meine eigene Eingrenzung
+(nur Links zu bestehenden Suchseiten) war zwar in sich stimmig, aber
+trotzdem meine eigene Interpretation einer Ein-Satz-Anforderung, keine
+bloße Übernahme des Vorgegebenen — genau das Kriterium, an dem der
+vierte Lauf den Punkt schon verworfen hatte. Zwei Läufe am selben Tag,
+die sich beim selben unterspezifizierten Punkt gegenseitig überstimmen,
+wäre kein sauberes Ergebnis. Deshalb zurückgenommen (`git checkout --`
+plus Löschen der neuen Dateien — keine Restspuren im Diff dieses
+Commits): kein Code-Ergebnis aus diesem Versuch.
+
+**Weitere Prüfung, kein Punkt gefunden:** Danach die übrigen, noch nicht
+vom vierten Lauf durchgesehenen Punkte geprüft:
+- 8.9 Premium (`/premium`) und 8.12 Loyalty-Anzeige — laut PRD an
+  OQ-03 bzw. OQ-04 hängend (Premium-Tarif-Inhalte, Loyalty-Regeln noch
+  offene Fragen), also Produktentscheidung, nicht autonom fällbar.
+- 8.10 Einstellungen (`/einstellungen`) — FR-103 nennt keine einzige
+  konkrete Einstellung, nur "App-Einstellungen und Benachrichtigungs-
+  einstellungen" als Kategorien; auch `nav-config.ts` ist nicht
+  konkreter. Anders als bei 8.8 Profil (vier namentlich genannte Felder)
+  müsste hier die komplette Feldliste selbst erfunden werden — dieselbe
+  Art Lücke, wegen der der vierte Lauf schon 6.8/6.9 (Checkliste) und
+  7.15 verworfen hat.
+- 8.13 Unit-Tests für calculateProgress/calculateCosts/checklistRules/
+  Schema-Validierung — drei der vier Ziele existieren noch gar nicht
+  (calculateCosts, checklistRules, Schema-Validierung hängen an
+  denselben offenen Punkten), nur calculateProgress hat bereits Tests.
+  Keine sauber abgrenzbare Teilmenge, ohne den Rest des Punkts
+  stillschweigend wegzulassen.
+- Sprint 5/6 (Duffel Stays, Zahlungsprozess-Entscheidung, Ende-zu-Ende-
+  Testing, Mobile-Politur, Bugfixing-Durchgang, Performance-Check) —
+  entweder explizite Produktentscheidungen oder zu groß/unscharf für
+  einen einzelnen autonomen Punkt, ohnehin erst für KW43+ geplant.
+
+**Ergebnis:** Heute nichts gefunden, das alle vier Sicherheitskriterien
+erfüllt und noch nicht vom vierten Lauf abgedeckt wurde. Kein
+Code-Commit für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** `npx tsc -b` und `npm run test` liefen für den
+zurückgenommenen ReiseSuche-Versuch grün (18 → 19 Testdateien, 78 Tests),
+sind aber nach der Rücknahme nicht mehr Teil des Repo-Stands. Nach der
+Rücknahme `git status`/`git diff` geprüft: Arbeitsverzeichnis wieder
+exakt auf dem Stand von `origin/it-chef/auto` (vierter Lauf), keine
+Restspuren außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
