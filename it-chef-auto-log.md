@@ -2334,3 +2334,80 @@ eigentliche Änderung zu beschränken.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20 (dritter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` lag bereits zwei Commits vor
+`origin/main` (die ersten beiden Läufe von heute, `mockAdvisor.ts`- und
+`Warenkorb.tsx`-Tests, noch nicht von Freigabe-Chef geprüft/gemergt).
+`main` selbst unverändert seit `24230b7`. Kein Merge nötig, auf dem
+bestehenden `it-chef/auto`-Stand weitergearbeitet.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut komplett durchgeprüft — dieselben Blockaden wie in den bisherigen
+Läufen bestehen unverändert fort (main unverändert seit 19.08.): 4.1-4.3
+weiterhin ohne KI-Zugangsdaten; 6.2/6.6/6.7/7.12 weiterhin ohne Preis-/
+Item-Felder in `TripDraft`; 6.8/6.9/6.10 weiterhin wegen unvollständiger
+FR-501-Spezifikation verworfen; 5.7 weiterhin ohne echte Zug/Bus/Fähre-
+Datenquelle; 7.4 weiterhin ohne Mehrfach-Entwürfe-Chat-Historie; 7.7
+Dashboard weiterhin abhängig von fehlenden Budget-/Loyalty-Bausteinen;
+7.15 ReiseSuche weiterhin unklar gegenüber der Startseite abgegrenzt.
+Kein neuer Kandidat in den beiden Aufgabendateien selbst.
+
+Stattdessen erneut, wie in den ersten beiden Läufen heute, eine
+bestehende, fertig gebaute Seite ohne eigene Testdatei gesucht (Punkt 3
+der "Weiteren Vorschläge" in `reports/it-chef.md`, 19.08.). Von den sechs
+Seiten in `src/pages/` ohne `.test.tsx` (`Flugsuche`, `Hotelsuche`,
+`Kalender`, `KiChat`, `PlaceholderPage`, `Urlaubsmodus`) fielen
+`Flugsuche`/`Hotelsuche` wegen des am 19.08. gemeldeten, noch ungeklärten
+Flugsuche-Chat-Bugs sowie eigener asynchroner Angebots-Ladelogik raus
+(gleicher Ausschlussgrund wie `useChat.ts` in den vorherigen Läufen:
+State/Seiteneffekte, die eigentlich erst nach Klärung der offenen
+UX-Frage angefasst werden sollten), `KiChat` als Haupt-Chat-Seite aus
+demselben Grund, `Urlaubsmodus` wegen seines Concierge-Chat-Anteils
+ebenfalls. Übrig blieben `Kalender.tsx` (7.11) und `PlaceholderPage.tsx`;
+`Kalender.tsx` gewählt, da es wie `Warenkorb.tsx` im zweiten Lauf bereits
+fertig, laut Checkbox erledigt ist und auf bereits getesteten reinen
+Hilfsfunktionen (`calendarUtils.ts`) aufbaut.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Anzeige-/Navigations-Logik mit
+Demo-Reisedaten. Keine offene Produkt- oder Architekturentscheidung: die
+Seite existiert bereits vollständig (Monats-Grid, Vor-/Zurück-Navigation,
+"Heute"-Button, Trip-Badges, Textliste), die Tests dokumentieren nur das
+bestehende Verhalten, ohne neues festzulegen. Klar genug beschrieben:
+kein Interpretationsspielraum, Struktur/Texte 1:1 aus dem bestehenden
+Code übernommen. Ergebnis objektiv prüfbar: Tests grün oder nicht.
+
+**Umgesetzt:**
+- Neue Datei `src/pages/Kalender.test.tsx` (3 Tests): Anzeige des
+  aktuellen Monats plus beider Demo-Reisen in der Textliste unabhängig
+  vom angezeigten Monat; Navigation zum nächsten Monat zeigt das
+  Lissabon-Trip-Badge auf allen acht zugehörigen Kalendertagen
+  (15.-22. September); Navigation zum vorherigen Monat und zurück zu
+  "Heute" über den entsprechenden Button. Die Systemzeit wird dafür via
+  `vi.setSystemTime` auf ein festes Datum (20. August 2026, außerhalb
+  beider Demo-Reisezeiträume) gelegt, damit der Ausgangszustand
+  deterministisch ist — analog zum bereits vorhandenen `vi.fn()`-Muster
+  in `EditMode.test.tsx`, hier erweitert um Fake-Timer, da `Kalender.tsx`
+  selbst `new Date()` für den Anfangsmonat verwendet. Keine Codeänderung
+  an `Kalender.tsx`/`calendarUtils.ts` selbst — reine Testergänzung.
+  Kein Eintrag in `tasks/tasks-prd-travix-platform.md` oder
+  `ZEITPLAN.md` geändert, da 7.11 dort bereits korrekt als erledigt
+  markiert ist und keine eigene Test-Checkbox existiert.
+
+**Geprüft:** Frischer Checkout, `npm install` (647 Pakete, `node_modules`
+fehlte erneut). `npm run test` → zunächst 1 fehlgeschlagener Test (Zähl-
+Annahme falsch: 8 Kalendertage im September-Zeitraum plus 1 Textlisten-
+Eintrag ergeben 9 Vorkommen von "Lissabon", nicht 2 wie zunächst
+angenommen), nach Korrektur der Erwartung grün: 17 Testdateien statt 16,
+72 Tests statt 69 (genau die 3 neuen `Kalender.test.tsx`-Tests kommen
+hinzu, keine bestehenden Tests verändert). `npm run build` (tsc -b + vite
+build) → grün. `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden
+Warnungen in `ui/badge.tsx`/`button.tsx`/`tabs.tsx` (react-refresh, nicht
+durch diese Änderung verursacht). Der durch `npm install` verursachte
+`package-lock.json`-Diff (nur `libc`-Metadaten-Felder) wurde wie in den
+vorherigen Läufen verworfen statt committet.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
