@@ -251,8 +251,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] Landingpage/Warteliste live (unabhängig vom Hauptprodukt umsetzbar)
 
 ### Sprint 3 (KW35-36, 25. Aug - 7. Sep)
-- [ ] Content-Plan erstellen (Themen, Formate, Kanäle)
-- [ ] Erste Content-Stücke produzieren (Blog/Social)
+- [x] Content-Plan erstellen (Themen, Formate, Kanäle) — vom autonomen
+  Marketing-Chef-Lauf am 20.08. als stale Checkbox erkannt: der Plan
+  liegt bereits seit 10.08. fertig in `marketing/content-plan.md`
+  (vier Content-Säulen, Kanal-/Format-Matrix, Redaktionsplan für die
+  ersten vier Wochen, Leitplanken). Keine Code-Änderung, nur die
+  Checkbox korrigiert.
+- [x] Erste Content-Stücke produzieren (Blog/Social) — ebenfalls stale:
+  liegt bereits seit 11.08. fertig in `marketing/content-stuecke-woche1.md`
+  (zwei Social-Posts für LinkedIn/Instagram plus ein Blog-Stück, alle
+  als reine Entwürfe, nichts veröffentlicht). Baut direkt auf dem
+  Content-Plan (Woche 1, Post A/B) auf. Keine Code-Änderung, nur die
+  Checkbox korrigiert.
 
 ### Sprint 4 (KW37-40, 8. Sep - 5. Okt)
 - [ ] Laufende Content-Produktion
