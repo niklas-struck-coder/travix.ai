@@ -9,24 +9,22 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
 - Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Seite "Aktivitäten" (aggregierte Aktivitäten über alle Reisen) mit EditMode
-- Seite "Kalender" (Reisekalender mit Monatsraster)
-- Seite "Warenkorb" (gruppierter Warenkorb mit Echtzeit-Summen)
-- Kartenansicht der Reiseziele (React-Leaflet), an echten Chat-Trip angebunden
-- KI-Concierge-Chat (Konversations-UI, Sprachfunktionen)
+- Seiten Aktivitäten, Kalender, Warenkorb, Kartenansicht, KI-Concierge-Chat
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-18):**
-- Kein neuer Code im src/-Verzeichnis — die IT-Chef-Auto-Läufe fanden meist
-  keinen sicheren autonomen Punkt und korrigierten nur veraltete Checkboxen
-  in der Aufgabenliste (u. a. Kernlayout/Navigation, Duffel-API-Stub)
-- Neues Marketing-Content-Format "Was wird gerade wirklich gespeichert?"
-  entworfen
-- UX-Prüfung der Reiseentwürfe-Aktionen durch Support-Chef
-- Beide oben genannten Stücke wurden vom Freigabe-Chef geprüft und nach
-  main gemergt
+**Seit letztem Update (2026-08-19):**
+- Bekannter Bug bestätigt: Flugsuche startet im Haupt-Chat-Ablauf nicht — von
+  IT-, Marketing- und Support-Chef unabhängig als wichtigster offener Punkt
+  eingestuft (Marketing pausiert dafür Werbung)
+- IT-Chef Auto hat Testabdeckung ergänzt (mockAdvisor.ts, Warenkorb.tsx,
+  Kalender.tsx)
+- Support-Chef Auto: UX-Analyse zum Reisekalender (7.11)
+- Marketing-Chef Auto: veraltete Checkboxen im Sprint-3-Plan korrigiert
+  (Content-Plan und erste Content-Stücke waren bereits fertig)
+- Freigabe-Chef hat die Marketing- und Support-Auto-Zweige geprüft und
+  nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-19_
+_Letztes Update: 2026-08-20_
