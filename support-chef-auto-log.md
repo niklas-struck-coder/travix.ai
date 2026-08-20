@@ -513,3 +513,73 @@ damit Screenreader die neue Monatsbezeichnung automatisch vorlesen.
 `calendarUtils.ts:69-71` erlaubt das grundsätzlich) wurden nicht
 geprüft, da die beiden Demo-Reisen sich zeitlich nicht überschneiden —
 dafür gibt es aktuell keinen erreichbaren Zustand.
+
+---
+
+## 2026-08-20 (zweiter Lauf) — Warenkorb (`/warenkorb`)
+
+**Geprüfter Bereich:** `src/pages/Warenkorb.tsx` und
+`src/lib/trip/cartTotals.ts`, laut `ZEITPLAN.md` (Aufgabe 7.6) am 17.08.
+vom autonomen IT-Chef-Lauf gebaut und bereits nach `main` gemergt — der
+gestrige IT-Chef-Auto-Lauf hat dort nur Testabdeckung ergänzt
+(`Warenkorb.test.tsx`), keinen neuen Code gebaut; dieser Bereich war
+bisher in keinem früheren Support-Chef-Lauf mit Dateibezug geprüft. Zum
+Vergleich herangezogen: die bereits mehrfach dokumentierten
+Löschen-ohne-Rückfrage-Fälle (`Angebote.tsx` 12.08.,
+`Reiseentwuerfe.tsx` 19.08., `EditMode.tsx` 18.08.) sowie `MeineReisen.tsx`
+(zwei Demo-Reisen: Lissabon, Kyoto).
+
+### Reibungspunkte
+
+**1. Kein Weg von der Kassenübersicht zur eigentlichen Buchung**
+`src/pages/Warenkorb.tsx:109-114` zeigt die Gesamtsumme in einer
+hervorgehobenen Karte an — aber weder dort noch sonst irgendwo auf der
+Seite gibt es einen Button oder Link, um mit dieser Auswahl
+weiterzumachen (z. B. "Weiter zur Buchung" o. Ä.). Eine Codesuche über
+`src/` nach "Kasse"/"checkout"/"bezahlen" findet dazu nichts. Wer den
+Warenkorb befüllt und die Summe sieht, landet an einer Sackgasse: Die
+einzige klickbare Aktion auf der ganzen Seite ist das Entfernen
+einzelner Positionen (`:89-98`). Das ist der eigentliche Zweck eines
+Warenkorbs — von hier aus weiterzukommen — und er fehlt komplett.
+
+*Vorschlag:* Mindestens einen (auch vorerst inaktiven oder auf
+`/buchung` verweisenden) "Weiter"-Button unterhalb der Gesamtsumme
+ergänzen, damit die Seite nicht wie eine Endstation wirkt.
+
+**2. Entfernen ist sofort und endgültig, ohne Bestätigung oder Rückgängig**
+`src/pages/Warenkorb.tsx:35-37` (`removeItem`), ausgelöst über den
+`X`-Button in Zeile 89-98, entfernt eine Position direkt aus dem State —
+kein Bestätigungsdialog, kein Rückgängig-Toast. Dasselbe Muster wurde in
+diesem Log bereits bei `Angebote.tsx` (12.08.), `EditMode.tsx` (18.08.)
+und `Reiseentwuerfe.tsx` (19.08.) dokumentiert; hier ist es der vierte
+Fundort. Besonders hier fällt es ins Gewicht, weil eine versehentlich
+entfernte Position (z. B. der Flug für 249 €) bei fehlendem
+"Weiter"-Button (siehe Punkt 1) ohnehin schon keinen sichtbaren nächsten
+Schritt hat, um den Fehler im Kontext zu bemerken und zu beheben.
+
+*Vorschlag:* Wie in den vorherigen Einträgen — ein "Rückgängig"-Toast
+nach dem Entfernen. Bei nun vier Fundorten lohnt sich ein gemeinsamer
+`useUndoableRemove`-Hook wirklich, statt es ein fünftes Mal einzeln
+nachzurüsten.
+
+**3. Positionen aus unterschiedlichen Reisen werden ohne Kennzeichnung vermischt**
+`src/pages/Warenkorb.tsx:20-26` (`initialItems`) mischt laut Kommentar in
+Zeile 17-19 Demo-Positionen aus zwei verschiedenen Reisen (Lissabon,
+Kyoto) — z. B. steht "Zugticket Kyoto → Osaka" (`:23`) in der Gruppe
+"Transport" direkt neben Positionen, die eigentlich zur Lissabon-Reise
+gehören. `groupCartItems` (`cartTotals.ts:20-25`) gruppiert ausschließlich
+nach Leistungstyp, nicht nach Reise. Wer parallel zwei Reisen plant,
+sieht im Warenkorb also einen einzigen unsortierten Topf ohne
+Information, welche Position zu welcher Reise gehört — bei nur einer
+Reise fällt das nicht auf, wird aber schnell verwirrend, sobald
+mehrere Reisen gleichzeitig geplant werden (genau das Szenario, das
+`MeineReisen.tsx` mit seinen zwei Demo-Reisen bereits vorsieht).
+
+*Vorschlag:* Jeder Position sichtbar die zugehörige Reise zuordnen (z. B.
+kleines Reiseziel-Label oder -Icon pro Karte) oder zusätzlich nach Reise
+gruppieren/filtern lassen, sobald `CartItem` ein Trip-Feld hat.
+
+### Nicht geprüft
+Der Leerzustand (`:39-58`) selbst wurde nicht erneut geprüft — er folgt
+sichtbar demselben, bereits an anderer Stelle für gut befundenen Muster
+(klare Erklärung + direkter Link zu `/ki-chat`).
