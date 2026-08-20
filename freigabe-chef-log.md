@@ -643,3 +643,43 @@ Log beschriebenen Punkten — kein Scope-Creep.
 
 **Ni-Info:** Nicht nötig (kein wiederholtes Scheitern, kein Fund mit
 eigener Dringlichkeit).
+
+## 2026-08-20, Vormittags-Check
+
+**Geprüfte Branches** (Stand nach `git fetch origin --prune`):
+- `it-chef/auto` — 0 Commits vor `main` (bereits vollständig im
+  früheren Nacht-Check gemergt, siehe Eintrag oben). Ignoriert wie
+  vorgesehen.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (9fa3a7a).
+- `support-chef/auto` — 1 neuer Commit vor `main` (ae59208).
+
+**`marketing-chef/auto` geprüft:**
+Diff betrifft ausschließlich `ZEITPLAN.md` (zwei Checkboxen in Sprint 3
+von offen auf erledigt) und `marketing-chef-auto-log.md`. Kein
+Produkt-Code, daher kein Build/Lint/Test nötig. Behauptung im
+Log-Eintrag selbst nachgeprüft statt geglaubt: `marketing/content-plan.md`
+und `marketing/content-stuecke-woche1.md` existieren tatsächlich bereits
+auf `main` (Erstellung laut Git-Historie am 10.08. bzw. 11.08., vor
+diesem Lauf), beide vollständig ausgearbeitet und ausdrücklich als
+unveröffentlichte Entwürfe markiert — keine erfundenen Kennzahlen, kein
+Hinweis auf tatsächliches Posten. Kein Scope-Creep, keine Design-Fragen
+betroffen (reine Text-/Doku-Korrektur).
+**Ergebnis:** Passt → nach `main` gemergt (Merge-Commit `5f1f81f`).
+
+**`support-chef/auto` geprüft:**
+Diff betrifft ausschließlich `support-chef-auto-log.md` (neuer Abschnitt
+zur Kalender-Seite `/kalender`), kein Code geändert. Stichprobenartig
+gegen `src/pages/Kalender.tsx` auf `main` verifiziert: Demo-Trips
+(Zeile 21-22, Lissabon September/Kyoto März, beide außerhalb des bei
+Aufruf gezeigten August-Monats), initialer Monat immer `today`
+(Zeile 26-28), Trip-Badges ohne Link (Zeile 114-118) und Listenkarten
+ohne Link (Zeile 129-139), Monatstitel ohne `aria-live` (Zeile 89) —
+alle Zeilenangaben stimmen exakt mit dem tatsächlichen Code überein,
+nichts wirkt erfunden. Reine Analyse ohne Code-Änderung, damit
+niedrigstes Risiko der drei Branch-Typen.
+**Ergebnis:** Passt → nach `main` gemergt (Merge-Commit `2366cd6`).
+
+**Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
+support-chef/auto) gemergt und gepusht, keine Probleme gefunden.
+Ni-Info nicht nötig (kein wiederholtes Scheitern, kein Fund mit eigener
+Dringlichkeit).
