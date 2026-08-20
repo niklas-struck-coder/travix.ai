@@ -1,50 +1,47 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-19
+**Datum:** 2026-08-20
 
-## Was ist seit dem letzten Eintrag (2026-08-18) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-19) passiert?
 
-Kein neues Feature im `src/`-Code seit gestern — die IT-Chef-Auto-Läufe
-haben nur veraltete Checkboxen in der Aufgabenliste korrigiert. Mein
-eigener autonomer Lauf hat dafür die im letzten Bericht vorgeschlagene
-Idee umgesetzt: ein neues, wiederkehrendes Content-Format "Was wird
-gerade wirklich gespeichert?" (August-Ausgabe) liegt jetzt fertig und
-geprüft in `marketing/`. Der Entwurfs-Stapel ist damit auf sechs fertige
-Stücke gewachsen — weiterhin ist laut bisherigem Stand keines davon
-tatsächlich veröffentlicht.
+Der IT-Chef hat heute gezielt alle neuen Seiten durchgeprüft (Kalender,
+Warenkorb, Aktivitäten, EditMode, erweiterte Reiseentwürfe) — keine neuen
+Bugs, aber auch: der Flugsuche-Bug aus dem letzten Bericht ist unverändert
+offen, weiterhin ohne Fix. Das bleibt also weiter ein Werbe-Stopp-Thema,
+jetzt den dritten Tag in Folge.
 
-Wichtiger als das neue Content-Stück ist ein Fund des IT-Chefs von heute:
-Im normalen Chat-Einstieg kündigt die KI wörtlich an, jetzt nach "echten
-Flug-Verbindungen" zu suchen — die Suche startet aber technisch nie
-(`useChat.ts`/`mockAdvisor.ts`, `nextField: null` wird nicht behandelt).
-Kein Ladezustand, kein Fehler, einfach Stille, bis der Bot beim nächsten
-Klick direkt zu "Dein Reiseplan steht!" springt. Das ist kein Marketing-
-Thema im Sinne von "Content dazu schreiben", sondern eine Warnung: genau
-an dieser Stelle würde jede Werbeaussage über "echte KI-Flugsuche" gerade
-nicht stimmen.
+Wichtiger für diesen Bericht: Der eigene autonome Lauf hat seit gestern
+**zwei weitere** Content-Stücke geschrieben (zu Warenkorb-Summen und zu
+Aktivitäten-Bearbeitung) — genau die Richtung, vor der ich gestern gewarnt
+habe. Der Entwurfs-Stapel in `marketing/` ist damit auf sieben bis acht
+fertige Stücke gewachsen, und nach allem, was im Repo sichtbar ist, ist
+weiterhin keines davon veröffentlicht. Ich habe außerdem `Warenkorb.tsx`
+selbst geprüft: einen "Jetzt buchen"-Button oder Checkout-Weg gibt es dort
+nach wie vor nicht.
 
 ## Vorschläge
 
-1. **Veröffentlichen jetzt wirklich anschieben, nicht noch ein Stück
-   schreiben.** Sechs fertige, geprüfte Texte liegen in `marketing/`,
-   keiner ist live — das ist jetzt der dritte Bericht in Folge mit
-   diesem Befund. Konkret: derzeit keine neuen Content-Stücke in
-   Auftrag geben, sondern mit dir klären, welche zwei der sechs
-   (Vorschlag: Kartenansicht + Warenkorb, weil beide an echte Daten
-   angebunden sind) diese Woche tatsächlich rausgehen — sonst wird der
-   Stapel zur Karteileiche.
+1. **Kein neues Content-Stück mehr, bis geklärt ist, was live geht.** Das
+   ist jetzt der vierte Bericht in Folge mit diesem Befund, und der
+   Stapel ist trotz meiner eigenen Warnung gestern weiter gewachsen statt
+   geschrumpft. Ich stelle den eigenen autonomen Lauf auf "kein neues
+   Stück" um, bis mit dir geklärt ist, welche der acht Texte diese Woche
+   tatsächlich rausgehen — sonst schreibe ich mir selbst am eigentlichen
+   Ziel vorbei.
 
-2. **Flugsuche-Chat-Bug: bis zum Fix keine Werbeaussagen dazu.** Sobald
-   dieser Bug (siehe oben) durch den IT-Chef behoben ist, wäre er
-   selbst eine gute, ehrliche Content-Idee für das neue "Was wird
-   gerade wirklich gespeichert"-Format — als Beispiel dafür, dass
-   still hängende KI-Antworten aktiv gesucht und gefixt werden. Bis
-   dahin: kein Post, keine Aussage, die suggeriert, die KI-Flugsuche im
-   Chat funktioniere bereits durchgängig.
+2. **Wenn ein erstes Stück raus soll: Aktivitäten-Bearbeitung statt
+   Warenkorb.** Die Aktivitäten-Bearbeitung (`EditMode.tsx`) wurde vom
+   IT-Chef heute als sauber und fehlerfrei bestätigt und ist ein
+   abgeschlossener Funktionsweg — im Gegensatz zum Warenkorb, der
+   weiterhin ohne Buchen-Möglichkeit endet. Ehrliche Content-Regel: erst
+   posten, was einen echten Anfang-bis-Ende-Weg hat.
 
-3. **Warenkorb-Content zurückhalten, bis "Jetzt buchen" existiert.**
-   Laut Support-Chef-Befund von gestern endet der Warenkorb aktuell in
-   einer reinen Summenanzeige ohne Weiterbuchen-Möglichkeit. Bevor ein
-   Warenkorb-Post rausgeht (siehe Vorschlag 1), lohnt sich ein Blick,
-   ob dieser fehlende nächste Schritt bis dahin geschlossen ist — sonst
-   bewirbt der Post eine Sackgasse.
+3. **Flugsuche-Bug: Werbe-Stopp bleibt bestehen.** Unverändert seit dem
+   letzten Bericht — solange die KI im Haupt-Chat eine echte Flugsuche
+   ankündigt, die nie startet, keine Aussagen, die suggerieren, die
+   KI-Flugsuche funktioniere im Chat bereits durchgängig.
+
+4. **Warenkorb-Content weiterhin zurückhalten.** Bestätigt durch eigenen
+   Code-Check heute: `Warenkorb.tsx` zeigt nur die Endsumme, kein
+   "Jetzt buchen". Das bereits fertige Warenkorb-Stück bleibt liegen, bis
+   dieser Weg existiert — sonst bewirbt der Post eine Sackgasse.
