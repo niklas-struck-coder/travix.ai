@@ -2259,3 +2259,78 @@ hinzu, keine bestehenden Tests verändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20 (zweiter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` lag bereits einen Commit vor
+`origin/main` (der erste Lauf von heute, "Testabdeckung für
+`mockAdvisor.ts` ergänzt", noch nicht von Freigabe-Chef geprüft/gemergt).
+`main` selbst unverändert seit `24230b7`. Kein Merge nötig, auf dem
+bestehenden `it-chef/auto`-Stand weitergearbeitet.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut komplett durchgeprüft — dieselben Blockaden wie in den fünf
+Läufen vom 19.08. bestehen unverändert fort (main unverändert seit
+19.08., siehe deren ausführliche Begründungen weiter oben): 4.1-4.3
+weiterhin "blocked on Base44/Gemini credentials"; 6.2/6.6/6.7/7.12
+weiterhin ohne Preis-/Item-Felder in `TripDraft`; 6.8/6.9/6.10 weiterhin
+wegen der unvollständigen 13-Punkte-Spezifikation in FR-501 (nur 10 von
+13 benannt) verworfen; 5.7 weiterhin ohne echte Zug/Bus/Fähre-
+Datenquelle; 7.4 weiterhin ohne Mehrfach-Entwürfe-Chat-Historie; 7.7
+Dashboard weiterhin abhängig von nicht existierenden Budget-/Loyalty-
+Bausteinen; 7.15 ReiseSuche weiterhin unklar gegenüber der Startseite
+abgegrenzt. Kein neuer Kandidat in den beiden Aufgabendateien selbst.
+
+Stattdessen — analog zum ersten Lauf von heute — einen weiteren, noch
+offenen Punkt aus Punkt 3 der "Weiteren Vorschläge" in
+`reports/it-chef.md` (19.08., "Testabdeckung für `useChat.ts`/
+`mockAdvisor.ts` ausbauen") aufgegriffen, aber bewusst nicht `useChat.ts`
+selbst (das bleibt aus denselben Gründen wie im ersten Lauf heute
+außen vor: React-State, `localStorage`-Seiteneffekte, und der vom
+Bug-Hunt-Bericht als offene UX-Entscheidung markierte Flugsuche-Pfad).
+Stattdessen eine bereits fertig gebaute, aber bislang ungetestete Seite
+gesucht: `src/pages/Warenkorb.tsx` (7.6) ist laut Checkbox in
+`tasks/tasks-prd-travix-platform.md` bereits erledigt und nutzt die schon
+getestete, reine `cartTotals.ts`-Logik (`groupCartItems`/
+`calculateCartTotal`) — aber die Seite selbst (Rendering, Entfernen-
+Button, Leerzustand) hatte anders als z. B. `Angebote.tsx`/
+`Favoriten.tsx`/`Aktivitaeten.tsx` keine eigene Testdatei.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Anzeige-/Interaktionslogik mit
+Demo-Cart-Daten, kein echter Bezahlvorgang (der Warenkorb verlinkt laut
+FR-1002/PRD-Notiz NG-01 bewusst nicht auf einen eigenen Checkout). Keine
+offene Produkt- oder Architekturentscheidung: die Seite existiert bereits
+vollständig und beschrieben, die Tests dokumentieren nur das bestehende
+Verhalten (Gruppierung nach Typ, Zwischensummen, Gesamtsumme, Entfernen,
+Leerzustand mit Link zu `/ki-chat`), ohne neues Verhalten festzulegen —
+gleiches Muster wie `Angebote.test.tsx`/`Favoriten.test.tsx`, an denen
+sich der neue Test auch orientiert. Klar genug beschrieben: kein
+Interpretationsspielraum, da Struktur und Texte 1:1 aus dem bestehenden
+Code übernommen wurden. Ergebnis objektiv prüfbar: Tests grün oder nicht.
+
+**Umgesetzt:**
+- Neue Datei `src/pages/Warenkorb.test.tsx` (3 Tests, Stil wie
+  `Angebote.test.tsx`): Gruppen-Rendering mit korrekten Zwischensummen
+  und Gesamtsumme (843 €) für die fünf Demo-Positionen; Neuberechnung von
+  Zwischensumme/Gesamtsumme nach Entfernen einer Position (inkl.
+  Verschwinden der ganzen Gruppe, wenn sie dadurch leer wird); ermutigender
+  Leerzustand mit Link zu `/ki-chat`, sobald alle Positionen entfernt sind.
+  Keine Codeänderung an `Warenkorb.tsx`/`cartTotals.ts` selbst — reine
+  Testergänzung. Kein Eintrag in `tasks/tasks-prd-travix-platform.md` oder
+  `ZEITPLAN.md` geändert, da 7.6 dort bereits korrekt als erledigt markiert
+  ist und keine eigene Test-Checkbox existiert.
+
+**Geprüft:** Frischer Checkout, `npm install` (647 Pakete, `node_modules`
+fehlte erneut). `npm run build` (tsc -b + vite build) → grün. `npm run
+lint` → 0 Fehler, dieselben 3 vorbestehenden Warnungen in
+`ui/badge.tsx`/`button.tsx`/`tabs.tsx` (react-refresh, nicht durch diese
+Änderung verursacht). `npm run test` → grün, 16 Testdateien statt 15, 69
+Tests statt 66 (genau die 3 neuen `Warenkorb.test.tsx`-Tests kommen hinzu,
+keine bestehenden Tests verändert). Ein durch `npm install` verursachter
+`package-lock.json`-Diff (nur `libc`-Metadaten-Felder, npm-Versions-
+Artefakt) wurde verworfen statt committet, um den Commit auf die
+eigentliche Änderung zu beschränken.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
