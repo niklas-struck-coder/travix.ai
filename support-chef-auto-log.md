@@ -436,3 +436,80 @@ Die Vergleichsstelle `EditMode.tsx` wurde nur zum Musterabgleich
 herangezogen, nicht erneut vollständig geprüft (bereits am 18.08.
 behandelt). `Preisalarme.tsx` bleibt weiterhin für einen künftigen Lauf
 offen (seit dem Eintrag vom 12.08. unerledigt).
+
+---
+
+## 2026-08-20 — Reisekalender (`/kalender`)
+
+**Geprüfter Bereich:** Die Kalender-Seite, laut `ZEITPLAN.md` am 17.08.
+vom autonomen IT-Chef-Lauf gebaut (Aufgabe 7.11) und bereits nach `main`
+gemergt — bisher nur einmal kurz in `reports/support-chef.md` als
+"Demo-Daten-Muster" erwähnt, aber noch nie in diesem Log mit
+Dateibezug geprüft:
+
+- `src/pages/Kalender.tsx`
+- `src/lib/trip/calendarUtils.ts`
+
+Zum Vergleich herangezogen: `src/pages/MeineReisen.tsx` und
+`src/pages/Reiseentwuerfe.tsx` (etabliertes Muster: Reisekarte = auch
+Einstiegspunkt in die nächste Aktion) sowie der frühere Eintrag zu
+`Kartenansicht.tsx` (11.08., dasselbe fehlende Klickziel-Problem).
+
+### Reibungspunkte
+
+**1. Beim ersten Aufruf zeigt der Kalender eine leere Ansicht, obwohl
+Reisen existieren**
+`src/pages/Kalender.tsx:26-28`: Der Kalender startet immer im
+*aktuellen* Monat (`today.getFullYear()`/`today.getMonth()`). Die beiden
+Demo-Reisen liegen laut `:21-22` aber im September 2026 (Lissabon,
+15.–22.9.) und im März 2026 (Kyoto, 3.–10.3.) — bei heutigem Datum
+(20.08.2026) fällt also keiner der beiden Trips in den initial
+angezeigten Monat August. Ergebnis: Wer die Seite öffnet, sieht ein
+komplett leeres Gitter ohne einen einzigen hervorgehobenen Tag
+(`cellTrips.length > 0`-Styling in `:109` greift nirgends), und muss
+erst selbst raten und über "→" so lange weiterklicken, bis der
+nächste Trip auftaucht. Nur die textliche Liste darunter (`:129-139`)
+verrät überhaupt, dass es Reisen gibt — die eigentliche Kalenderfläche,
+der Hauptzweck der Seite, wirkt beim Einstieg wie leer/fehlerhaft.
+
+*Vorschlag:* Beim Laden nicht stur den heutigen Monat wählen, sondern
+den Monat der nächstgelegenen (kommenden oder zuletzt aktiven) Reise
+vorauswählen, falls im aktuellen Monat keine Reise liegt — z. B. über
+`trips[0].startDate` bzw. den nächsten Trip mit `startDate >= todayIso`.
+
+**2. Trip-Badges im Gitter und die Karten in der Liste darunter sind
+reine Anzeige, kein Klickziel**
+`src/pages/Kalender.tsx:114-118` (Badge je Tageszelle) und `:129-139`
+(Karten in der Liste): Beide zeigen nur Zielname bzw. Zielname+Datum an,
+ohne `Link` oder Button. Das ist dieselbe Lücke, die dieses Log bereits
+am 11.08. bei `Kartenansicht.tsx` gefunden hat, und bricht mit dem
+Muster, das `MeineReisen.tsx:48-53` etabliert (dort führt jede
+Trip-Karte per Link weiter, z. B. zu `/urlaubsmodus`). Wer im Kalender
+auf eine Reise klickt oder tippt, erwartet an dieser Stelle in einer
+App mit sonst durchgängig interaktiven Reisekarten mindestens eine
+Reaktion — hier passiert nichts.
+
+*Vorschlag:* Analog zu `MeineReisen.tsx` einen Link pro Kalender-Karte
+ergänzen (z. B. zu `/meine-reisen` oder künftig zur Trip-Detailseite),
+solange es noch keine eigene Detailroute pro Reise gibt.
+
+**3. Monatswechsel wird für Screenreader-Nutzer:innen nicht angekündigt**
+`src/pages/Kalender.tsx:74-82` (Vor-/Zurück-Buttons) ändern den
+sichtbaren Monatstitel in `:89` (`formatMonthLabel(year, month)`), aber
+weder der Titel noch das umgebende `Card` haben ein `aria-live`-Attribut
+oder eine `role="status"`. Für sehende Nutzer:innen ist der
+Monatswechsel offensichtlich, für Screenreader-Nutzer:innen dagegen
+unsichtbar — nach einem Klick auf "→" bleibt unklar, ob überhaupt etwas
+passiert ist, ohne den Fokus manuell zum Titel zu bewegen. Codebase-weit
+gibt es aktuell kein einziges `aria-live` (Suche über `src/` ergab
+keinen Treffer), das ist also kein Einzelfall nur hier, aber am
+Kalender mit seiner rein visuellen Zustandsänderung besonders spürbar.
+
+*Vorschlag:* `aria-live="polite"` auf den Monatstitel (`:89`) setzen,
+damit Screenreader die neue Monatsbezeichnung automatisch vorlesen.
+
+### Nicht geprüft
+Überlappende Reisen am selben Tag (`getTripsForDay` in
+`calendarUtils.ts:69-71` erlaubt das grundsätzlich) wurden nicht
+geprüft, da die beiden Demo-Reisen sich zeitlich nicht überschneiden —
+dafür gibt es aktuell keinen erreichbaren Zustand.
