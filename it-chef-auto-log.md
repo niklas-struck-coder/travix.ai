@@ -2201,3 +2201,61 @@ oben).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20
+
+**Ausgangslage:** `origin/it-chef/auto` lag exakt auf `main` (Stand
+`24230b7`, unverändert seit dem fünften Lauf vom 19.08.), plus den beiden
+Log-Commits vom 19.08. Kein Merge nötig.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+selbst brachten wieder keinen neuen sicheren Kandidaten (`main` seit dem
+letzten Lauf unverändert — alle dort dokumentierten Blockaden bestehen
+unverändert fort, siehe Einträge vom 19.08.). Stattdessen einen konkreten
+Vorschlag aus `reports/it-chef.md` (Stand 19.08., "Weitere Vorschläge",
+Punkt 3) aufgegriffen: **Testabdeckung für `mockAdvisor.ts` ausbauen** —
+die zentrale Konversationslogik des Mock-Advisors (`detectTransportMode`,
+`getGreeting`, `getNextAdvisorStep`) hatte trotz mehrstufiger
+Verzweigungslogik keine eigene Testdatei.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine, zustandslose Konversationslogik ohne
+Seiteneffekte (kein `localStorage`, kein Netzwerk). Keine offene Produkt-
+oder Architekturentscheidung nötig: Tests dokumentieren nur das
+bestehende, bereits implementierte Verhalten, ohne neues Verhalten
+festzulegen. Klar abgegrenzt: nur `mockAdvisor.ts` selbst (bewusst *nicht*
+`useChat.ts`, das React-State, `localStorage`-Seiteneffekte und den vom
+Bug-Hunt-Bericht vom 19.08. als offene UX-Entscheidung markierten
+Flugsuche-Pfad enthält — dort wäre eine Testabdeckung an genau der Stelle
+zwangsläufig eine Annahme über das gewünschte Verhalten). Ergebnis
+objektiv prüfbar: alle Tests grün oder nicht.
+
+**Umgesetzt:** Neue Datei `src/lib/ai/mockAdvisor.test.ts` (11 Tests,
+gleicher Stil wie `calculateProgress.test.ts`):
+`detectTransportMode` für alle fünf Verkehrsmittel-Keyword-Gruppen
+(inkl. Groß-/Kleinschreibung) sowie den Fall ohne Treffer; `getGreeting`
+für den initialen Zustand; `getNextAdvisorStep` für jeden Schritt der
+Frage-Kette (Ziel → Verkehrsmittel → Termine → Budget → Unterkunft),
+inklusive des erneuten Nachfragens bei nicht erkanntem Verkehrsmittel,
+des `nextField: null`-Zwischenzustands direkt nach der Unterkunfts-Antwort
+(dokumentiert exakt den vom Bug-Hunt-Bericht beschriebenen Zustand, ohne
+ihn zu verändern) sowie des finalen "Reiseplan steht"-Zustands bei
+vollständig ausgefülltem Trip. Zusätzlich ein Test, dass
+`getNextAdvisorStep` das übergebene Trip-Objekt nicht mutiert. Keine
+Codeänderung an `mockAdvisor.ts` selbst — reine Testergänzung. Kein
+Eintrag in `tasks/tasks-prd-travix-platform.md` oder `ZEITPLAN.md`
+geändert, da diese Testdatei keiner dortigen Checkbox entspricht (die
+"Tests"-Sektion in `tasks-prd-travix-platform.md` listet `mockAdvisor.ts`
+nicht auf); die Ergänzung deckt stattdessen direkt Punkt 3 der "Weiteren
+Vorschläge" aus `reports/it-chef.md` (19.08.) ab.
+
+**Geprüft:** Frischer Checkout, `npm install` (647 Pakete, `node_modules`
+fehlte), danach `npm run build` (tsc -b + vite build) grün, `npm run
+lint` grün (0 Fehler, dieselben 3 vorbestehenden Warnungen in
+`ui/badge.tsx`/`button.tsx`/`tabs.tsx`, react-refresh, nicht durch diese
+Änderung verursacht), `npm run test` grün (15 Testdateien statt 14, 66
+Tests statt 55 — genau die 11 neuen `mockAdvisor.test.ts`-Tests kommen
+hinzu, keine bestehenden Tests verändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
