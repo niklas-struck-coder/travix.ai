@@ -604,3 +604,42 @@ Commits — folgt beim 6-Uhr-Lauf. Ni-Info nicht nötig.
 **Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
 support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
 (kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit).
+
+## 2026-08-20, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (drei heutige Läufe mit
+  Testabdeckung für `mockAdvisor.ts`, `Warenkorb.tsx`, `Kalender.tsx`,
+  plus zwei "kein sicherer autonomer Punkt gefunden"-Läufe vom 19.08.
+  ohne Codeänderung).
+- `marketing-chef/auto` — 0 Commits vor `main`, noch nichts Neues
+  (regulärer Lauf erst um 6 Uhr). Wie vorgesehen ignoriert.
+- `support-chef/auto` — 0 Commits vor `main`, noch nichts Neues
+  (regulärer Lauf erst um 6 Uhr). Wie vorgesehen ignoriert.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch ausgecheckt, frisch
+`npm install`, dann selbst ausgeführt statt nur dem Log zu glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur die 3 bekannten vorbestehenden Warnings
+  in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht
+  durch diesen Branch verursacht).
+- `npx vitest run` → grün, 17 Testdateien, 72 Tests — deckt sich exakt
+  mit der Zahl, die `it-chef-auto-log.md` für den dritten Lauf angibt.
+
+**Scope-Check:** Diff gegen `main` betrifft ausschließlich
+`it-chef-auto-log.md` plus drei neue reine Testdateien
+(`src/lib/ai/mockAdvisor.test.ts`, `src/pages/Kalender.test.tsx`,
+`src/pages/Warenkorb.test.tsx`) — keine Änderung an bestehendem
+Produktivcode. Diff-Inhalt selbst gelesen: Tests decken tatsächlich
+bestehendes Verhalten ab (Transportmodus-Erkennung, Berater-Schrittfolge,
+Kalender-Monatsnavigation mit Trip-Badges, Warenkorb-Gruppen/Summen/
+Leerzustand), keine erfundenen Annahmen erkennbar. Kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine UI-Änderung,
+daher kein `MARKENDESIGN.md`-Abgleich nötig. Deckt sich mit den drei im
+Log beschriebenen Punkten — kein Scope-Creep.
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `24230b7..1d399c6`, gepusht).
+
+**Ni-Info:** Nicht nötig (kein wiederholtes Scheitern, kein Fund mit
+eigener Dringlichkeit).
