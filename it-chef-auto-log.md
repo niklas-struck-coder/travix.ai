@@ -2411,3 +2411,94 @@ vorherigen Läufen verworfen statt committet.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20 (vierter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war seit dem letzten Nacht-Check
+bereits vollständig nach `main` gemerged (identisch mit `origin/main`,
+kein Diff) — Freigabe-Chef hat die drei vorherigen Läufe von heute
+zwischenzeitlich geprüft und übernommen. Branch frisch von `origin/main`
+neu aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf
+altem, bereits gemergtem Stand weiterzuarbeiten.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+komplett durchgeprüft. Dieselben Blockaden wie in den bisherigen Läufen
+bestehen fort: 4.1-4.3 ohne KI-Zugangsdaten; 6.2/6.6/6.7/7.12 ohne Preis-/
+Item-Felder in `TripDraft`; 6.8/6.9/6.10 (Checkliste) weiterhin verworfen,
+da FR-501 zehn benannte Punkte (u.a. Hin-/Rückflug getrennt, Mietwagen,
+Restaurants, Versicherung, Reisedokumente, Packen, Flughafentransfer)
+vorgibt, `TripDraft` aber nur `transportMode`/`accommodation`/`activities`
+kennt — jede Zuordnung darüber hinaus wäre eine eigene Interpretation,
+nicht nur eine Übernahme des Vorgegebenen; 5.7 ohne echte Zug/Bus/Fähre-
+Datenquelle im Chat; 7.4 ohne Mehrfach-Entwürfe-Chat-Historie; 7.7
+Dashboard weiterhin an denselben fehlenden Budget-Feldern (6.6/6.7) sowie
+der laut PRD (OQ-04) offenen Loyalty-Punkte-Regel hängend; 7.15 ReiseSuche
+mit nur einem Satz Spezifikation (FR-902) und keiner erkennbaren
+Abgrenzung zur Startseite — zu unklar für einen autonomen Lauf ohne
+Rückfrage; 8.5-8.7 Deal Finder ebenfalls an KI-Zugangsdaten und einer
+laut PRD (OQ-02) offenen Scope-Frage hängend; 8.11 Hilfe blockiert auf
+die noch ausstehenden FAQ-Inhalte vom Support-Chef (Sprint 2, nicht
+abgeschlossen).
+
+Neu identifiziert und gewählt: **8.8 `Profil.tsx`** (`/profil`). FR-102
+ist vollständig und ohne offene Frage spezifiziert (vier konkret benannte
+Felder: Reisestile, Budgetrahmen, Ernährungsweise, Heimatflughafen), im
+Gegensatz zu den benachbarten, bewusst offen gelassenen FR-106/FR-107
+(Premium-Tarif, Loyalty-Regeln — beide mit eigenem OQ-Eintrag in der
+PRD). Die Seite stand bisher nur als `PlaceholderPage` über
+`nav-config.ts`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Formular-/Anzeige-Logik mit rein lokalem
+Demo-State, kein echtes Nutzerkonto nötig (FR-102 selbst verlangt nur die
+Verwaltung der Präferenzen, keine Anbindung an echte Konten — das wäre
+Teil der noch offenen Backend-/Auth-Entscheidung). Keine offene Produkt-
+oder Architekturentscheidung: alle vier Felder sind in FR-102 benannt,
+für den Budgetrahmen wurden bewusst vier grobe Stufen (sparsam/
+mittelklasse/komfortabel/luxus) statt erfundener €-Beträge gewählt, um
+keine Preis-/Zahlungsentscheidung vorwegzunehmen. Klar genug beschrieben:
+keine Interpretation über die vier genannten Felder hinaus. Ergebnis
+objektiv prüfbar: Typecheck/Lint/Tests grün, neue Komponententests
+decken Toggle- und Eingabeverhalten ab.
+
+**Umgesetzt:**
+- Neue Datei `src/types/profile.ts`: Typen/Konstanten für Reisestile,
+  Budgetstufen und Ernährungsweisen sowie `TravelPreferences` mit
+  `emptyPreferences`-Default.
+- Neue Datei `src/pages/Profil.tsx`: Reisestile und Ernährungsweise als
+  Mehrfachauswahl-Toggle-Chips (gleiches visuelles Muster wie
+  `QuickReplies.tsx`, aber mit `aria-pressed` statt Einmal-Klick, da hier
+  echte Mehrfachauswahl statt einer Chat-Antwort gebraucht wird),
+  Budgetrahmen als `Select` mit den vier Stufen, Heimatflughafen als
+  Eingabefeld mit Großschreibung + 3-Zeichen-Begrenzung (analog dem
+  `origin`-Feld in `FlightWizard.tsx`). Rein lokaler `useState`-Demo-State
+  ohne Persistenz über Reloads hinweg — bewusst dasselbe Muster wie
+  `Favoriten.tsx`/`Preisalarme.tsx`/`Angebote.tsx`, nicht eine neue
+  eigene `localStorage`-Ablage, da echte Speicherung an der offenen
+  Backend-Entscheidung hängt.
+- Neue Datei `src/pages/Profil.test.tsx` (4 Tests): Ausgangszustand aller
+  Chips auf `aria-pressed="false"` und leerem Heimatflughafen-Feld; ein
+  Reisestil lässt sich an- und wieder abwählen; zwei Ernährungsweisen
+  lassen sich unabhängig voneinander gleichzeitig auswählen;
+  Heimatflughafen-Eingabe wird großgeschrieben und auf 3 Zeichen
+  gekürzt.
+- `src/routes.tsx`: `/profil` von `PlaceholderPage` auf die neue
+  `Profil`-Komponente umgestellt (Import, `builtRoutes`-Set, eigene
+  `<Route>`). `nav-config.ts` unverändert, da Label/Beschreibung dort
+  bereits zur neuen Seite passen.
+- Checkbox 8.8 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, jeweils mit Begründung für die getroffenen
+  Entscheidungen (Budgetstufen statt €-Beträge, kein Persistenz-Layer).
+
+**Geprüft:** Frischer Checkout, `npm install` (647 Pakete, `node_modules`
+fehlte). `npx tsc -b` → grün, keine Fehler. `npm run lint` → 0 Fehler,
+dieselben 3 vorbestehenden Warnungen in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx` (react-refresh, nicht durch diese Änderung verursacht).
+`npm run test` → 18 Testdateien, 76 Tests, alle grün (die 4 neuen
+`Profil.test.tsx`-Tests kommen zu den bereits bestehenden hinzu, keine
+bestehenden Tests verändert). Der durch `npm install` verursachte
+`package-lock.json`-Diff (nur `libc`-Metadaten-Felder, wie in den
+vorherigen Läufen) wurde verworfen statt committet.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
