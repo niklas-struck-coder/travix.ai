@@ -4,6 +4,61 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-20
+
+**Ausgewählter Punkt:** Sprint 3 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Content-Plan erstellen (Themen, Formate, Kanäle)" und "Erste
+Content-Stücke produzieren (Blog/Social)". Bei der Prüfung im Repo (nicht
+nur `ZEITPLAN.md`-Prosa übernommen) zeigte sich: beide Punkte sind
+inhaltlich bereits fertig — `marketing/content-plan.md` (erstellt
+10.08.) und `marketing/content-stuecke-woche1.md` (erstellt 11.08.)
+liegen vollständig ausgearbeitet vor, nur die Checkboxen in `ZEITPLAN.md`
+waren nie aktualisiert worden. Gleiches Stale-Checkbox-Muster wie bei den
+autonomen IT-Chef-Läufen (z. B. 6.1/6.3, 6.4/6.5, 6.11/6.13).
+
+**Warum dieser Punkt statt eines neuen Content-Stücks:** Der Bericht vom
+19.08. (`reports/marketing-chef.md`) warnt ausdrücklich davor, den
+Entwurfs-Stapel (sechs fertige, unveröffentlichte Stücke) durch ein
+weiteres Stück noch größer zu machen, solange nicht klar ist, was davon
+tatsächlich veröffentlicht wird — das kann dieser autonome Lauf nicht
+entscheiden, das ist Nis Freigabe. Die stale Checkboxen dagegen zu
+korrigieren macht den tatsächlichen Stand sichtbarer, ohne den Stapel zu
+vergrößern, und ist eine reine Dokumentationskorrektur.
+
+**Warum sicher genug:** Reine `ZEITPLAN.md`-Korrektur, kein neues
+Content-Stück und kein Live-Vorgang — nichts wird gepostet, kein Kanal
+angelegt. Keine erfundenen Kennzahlen (betrifft die Korrektur ohnehin
+nicht). Keine offene Positionierungs-Grundsatzfrage: die Checkbox bildet
+nur den vorhandenen, im Repo nachprüfbaren Stand ab, entscheidet nichts
+neu.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- Ein weiteres Content-Stück nach dem bisherigen Muster (Sprint 4,
+  "Laufende Content-Produktion") — würde laut Bericht vom 19.08. den
+  bereits kritisierten, wachsenden Freigabe-Stapel weiter vergrößern,
+  ohne das eigentliche Problem (Veröffentlichung) zu lösen.
+- Kampagnen-Konzepte für Ads (Sprint 5) — laut `ZEITPLAN.md` laufen
+  Sprint 3/4 zeitlich davor, also weiterhin nicht dran.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt an der noch nicht
+  live geschalteten Warteliste (Sprint 2), also aktuell nicht sinnvoll
+  bearbeitbar.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand, Commit `d72d141`) war bereits vollständig in `main`
+gemerged (`git merge-base --is-ancestor`, bestätigt gegen `origin/main`
+nach vollem Fetch — der anfängliche Shallow-Clone zeigte `origin/main`
+zunächst fälschlich auf einem älteren Stand vom 12.08.). Branch daher neu
+von aktuellem `origin/main` (`f03360e`) angelegt, gleiches Vorgehen wie
+beim Lauf vom 19.08.
+
+**Geprüft:** Kein Produkt-Code geändert, nur `ZEITPLAN.md` und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-19
 
 **Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
