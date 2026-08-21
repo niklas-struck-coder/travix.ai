@@ -583,3 +583,76 @@ gruppieren/filtern lassen, sobald `CartItem` ein Trip-Feld hat.
 Der Leerzustand (`:39-58`) selbst wurde nicht erneut geprüft — er folgt
 sichtbar demselben, bereits an anderer Stelle für gut befundenen Muster
 (klare Erklärung + direkter Link zu `/ki-chat`).
+
+---
+
+## 2026-08-21 — Profil (`/profil`)
+
+**Geprüfter Bereich:** `src/pages/Profil.tsx` und `src/types/profile.ts`,
+laut `ZEITPLAN.md` (Aufgabe 8.8) am 20.08. vom autonomen IT-Chef-Lauf
+gebaut, bereits über die Sidebar unter "Konto" erreichbar
+(`src/lib/nav-config.ts:67`) und noch in keinem Support-Chef-Lauf
+geprüft. Zum Vergleich herangezogen: `src/pages/Favoriten.tsx` (gleiches
+`useState`-Demo-Muster, aber dort werden nur vorhandene Demo-Einträge
+entfernt statt aktiv Formulardaten eingegeben) und
+`src/components/search/FlightWizard.tsx` (Vorbild für das
+IATA-Eingabefeld laut `ZEITPLAN.md`).
+
+### Reibungspunkte
+
+**1. Eingegebene Präferenzen gehen schon beim Wegnavigieren verloren —
+nicht erst beim Reload**
+`src/pages/Profil.tsx:21` hält die Auswahl ausschließlich in lokalem
+`useState(emptyPreferences)`, ohne `localStorage` oder einen
+übergeordneten Store. `src/routes.tsx:44-66` rendert alle Seiten über
+`<Routes location={location} key={location.pathname}>`, wodurch jede
+Seite bei einem Routenwechsel vollständig neu gemountet wird. Wer auf
+`/profil` mehrere Reisestile anklickt, einen Budgetrahmen wählt und
+"BER" einträgt, dann kurz zu einer anderen Seite wechselt (z. B. über
+die Sidebar) und zurück zu "Profil" geht, sieht wieder den
+komplett leeren Ausgangszustand — ohne jede Rückfrage oder Warnung. Das
+ist strenger als die in `ZEITPLAN.md` (Zeile 221-227) benannte
+Einschränkung "keine Persistenz über Reloads hinweg", denn hier reicht
+bereits ein einfacher Klick in der Navigation innerhalb derselben
+Sitzung. Die Seitenbeschreibung "Reisepräferenzen **verwalten**"
+(`Profil.tsx:43`) weckt zusätzlich die Erwartung einer echten
+Kontoeinstellung, was den Verlust noch überraschender macht. Zum
+Vergleich: Bei `Favoriten.tsx` betrifft derselbe fehlende Persistenz nur
+das Entfernen von Demo-Einträgen (`ZEITPLAN.md` Zeile 173-179) — ein
+kleinerer Verlust als hier aktiv eingegebene Formulardaten.
+
+*Vorschlag:* Kurzfristig, ohne Backend: die Auswahl in `localStorage`
+zwischenspeichern (analog zum `tripStorage.ts`-Muster für Trips), damit
+sie zumindest die Sitzung über Routenwechsel hinweg übersteht. Bis dahin
+zumindest einen Hinweistext ergänzen (z. B. "Deine Auswahl wird noch
+nicht gespeichert"), damit die Erwartung nicht falsch gesetzt wird.
+
+**2. Heimatflughafen-Feld ist nirgends verdrahtet und erklärt seinen Nutzen
+nicht**
+`src/pages/Profil.tsx:127-143`: Anders als bei Reisestilen ("die KI
+berücksichtigt das bei Vorschlägen"), Budgetrahmen ("hilft der KI,
+passende Angebote zu priorisieren") und Ernährungsweise ("Relevant für
+Restaurant- und Verpflegungsvorschläge") fehlt beim Heimatflughafen jede
+Erklärung, wofür der Wert verwendet wird — nur "IATA-Code, z. B. BER für
+Berlin". Eine Codesuche nach `homeAirport` (`src/types/profile.ts`,
+`src/pages/Profil.tsx`) zeigt: Der Wert wird aktuell nirgends
+weiterverwendet, insbesondere nicht als Vorbelegung für das
+`origin`-Feld in `FlightWizard.tsx:24,61-64`, obwohl genau das der
+naheliegende Nutzen wäre. Zusätzlich gibt es — anders als bei
+`FlightWizard.tsx:32` (`origin.trim().length === 3`) — keine Prüfung,
+ob wirklich 3 Zeichen eingegeben wurden; auch "B" oder "BE" werden
+klaglos übernommen.
+
+*Vorschlag:* Sobald das Feld an eine echte Stelle angebunden wird (z. B.
+Vorbelegung des `origin`-Feldes in der Flugsuche), das kurz im Hilfetext
+erwähnen, analog zu den anderen drei Feldern. Bis dahin optional eine
+dezente Validierung (z. B. Hinweistext bei 1-2 Zeichen), damit klar ist,
+dass ein vollständiger 3-Buchstaben-Code erwartet wird.
+
+### Nicht geprüft
+Die Zugänglichkeit der Toggle-Chip-Gruppen (`aria-pressed`, `role="group"`
++ `aria-label`) wurde stichprobenartig mitgelesen und wirkt sauber
+umgesetzt — keine vertiefte Screenreader-Prüfung durchgeführt. Fehlende
+`aria-live`-Rückmeldung nach dem Ändern einzelner Felder wurde nicht
+gesondert untersucht, da das Fehlen von `aria-live` codebase-weit bereits
+im Eintrag vom 20.08. (Kalender) dokumentiert ist.
