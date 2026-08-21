@@ -4,6 +4,71 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-21
+
+**Ausgewählter Punkt:** Kein neues Content-Stück aus Sprint 3/4. Stattdessen:
+neue Datei `marketing/freigabe-uebersicht.md` — eine Priorisierungs-Übersicht
+über die sechs bereits fertigen, unveröffentlichten Entwürfe in `marketing/`.
+
+**Warum dieser Punkt statt eines siebten Content-Stücks:** Der Bericht vom
+19.08. (`reports/marketing-chef.md`) hatte explizit angekündigt, den
+eigenen autonomen Lauf auf "kein neues Stück" umzustellen, bis mit Ni
+geklärt ist, welche der bereits fertigen Texte tatsächlich rausgehen —
+der Stapel war trotz einer früheren Warnung weitergewachsen. Vor diesem
+Lauf geprüft, ob sich seither etwas an dieser Einschätzung geändert hat:
+kein neuer Commit auf `Warenkorb.tsx`, `EditMode.tsx` oder
+`Kartenansicht.tsx` seit den jeweiligen Content-Stücken, Flugsuche-Bug
+laut `ZEITPLAN.md`/`it-chef-auto-log.md` weiterhin offen und explizit als
+UX-Entscheidung (kein Auto-Fix) markiert, kein neuer Kanal/keine
+Warteliste live. Die Selbstbeschränkung gilt also unverändert weiter —
+ein siebtes Stück hätte genau das wiederholt, wovor der Bericht warnte.
+Statt gar nichts zu tun, wurde die im selben Bericht faktisch schon
+begonnene, aber nie als eigenes Dokument fertiggestellte Priorisierung
+der sechs vorhandenen Stücke ausgearbeitet — das adressiert direkt den
+im Bericht benannten Engpass (Freigabe/Priorisierung, nicht neue Ideen),
+statt ihn zu vergrößern.
+
+**Warum sicher genug:** Reines Entwurfs-/Übersichtsdokument, kein
+Live-Vorgang — nichts wird gepostet, kein Kanal angelegt, kein Text
+verändert oder gelöscht. Keine erfundenen Kennzahlen (Follower,
+Reichweite o.ä. kommen im Dokument nicht vor). Keine offene
+Positionierungs-Grundsatzfrage: die Übersicht entscheidet nichts neu
+(insbesondere nicht "was wird veröffentlicht" — das bleibt ausdrücklich
+Nis Entscheidung, siehe letzter Abschnitt des Dokuments), sondern
+organisiert nur den bereits im Repo nachprüfbaren Stand nach
+Freigabe-Reihenfolge.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein siebtes Content-Stück (z. B. zur neuen Profil-Seite/8.8
+  Reisepräferenzen, IT-Chef Auto vom 20.08.) — würde die im Bericht vom
+  19.08. kritisierte, ohnehin schon gewachsene Ansammlung
+  unveröffentlichter Texte weiter vergrößern, ohne den eigentlichen
+  Engpass zu lösen. Als möglicher Kandidat für einen späteren Lauf in
+  `freigabe-uebersicht.md` vermerkt, nicht ausgearbeitet.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- Kampagnen-Konzepte für Ads (Sprint 5) — laut `ZEITPLAN.md` weiterhin
+  zeitlich nicht dran.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — kein neuer,
+  konkreter Design-Bedarf erkennbar (die neue Profil-Seite nutzt laut
+  IT-Chef-Log bereits bestehende Design-Tokens), daher nichts Sinnvolles
+  ohne Erfinden einer Vorgabe zu ergänzen.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `9fa3a7a`, entspricht dem Lauf vom 20.08.) war bereits vollständig
+in `main` gemerged (`git merge-base --is-ancestor`, gegen `origin/main`
+nach vollem Fetch bestätigt). Branch daher neu von aktuellem
+`origin/main` (`f450fd1`) angelegt, gleiches Vorgehen wie bei allen
+bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine neue Markdown-Datei und
+dieser Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-20
 
 **Ausgewählter Punkt:** Sprint 3 aus `ZEITPLAN.md`, Marketing-Bereich —
