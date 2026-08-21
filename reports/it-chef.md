@@ -1,50 +1,53 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-20
+**Datum:** 2026-08-21
 
-## Was ist seit dem letzten Eintrag (2026-08-19) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-20) passiert?
 
-Seit gestern lief das autonome `it-chef/auto`-Programm dreimal (von
-Freigabe-Chef geprüft und gemergt) — dabei ging es ausschließlich um neue
-Testabdeckung (`mockAdvisor.ts`, `Warenkorb.tsx`, `Kalender.tsx`), kein
-Produktcode wurde verändert. Parallel sind über andere Kanäle mehrere neue
-Seiten dazugekommen, die in diesem Lauf noch nicht Zeile für Zeile geprüft
-waren: `Aktivitaeten.tsx`, `Kalender.tsx` (+ `calendarUtils.ts`),
-`Warenkorb.tsx` (+ `cartTotals.ts`), `EditMode.tsx` (Aktivitäten-Bearbeitung
-in `Buchung.tsx`) sowie die erweiterte `Reiseentwuerfe.tsx` (Pausieren/
-Abschließen/Duplizieren/Löschen). Ich habe diese Dateien gezielt gelesen,
-dazu `routes.tsx` und `nav-config.ts` auf Konsistenz geprüft — keine neuen
-Bugs gefunden, alles sauber: Routen, Datumsgrenzen im Kalender, Gruppierung/
-Summenbildung im Warenkorb und die Aktivitäten-Bearbeitung funktionieren wie
-erwartet.
-
-Die vier PRs aus früheren Läufen sind weiterhin unverändert offen und warten
-auf Nis Review — teils seit über einer Woche:
-[PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
-(hängender Ladezustand bei Unterkunftssuche),
-[PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
-(Hotelsuche-Ladezustand),
-[PR #5](https://github.com/niklas-struck-coder/travix.ai/pull/5)
-("Überrasch mich" als Reiseziel) und
-[PR #6](https://github.com/niklas-struck-coder/travix.ai/pull/6)
-(ungeschützte `localStorage`-Schreibzugriffe im Chat).
+Seit gestern kam über die Auto-Kanäle nur die neue `Profil.tsx` (Reise-
+präferenzen, Punkt 8.8) plus zugehörige Tests dazu — Support-Chef hat sie
+bereits auf UX geprüft, Marketing-Chef hat statt eines siebten Content-
+Stücks eine Freigabe-Übersicht erstellt. Ich habe in diesem Lauf gezielt
+`Profil.tsx`/`profile.ts`, den zentralen Chat-Hook `useChat.ts` samt
+`mockAdvisor.ts`, `tripStorage.ts`, `duffel/client.ts`, `speech.ts`,
+`useConcierge.ts`/`mockConcierge.ts`, `FlightWizard.tsx`, `EditMode.tsx`
+sowie `calendarUtils.ts`/`cartTotals.ts` noch einmal Zeile für Zeile
+gelesen (nicht nur grep) — keine neuen Bugs gefunden. Die bekannten Funde
+aus den letzten Berichten habe ich am aktuellen Code noch einmal verifiziert:
+alle sind unverändert noch vorhanden (siehe unten).
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine — in diesem Lauf kein neuer Bug gefunden, bei dem ich mir sicher genug
-war und der Fix klein/isoliert genug gewesen wäre. Die vier PRs aus
-früheren Läufen (siehe oben) sind weiterhin offen und warten auf Merge.
+Keine — auch in diesem Lauf kein neuer Bug gefunden, bei dem ich mir sicher
+genug war und der Fix klein/isoliert genug gewesen wäre.
+
+Die vier PRs aus früheren Läufen liegen weiterhin ungemergt bereit, mittlerweile
+teils seit über einer Woche (ältester seit 12 Tagen):
+[PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
+(hängender Ladezustand bei Unterkunftssuche, seit 9.8.),
+[PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
+(Hotelsuche-Ladezustand, seit 11.8.),
+[PR #5](https://github.com/niklas-struck-coder/travix.ai/pull/5)
+("Überrasch mich" als Reiseziel, seit 12.8.) und
+[PR #6](https://github.com/niklas-struck-coder/travix.ai/pull/6)
+(ungeschützte `localStorage`-Schreibzugriffe in `useChat.ts` und
+`tripStorage.ts`, seit 12.8.).
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Unverändert gegenüber dem letzten Bericht — alle noch im Code:
+Unverändert gegenüber dem letzten Bericht — alle noch im Code, heute erneut
+am Quelltext bestätigt:
 
 - **Flug-/Transportsuche im normalen Chat-Ablauf startet nie.**
-  `src/hooks/useChat.ts` (`sendMessage`) hat keinen Zweig für den
-  `nextField: null`-Zustand, den `mockAdvisor.ts` nach der letzten Frage
-  zurückgibt — die KI kündigt eine echte Suche an, die nie startet. Kein
-  Auto-Fix, weil eine echte Flugsuche einen Abflughafen braucht, der im
-  linearen Ablauf noch gar nicht abgefragt wird — UX-Entscheidung nötig.
+  `mockAdvisor.ts` (`getNextAdvisorStep`) kündigt nach der letzten Frage
+  ("Ich suche jetzt nach echten Flug-Verbindungen …") eine Suche an und
+  liefert `nextField: null` zurück — `useChat.ts` (`sendMessage`) prüft im
+  linearen Ablauf aber nur auf `nextField === 'accommodation'`, für
+  `null`/Transport gibt es keinen Zweig. Die (neuere) Edit-Flow-Variante
+  über "Bearbeiten" fragt inzwischen sauber nach dem Startflughafen und löst
+  eine echte Suche aus — der ursprüngliche lineare Erstablauf hat das aber
+  weiterhin nicht. Kein Auto-Fix: eine echte Flugsuche braucht einen
+  Abflughafen, der dort noch gar nicht abgefragt wird — UX-Entscheidung nötig.
 - **Automatische Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar
   hängen.** `useChat.ts` startet die Suche nur bei einem der acht
   kuratierten Ziele, sonst passiert nach der Ankündigung nichts, ohne
@@ -71,15 +74,16 @@ Unverändert gegenüber dem letzten Bericht — alle noch im Code:
 ## Weitere Vorschläge
 
 1. **Offene Auto-Fix-PRs mergen.** Vier PRs (#1, #4, #5, #6) liegen bereit
-   und ungefährlich auf GitHub, teils seit über einer Woche — weiterhin der
+   und ungefährlich auf GitHub, mittlerweile seit 9–12 Tagen — weiterhin der
    größte Hebel, noch vor neuem Code.
 2. **Entscheidung zum Flugsuche-Bug treffen.** Betrifft den zentralen
    Verkaufspfad und wird von Marketing- und Support-Chef unabhängig als
    wichtigster offener Punkt eingestuft (Marketing pausiert deswegen
-   Werbung) — lohnt sich, jetzt bewusst zu lösen statt weiter nur zu melden.
+   weiterhin Werbung) — lohnt sich, jetzt bewusst zu lösen statt weiter nur
+   zu melden.
 3. **Testabdeckung für `useChat.ts` selbst ausbauen.** Die letzten Auto-Läufe
    haben `mockAdvisor.ts`, `Warenkorb.tsx` und `Kalender.tsx` abgedeckt, aber
    der zentrale Hook `useChat.ts` (React-State, localStorage-Seiteneffekte,
    der Flugsuche-Bug) hat weiterhin keine eigenen Tests.
 
-_Letztes Update: 2026-08-20_
+_Letztes Update: 2026-08-21_
