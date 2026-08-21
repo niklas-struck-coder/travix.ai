@@ -683,3 +683,46 @@ niedrigstes Risiko der drei Branch-Typen.
 support-chef/auto) gemergt und gepusht, keine Probleme gefunden.
 Ni-Info nicht nötig (kein wiederholtes Scheitern, kein Fund mit eigener
 Dringlichkeit).
+
+## 2026-08-21, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:** `it-chef/auto` (Fokus dieses Laufs laut Auftrag).
+`marketing-chef/auto` und `support-chef/auto` kurz mitgeprüft, aber
+zurückgestellt: `marketing-chef/auto` hat keine neuen Commits gegenüber
+`main`; `support-chef/auto` hat nur einen Commit vom 20.08. (Warenkorb
+UX-Analyse), keinen von heute — beide laufen laut Auftrag erst um 6 Uhr
+im separaten späteren Freigabe-Chef-Lauf, dafür nicht angefasst.
+
+**`it-chef/auto` geprüft:**
+5 Commits seit `main` voraus. 4 davon reine Log-Einträge ("kein sicherer
+neuer Punkt gefunden", drei Läufe am 21.08. plus einer am 20.08.), kein
+Code geändert. Ein Commit mit echter Änderung: **8.8 `Profil.tsx`**
+(`/profil`, vierter Lauf 20.08.) — neue Seite für Reisepräferenzen
+(Reisestile + Ernährungsweise als Mehrfachauswahl-Toggle-Chips,
+Budgetrahmen als vierstufiges Select, Heimatflughafen als
+IATA-Eingabefeld), reiner lokaler Demo-State ohne Persistenz, plus
+Checkbox-Updates in `ZEITPLAN.md`/`tasks-prd-travix-platform.md`.
+
+**Unabhängig verifiziert** (frischer `npm install`, nicht nur Log
+geglaubt): `npx tsc -b` → grün, keine Fehler. `npx eslint .` → 0 Fehler,
+dieselben 3 vorbestehenden Warnungen in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx` (react-refresh, nicht durch diese Änderung verursacht,
+bestätigt gegen `main`-Historie). `npx vitest run` → 18 Testdateien, 76
+Tests, alle grün — deckt sich exakt mit der Behauptung im Log-Eintrag.
+`package-lock.json`-Diff aus `npm install` (nur `libc`-Metadaten) wie in
+den Läufen zuvor verworfen statt committet.
+
+**Diff-Prüfung:** Nur die 7 im Log genannten Dateien geändert
+(`ZEITPLAN.md`, `it-chef-auto-log.md`, `src/pages/Profil.tsx`,
+`src/pages/Profil.test.tsx`, `src/routes.tsx`, `src/types/profile.ts`,
+`tasks/tasks-prd-travix-platform.md`) — kein Scope-Creep über den einen
+Punkt 8.8 hinaus. Kein Bezug zu Auth, Zahlungen oder rechtlichen Texten.
+Design: Toggle-Chips nutzen `border-teal`/`bg-teal/10`/`text-navy` für
+aktiven Zustand — passt zur in `MARKENDESIGN.md` vorgegebenen
+Navy/Teal/Gold-Palette, kein Rot-Schock, ruhige Formsprache.
+
+**Ergebnis:** Passt → alle 5 Commits (inkl. der 4 reinen Log-Commits)
+nach `main` gemergt und gepusht (Merge-Commit `bb55cad`).
+
+**Ni-Info:** Nicht nötig (kein wiederholtes Scheitern, kein Fund mit
+eigener Dringlichkeit — sauberer, klar abgegrenzter Lauf).
