@@ -1,57 +1,59 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-19
+**Datum:** 2026-08-21
 
-## Was ist seit dem letzten Eintrag (2026-08-18) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-19) passiert?
 
-Der IT-Chef hat beim gezielten Bug-Hunt einen neuen, bestätigten Fehler im
-zentralen Chat-Ablauf gefunden (dazu unten mehr) — das ist aus
-Nutzersicht der wichtigste Fund seit meinem letzten Bericht. Daneben lief
-der automatische Support-Chef-Check weiter und hat `Reiseentwuerfe.tsx`
-geprüft: Löschen ohne Rückfrage taucht dort jetzt zum dritten Mal an einer
-neuen Stelle auf, und eine duplizierte Reisekarte ist von der Originalkarte
-nicht zu unterscheiden. Die vier zuvor gemeldeten Punkte (Warenkorb ohne
-Checkout, Kalender-Demo-Daten, rohe Duffel-Fehler, Mikrofon-Fehler,
-fehlender Preisalarm-Button) sind alle weiterhin unverändert im Code.
+Am Code selbst hat sich für Nutzer:innen wenig verändert: Der IT-Chef hat
+seitdem nur Testabdeckung ergänzt (Kalender, Warenkorb, mockAdvisor) und
+neu die Profil-Seite gebaut — die vier zuvor gemeldeten Kernprobleme
+(Flugsuche-Chat-Bug, Warenkorb ohne Checkout-Weg, Löschen ohne Rückfrage,
+nicht unterscheidbarer duplizierter Reiseentwurf) sind alle weiterhin
+unverändert im Code, mehrfach durch erneute Bug-Hunts bestätigt. Ich habe
+diesmal tiefer in den Kalender, den Warenkorb und die neue Profil-Seite
+geschaut und dabei neue, bisher nicht gemeldete Reibungspunkte gefunden.
 
 ## Meine Vorschläge
 
-1. **Die KI kündigt eine Flugsuche an, die im normalen Chat-Ablauf nie
-   startet.** Sobald man im Haupt-Chat (Ziel → Verkehrsmittel → Termine →
-   Budget → Unterkunft) die letzte Frage beantwortet, sagt der Bot
-   wörtlich, er suche jetzt nach echten Verbindungen — aber
-   `src/hooks/useChat.ts:285` reagiert nur auf `nextField ===
-   'accommodation'`, nicht auf den `null`-Zustand, den
-   `src/lib/ai/mockAdvisor.ts:112-120` an dieser Stelle zurückgibt. Die
-   echte Suche existiert nur über den "Bearbeiten"-Pfad auf der
-   Buchungsseite. Für Nutzer:innen heißt das: keine Ladeanzeige, kein
-   Ergebnis, kein Fehler — einfach nichts, bis der Bot beim nächsten
-   Klick plötzlich "Dein Reiseplan steht!" sagt. Das ist der zentrale
-   Verkaufspfad der App, deshalb würde ich das ganz oben einordnen.
+1. **Auf der neuen Profil-Seite gehen eingegebene Präferenzen schon beim
+   Wegklicken verloren — nicht erst beim Neuladen.** `src/pages/Profil.tsx:21`
+   hält die Auswahl nur in lokalem `useState`, ohne `localStorage` oder
+   Speicherung. Weil jede Seite bei Routenwechsel komplett neu gemountet
+   wird (`src/routes.tsx:44-66`), reicht schon ein Klick zu einer anderen
+   Seite und zurück, um Reisestile, Budgetrahmen und Heimatflughafen
+   wieder auf leer zu setzen — ganz ohne Warnung. Die Überschrift
+   "Reisepräferenzen **verwalten**" weckt dabei die Erwartung einer
+   echten Kontoeinstellung, was den Verlust noch unangenehmer macht. Ich
+   würde hier kurzfristig zumindest einen Hinweistext ergänzen ("wird
+   noch nicht gespeichert"), mittelfristig `localStorage` nutzen.
 
-2. **Der Warenkorb hat weiterhin keinen Weg zum Buchen.**
-   `src/pages/Warenkorb.tsx:109-114` zeigt die Endsumme, aber es gibt
-   nirgends (auch nicht in `src/routes.tsx`) einen "Jetzt buchen"-Button
-   oder eine Checkout-Route. Das ist seit meinem letzten Bericht
-   unverändert und bleibt für mich der zweitwichtigste Punkt, weil er
-   genau dort auftritt, wo Nutzer eigentlich abschließen wollen.
+2. **Das Heimatflughafen-Feld im Profil ist an nichts angebunden und
+   erklärt nicht, wofür es gut ist.** Anders als die drei anderen Felder
+   auf `src/pages/Profil.tsx:127-143` fehlt hier jeder Hinweis, wofür der
+   Wert verwendet wird — und eine Codesuche zeigt: aktuell nirgends,
+   insbesondere nicht als Vorbelegung in der Flugsuche
+   (`FlightWizard.tsx`), wo das der naheliegende Nutzen wäre. Es fehlt
+   zudem jede Prüfung auf drei Zeichen, wie sie die Flugsuche selbst
+   längst hat. Sobald das Feld angebunden wird, würde ich das kurz im
+   Hilfetext erwähnen, wie bei den anderen Feldern.
 
-3. **Löschen ohne Rückfrage wiederholt sich jetzt zum dritten Mal.**
-   `src/pages/Reiseentwuerfe.tsx:90-92` (`deleteDraft`) entfernt einen
-   Reiseentwurf sofort und endgültig per Klick — kein Bestätigungsdialog,
-   kein Rückgängig. Dasselbe Muster steht schon bei `Angebote.tsx` und
-   `EditMode.tsx`. Bei einem Entwurf mit 60 % Fortschritt (Transportmittel,
-   Budget, Datum bereits ausgefüllt) ist das echte Planungsarbeit, die
-   ohne Warnung weg ist. Weil sich das jetzt dreimal wiederholt, würde
-   sich ein gemeinsamer, wiederverwendbarer Bestätigungs-/Rückgängig-Baustein
-   lohnen, statt es dreimal einzeln nachzurüsten.
+3. **Der Kalender zeigt beim ersten Öffnen oft eine leere Ansicht, obwohl
+   Reisen existieren.** `src/pages/Kalender.tsx:26-28` startet immer im
+   aktuellen Kalendermonat statt im Monat der nächsten Reise. Bei den
+   beiden Demo-Reisen (September, März) fällt am heutigen Datum keine in
+   den angezeigten August — Nutzer:innen sehen ein leeres Gitter und
+   müssen selbst raten, in welche Richtung sie weiterklicken müssen, um
+   überhaupt eine Reise zu sehen. Vorschlag: beim Laden den Monat der
+   nächstgelegenen Reise vorauswählen, falls im aktuellen Monat keine
+   liegt.
 
-4. **Ein duplizierter Reiseentwurf ist von der Originalkarte nicht zu
-   unterscheiden.** `src/pages/Reiseentwuerfe.tsx:80-88`
-   (`duplicateDraft`) übernimmt Ziel, Fortschritt und Status 1:1 — beide
-   Karten sehen danach identisch aus, ohne "Kopie"-Hinweis oder
-   Rückmeldung, dass etwas passiert ist. Bei mehreren duplizierten
-   Entwürfen wird kaum noch erkennbar, welche Karte neu und welche das
-   Original ist.
+4. **Im Warenkorb werden Positionen aus verschiedenen Reisen ohne jede
+   Kennzeichnung vermischt.** `src/pages/Warenkorb.tsx:20-26` zeigt Demo-
+   Positionen aus zwei Reisen (Lissabon, Kyoto) nebeneinander in derselben
+   Gruppe — `groupCartItems` (`cartTotals.ts:20-25`) gruppiert nur nach
+   Leistungstyp, nicht nach Reise. Wer mehrere Reisen parallel plant,
+   sieht einen unsortierten Topf ohne Information, was zu welcher Reise
+   gehört. Ein sichtbares Reiseziel-Label pro Position würde hier schon
+   viel klarer machen, was zusammengehört.
 
-_Letztes Update: 2026-08-19_
+_Letztes Update: 2026-08-21_
