@@ -218,7 +218,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zielort — aktuell nur einfache Concierge-Fakten)
 - [ ] 8.4 Quick-Action-Buttons (Restaurant finden, Schild übersetzen, Route)
 - [ ] 8.5, 8.6, 8.7 Deal Finder
-- [ ] 8.8 Profil, 8.10 Einstellungen, 8.11 Hilfe
+- [x] 8.8 `Profil.tsx` (`/profil`) — vom autonomen IT-Chef-Lauf am 20.08.
+  gebaut: Reisestile (Mehrfachauswahl als Toggle-Chips, analog
+  `QuickReplies.tsx`), Budgetrahmen (Select mit vier groben Stufen statt
+  konkreter €-Beträge, um keine Zahlungs-/Preisentscheidung vorwegzunehmen),
+  Ernährungsweise (ebenfalls Toggle-Chips, Mehrfachauswahl) und
+  Heimatflughafen (IATA-Eingabe, Großschreibung + 3 Zeichen, analog dem
+  `origin`-Feld in `FlightWizard.tsx`). Rein lokaler Demo-State ohne
+  Persistenz über Reloads hinweg, gleiches Muster wie
+  Favoriten/Preisalarme/Angebote — echte Speicherung hängt an der offenen
+  Backend-/Auth-Entscheidung. 8.10 Einstellungen und 8.11 Hilfe bleiben
+  eigene offene Punkte (Hilfe zusätzlich blockiert auf die FAQ-Inhalte vom
+  Support-Chef).
+- [ ] 8.10 Einstellungen, 8.11 Hilfe
 - [ ] 8.9 Premium, 8.12 Rewards/Loyalty
 
 ### Sprint 5 — Duffel Stays & Zahlungsprozess (KW43-44, 20. Okt - 2. Nov)

@@ -2411,3 +2411,292 @@ vorherigen Läufen verworfen statt committet.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-20 (vierter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war seit dem letzten Nacht-Check
+bereits vollständig nach `main` gemerged (identisch mit `origin/main`,
+kein Diff) — Freigabe-Chef hat die drei vorherigen Läufe von heute
+zwischenzeitlich geprüft und übernommen. Branch frisch von `origin/main`
+neu aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf
+altem, bereits gemergtem Stand weiterzuarbeiten.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+komplett durchgeprüft. Dieselben Blockaden wie in den bisherigen Läufen
+bestehen fort: 4.1-4.3 ohne KI-Zugangsdaten; 6.2/6.6/6.7/7.12 ohne Preis-/
+Item-Felder in `TripDraft`; 6.8/6.9/6.10 (Checkliste) weiterhin verworfen,
+da FR-501 zehn benannte Punkte (u.a. Hin-/Rückflug getrennt, Mietwagen,
+Restaurants, Versicherung, Reisedokumente, Packen, Flughafentransfer)
+vorgibt, `TripDraft` aber nur `transportMode`/`accommodation`/`activities`
+kennt — jede Zuordnung darüber hinaus wäre eine eigene Interpretation,
+nicht nur eine Übernahme des Vorgegebenen; 5.7 ohne echte Zug/Bus/Fähre-
+Datenquelle im Chat; 7.4 ohne Mehrfach-Entwürfe-Chat-Historie; 7.7
+Dashboard weiterhin an denselben fehlenden Budget-Feldern (6.6/6.7) sowie
+der laut PRD (OQ-04) offenen Loyalty-Punkte-Regel hängend; 7.15 ReiseSuche
+mit nur einem Satz Spezifikation (FR-902) und keiner erkennbaren
+Abgrenzung zur Startseite — zu unklar für einen autonomen Lauf ohne
+Rückfrage; 8.5-8.7 Deal Finder ebenfalls an KI-Zugangsdaten und einer
+laut PRD (OQ-02) offenen Scope-Frage hängend; 8.11 Hilfe blockiert auf
+die noch ausstehenden FAQ-Inhalte vom Support-Chef (Sprint 2, nicht
+abgeschlossen).
+
+Neu identifiziert und gewählt: **8.8 `Profil.tsx`** (`/profil`). FR-102
+ist vollständig und ohne offene Frage spezifiziert (vier konkret benannte
+Felder: Reisestile, Budgetrahmen, Ernährungsweise, Heimatflughafen), im
+Gegensatz zu den benachbarten, bewusst offen gelassenen FR-106/FR-107
+(Premium-Tarif, Loyalty-Regeln — beide mit eigenem OQ-Eintrag in der
+PRD). Die Seite stand bisher nur als `PlaceholderPage` über
+`nav-config.ts`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Formular-/Anzeige-Logik mit rein lokalem
+Demo-State, kein echtes Nutzerkonto nötig (FR-102 selbst verlangt nur die
+Verwaltung der Präferenzen, keine Anbindung an echte Konten — das wäre
+Teil der noch offenen Backend-/Auth-Entscheidung). Keine offene Produkt-
+oder Architekturentscheidung: alle vier Felder sind in FR-102 benannt,
+für den Budgetrahmen wurden bewusst vier grobe Stufen (sparsam/
+mittelklasse/komfortabel/luxus) statt erfundener €-Beträge gewählt, um
+keine Preis-/Zahlungsentscheidung vorwegzunehmen. Klar genug beschrieben:
+keine Interpretation über die vier genannten Felder hinaus. Ergebnis
+objektiv prüfbar: Typecheck/Lint/Tests grün, neue Komponententests
+decken Toggle- und Eingabeverhalten ab.
+
+**Umgesetzt:**
+- Neue Datei `src/types/profile.ts`: Typen/Konstanten für Reisestile,
+  Budgetstufen und Ernährungsweisen sowie `TravelPreferences` mit
+  `emptyPreferences`-Default.
+- Neue Datei `src/pages/Profil.tsx`: Reisestile und Ernährungsweise als
+  Mehrfachauswahl-Toggle-Chips (gleiches visuelles Muster wie
+  `QuickReplies.tsx`, aber mit `aria-pressed` statt Einmal-Klick, da hier
+  echte Mehrfachauswahl statt einer Chat-Antwort gebraucht wird),
+  Budgetrahmen als `Select` mit den vier Stufen, Heimatflughafen als
+  Eingabefeld mit Großschreibung + 3-Zeichen-Begrenzung (analog dem
+  `origin`-Feld in `FlightWizard.tsx`). Rein lokaler `useState`-Demo-State
+  ohne Persistenz über Reloads hinweg — bewusst dasselbe Muster wie
+  `Favoriten.tsx`/`Preisalarme.tsx`/`Angebote.tsx`, nicht eine neue
+  eigene `localStorage`-Ablage, da echte Speicherung an der offenen
+  Backend-Entscheidung hängt.
+- Neue Datei `src/pages/Profil.test.tsx` (4 Tests): Ausgangszustand aller
+  Chips auf `aria-pressed="false"` und leerem Heimatflughafen-Feld; ein
+  Reisestil lässt sich an- und wieder abwählen; zwei Ernährungsweisen
+  lassen sich unabhängig voneinander gleichzeitig auswählen;
+  Heimatflughafen-Eingabe wird großgeschrieben und auf 3 Zeichen
+  gekürzt.
+- `src/routes.tsx`: `/profil` von `PlaceholderPage` auf die neue
+  `Profil`-Komponente umgestellt (Import, `builtRoutes`-Set, eigene
+  `<Route>`). `nav-config.ts` unverändert, da Label/Beschreibung dort
+  bereits zur neuen Seite passen.
+- Checkbox 8.8 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, jeweils mit Begründung für die getroffenen
+  Entscheidungen (Budgetstufen statt €-Beträge, kein Persistenz-Layer).
+
+**Geprüft:** Frischer Checkout, `npm install` (647 Pakete, `node_modules`
+fehlte). `npx tsc -b` → grün, keine Fehler. `npm run lint` → 0 Fehler,
+dieselben 3 vorbestehenden Warnungen in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx` (react-refresh, nicht durch diese Änderung verursacht).
+`npm run test` → 18 Testdateien, 76 Tests, alle grün (die 4 neuen
+`Profil.test.tsx`-Tests kommen zu den bereits bestehenden hinzu, keine
+bestehenden Tests verändert). Der durch `npm install` verursachte
+`package-lock.json`-Diff (nur `libc`-Metadaten-Felder, wie in den
+vorherigen Läufen) wurde verworfen statt committet.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-20 (fünfter Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war ein Commit vor `origin/main`
+identisch, plus den vierten Lauf von heute (8.8 Profil-Seite) obendrauf,
+noch nicht vom Freigabe-Chef gemergt. Auf diesem Stand weitergearbeitet
+(`git checkout -B it-chef/auto origin/it-chef/auto`), `main` selbst nicht
+angefasst.
+
+**Erster Versuch, dann zurückgenommen:** 7.15 `ReiseSuche.tsx`
+(`/reise-planen`) implementiert — zwei Karten zu den bestehenden
+manuellen Suchflüssen (Flugsuche, Hotelsuche) plus ein KI-Chat-Hinweis
+für alles andere, gestützt auf den bereits in `Home.tsx` vorhandenen
+"Selbst durchsuchen"-Button und den `nav-config.ts`-Eintrag. Typecheck/
+Lint/Tests liefen grün. Beim Schreiben des Berichts fiel aber auf: der
+**vierte Lauf von heute** hatte genau diesen Punkt bereits geprüft und
+bewusst verworfen ("7.15 ReiseSuche mit nur einem Satz Spezifikation
+(FR-902) und keiner erkennbaren Abgrenzung zur Startseite — zu unklar
+für einen autonomen Lauf ohne Rückfrage"). Meine eigene Eingrenzung
+(nur Links zu bestehenden Suchseiten) war zwar in sich stimmig, aber
+trotzdem meine eigene Interpretation einer Ein-Satz-Anforderung, keine
+bloße Übernahme des Vorgegebenen — genau das Kriterium, an dem der
+vierte Lauf den Punkt schon verworfen hatte. Zwei Läufe am selben Tag,
+die sich beim selben unterspezifizierten Punkt gegenseitig überstimmen,
+wäre kein sauberes Ergebnis. Deshalb zurückgenommen (`git checkout --`
+plus Löschen der neuen Dateien — keine Restspuren im Diff dieses
+Commits): kein Code-Ergebnis aus diesem Versuch.
+
+**Weitere Prüfung, kein Punkt gefunden:** Danach die übrigen, noch nicht
+vom vierten Lauf durchgesehenen Punkte geprüft:
+- 8.9 Premium (`/premium`) und 8.12 Loyalty-Anzeige — laut PRD an
+  OQ-03 bzw. OQ-04 hängend (Premium-Tarif-Inhalte, Loyalty-Regeln noch
+  offene Fragen), also Produktentscheidung, nicht autonom fällbar.
+- 8.10 Einstellungen (`/einstellungen`) — FR-103 nennt keine einzige
+  konkrete Einstellung, nur "App-Einstellungen und Benachrichtigungs-
+  einstellungen" als Kategorien; auch `nav-config.ts` ist nicht
+  konkreter. Anders als bei 8.8 Profil (vier namentlich genannte Felder)
+  müsste hier die komplette Feldliste selbst erfunden werden — dieselbe
+  Art Lücke, wegen der der vierte Lauf schon 6.8/6.9 (Checkliste) und
+  7.15 verworfen hat.
+- 8.13 Unit-Tests für calculateProgress/calculateCosts/checklistRules/
+  Schema-Validierung — drei der vier Ziele existieren noch gar nicht
+  (calculateCosts, checklistRules, Schema-Validierung hängen an
+  denselben offenen Punkten), nur calculateProgress hat bereits Tests.
+  Keine sauber abgrenzbare Teilmenge, ohne den Rest des Punkts
+  stillschweigend wegzulassen.
+- Sprint 5/6 (Duffel Stays, Zahlungsprozess-Entscheidung, Ende-zu-Ende-
+  Testing, Mobile-Politur, Bugfixing-Durchgang, Performance-Check) —
+  entweder explizite Produktentscheidungen oder zu groß/unscharf für
+  einen einzelnen autonomen Punkt, ohnehin erst für KW43+ geplant.
+
+**Ergebnis:** Heute nichts gefunden, das alle vier Sicherheitskriterien
+erfüllt und noch nicht vom vierten Lauf abgedeckt wurde. Kein
+Code-Commit für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** `npx tsc -b` und `npm run test` liefen für den
+zurückgenommenen ReiseSuche-Versuch grün (18 → 19 Testdateien, 78 Tests),
+sind aber nach der Rücknahme nicht mehr Teil des Repo-Stands. Nach der
+Rücknahme `git status`/`git diff` geprüft: Arbeitsverzeichnis wieder
+exakt auf dem Stand von `origin/it-chef/auto` (vierter Lauf), keine
+Restspuren außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-21
+
+Neuer geplanter Cloud-Lauf, `main` unverändert seit gestern (Merge-Base
+von `origin/main`/`origin/it-chef/auto` = `origin/main`-HEAD), daher
+keine neuen Erledigungen anderer Chefs, die neue Punkte in `ZEITPLAN.md`
+freigeschaltet hätten. `it-chef/auto` ausgecheckt
+(`git checkout -B it-chef/auto origin/it-chef/auto`) — enthält weiterhin
+die noch nicht vom Freigabe-Chef gemergten Läufe vom 20.08. (vierter Lauf:
+8.8 Profil-Seite; fünfter Lauf: kein Punkt gefunden). `main` selbst nicht
+angefasst.
+
+**Eigene, unabhängige Prüfung aller noch offenen Sprint-1-bis-4-Punkte**
+(bevor der Bericht vom fünften Lauf gestern gelesen wurde, um eine echte
+Zweitmeinung zu haben):
+- 4.1-4.3 (Schema/Prompts/`invokeLLM.ts`) — laut Aufgabenliste selbst
+  explizit "blocked on Base44/Gemini credentials".
+- 6.6/6.7 (`CostBreakdown.tsx`/`calculateCosts.ts`) — `TripDraft` hat
+  weiterhin keine Preisfelder für Transport/Unterkunft (bereits bei 6.12
+  als Blocker dokumentiert).
+- 6.8/6.9 (Checkliste) — FR-501 nennt nur 10 konkrete Punkte (Hin-/
+  Rückflug, Unterkunft, Aktivitäten, Mietwagen, Restaurants, Versicherung,
+  Reisedokumente, Packen, Flughafentransfer) für einen "13-Punkte"-
+  Checkliste — die fehlenden drei Punkte müssten erfunden werden. Selbst
+  für die 10 genannten fehlen im `TripDraft`-Datenmodell mehrere
+  Felder (Versicherung, Reisedokumente, Packen), FR-502 (Auto-Erkennung
+  aus Trip-Daten) wäre für diese Felder gar nicht erfüllbar.
+- 7.4 (Planung fortsetzen mit voller Chat-Historie) — `tripStorage.ts`
+  hält nur einen einzigen aktiven Chat-Zustand (`CHAT_STORAGE_KEY`,
+  ein Schlüssel), keine Historie pro Entwurf; `Reiseentwuerfe.tsx` nutzt
+  ohnehin nur lokalen Demo-State ohne echte Speicherung. Eine echte
+  Umsetzung bräuchte ein neues Mehrfach-Entwurf-Speicherkonzept — das
+  ist eine Architekturentscheidung, keine reine Umsetzung.
+- 7.7 (Dashboard) — laut Aufgabenliste braucht die Seite Budgets (6.6/6.7
+  offen) und Loyalty-Punkte (8.12 offen) als Bestandteile; nicht sauber
+  ohne diese Abhängigkeiten umsetzbar.
+- 7.12 (Reisebudget/Recharts) — weiterhin explizit blockiert (keine
+  Preisfelder im Datenmodell).
+- 7.15 (ReiseSuche) — nur ein Satz Spezifikation ("trip planning search
+  entry point"), keine erkennbare Abgrenzung zu `Home.tsx`/`Flugsuche.tsx`.
+- 8.4 (Quick-Action-Buttons im Urlaubsmodus: Restaurant finden,
+  Schild übersetzen, Route) — würde gegen das dokumentierte Prinzip in
+  `mockConcierge.ts` verstoßen ("never invented specifics like restaurant
+  recommendations ... without a real search backend"); "Schild
+  übersetzen" hängt zudem an der als blockiert markierten Foto-/Vision-
+  Funktion (8.2). Nicht ohne echte Backend-/API-Anbindung sauber lösbar.
+- 8.9/8.12 (Premium, Loyalty-Anzeige) — laut PRD an offenen Fragen (OQ-03
+  Premium-Tarif-Inhalte, OQ-04 Loyalty-Regeln) hängend, also
+  Produktentscheidung.
+- 8.10 (Einstellungen) — FR-103 nennt keine einzelne konkrete Einstellung,
+  nur grobe Kategorien; die komplette Feldliste müsste selbst erfunden
+  werden.
+- 8.13 (Unit-Tests für calculateProgress/calculateCosts/checklistRules/
+  Schema-Validierung) — drei der vier Ziele existieren noch nicht; nur
+  `calculateProgress.ts` hat bereits Tests (`calculateProgress.test.ts`).
+  Keine sauber abgrenzbare Teilmenge übrig.
+- Sprint 5/6 — explizite Produktentscheidungen bzw. für KW43+ geplant,
+  zu groß/unscharf für einen einzelnen autonomen Punkt.
+
+Stichprobe auf stale Checkboxen (Fälle wie in früheren Läufen, wo ein
+Punkt bereits im Code existierte, aber die Checkbox das nicht
+widerspiegelte): für alle oben geprüften offenen Punkte existieren
+weder passende Dateien (`ChecklistPanel.tsx`, `ReiseSuche.tsx`,
+`Einstellungen.tsx`, `Premium.tsx`, `Dashboard.tsx`) noch Routen — also
+keine stale Checkbox, echt offen.
+
+**Ergebnis:** Diese unabhängige Prüfung deckt sich vollständig mit der
+Einschätzung aus dem fünften Lauf gestern (siehe oben) — seit gestern
+ist nichts Neues in `ZEITPLAN.md`/der Aufgabenliste hinzugekommen, das
+einen der bisherigen Blocker aufheben würde. Auch heute nichts gefunden,
+das alle vier Sicherheitskriterien erfüllt. Kein Code-Commit für einen
+neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Kein Code geändert, daher kein Typecheck/Lint/Testlauf
+nötig; `git status` vor und nach der Prüfung identisch (working tree
+clean).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-21 (zweiter Lauf, 01:04 UTC)
+
+Erneuter geplanter Cloud-Lauf, nur ~55 Minuten nach dem vorherigen
+(00:09 UTC). `origin/main` unverändert seit dem vorherigen Lauf (weiterhin
+Commit `2012001`), `origin/it-chef/auto` ebenfalls unverändert seither
+(`70c45aa`) — kein anderer Chef hat in der Zwischenzeit etwas gemergt, das
+einen der im vorherigen Lauf dokumentierten Blocker (Backend-/Credentials-
+Entscheidung, fehlende Preisfelder in `TripDraft`, unterspezifizierte
+Punkte wie 7.7/7.15/8.10, Produktentscheidungen bei 8.9/8.12) aufgehoben
+hätte.
+
+Deshalb keine vollständige Neu-Enumeration aller Sprint-Punkte wiederholt
+— die unabhängige Prüfung von 00:09 UTC bleibt bei identischem
+Ausgangszustand gültig. Stattdessen nur verifiziert: `git status`
+sauber, `origin/it-chef/auto` == lokaler Stand, keine neuen Commits auf
+`origin/main` seit dem letzten Merge-Base-Vergleich. Kein Punkt erfüllt
+demnach heute (weiterhin) alle vier Sicherheitskriterien für eine
+autonome Umsetzung. Kein Code geändert.
+
+**Geprüft:** `git fetch origin`, `git log origin/main..origin/it-chef/auto`,
+Commit-Zeitstempel-Vergleich (`git log -1 --format=%ci` auf `origin/main`,
+`origin/it-chef/auto`, `origin/marketing-chef/auto`,
+`origin/support-chef/auto`) — keine relevante Änderung seit dem
+vorherigen Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-21 (dritter Lauf, 02:04 UTC)
+
+Erneuter geplanter Cloud-Lauf, ~1 Stunde nach dem vorherigen (01:05 UTC).
+`origin/main` weiterhin unverändert seit dem ersten Lauf heute (Commit
+`2012001`, zuletzt Marketing-Chef am 20.08.), `origin/it-chef/auto`
+ebenfalls unverändert seit dem zweiten Lauf (`18e40ff`). Auch
+`origin/marketing-chef/auto` (`9fa3a7a`, 20.08.) und
+`origin/support-chef/auto` (`64668a1`, 20.08.) unverändert — kein anderer
+Chef hat zwischenzeitlich etwas gemergt oder committet, das einen der
+dokumentierten Blocker (Backend-/Credentials-Entscheidung, fehlende
+Preisfelder in `TripDraft`, unterspezifizierte Punkte wie 7.7/7.15/8.10,
+Produktentscheidungen bei 8.9/8.12) aufheben würde.
+
+Identischer Ausgangszustand wie bei den ersten beiden Läufen heute,
+daher wieder keine vollständige Neu-Enumeration — die unabhängige
+Prüfung von 00:09 UTC bleibt gültig. Kein Punkt erfüllt demnach heute
+(weiterhin) alle vier Sicherheitskriterien für eine autonome Umsetzung.
+Kein Code geändert.
+
+**Geprüft:** `git fetch origin` für `main`, `it-chef/auto`,
+`marketing-chef/auto`, `support-chef/auto`; Commit-Hash-/Zeitstempel-
+Vergleich gegen die vorherigen zwei Läufe — keine relevante Änderung.
+`git status` sauber.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

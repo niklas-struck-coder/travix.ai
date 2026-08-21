@@ -224,7 +224,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 8.5 Build DealFinderChat page (`/deal-finder`) with autonomous AI agent and web search
   - [ ] 8.6 Implement deal results display for flights, hotels, and packages
   - [ ] 8.7 Create WhatsApp/Telegram channel integration architecture stub
-  - [ ] 8.8 Build Profil page (`/profil`) with travel preferences (styles, budget, dietary, home airport)
+  - [x] 8.8 Build Profil page (`/profil`) with travel preferences (styles, budget, dietary, home airport) — `src/pages/Profil.tsx`: travel styles and dietary restrictions as multi-select toggle chips, budget as a four-tier `Select` (sparsam/mittelklasse/komfortabel/luxus, no invented € amounts), home airport as an uppercase 3-letter IATA input matching `FlightWizard.tsx`'s `origin` field. Local demo state only (no persistence across reloads), same placeholder-data pattern as `Favoriten.tsx`/`Preisalarme.tsx`/`Angebote.tsx` — real storage depends on the still-open Backend-Entscheidung
   - [ ] 8.9 Build Premium page (`/premium`) with subscription tier benefits
   - [ ] 8.10 Build Einstellungen page (`/einstellungen`) for app preferences
   - [ ] 8.11 Build Hilfe page (`/hilfe`) with FAQ and support information
