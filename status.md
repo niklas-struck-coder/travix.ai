@@ -9,22 +9,23 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
 - Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Seiten Aktivitäten, Kalender, Warenkorb, Kartenansicht, KI-Concierge-Chat
+- Seiten Aktivitäten, Kalender, Warenkorb, Profil, Kartenansicht, KI-Concierge-Chat
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-19):**
-- Bekannter Bug bestätigt: Flugsuche startet im Haupt-Chat-Ablauf nicht — von
-  IT-, Marketing- und Support-Chef unabhängig als wichtigster offener Punkt
-  eingestuft (Marketing pausiert dafür Werbung)
-- IT-Chef Auto hat Testabdeckung ergänzt (mockAdvisor.ts, Warenkorb.tsx,
-  Kalender.tsx)
-- Support-Chef Auto: UX-Analyse zum Reisekalender (7.11)
-- Marketing-Chef Auto: veraltete Checkboxen im Sprint-3-Plan korrigiert
-  (Content-Plan und erste Content-Stücke waren bereits fertig)
-- Freigabe-Chef hat die Marketing- und Support-Auto-Zweige geprüft und
+**Seit letztem Update (2026-08-20):**
+- Neue Profil-Seite mit Reisepräferenzen von IT-Chef Auto umgesetzt, danach
+  von Support-Chef auf UX geprüft
+- Support-Chef Auto: UX-Analyse zum Warenkorb
+- Marketing-Chef Auto: Freigabe-Übersicht statt eines weiteren Content-Stücks
+  erstellt
+- IT-Chef lief mehrfach gezielt auf Bug-Suche, ohne neue sichere Punkte zu
+  finden
+- Bekannter Bug weiterhin offen: Flugsuche startet im Haupt-Chat-Ablauf nicht
+  (Marketing pausiert deswegen weiterhin Werbung)
+- Freigabe-Chef hat die IT-, Marketing- und Support-Auto-Zweige geprüft und
   nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-20_
+_Letztes Update: 2026-08-21_
