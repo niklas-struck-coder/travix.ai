@@ -2566,3 +2566,82 @@ Restspuren außer diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-21
+
+Neuer geplanter Cloud-Lauf, `main` unverändert seit gestern (Merge-Base
+von `origin/main`/`origin/it-chef/auto` = `origin/main`-HEAD), daher
+keine neuen Erledigungen anderer Chefs, die neue Punkte in `ZEITPLAN.md`
+freigeschaltet hätten. `it-chef/auto` ausgecheckt
+(`git checkout -B it-chef/auto origin/it-chef/auto`) — enthält weiterhin
+die noch nicht vom Freigabe-Chef gemergten Läufe vom 20.08. (vierter Lauf:
+8.8 Profil-Seite; fünfter Lauf: kein Punkt gefunden). `main` selbst nicht
+angefasst.
+
+**Eigene, unabhängige Prüfung aller noch offenen Sprint-1-bis-4-Punkte**
+(bevor der Bericht vom fünften Lauf gestern gelesen wurde, um eine echte
+Zweitmeinung zu haben):
+- 4.1-4.3 (Schema/Prompts/`invokeLLM.ts`) — laut Aufgabenliste selbst
+  explizit "blocked on Base44/Gemini credentials".
+- 6.6/6.7 (`CostBreakdown.tsx`/`calculateCosts.ts`) — `TripDraft` hat
+  weiterhin keine Preisfelder für Transport/Unterkunft (bereits bei 6.12
+  als Blocker dokumentiert).
+- 6.8/6.9 (Checkliste) — FR-501 nennt nur 10 konkrete Punkte (Hin-/
+  Rückflug, Unterkunft, Aktivitäten, Mietwagen, Restaurants, Versicherung,
+  Reisedokumente, Packen, Flughafentransfer) für einen "13-Punkte"-
+  Checkliste — die fehlenden drei Punkte müssten erfunden werden. Selbst
+  für die 10 genannten fehlen im `TripDraft`-Datenmodell mehrere
+  Felder (Versicherung, Reisedokumente, Packen), FR-502 (Auto-Erkennung
+  aus Trip-Daten) wäre für diese Felder gar nicht erfüllbar.
+- 7.4 (Planung fortsetzen mit voller Chat-Historie) — `tripStorage.ts`
+  hält nur einen einzigen aktiven Chat-Zustand (`CHAT_STORAGE_KEY`,
+  ein Schlüssel), keine Historie pro Entwurf; `Reiseentwuerfe.tsx` nutzt
+  ohnehin nur lokalen Demo-State ohne echte Speicherung. Eine echte
+  Umsetzung bräuchte ein neues Mehrfach-Entwurf-Speicherkonzept — das
+  ist eine Architekturentscheidung, keine reine Umsetzung.
+- 7.7 (Dashboard) — laut Aufgabenliste braucht die Seite Budgets (6.6/6.7
+  offen) und Loyalty-Punkte (8.12 offen) als Bestandteile; nicht sauber
+  ohne diese Abhängigkeiten umsetzbar.
+- 7.12 (Reisebudget/Recharts) — weiterhin explizit blockiert (keine
+  Preisfelder im Datenmodell).
+- 7.15 (ReiseSuche) — nur ein Satz Spezifikation ("trip planning search
+  entry point"), keine erkennbare Abgrenzung zu `Home.tsx`/`Flugsuche.tsx`.
+- 8.4 (Quick-Action-Buttons im Urlaubsmodus: Restaurant finden,
+  Schild übersetzen, Route) — würde gegen das dokumentierte Prinzip in
+  `mockConcierge.ts` verstoßen ("never invented specifics like restaurant
+  recommendations ... without a real search backend"); "Schild
+  übersetzen" hängt zudem an der als blockiert markierten Foto-/Vision-
+  Funktion (8.2). Nicht ohne echte Backend-/API-Anbindung sauber lösbar.
+- 8.9/8.12 (Premium, Loyalty-Anzeige) — laut PRD an offenen Fragen (OQ-03
+  Premium-Tarif-Inhalte, OQ-04 Loyalty-Regeln) hängend, also
+  Produktentscheidung.
+- 8.10 (Einstellungen) — FR-103 nennt keine einzelne konkrete Einstellung,
+  nur grobe Kategorien; die komplette Feldliste müsste selbst erfunden
+  werden.
+- 8.13 (Unit-Tests für calculateProgress/calculateCosts/checklistRules/
+  Schema-Validierung) — drei der vier Ziele existieren noch nicht; nur
+  `calculateProgress.ts` hat bereits Tests (`calculateProgress.test.ts`).
+  Keine sauber abgrenzbare Teilmenge übrig.
+- Sprint 5/6 — explizite Produktentscheidungen bzw. für KW43+ geplant,
+  zu groß/unscharf für einen einzelnen autonomen Punkt.
+
+Stichprobe auf stale Checkboxen (Fälle wie in früheren Läufen, wo ein
+Punkt bereits im Code existierte, aber die Checkbox das nicht
+widerspiegelte): für alle oben geprüften offenen Punkte existieren
+weder passende Dateien (`ChecklistPanel.tsx`, `ReiseSuche.tsx`,
+`Einstellungen.tsx`, `Premium.tsx`, `Dashboard.tsx`) noch Routen — also
+keine stale Checkbox, echt offen.
+
+**Ergebnis:** Diese unabhängige Prüfung deckt sich vollständig mit der
+Einschätzung aus dem fünften Lauf gestern (siehe oben) — seit gestern
+ist nichts Neues in `ZEITPLAN.md`/der Aufgabenliste hinzugekommen, das
+einen der bisherigen Blocker aufheben würde. Auch heute nichts gefunden,
+das alle vier Sicherheitskriterien erfüllt. Kein Code-Commit für einen
+neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Kein Code geändert, daher kein Typecheck/Lint/Testlauf
+nötig; `git status` vor und nach der Prüfung identisch (working tree
+clean).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
