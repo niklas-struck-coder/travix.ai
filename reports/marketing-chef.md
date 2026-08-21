@@ -1,47 +1,48 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-20
+**Datum:** 2026-08-21
 
-## Was ist seit dem letzten Eintrag (2026-08-19) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-20) passiert?
 
-Der IT-Chef hat heute gezielt alle neuen Seiten durchgeprüft (Kalender,
-Warenkorb, Aktivitäten, EditMode, erweiterte Reiseentwürfe) — keine neuen
-Bugs, aber auch: der Flugsuche-Bug aus dem letzten Bericht ist unverändert
-offen, weiterhin ohne Fix. Das bleibt also weiter ein Werbe-Stopp-Thema,
-jetzt den dritten Tag in Folge.
-
-Wichtiger für diesen Bericht: Der eigene autonome Lauf hat seit gestern
-**zwei weitere** Content-Stücke geschrieben (zu Warenkorb-Summen und zu
-Aktivitäten-Bearbeitung) — genau die Richtung, vor der ich gestern gewarnt
-habe. Der Entwurfs-Stapel in `marketing/` ist damit auf sieben bis acht
-fertige Stücke gewachsen, und nach allem, was im Repo sichtbar ist, ist
-weiterhin keines davon veröffentlicht. Ich habe außerdem `Warenkorb.tsx`
-selbst geprüft: einen "Jetzt buchen"-Button oder Checkout-Weg gibt es dort
-nach wie vor nicht.
+Der eigene autonome Lauf hat heute genau das gemacht, was der letzte
+Bericht angekündigt hat: **kein** siebtes Content-Stück, stattdessen die
+neue `marketing/freigabe-uebersicht.md` — eine Sortierung der sechs
+fertigen Entwürfe in vier Freigabe-Stufen (sofort postbar, zurückhalten,
+Grundlagen-Dokument, eigene Format-Entscheidung), mit einem eigenen
+Code-Check statt Copy-Paste alter Befunde. Der Entwurfs-Stapel ist damit
+heute nicht weiter gewachsen. Der IT-Chef hat parallel noch einmal
+zeilenweise nach neuen Bugs gesucht (Profil, Chat-Hook, Duffel-Client)
+und dabei den Flugsuche-Bug im normalen Chat-Ablauf erneut unverändert
+offen bestätigt — der Werbe-Stopp dafür bleibt also bestehen, jetzt den
+vierten Tag in Folge.
 
 ## Vorschläge
 
-1. **Kein neues Content-Stück mehr, bis geklärt ist, was live geht.** Das
-   ist jetzt der vierte Bericht in Folge mit diesem Befund, und der
-   Stapel ist trotz meiner eigenen Warnung gestern weiter gewachsen statt
-   geschrumpft. Ich stelle den eigenen autonomen Lauf auf "kein neues
-   Stück" um, bis mit dir geklärt ist, welche der acht Texte diese Woche
-   tatsächlich rausgehen — sonst schreibe ich mir selbst am eigentlichen
-   Ziel vorbei.
+1. **Die Freigabe-Übersicht ist fertig zum Entscheiden — jetzt wirklich
+   entscheiden statt weiter sortieren.** `marketing/freigabe-uebersicht.md`
+   hat die Vorarbeit gemacht: Tier 1 ("Deine Reise ist keine
+   Einbahnstraße" zu Aktivitäten-Bearbeiten, "Die ehrliche Kartenansicht")
+   ist ohne technischen Vorbehalt postbar. Meine konkrete Empfehlung: mit
+   diesen zwei Stücken LinkedIn+Instagram eröffnen, statt weiter auf die
+   Landingpage zu warten — Kanal-Aufbau und Warteliste sind zwei
+   unabhängige Baustellen, das eine muss nicht auf das andere warten.
 
-2. **Wenn ein erstes Stück raus soll: Aktivitäten-Bearbeitung statt
-   Warenkorb.** Die Aktivitäten-Bearbeitung (`EditMode.tsx`) wurde vom
-   IT-Chef heute als sauber und fehlerfrei bestätigt und ist ein
-   abgeschlossener Funktionsweg — im Gegensatz zum Warenkorb, der
-   weiterhin ohne Buchen-Möglichkeit endet. Ehrliche Content-Regel: erst
-   posten, was einen echten Anfang-bis-Ende-Weg hat.
+2. **6.2 (Buchen-Button im Warenkorb) priorisieren, damit ein fertiger
+   Text nicht länger liegen bleibt.** "Echte Zahlen, keine Show" ist seit
+   drei Tagen geschrieben und ungenutzt, weil `Warenkorb.tsx` weiterhin
+   ohne Checkout-Weg endet. Das ist kein Marketing-Blocker mehr, sondern
+   ein reiner Priorisierungs-Punkt für die Roadmap — lohnt sich, dem
+   IT-Chef als nächsten Punkt mitzugeben.
 
-3. **Flugsuche-Bug: Werbe-Stopp bleibt bestehen.** Unverändert seit dem
-   letzten Bericht — solange die KI im Haupt-Chat eine echte Flugsuche
-   ankündigt, die nie startet, keine Aussagen, die suggerieren, die
-   KI-Flugsuche funktioniere im Chat bereits durchgängig.
+3. **Flugsuche-Bug bleibt Werbe-Stopp, unverändert.** Solange die KI im
+   Haupt-Chat eine Flugsuche ankündigt, die nie startet, keine
+   Kommunikation, die eine durchgängige KI-Flugsuche im Chat suggeriert.
+   Das betrifft laut heutiger Prüfung keinen der sechs fertigen Entwürfe
+   direkt, gilt aber weiter als Leitplanke für alles Neue.
 
-4. **Warenkorb-Content weiterhin zurückhalten.** Bestätigt durch eigenen
-   Code-Check heute: `Warenkorb.tsx` zeigt nur die Endsumme, kein
-   "Jetzt buchen". Das bereits fertige Warenkorb-Stück bleibt liegen, bis
-   dieser Weg existiert — sonst bewirbt der Post eine Sackgasse.
+4. **Wiederkehrendes Monats-Format (Tier 4) ist eine Ja/Nein-Frage, keine
+   Content-Frage.** `content-format-was-wird-gespeichert.md` liegt als
+   erste Ausgabe fertig da. Bevor eine zweite Ausgabe Sinn ergibt, braucht
+   es einmal deine Entscheidung, ob das Format als feste Rubrik überhaupt
+   gewollt ist — sonst schreibt der autonome Lauf sonst versehentlich eine
+   Serie an, die niemand bestellt hat.
