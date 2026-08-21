@@ -214,7 +214,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 7.12 Build Reisebudget page (`/budget`) with Recharts cost breakdown charts
   - [x] 7.13 Build Aktivitaeten page (`/aktivitaeten`) with aggregated activities across all trips — demo data (`initialActivities` in `Aktivitaeten.tsx`) aggregated from the two demo trips in `MeineReisen.tsx` (Lissabon, Kyoto), same placeholder pattern as `Angebote.tsx`/`Preisalarme.tsx`; destination badge per activity, optional price (mirrors `TripActivity.price`), working remove button, encouraging empty state per `MARKENDESIGN.md`
   - [x] 7.14 Build Kartenansicht page (`/karte`) with React-Leaflet map and trip destination markers
-  - [ ] 7.15 Build ReiseSuche page (`/reise-planen`) as trip planning search entry point
+  - [x] 7.15 Build ReiseSuche page (`/reise-planen`) as trip planning search entry point — vom autonomen IT-Chef-Lauf am 21.08. gebaut: `src/pages/ReiseSuche.tsx`, drei Karten (KI-Chat empfohlen/hervorgehoben, Flugsuche, Hotelsuche), jede mit kurzer Beschreibung und Link-Button. Schließt eine echte Lücke: `Home.tsx`s "Selbst durchsuchen"-Button verlinkte bereits auf `/reise-planen`, das bisher nur die `PlaceholderPage` zeigte. Kein Zug/Bus/Fähre-Kärtchen, da dafür noch keine eigenständige Route existiert (5.7 offen, `TrainCard`/`TrainResults` sind bisher nur in den KI-Chat-Flow eingebunden). Keine erfundenen Daten, reine Navigation zu bereits bestehenden Seiten.
 
 - [ ] 8.0 Holiday mode, deal finder, account — Urlaubsmodus, DealFinderChat, profile, Premium, settings
   - [ ] 8.1 Build Urlaubsmodus page (`/urlaubsmodus`) tied to active/booked trip with daily itinerary display

@@ -2752,4 +2752,70 @@ Laufs und jetzigem `main` (leer). Kein Code geändert, daher kein
 Typecheck/Lint/Testlauf nötig.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-21 (fünfter Lauf, geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` (Stand: vierter Lauf von heute,
+Branch frisch von `main` neu aufgesetzt, keine offene Vorarbeit) per
+Rebase übernommen. `main` selbst wurde nicht angerührt.
+
+**Abweichung vom vierten Lauf heute (und vom Lauf am 11.08.) zu 7.15:**
+Beide früheren Prüfungen haben Task 7.15 (ReiseSuche) verworfen, u.a. mit
+der Begründung "keine konkrete Feldliste in PRD/Aufgabenliste" bzw.
+"unklar, was die Seite von der Startseite unterscheiden soll". Bei
+erneuter Prüfung zeigt sich aber ein konkreter, im bestehenden Code schon
+angelegter Anker: `Home.tsx`s Hero-Sektion hat bereits zwei Buttons —
+"Reise mit KI planen" (`/ki-chat`) und "Selbst durchsuchen"
+(`/reise-planen`) — der zweite Button existiert also bereits produktiv
+und verlinkt bislang nur auf die generische `PlaceholderPage`. Das macht
+den Umfang eindeutig, ohne etwas erfinden zu müssen: die Seite ist der
+Einstiegspunkt für "selbst suchen" als Alternative zum KI-Chat, mit
+Links auf die beiden bereits fertigen Direktsuchen (Flug, Hotel). Damit
+erfüllt der Punkt entgegen der früheren Einschätzung alle vier Kriterien.
+
+**Ausgewählter Punkt:** Task 7.15 aus `tasks/tasks-prd-travix-platform.md` —
+"Build ReiseSuche page (`/reise-planen`) as trip planning search entry
+point". Laut `ZEITPLAN.md` einer der wenigen noch offenen, klar
+beschriebenen Programmierungs-Punkte in Sprint 3.
+
+**Warum sicher genug:** Reine Navigations-/UI-Seite ohne Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung nötig — die Seite verlinkt nur auf
+bereits bestehende, fertige Seiten (`/ki-chat`, `/flugsuche`,
+`/hotelsuche`). Klar genug beschrieben ("trip planning search entry
+point"), kein erfundenes Datenmodell nötig (anders als z.B. 7.7 Dashboard
+mit "budgets, loyalty points" oder 8.10 Einstellungen mit vagem "app
+preferences" — beide deshalb bewusst nicht gewählt). Ergebnis objektiv
+prüfbar über Typecheck/Lint/Tests plus neuem Test für die drei Links.
+
+**Umgesetzt:**
+- Neue Seite `src/pages/ReiseSuche.tsx` — drei Karten (KI-Chat als
+  empfohlener Weg hervorgehoben, Flugsuche, Hotelsuche), je mit Icon,
+  kurzer Beschreibung und Link-Button, im bestehenden Card-Stil.
+- `src/routes.tsx`: Import, `/reise-planen` zu `builtRoutes` hinzugefügt,
+  echte `<Route>` statt der bisherigen generierten `PlaceholderPage`-Route.
+  `src/lib/nav-config.ts` hatte den Eintrag (Pfad/Label/Beschreibung/Icon)
+  bereits — keine Änderung dort nötig.
+- Neuer Test `src/pages/ReiseSuche.test.tsx` — prüft, dass alle drei Links
+  auf die richtigen Pfade zeigen.
+- Bewusst kein Zug/Bus/Fähre-Kärtchen: 5.7 (Einbindung von
+  `TrainCard`/`TrainResults` in den Buchungsfluss) ist noch offen, es
+  existiert dafür keine eigenständige Route — hätte eine Annahme über den
+  Aufgabentext hinaus bedeutet.
+- Checkbox 7.15 in `tasks/tasks-prd-travix-platform.md` sowie der
+  entsprechende Punkt in `ZEITPLAN.md` (Sprint 3) auf erledigt gesetzt.
+
+**Geprüft:**
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie in
+  früheren Läufen (react-refresh in `badge.tsx`/`button.tsx`/`tabs.tsx`,
+  nicht durch diesen Change verursacht).
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run test` (vitest) → 19/19 Testdateien, 77/77 Tests grün
+  (inkl. neuer `ReiseSuche.test.tsx`).
+
+**Hinweis:** `node_modules` fehlte im frischen Checkout und musste erst
+per `npm ci` installiert werden (gleiches Muster wie in früheren Läufen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).

@@ -210,7 +210,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Angebote/Favoriten/Preisalarme), ermutigender Leer-Zustand laut
   `MARKENDESIGN.md`. Rein lokaler Demo-State, noch keine echte
   geteilte Aktivitäten-Speicherung über Trips hinweg
-- [ ] 7.15 ReiseSuche
+- [x] 7.15 `ReiseSuche.tsx` (`/reise-planen`) — vom autonomen IT-Chef-Lauf am
+  21.08. gebaut: drei Karten (KI-Chat, Flugsuche, Hotelsuche) als
+  Einstiegspunkt für die Reiseplanung, KI-Chat hervorgehoben als
+  empfohlener Weg. Schließt eine echte Lücke — `Home.tsx`s
+  "Selbst durchsuchen"-Button verlinkte bereits dorthin, zeigte bisher
+  aber nur die `PlaceholderPage`. Kein Zug/Bus/Fähre-Kärtchen, da 5.7
+  (Einbindung von `TrainCard`/`TrainResults`) noch offen ist und dafür
+  keine eigenständige Route existiert. Reine Navigation, keine
+  erfundenen Daten.
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse
