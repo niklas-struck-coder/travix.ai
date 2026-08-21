@@ -726,3 +726,53 @@ nach `main` gemergt und gepusht (Merge-Commit `bb55cad`).
 
 **Ni-Info:** Nicht nötig (kein wiederholtes Scheitern, kein Fund mit
 eigener Dringlichkeit — sauberer, klar abgegrenzter Lauf).
+
+## 2026-08-21, automatischer Lauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, aber keine neuen Commits gegenüber `main`
+  (letzter Stand bereits im früheren Check des heutigen Tages gemergt).
+  Übersprungen wie vorgesehen.
+- `marketing-chef/auto` — 1 neuer Commit (2026-08-21): kein siebtes
+  Content-Stück, stattdessen neue Datei `marketing/freigabe-uebersicht.md`
+  mit einer Priorisierungs-Übersicht der sechs bereits fertigen,
+  unveröffentlichten Entwürfe.
+- `support-chef/auto` — 2 neue Commits: Warenkorb-UX-Analyse (20.08.,
+  zweiter Lauf) und Profil-UX-Analyse (21.08.), beide nur als Ergänzung
+  in `support-chef-auto-log.md`, kein Produktcode geändert.
+
+**`marketing-chef/auto` geprüft:**
+Nur eine neue Markdown-Datei plus Log-Eintrag, kein Produktcode, daher
+kein Build/Lint/Test nötig. Inhalt geprüft: keine erfundenen Kennzahlen
+(Follower, Reichweite o. ä. kommen nicht vor), reines Entwurfs-/
+Organisationsdokument ohne Hinweis auf tatsächliches Posten/Anlegen
+eines Kanals, entscheidet nichts eigenständig (überlässt die Freigabe-
+Frage ausdrücklich Ni), Text ist vollständig und kohärent, kein
+Scope-Creep über den beschriebenen Punkt hinaus.
+**Ergebnis:** Passt → nach `main` gemergt und gepusht.
+
+**`support-chef/auto` geprüft:**
+Erster Blick auf `git diff main..support-chef/auto` zeigte scheinbare
+Löschungen von `src/pages/Profil.tsx`, `src/types/profile.ts` u. a. —
+das war aber nur der reine Baum-Vergleich (Branch ist älter als der
+Profil.tsx-Commit auf `main`, hat diese Dateien nie angefasst). Mit
+einem echten Testmerge (`git merge --no-commit`, danach abgebrochen)
+verifiziert: Der tatsächliche 3-Wege-Merge ist sauber und ändert nur
+`support-chef-auto-log.md` — keine Datei geht verloren. Inhaltlich
+stichprobenartig gegen den aktuellen Code geprüft: Warenkorb-Befund 1
+("kein Weg zur Buchung") bestätigt (`src/pages/Warenkorb.tsx`, Codesuche
+nach "Kasse"/"checkout"/"bezahlen" ergebnislos); Profil-Befund 1
+(Zustandsverlust schon beim Wegnavigieren wegen `key={location.pathname}`
+in `src/routes.tsx`) bestätigt; Profil-Befund 2 (`homeAirport` nirgends
+weiterverwendet, keine 3-Zeichen-Validierung) bestätigt gegen
+`src/types/profile.ts`/`src/pages/Profil.tsx`. Reine Analyse ohne
+Codeänderung, wie von diesem Branch vorgesehen.
+**Ergebnis:** Passt → nach `main` gemergt und gepusht (zusammen mit
+`marketing-chef/auto`, Merge-Commits siehe Git-Historie ab `f450fd1`).
+
+**Ni-Info:** Nicht nötig — beide Läufe sauber, keine wiederholten
+Regelverstöße, kein dringlicher Fund. Erwähnenswert nur als Randnotiz:
+der erste Blick auf den `support-chef/auto`-Diff sah wegen des Branch-
+Alters nach einer Löschung von Profil.tsx aus; das war ein Diff-
+Artefakt, kein echtes Problem — durch den Testmerge zweifelsfrei geklärt,
+bevor gemergt wurde.
