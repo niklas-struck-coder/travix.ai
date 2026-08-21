@@ -2700,3 +2700,56 @@ Vergleich gegen die vorherigen zwei Läufe — keine relevante Änderung.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-21 (vierter Lauf, geplanter Cloud-Lauf am Nachmittag)
+
+Neuer geplanter Cloud-Lauf. `origin/it-chef/auto` war zwischenzeitlich
+vom Freigabe-Chef komplett nach `main` gemergt worden (`bb55cad Merge
+it-chef/auto into main`) — der alte Branch-Stand war also bereits
+vollständig in `main` enthalten (`git log origin/it-chef/auto..origin/main`
+zeigt 12 neue Commits, `git log origin/main..origin/it-chef/auto` zeigt
+0). Branch `it-chef/auto` deshalb frisch von `origin/main` neu
+aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf dem
+veralteten alten Branch-Stand weiterzuarbeiten — `main` selbst dabei nur
+gelesen, nicht verändert.
+
+Seit dem letzten ausführlichen Review heute früh (00:09 UTC, dritter
+Lauf) sind auf `main` drei neue Commits dazugekommen: ein IT-Chef
+Bug-Hunt-Bericht (`787a3d7`, keine neuen Funde), ein Marketing-Chef-
+Bericht (`e6e74fb`) und ein Support-Chef-Bericht zur Profil-Seite
+(`8cc3d55`, Reibungspunkte: Präferenzen gehen schon beim Wegnavigieren
+verloren, Heimatflughafen-Feld ist nirgends verdrahtet). Keiner davon
+ändert `ZEITPLAN.md` oder `tasks/tasks-prd-travix-platform.md`
+(`git diff <letzter-Lauf>..main -- ZEITPLAN.md tasks/tasks-prd-travix-platform.md`
+ist leer) — die Support-Chef-Funde sind UX-Reibungspunkte für einen
+späteren, mit Ni abgestimmten Fix-Lauf, kein neuer freigeschalteter
+Punkt aus der Aufgabenliste, an der sich der autonome Modus laut Skill
+orientiert.
+
+Eigene, unabhängige Neuprüfung aller offenen Sprint-1-bis-4-Punkte
+(ohne den Bericht vom dritten Lauf vorher zu lesen, für eine echte
+Zweitmeinung) kam zum selben Ergebnis wie dieser: 4.1-4.3 weiterhin
+explizit "blocked on Base44/Gemini credentials"; 6.6/6.7/7.12 weiterhin
+ohne Preisfelder in `TripDraft`; 6.8/6.9 (Checkliste) weiterhin nur mit
+erfundenen zusätzlichen Punkten auf "13" zu bringen (FR-501 nennt nur
+10 konkrete); 7.4 weiterhin eine Architekturentscheidung (Mehrfach-
+Entwurf-Speicherung); 7.7 weiterhin abhängig von den offenen 6.6/6.7/
+8.12; 7.15/8.10 weiterhin ohne konkrete Feldliste in PRD/Aufgabenliste;
+8.4 weiterhin gegen das dokumentierte "keine erfundenen Spezifika"-
+Prinzip bzw. blockiert von 8.2; 8.9/8.12 weiterhin offene
+Produktentscheidungen (OQ-03/OQ-04); 8.13 weiterhin ohne saubere
+Teilmenge, da drei der vier Testziele noch nicht existieren.
+
+**Ergebnis:** Wieder nichts gefunden, das alle vier Sicherheitskriterien
+erfüllt — der Zustand seit dem dritten Lauf heute ist unverändert
+geblieben. Kein Code-Commit für einen neuen Punkt, nur dieser
+Log-Eintrag plus der Branch-Neuaufsatz von `main`.
+
+**Geprüft:** `git fetch origin`, Commit-Vergleich `origin/it-chef/auto`
+vs. `origin/main` in beide Richtungen, `git diff` auf `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` zwischen dem Stand des dritten
+Laufs und jetzigem `main` (leer). Kein Code geändert, daher kein
+Typecheck/Lint/Testlauf nötig.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
