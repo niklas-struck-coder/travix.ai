@@ -656,3 +656,51 @@ umgesetzt — keine vertiefte Screenreader-Prüfung durchgeführt. Fehlende
 `aria-live`-Rückmeldung nach dem Ändern einzelner Felder wurde nicht
 gesondert untersucht, da das Fehlen von `aria-live` codebase-weit bereits
 im Eintrag vom 20.08. (Kalender) dokumentiert ist.
+
+## 2026-08-22 — Reise suchen (`/reise-planen`)
+
+**Geprüfter Bereich:** `src/pages/ReiseSuche.tsx` und
+`src/pages/ReiseSuche.test.tsx`, laut `ZEITPLAN.md` (Aufgabe 7.15) am
+21.08. vom autonomen IT-Chef-Lauf gebaut und mit dem heutigen
+Freigabe-Chef-Merge (`5d688da`/`4d70bff`) erstmals in `main` gelandet —
+noch in keinem Support-Chef-Lauf geprüft. `Home.tsx:46-50` verlinkt
+bereits seit früherem Stand dorthin ("Selbst durchsuchen"), zeigte bis
+zu diesem Merge aber nur die generische `PlaceholderPage`.
+
+### Reibungspunkte
+
+**1. Die als "empfohlen" markierte KI-Chat-Karte hat de facto keine
+sichtbare Hervorhebung — die Border-Klasse rendert nicht**
+`src/pages/ReiseSuche.tsx:49` setzt bei `option.recommended` nur die
+Klasse `border-teal/40` (reine Randfarbe) auf die `Card`. Die
+`Card`-Basiskomponente (`src/components/ui/card.tsx:14`) nutzt aber gar
+kein `border`-Utility, sondern `ring-1 ring-foreground/10`. Der globale
+Tailwind-Reset in `src/styles/globals.css:126-128`
+(`* { @apply border-border outline-ring/50; }`) setzt ebenfalls nur die
+Randfarbe, keine Randbreite — Tailwinds Preflight lässt `border-width`
+bei allen Elementen ohne explizites `border`-Utility auf `0`. Ergebnis:
+`border-teal/40` hat schlicht keine Randbreite, an der die Farbe
+sichtbar würde, und rendert damit unsichtbar. Übrig bleibt als einziges
+Unterscheidungsmerkmal die Button-Farbe (gefüllt Teal vs. Outline,
+`ReiseSuche.tsx:58-61`) plus die Position an erster Stelle — ein
+Erstnutzer, der laut `ZEITPLAN.md` (Zeile 216) über die KI-Chat-Karte
+"als empfohlener Weg" geführt werden soll, bekommt davon praktisch
+nichts mit, wenn er die drei Karten überfliegt. Auch ein Textlabel
+("Empfohlen") fehlt komplett — eine Codesuche nach "Empfohlen" im
+gesamten `src`-Ordner findet nur diese eine Datei (den Code-Kommentar
+gibt es nicht einmal), obwohl `src/components/ui/badge.tsx` bereits in
+acht anderen Seiten (u. a. `MeineReisen.tsx`, `Angebote.tsx`,
+`FlightCard.tsx`) für genau solche Kennzeichnungen verwendet wird.
+
+*Vorschlag:* Entweder `border` zur Klasse ergänzen (z. B.
+`border border-teal/40`), damit die Randfarbe sichtbar wird, oder —
+konsistenter zum Rest der App — ein `Badge` mit Text "Empfohlen" auf der
+KI-Chat-Karte ergänzen, analog zum bestehenden Muster in den acht oben
+genannten Dateien.
+
+### Nicht geprüft
+Die Seite ist reine Navigation ohne Formulare, Ladezustände oder
+Fehlerfälle — entsprechend gab es dort nichts Weiteres zu prüfen. Die
+Zielseiten `/ki-chat`, `/flugsuche` und `/hotelsuche` selbst waren nicht
+Gegenstand dieses Laufs, da sie bereits in früheren Einträgen (siehe
+2026-08-10, Flugsuche) behandelt wurden bzw. noch nicht geprüft sind.
