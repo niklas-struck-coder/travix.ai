@@ -2819,3 +2819,89 @@ per `npm ci` installiert werden (gleiches Muster wie in früheren Läufen).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-22 (geplanter Cloud-Lauf)
+
+**Vorbereitung:** Frischer, isolierter Checkout. `origin/it-chef/auto`
+(Stand: fünfter Lauf vom 21.08., Tip `93f86cc`, ReiseSuche 7.15) als
+lokalen Branch `it-chef/auto` ausgecheckt. `git log origin/it-chef/auto..
+origin/main` und umgekehrt geprüft: leer in beide Richtungen — der Branch
+ist bereits exakt auf dem aktuellen `main`-Stand aufgesetzt, kein Merge
+nötig. `main` selbst wurde nicht angerührt.
+
+**Unabhängige Neuprüfung aller offenen Punkte** (vor dem Lesen des
+gestrigen Log-Eintrags, für eine echte Zweitmeinung) über
+`tasks/tasks-prd-travix-platform.md`:
+- 2.x (Base44/Auth) — explizit blockiert von der offenen
+  Backend-Entscheidung, nicht autonom fällbar.
+- 4.1-4.3 — weiterhin explizit "blocked on Base44/Gemini credentials".
+- 5.7 (Zug-Ergebnisse in KI-Chat einbinden) — Hotel-Teil ist bereits über
+  `stayOffers`/`searchStays` in `useChat.ts` eingebunden; für Züge gibt es
+  aber keine echte Such-API (`TrainCard`/`TrainResults` sind vollständig
+  ungenutzte Komponenten, kein `searchTrains` im Duffel-Client). Echte
+  Zugdaten anzubinden ist eine offene Architekturentscheidung (welcher
+  Anbieter?), erfundene Zugverbindungen anzuzeigen verletzt das im Code
+  dokumentierte "keine erfundenen Spezifika ohne echten Search-Backend"-
+  Prinzip (`mockConcierge.ts`, Feld-Auswahl bei `HotelCard`/`TrainCard`).
+  Beides disqualifiziert den Punkt.
+- 6.2/6.6/6.7 — weiterhin ohne Preis-/Provider-URL-Felder in `TripDraft`.
+- 6.8/6.9/6.10 (Checkliste) — Aufgabentext nennt nur Beispiele
+  ("outbound/return flight, accommodation, activities, etc.") für
+  angeblich 13 Punkte; `TripDraft` hat nur 5 auto-erkennbare Dimensionen
+  (Transport, Termine, Budget, Unterkunft, Aktivitäten). Die restlichen
+  ~8 Punkte auf 13 wären erfunden (z. B. Reisepass, Versicherung,
+  Packliste) — mehr Interpretation als die Aufgabenliste hergibt.
+- 7.4 — Architekturentscheidung: bräuchte Mehrfach-Chat-Historien pro
+  Entwurf, aktuell existiert nur ein einziger globaler Chat-Storage-Slot.
+- 7.7 (Dashboard) — "budgets, loyalty points" sind Konzepte ohne jede
+  Entsprechung im Datenmodell (kein Budget-Feld an Demo-Trips, kein
+  Loyalty-Konzept irgendwo im Code — das wäre 8.12, selbst offen und eine
+  Produktentscheidung). Zu viel Erfindung nötig.
+- 7.12 — weiterhin ohne Preisfelder blockiert (gleicher Grund wie 6.6/6.7).
+- 7.15 — bereits am 21.08. auf diesem Branch umgesetzt (`ReiseSuche.tsx`),
+  noch nicht nach `main` gemergt (wartet auf Freigabe-Chef-Prüfung). Kein
+  neuer Punkt für heute.
+- 8.1/8.3 — "daily itinerary display" bräuchte strukturierte Tages-/
+  Zeit-Daten, die `TripActivity` (nur `id`/`name`/`price`) nicht hat.
+- 8.2, 8.5, 8.6 — Vision-Analyse bzw. autonomer Web-Search-Agent, klar
+  außerhalb von "einzelner sicherer Punkt ohne offene Architekturfrage".
+- 8.4 — verletzt dasselbe "keine erfundenen Spezifika"-Prinzip wie 5.7
+  (Restaurant-Empfehlungen wären erfunden) und hängt zusätzlich an 8.2.
+- 8.7 (WhatsApp/Telegram-Architektur-Stub) — Aufgabentext gibt keine
+  konkrete Form für den "Stub" vor (welcher Anbieter, welche Schnittstelle?)
+  — zu vage für eine Umsetzung ohne eigene Annahmen.
+- 8.9, 8.12 — explizite offene Produktentscheidungen (Premium-Tarif,
+  Rewards-Programm).
+- 8.10 (Einstellungen) — `nav-config.ts` gibt nur die vage Beschreibung
+  "App- und Benachrichtigungseinstellungen" vor, ohne konkreten Anker wie
+  bei 7.15 (dort gab es bereits einen echten, verlinkten "Selbst
+  durchsuchen"-Button in `Home.tsx`, der nur auf die Platzhalterseite
+  zeigte). Für Einstellungen existiert keine vergleichbare bestehende
+  Verlinkung oder konkrete Feldliste — würde eigene Annahmen über Umfang
+  und Inhalt erfordern (z. B. ob/wie eine Sprachausgabe-Voreinstellung
+  global gespeichert wird). Bewusst nicht gewählt.
+- 8.11 — blockiert von den noch fehlenden FAQ-Inhalten des Support-Chefs.
+- 8.13 — einziges nicht-blockiertes Testziel (`calculateProgress.ts`) hat
+  bereits eine Testdatei (`calculateProgress.test.ts`); die drei anderen
+  genannten Ziele (`calculateCosts`, `checklistRules`, Schema-Validierung)
+  existieren noch nicht. Keine saubere Teilmenge übrig.
+
+**Ergebnis:** Wieder kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt — Stand deckt sich mit der Einschätzung des
+fünften Laufs vom 21.08. Kein neuer Code-Commit für einen Aufgabenpunkt.
+
+**Kleine Doku-Korrektur (kein Aufgabenpunkt, nur Konsistenz):** Die
+Ist-Stand-Zusammenfassung zu Phase 7 in `ZEITPLAN.md` listete 7.15
+fälschlich noch unter "Rest ... komplett offen", obwohl die Checkbox
+weiter unten im selben Sprint-Abschnitt bereits seit dem Lauf vom 21.08.
+auf erledigt steht. Ein Satz korrigiert, kein Code geändert — daher kein
+Typecheck/Lint/Testlauf nötig für diese Änderung.
+
+**Geprüft:** `git fetch origin`, Commit-Vergleich `origin/it-chef/auto`
+vs. `origin/main` in beide Richtungen (leer), Durchsicht aller offenen
+Checkboxen in `tasks/tasks-prd-travix-platform.md`, Codeprüfung zu 5.7
+(`useChat.ts`, `src/lib/duffel/client.ts`, `src/types/trains.ts`), 7.7
+(`MeineReisen.tsx`, `TripDraft`), 8.10 (`nav-config.ts`), 8.13
+(`src/lib/trip/`-Ordnerinhalt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

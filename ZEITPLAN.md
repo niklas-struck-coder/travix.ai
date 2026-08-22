@@ -56,8 +56,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Aktivitäten-Seite (7.13) seit 17.08. ebenfalls mit Demo-Daten und
   Entfernen-Button fertig; Kalender-Seite (7.11) seit 17.08. ebenfalls mit
   Demo-Daten fertig; Warenkorb-Seite (7.6) seit 17.08. ebenfalls mit
-  Demo-Daten und gruppierten Positionen fertig; Rest (7.4, 7.7, 7.12, 7.15)
-  komplett offen
+  Demo-Daten und gruppierten Positionen fertig; ReiseSuche-Seite (7.15)
+  seit 21.08. ebenfalls fertig (auf `it-chef/auto`, noch nicht in `main`
+  gemergt); Rest (7.4, 7.7, 7.12) komplett offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
