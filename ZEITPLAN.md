@@ -239,7 +239,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Backend-/Auth-Entscheidung. 8.10 Einstellungen und 8.11 Hilfe bleiben
   eigene offene Punkte (Hilfe zusätzlich blockiert auf die FAQ-Inhalte vom
   Support-Chef).
-- [ ] 8.10 Einstellungen, 8.11 Hilfe
+- [x] 8.10 `Einstellungen.tsx` (`/einstellungen`) — vom autonomen IT-Chef-Lauf
+  am 22.08. gebaut: Benachrichtigungs-Toggles (Preisalarme, Neue Angebote,
+  Reise-Updates — Toggle-Chips analog `Profil.tsx`) und Maßeinheiten-Auswahl
+  (Metrisch/Imperial). Bewusst ohne Sprachumschaltung (PRD-Frage OQ-05 ist
+  noch offen) und ohne Währungsumschaltung. Rein lokaler Demo-State ohne
+  Persistenz und ohne echten E-Mail-Versand (Postfach laut Support-Track noch
+  nicht live), gleiches Muster wie Profil/Favoriten/Preisalarme
+- [ ] 8.11 Hilfe
 - [ ] 8.9 Premium, 8.12 Rewards/Loyalty
 
 ### Sprint 5 — Duffel Stays & Zahlungsprozess (KW43-44, 20. Okt - 2. Nov)

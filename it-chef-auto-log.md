@@ -2993,3 +2993,70 @@ keine Code-Datei angefasst wurde.
 **Geprüft:** `git fetch origin`, Commit-Diff zwischen dem alten
 `it-chef/auto`-Stand und `origin/main` (Dateien: Tasks-Liste, Zeitplan,
 `src/`), TODO/FIXME-Grep in `src/`.
+
+## 2026-08-22 (fünfter Lauf, 23:08 UTC)
+
+Frischer, unabhängiger Checkout (eigene Session, ~1 Stunde nach dem
+vierten Lauf oben). `origin/it-chef/auto` existierte zu Beginn dieses
+Laufs noch nicht (letzter Stand war nach `main` gemergt) — Branch neu von
+`origin/main` aufgesetzt; der vierte-Lauf-Commit oben kam erst beim Push
+dazu und wurde per Rebase eingeordnet, `main` selbst blieb unangetastet.
+
+Anders als der vorherige Lauf (der nur einen Diff zum letzten
+`it-chef/auto`-Stand prüfte) bin ich `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` komplett neu durchgegangen, nicht nur
+den Delta seit dem letzten Lauf.
+
+**Ausgewählter Punkt:** 8.10 `Einstellungen.tsx` (`/einstellungen`), FR-103
+aus `tasks/prd-travix-platform.md`. Die Route fiel bisher auf
+`PlaceholderPage` zurück.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine App-Präferenzen-Seite, gleiches Muster wie `Profil.tsx`.
+- Keine offene Produkt-/Architekturentscheidung nötig. Bewusst NICHT
+  angefasst: Sprachumschaltung (PRD-Frage OQ-05 ist noch offen, siehe
+  `tasks/prd-travix-platform.md`) und Währungsumschaltung — beide hätten
+  eine Annahme über eine noch offene Entscheidung erfordert.
+- FR-103 ist klar umrissen ("App-Präferenzen und Benachrichtigungs-
+  einstellungen"), zusätzlich durch die bestehende Nav-Beschreibung in
+  `src/lib/nav-config.ts` bestätigt.
+- Objektiv prüfbar über Typecheck/Lint/Tests plus neue Test-Assertions.
+
+Andere zuvor geprüfte, aber verworfene Kandidaten: 6.6/6.7/6.8/6.9
+(Kostenübersicht/Checkliste) bleiben blockiert, da `TripDraft`
+(`src/types/chat.ts`) weder Preisfelder pro Kategorie noch Daten für
+mindestens 6 der 13 Checklisten-Punkte (Mietwagen, Restaurants,
+Versicherung, Reisedokumente, Packliste, Flughafentransfer) hat — eine
+saubere Umsetzung würde Annahmen über nicht vorhandene Daten erfordern,
+nicht nur eine Checkbox-Korrektur. 7.4/7.7/7.12 ebenfalls verworfen (siehe
+gleiche Preisfeld-Lücke bzw. fehlende echte Chat-Historie-Speicherung).
+
+**Umgesetzt:**
+- Neue Datei `src/types/settings.ts` — `NOTIFICATION_PREFERENCES`
+  (Preisalarme/Neue Angebote/Reise-Updates, alle standardmäßig aktiv),
+  `MEASUREMENT_UNITS` (Metrisch/Imperial), `AppPreferences`-Typ.
+- Neue Seite `src/pages/Einstellungen.tsx` — Benachrichtigungs-Toggle-Chips
+  (identisches Muster wie die Reisestile-Chips in `Profil.tsx`) plus
+  Maßeinheiten-`Select`. Rein lokaler Demo-State, kein Speichern über
+  Reloads hinweg und kein echter E-Mail-Versand (Postfach laut
+  Support-Track noch nicht live) — gleiches Muster wie
+  Profil/Favoriten/Preisalarme.
+- `src/routes.tsx`: Route `/einstellungen` auf `Einstellungen` verdrahtet
+  (vorher `PlaceholderPage` über die generierte Route aus `nav-config.ts`),
+  zu `builtRoutes` hinzugefügt.
+- Neue Tests `src/pages/Einstellungen.test.tsx` (4 Tests: Default-Zustand
+  der Toggles, Toggle an/aus, unabhängiges Umschalten mehrerer Toggles,
+  Default-Maßeinheit).
+- Checkbox 8.10 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, jeweils mit Begründung.
+
+**Geprüft:**
+- `npm ci` (node_modules fehlte im frischen Checkout).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, nur 3 vorbestehende `react-refresh`-Warnungen
+  in unveränderten Dateien (`badge.tsx`, `button.tsx`, `tabs.tsx`).
+- `npx vitest run` — 20 Testdateien, 81 Tests, alle grün (inkl. der 4 neuen).
+- `npm run build` — Produktions-Build erfolgreich.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
