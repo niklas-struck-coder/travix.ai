@@ -776,3 +776,42 @@ der erste Blick auf den `support-chef/auto`-Diff sah wegen des Branch-
 Alters nach einer Löschung von Profil.tsx aus; das war ein Diff-
 Artefakt, kein echtes Problem — durch den Testmerge zweifelsfrei geklärt,
 bevor gemergt wurde.
+
+## 2026-08-22, automatischer Lauf (früher Nacht-Check, 0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits gegenüber `main`, davon nur einer mit
+  echter Codeänderung (`93f86cc`, 21.08.: ReiseSuche-Seite); die übrigen
+  vier sind reine Berichts-Commits ohne Diff ("kein sicherer neuer Punkt
+  gefunden" / Wiederholungsläufe ohne Repo-Änderung).
+- `marketing-chef/auto` — keine neuen Commits gegenüber `main` (bereits
+  vollständig gemergter Stand). Wie vorgesehen übersprungen, da für den
+  frühen Lauf nicht relevant (läuft normal erst um 6 Uhr).
+- `support-chef/auto` — ebenfalls keine neuen Commits gegenüber `main`.
+  Aus demselben Grund übersprungen.
+
+**`it-chef/auto` geprüft:**
+Diff-Stat zeigt nur `ZEITPLAN.md`, `it-chef-auto-log.md`,
+`src/pages/ReiseSuche.tsx` (neu), `src/pages/ReiseSuche.test.tsx` (neu),
+`src/routes.tsx`, `tasks/tasks-prd-travix-platform.md` — genau der eine
+in den Commit-Nachrichten beschriebene Punkt (7.15 ReiseSuche als
+Planungs-Einstiegspunkt unter `/reise-planen`), kein Scope-Creep.
+Unabhängig selbst nachgeprüft (nicht nur dem Log geglaubt): in einem
+frischen `git worktree` auf `origin/it-chef/auto` `npm install`,
+`npx tsc -b`, `npx eslint .` und `npx vitest run` tatsächlich selbst
+ausgeführt. Ergebnis: `tsc -b` fehlerfrei (Exit 0); `eslint .` 0 Fehler
+(nur 3 vorbestehende Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`,
+nicht durch diese Änderung verursacht); `vitest run` 77/77 Tests in
+19/19 Testdateien grün — deckt sich mit der eigenen Behauptung im
+IT-Chef-Log. Kein Bezug zu Auth, Zahlungen oder rechtlichen Texten. Die
+drei Karten (KI-Chat/Flugsuche/Hotelsuche) verlinken ausschließlich auf
+bereits bestehende Seiten, keine erfundenen Daten. Design: `bg-teal/10`,
+`text-teal`, `border-teal/40`, `bg-teal text-navy` für die hervorgehobene
+KI-Chat-Karte — passt zur Navy/Teal/Gold-Palette aus `MARKENDESIGN.md`.
+**Ergebnis:** Passt → alle 5 Commits nach `main` gemergt und gepusht
+(Merge-Commit `4d70bff`, No-Fast-Forward-Merge, Diff nach Merge
+identisch mit `origin/it-chef/auto`, keine Konflikte).
+
+**Ni-Info:** Nicht nötig — sauberer, klar abgegrenzter Lauf, alle
+Checks eigenständig reproduziert und grün, kein wiederholter
+Regelverstoß, kein dringlicher Fund.
