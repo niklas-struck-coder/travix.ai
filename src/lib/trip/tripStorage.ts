@@ -28,7 +28,11 @@ export function updateStoredTrip(patch: Partial<TripDraft>): StoredChatState | n
   if (!stored) return null
 
   const updated: StoredChatState = { ...stored, trip: { ...stored.trip, ...patch } }
-  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(updated))
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(updated))
+  } catch {
+    // Storage full/disabled — caller still gets the merged trip back.
+  }
   return updated
 }
 
