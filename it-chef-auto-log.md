@@ -2700,3 +2700,267 @@ Vergleich gegen die vorherigen zwei Läufe — keine relevante Änderung.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-21 (vierter Lauf, geplanter Cloud-Lauf am Nachmittag)
+
+Neuer geplanter Cloud-Lauf. `origin/it-chef/auto` war zwischenzeitlich
+vom Freigabe-Chef komplett nach `main` gemergt worden (`bb55cad Merge
+it-chef/auto into main`) — der alte Branch-Stand war also bereits
+vollständig in `main` enthalten (`git log origin/it-chef/auto..origin/main`
+zeigt 12 neue Commits, `git log origin/main..origin/it-chef/auto` zeigt
+0). Branch `it-chef/auto` deshalb frisch von `origin/main` neu
+aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf dem
+veralteten alten Branch-Stand weiterzuarbeiten — `main` selbst dabei nur
+gelesen, nicht verändert.
+
+Seit dem letzten ausführlichen Review heute früh (00:09 UTC, dritter
+Lauf) sind auf `main` drei neue Commits dazugekommen: ein IT-Chef
+Bug-Hunt-Bericht (`787a3d7`, keine neuen Funde), ein Marketing-Chef-
+Bericht (`e6e74fb`) und ein Support-Chef-Bericht zur Profil-Seite
+(`8cc3d55`, Reibungspunkte: Präferenzen gehen schon beim Wegnavigieren
+verloren, Heimatflughafen-Feld ist nirgends verdrahtet). Keiner davon
+ändert `ZEITPLAN.md` oder `tasks/tasks-prd-travix-platform.md`
+(`git diff <letzter-Lauf>..main -- ZEITPLAN.md tasks/tasks-prd-travix-platform.md`
+ist leer) — die Support-Chef-Funde sind UX-Reibungspunkte für einen
+späteren, mit Ni abgestimmten Fix-Lauf, kein neuer freigeschalteter
+Punkt aus der Aufgabenliste, an der sich der autonome Modus laut Skill
+orientiert.
+
+Eigene, unabhängige Neuprüfung aller offenen Sprint-1-bis-4-Punkte
+(ohne den Bericht vom dritten Lauf vorher zu lesen, für eine echte
+Zweitmeinung) kam zum selben Ergebnis wie dieser: 4.1-4.3 weiterhin
+explizit "blocked on Base44/Gemini credentials"; 6.6/6.7/7.12 weiterhin
+ohne Preisfelder in `TripDraft`; 6.8/6.9 (Checkliste) weiterhin nur mit
+erfundenen zusätzlichen Punkten auf "13" zu bringen (FR-501 nennt nur
+10 konkrete); 7.4 weiterhin eine Architekturentscheidung (Mehrfach-
+Entwurf-Speicherung); 7.7 weiterhin abhängig von den offenen 6.6/6.7/
+8.12; 7.15/8.10 weiterhin ohne konkrete Feldliste in PRD/Aufgabenliste;
+8.4 weiterhin gegen das dokumentierte "keine erfundenen Spezifika"-
+Prinzip bzw. blockiert von 8.2; 8.9/8.12 weiterhin offene
+Produktentscheidungen (OQ-03/OQ-04); 8.13 weiterhin ohne saubere
+Teilmenge, da drei der vier Testziele noch nicht existieren.
+
+**Ergebnis:** Wieder nichts gefunden, das alle vier Sicherheitskriterien
+erfüllt — der Zustand seit dem dritten Lauf heute ist unverändert
+geblieben. Kein Code-Commit für einen neuen Punkt, nur dieser
+Log-Eintrag plus der Branch-Neuaufsatz von `main`.
+
+**Geprüft:** `git fetch origin`, Commit-Vergleich `origin/it-chef/auto`
+vs. `origin/main` in beide Richtungen, `git diff` auf `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` zwischen dem Stand des dritten
+Laufs und jetzigem `main` (leer). Kein Code geändert, daher kein
+Typecheck/Lint/Testlauf nötig.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-21 (fünfter Lauf, geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` (Stand: vierter Lauf von heute,
+Branch frisch von `main` neu aufgesetzt, keine offene Vorarbeit) per
+Rebase übernommen. `main` selbst wurde nicht angerührt.
+
+**Abweichung vom vierten Lauf heute (und vom Lauf am 11.08.) zu 7.15:**
+Beide früheren Prüfungen haben Task 7.15 (ReiseSuche) verworfen, u.a. mit
+der Begründung "keine konkrete Feldliste in PRD/Aufgabenliste" bzw.
+"unklar, was die Seite von der Startseite unterscheiden soll". Bei
+erneuter Prüfung zeigt sich aber ein konkreter, im bestehenden Code schon
+angelegter Anker: `Home.tsx`s Hero-Sektion hat bereits zwei Buttons —
+"Reise mit KI planen" (`/ki-chat`) und "Selbst durchsuchen"
+(`/reise-planen`) — der zweite Button existiert also bereits produktiv
+und verlinkt bislang nur auf die generische `PlaceholderPage`. Das macht
+den Umfang eindeutig, ohne etwas erfinden zu müssen: die Seite ist der
+Einstiegspunkt für "selbst suchen" als Alternative zum KI-Chat, mit
+Links auf die beiden bereits fertigen Direktsuchen (Flug, Hotel). Damit
+erfüllt der Punkt entgegen der früheren Einschätzung alle vier Kriterien.
+
+**Ausgewählter Punkt:** Task 7.15 aus `tasks/tasks-prd-travix-platform.md` —
+"Build ReiseSuche page (`/reise-planen`) as trip planning search entry
+point". Laut `ZEITPLAN.md` einer der wenigen noch offenen, klar
+beschriebenen Programmierungs-Punkte in Sprint 3.
+
+**Warum sicher genug:** Reine Navigations-/UI-Seite ohne Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung nötig — die Seite verlinkt nur auf
+bereits bestehende, fertige Seiten (`/ki-chat`, `/flugsuche`,
+`/hotelsuche`). Klar genug beschrieben ("trip planning search entry
+point"), kein erfundenes Datenmodell nötig (anders als z.B. 7.7 Dashboard
+mit "budgets, loyalty points" oder 8.10 Einstellungen mit vagem "app
+preferences" — beide deshalb bewusst nicht gewählt). Ergebnis objektiv
+prüfbar über Typecheck/Lint/Tests plus neuem Test für die drei Links.
+
+**Umgesetzt:**
+- Neue Seite `src/pages/ReiseSuche.tsx` — drei Karten (KI-Chat als
+  empfohlener Weg hervorgehoben, Flugsuche, Hotelsuche), je mit Icon,
+  kurzer Beschreibung und Link-Button, im bestehenden Card-Stil.
+- `src/routes.tsx`: Import, `/reise-planen` zu `builtRoutes` hinzugefügt,
+  echte `<Route>` statt der bisherigen generierten `PlaceholderPage`-Route.
+  `src/lib/nav-config.ts` hatte den Eintrag (Pfad/Label/Beschreibung/Icon)
+  bereits — keine Änderung dort nötig.
+- Neuer Test `src/pages/ReiseSuche.test.tsx` — prüft, dass alle drei Links
+  auf die richtigen Pfade zeigen.
+- Bewusst kein Zug/Bus/Fähre-Kärtchen: 5.7 (Einbindung von
+  `TrainCard`/`TrainResults` in den Buchungsfluss) ist noch offen, es
+  existiert dafür keine eigenständige Route — hätte eine Annahme über den
+  Aufgabentext hinaus bedeutet.
+- Checkbox 7.15 in `tasks/tasks-prd-travix-platform.md` sowie der
+  entsprechende Punkt in `ZEITPLAN.md` (Sprint 3) auf erledigt gesetzt.
+
+**Geprüft:**
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings wie in
+  früheren Läufen (react-refresh in `badge.tsx`/`button.tsx`/`tabs.tsx`,
+  nicht durch diesen Change verursacht).
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run test` (vitest) → 19/19 Testdateien, 77/77 Tests grün
+  (inkl. neuer `ReiseSuche.test.tsx`).
+
+**Hinweis:** `node_modules` fehlte im frischen Checkout und musste erst
+per `npm ci` installiert werden (gleiches Muster wie in früheren Läufen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-22 (geplanter Cloud-Lauf)
+
+**Vorbereitung:** Frischer, isolierter Checkout. `origin/it-chef/auto`
+(Stand: fünfter Lauf vom 21.08., Tip `93f86cc`, ReiseSuche 7.15) als
+lokalen Branch `it-chef/auto` ausgecheckt. `git log origin/it-chef/auto..
+origin/main` und umgekehrt geprüft: leer in beide Richtungen — der Branch
+ist bereits exakt auf dem aktuellen `main`-Stand aufgesetzt, kein Merge
+nötig. `main` selbst wurde nicht angerührt.
+
+**Unabhängige Neuprüfung aller offenen Punkte** (vor dem Lesen des
+gestrigen Log-Eintrags, für eine echte Zweitmeinung) über
+`tasks/tasks-prd-travix-platform.md`:
+- 2.x (Base44/Auth) — explizit blockiert von der offenen
+  Backend-Entscheidung, nicht autonom fällbar.
+- 4.1-4.3 — weiterhin explizit "blocked on Base44/Gemini credentials".
+- 5.7 (Zug-Ergebnisse in KI-Chat einbinden) — Hotel-Teil ist bereits über
+  `stayOffers`/`searchStays` in `useChat.ts` eingebunden; für Züge gibt es
+  aber keine echte Such-API (`TrainCard`/`TrainResults` sind vollständig
+  ungenutzte Komponenten, kein `searchTrains` im Duffel-Client). Echte
+  Zugdaten anzubinden ist eine offene Architekturentscheidung (welcher
+  Anbieter?), erfundene Zugverbindungen anzuzeigen verletzt das im Code
+  dokumentierte "keine erfundenen Spezifika ohne echten Search-Backend"-
+  Prinzip (`mockConcierge.ts`, Feld-Auswahl bei `HotelCard`/`TrainCard`).
+  Beides disqualifiziert den Punkt.
+- 6.2/6.6/6.7 — weiterhin ohne Preis-/Provider-URL-Felder in `TripDraft`.
+- 6.8/6.9/6.10 (Checkliste) — Aufgabentext nennt nur Beispiele
+  ("outbound/return flight, accommodation, activities, etc.") für
+  angeblich 13 Punkte; `TripDraft` hat nur 5 auto-erkennbare Dimensionen
+  (Transport, Termine, Budget, Unterkunft, Aktivitäten). Die restlichen
+  ~8 Punkte auf 13 wären erfunden (z. B. Reisepass, Versicherung,
+  Packliste) — mehr Interpretation als die Aufgabenliste hergibt.
+- 7.4 — Architekturentscheidung: bräuchte Mehrfach-Chat-Historien pro
+  Entwurf, aktuell existiert nur ein einziger globaler Chat-Storage-Slot.
+- 7.7 (Dashboard) — "budgets, loyalty points" sind Konzepte ohne jede
+  Entsprechung im Datenmodell (kein Budget-Feld an Demo-Trips, kein
+  Loyalty-Konzept irgendwo im Code — das wäre 8.12, selbst offen und eine
+  Produktentscheidung). Zu viel Erfindung nötig.
+- 7.12 — weiterhin ohne Preisfelder blockiert (gleicher Grund wie 6.6/6.7).
+- 7.15 — bereits am 21.08. auf diesem Branch umgesetzt (`ReiseSuche.tsx`),
+  noch nicht nach `main` gemergt (wartet auf Freigabe-Chef-Prüfung). Kein
+  neuer Punkt für heute.
+- 8.1/8.3 — "daily itinerary display" bräuchte strukturierte Tages-/
+  Zeit-Daten, die `TripActivity` (nur `id`/`name`/`price`) nicht hat.
+- 8.2, 8.5, 8.6 — Vision-Analyse bzw. autonomer Web-Search-Agent, klar
+  außerhalb von "einzelner sicherer Punkt ohne offene Architekturfrage".
+- 8.4 — verletzt dasselbe "keine erfundenen Spezifika"-Prinzip wie 5.7
+  (Restaurant-Empfehlungen wären erfunden) und hängt zusätzlich an 8.2.
+- 8.7 (WhatsApp/Telegram-Architektur-Stub) — Aufgabentext gibt keine
+  konkrete Form für den "Stub" vor (welcher Anbieter, welche Schnittstelle?)
+  — zu vage für eine Umsetzung ohne eigene Annahmen.
+- 8.9, 8.12 — explizite offene Produktentscheidungen (Premium-Tarif,
+  Rewards-Programm).
+- 8.10 (Einstellungen) — `nav-config.ts` gibt nur die vage Beschreibung
+  "App- und Benachrichtigungseinstellungen" vor, ohne konkreten Anker wie
+  bei 7.15 (dort gab es bereits einen echten, verlinkten "Selbst
+  durchsuchen"-Button in `Home.tsx`, der nur auf die Platzhalterseite
+  zeigte). Für Einstellungen existiert keine vergleichbare bestehende
+  Verlinkung oder konkrete Feldliste — würde eigene Annahmen über Umfang
+  und Inhalt erfordern (z. B. ob/wie eine Sprachausgabe-Voreinstellung
+  global gespeichert wird). Bewusst nicht gewählt.
+- 8.11 — blockiert von den noch fehlenden FAQ-Inhalten des Support-Chefs.
+- 8.13 — einziges nicht-blockiertes Testziel (`calculateProgress.ts`) hat
+  bereits eine Testdatei (`calculateProgress.test.ts`); die drei anderen
+  genannten Ziele (`calculateCosts`, `checklistRules`, Schema-Validierung)
+  existieren noch nicht. Keine saubere Teilmenge übrig.
+
+**Ergebnis:** Wieder kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt — Stand deckt sich mit der Einschätzung des
+fünften Laufs vom 21.08. Kein neuer Code-Commit für einen Aufgabenpunkt.
+
+**Kleine Doku-Korrektur (kein Aufgabenpunkt, nur Konsistenz):** Die
+Ist-Stand-Zusammenfassung zu Phase 7 in `ZEITPLAN.md` listete 7.15
+fälschlich noch unter "Rest ... komplett offen", obwohl die Checkbox
+weiter unten im selben Sprint-Abschnitt bereits seit dem Lauf vom 21.08.
+auf erledigt steht. Ein Satz korrigiert, kein Code geändert — daher kein
+Typecheck/Lint/Testlauf nötig für diese Änderung.
+
+**Geprüft:** `git fetch origin`, Commit-Vergleich `origin/it-chef/auto`
+vs. `origin/main` in beide Richtungen (leer), Durchsicht aller offenen
+Checkboxen in `tasks/tasks-prd-travix-platform.md`, Codeprüfung zu 5.7
+(`useChat.ts`, `src/lib/duffel/client.ts`, `src/types/trains.ts`), 7.7
+(`MeineReisen.tsx`, `TripDraft`), 8.10 (`nav-config.ts`), 8.13
+(`src/lib/trip/`-Ordnerinhalt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-22 (zweiter Lauf, 01:05 UTC)
+
+Erneute Auslösung desselben Tages, nur ~56 Minuten nach dem vorherigen
+Lauf (00:09 UTC, siehe Eintrag oben). Vor einer Neuprüfung erst geschaut,
+ob sich seitdem überhaupt etwas geändert hat, statt die eben erst
+abgeschlossene erschöpfende Analyse blind zu wiederholen:
+
+- `git fetch origin` + Commit-Vergleich `origin/main` ↔ `origin/it-chef/auto`
+  in beide Richtungen: keine neuen Commits auf `main` seit dem letzten Lauf,
+  `it-chef/auto` unverändert bei `43c3093`.
+- `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`: keine neuen oder
+  geänderten Checkboxen gegenüber dem letzten Lauf.
+- Zusätzlicher Grep nach `TODO`/`FIXME`/`XXX` in `src/` (nicht Teil des
+  letzten Laufs): keine Treffer.
+
+**Ergebnis:** Repo-Zustand ist identisch zum letzten Lauf, dessen
+Begründungen (siehe Eintrag 00:09 UTC oben) weiterhin vollständig gelten.
+Kein neuer sicherer Punkt gefunden, kein Code geändert, kein Commit mit
+Feature-Inhalt nötig. Typecheck/Lint/Tests entfallen, da keine Code-Datei
+angefasst wurde.
+
+**Geprüft:** wie oben beschrieben (Git-Diff, Task-/Zeitplan-Abgleich,
+TODO-Grep).
+
+## 2026-08-22 (dritter Lauf, 02:04 UTC)
+
+Erneute Auslösung, ~1 Stunde nach dem letzten Lauf (01:05 UTC). Wieder
+zuerst geprüft, ob sich seitdem etwas geändert hat, bevor die erschöpfende
+Analyse vom ersten Lauf (00:09 UTC) wiederholt würde:
+
+- `git fetch origin` + Commit-Vergleich `origin/main` ↔ `origin/it-chef/auto`
+  in beide Richtungen: keine neuen Commits auf `main` seit dem letzten
+  Lauf, `it-chef/auto` unverändert bei `3522c4d`.
+- `tasks/tasks-prd-travix-platform.md`: alle 41 offenen Checkboxen
+  gegengeprüft — identisch zur Liste aus dem ersten Lauf des Tages, keine
+  neue oder veränderte.
+- Zusätzlicher Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine
+  Treffer.
+
+**Ergebnis:** Repo-Zustand ist identisch zu den beiden vorherigen Läufen
+von heute. Die Begründungen aus dem ersten Lauf (00:09 UTC) gelten
+unverändert fort — kein Punkt erfüllt alle vier Sicherheitskriterien.
+Kein neuer sicherer Punkt, kein Code geändert, kein Feature-Commit nötig.
+Typecheck/Lint/Tests entfallen, da keine Code-Datei angefasst wurde.
+
+**Hinweis für Ni (kein Aufgabenpunkt, nur Beobachtung):** Der autonome
+Lauf findet seit dem späten Nachmittag des 21.08. durchgehend keinen
+neuen sicheren Punkt mehr — die verbleibenden offenen Punkte hängen
+überwiegend an Dingen, die nur Ni entscheiden/freischalten kann
+(Base44/Gemini-Zugangsdaten für 2.x/4.1-4.3, Architekturentscheidungen
+bei 5.7/7.4, Produktentscheidungen bei 8.9/8.12, u.a.). Zusätzlich liegt
+der bereits fertige Punkt 7.15 (ReiseSuche-Seite, Commit `93f86cc` vom
+21.08.) weiterhin ungemergt auf diesem Branch und wartet auf die Prüfung
+durch den Freigabe-Chef. Keine Aktion in diesem Lauf nötig, nur zur
+Einordnung, falls die wiederholten "kein Punkt gefunden"-Läufe auffallen.
+
+**Geprüft:** wie oben beschrieben (Git-Diff, Task-/Zeitplan-Abgleich,
+TODO-Grep).
