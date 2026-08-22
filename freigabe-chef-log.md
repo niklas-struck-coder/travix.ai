@@ -815,3 +815,67 @@ identisch mit `origin/it-chef/auto`, keine Konflikte).
 **Ni-Info:** Nicht nötig — sauberer, klar abgegrenzter Lauf, alle
 Checks eigenständig reproduziert und grün, kein wiederholter
 Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-22, weiterer Check (Tageslauf, autonomer Lauf, ohne Ni)
+
+**Geprüfte Branches** (nach `git fetch origin --prune`):
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Nacht-Check
+  heute gemergt, siehe Eintrag oben). Nichts zu tun, keine erneute
+  Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit vor `main`
+  (`1d1ebd3`, 2026-08-22).
+- `support-chef/auto` — 1 neuer Commit vor `main`
+  (`364620c`, 2026-08-22).
+
+**Prüfung `marketing-chef/auto`** (Diff: `ZEITPLAN.md`,
+`marketing-chef-auto-log.md`, neue Datei
+`marketing/kampagnen-konzept-ads.md`, kein Produkt-Code):
+- Reines Entwurfsdokument (Kampagnen-Konzept Google/Meta/TikTok Ads,
+  Sprint 5) — explizit als Vorlage zum manuellen Eintragen markiert,
+  "startklar, aber nicht startbereit", kein angelegtes Konto, kein
+  freigegebenes Budget, keine geschaltete Kampagne.
+- Keine erfundenen Kennzahlen: kein CAC/ROAS/CTR/CPC, Budget-Angaben
+  ausdrücklich als Größenordnung statt Prognose gekennzeichnet.
+- Selbst nachgeprüft statt dem Log geglaubt: `reports/it-chef.md`
+  (Stand 21.08.) tatsächlich gegen den offenen Flugsuche-Bug im
+  Haupt-Chat geprüft (`grep -n -i flugsuche`) — Zeilen 49/79/87
+  bestätigen den Bug ist real und weiterhin offen. Der Entwurf bewirbt
+  konsequent keine im Chat funktionierende KI-Flugsuche, Google-Search-
+  Leistungs-Keywords sind bewusst zurückgestellt — Behauptung stimmt mit
+  der Quelle überein.
+- Zielgruppen-/Ton-Angaben aus `MARKENDESIGN.md` übernommen, keine neue
+  Positionierungs-Entscheidung. Keine künstliche Dringlichkeit in den
+  Anzeigentexten (kein Countdown/Verknappung), passt zum
+  "Ehrlichkeit als Feature"-Grundsatz.
+- Vollständiger, kohärenter Text (Kanal-Rollen, Zielgruppen,
+  Anzeigentext-Varianten, Gebots-/Budget-Empfehlung, offene Punkte für
+  Ni), keine bloße Stichpunkt-Skizze.
+- Kein Produkt-Code geändert → kein Build/Lint/Test nötig.
+
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+neuer Abschnitt zur Seite "Reise suchen" `/reise-planen`
+(`src/pages/ReiseSuche.tsx`), kein Code geändert):
+- Einziger genannter Reibungspunkt (die als "empfohlen" markierte
+  KI-Chat-Karte hat de facto keine sichtbare Hervorhebung) Zeile für
+  Zeile gegen den echten Code auf `main` nachvollzogen:
+  `ReiseSuche.tsx:49` setzt tatsächlich nur `border-teal/40` ohne
+  `border`-Utility; `card.tsx:14` bestätigt, dass `Card` nur
+  `ring-1 ring-foreground/10` nutzt, kein `border`-Utility;
+  `globals.css:126-128` bestätigt, dass der globale Preflight
+  (`@apply border-border outline-ring/50`) nur die Randfarbe setzt, keine
+  Randbreite. `grep -rn "Empfohlen" src/` ergab tatsächlich keinen
+  Treffer — kein Textlabel vorhanden. Alle Datei-/Zeilenangaben und die
+  technische Erklärung stimmen exakt mit dem Code überein, nichts wirkt
+  erfunden.
+- Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, gepusht,
+`5d688da..9d87e8b`).
+
+**Zusammenfassung:** Beide geprüften Branches (marketing-chef/auto,
+support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
+(kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit — ein
+konkreter, gut belegter UX-Fund von Support-Chef, aber kein dringlicher
+Sonderfall, der eine sofortige Benachrichtigung rechtfertigt).
