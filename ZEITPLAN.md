@@ -290,8 +290,13 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)
-- [ ] Kampagnen-Konzepte für Google/Meta/TikTok Ads (Performance-Teil des
-  Skills nutzen — Kampagnenstruktur, Zielgruppen, Anzeigentexte)
+- [x] Kampagnen-Konzepte für Google/Meta/TikTok Ads (Performance-Teil des
+  Skills nutzen — Kampagnenstruktur, Zielgruppen, Anzeigentexte) — vom
+  autonomen Marketing-Chef-Lauf am 22.08. vorgezogen, da Sprint 3/4
+  weiterhin an Nis Freigabe-Entscheidung bzw. der noch nicht live
+  geschalteten Landingpage hängen; Entwurf in
+  `marketing/kampagnen-konzept-ads.md`. Bewusst noch nicht startbereit
+  (siehe Vorbedingungen dort), nur als Vorlage fertig.
 
 ### Sprint 6 (KW43-45, 20. Okt - 9. Nov)
 - [ ] Test-Kampagnen mit kleinem Budget starten, Learnings sammeln

@@ -4,6 +4,77 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-22
+
+**Ausgewählter Punkt:** Sprint 5 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Kampagnen-Konzepte für Google/Meta/TikTok Ads". Neue Datei
+`marketing/kampagnen-konzept-ads.md`: Kanal-Rollen (Meta/TikTok
+Inspiration, Google Search bewusst zurückgestellt bzw. nur als reine
+Marken-Suchkampagne skizziert), Zielgruppen-Definition aus
+`MARKENDESIGN.md`, je 2-3 Anzeigentext-Varianten pro Kanal,
+Gebotsstrategie- und Testbudget-Empfehlung (Größenordnung, keine
+Prognose), sowie eine explizite Liste offener Punkte für Ni.
+
+**Warum dieser Punkt statt eines weiteren Content-Stücks oder einer
+erneuten Freigabe-Übersicht:** Seit dem letzten Lauf (21.08.,
+`marketing/freigabe-uebersicht.md`) hat sich am Repo-Zustand nichts
+geändert, das die dortige Selbstbeschränkung ("kein neues Content-Stück,
+bis Ni entschieden hat, was von den sechs fertigen Entwürfen live geht")
+entkräften würde — geprüft: `reports/marketing-chef.md` (21.08., letzter
+Eintrag) und die drei dort offen gelassenen Fragen (Kanal-Start mit
+Tier-1-Stücken? 6.2 priorisieren? Monats-Format gewollt?) sind
+unbeantwortet, kein neuer Commit dazu. Ein siebtes Content-Stück hätte
+also den kritisierten Stapel weiter vergrößert; eine erneute
+Freigabe-Übersicht hätte nur denselben Stand wiederholt, ohne neuen
+Inhalt. "Community/Warteliste aufbauen" (ebenfalls Sprint 4) hängt
+weiterhin an der nicht live geschalteten Landingpage (Sprint 2) und fällt
+damit unter das Live-Verbot. Kampagnen-Konzepte sind dagegen ein
+eigenständiger, bisher nie bearbeiteter Marketing-Punkt, der ohne Live-
+Kanal und ohne die blockierten Content-Fragen auskommt — echter neuer
+Fortschritt statt Wiederholung.
+
+**Warum sicher genug:** Reines Entwurfsdokument (Vorlage zum manuellen
+Eintragen in den jeweiligen Ads Manager), kein Live-Vorgang — kein Konto
+angelegt, kein Budget freigegeben, keine Kampagne geschaltet. Keine
+erfundenen Kennzahlen (kein CAC/ROAS/CTR/CPC — das Dokument sagt explizit,
+dass es noch keine echten Kampagnendaten gibt, Budget-Empfehlungen sind
+Größenordnungen, keine Prognosen). Keine offene Positionierungs-
+Grundsatzfrage: Zielgruppe/Markenstimme kommen unverändert aus
+`MARKENDESIGN.md`, hier nur angewendet. Zusätzlich explizit geprüft und
+im Dokument selbst berücksichtigt: der laut `reports/it-chef.md` (Stand
+21.08.) weiterhin offene Flugsuche-Bug im Haupt-Chat, den Marketing- und
+Support-Chef unabhängig als Werbe-Stopp für dieses Feature einstufen —
+keine der Anzeigentext-Vorlagen bewirbt eine im Chat durchgängig
+funktionierende KI-Flugsuche, Google-Search-Leistungs-Keywords sind
+deshalb bewusst zurückgestellt (nur Marken-Suchkampagne als Option
+skizziert).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein siebtes Content-Stück oder eine erneute Freigabe-Übersicht — siehe
+  Begründung oben, keine neue Information seit dem 21.08.-Lauf.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — kein neuer,
+  konkreter Design-Bedarf erkennbar seit dem letzten Lauf (keine neue
+  Seite ohne bereits gedeckte Design-Vorgabe im aktuellen
+  `it-chef-auto-log.md`-Stand).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `d8937c7`, entspricht dem Lauf vom 21.08.) war bereits vollständig
+in `main` gemerged (`git merge-base --is-ancestor`, gegen `origin/main`
+nach vollem Fetch bestätigt). Branch daher neu von aktuellem
+`origin/main` (`5d688da`) angelegt, gleiches Vorgehen wie bei allen
+bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine neue Markdown-Datei,
+eine `ZEITPLAN.md`-Checkbox und dieser Log-Eintrag — kein
+Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-21
 
 **Ausgewählter Punkt:** Kein neues Content-Stück aus Sprint 3/4. Stattdessen:
