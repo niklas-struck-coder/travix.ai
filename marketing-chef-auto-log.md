@@ -4,6 +4,82 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-23
+
+**Ausgewählter Punkt:** Sprint 7 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Presse-/Multiplikatoren-Kontakte aufbauen". Neue Datei
+`marketing/presse-multiplikatoren-strategie.md`: Zielgruppen-Typen
+(Tech-/Startup-Presse, KI/LLM-Newsletter, Reise-Content-Creator mit
+Planungs-Frust-Fokus, Build-in-public-Communities), Auswahlkriterien,
+generische Outreach-Vorlage mit Pflicht-Platzhaltern, sowie Vorbedingungen
+und eine offene Frage für Ni.
+
+**Warum dieser Punkt statt eines weiteren Content-Stücks, einer erneuten
+Freigabe-Übersicht oder eines weiteren Kampagnen-Konzepts:** Geprüft:
+`marketing/freigabe-uebersicht.md` (21.08.) und der letzte
+`reports/marketing-chef.md`-Eintrag (22.08.) — die drei dort offenen
+Fragen (Kanal-Start mit Tier-1-Stücken? 6.2 priorisieren? Monats-Format
+gewollt?) sind weiterhin unbeantwortet, kein neuer Commit dazu (`git log
+-- src/pages/Warenkorb.tsx` zeigt seit 18.08. keine Änderung, `6.2` in
+`ZEITPLAN.md` weiterhin `[ ]`). Ein siebtes/achtes Content-Stück hätte
+damit erneut nur den kritisierten, unangetasteten Stapel vergrößert; eine
+erneute Freigabe-Übersicht hätte keinen neuen Inhalt gehabt. Ein weiteres
+Kampagnen-Konzept (Sprint 5, bereits am 22.08. erledigt) wäre reine
+Wiederholung gewesen. Presse-/Multiplikatoren-Kontakte (Sprint 7) ist
+dagegen ein eigenständiger, bisher nie bearbeiteter Marketing-Punkt
+(geprüft: `grep -rniE "presse|multiplikator"` über `marketing/`,
+`reports/marketing-chef.md` und dieses Log ergab vor diesem Lauf keinen
+Treffer) — echter neuer Fortschritt statt Wiederholung des blockierten
+Content-Stapels.
+
+**Warum sicher genug:** Ergebnis ist ein reines Strategie-/
+Vorlagendokument, kein Live-Vorgang — keine tatsächliche
+Presseanfrage wird versendet, kein Kontakt wird hergestellt. Bewusst
+KEINE echten Namen von Journalist:innen, Blogger:innen oder Redaktionen
+recherchiert oder genannt — das hätte entweder unverifizierte
+(möglicherweise falsche) Personen erfunden, was diesem Skill ausdrücklich
+untersagt ist (keine erfundenen Kennzahlen/Behauptungen), oder eine echte
+Web-Recherche vorausgesetzt, die dieser Lauf nicht durchführt. Keine
+erfundenen Reichweiten-/Abo-Zahlen zu Publikationen. Keine offene
+Positionierungs-Grundsatzfrage: Zielgruppen-Typen und Markenstimme sind
+direkt aus dem bereits von Ni bestätigten `MARKENDESIGN.md` abgeleitet
+(Leitbild-Persona "die erschöpfte Planerin", Ehrlichkeit als Feature),
+nicht neu entschieden. Die Outreach-Vorlage macht explizit, dass echte
+Traktion/Dringlichkeit nicht vorgetäuscht werden darf, passend zum
+Pre-Launch-Grundsatz des Skills.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein weiteres Content-Stück oder eine erneute Freigabe-Übersicht —
+  siehe Begründung oben, keine neue Information seit dem 22.08.-Lauf.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) — ausdrücklich
+  ein Live-Vorgang (echtes Budget/echte Kampagne), fällt unter das
+  Verbot, unabhängig von der Sprint-Reihenfolge.
+- "Launch-Kampagne vorbereiten" (ebenfalls Sprint 7) — hängt inhaltlich
+  an denselben ungelösten Blockern (kein freigegebener Content, keine
+  Landingpage) wie die bisherigen Content-/Kampagnen-Läufe und hätte zu
+  diesem frühen Zeitpunkt vor allem erfundene Annahmen über eine
+  Launch-Story gebraucht, die es so noch nicht gibt — Presse-Strategie
+  kam ohne diese Annahmen aus.
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — kein neuer,
+  konkreter Design-Bedarf erkennbar seit dem letzten Lauf.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `1d1ebd3`, entspricht dem Lauf vom 22.08.) war bereits vollständig
+in `main` gemerged (`git merge-base` gegen `origin/main` bestätigte den
+Branch-Tip als Vorfahren). Branch daher neu von aktuellem `origin/main`
+(`62d7f55`) angelegt, gleiches Vorgehen wie bei allen bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine neue Markdown-Datei,
+eine `ZEITPLAN.md`-Checkbox und dieser Log-Eintrag — kein
+Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-22
 
 **Ausgewählter Punkt:** Sprint 5 aus `ZEITPLAN.md`, Marketing-Bereich —

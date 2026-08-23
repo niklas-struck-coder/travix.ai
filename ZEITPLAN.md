@@ -310,7 +310,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 
 ### Sprint 7 (KW46-47, 10.-23. Nov)
 - [ ] Launch-Kampagne vorbereiten
-- [ ] Presse-/Multiplikatoren-Kontakte aufbauen
+- [x] Presse-/Multiplikatoren-Kontakte aufbauen — vom autonomen
+  Marketing-Chef-Lauf am 23.08. vorgezogen (Sprint 3/4/6 hängen
+  weiterhin an Nis Freigabe-Entscheidung bzw. der noch nicht live
+  geschalteten Landingpage). Bewusst nur die Strategie/Vorlage in
+  `marketing/presse-multiplikatoren-strategie.md`: Zielgruppen-Typen,
+  Auswahlkriterien, Outreach-Vorlage — **keine echten Namen recherchiert
+  oder kontaktiert**, das bräuchte entweder echte Web-Recherche
+  (unverifizierbar in diesem Lauf) oder wäre ein Live-Vorgang. Die
+  tatsächliche Kontaktliste bleibt Nis nächster Schritt, siehe
+  Vorbedingungen im Dokument.
 
 ### Launch-Woche
 - [ ] Kampagne live schalten
