@@ -944,3 +944,57 @@ zusammen mit obigem Merge in `2ce3933`).
 übersprungen (keine neuen Commits). Ni-Info nicht nötig — sauberer,
 klar abgegrenzter Lauf, alle Checks eigenständig reproduziert und
 grün, kein wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-23, Folge-Lauf
+
+**Geprüfte Branches** (nach `git fetch origin --prune`, `main` zuvor auf
+`origin/main` synchronisiert):
+- `it-chef/auto` — 0 neue Commits gegenüber `main`. Bereits im vorherigen
+  Lauf heute (siehe oben, `2ce3933`) vollständig gemergt. Übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`ffd87ff`, 23.08. 04:06 UTC):
+  Presse-/Multiplikatoren-Strategie (Sprint 7).
+- `support-chef/auto` — 1 neuer Commit (`0fd12a7`, 23.08. 04:03 UTC):
+  UX-Analyse der neu gemergten Einstellungen-Seite (`/einstellungen`).
+
+**Prüfung `marketing-chef/auto`** (Diff: `ZEITPLAN.md`,
+`marketing-chef-auto-log.md`, neue Datei
+`marketing/presse-multiplikatoren-strategie.md` — kein Produkt-Code):
+Dokument selbst gelesen. Keine erfundenen Namen von Journalist:innen/
+Redaktionen, keine erfundenen Reichweiten-/Abo-Zahlen — explizit und
+mehrfach im Dokument selbst als bewusst ausgespart begründet. Reines
+Strategie-/Vorlagendokument (Zielgruppen-Typen, Auswahlkriterien,
+generische Outreach-Vorlage mit Pflicht-Platzhaltern), keinerlei Hinweis
+auf tatsächlich versendete Anfragen oder hergestellten Kontakt — bewusst
+als "Voraussetzungen noch nicht erfüllt" (keine Landingpage, kein
+freigegebener Content) markiert. Zielgruppen-Herleitung stützt sich
+nachvollziehbar auf bereits bestätigtes `MARKENDESIGN.md`
+(Leitbild-Persona, Ehrlichkeits-Positionierung), keine neue
+Grundsatzentscheidung. Vollständiger, kohärenter Text, keine
+Stichpunkt-Skizze.
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, `19e27ff`).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+neuer Eintrag zur Einstellungen-Seite, kein Code geändert):
+Stichprobenartig gegen den tatsächlichen Code auf `main` verifiziert
+(nicht nur dem Log geglaubt): `src/pages/Einstellungen.tsx` selbst
+gelesen — Zeile 31 enthält wortwörtlich "Worüber Travix dich per E-Mail
+informieren soll.", der interne Kommentar in Zeile 9-12 bestätigt
+"keine echten Benachrichtigungen (E-Mail-Versand hängt am
+Support-Chef-Track 'Support-E-Mail live')" — Reibungspunkt 1 stimmt.
+Zeile 14 bestätigt reinen `useState(emptyAppPreferences)` ohne
+`localStorage` — Reibungspunkt 3 stimmt. `grep -rniE
+"km|°C|distance|temperature"` über `src/pages`/`src/components` (außer
+der Einstellungen-Seite selbst) ergab keinen Treffer — Behauptung in
+Reibungspunkt 2, die Maßeinheiten-Auswahl habe nirgends in der App eine
+Wirkung, stimmt. `src/routes.tsx` bestätigt `key={location.pathname}`
+auf der `Routes`-Ebene, also Neu-Mount jeder Seite bei Routenwechsel —
+stützt die Persistenz-Behauptung in Reibungspunkt 3. Nichts wirkt
+erfunden, alle Datei-/Zeilenangaben stimmen.
+Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, `e80ba37`).
+
+**Zusammenfassung:** Beide fälligen Branches (`marketing-chef/auto`,
+`support-chef/auto`) gemergt, keine Probleme gefunden. `it-chef/auto`
+korrekt als bereits gemergt übersprungen. Ni-Info nicht nötig — beide
+Prüfungen sauber reproduziert, kein Erfundenes gefunden, kein
+wiederholter Regelverstoß, kein dringlicher Fund.
