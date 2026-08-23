@@ -1,59 +1,59 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-21
+**Datum:** 2026-08-23
 
-## Was ist seit dem letzten Eintrag (2026-08-19) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-21) passiert?
 
-Am Code selbst hat sich für Nutzer:innen wenig verändert: Der IT-Chef hat
-seitdem nur Testabdeckung ergänzt (Kalender, Warenkorb, mockAdvisor) und
-neu die Profil-Seite gebaut — die vier zuvor gemeldeten Kernprobleme
-(Flugsuche-Chat-Bug, Warenkorb ohne Checkout-Weg, Löschen ohne Rückfrage,
-nicht unterscheidbarer duplizierter Reiseentwurf) sind alle weiterhin
-unverändert im Code, mehrfach durch erneute Bug-Hunts bestätigt. Ich habe
-diesmal tiefer in den Kalender, den Warenkorb und die neue Profil-Seite
-geschaut und dabei neue, bisher nicht gemeldete Reibungspunkte gefunden.
+Zwei neue Seiten sind seitdem dazugekommen: **Reise suchen** (`/reise-planen`,
+Einstiegspunkt für die Reiseplanung) und **Einstellungen** (`/einstellungen`).
+Die vier zuvor gemeldeten Kernprobleme (Flugsuche-Chat-Bug, Warenkorb ohne
+Checkout-Weg, Löschen ohne Rückfrage, nicht unterscheidbarer duplizierter
+Reiseentwurf) habe ich diesmal nicht erneut geprüft, da mein Fokus auf den
+beiden neuen Seiten lag. Ich habe mir beide aus Nutzersicht angeschaut und
+dabei ein paar konkrete Punkte gefunden, die ich Ni mitgeben möchte.
 
 ## Meine Vorschläge
 
-1. **Auf der neuen Profil-Seite gehen eingegebene Präferenzen schon beim
-   Wegklicken verloren — nicht erst beim Neuladen.** `src/pages/Profil.tsx:21`
-   hält die Auswahl nur in lokalem `useState`, ohne `localStorage` oder
-   Speicherung. Weil jede Seite bei Routenwechsel komplett neu gemountet
-   wird (`src/routes.tsx:44-66`), reicht schon ein Klick zu einer anderen
-   Seite und zurück, um Reisestile, Budgetrahmen und Heimatflughafen
-   wieder auf leer zu setzen — ganz ohne Warnung. Die Überschrift
-   "Reisepräferenzen **verwalten**" weckt dabei die Erwartung einer
-   echten Kontoeinstellung, was den Verlust noch unangenehmer macht. Ich
-   würde hier kurzfristig zumindest einen Hinweistext ergänzen ("wird
-   noch nicht gespeichert"), mittelfristig `localStorage` nutzen.
+1. **Die als "empfohlen" markierte Karte auf der neuen "Reise suchen"-Seite
+   ist optisch nicht als solche zu erkennen.** `src/pages/ReiseSuche.tsx:49`
+   soll die KI-Chat-Karte per `border-teal/40` hervorheben. Die
+   `Card`-Komponente (`src/components/ui/card.tsx:14`) nutzt aber gar kein
+   `border`-Utility, sondern `ring-1`, und der globale Tailwind-Reweset in
+   `src/styles/globals.css:126-128` setzt Randbreite standardmäßig auf 0 —
+   die Farbe hat also nichts, an dem sie sichtbar würde. Ein Textlabel wie
+   "Empfohlen" fehlt ebenfalls, obwohl genau dafür an acht anderen Stellen
+   in der App schon ein `Badge`-Baustein existiert. Für Erstnutzer:innen,
+   die eigentlich zum KI-Chat geführt werden sollen, sehen alle drei Karten
+   gleichwertig aus. Vorschlag: entweder `border` zur Klasse ergänzen oder
+   ein `Badge` "Empfohlen" auf der Karte ergänzen.
 
-2. **Das Heimatflughafen-Feld im Profil ist an nichts angebunden und
-   erklärt nicht, wofür es gut ist.** Anders als die drei anderen Felder
-   auf `src/pages/Profil.tsx:127-143` fehlt hier jeder Hinweis, wofür der
-   Wert verwendet wird — und eine Codesuche zeigt: aktuell nirgends,
-   insbesondere nicht als Vorbelegung in der Flugsuche
-   (`FlightWizard.tsx`), wo das der naheliegende Nutzen wäre. Es fehlt
-   zudem jede Prüfung auf drei Zeichen, wie sie die Flugsuche selbst
-   längst hat. Sobald das Feld angebunden wird, würde ich das kurz im
-   Hilfetext erwähnen, wie bei den anderen Feldern.
+2. **Auf der neuen Einstellungen-Seite verspricht der Text mehr, als die App
+   aktuell einlöst.** `src/pages/Einstellungen.tsx:32` sagt wörtlich
+   "Worüber Travix dich **per E-Mail** informieren soll." — dabei ist der
+   Support-E-Mail-Versand laut `ZEITPLAN.md` noch gar nicht live. Wer hier
+   z. B. "Preisalarme" aktiviert, geht davon aus, künftig wirklich eine
+   Mail zu bekommen; ein Hinweis, dass dahinter aktuell nichts passiert,
+   fehlt komplett. Vorschlag: Text neutraler formulieren (z. B. "sobald
+   Benachrichtigungen aktiv sind") oder kurz vermerken, dass das noch nicht
+   scharf geschaltet ist.
 
-3. **Der Kalender zeigt beim ersten Öffnen oft eine leere Ansicht, obwohl
-   Reisen existieren.** `src/pages/Kalender.tsx:26-28` startet immer im
-   aktuellen Kalendermonat statt im Monat der nächsten Reise. Bei den
-   beiden Demo-Reisen (September, März) fällt am heutigen Datum keine in
-   den angezeigten August — Nutzer:innen sehen ein leeres Gitter und
-   müssen selbst raten, in welche Richtung sie weiterklicken müssen, um
-   überhaupt eine Reise zu sehen. Vorschlag: beim Laden den Monat der
-   nächstgelegenen Reise vorauswählen, falls im aktuellen Monat keine
-   liegt.
+3. **Die Maßeinheiten-Auswahl in den Einstellungen hat aktuell in der
+   gesamten App keine Wirkung.** `src/pages/Einstellungen.tsx:59-61` wirbt
+   mit "Für Distanzen und Temperaturen in Reiseplänen und Karten" — eine
+   Codesuche zeigt aber, dass nirgends in der App (auch nicht in Kalender
+   oder Kartenansicht) überhaupt eine Distanz oder Temperatur angezeigt
+   wird. Die Auswahl beschreibt damit ein Feature, das schlicht noch nicht
+   existiert. Vorschlag: Text vorerst auf "für künftige Distanz-/
+   Temperaturanzeigen" reduzieren oder das Feld noch ausblenden.
 
-4. **Im Warenkorb werden Positionen aus verschiedenen Reisen ohne jede
-   Kennzeichnung vermischt.** `src/pages/Warenkorb.tsx:20-26` zeigt Demo-
-   Positionen aus zwei Reisen (Lissabon, Kyoto) nebeneinander in derselben
-   Gruppe — `groupCartItems` (`cartTotals.ts:20-25`) gruppiert nur nach
-   Leistungstyp, nicht nach Reise. Wer mehrere Reisen parallel plant,
-   sieht einen unsortierten Topf ohne Information, was zu welcher Reise
-   gehört. Ein sichtbares Reiseziel-Label pro Position würde hier schon
-   viel klarer machen, was zusammengehört.
+4. **Die Einstellungen gehen wie schon bei der Profil-Seite beim
+   Wegnavigieren verloren, nicht erst beim Neuladen.**
+   `src/pages/Einstellungen.tsx:14` hält die Auswahl nur in lokalem
+   `useState`, ohne Speicherung — genau das Muster, das ich am 21.08. schon
+   für die Profil-Seite gemeldet hatte. Jetzt taucht es auf einer zweiten
+   Seite auf, was zeigt: Das ist kein Einzelfall mehr, sondern ein
+   wiederkehrendes Muster, das sich lohnt, einmal grundsätzlich zu lösen
+   (z. B. gemeinsamer `localStorage`-Zwischenspeicher für beide Seiten),
+   statt es Seite für Seite einzeln nachzuziehen.
 
-_Letztes Update: 2026-08-21_
+_Letztes Update: 2026-08-23_
