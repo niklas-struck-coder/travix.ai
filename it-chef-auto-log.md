@@ -3060,3 +3060,54 @@ gleiche Preisfeld-Lücke bzw. fehlende echte Chat-Historie-Speicherung).
 - `npm run build` — Produktions-Build erfolgreich.
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23
+
+**Vorbereitung:** Frischer, unabhängiger Checkout. `origin/it-chef/auto`
+lag exakt auf `origin/main` (Fast-Forward über den fünften Lauf vom
+22.08., 23:08 UTC — 8.10 Einstellungen), keine Merge-Arbeit nötig. `main`
+war seitdem um zwei Commits gewachsen: ein neuer IT-Chef-Bug-Bericht
+(`175fbb6`, Ergebnis: kein neuer Auto-Fix, nur PR-Konfliktcheck-Hinweis)
+und ein Marketing-Chef-Bericht (`4be147f`, Kampagnen-Konzept/Freigabe-
+Stand) — beide ohne Berührung des Programmierungs-Bereichs.
+
+**Vollständige Neuprüfung** von `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` (nicht nur Delta seit letztem Lauf),
+gegen die vier Sicherheitskriterien:
+
+- Keine der offenen Checkboxen hat sich gegenüber dem fünften Lauf vom
+  22.08. verändert (`git diff` gegen den alten `it-chef/auto`-Stand: nur
+  die zwei o.g. Berichte, keine Checkbox-Änderung).
+- Alle offenen Punkte (2.x Auth; 4.1-4.3 Base44/Gemini-Credentials; 5.7
+  fehlende Zug/Bus/Fähre-Datenquelle; 6.2/6.6/6.7/6.8/6.9/6.12 fehlende
+  Preisfelder bzw. unvollständige 13-Punkte-Spezifikation in `TripDraft`;
+  7.4/7.7/7.12 fehlende Chat-Historie-Persistenz bzw. Preisfelder; 8.1-8.7
+  fehlende Vision-/Websuche-Backends bzw. erfundene Spezifika; 8.9/8.12
+  offene Produktentscheidungen; 8.11 fehlende FAQ-Inhalte vom
+  Support-Chef; 8.13 fehlende Testziele) tragen weiterhin exakt die
+  Begründung aus den vorherigen ~20 Läufen, die ich einzeln gegen den
+  aktuellen Code-Stand gegengeprüft habe (u.a. `src/types/chat.ts` für
+  die Preisfeld-Lücke, `src/lib/ai/mockAdvisor.ts` für die fehlende
+  Zug/Bus/Fähre-Anbindung, `nav-config.ts`/`ZEITPLAN.md` für 8.11).
+- Zusätzlich erneut den in früheren Läufen (u.a. 11.08., zweiter Lauf)
+  bereits verworfenen IATA-Hinweistext (`FlightWizard.tsx`) geprüft, da
+  Support-Chef dafür am 10.08. eine konkrete Formulierung vorgeschlagen
+  hatte ("3-Buchstaben-Flughafencode, z. B. BER für Berlin"): Der Code ist
+  seitdem unverändert, keine neue Information, die die frühere Einstufung
+  als UX-Entscheidung (Formulierung/Platzierung) entkräften würde — dabei
+  belassen, nicht umgesetzt, um nicht einer wiederholt konsistenten
+  Einschätzung ohne neuen Grund zu widersprechen.
+- Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine Treffer.
+
+**Ergebnis:** Kein Punkt erfüllt heute alle vier Sicherheitskriterien.
+Repo-/Aufgabenstand für den Programmierungs-Bereich ist unverändert
+gegenüber dem fünften Lauf vom 22.08. Kein Code geändert, kein
+Feature-Commit. Typecheck/Lint/Tests entfallen, da keine Code-Datei
+angefasst wurde.
+
+**Geprüft:** `git fetch origin`, Commit-Diff `origin/it-chef/auto` ↔
+`origin/main` in beide Richtungen, vollständiger Abgleich aller offenen
+Checkboxen in `tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` gegen
+den Code, TODO/FIXME-Grep in `src/`.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
