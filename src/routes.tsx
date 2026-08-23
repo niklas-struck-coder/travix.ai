@@ -18,6 +18,7 @@ import { Aktivitaeten } from '@/pages/Aktivitaeten'
 import { Kalender } from '@/pages/Kalender'
 import { Warenkorb } from '@/pages/Warenkorb'
 import { Profil } from '@/pages/Profil'
+import { Einstellungen } from '@/pages/Einstellungen'
 import { ReiseSuche } from '@/pages/ReiseSuche'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { allRoutes } from '@/lib/nav-config'
@@ -39,6 +40,7 @@ const builtRoutes = new Set([
   '/kalender',
   '/warenkorb',
   '/profil',
+  '/einstellungen',
   '/reise-planen',
 ])
 
@@ -65,6 +67,7 @@ export function AppRoutes() {
           <Route path="/kalender" element={<PageTransition><Kalender /></PageTransition>} />
           <Route path="/warenkorb" element={<PageTransition><Warenkorb /></PageTransition>} />
           <Route path="/profil" element={<PageTransition><Profil /></PageTransition>} />
+          <Route path="/einstellungen" element={<PageTransition><Einstellungen /></PageTransition>} />
           <Route path="/reise-planen" element={<PageTransition><ReiseSuche /></PageTransition>} />
           {allRoutes
             .filter((item) => !builtRoutes.has(item.path))

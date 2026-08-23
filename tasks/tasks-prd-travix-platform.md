@@ -226,7 +226,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 8.7 Create WhatsApp/Telegram channel integration architecture stub
   - [x] 8.8 Build Profil page (`/profil`) with travel preferences (styles, budget, dietary, home airport) — `src/pages/Profil.tsx`: travel styles and dietary restrictions as multi-select toggle chips, budget as a four-tier `Select` (sparsam/mittelklasse/komfortabel/luxus, no invented € amounts), home airport as an uppercase 3-letter IATA input matching `FlightWizard.tsx`'s `origin` field. Local demo state only (no persistence across reloads), same placeholder-data pattern as `Favoriten.tsx`/`Preisalarme.tsx`/`Angebote.tsx` — real storage depends on the still-open Backend-Entscheidung
   - [ ] 8.9 Build Premium page (`/premium`) with subscription tier benefits
-  - [ ] 8.10 Build Einstellungen page (`/einstellungen`) for app preferences
+  - [x] 8.10 Build Einstellungen page (`/einstellungen`) for app preferences — vom autonomen IT-Chef-Lauf am 22.08. gebaut: Benachrichtigungs-Toggles (Preisalarme/Neue Angebote/Reise-Updates, analog Profil.tsx-Toggle-Chips) und Maßeinheiten-Auswahl (Metrisch/Imperial). Bewusst ohne Sprachumschaltung (offene Frage OQ-05 im PRD, noch nicht entschieden) und ohne Währungsumschaltung. Rein lokaler Demo-State ohne Persistenz und ohne echten E-Mail-Versand (Support-E-Mail-Postfach laut ZEITPLAN.md noch nicht live), gleiches Muster wie Profil/Favoriten/Preisalarme
   - [ ] 8.11 Build Hilfe page (`/hilfe`) with FAQ and support information
   - [ ] 8.12 Implement rewards/loyalty program display in profile or dashboard
   - [ ] 8.13 Write unit tests for calculateProgress, calculateCosts, checklistRules, and schema validation

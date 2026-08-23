@@ -2964,3 +2964,264 @@ Einordnung, falls die wiederholten "kein Punkt gefunden"-Läufe auffallen.
 
 **Geprüft:** wie oben beschrieben (Git-Diff, Task-/Zeitplan-Abgleich,
 TODO-Grep).
+
+## 2026-08-22 (vierter Lauf)
+
+**Vorbereitung:** Frischer, isolierter Checkout. `origin/it-chef/auto`
+(Stand: dritter Lauf von heute, Tip `28cf278`) ausgecheckt und mit
+`origin/main` gemergt — Fast-Forward, da `28cf278` inzwischen über den
+Freigabe-Chef bereits nach `main` gemergt wurde (siehe
+`freigabe-chef-log.md`, "früher Nacht-Check"; damit ist auch 7.15
+ReiseSuche jetzt in `main`). `it-chef/auto` und `main` sind seitdem
+wieder deckungsgleich. `main` selbst nicht angerührt.
+
+**Neuprüfung:** `git diff` zwischen dem alten `it-chef/auto`-Stand und
+dem neuen `origin/main` auf `tasks/tasks-prd-travix-platform.md`,
+`ZEITPLAN.md` und `src/` geprüft — einzige Änderung war eine
+Marketing-Chef-Ergänzung in `ZEITPLAN.md` (Kampagnen-Konzept-Eintrag),
+keine Berührung mit dem Programmierungs-Bereich. Kein Punkt wurde als
+erledigt abgehakt oder neu hinzugefügt. Zusätzlich erneut nach
+`TODO`/`FIXME`/`XXX` in `src/` gesucht — weiterhin keine Treffer.
+
+**Ergebnis:** Repo-Zustand für den Programmierungs-Bereich ist
+unverändert gegenüber dem dritten Lauf von heute (02:04 UTC); dessen
+Begründung (siehe oben) gilt vollständig fort — kein Punkt erfüllt alle
+vier Sicherheitskriterien. Kein neuer sicherer Punkt gefunden, kein
+Code geändert, kein Feature-Commit. Typecheck/Lint/Tests entfallen, da
+keine Code-Datei angefasst wurde.
+
+**Geprüft:** `git fetch origin`, Commit-Diff zwischen dem alten
+`it-chef/auto`-Stand und `origin/main` (Dateien: Tasks-Liste, Zeitplan,
+`src/`), TODO/FIXME-Grep in `src/`.
+
+## 2026-08-22 (fünfter Lauf, 23:08 UTC)
+
+Frischer, unabhängiger Checkout (eigene Session, ~1 Stunde nach dem
+vierten Lauf oben). `origin/it-chef/auto` existierte zu Beginn dieses
+Laufs noch nicht (letzter Stand war nach `main` gemergt) — Branch neu von
+`origin/main` aufgesetzt; der vierte-Lauf-Commit oben kam erst beim Push
+dazu und wurde per Rebase eingeordnet, `main` selbst blieb unangetastet.
+
+Anders als der vorherige Lauf (der nur einen Diff zum letzten
+`it-chef/auto`-Stand prüfte) bin ich `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` komplett neu durchgegangen, nicht nur
+den Delta seit dem letzten Lauf.
+
+**Ausgewählter Punkt:** 8.10 `Einstellungen.tsx` (`/einstellungen`), FR-103
+aus `tasks/prd-travix-platform.md`. Die Route fiel bisher auf
+`PlaceholderPage` zurück.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine App-Präferenzen-Seite, gleiches Muster wie `Profil.tsx`.
+- Keine offene Produkt-/Architekturentscheidung nötig. Bewusst NICHT
+  angefasst: Sprachumschaltung (PRD-Frage OQ-05 ist noch offen, siehe
+  `tasks/prd-travix-platform.md`) und Währungsumschaltung — beide hätten
+  eine Annahme über eine noch offene Entscheidung erfordert.
+- FR-103 ist klar umrissen ("App-Präferenzen und Benachrichtigungs-
+  einstellungen"), zusätzlich durch die bestehende Nav-Beschreibung in
+  `src/lib/nav-config.ts` bestätigt.
+- Objektiv prüfbar über Typecheck/Lint/Tests plus neue Test-Assertions.
+
+Andere zuvor geprüfte, aber verworfene Kandidaten: 6.6/6.7/6.8/6.9
+(Kostenübersicht/Checkliste) bleiben blockiert, da `TripDraft`
+(`src/types/chat.ts`) weder Preisfelder pro Kategorie noch Daten für
+mindestens 6 der 13 Checklisten-Punkte (Mietwagen, Restaurants,
+Versicherung, Reisedokumente, Packliste, Flughafentransfer) hat — eine
+saubere Umsetzung würde Annahmen über nicht vorhandene Daten erfordern,
+nicht nur eine Checkbox-Korrektur. 7.4/7.7/7.12 ebenfalls verworfen (siehe
+gleiche Preisfeld-Lücke bzw. fehlende echte Chat-Historie-Speicherung).
+
+**Umgesetzt:**
+- Neue Datei `src/types/settings.ts` — `NOTIFICATION_PREFERENCES`
+  (Preisalarme/Neue Angebote/Reise-Updates, alle standardmäßig aktiv),
+  `MEASUREMENT_UNITS` (Metrisch/Imperial), `AppPreferences`-Typ.
+- Neue Seite `src/pages/Einstellungen.tsx` — Benachrichtigungs-Toggle-Chips
+  (identisches Muster wie die Reisestile-Chips in `Profil.tsx`) plus
+  Maßeinheiten-`Select`. Rein lokaler Demo-State, kein Speichern über
+  Reloads hinweg und kein echter E-Mail-Versand (Postfach laut
+  Support-Track noch nicht live) — gleiches Muster wie
+  Profil/Favoriten/Preisalarme.
+- `src/routes.tsx`: Route `/einstellungen` auf `Einstellungen` verdrahtet
+  (vorher `PlaceholderPage` über die generierte Route aus `nav-config.ts`),
+  zu `builtRoutes` hinzugefügt.
+- Neue Tests `src/pages/Einstellungen.test.tsx` (4 Tests: Default-Zustand
+  der Toggles, Toggle an/aus, unabhängiges Umschalten mehrerer Toggles,
+  Default-Maßeinheit).
+- Checkbox 8.10 in `tasks/tasks-prd-travix-platform.md` und `ZEITPLAN.md`
+  auf erledigt gesetzt, jeweils mit Begründung.
+
+**Geprüft:**
+- `npm ci` (node_modules fehlte im frischen Checkout).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, nur 3 vorbestehende `react-refresh`-Warnungen
+  in unveränderten Dateien (`badge.tsx`, `button.tsx`, `tabs.tsx`).
+- `npx vitest run` — 20 Testdateien, 81 Tests, alle grün (inkl. der 4 neuen).
+- `npm run build` — Produktions-Build erfolgreich.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23
+
+**Vorbereitung:** Frischer, unabhängiger Checkout. `origin/it-chef/auto`
+lag exakt auf `origin/main` (Fast-Forward über den fünften Lauf vom
+22.08., 23:08 UTC — 8.10 Einstellungen), keine Merge-Arbeit nötig. `main`
+war seitdem um zwei Commits gewachsen: ein neuer IT-Chef-Bug-Bericht
+(`175fbb6`, Ergebnis: kein neuer Auto-Fix, nur PR-Konfliktcheck-Hinweis)
+und ein Marketing-Chef-Bericht (`4be147f`, Kampagnen-Konzept/Freigabe-
+Stand) — beide ohne Berührung des Programmierungs-Bereichs.
+
+**Vollständige Neuprüfung** von `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` (nicht nur Delta seit letztem Lauf),
+gegen die vier Sicherheitskriterien:
+
+- Keine der offenen Checkboxen hat sich gegenüber dem fünften Lauf vom
+  22.08. verändert (`git diff` gegen den alten `it-chef/auto`-Stand: nur
+  die zwei o.g. Berichte, keine Checkbox-Änderung).
+- Alle offenen Punkte (2.x Auth; 4.1-4.3 Base44/Gemini-Credentials; 5.7
+  fehlende Zug/Bus/Fähre-Datenquelle; 6.2/6.6/6.7/6.8/6.9/6.12 fehlende
+  Preisfelder bzw. unvollständige 13-Punkte-Spezifikation in `TripDraft`;
+  7.4/7.7/7.12 fehlende Chat-Historie-Persistenz bzw. Preisfelder; 8.1-8.7
+  fehlende Vision-/Websuche-Backends bzw. erfundene Spezifika; 8.9/8.12
+  offene Produktentscheidungen; 8.11 fehlende FAQ-Inhalte vom
+  Support-Chef; 8.13 fehlende Testziele) tragen weiterhin exakt die
+  Begründung aus den vorherigen ~20 Läufen, die ich einzeln gegen den
+  aktuellen Code-Stand gegengeprüft habe (u.a. `src/types/chat.ts` für
+  die Preisfeld-Lücke, `src/lib/ai/mockAdvisor.ts` für die fehlende
+  Zug/Bus/Fähre-Anbindung, `nav-config.ts`/`ZEITPLAN.md` für 8.11).
+- Zusätzlich erneut den in früheren Läufen (u.a. 11.08., zweiter Lauf)
+  bereits verworfenen IATA-Hinweistext (`FlightWizard.tsx`) geprüft, da
+  Support-Chef dafür am 10.08. eine konkrete Formulierung vorgeschlagen
+  hatte ("3-Buchstaben-Flughafencode, z. B. BER für Berlin"): Der Code ist
+  seitdem unverändert, keine neue Information, die die frühere Einstufung
+  als UX-Entscheidung (Formulierung/Platzierung) entkräften würde — dabei
+  belassen, nicht umgesetzt, um nicht einer wiederholt konsistenten
+  Einschätzung ohne neuen Grund zu widersprechen.
+- Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine Treffer.
+
+**Ergebnis:** Kein Punkt erfüllt heute alle vier Sicherheitskriterien.
+Repo-/Aufgabenstand für den Programmierungs-Bereich ist unverändert
+gegenüber dem fünften Lauf vom 22.08. Kein Code geändert, kein
+Feature-Commit. Typecheck/Lint/Tests entfallen, da keine Code-Datei
+angefasst wurde.
+
+**Geprüft:** `git fetch origin`, Commit-Diff `origin/it-chef/auto` ↔
+`origin/main` in beide Richtungen, vollständiger Abgleich aller offenen
+Checkboxen in `tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` gegen
+den Code, TODO/FIXME-Grep in `src/`.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23 (zweiter Lauf, 01:08 UTC)
+
+Erneute Auslösung, ~1 Stunde nach dem letzten Lauf (00:07 UTC, siehe
+Eintrag oben). Diesmal unabhängig und ohne den vorherigen Log-Eintrag
+zuerst zu lesen komplett neu anhand von `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` und dem tatsächlichen Code geprüft
+(u. a. `src/types/chat.ts`, `src/lib/trip/tripStorage.ts`,
+`src/components/chat/KiChat.tsx`, `src/hooks/useChat.ts`,
+`src/lib/duffel/client.ts`, `src/types/trains.ts`), bevor der vorherige
+Eintrag zum Abgleich gelesen wurde:
+
+- `git fetch origin` + Commit-Diff `origin/main` ↔ `origin/it-chef/auto`
+  in beide Richtungen: keine neuen Commits auf `main` seit dem letzten
+  Lauf; `it-chef/auto` unverändert bei `477e1b5`.
+- Alle 30 verbleibenden offenen Checkboxen in
+  `tasks/tasks-prd-travix-platform.md` einzeln gegen die vier
+  Sicherheitskriterien geprüft. Unabhängig zu denselben Einstufungen
+  gekommen wie die vorherigen Läufe: 2.x/4.1-4.3 (blocked on Base44/
+  Gemini-Credentials, in der Aufgabenliste selbst so vermerkt), 5.7
+  (`TrainCard.tsx`/`TrainResults.tsx` fertig, aber keine echte oder
+  simulierte Zug/Bus/Fähre-Datenquelle im Code — kein `searchTrains`,
+  keine Nutzung von `TrainResults` außerhalb der eigenen Datei; anders
+  als bei Hotel/Flug, die längst über `HotelResults`/`FlightResults` in
+  `KiChat.tsx` eingebunden sind), 6.2/6.6/6.7/6.12-Rest (`TripDraft` hat
+  weiterhin keine Preisfelder für Transport/Unterkunft/Auto), 6.8/6.9
+  (FR-501 benennt weiterhin nur 10 von 13 Checklistenpunkten konkret),
+  7.4 (nur ein globaler `CHAT_STORAGE_KEY` für den aktiven Trip, keine
+  Mehrfach-Entwürfe-Speicherung mit eigener Chat-Historie pro Entwurf),
+  7.7 (bräuchte Budget- und Loyalty-Daten, die es beide nicht gibt),
+  7.12 (fehlende Preisfelder), 8.1-8.7 (KI-/Vision-Funktionen weiterhin
+  an Credentials bzw. Architekturentscheidungen gebunden), 8.9 (Premium/
+  Abo-Seite zahlungsnah, laut Skill-Regeln tabu), 8.11 (wartet auf
+  FAQ-Inhalte vom Support-Chef), 8.12 (kein Loyalty-Datenmodell), 8.13
+  (nur `calculateProgress` existiert und hat bereits Tests;
+  `calculateCosts`/`checklistRules` selbst sind noch nicht gebaut, also
+  auch nicht testbar).
+- `Umgebungs-Hinweis`: `node_modules` fehlte im frischen Checkout
+  komplett (`npm run lint`/`tsc -b` schlugen zunächst mit
+  `ERR_MODULE_NOT_FOUND` fehl). `npm install` ausgeführt, danach als
+  Gesundheits-Check `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+  dieselben 3 vorbestehenden `react-refresh`-Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx`) und `npm test` (19
+  Testdateien, 77 Tests, alle grün) laufen lassen — keine Bugs gefunden.
+  `npm install` hat `package-lock.json` nur um plattformspezifische
+  `libc`-Metadaten einer lokal abweichenden npm-Version verändert; diese
+  Änderung verworfen (`git checkout -- package-lock.json`), da kein
+  echter Abhängigkeitswechsel.
+- Anschließend den vorherigen Eintrag (00:07 UTC) zum Abgleich gelesen:
+  identische Einstufung, keine neue Erkenntnis.
+
+**Ergebnis:** Kein Punkt erfüllt heute (weiterhin) alle vier
+Sicherheitskriterien. Repo-/Aufgabenstand unverändert gegenüber dem
+ersten Lauf von heute. Kein Code geändert, kein Feature-Commit — dieser
+Log-Eintrag ist die einzige Änderung.
+
+**Geprüft:** wie oben beschrieben (Git-Diff, vollständiger unabhängiger
+Abgleich aller offenen Checkboxen gegen Code, `npm install` +
+Typecheck/Lint/Testlauf als Gesundheits-Check, TODO/FIXME-Grep bereits
+in Vorläufen ohne Treffer).
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23 (dritter Lauf, 02:06 UTC)
+
+Erneute Auslösung, ~1 Stunde nach dem letzten Lauf (01:08 UTC, siehe
+Eintrag oben). Frischer, unabhängiger Checkout.
+
+**Vorbereitung/Diff-Check:** `git fetch origin main it-chef/auto` und
+Commit-Diff in beide Richtungen geprüft:
+- `origin/main` liegt seit `4be147f` (22.08., 13:04 UTC — Marketing-Chef-
+  Bericht) unverändert, keine neuen Commits.
+- `origin/it-chef/auto` liegt weiterhin nur um den bereits vom fünften
+  Lauf am 22.08. gebauten, noch nicht gemergten Punkt 8.10 (Einstellungen-
+  Seite, `src/pages/Einstellungen.tsx`) vor `main` — Diff zwischen beiden
+  Branches identisch zum Diff des letzten Laufs (`ZEITPLAN.md`,
+  `it-chef-auto-log.md`, `Einstellungen.tsx`/`.test.tsx`,
+  `src/types/settings.ts`, `routes.tsx`, eine Checkbox in
+  `tasks/tasks-prd-travix-platform.md`). Keine Checkbox hat sich seit dem
+  letzten Lauf verändert.
+- Erneuter Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine
+  Treffer.
+
+Da der Repo-/Aufgabenstand für den Programmierungs-Bereich exakt
+identisch zum Lauf von 01:08 UTC ist, wurde die dortige vollständige
+Einzelprüfung aller 30 offenen Checkboxen nicht nochmal Punkt für Punkt
+wiederholt (siehe Eintrag oben für die volle Begründung je Punkt) —
+stattdessen zusätzlich geprüft, ob sich abseits der Aufgabenliste ein
+eigenständiger, sicherer Punkt anbietet:
+- Die 3 vorbestehenden `react-refresh`-Lint-Warnings
+  (`src/components/ui/{badge,button,tabs}.tsx`, jeweils weil die Datei
+  neben der Komponente auch eine `*Variants`-Hilfsfunktion exportiert)
+  erneut geprüft. Verworfen: das sind Standard-shadcn/ui-Bibliotheksdateien
+  mit einem verbreiteten, bewusst so gewählten Muster; eine Behebung
+  würde jede der drei Dateien aufsplitten und alle Importstellen im
+  gesamten Code anfassen — das ist kein einzelner, eng abgegrenzter Punkt
+  aus `ZEITPLAN.md`/der Aufgabenliste, sondern ein selbst erfundener
+  Breitband-Refactor. Nicht gewählt.
+- Keine weiteren Kandidaten außerhalb der Aufgabenliste gefunden.
+
+**Ergebnis:** Kein Punkt erfüllt heute (weiterhin) alle vier
+Sicherheitskriterien. Repo-/Aufgabenstand unverändert gegenüber den
+beiden vorherigen Läufen von heute. Kein Code geändert, kein
+Feature-Commit — dieser Log-Eintrag ist die einzige inhaltliche Änderung.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), danach
+als Gesundheits-Check `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+dieselben 3 vorbestehenden Warnings), `npx vitest run` (20 Testdateien,
+81 Tests, alle grün) und `npm run build` (Produktions-Build erfolgreich)
+— keine Regressionen. `git status` nach `npm ci` sauber (keine
+`package-lock.json`-Nebenwirkung diesmal, anders als beim vorherigen
+Lauf).
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
