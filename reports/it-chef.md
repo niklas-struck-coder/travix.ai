@@ -1,32 +1,26 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-22
+**Datum:** 2026-08-23
 
-## Was ist seit dem letzten Eintrag (2026-08-21) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-22) passiert?
 
-Seit gestern kam über die Auto-Kanäle nur eine neue Seite dazu: `ReiseSuche.tsx`
-(Einstiegspunkt "Reise suchen" unter `/reise-planen`, verlinkt von der
-Startseite, samt Test). Ich habe sie inklusive Routing-Anbindung geprüft —
-sauber. Zusätzlich habe ich heute gezielt alle bisher noch nicht Zeile-für-
-Zeile gelesenen Dateien durchgesehen: die komplette Layout-Ebene (Sidebar,
-MobileNav, PageHeader, PageTransition, AppShell), alle Such-Ergebnis-
-Komponenten (Flight-/Hotel-/Train-Results & Cards, NoResultsMessage,
-HotelWizard), die komplette Chat-UI (ChatInput, ChatMessage, KiChat,
-QuickReplies, TravixAvatar, TripSummaryCard), alle bisher ungeprüften Seiten
-(Home, Kartenansicht, Favoriten, Preisalarme, Angebote, Aktivitaeten,
-Kalender, Warenkorb, Buchung, Urlaubsmodus, Reiseentwuerfe, MeineReisen,
-PlaceholderPage, Flugsuche, Hotelsuche), sowie `calculateProgress.ts`,
-`nav-config.ts` (gegen `routes.tsx` abgeglichen), `utils.ts`,
-`design-tokens.ts`, alle `types/*.ts`, `App.tsx`, `main.tsx` und
-`duffel-proxy.ts`. TODO/FIXME-Grep über `src/` ohne Treffer.
+Seit gestern kam über die Auto-Kanäle eine neue Seite dazu: `Einstellungen.tsx`
+(App- und Benachrichtigungseinstellungen unter `/einstellungen`, samt Typen in
+`types/settings.ts`, Routing-Anbindung und Test). Ich habe alle vier Dateien
+Zeile für Zeile geprüft — sauber, keine Bugs, Test deckt Toggle-Verhalten und
+Default-Werte ab. `routes.tsx` gegen `nav-config.ts` abgeglichen, konsistent.
+Sonst keine Änderungen im `src/`-Baum seit gestern. TODO/FIXME-Grep über
+`src/` weiterhin ohne Treffer. Alle bereits bekannten offenen Bugs (siehe
+unten) am aktuellen Quelltext erneut bestätigt — keiner wurde durch
+zwischenzeitliche Commits gelöst oder verschärft.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine — auch heute kein neuer Bug gefunden, der beide Kriterien (wirklich
-sicher **und** klein/isoliert/risikoarm) erfüllt.
+Keine — kein neuer Bug gefunden, der beide Kriterien (wirklich sicher **und**
+klein/isoliert/risikoarm) erfüllt.
 
-Die vier PRs aus früheren Läufen liegen weiterhin ungemergt bereit, jetzt
-seit 10–13 Tagen:
+Die vier PRs aus früheren Läufen liegen weiterhin ungemergt bereit, jetzt seit
+11–14 Tagen:
 [PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
 (hängender Ladezustand bei Unterkunftssuche, seit 9.8.),
 [PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
@@ -39,21 +33,6 @@ Erstellung dieser PRs weiterentwickelt — vor dem Merge lohnt sich ein kurzer
 Konfliktcheck.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
-
-Neu heute:
-
-- **Hotelsuche zeigt bei neuer Suche weiterhin alte Ergebnisse.** Bestätigt
-  am aktuellen Code (`Hotelsuche.tsx`, `handleSearch`) — genau der Bug, den
-  PR #4 bereits behebt, nur noch nicht gemergt. Kein neuer Fix nötig, nur
-  Merge von PR #4.
-- **Zimmer-/Gästezahl in `HotelWizard.tsx` könnte theoretisch auf `NaN`
-  laufen** (Zeilen 86/97: `Math.min(9, Math.max(1, Number(event.target.value)))`
-  ohne `NaN`-Schutz). Niedrige Konfidenz: Bei Standard-Browserverhalten für
-  `<input type="number">` liefert `event.target.value` bei einer ungültigen
-  Zwischeneingabe normalerweise bereits `""` (→ `Number('') = 0` → klemmt
-  korrekt auf 1), nicht den rohen Text. Ob das auf allen Zielbrowsern
-  zuverlässig so ist, habe ich nicht verifiziert — daher nur gemeldet, nicht
-  automatisch gefixt.
 
 Unverändert gegenüber dem letzten Bericht (heute erneut am Quelltext
 bestätigt):
@@ -79,14 +58,20 @@ bestätigt):
   verloren.
 - **IATA-Code-Eingabe ohne Erklärung.** `FlightWizard.tsx`: Such-Button
   bleibt unter 3 Zeichen deaktiviert, ohne Hinweistext.
+- **Zimmer-/Gästezahl in `HotelWizard.tsx` könnte theoretisch auf `NaN`
+  laufen** (Zeilen 86/97: `Math.min(9, Math.max(1, Number(event.target.value)))`
+  ohne `NaN`-Schutz). Niedrige Konfidenz — bei Standard-Browserverhalten für
+  `<input type="number">` liefert das Feld bei ungültiger Eingabe normalerweise
+  bereits `""`, nicht rohen Text. Nicht auf allen Zielbrowsern verifiziert,
+  daher nur gemeldet.
 - **Duffel-Stays-Feldnamen weiterhin ungetestet.** `mapStayResult` rät bei
   den Feldnamen nach wie vor defensiv — noch kein echter API-Key zum
   Verifizieren.
 
 ## Weitere Vorschläge
 
-1. **Offene Auto-Fix-PRs mergen.** Größter Hebel, liegt seit über einer
-   Woche ungenutzt bereit — mit steigendem Risiko für Merge-Konflikte durch
+1. **Offene Auto-Fix-PRs mergen.** Größter Hebel, liegt seit über zwei
+   Wochen ungenutzt bereit — mit steigendem Risiko für Merge-Konflikte durch
    weitere main-Commits.
 2. **Entscheidung zum Flugsuche-Bug treffen.** Zentraler Verkaufspfad, von
    Marketing- und Support-Chef unabhängig als wichtigster offener Punkt
@@ -95,4 +80,4 @@ bestätigt):
    localStorage-Seiteneffekte, der Flugsuche-Bug) hat weiterhin keine
    eigenen Tests.
 
-_Letztes Update: 2026-08-22_
+_Letztes Update: 2026-08-23_
