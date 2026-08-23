@@ -3225,3 +3225,68 @@ dieselben 3 vorbestehenden Warnings), `npx vitest run` (20 Testdateien,
 Lauf).
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23 (vierter Lauf, 22:06 UTC)
+
+Erneute Auslösung, unabhängiger Checkout. `it-chef/auto` war zwischenzeitlich
+vom Freigabe-Chef nach `main` gemergt worden (`71ef2e3`) — Branch neu von
+`origin/main` aufgesetzt (`git checkout -B it-chef/auto origin/main`), wie
+in Schritt 1 der Regeln vorgesehen.
+
+**Ausgangslage:** Seit dem letzten IT-Chef-eigen-Lauf (dritter Lauf,
+02:06 UTC) hat sich an den 30 offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` nichts verändert — die
+dortigen Einstufungen (blockiert auf Backend-/Auth-Entscheidung, fehlende
+Preisfelder, fehlende Credentials, offene Produktentscheidungen) gelten
+unverändert weiter, kein neuer Kandidat aus der Aufgabenliste selbst.
+
+**Gefundener Punkt (außerhalb der Checkbox-Liste, wie in den letzten
+Läufen zusätzlich geprüft):** Support-Chef hat im Bericht vom 23.08.
+(`f36c390`, `reports/support-chef.md`) zwei konkrete UX-Textprobleme in
+`src/pages/Einstellungen.tsx` gefunden und mit vorgeschlagener Formulierung
+versehen:
+1. Der Benachrichtigungs-Beschreibungstext versprach wörtlich künftige
+   E-Mail-Benachrichtigungen ("Worüber Travix dich per E-Mail informieren
+   soll"), obwohl laut Code-Kommentar und `ZEITPLAN.md` (Support-Track)
+   noch kein E-Mail-Versand existiert.
+2. Der Maßeinheiten-Beschreibungstext versprach eine Distanz-/
+   Temperaturanzeige ("Für Distanzen und Temperaturen in Reiseplänen und
+   Karten"), die laut Codesuche (`km`, `°C`, `distance`, `temperature`)
+   nirgends in der App existiert.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug; keine offene Produkt-/Architekturentscheidung
+(reine Korrektur irreführender UI-Copy, keine neue Funktionsentscheidung);
+klar genug (Support-Chef hat konkrete Alternativformulierungen
+vorgeschlagen, hier nahezu wörtlich übernommen); objektiv prüfbar (Text
+im DOM, per Test verifizierbar). Erfüllt alle vier Kriterien — umgesetzt.
+
+Der dritte, in demselben Support-Chef-Bericht genannte Punkt (Auswahl geht
+beim Wegnavigieren verloren, da nur `useState` ohne `localStorage`) wurde
+bewusst **nicht** angefasst: das ist dasselbe absichtliche Demo-State-Muster
+wie bei praktisch allen anderen Seiten mit Demo-Daten (Profil, Favoriten,
+Preisalarme, Angebote, Aktivitäten — keine davon nutzt `localStorage`),
+dokumentiert im Code-Kommentar selbst und an die offene Backend-/
+Auth-Entscheidung gekoppelt. Nur für `Einstellungen.tsx` echte Persistenz
+nachzurüsten wäre ein eigenmächtiger, inkonsistenter Eingriff über den
+engen, klar abgegrenzten Punkt hinaus — nicht umgesetzt.
+
+**Umsetzung** (`src/pages/Einstellungen.tsx`):
+- Benachrichtigungstext → "Worüber Travix dich informieren soll, sobald
+  Benachrichtigungen aktiv sind."
+- Maßeinheiten-Text → "Für künftige Distanz- und Temperaturanzeigen."
+- Kopfkommentar der Datei um den Hinweis auf die bewusst neutrale
+  Formulierung ergänzt.
+- `src/pages/Einstellungen.test.tsx`: zwei neue Test-Assertions, die
+  sowohl den alten (nicht mehr vorhandenen) als auch den neuen Text
+  prüfen, damit ein versehentliches Zurückrollen auffällt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte, keine
+`package-lock.json`-Nebenwirkung), `npx tsc -b` (grün), `npm run lint`
+(0 Fehler, dieselben 3 vorbestehenden `react-refresh`-Warnings in
+`src/components/ui/{badge,button,tabs}.tsx`, unverändert), `npx vitest run`
+(20 Testdateien, 83 Tests — 81 vorher + 2 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende Chunk-Size-Warnung
+wie in Vorläufen). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
