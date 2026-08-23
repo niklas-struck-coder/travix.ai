@@ -879,3 +879,68 @@ support-chef/auto) gemergt, keine Probleme gefunden. Ni-Info nicht nötig
 (kein wiederholtes Scheitern, kein Fund mit eigener Dringlichkeit — ein
 konkreter, gut belegter UX-Fund von Support-Chef, aber kein dringlicher
 Sonderfall, der eine sofortige Benachrichtigung rechtfertigt).
+
+## 2026-08-23, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches** (nach `git fetch origin --prune`):
+- `it-chef/auto` — 5 neue Commits gegenüber `main`. Davon 4 reine
+  Berichts-Commits ohne Diff am Produkt-Code (`477e1b5`, `d3fd46f`,
+  `ba8e7ab` = "kein sicherer Auto-Punkt" aus den stündlichen Läufen
+  heute Nacht; `2910067` = Branch-Reset ohne neuen Punkt) und ein
+  einziger Commit mit echter Codeänderung (`4e353bc`, 22.08. 23:08 UTC:
+  Einstellungen-Seite, PRD-Punkt 8.10, `/einstellungen`).
+- `marketing-chef/auto` — 0 neue Commits gegenüber `main`. Wie
+  vorgesehen übersprungen (läuft normal erst um 6 Uhr, separater
+  späterer Lauf).
+- `support-chef/auto` — 1 neuer Commit gegenüber `main` (`822d57b`,
+  22.08. 13:33 UTC). Kein Commit von heute, aber da noch ungemergt
+  trotzdem kurz mitgeprüft statt stehen gelassen.
+
+**Prüfung `it-chef/auto`:**
+Diffstat des gesamten Branchs gegen `main` deckt sich exakt mit dem
+Diffstat des einzelnen Codeänderungs-Commits `4e353bc`
+(`ZEITPLAN.md`, `it-chef-auto-log.md`, `src/pages/Einstellungen.tsx`
+(neu), `src/pages/Einstellungen.test.tsx` (neu), `src/routes.tsx`,
+`src/types/settings.ts` (neu), `tasks/tasks-prd-travix-platform.md`) —
+die drei Berichts-Commits haben also tatsächlich keinen zusätzlichen
+Code-Diff eingebracht, kein Scope-Creep über den einen beschriebenen
+Punkt hinaus.
+Unabhängig selbst nachgeprüft (nicht nur dem Log geglaubt): in einem
+frischen `git worktree` auf `origin/it-chef/auto` `npm install`,
+`npx tsc -b`, `npx eslint .` und `npx vitest run` tatsächlich selbst
+ausgeführt. Ergebnis: `tsc -b` fehlerfrei (Exit 0); `eslint .` 0 Fehler
+(nur dieselben 3 vorbestehenden Warnungen in
+`badge.tsx`/`button.tsx`/`tabs.tsx`, nicht durch diese Änderung
+verursacht); `vitest run` 81/81 Tests in 20/20 Testdateien grün (die 4
+neuen Tests aus `Einstellungen.test.tsx` inklusive) — deckt sich mit der
+eigenen Behauptung im IT-Chef-Log. Kein Bezug zu Auth, Zahlungen oder
+rechtlichen Texten. `Einstellungen.tsx` selbst gelesen: reiner lokaler
+Demo-State (Benachrichtigungs-Toggles, Maßeinheiten-Auswahl) ohne
+Persistenz, gleiches Muster wie `Profil.tsx`/`Favoriten.tsx`, im
+Kommentar explizit als bewusst unvollständig markiert (Sprach-/
+Währungsumschaltung zurückgestellt, da PRD-Fragen offen). Design: Toggle-
+Chips mit `border-teal bg-teal/10 text-navy` im aktiven Zustand — passt
+zur Navy/Teal/Gold-Palette aus `MARKENDESIGN.md`.
+**Ergebnis:** Passt → alle 5 Commits nach `main` gemergt und gepusht
+(Merge-Commit auf `4be147f..2ce3933`, No-Fast-Forward-Merge, kein
+Konflikt, Diff nach Merge identisch mit `origin/it-chef/auto`).
+
+**Prüfung `support-chef/auto`** (Diff: nur `support-chef-auto-log.md`,
+10 neue Zeilen, kein Code geändert):
+Reiner Log-Eintrag "kein neuer Punkt" für den zweiten Lauf vom 22.08. —
+begründet nachvollziehbar mit `git log`, dass seit dem letzten
+geprüften Reibungspunkt (Reise suchen) kein neuer UI-Code nach `main`
+gelandet ist und der heutige IT-Chef-Lauf (`175fbb6`) zwar Layout-/
+Such-/Chat-Komponenten durchgesehen, aber nichts gemergt hat. Explizit
+damit begründet, keine Punkte zu erfinden, nur damit der Bericht nicht
+leer aussieht — passt zum eigenen Grundsatz von Support-Chef, nichts
+Erfundenes zu berichten. Kein Code geändert → niedrigstes Risiko.
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, gepusht,
+zusammen mit obigem Merge in `2ce3933`).
+
+**Zusammenfassung:** Beide fällige Branches (`it-chef/auto`,
+`support-chef/auto`) gemergt, keine Probleme gefunden.
+`marketing-chef/auto` wie vorgesehen für diesen frühen Lauf
+übersprungen (keine neuen Commits). Ni-Info nicht nötig — sauberer,
+klar abgegrenzter Lauf, alle Checks eigenständig reproduziert und
+grün, kein wiederholter Regelverstoß, kein dringlicher Fund.
