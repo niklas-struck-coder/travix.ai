@@ -714,3 +714,82 @@ Chat-Komponenten durchgesehen, aber keinen neuen Auto-Fix gemergt. Damit
 gibt es keine neue Seite oder Komponente, die noch nicht geprüft wäre.
 Kein neuer Reibungspunkt in diesem Lauf, um keine Punkte zu erfinden, nur
 damit der Bericht nicht leer aussieht.
+
+---
+
+## 2026-08-23 — Einstellungen (`/einstellungen`)
+
+**Geprüfter Bereich:** `src/pages/Einstellungen.tsx`, `src/types/settings.ts`
+und `src/pages/Einstellungen.test.tsx`, laut `ZEITPLAN.md` (Aufgabe 8.10)
+am 22.08. vom autonomen IT-Chef-Lauf gebaut und mit dem heutigen
+Freigabe-Chef-Merge (`71ef2e3`) erstmals in `main` gelandet — noch in
+keinem Support-Chef-Lauf geprüft. Zum Vergleich herangezogen:
+`src/pages/Profil.tsx` (21.08., gleiches lokales `useState`-Demo-Muster
+ohne Persistenz) und `src/pages/Kartenansicht.tsx`/`src/pages/Kalender.tsx`
+(mögliche Verwendungsstellen für Distanz-/Datumsanzeigen).
+
+### Reibungspunkte
+
+**1. Benachrichtigungs-Toggles versprechen "per E-Mail", ohne dass es
+irgendeinen E-Mail-Versand gibt — und ohne Hinweis darauf in der UI**
+`src/pages/Einstellungen.tsx:31-33`: Der Beschreibungstext unter
+"Benachrichtigungen" lautet wörtlich "Worüber Travix dich **per E-Mail**
+informieren soll." Laut `ZEITPLAN.md` (Support-Track, Sprint 1) ist die
+Support-E-Mail-Adresse selbst noch nicht live ("Support-E-Mail live" ist
+weiterhin offen, `[ ]`), und der Code-Kommentar in `Einstellungen.tsx:9-12`
+bestätigt intern selbst "keine echten Benachrichtigungen (E-Mail-Versand
+hängt am Support-Chef-Track 'Support-E-Mail live')". Nutzer:innen, die
+hier z. B. "Preisalarme" aktivieren, gehen aber aufgrund des Texts davon
+aus, künftig tatsächlich eine E-Mail zu bekommen — es gibt in der UI
+selbst keinerlei Hinweis, dass dahinter aktuell nichts passiert. Anders
+als bei `Profil.tsx`, wo die Formulierung ("Reisepräferenzen verwalten")
+keine konkrete zukünftige Aktion verspricht, macht der Text hier ein
+explizites Versprechen ("Travix informiert dich"), das nicht eingehalten
+werden kann.
+
+*Vorschlag:* Entweder den Beschreibungstext neutraler formulieren (z. B.
+"Worüber Travix dich informieren soll, sobald Benachrichtigungen aktiv
+sind"), oder einen kleinen Hinweis ergänzen (analog zum in
+`Profil.tsx` (21.08.) vorgeschlagenen "Deine Auswahl wird noch nicht
+gespeichert"), solange E-Mail-Versand technisch nicht existiert.
+
+**2. Maßeinheiten-Auswahl hat aktuell in der gesamten App keinerlei
+Wirkung — es gibt nirgends eine Distanz- oder Temperaturanzeige**
+`src/pages/Einstellungen.tsx:59-61` beschreibt die Auswahl mit "Für
+Distanzen und Temperaturen in Reiseplänen und Karten." Eine Codesuche
+über `src/pages` und `src/components` nach Distanz-/Temperaturanzeigen
+(`km`, `°C`, `distance`, `temperature`) findet außer der Einstellungen-Seite
+selbst keinen einzigen Treffer — auch `Kartenansicht.tsx` (11.08.) und
+`Kalender.tsx` (20.08.), die naheliegendsten Kandidaten, zeigen keine
+Entfernungen oder Temperaturen an. Eine Codesuche nach `AppPreferences`/
+`emptyAppPreferences`/`preferences.units` außerhalb von
+`Einstellungen.tsx`/`Einstellungen.test.tsx` findet ebenfalls nichts. Die
+Auswahl ist damit nicht nur unpersistiert (wie schon bei `Profil.tsx`
+dokumentiert), sondern beschreibt ein Feature, das im Rest der App noch
+gar nicht existiert — stärker als bei `Profil.tsx`s Heimatflughafen-Feld
+(21.08.), wo zumindest ein plausibles Anbindungsziel (`FlightWizard.tsx`
+`origin`) bereits vorhanden ist.
+
+*Vorschlag:* Bis eine echte Distanz-/Temperaturanzeige existiert, entweder
+den Beschreibungstext auf das Vorhandene beschränken (z. B. nur "Für
+künftige Distanz- und Temperaturanzeigen") oder das Feld vorerst
+ausblenden, um keine Erwartung an eine Funktion zu wecken, die aktuell
+nirgends sichtbar wird.
+
+**3. Gleiches Persistenz-Problem wie bei `Profil.tsx` (21.08.) — Auswahl
+geht schon beim Wegnavigieren verloren**
+`src/pages/Einstellungen.tsx:14` hält `preferences` wie `Profil.tsx`
+ausschließlich in lokalem `useState(emptyAppPreferences)`, ohne
+`localStorage`. Da `src/routes.tsx:44-66` jede Seite bei Routenwechsel neu
+mountet, springt ein deaktiviertes Benachrichtigungs-Toggle oder ein
+geändertes Einheiten-Feld beim Zurückkehren zu `/einstellungen` wieder auf
+den Ausgangszustand — ohne Hinweis. Der am 21.08. für `Profil.tsx`
+vorgeschlagene `localStorage`-Zwischenspeicher-Fix (bzw. der dortige
+Hinweistext-Vorschlag) wurde bislang nicht umgesetzt und würde hier im
+selben Zug mit gelöst.
+
+### Nicht geprüft
+Keine weiteren Formulare oder Fehlerfälle auf der Seite — sie besteht nur
+aus den beiden oben genannten Feldern. Eine vertiefte Screenreader-Prüfung
+der `Select`-Komponente wurde nicht durchgeführt (analog zur
+Einschränkung im Profil-Eintrag vom 21.08.).
