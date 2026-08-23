@@ -1,54 +1,48 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-22
+**Datum:** 2026-08-23
 
-## Was ist seit dem letzten Eintrag (2026-08-21) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-22) passiert?
 
-Der autonome Lauf hat heute `marketing/kampagnen-konzept-ads.md`
-geschrieben — ein startklares, aber bewusst nicht startbereites
-Kampagnen-Konzept für Meta, TikTok und (zurückgestellt) Google Ads:
-drei Text-Varianten pro Kanal, Fokus Warteliste/Markenbekanntheit statt
-Direktbuchung, keine erfundenen Kennzahlen, kein Live-Vorgang. Parallel
-ist eine neue Seite "Reise suchen" (`/reise-planen`) live gegangen —
-der neue Einstiegspunkt mit drei Wegen (KI-Chat als empfohlener Weg,
-Flugsuche, Hotelsuche). Der Support-Chef hat dabei gefunden: Die
-"Empfohlen"-Markierung der KI-Chat-Karte ist aktuell technisch
-unsichtbar (CSS-Bug, kein Badge-Text). Der Flugsuche-Bug im Haupt-Chat
-bleibt laut IT-Chef unverändert offen — der Werbe-Stopp dafür gilt
-weiterhin. Bei der Freigabe-Entscheidung zu den sechs fertigen
-Content-Entwürfen (Tier 1 aus `marketing/freigabe-uebersicht.md`) hat
-sich seit dem 21.08. nichts Neues ergeben.
+Der autonome Lauf hat heute die drei offenen Freigabe-Fragen aus
+`marketing/freigabe-uebersicht.md` erneut geprüft — dazu gibt es weiterhin
+keine neue Antwort von dir, also kein neues Content-Stück, sondern ein
+eigenständiger Marketing-Punkt: `marketing/presse-multiplikatoren-strategie.md`
+(Sprint 7). Darin: vier Zielgruppen-Typen für Presse/Multiplikatoren (Tech-
+/Startup-Presse, KI/LLM-Newsletter, Reise-Creator mit Planungs-Frust-Fokus,
+Build-in-public-Communities), Auswahlkriterien und eine generische
+Outreach-Vorlage — bewusst ohne erfundene Namen oder Reichweitenzahlen,
+reine Vorbereitung für dich. Parallel hat der Support-Chef die neue
+Einstellungen-Seite (`/einstellungen`) geprüft und drei Reibungspunkte
+gefunden: Benachrichtigungen versprechen E-Mail-Versand, der nicht
+stattfindet, die Maßeinheiten-Auswahl hat keinerlei Wirkung in der App, und
+Einstellungen werden (wie schon bei Profil.tsx) nicht dauerhaft gespeichert.
+Der IT-Chef hat die Seite ebenfalls geprüft, aber keinen sicheren
+Auto-Fix-Punkt gefunden — die Lücken bestehen also noch. Der "Empfohlen"-
+Badge-Bug auf `/reise-planen` (gestern gemeldet) ist laut Commit-Historie
+weiterhin nicht behoben.
 
 ## Vorschläge
 
-1. **"Empfohlen"-Badge auf `/reise-planen` reparieren, bevor die Seite
-   in Content auftaucht.** Genau diese neue Seite wäre ein gutes,
-   ehrliches Beispiel dafür, wie unaufdringlich wir Nutzer:innen führen
-   ("ein Gespräch statt ein Formular") — aber nur, wenn die Kennzeichnung
-   auch wirklich sichtbar ist. Sonst zeigt ein Screenshot etwas, das die
-   echte App gerade nicht liefert. Kurzer Hinweis an den IT-Chef lohnt
-   sich, danach ist die Seite ein natürlicher Kandidat für ein
-   "So startest du bei uns"-Content-Stück.
+1. **Einstellungen-Seite jetzt bewusst NICHT bewerben.** Die drei vom
+   Support-Chef gefundenen Lücken (E-Mail-Versprechen ohne Versand, wirkungslose
+   Maßeinheiten, keine Persistenz) würden unserer eigenen "Ehrlichkeit als
+   Feature"-Botschaft direkt widersprechen, wenn wir gerade jetzt Screenshots
+   davon zeigen. Sobald IT-Chef das behoben hat, ist die Seite dagegen ein
+   naheliegendes zukünftiges Content-Stück nach demselben Muster wie die
+   Kartenansicht: "was hier ehrlich funktioniert, was noch nicht".
 
-2. **Organischen TikTok-Start schon vor der Landingpage testen.** Die
-   heutige Kampagnen-Konzept-Vorlage braucht für bezahlte Ads ein
-   Linkziel, das noch fehlt (Warteliste, Sprint 2). Ein organischer,
-   unbezahlter Post nach TikTok-Variante B ("Wir bauen eine Reise-App,
-   die dich nicht anschreit") braucht das nicht — CTA einfach "Folgen"
-   statt "Warteliste". Das würde den Kanal-Aufbau schon heute starten,
-   unabhängig vom Landingpage-Blocker.
+2. **Presse-Strategie ist vorbereitet — der nächste Schritt liegt bei dir.**
+   `marketing/presse-multiplikatoren-strategie.md` gibt dir das Raster für
+   die vier Zielgruppen-Typen. Der eigentliche nächste Schritt (echte
+   Namen/Kontakte recherchieren) kann ein autonomer Lauf bewusst nicht
+   übernehmen, ohne Personen zu erfinden. Wenn du magst, wäre ein guter
+   erster Fokus die Build-in-public-Communities — dort passt eine unfertige,
+   ehrliche Pre-Launch-Story am besten, ganz ohne Warteliste als
+   Voraussetzung.
 
-3. **Den offenen Flugsuche-Bug offen kommunizieren statt verstecken.**
-   Wir haben ohnehin einen aktiven Werbe-Stopp für dieses Feature — das
-   passt zufällig genau zur eigenen "Ehrlichkeit als Feature"-Botschaft.
-   Ein Build-in-public-Satz wie "Die Flugsuche im Chat ist noch nicht
-   fertig, deshalb bewerben wir sie noch nicht" wäre ehrlicher als
-   Schweigen und würde die Positionierung durch eigenes Verhalten
-   belegen, statt sie nur zu behaupten.
-
-4. **Freigabe-Entscheidung zu Tier 1 steht weiter aus.** "Deine Reise
-   ist keine Einbahnstraße" und "Die ehrliche Kartenansicht" liegen seit
-   Tagen fertig und ohne technischen Vorbehalt postbar
-   (`marketing/freigabe-uebersicht.md`). Ohne neue Information von hier
-   aus wiederhole ich nur den Stand von gestern — die Entscheidung liegt
-   bei dir, nicht bei einem weiteren Bericht.
+3. **Die drei Freigabe-Fragen bleiben offen — kurzer Reminder statt neuer
+   Wiederholung.** Tier-1-Content ("Deine Reise ist keine Einbahnstraße",
+   "Die ehrliche Kartenansicht") liegt weiter fertig und ohne technischen
+   Vorbehalt bereit. Ich wiederhole die Begründung nicht erneut — die
+   Entscheidung liegt bei dir, siehe `marketing/freigabe-uebersicht.md`.
