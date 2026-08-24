@@ -4,6 +4,81 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-24
+
+**Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Laufende Content-Produktion". Neue Datei
+`marketing/content-stueck-reise-suchen-empfohlen.md`: Post in LinkedIn-
+und Instagram-Fassung (Säule 2 "Ein Gespräch statt ein Formular" plus
+Säule 1 "Ehrlichkeit als Feature") zur neuen `/reise-planen`-Seite, plus
+Canva-Design-Brief für eine sofort umsetzbare, abstrakte Drei-Spalten-
+Grafik (Option A).
+
+**Warum genau jetzt und warum kein Verstoß gegen die eigene
+Zurückhaltung:** Der letzte Marketing-Bericht (`reports/marketing-chef.md`,
+22.08., Vorschlag 1) hatte selbst festgehalten: Sobald der gemeldete
+"Empfohlen"-Badge-Bug auf `/reise-planen` behoben ist, ist die Seite "ein
+natürlicher Kandidat für ein 'So startest du bei uns'-Content-Stück". Am
+23.08. bestätigte derselbe Bericht: "weiterhin nicht behoben". Vor dem
+heutigen Lauf `origin/main` in `marketing-chef/auto` gemergt und
+`src/pages/ReiseSuche.tsx` direkt im Code geprüft: Der Badge ist jetzt ein
+echtes, sichtbares `<Badge>`-Element (`ZEITPLAN.md` bestätigt den Fix als
+Teil des IT-Chef-Laufs vom 24.08.). Anders als bei den bisherigen
+"kein neues Content-Stück"-Entscheidungen (22./23.08., siehe dortige
+Begründungen) gab es hier also echte, neue, im Code verifizierte
+Information — kein weiteres Stück auf denselben unveränderten Stapel,
+sondern die Einlösung einer selbst gesetzten Bedingung.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument, kein
+Live-Vorgang — nichts wird gepostet, kein Kanal angelegt. Keine erfundenen
+Kennzahlen (keine Nutzer-/Reichweitenzahlen). Keine offene
+Positionierungs-Grundsatzfrage: Säulen/Markenstimme kommen unverändert aus
+`content-plan.md`/`MARKENDESIGN.md`. Ausdrücklich geprüft und im Dokument
+selbst berücksichtigt: der laut `reports/it-chef.md` (Stand 23.08.)
+weiterhin offene Flugsuche-Chat-Bug — der Post bewirbt die eigenständige
+Flugsuche-Seite und den KI-Chat allgemein, keine Aussage zur
+Flugsuche-Funktion innerhalb des Chats. Die offene Bildsprachen-Frage
+(echte Screenshots ja/nein, `MARKENDESIGN.md`, Abschnitt "Offen") wurde
+nicht selbst entschieden — der Design-Brief nutzt bewusst nur die
+unstrittige abstrakte Gradient-Option A, analog zum Vorgehen bei
+`content-stueck-ehrliche-kartenansicht.md`.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) — ausdrücklich
+  ein Live-Vorgang, fällt unter das Verbot.
+- "Launch-Kampagne vorbereiten" (Sprint 7) — weiterhin an denselben
+  ungelösten Blockern (keine Landingpage, offene Freigabe-Fragen zum
+  bisherigen Content) hängend wie am 23.08. eingeschätzt; keine neue
+  Information seit gestern, die das ändern würde.
+- Eine erneute/aktualisierte `marketing/freigabe-uebersicht.md` — bewusst
+  nicht in diesem Lauf mit angefasst, um nicht zwei Dateien parallel zu
+  verändern; das heutige Stück selbst enthält einen kurzen Hinweis dazu
+  für den nächsten Blick auf die Übersicht.
+- Presse-/Kampagnen-Vorlagen — beide Sprint-5/7-Punkte sind bereits erledigt
+  (`kampagnen-konzept-ads.md` 22.08., `presse-multiplikatoren-strategie.md`
+  23.08.), keine Wiederholung sinnvoll.
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — kein neuer,
+  konkreter Design-Bedarf erkennbar seit dem letzten Lauf.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand,
+Commit `ffd87ff`, entspricht dem Lauf vom 23.08.) war bereits vollständig
+in `main` gemerged. `origin/main` (`a3e3699`, inkl. IT-Chef-Merge vom
+24.08. mit Badge-Fix, Reise-Checkliste 6.8/6.9, IATA-Hinweistexten) per
+Fast-Forward-Merge in den Branch eingebracht, bevor der eigentliche Lauf
+begann, damit der Produktstand-Abgleich im Content-Stück auf dem
+tatsächlich aktuellen Code beruht.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine neue Markdown-Datei,
+eine Notiz in `ZEITPLAN.md` und dieser Log-Eintrag — kein
+Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-23
 
 **Ausgewählter Punkt:** Sprint 7 aus `ZEITPLAN.md`, Marketing-Bereich —

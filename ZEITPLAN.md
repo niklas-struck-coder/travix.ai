@@ -313,7 +313,13 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Checkbox korrigiert.
 
 ### Sprint 4 (KW37-40, 8. Sep - 5. Okt)
-- [ ] Laufende Content-Produktion
+- [ ] Laufende Content-Produktion — läuft bereits vorgezogen, siehe die
+  einzelnen Content-Stücke in `marketing/` (bleibt als laufender Punkt
+  offen, kein einmaliger Abschluss). Neuester Zugang am 24.08.:
+  `marketing/content-stueck-reise-suchen-empfohlen.md` zur neuen
+  `/reise-planen`-Seite, nachdem der zuvor gemeldete "Empfohlen"-Badge-Bug
+  (siehe `reports/marketing-chef.md`, 22./23.08.) heute vom IT-Chef
+  behoben wurde.
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)
