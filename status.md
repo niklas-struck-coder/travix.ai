@@ -14,15 +14,14 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-22):**
-- Neue Einstellungen-Seite (/einstellungen) von IT-Chef Auto umgesetzt, danach
-  von Support-Chef auf UX-Reibungspunkte geprüft
-- Marketing-Chef Auto: Presse-/Multiplikatoren-Strategie ausgearbeitet (Sprint 7)
-- IT-Chef lief mehrfach gezielt auf Bug-Suche, ohne neue sichere Auto-Punkte zu
-  finden
-- Freigabe-Chef hat die IT-, Marketing- und Support-Auto-Zweige mehrfach geprüft
-  und nach main gemergt
+**Seit letztem Update (2026-08-23):**
+- IT-Chef Auto: Empfohlen-Badge auf ReiseSuche.tsx repariert, Hinweistext für
+  IATA-Felder ergänzt, neue Reise-Checkliste (ChecklistPanel)
+- Support-Chef Auto: eigene UX-Analyse zur neuen Reise-Checkliste
+- Marketing-Chef Auto: Content-Stück zur Reiseplanung rund um das reparierte
+  Empfohlen-Badge
+- Freigabe-Chef hat alle diese Auto-Zweige mehrfach geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-23_
+_Letztes Update: 2026-08-24_
