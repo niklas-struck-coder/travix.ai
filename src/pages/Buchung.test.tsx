@@ -174,3 +174,54 @@ describe('Buchung – Aktivitäten', () => {
     expect(screen.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
   })
 })
+
+describe('Buchung – Reise-Checkliste', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('shows the checklist with 0/13 erledigt for a trip with no fields set yet', () => {
+    seedStoredChat()
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Reise-Checkliste')).toBeInTheDocument()
+    expect(screen.getByText('0/13 erledigt')).toBeInTheDocument()
+  })
+
+  it('auto-detects filled trip fields as checked without any user interaction', () => {
+    seedStoredChat({
+      transportMode: 'train',
+      dates: '12.–19. Sept.',
+      budget: '1.500 €',
+      accommodation: 'Hotel Lissabon',
+      activities: [{ id: '1', name: 'Museum', price: '10 €' }],
+    })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('5/13 erledigt')).toBeInTheDocument()
+  })
+
+  it('lets the traveler manually check off a standard prep item like the passport', () => {
+    seedStoredChat()
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reisepass/Ausweis gültig' }))
+    expect(screen.getByRole('button', { name: 'Reisepass/Ausweis gültig' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(screen.getByText('1/13 erledigt')).toBeInTheDocument()
+  })
+})

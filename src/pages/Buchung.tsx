@@ -31,6 +31,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { EditMode } from '@/components/trip/EditMode'
+import { ChecklistPanel } from '@/components/trip/ChecklistPanel'
 import { loadStoredChat, updateStoredTrip, isTripComplete, hasTripData } from '@/lib/trip/tripStorage'
 import type { TransportMode, TripActivity } from '@/types/chat'
 
@@ -266,6 +267,8 @@ export function Buchung() {
           </CardContent>
         </Card>
       </div>
+
+      <ChecklistPanel trip={trip} />
 
       {complete && (
         <Card className="border-teal/30 bg-teal/5">

@@ -92,8 +92,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   wie die fehlenden Kostenfelder bei 6.6/6.7/6.12)
 - [ ] 6.6 `CostBreakdown.tsx` — echte Kostenübersicht nach Kategorie
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
-- [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
-- [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
+- [x] 6.8/6.9 `ChecklistPanel.tsx` + `checklistRules.ts` — vom autonomen
+  IT-Chef-Lauf am 24.08. gebaut: 13-Punkte-Checkliste in `Buchung.tsx`
+  eingebunden, unterteilt in fünf automatisch aus den Trip-Feldern
+  erkannte Punkte (Transport/Reisedaten/Unterkunft/Aktivitäten/Budget —
+  gleiche Felder wie `calculateProgress.ts`) und acht Standard-
+  Reisevorbereitungspunkte (Reisepass, Visum, Versicherung usw.), die der
+  Reisende manuell abhakt. Bewusst ein einziger "Transport"-Punkt statt
+  getrennter Hin-/Rückflug-Punkte, da `TripDraft` nur ein
+  `transportMode`-Feld statt separater Hin-/Rückreise-Daten hat. Manuelles
+  Abhaken ist reiner lokaler Demo-State ohne Persistenz über Reloads
+  hinweg, gleiches Muster wie `Profil.tsx`/`Einstellungen.tsx`, bis die
+  echte Nutzerkonten-/Backend-Entscheidung gefallen ist.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/

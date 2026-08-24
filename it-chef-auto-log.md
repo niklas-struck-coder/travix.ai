@@ -3480,3 +3480,67 @@ Kriterien — umgesetzt.
 Chunk-Size-Warnung). Keine Regressionen.
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (achter Lauf)
+
+**Ausgewählter Punkt:** 6.8/6.9 aus `tasks/tasks-prd-travix-platform.md`
+(Sprint 2, `ZEITPLAN.md`) — `ChecklistPanel.tsx` (13-Punkte-Checkliste)
+und `checklistRules.ts` (Auto-Erkennung aus Trip-Daten).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (reine UI-Ergänzung auf der
+bestehenden `/buchung`-Seite, keine neuen Datenflüsse). Keine offene
+Produkt-/Architekturentscheidung — anders als 6.2/6.6/6.7/7.12 hängt die
+Checkliste nicht an fehlenden Preisfeldern in `TripDraft`, weil die
+5 datengestützten Punkte exakt die schon vorhandenen Felder nutzen
+(gleiche fünf wie `calculateProgress.ts`) und die restlichen 8 Punkte
+bewusst als vom Reisenden manuell abgehakte Standard-
+Reisevorbereitungspunkte umgesetzt sind (Reisepass, Visum, Versicherung
+usw. — allgemein bekannter, nicht-kontroverser Inhalt, gleiche Art
+Aufzählung wie bereits bei `Profil.tsx` (Reisestile,
+Ernährungsweise) und `Einstellungen.tsx` (Benachrichtigungs-Kategorien)
+vom autonomen Lauf erfunden). Einzige Abweichung von der Aufgaben-
+beschreibung: ein einziger "Transport"-Punkt statt getrennter Hin-/
+Rückflug-Punkte, da `TripDraft` nur ein `transportMode`-Feld statt
+separater Hin-/Rückreise-Daten hat — im Bericht und in `ZEITPLAN.md`
+offengelegt statt stillschweigend zu erfinden. Ergebnis objektiv prüfbar
+(Checkliste zeigt exakt 13 Punkte, Auto-Punkte spiegeln die Trip-Felder,
+Fortschrittszähler stimmt — alles per Test verifizierbar).
+
+**Umsetzung:**
+- `src/lib/trip/checklistRules.ts` (neu) — `AUTO_CHECKLIST_ITEMS` (5,
+  aus `trip.transportMode`/`dates`/`accommodation`/`activities`/`budget`
+  hergeleitet, gleiche Felder wie `calculateProgress.ts`),
+  `MANUAL_CHECKLIST_ITEMS` (8 Standard-Reisevorbereitungspunkte) und
+  `isAutoItemChecked()` als reine Funktion, analog `calculateProgress.ts`/
+  `cartTotals.ts`/`calendarUtils.ts`.
+- `src/lib/trip/checklistRules.test.ts` (neu) — 7 Tests: 13 Punkte
+  insgesamt, eindeutige IDs, leere Reise = nichts erkannt, jedes
+  Trip-Feld einzeln geprüft, unbekannte ID = false.
+- `src/components/trip/ChecklistPanel.tsx` (neu) — Card mit
+  Fortschrittsbalken (`x/13 erledigt`, wiederverwendete `Progress`-
+  Komponente), Liste der 5 Auto-Punkte (nicht interaktiv, Haken/Kreis-Icon
+  je nach Trip-Daten) und Liste der 8 manuellen Punkte (Toggle-Buttons mit
+  `aria-pressed`, gleiches Muster wie die Benachrichtigungs-Toggles in
+  `Einstellungen.tsx`). Manuelles Abhaken ist reiner lokaler Demo-State
+  ohne Persistenz über Reloads hinweg, gleiches Muster wie
+  `Profil.tsx`/`Einstellungen.tsx`, bis die echte Nutzerkonten-/Backend-
+  Entscheidung gefallen ist.
+- `src/pages/Buchung.tsx` — `ChecklistPanel` unterhalb des Sektionen-Grids
+  eingebunden, bekommt den geladenen `trip`.
+- `src/pages/Buchung.test.tsx` — 3 neue Tests: 0/13 bei leerer Reise,
+  5/13 bei vollständig gefüllten Trip-Feldern, manuelles Abhaken erhöht
+  den Zähler und setzt `aria-pressed`.
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`: 6.8/6.9 auf erledigt
+  gesetzt, mit Begründung/Abweichung dokumentiert. 6.10 ("Checklisten-
+  Punkte öffnen KI-Chat für die jeweilige Planung") bewusst offen
+  gelassen — eigener, separater Punkt, nicht Teil von 6.8/6.9.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings, unverändert), `npx vitest run` (22 Testdateien,
+95 Tests — 85 vorher + 10 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
