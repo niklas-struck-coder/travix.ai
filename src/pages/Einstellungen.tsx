@@ -10,6 +10,9 @@ import { MEASUREMENT_UNITS, NOTIFICATION_PREFERENCES, emptyAppPreferences } from
 // echten Benachrichtigungen (E-Mail-Versand hängt am Support-Chef-Track
 // "Support-E-Mail live") — gleiches Muster wie Profil.tsx/Favoriten.tsx, bis
 // die echte Nutzerkonten-/Backend-Entscheidung gefallen ist (siehe ZEITPLAN.md).
+// Beschreibungstexte bewusst neutral gehalten, damit sie keine Funktion
+// versprechen, die aktuell nicht existiert (E-Mail-Versand, Distanz-/
+// Temperaturanzeige) — siehe Support-Chef-Bericht 2026-08-23.
 export function Einstellungen() {
   const [preferences, setPreferences] = useState(emptyAppPreferences)
 
@@ -29,7 +32,7 @@ export function Einstellungen() {
           <div className="flex flex-col gap-2">
             <Label>Benachrichtigungen</Label>
             <p className="text-sm text-muted-foreground">
-              Worüber Travix dich per E-Mail informieren soll.
+              Worüber Travix dich informieren soll, sobald Benachrichtigungen aktiv sind.
             </p>
             <div className="flex flex-wrap gap-2 pt-1" role="group" aria-label="Benachrichtigungen">
               {NOTIFICATION_PREFERENCES.map(({ key, label }) => {
@@ -57,7 +60,7 @@ export function Einstellungen() {
           <div className="flex flex-col gap-2 border-t border-border pt-5">
             <Label htmlFor="units">Maßeinheiten</Label>
             <p className="text-sm text-muted-foreground">
-              Für Distanzen und Temperaturen in Reiseplänen und Karten.
+              Für künftige Distanz- und Temperaturanzeigen.
             </p>
             <Select
               value={preferences.units}

@@ -79,7 +79,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   schreibt `transportMode: 'flight'` in den bestehenden Trip via neuer
   `updateStoredTrip()`-Funktion in `tripStorage.ts`; kein neues Datenfeld
   für Flugdetails (Route/Preis) eingeführt, das wäre über die
-  Aufgabenbeschreibung hinausgegangen
+  Aufgabenbeschreibung hinausgegangen. Am 24.08. vom autonomen
+  IT-Chef-Lauf ergänzt: In `FlightWizard.tsx` blieb der "Flüge
+  suchen"-Button unter 3 Zeichen in Von/Nach ohne jede Erklärung
+  deaktiviert (vom IT-Chef-Bericht 23.08. gemeldet) — jetzt mit
+  Hinweistext "3-stelliger Flughafencode, z. B. BER/LIS" unter beiden
+  Feldern.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,
@@ -87,8 +92,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   wie die fehlenden Kostenfelder bei 6.6/6.7/6.12)
 - [ ] 6.6 `CostBreakdown.tsx` — echte Kostenübersicht nach Kategorie
 - [ ] 6.7 `calculateCosts.ts` — Neuberechnung bei Änderungen
-- [ ] 6.8 `ChecklistPanel.tsx` (13-Punkte-Checkliste)
-- [ ] 6.9 `checklistRules.ts` — Auto-Erkennung aus Trip-Daten
+- [x] 6.8/6.9 `ChecklistPanel.tsx` + `checklistRules.ts` — vom autonomen
+  IT-Chef-Lauf am 24.08. gebaut: 13-Punkte-Checkliste in `Buchung.tsx`
+  eingebunden, unterteilt in fünf automatisch aus den Trip-Feldern
+  erkannte Punkte (Transport/Reisedaten/Unterkunft/Aktivitäten/Budget —
+  gleiche Felder wie `calculateProgress.ts`) und acht Standard-
+  Reisevorbereitungspunkte (Reisepass, Visum, Versicherung usw.), die der
+  Reisende manuell abhakt. Bewusst ein einziger "Transport"-Punkt statt
+  getrennter Hin-/Rückflug-Punkte, da `TripDraft` nur ein
+  `transportMode`-Feld statt separater Hin-/Rückreise-Daten hat. Manuelles
+  Abhaken ist reiner lokaler Demo-State ohne Persistenz über Reloads
+  hinweg, gleiches Muster wie `Profil.tsx`/`Einstellungen.tsx`, bis die
+  echte Nutzerkonten-/Backend-Entscheidung gefallen ist.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/
@@ -219,7 +234,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   aber nur die `PlaceholderPage`. Kein Zug/Bus/Fähre-Kärtchen, da 5.7
   (Einbindung von `TrainCard`/`TrainResults`) noch offen ist und dafür
   keine eigenständige Route existiert. Reine Navigation, keine
-  erfundenen Daten.
+  erfundenen Daten. Am 24.08. vom autonomen IT-Chef-Lauf korrigiert: die
+  "empfohlen"-Hervorhebung der KI-Chat-Karte (`border-teal/40`) hatte
+  keine sichtbare Wirkung, weil `Card` intern `ring-1` statt eines
+  `border`-Utilities nutzt (vom Support-Chef am 23.08. gemeldet) — durch
+  ein sichtbares "Empfohlen"-Badge ersetzt, analog dem bestehenden
+  Badge-Muster in `Preisalarme.tsx`/`Buchung.tsx`.
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse

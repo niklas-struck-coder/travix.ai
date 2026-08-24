@@ -3225,3 +3225,322 @@ dieselben 3 vorbestehenden Warnings), `npx vitest run` (20 Testdateien,
 Lauf).
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23 (vierter Lauf, 22:06 UTC)
+
+Erneute Auslösung, unabhängiger Checkout. `it-chef/auto` war zwischenzeitlich
+vom Freigabe-Chef nach `main` gemergt worden (`71ef2e3`) — Branch neu von
+`origin/main` aufgesetzt (`git checkout -B it-chef/auto origin/main`), wie
+in Schritt 1 der Regeln vorgesehen.
+
+**Ausgangslage:** Seit dem letzten IT-Chef-eigen-Lauf (dritter Lauf,
+02:06 UTC) hat sich an den 30 offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` nichts verändert — die
+dortigen Einstufungen (blockiert auf Backend-/Auth-Entscheidung, fehlende
+Preisfelder, fehlende Credentials, offene Produktentscheidungen) gelten
+unverändert weiter, kein neuer Kandidat aus der Aufgabenliste selbst.
+
+**Gefundener Punkt (außerhalb der Checkbox-Liste, wie in den letzten
+Läufen zusätzlich geprüft):** Support-Chef hat im Bericht vom 23.08.
+(`f36c390`, `reports/support-chef.md`) zwei konkrete UX-Textprobleme in
+`src/pages/Einstellungen.tsx` gefunden und mit vorgeschlagener Formulierung
+versehen:
+1. Der Benachrichtigungs-Beschreibungstext versprach wörtlich künftige
+   E-Mail-Benachrichtigungen ("Worüber Travix dich per E-Mail informieren
+   soll"), obwohl laut Code-Kommentar und `ZEITPLAN.md` (Support-Track)
+   noch kein E-Mail-Versand existiert.
+2. Der Maßeinheiten-Beschreibungstext versprach eine Distanz-/
+   Temperaturanzeige ("Für Distanzen und Temperaturen in Reiseplänen und
+   Karten"), die laut Codesuche (`km`, `°C`, `distance`, `temperature`)
+   nirgends in der App existiert.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug; keine offene Produkt-/Architekturentscheidung
+(reine Korrektur irreführender UI-Copy, keine neue Funktionsentscheidung);
+klar genug (Support-Chef hat konkrete Alternativformulierungen
+vorgeschlagen, hier nahezu wörtlich übernommen); objektiv prüfbar (Text
+im DOM, per Test verifizierbar). Erfüllt alle vier Kriterien — umgesetzt.
+
+Der dritte, in demselben Support-Chef-Bericht genannte Punkt (Auswahl geht
+beim Wegnavigieren verloren, da nur `useState` ohne `localStorage`) wurde
+bewusst **nicht** angefasst: das ist dasselbe absichtliche Demo-State-Muster
+wie bei praktisch allen anderen Seiten mit Demo-Daten (Profil, Favoriten,
+Preisalarme, Angebote, Aktivitäten — keine davon nutzt `localStorage`),
+dokumentiert im Code-Kommentar selbst und an die offene Backend-/
+Auth-Entscheidung gekoppelt. Nur für `Einstellungen.tsx` echte Persistenz
+nachzurüsten wäre ein eigenmächtiger, inkonsistenter Eingriff über den
+engen, klar abgegrenzten Punkt hinaus — nicht umgesetzt.
+
+**Umsetzung** (`src/pages/Einstellungen.tsx`):
+- Benachrichtigungstext → "Worüber Travix dich informieren soll, sobald
+  Benachrichtigungen aktiv sind."
+- Maßeinheiten-Text → "Für künftige Distanz- und Temperaturanzeigen."
+- Kopfkommentar der Datei um den Hinweis auf die bewusst neutrale
+  Formulierung ergänzt.
+- `src/pages/Einstellungen.test.tsx`: zwei neue Test-Assertions, die
+  sowohl den alten (nicht mehr vorhandenen) als auch den neuen Text
+  prüfen, damit ein versehentliches Zurückrollen auffällt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte, keine
+`package-lock.json`-Nebenwirkung), `npx tsc -b` (grün), `npm run lint`
+(0 Fehler, dieselben 3 vorbestehenden `react-refresh`-Warnings in
+`src/components/ui/{badge,button,tabs}.tsx`, unverändert), `npx vitest run`
+(20 Testdateien, 83 Tests — 81 vorher + 2 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende Chunk-Size-Warnung
+wie in Vorläufen). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-23 (fünfter Lauf, 23:08 UTC)
+
+Erneute Auslösung, unabhängiger Checkout, gut eine Stunde nach dem vierten
+Lauf (22:06 UTC). `it-chef/auto` war seitdem nicht vom Freigabe-Chef
+gemergt worden — Branch unverändert vom vierten Lauf übernommen
+(`git checkout -B it-chef/auto origin/it-chef/auto`), `main` (`f36c390`)
+seit dem vierten Lauf ebenfalls unverändert.
+
+**Ausgangslage:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+gegenüber dem vierten Lauf identisch — keine neuen Support-/
+Marketing-Chef-Berichte seit `f36c390` (der bereits im vierten Lauf
+ausgewertet wurde). Die 30 offenen Checkbox-Punkte tragen weiterhin
+dieselben, in den letzten Läufen wiederholt dokumentierten Blocker:
+Backend-/Auth-Entscheidung (4.x, 2.x), fehlende Preis-/Item-Felder in
+`TripDraft` (6.2/6.6/6.7/6.12/7.12/8.13), unvollständige
+PRD-Checklisten-Spezifikation — FR-501 nennt weiterhin nur 10 von 13
+Punkten konkret (6.8/6.9/6.10), fehlende Zug/Bus/Fähre-Datenquelle (5.7),
+offene Produktentscheidungen (8.9/8.11/8.12, Zahlungsprozess), sowie zu
+breite/vage Punkte für einen einzelnen Auto-Lauf (7.4, 7.7, 8.2-8.5,
+Sprint 6). Erneuter Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin
+keine Treffer. Keine neuen Kandidaten außerhalb der Aufgabenliste
+gefunden.
+
+**Ergebnis:** Kein Punkt erfüllt heute (weiterhin) alle vier
+Sicherheitskriterien. Repo-/Aufgabenstand unverändert gegenüber dem
+vierten Lauf. Kein Code geändert, kein Feature-Commit — dieser
+Log-Eintrag ist die einzige inhaltliche Änderung.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte, keine
+`package-lock.json`-Nebenwirkung), `npx tsc -b` (grün), `npm run lint`
+(0 Fehler, dieselben 3 vorbestehenden `react-refresh`-Warnings in
+`src/components/ui/{badge,button,tabs}.tsx`), `npx vitest run`
+(20 Testdateien, 83 Tests, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (sechster Lauf)
+
+Erneute Auslösung, unabhängiger Checkout. `origin/main` (`f36c390`) seit dem
+fünften Lauf (23.08., 23:08 UTC) unverändert; `it-chef/auto` bereits mit
+`main` deckungsgleich plus den beiden noch ungemergten Commits aus dem
+vierten/fünften Lauf — direkt weitergearbeitet, kein Neuaufsetzen nötig.
+
+**Ausgangslage:** Die 30 offenen Checkbox-Punkte in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` tragen weiterhin
+dieselben, in den letzten Läufen dokumentierten Blocker (Backend-/Auth-
+Entscheidung, fehlende Preis-/Item-Felder, unvollständige FR-501-Spezifikation,
+fehlende Zug/Bus/Fähre-Datenquelle, offene Produktentscheidungen, zu vage
+Punkte). Erneuter Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine
+Treffer. `reports/support-chef.md`, `reports/marketing-chef.md` und
+`reports/it-chef.md` (alle datiert 23.08.) inhaltlich identisch zu den im
+vierten/fünften Lauf bereits ausgewerteten Ständen — keine neuen
+Support-/Marketing-Chef-Berichte seit `f36c390`.
+
+**Ausgewählter Punkt (außerhalb der Checkbox-Liste, wie zusätzlich
+geprüft):** Punkt 1 aus dem Support-Chef-Bericht vom 23.08.
+(`reports/support-chef.md`), im vierten Lauf noch nicht mit aufgegriffen
+(dort nur Punkte 2+3 zur Einstellungen-Seite umgesetzt): die "Empfohlen"-
+Hervorhebung der KI-Chat-Karte auf `/reise-planen`
+(`src/pages/ReiseSuche.tsx:49`) war unsichtbar, weil die `Card`-Klasse
+`border-teal/40` nur die Randfarbe setzt, `Card` selbst
+(`src/components/ui/card.tsx:14`) aber `ring-1` statt eines `border`-
+Utilities verwendet und der globale Tailwind-Reset
+(`src/styles/globals.css:126-128`) die Randbreite auf 0 setzt — die Farbe
+hatte also nichts, an dem sie sichtbar würde. Verifiziert: Bug bestand
+weiterhin unverändert im aktuellen Quelltext.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug; keine offene Produkt-/Architekturentscheidung
+(reine Sichtbarkeits-Korrektur einer bestehenden Auszeichnung, keine neue
+Funktion); klar genug (Support-Chef hat Datei/Zeile und zwei konkrete
+Lösungswege genannt); objektiv prüfbar (Badge-Text im DOM, per Test
+verifizierbar). Erfüllt alle vier Kriterien — umgesetzt.
+
+Von den beiden vom Support-Chef vorgeschlagenen Lösungswegen (Rand
+sichtbar machen ODER Badge ergänzen) wurde die Badge-Variante gewählt,
+weil das bestehende Highlight-Muster in der App (`Preisalarme.tsx`,
+`Buchung.tsx`: `Badge className="bg-teal text-navy hover:bg-teal"`)
+bereits genau dafür existiert und zusätzlich zugänglicher ist als eine
+reine Farbänderung am Kartenrand (die für Screenreader ohnehin unsichtbar
+bliebe). Die wirkungslose `border-teal/40`-Klasse wurde entfernt statt
+zusätzlich zu reparieren, um nicht zwei redundante visuelle Hinweise zu
+haben.
+
+Punkt 4 aus demselben Support-Chef-Bericht (Einstellungen gehen beim
+Wegnavigieren verloren, gleiches Muster wie Profil-Seite) weiterhin
+bewusst **nicht** angefasst: das ist derselbe absichtliche, dokumentierte
+Demo-State-Ansatz wie bei praktisch allen anderen Seiten mit Demo-Daten,
+an die offene Backend-/Auth-Entscheidung gekoppelt — ein Seiten-
+übergreifender `localStorage`-Zwischenspeicher wäre ein eigenmächtiger,
+breiterer Eingriff über den engen Punkt hinaus.
+
+**Umsetzung** (`src/pages/ReiseSuche.tsx`):
+- `Badge`-Import ergänzt.
+- Wirkungslose `className={option.recommended ? 'border-teal/40' : undefined}`
+  am `Card`-Element entfernt.
+- Icon-Kreis und ein neues `Badge` "Empfohlen" (nur für die
+  `recommended`-Option) in eine `flex items-center justify-between`-Zeile
+  gepackt, Badge-Styling analog `Preisalarme.tsx`/`Buchung.tsx`.
+- `src/pages/ReiseSuche.test.tsx`: neue Test-Assertion, die das sichtbare
+  "Empfohlen"-Badge im DOM prüft.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings in `src/components/ui/{badge,button,tabs}.tsx`,
+unverändert), `npx vitest run` (20 Testdateien, 84 Tests — 83 vorher + 1
+neu —, alle grün), `npm run build` (Produktions-Build erfolgreich, gleiche
+vorbestehende Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (siebter Lauf)
+
+Erneute Auslösung, unabhängiger Checkout. `origin/main` (`f36c390`) seit
+dem sechsten Lauf unverändert; `it-chef/auto` bereits mit `main` plus den
+drei noch ungemergten Commits aus dem vierten/fünften/sechsten Lauf
+deckungsgleich — direkt weitergearbeitet, kein Neuaufsetzen nötig.
+
+**Ausgangslage:** Die 30 offenen Checkbox-Punkte weiterhin mit denselben
+Blockern wie in den vorherigen Läufen (Backend-/Auth-Entscheidung,
+fehlende Preis-/Item-Felder, offene Produktentscheidungen, zu vage
+Punkte). `reports/support-chef.md` (23.08.): Punkt 1 (Empfohlen-Badge)
+bereits im sechsten Lauf erledigt, Punkte 2+3 (Einstellungen-Texte)
+bereits im vierten Lauf erledigt, Punkt 4 (Einstellungen-Persistenz)
+weiterhin bewusst nicht angefasst (siehe Begründung fünfter/sechster
+Lauf). `reports/marketing-chef.md` (23.08.) enthält keine Programmier-Punkte.
+`reports/it-chef.md` (23.08.) erneut durchgesehen: alle dort gelisteten
+Bugs geprüft.
+
+**Ausgewählter Punkt (aus `reports/it-chef.md`, Abschnitt "Gefundene
+Bugs"):** "IATA-Code-Eingabe ohne Erklärung" — `FlightWizard.tsx` (Von-/
+Nach-Felder) deaktiviert den "Flüge suchen"-Button, solange die Eingabe
+unter 3 Zeichen liegt, ohne jeden Hinweistext, warum. Verifiziert: Bug
+besteht weiterhin unverändert im aktuellen Quelltext (`isValid`-Prüfung
+Zeilen 31-35, keine Hilfetexte unter den Inputs).
+
+Andere Punkte aus demselben Bericht geprüft und verworfen:
+- Flugsuche startet nie im normalen Chat-Ablauf / automatische
+  Unterkunftssuche hängt bei unbekanntem Ziel: beides braucht eine
+  UX-Entscheidung (was soll bei fehlendem Abflughafen/unbekanntem Ziel
+  passieren) — nicht autonom fällbar.
+- Ungeschützte `localStorage`-Schreibzugriffe: Fix liegt bereits fertig
+  auf PR #6 (separater Kanal, Merge ist Sache des Freigabe-Chefs/Ni) —
+  eigene Änderung hier hätte nur Merge-Konflikte riskiert.
+- Rohe englische Duffel-Fehlermeldungen im UI: Bericht nennt kein
+  konkretes Zieltext-Mapping (anders als beim Empfohlen-Badge/
+  Einstellungen-Texte, wo Support-Chef exakte Formulierungen vorschlug) —
+  eine generische Übersetzung hätte Interpretationsspielraum über das
+  hinaus erfordert, was im Bericht steht, also nicht klar genug für
+  autonom.
+- Mikrofon-Fehler unsichtbar / ausgewählter Flug nicht im Reiseplan
+  sichtbar: beide brauchen entweder ein neues Datenfeld (Flugdetails) oder
+  eine Entscheidung über das gewünschte Fehlerverhalten — außerhalb des
+  engen "klar beschrieben, keine Interpretation nötig"-Kriteriums.
+- Zimmer-/Gästezahl NaN-Risiko: Bericht selbst stuft das als niedrige
+  Konfidenz ein ("nicht auf allen Zielbrowsern verifiziert") — kein
+  bestätigter Bug, also nichts, das objektiv zu beheben wäre.
+- Duffel-Stays-Feldnamen ungetestet: blockiert auf einen echten API-Key,
+  nicht umsetzbar.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug (reines Flugsuche-Formular, kein Zahlungs-
+oder Kontofluss); keine offene Produkt-/Architekturentscheidung (nur ein
+erklärender Hinweistext, kein neues Verhalten); klar genug (Datei,
+Zeilen und exaktes Problem im IT-Chef-Bericht benannt); objektiv prüfbar
+(Hinweistext im DOM, per Test verifizierbar). Erfüllt alle vier
+Kriterien — umgesetzt.
+
+**Umsetzung** (`src/components/search/FlightWizard.tsx`):
+- Unter beiden IATA-Eingabefeldern (Von/Nach) je ein `<p
+  className="text-xs text-muted-foreground">`-Hinweistext ergänzt:
+  "3-stelliger Flughafencode, z. B. BER" bzw. "…LIS" — gleiches Muster
+  (`text-xs text-muted-foreground`) wie an 13 anderen Stellen der App für
+  Hilfetexte verwendet.
+- Neue Testdatei `src/components/search/FlightWizard.test.tsx` (gab es
+  vorher nicht) mit einer Assertion, die beide Hinweistexte im DOM prüft.
+- `ZEITPLAN.md`: Notiz unter Punkt 5.11 ergänzt (nächstgelegener
+  Flugsuche-Eintrag).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings, unverändert), `npx vitest run` (21 Testdateien,
+85 Tests — 84 vorher + 1 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (achter Lauf)
+
+**Ausgewählter Punkt:** 6.8/6.9 aus `tasks/tasks-prd-travix-platform.md`
+(Sprint 2, `ZEITPLAN.md`) — `ChecklistPanel.tsx` (13-Punkte-Checkliste)
+und `checklistRules.ts` (Auto-Erkennung aus Trip-Daten).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (reine UI-Ergänzung auf der
+bestehenden `/buchung`-Seite, keine neuen Datenflüsse). Keine offene
+Produkt-/Architekturentscheidung — anders als 6.2/6.6/6.7/7.12 hängt die
+Checkliste nicht an fehlenden Preisfeldern in `TripDraft`, weil die
+5 datengestützten Punkte exakt die schon vorhandenen Felder nutzen
+(gleiche fünf wie `calculateProgress.ts`) und die restlichen 8 Punkte
+bewusst als vom Reisenden manuell abgehakte Standard-
+Reisevorbereitungspunkte umgesetzt sind (Reisepass, Visum, Versicherung
+usw. — allgemein bekannter, nicht-kontroverser Inhalt, gleiche Art
+Aufzählung wie bereits bei `Profil.tsx` (Reisestile,
+Ernährungsweise) und `Einstellungen.tsx` (Benachrichtigungs-Kategorien)
+vom autonomen Lauf erfunden). Einzige Abweichung von der Aufgaben-
+beschreibung: ein einziger "Transport"-Punkt statt getrennter Hin-/
+Rückflug-Punkte, da `TripDraft` nur ein `transportMode`-Feld statt
+separater Hin-/Rückreise-Daten hat — im Bericht und in `ZEITPLAN.md`
+offengelegt statt stillschweigend zu erfinden. Ergebnis objektiv prüfbar
+(Checkliste zeigt exakt 13 Punkte, Auto-Punkte spiegeln die Trip-Felder,
+Fortschrittszähler stimmt — alles per Test verifizierbar).
+
+**Umsetzung:**
+- `src/lib/trip/checklistRules.ts` (neu) — `AUTO_CHECKLIST_ITEMS` (5,
+  aus `trip.transportMode`/`dates`/`accommodation`/`activities`/`budget`
+  hergeleitet, gleiche Felder wie `calculateProgress.ts`),
+  `MANUAL_CHECKLIST_ITEMS` (8 Standard-Reisevorbereitungspunkte) und
+  `isAutoItemChecked()` als reine Funktion, analog `calculateProgress.ts`/
+  `cartTotals.ts`/`calendarUtils.ts`.
+- `src/lib/trip/checklistRules.test.ts` (neu) — 7 Tests: 13 Punkte
+  insgesamt, eindeutige IDs, leere Reise = nichts erkannt, jedes
+  Trip-Feld einzeln geprüft, unbekannte ID = false.
+- `src/components/trip/ChecklistPanel.tsx` (neu) — Card mit
+  Fortschrittsbalken (`x/13 erledigt`, wiederverwendete `Progress`-
+  Komponente), Liste der 5 Auto-Punkte (nicht interaktiv, Haken/Kreis-Icon
+  je nach Trip-Daten) und Liste der 8 manuellen Punkte (Toggle-Buttons mit
+  `aria-pressed`, gleiches Muster wie die Benachrichtigungs-Toggles in
+  `Einstellungen.tsx`). Manuelles Abhaken ist reiner lokaler Demo-State
+  ohne Persistenz über Reloads hinweg, gleiches Muster wie
+  `Profil.tsx`/`Einstellungen.tsx`, bis die echte Nutzerkonten-/Backend-
+  Entscheidung gefallen ist.
+- `src/pages/Buchung.tsx` — `ChecklistPanel` unterhalb des Sektionen-Grids
+  eingebunden, bekommt den geladenen `trip`.
+- `src/pages/Buchung.test.tsx` — 3 neue Tests: 0/13 bei leerer Reise,
+  5/13 bei vollständig gefüllten Trip-Feldern, manuelles Abhaken erhöht
+  den Zähler und setzt `aria-pressed`.
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`: 6.8/6.9 auf erledigt
+  gesetzt, mit Begründung/Abweichung dokumentiert. 6.10 ("Checklisten-
+  Punkte öffnen KI-Chat für die jeweilige Planung") bewusst offen
+  gelassen — eigener, separater Punkt, nicht Teil von 6.8/6.9.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings, unverändert), `npx vitest run` (22 Testdateien,
+95 Tests — 85 vorher + 10 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.

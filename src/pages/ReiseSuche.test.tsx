@@ -15,4 +15,14 @@ describe('ReiseSuche', () => {
     expect(screen.getByRole('link', { name: /Zur Flugsuche/ })).toHaveAttribute('href', '/flugsuche')
     expect(screen.getByRole('link', { name: /Zur Hotelsuche/ })).toHaveAttribute('href', '/hotelsuche')
   })
+
+  it('marks the KI-Chat option as recommended with a visible badge', () => {
+    render(
+      <MemoryRouter>
+        <ReiseSuche />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Empfohlen')).toBeInTheDocument()
+  })
 })

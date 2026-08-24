@@ -68,6 +68,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             className="uppercase"
             required
           />
+          <p className="text-xs text-muted-foreground">3-stelliger Flughafencode, z. B. BER</p>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="destination">Nach (IATA)</Label>
@@ -80,6 +81,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             className="uppercase"
             required
           />
+          <p className="text-xs text-muted-foreground">3-stelliger Flughafencode, z. B. LIS</p>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="departure">Hinflug</Label>

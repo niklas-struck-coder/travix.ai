@@ -42,4 +42,22 @@ describe('Einstellungen', () => {
 
     expect(screen.getByText('Metrisch (km, °C)')).toBeInTheDocument()
   })
+
+  it('does not promise notification delivery that is not yet implemented', () => {
+    render(<Einstellungen />)
+
+    expect(screen.queryByText('Worüber Travix dich per E-Mail informieren soll.')).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Worüber Travix dich informieren soll, sobald Benachrichtigungen aktiv sind.'),
+    ).toBeInTheDocument()
+  })
+
+  it('does not promise a distance/temperature display that does not exist yet', () => {
+    render(<Einstellungen />)
+
+    expect(
+      screen.queryByText('Für Distanzen und Temperaturen in Reiseplänen und Karten.'),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('Für künftige Distanz- und Temperaturanzeigen.')).toBeInTheDocument()
+  })
 })
