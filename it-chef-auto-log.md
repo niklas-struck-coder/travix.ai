@@ -3603,3 +3603,69 @@ benannt). Ergebnis objektiv prüfbar über neue Unit-Tests.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-24 (weiterer Auto-Lauf, 23:xx UTC)
+
+Erneute, unabhängige Auslösung am selben Tag. `origin/it-chef/auto` lag
+bei `88dc75d` (HotelWizard-NaN-Fix aus dem vorherigen Lauf heute), exakt
+`main` (`3b2df2d`) plus diesen einen Commit — kein Nachziehen nötig,
+direkt weitergearbeitet, `main` nicht angerührt.
+
+**Geprüft und kein neuer sicherer Punkt gefunden.** `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` und `reports/it-chef.md` (Stand
+24.08.) komplett durchgesehen:
+
+- **HotelWizard-NaN-Fix, IATA-Hinweistext, ChecklistPanel/6.8-6.9,
+  Empfohlen-Badge (7.15):** alle bereits von früheren Läufen heute erledigt
+  und unverändert im aktuellen Stand vorhanden — nichts davon erneut
+  angefasst.
+- **`reports/it-chef.md`-Behauptung, `Flugsuche.tsx` habe eine eigene
+  Suchmaske ohne IATA-Hinweistext:** am Quelltext geprüft und widerlegt —
+  `Flugsuche.tsx` rendert selbst kein Formular, sondern bindet
+  `FlightWizard` ein (`<FlightWizard onSearch={handleSearch}
+  loading={loading} />`), die den Hinweistext seit dem siebten Lauf
+  bereits hat. Veraltete Bericht-Notiz, keine Codeänderung nötig (schon
+  am 24.08. im achten/"Auto-Lauf"-Eintrag oben so festgehalten).
+- **Restliche gemeldete Bugs aus `reports/it-chef.md`** (Flug-/
+  Transportsuche startet nie im Hauptchat, automatische
+  Unterkunftssuche hängt bei unbekanntem Ziel, rohe englische
+  Duffel-Fehlermeldungen, unsichtbare Mikrofon-Fehler, ausgewählter Flug
+  fehlt im Reiseplan, Duffel-Stays-Feldnamen ungetestet): am Quelltext
+  erneut bestätigt (`useChat.ts`, `mockAdvisor.ts`, `speech.ts`,
+  `duffel/client.ts` gelesen, nicht nur gegrept) — jeweils dieselben
+  Blocker wie in den Vorläufen heute: UX-/Produktentscheidung nötig, oder
+  neues Datenfeld erforderlich, oder Zieltext nicht konkret genug
+  vorgegeben, um ohne Interpretation umzusetzen. `localStorage`-Fix liegt
+  weiterhin fertig auf PR #6, nicht dupliziert.
+- **6.10 (Checklisten-Punkte öffnen KI-Chat):** erneut geprüft, ob sich
+  das inzwischen sauber eingrenzen lässt. Die vier Auto-Punkte
+  Transport/Reisedaten/Unterkunft/Budget ließen sich zwar 1:1 auf die
+  bestehenden `?edit=`-Ziele in `Buchung.tsx`
+  (`transportMode`/`dates`/`accommodation`/`budget`) abbilden, aber der
+  fünfte Auto-Punkt "Aktivitäten" hat kein Gegenstück in
+  `EditableTripField` (`useChat.ts`) — Aktivitäten laufen über den
+  separaten `EditMode`-Dialog, nicht über KI-Chat — und für die acht
+  manuellen Standardpunkte (Reisepass, Visum usw.) gibt es überhaupt
+  keinen KI-Chat-Bezug. Nur die vier passenden Punkte zu verdrahten und
+  die übrigen neun auszulassen wäre eine eigene Scope-Entscheidung, die
+  über die Aufgabenbeschreibung hinausgeht — weiterhin bewusst offen
+  gelassen, wie im achten Lauf begründet.
+- **Übrige offene Checkboxen** (4.1-4.3, 5.7, 6.2/6.6/6.7/7.12, 7.4/7.7,
+  8.x) stichprobenartig gegen die ausführlichen Begründungen der
+  Vorläufe gegengeprüft — keine Codeänderung seit der letzten Prüfung,
+  alle Blocker (Backend-/Produktentscheidung, fehlende Preis-/
+  Datenfelder, zu vage Beschreibung) bestehen unverändert fort.
+
+**Ergebnis:** kein Punkt umgesetzt. Kein Produktcode geändert, nur dieser
+Log-Eintrag.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci` (frischer Checkout, `node_modules` fehlte, 647 Pakete), `npx tsc
+-b` (grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`),
+`npx vitest run` (23 Testdateien, 97 Tests, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
