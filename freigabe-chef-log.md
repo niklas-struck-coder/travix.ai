@@ -998,3 +998,59 @@ Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
 korrekt als bereits gemergt übersprungen. Ni-Info nicht nötig — beide
 Prüfungen sauber reproduziert, kein Erfundenes gefunden, kein
 wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-24, früher Nacht-Check
+
+**Geprüfte Branches** (nach `git fetch origin --prune`, lokales `main`
+zuvor per `git pull` auf `origin/main` (`f36c390`) synchronisiert):
+- `it-chef/auto` — 5 neue Commits gegenüber `main` (vierter bis achter
+  Lauf, 23./24.08.): Einstellungen-Texte korrigiert, kein Auto-Punkt
+  (Log-Only), Empfohlen-Badge auf `ReiseSuche.tsx` repariert,
+  Hinweistext für IATA-Felder, Reise-Checkliste (6.8/6.9).
+- `marketing-chef/auto` — 0 neue Commits gegenüber `main`. Wie
+  vorgesehen für diesen frühen Lauf übersprungen (läuft erst um 6 Uhr).
+- `support-chef/auto` — 0 neue Commits gegenüber `main`. Ebenfalls
+  übersprungen.
+
+**Prüfung `it-chef/auto`** (Diff: `FlightWizard.tsx`+Test,
+`ReiseSuche.tsx`+Test, `Einstellungen.tsx`+Test, `Buchung.tsx`+Test,
+neu `ChecklistPanel.tsx`+`checklistRules.ts`+Test, `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md`, `it-chef-auto-log.md`):
+Unabhängig selbst verifiziert, nicht nur dem Log geglaubt — frischer
+`npm install` (kein `node_modules` vorhanden), danach `npx tsc -b`
+(grün, keine Fehler), `npx eslint .` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings in
+`src/components/ui/{badge,button,tabs}.tsx`, unverändert), `npx vitest
+run` (22 Testdateien, 95 Tests, alle grün) — deckt sich exakt mit den
+Angaben im `it-chef-auto-log.md`.
+
+Diffs selbst gelesen: alle fünf Läufe bleiben eng auf den im jeweiligen
+Log-Eintrag beschriebenen Einzelpunkt begrenzt, kein Scope-Creep.
+Keinerlei Berührung von Auth, Zahlungen oder rechtlichen Texten (reine
+Formular-Hinweistexte, ein Badge, zwei UI-Copy-Korrekturen, eine neue
+Checklisten-Karte auf `/buchung` mit reinem lokalem Demo-State ohne
+Persistenz — gleiches, bereits etabliertes Muster wie
+`Profil.tsx`/`Einstellungen.tsx`). Design-Aspekte geprüft: Badge-Nutzung
+(`bg-teal text-navy`) entspricht dem bestehenden Highlight-Muster in
+`Preisalarme.tsx`/`Buchung.tsx`; `ChecklistPanel.tsx` nutzt
+durchgängig bestehende Komponenten (`Card`, `Progress`) und
+Farb-Token (`text-teal`, `text-muted-foreground`), deckt sich mit
+`MARKENDESIGN.md` (Teal für positive/normale Zustände, ruhige,
+zurückhaltende Flächenfarbe). Keine erfundenen Kennzahlen oder
+Nutzerdaten.
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, `69d2096`).
+`it-chef/auto` anschließend per Fast-Forward auf den neuen `main`-Stand
+gebracht.
+
+Ein lokaler Nebeneffekt von `npm install` (66 entfernte Zeilen in
+`package-lock.json`, vermutlich abweichende lokale
+Registry-/Plattform-Auflösung) wurde vor dem Merge verworfen
+(`git checkout -- package-lock.json`), um keine ungewollte
+Lockfile-Änderung mitzumergen.
+
+**Zusammenfassung:** Einziger fälliger Branch (`it-chef/auto`)
+unabhängig geprüft und gemergt, keine Probleme gefunden.
+`marketing-chef/auto`/`support-chef/auto` korrekt übersprungen (keine
+neuen Commits, laufen erst um 6 Uhr). Ni-Info nicht nötig — sauberer,
+klar abgegrenzter Lauf, alle Checks eigenständig reproduziert und
+grün, kein wiederholter Regelverstoß, kein dringlicher Fund.
