@@ -1054,3 +1054,62 @@ unabhängig geprüft und gemergt, keine Probleme gefunden.
 neuen Commits, laufen erst um 6 Uhr). Ni-Info nicht nötig — sauberer,
 klar abgegrenzter Lauf, alle Checks eigenständig reproduziert und
 grün, kein wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-24, weiterer Check
+
+**Geprüfte Branches** (nach `git fetch origin --prune`, lokales `main`
+per `git pull` auf `origin/main` (`a3e3699`) synchronisiert):
+- `it-chef/auto` — 0 neue Commits gegenüber `main` (bereits aus dem
+  früheren Nacht-Check von heute gemergt). Übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit: Content-Stück
+  "Drei Wege, eine Empfehlung" zu `/reise-planen`.
+- `support-chef/auto` — 1 neuer Commit: UX-Bericht zur neuen
+  Reise-Checkliste (`ChecklistPanel.tsx`, `/buchung`).
+
+**Prüfung `marketing-chef/auto`:** Diff besteht aus einer neuen Datei
+(`marketing/content-stueck-reise-suchen-empfohlen.md`), einem Absatz in
+`ZEITPLAN.md` und dem Log-Eintrag — kein Produkt-Code betroffen. Reiner
+Entwurf, an mehreren Stellen im Dokument selbst als "wartet auf Nis
+Freigabe" markiert, kein Hinweis auf tatsächliches Posten/Versenden.
+Die zentrale Tatsachenbehauptung selbst nachgeprüft statt nur dem Log
+geglaubt: `src/pages/ReiseSuche.tsx` Zeile 57 enthält tatsächlich ein
+sichtbares `<Badge className="bg-teal text-navy hover:bg-teal">Empfohlen</Badge>`
+innerhalb `{option.recommended && (...)}` — die Behauptung "Badge ist
+jetzt ein echtes, sichtbares Element" stimmt. Keine erfundenen
+Kennzahlen oder Nutzerzahlen (Dokument sagt selbst "es gibt noch keine
+echten Nutzer:innen"). Bildsprache bewusst auf die unstrittige
+abstrakte Option A beschränkt, offene `MARKENDESIGN.md`-Frage zu echten
+Screenshots nicht eigenmächtig entschieden. Positionierung (Säule 1/2)
+deckt sich mit `content-plan.md`.
+**Ergebnis:** Passt → nach `main` gemergt (Fast-Forward, `e43780a`).
+
+**Prüfung `support-chef/auto`:** Diff besteht nur aus einem neuen
+Abschnitt in `support-chef-auto-log.md` (reine Analyse, kein
+Code geändert) — niedrigstes Risiko der drei. Stichprobenartig gegen
+den tatsächlichen Code verifiziert, nicht nur dem Log geglaubt:
+`src/components/trip/ChecklistPanel.tsx` bestätigt `checkedManual` als
+reinen `useState<Set<string>>(new Set())` ohne Persistenz;
+`src/lib/trip/checklistRules.ts` bestätigt `isAutoItemChecked()` als
+reine Ableitung aus dem `trip`-Objekt; `src/lib/trip/tripStorage.ts`
+bestätigt, dass `loadStoredChat()` aktiv aus `localStorage`
+(`travix.ki-chat.draft`) liest, also tatsächlich persistent ist, anders
+als der manuelle Checklistenteil; `src/pages/Buchung.tsx` bestätigt,
+dass `trip` aus genau diesem `loadStoredChat()` kommt; `src/routes.tsx`
+bestätigt `key={location.pathname}` auf `Routes`-Ebene, also Neu-Mount
+bei jedem Routenwechsel. Der beschriebene Reibungspunkt (automatischer
+Teil bleibt über Reload/Navigation erhalten, manueller Teil springt auf
+0 zurück, ohne dass die UI das kenntlich macht) ist damit im Code
+nachvollziehbar, nichts wirkt erfunden.
+**Ergebnis:** Passt → nach `main` gemergt (`--no-ff`, `40810bf`).
+
+Beide gemergten Branches sowie das bereits aktuelle `it-chef/auto`
+anschließend per Fast-Forward auf den neuen `main`-Stand (`40810bf`)
+gebracht.
+
+**Zusammenfassung:** Beide fälligen Branches (`marketing-chef/auto`,
+`support-chef/auto`) unabhängig geprüft und gemergt, keine Probleme
+gefunden. `it-chef/auto` korrekt als bereits gemergt übersprungen.
+Ni-Info nicht nötig — beide Prüfungen sauber reproduziert, alle
+Datei-/Zeilenangaben und Tatsachenbehauptungen stimmen, kein
+Erfundenes gefunden, kein wiederholter Regelverstoß, kein dringlicher
+Fund.
