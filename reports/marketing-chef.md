@@ -1,48 +1,48 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-23
+**Datum:** 2026-08-24
 
-## Was ist seit dem letzten Eintrag (2026-08-22) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-23) passiert?
 
-Der autonome Lauf hat heute die drei offenen Freigabe-Fragen aus
-`marketing/freigabe-uebersicht.md` erneut geprüft — dazu gibt es weiterhin
-keine neue Antwort von dir, also kein neues Content-Stück, sondern ein
-eigenständiger Marketing-Punkt: `marketing/presse-multiplikatoren-strategie.md`
-(Sprint 7). Darin: vier Zielgruppen-Typen für Presse/Multiplikatoren (Tech-
-/Startup-Presse, KI/LLM-Newsletter, Reise-Creator mit Planungs-Frust-Fokus,
-Build-in-public-Communities), Auswahlkriterien und eine generische
-Outreach-Vorlage — bewusst ohne erfundene Namen oder Reichweitenzahlen,
-reine Vorbereitung für dich. Parallel hat der Support-Chef die neue
-Einstellungen-Seite (`/einstellungen`) geprüft und drei Reibungspunkte
-gefunden: Benachrichtigungen versprechen E-Mail-Versand, der nicht
-stattfindet, die Maßeinheiten-Auswahl hat keinerlei Wirkung in der App, und
-Einstellungen werden (wie schon bei Profil.tsx) nicht dauerhaft gespeichert.
-Der IT-Chef hat die Seite ebenfalls geprüft, aber keinen sicheren
-Auto-Fix-Punkt gefunden — die Lücken bestehen also noch. Der "Empfohlen"-
-Badge-Bug auf `/reise-planen` (gestern gemeldet) ist laut Commit-Historie
-weiterhin nicht behoben.
+Der gemeldete Empfohlen-Badge-Bug auf `/reise-planen` ist heute vom
+IT-Chef behoben — die Bedingung aus dem gestrigen Bericht ist damit
+erfüllt. Der autonome Marketing-Lauf hat direkt reagiert und ein
+Content-Stück dazu vorbereitet (`marketing/content-stueck-reise-suchen-empfohlen.md`,
+Entwurf, nichts veröffentlicht). Daneben kamen kleinere ehrliche
+Korrekturen dazu: Hinweistexte für IATA-Codes im Chat-Editierpfad
+(`FlightWizard.tsx`, aber noch nicht auf der eigenständigen
+`Flugsuche.tsx`-Seite) und neutraler formulierte Einstellungen-Texte, die
+jetzt kein E-Mail-Versprechen mehr machen, das die App nicht einlöst.
+Neu ist außerdem eine Reise-Checkliste auf `/buchung`
+(`ChecklistPanel.tsx`) — der Support-Chef hat aber direkt eine
+Inkonsistenz gefunden: die 5 automatischen Punkte überleben Reload/
+Wegnavigieren, die 8 manuell abgehakten nicht. Die Freigabe-Fragen zu den
+sechs fertigen Content-Entwürfen bleiben weiterhin offen.
 
 ## Vorschläge
 
-1. **Einstellungen-Seite jetzt bewusst NICHT bewerben.** Die drei vom
-   Support-Chef gefundenen Lücken (E-Mail-Versprechen ohne Versand, wirkungslose
-   Maßeinheiten, keine Persistenz) würden unserer eigenen "Ehrlichkeit als
-   Feature"-Botschaft direkt widersprechen, wenn wir gerade jetzt Screenshots
-   davon zeigen. Sobald IT-Chef das behoben hat, ist die Seite dagegen ein
-   naheliegendes zukünftiges Content-Stück nach demselben Muster wie die
-   Kartenansicht: "was hier ehrlich funktioniert, was noch nicht".
+1. **"Drei Wege, eine Empfehlung" priorisiert freigeben.** Das Stück ist
+   fertig und zeigt beispielhaft, wie schnell ein behobener Bug zu echtem,
+   ehrlichem Content wird (Badge war im Code, aber unsichtbar — jetzt
+   sichtbar). Genau die Art Geschichte, die zur Marke passt: kein
+   erfundenes Feature, sondern ein echter, kleiner Fortschritt.
 
-2. **Presse-Strategie ist vorbereitet — der nächste Schritt liegt bei dir.**
-   `marketing/presse-multiplikatoren-strategie.md` gibt dir das Raster für
-   die vier Zielgruppen-Typen. Der eigentliche nächste Schritt (echte
-   Namen/Kontakte recherchieren) kann ein autonomer Lauf bewusst nicht
-   übernehmen, ohne Personen zu erfinden. Wenn du magst, wäre ein guter
-   erster Fokus die Build-in-public-Communities — dort passt eine unfertige,
-   ehrliche Pre-Launch-Story am besten, ganz ohne Warteliste als
-   Voraussetzung.
+2. **Checkliste jetzt bewusst noch nicht bewerben.** Solange die 8
+   manuellen Punkte beim Wegnavigieren verschwinden, würde ein Post
+   darüber genau die "Ehrlichkeit als Feature"-Botschaft untergraben, die
+   wir gerade im neuen Content-Stück feiern. Sobald das behoben ist: eine
+   Checkliste, die wirklich hält was sie zeigt, ist ein naheliegendes
+   nächstes Stück nach demselben Muster.
 
-3. **Die drei Freigabe-Fragen bleiben offen — kurzer Reminder statt neuer
-   Wiederholung.** Tier-1-Content ("Deine Reise ist keine Einbahnstraße",
-   "Die ehrliche Kartenansicht") liegt weiter fertig und ohne technischen
-   Vorbehalt bereit. Ich wiederhole die Begründung nicht erneut — die
-   Entscheidung liegt bei dir, siehe `marketing/freigabe-uebersicht.md`.
+3. **Kleine ehrliche Korrekturen gebündelt statt einzeln erzählen.**
+   IATA-Hinweistexte, entschärfte Einstellungen-Texte — jede für sich zu
+   klein für einen eigenen Post, aber zusammen ein gutes Beispiel für
+   "wir polieren leise nach, bevor wir laut werden". Eignet sich als
+   kurzes Build-in-public-Format (z. B. monatlicher "Was wir diese Woche
+   ehrlicher gemacht haben"-Post), sobald die ersten Kanäle live sind.
+
+4. **Freigabe-Stau bleibt der eigentliche Engpass.** Die sechs fertigen
+   Entwürfe (siehe `marketing/freigabe-uebersicht.md`) plus jetzt ein
+   siebtes Stück warten weiter auf deine Entscheidung, nicht auf neue
+   Ideen. Kein neuer Reminder-Text nötig — die Übersicht steht bereit,
+   wenn du Zeit findest.
