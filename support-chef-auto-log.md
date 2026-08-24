@@ -793,3 +793,56 @@ Keine weiteren Formulare oder Fehlerfälle auf der Seite — sie besteht nur
 aus den beiden oben genannten Feldern. Eine vertiefte Screenreader-Prüfung
 der `Select`-Komponente wurde nicht durchgeführt (analog zur
 Einschränkung im Profil-Eintrag vom 21.08.).
+
+---
+
+## 2026-08-24 — Reise-Checkliste (`ChecklistPanel.tsx`, `/buchung`)
+
+**Geprüfter Bereich:** `src/components/trip/ChecklistPanel.tsx`,
+`src/lib/trip/checklistRules.ts` und deren Einbindung in
+`src/pages/Buchung.tsx`, laut `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+(Aufgabe 6.8/6.9) heute vom autonomen IT-Chef-Lauf ("achter Lauf") gebaut
+— noch in keinem Support-Chef-Lauf geprüft.
+
+### Reibungspunkte
+
+**1. Innerhalb derselben Checkliste verhalten sich die 5 automatischen
+und die 8 manuellen Punkte bei Reload/Wegnavigieren widersprüchlich —
+ohne dass die UI das kenntlich macht**
+`ChecklistPanel.tsx:20` hält die manuell abgehakten Punkte
+(`checkedManual`) ausschließlich in lokalem `useState(new Set())`. Die
+fünf automatischen Punkte (`isAutoItemChecked()` in
+`checklistRules.ts:39-54`) werden dagegen aus `trip` berechnet, und
+`trip` kommt in `Buchung.tsx:139` aus `loadStoredChat()`
+(`src/lib/trip/tripStorage.ts:11-17`), das aktiv aus `localStorage`
+(Key `travix.ki-chat.draft`) liest — also *doch* persistent ist, anders
+als beim bereits dokumentierten Muster von `Profil.tsx`/
+`Einstellungen.tsx`, wo die komplette Seite gleichmäßig zurückspringt.
+Hier springt bei einem Reload oder einem Ausflug zu einer anderen Seite
+(jede Route mountet laut `src/routes.tsx:44-66` neu) nur der untere,
+manuelle Teil der Liste zurück auf 0 von 8 — während der obere,
+automatische Teil (z. B. "Transport gebucht", "Budget festgelegt")
+unverändert stehen bleibt. Ein Reisender, der z. B. "Reisepass gültig"
+und "Koffer gepackt" abgehakt hat, später zur Startseite wechselt und zu
+`/buchung` zurückkehrt, sieht seinen Fortschrittsbalken ohne Vorwarnung
+von z. B. 7/13 auf 5/13 zurückfallen — nur bei den beiden Punkten, die er
+selbst gerade erst bearbeitet hat. Das ist verwirrender als ein
+einheitlich zurückspringender Zustand, weil es innerhalb einer einzigen
+Komponente inkonsistent wirkt, statt (wie bei Profil/Einstellungen)
+gleichmäßig auf einer ganzen Seite.
+
+*Vorschlag:* Kurzfristig reicht ein kleiner Hinweistext unter der
+manuellen Liste (z. B. "Dein Haken bleibt nur, solange du auf dieser
+Seite bleibst"), damit die Diskrepanz zu den automatischen Punkten nicht
+überrascht. Mittelfristig würde sich `checkedManual` mit demselben
+`localStorage`-Muster wie `tripStorage.ts` (z. B. unter einem eigenen Key
+je `trip.destination` oder direkt im `StoredChatState`) genauso
+persistieren lassen wie die Trip-Felder selbst — dann verhalten sich
+beide Listenhälften gleich.
+
+### Nicht geprüft
+Keine Fehlerzustände oder Ladezustände auf der Checkliste selbst — sie
+ist rein clientseitig aus bereits geladenen `trip`-Daten abgeleitet, ohne
+eigenen Netzwerk-/Ladeaufruf. Der übrige Inhalt von `Buchung.tsx`
+(Buchungs-Details, `EditMode`-Dialog für Aktivitäten) war nicht
+Gegenstand dieses Laufs.
