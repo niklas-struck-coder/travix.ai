@@ -3328,3 +3328,78 @@ Log-Eintrag ist die einzige inhaltliche Änderung.
 Keine Regressionen.
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (sechster Lauf)
+
+Erneute Auslösung, unabhängiger Checkout. `origin/main` (`f36c390`) seit dem
+fünften Lauf (23.08., 23:08 UTC) unverändert; `it-chef/auto` bereits mit
+`main` deckungsgleich plus den beiden noch ungemergten Commits aus dem
+vierten/fünften Lauf — direkt weitergearbeitet, kein Neuaufsetzen nötig.
+
+**Ausgangslage:** Die 30 offenen Checkbox-Punkte in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` tragen weiterhin
+dieselben, in den letzten Läufen dokumentierten Blocker (Backend-/Auth-
+Entscheidung, fehlende Preis-/Item-Felder, unvollständige FR-501-Spezifikation,
+fehlende Zug/Bus/Fähre-Datenquelle, offene Produktentscheidungen, zu vage
+Punkte). Erneuter Grep nach `TODO`/`FIXME`/`XXX` in `src/`: weiterhin keine
+Treffer. `reports/support-chef.md`, `reports/marketing-chef.md` und
+`reports/it-chef.md` (alle datiert 23.08.) inhaltlich identisch zu den im
+vierten/fünften Lauf bereits ausgewerteten Ständen — keine neuen
+Support-/Marketing-Chef-Berichte seit `f36c390`.
+
+**Ausgewählter Punkt (außerhalb der Checkbox-Liste, wie zusätzlich
+geprüft):** Punkt 1 aus dem Support-Chef-Bericht vom 23.08.
+(`reports/support-chef.md`), im vierten Lauf noch nicht mit aufgegriffen
+(dort nur Punkte 2+3 zur Einstellungen-Seite umgesetzt): die "Empfohlen"-
+Hervorhebung der KI-Chat-Karte auf `/reise-planen`
+(`src/pages/ReiseSuche.tsx:49`) war unsichtbar, weil die `Card`-Klasse
+`border-teal/40` nur die Randfarbe setzt, `Card` selbst
+(`src/components/ui/card.tsx:14`) aber `ring-1` statt eines `border`-
+Utilities verwendet und der globale Tailwind-Reset
+(`src/styles/globals.css:126-128`) die Randbreite auf 0 setzt — die Farbe
+hatte also nichts, an dem sie sichtbar würde. Verifiziert: Bug bestand
+weiterhin unverändert im aktuellen Quelltext.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug; keine offene Produkt-/Architekturentscheidung
+(reine Sichtbarkeits-Korrektur einer bestehenden Auszeichnung, keine neue
+Funktion); klar genug (Support-Chef hat Datei/Zeile und zwei konkrete
+Lösungswege genannt); objektiv prüfbar (Badge-Text im DOM, per Test
+verifizierbar). Erfüllt alle vier Kriterien — umgesetzt.
+
+Von den beiden vom Support-Chef vorgeschlagenen Lösungswegen (Rand
+sichtbar machen ODER Badge ergänzen) wurde die Badge-Variante gewählt,
+weil das bestehende Highlight-Muster in der App (`Preisalarme.tsx`,
+`Buchung.tsx`: `Badge className="bg-teal text-navy hover:bg-teal"`)
+bereits genau dafür existiert und zusätzlich zugänglicher ist als eine
+reine Farbänderung am Kartenrand (die für Screenreader ohnehin unsichtbar
+bliebe). Die wirkungslose `border-teal/40`-Klasse wurde entfernt statt
+zusätzlich zu reparieren, um nicht zwei redundante visuelle Hinweise zu
+haben.
+
+Punkt 4 aus demselben Support-Chef-Bericht (Einstellungen gehen beim
+Wegnavigieren verloren, gleiches Muster wie Profil-Seite) weiterhin
+bewusst **nicht** angefasst: das ist derselbe absichtliche, dokumentierte
+Demo-State-Ansatz wie bei praktisch allen anderen Seiten mit Demo-Daten,
+an die offene Backend-/Auth-Entscheidung gekoppelt — ein Seiten-
+übergreifender `localStorage`-Zwischenspeicher wäre ein eigenmächtiger,
+breiterer Eingriff über den engen Punkt hinaus.
+
+**Umsetzung** (`src/pages/ReiseSuche.tsx`):
+- `Badge`-Import ergänzt.
+- Wirkungslose `className={option.recommended ? 'border-teal/40' : undefined}`
+  am `Card`-Element entfernt.
+- Icon-Kreis und ein neues `Badge` "Empfohlen" (nur für die
+  `recommended`-Option) in eine `flex items-center justify-between`-Zeile
+  gepackt, Badge-Styling analog `Preisalarme.tsx`/`Buchung.tsx`.
+- `src/pages/ReiseSuche.test.tsx`: neue Test-Assertion, die das sichtbare
+  "Empfohlen"-Badge im DOM prüft.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings in `src/components/ui/{badge,button,tabs}.tsx`,
+unverändert), `npx vitest run` (20 Testdateien, 84 Tests — 83 vorher + 1
+neu —, alle grün), `npm run build` (Produktions-Build erfolgreich, gleiche
+vorbestehende Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.

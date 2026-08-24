@@ -219,7 +219,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   aber nur die `PlaceholderPage`. Kein Zug/Bus/Fähre-Kärtchen, da 5.7
   (Einbindung von `TrainCard`/`TrainResults`) noch offen ist und dafür
   keine eigenständige Route existiert. Reine Navigation, keine
-  erfundenen Daten.
+  erfundenen Daten. Am 24.08. vom autonomen IT-Chef-Lauf korrigiert: die
+  "empfohlen"-Hervorhebung der KI-Chat-Karte (`border-teal/40`) hatte
+  keine sichtbare Wirkung, weil `Card` intern `ring-1` statt eines
+  `border`-Utilities nutzt (vom Support-Chef am 23.08. gemeldet) — durch
+  ein sichtbares "Empfohlen"-Badge ersetzt, analog dem bestehenden
+  Badge-Muster in `Preisalarme.tsx`/`Buchung.tsx`.
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse

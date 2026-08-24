@@ -3,6 +3,7 @@ import { MessageCircle, Plane, BedDouble, ArrowRight } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface SearchOption {
   path: string
@@ -46,10 +47,15 @@ export function ReiseSuche() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         {searchOptions.map((option) => (
-          <Card key={option.path} className={option.recommended ? 'border-teal/40' : undefined}>
+          <Card key={option.path}>
             <CardContent className="flex h-full flex-col gap-4 px-4 py-5">
-              <div className="flex size-10 items-center justify-center rounded-full bg-teal/10 text-teal">
-                <option.icon className="size-5" strokeWidth={1.75} />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex size-10 items-center justify-center rounded-full bg-teal/10 text-teal">
+                  <option.icon className="size-5" strokeWidth={1.75} />
+                </div>
+                {option.recommended && (
+                  <Badge className="bg-teal text-navy hover:bg-teal">Empfohlen</Badge>
+                )}
               </div>
               <div className="flex flex-1 flex-col gap-1">
                 <p className="font-heading font-semibold text-foreground">{option.title}</p>
