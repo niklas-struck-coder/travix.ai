@@ -3403,3 +3403,80 @@ neu —, alle grün), `npm run build` (Produktions-Build erfolgreich, gleiche
 vorbestehende Chunk-Size-Warnung). Keine Regressionen.
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (siebter Lauf)
+
+Erneute Auslösung, unabhängiger Checkout. `origin/main` (`f36c390`) seit
+dem sechsten Lauf unverändert; `it-chef/auto` bereits mit `main` plus den
+drei noch ungemergten Commits aus dem vierten/fünften/sechsten Lauf
+deckungsgleich — direkt weitergearbeitet, kein Neuaufsetzen nötig.
+
+**Ausgangslage:** Die 30 offenen Checkbox-Punkte weiterhin mit denselben
+Blockern wie in den vorherigen Läufen (Backend-/Auth-Entscheidung,
+fehlende Preis-/Item-Felder, offene Produktentscheidungen, zu vage
+Punkte). `reports/support-chef.md` (23.08.): Punkt 1 (Empfohlen-Badge)
+bereits im sechsten Lauf erledigt, Punkte 2+3 (Einstellungen-Texte)
+bereits im vierten Lauf erledigt, Punkt 4 (Einstellungen-Persistenz)
+weiterhin bewusst nicht angefasst (siehe Begründung fünfter/sechster
+Lauf). `reports/marketing-chef.md` (23.08.) enthält keine Programmier-Punkte.
+`reports/it-chef.md` (23.08.) erneut durchgesehen: alle dort gelisteten
+Bugs geprüft.
+
+**Ausgewählter Punkt (aus `reports/it-chef.md`, Abschnitt "Gefundene
+Bugs"):** "IATA-Code-Eingabe ohne Erklärung" — `FlightWizard.tsx` (Von-/
+Nach-Felder) deaktiviert den "Flüge suchen"-Button, solange die Eingabe
+unter 3 Zeichen liegt, ohne jeden Hinweistext, warum. Verifiziert: Bug
+besteht weiterhin unverändert im aktuellen Quelltext (`isValid`-Prüfung
+Zeilen 31-35, keine Hilfetexte unter den Inputs).
+
+Andere Punkte aus demselben Bericht geprüft und verworfen:
+- Flugsuche startet nie im normalen Chat-Ablauf / automatische
+  Unterkunftssuche hängt bei unbekanntem Ziel: beides braucht eine
+  UX-Entscheidung (was soll bei fehlendem Abflughafen/unbekanntem Ziel
+  passieren) — nicht autonom fällbar.
+- Ungeschützte `localStorage`-Schreibzugriffe: Fix liegt bereits fertig
+  auf PR #6 (separater Kanal, Merge ist Sache des Freigabe-Chefs/Ni) —
+  eigene Änderung hier hätte nur Merge-Konflikte riskiert.
+- Rohe englische Duffel-Fehlermeldungen im UI: Bericht nennt kein
+  konkretes Zieltext-Mapping (anders als beim Empfohlen-Badge/
+  Einstellungen-Texte, wo Support-Chef exakte Formulierungen vorschlug) —
+  eine generische Übersetzung hätte Interpretationsspielraum über das
+  hinaus erfordert, was im Bericht steht, also nicht klar genug für
+  autonom.
+- Mikrofon-Fehler unsichtbar / ausgewählter Flug nicht im Reiseplan
+  sichtbar: beide brauchen entweder ein neues Datenfeld (Flugdetails) oder
+  eine Entscheidung über das gewünschte Fehlerverhalten — außerhalb des
+  engen "klar beschrieben, keine Interpretation nötig"-Kriteriums.
+- Zimmer-/Gästezahl NaN-Risiko: Bericht selbst stuft das als niedrige
+  Konfidenz ein ("nicht auf allen Zielbrowsern verifiziert") — kein
+  bestätigter Bug, also nichts, das objektiv zu beheben wäre.
+- Duffel-Stays-Feldnamen ungetestet: blockiert auf einen echten API-Key,
+  nicht umsetzbar.
+
+Geprüft gegen die vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug (reines Flugsuche-Formular, kein Zahlungs-
+oder Kontofluss); keine offene Produkt-/Architekturentscheidung (nur ein
+erklärender Hinweistext, kein neues Verhalten); klar genug (Datei,
+Zeilen und exaktes Problem im IT-Chef-Bericht benannt); objektiv prüfbar
+(Hinweistext im DOM, per Test verifizierbar). Erfüllt alle vier
+Kriterien — umgesetzt.
+
+**Umsetzung** (`src/components/search/FlightWizard.tsx`):
+- Unter beiden IATA-Eingabefeldern (Von/Nach) je ein `<p
+  className="text-xs text-muted-foreground">`-Hinweistext ergänzt:
+  "3-stelliger Flughafencode, z. B. BER" bzw. "…LIS" — gleiches Muster
+  (`text-xs text-muted-foreground`) wie an 13 anderen Stellen der App für
+  Hilfetexte verwendet.
+- Neue Testdatei `src/components/search/FlightWizard.test.tsx` (gab es
+  vorher nicht) mit einer Assertion, die beide Hinweistexte im DOM prüft.
+- `ZEITPLAN.md`: Notiz unter Punkt 5.11 ergänzt (nächstgelegener
+  Flugsuche-Eintrag).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b`
+(grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings, unverändert), `npx vitest run` (21 Testdateien,
+85 Tests — 84 vorher + 1 neu —, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung). Keine Regressionen.
+
+**Commit:** siehe Git-Log auf `it-chef/auto`.

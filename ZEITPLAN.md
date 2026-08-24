@@ -79,7 +79,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   schreibt `transportMode: 'flight'` in den bestehenden Trip via neuer
   `updateStoredTrip()`-Funktion in `tripStorage.ts`; kein neues Datenfeld
   für Flugdetails (Route/Preis) eingeführt, das wäre über die
-  Aufgabenbeschreibung hinausgegangen
+  Aufgabenbeschreibung hinausgegangen. Am 24.08. vom autonomen
+  IT-Chef-Lauf ergänzt: In `FlightWizard.tsx` blieb der "Flüge
+  suchen"-Button unter 3 Zeichen in Von/Nach ohne jede Erklärung
+  deaktiviert (vom IT-Chef-Bericht 23.08. gemeldet) — jetzt mit
+  Hinweistext "3-stelliger Flughafencode, z. B. BER/LIS" unter beiden
+  Feldern.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,
