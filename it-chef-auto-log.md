@@ -3544,3 +3544,62 @@ Fortschrittszähler stimmt — alles per Test verifizierbar).
 Chunk-Size-Warnung). Keine Regressionen.
 
 **Commit:** siehe Git-Log auf `it-chef/auto`.
+
+## 2026-08-24 (Auto-Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag 4 Commits hinter `origin/main`
+zurück (Support-/Marketing-/IT-Chef-Berichte vom 24.08.). Sauberer
+Fast-Forward-Merge, keine Konflikte. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** aus `reports/it-chef.md` (Bericht vom 24.08.,
+Commit `900e149`) gemeldeter Bug: "Zimmer-/Gästezahl in `HotelWizard.tsx`
+könnte theoretisch auf `NaN` laufen" (Zeilen 86/97,
+`Math.min(9, Math.max(1, Number(event.target.value)))` ohne
+`NaN`-Schutz).
+
+Vorher geprüft und verworfen:
+- **IATA-Hinweistext auf `Flugsuche.tsx`** (im selben Bericht als noch
+  offen gemeldet): beim Nachlesen des aktuellen Quelltexts stellte sich
+  heraus, dass `Flugsuche.tsx` die Eingabemaske gar nicht selbst rendert,
+  sondern dieselbe `FlightWizard`-Komponente einbindet, die am 23./24.08.
+  bereits um den Hinweistext ergänzt wurde (`FlightWizard.tsx:71,84`) —
+  der Hinweis erscheint dadurch automatisch auch auf `/flugsuche`. Kein
+  offener Punkt mehr, nur eine veraltete Bericht-Notiz; nicht als
+  "erledigt" in `ZEITPLAN.md` vermerkt, da es dort ohnehin kein eigener
+  Punkt war.
+- 4.1-4.3, Backend-Entscheidung: weiterhin explizit blockiert/
+  Produktentscheidung.
+- Übrige im Bericht gemeldete Bugs (rohe Duffel-Fehlermeldungen,
+  unsichtbare Mikrofon-Fehler, fehlende Transportsuche im Hauptchat,
+  verlorene Flugdetails im Reiseplan, ungeschützte `localStorage`-Zugriffe)
+  brauchen laut Bericht selbst UX-/Datenmodell-Entscheidungen oder haben
+  bereits einen wartenden PR (#6) — nicht autonom sicher genug.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+reiner Defensiv-Fix an einer bestehenden Eingabe-Validierung, exakt wie im
+Bericht beschrieben. Klar genug beschrieben (Zeilen und Ursache im Bericht
+benannt). Ergebnis objektiv prüfbar über neue Unit-Tests.
+
+**Umgesetzt:**
+- `src/components/search/HotelWizard.tsx`: neue Hilfsfunktion
+  `clampGuestCount(value)` — gibt bei `NaN` (z. B. nicht-numerische
+  Eingabe) `1` zurück, sonst wie bisher auf den Bereich 1-9 geklemmt.
+  Ersetzt die bisherige Inline-Rechnung in den `onChange`-Handlern von
+  Zimmer- und Gästezahl.
+- Neuer Test `src/components/search/HotelWizard.test.tsx` (2 Fälle: nicht-
+  numerische Gästezahl fällt auf 1 zurück statt `NaN`; Zimmerzahl wird auf
+  1-9 geklemmt).
+
+**Geprüft:**
+- `npm ci` → sauber, 647 Pakete (frischer Checkout, `node_modules` fehlt
+  jedes Mal).
+- `npx tsc -b` → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht durch
+  diesen Change verursacht).
+- `npm run test` (vitest) → 97/97 Tests grün (95 bestehende + 2 neue für
+  `HotelWizard`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

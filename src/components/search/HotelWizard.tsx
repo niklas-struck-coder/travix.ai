@@ -8,6 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { findKnownDestination, knownDestinations } from '@/types/stays'
 import type { StaySearchParams } from '@/types/stays'
 
+function clampGuestCount(value: string) {
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
+}
+
 interface HotelWizardProps {
   onSearch: (params: StaySearchParams) => void
   loading: boolean
@@ -83,7 +88,7 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
             min={1}
             max={9}
             value={rooms}
-            onChange={(event) => setRooms(Math.min(9, Math.max(1, Number(event.target.value))))}
+            onChange={(event) => setRooms(clampGuestCount(event.target.value))}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -94,7 +99,7 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
             min={1}
             max={9}
             value={guests}
-            onChange={(event) => setGuests(Math.min(9, Math.max(1, Number(event.target.value))))}
+            onChange={(event) => setGuests(clampGuestCount(event.target.value))}
           />
         </div>
       </div>
