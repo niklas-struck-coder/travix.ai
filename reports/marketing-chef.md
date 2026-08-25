@@ -1,48 +1,58 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-24
+**Datum:** 2026-08-25
 
-## Was ist seit dem letzten Eintrag (2026-08-23) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-24) passiert?
 
-Der gemeldete Empfohlen-Badge-Bug auf `/reise-planen` ist heute vom
-IT-Chef behoben — die Bedingung aus dem gestrigen Bericht ist damit
-erfüllt. Der autonome Marketing-Lauf hat direkt reagiert und ein
-Content-Stück dazu vorbereitet (`marketing/content-stueck-reise-suchen-empfohlen.md`,
-Entwurf, nichts veröffentlicht). Daneben kamen kleinere ehrliche
-Korrekturen dazu: Hinweistexte für IATA-Codes im Chat-Editierpfad
-(`FlightWizard.tsx`, aber noch nicht auf der eigenständigen
-`Flugsuche.tsx`-Seite) und neutraler formulierte Einstellungen-Texte, die
-jetzt kein E-Mail-Versprechen mehr machen, das die App nicht einlöst.
-Neu ist außerdem eine Reise-Checkliste auf `/buchung`
-(`ChecklistPanel.tsx`) — der Support-Chef hat aber direkt eine
-Inkonsistenz gefunden: die 5 automatischen Punkte überleben Reload/
-Wegnavigieren, die 8 manuell abgehakten nicht. Die Freigabe-Fragen zu den
-sechs fertigen Content-Entwürfen bleiben weiterhin offen.
+Ein ruhiger, aber produktiver Tag auf der IT-Seite, nichts davon
+veröffentlichungsreif Neues auf meiner Seite. Der IT-Chef hat drei
+kleine, ehrliche Korrekturen gemacht: rohe Duffel-Fehlermeldungen zeigen
+jetzt einen verständlichen deutschen Text, ein bisher stiller
+Mikrofon-Fehler im KI-Chat wird jetzt sichtbar gemacht, und die
+Reise-Checkliste sagt jetzt korrekt "ausgewählt" statt irreführend
+"gebucht" (`checklistRules.ts`) — behebt aber nicht die Persistenz-Lücke,
+die der Support-Chef gestern gefunden hat. Dazu kam PR #7: der gleiche
+Zahlenfeld-Bug wie bei der Hotelsuche (ungeschützt gegen `NaN`), jetzt
+auch bei der Flugsuche gefixt, nach exakt demselben bewährten Muster.
+Der autonome Content-Lauf hat parallel nur die Freigabe-Übersicht um das
+siebte Stück nachgeführt — keine neuen Fragen an dich, die drei aus dem
+21.08. stehen weiterhin offen.
 
 ## Vorschläge
 
-1. **"Drei Wege, eine Empfehlung" priorisiert freigeben.** Das Stück ist
-   fertig und zeigt beispielhaft, wie schnell ein behobener Bug zu echtem,
-   ehrlichem Content wird (Badge war im Code, aber unsichtbar — jetzt
-   sichtbar). Genau die Art Geschichte, die zur Marke passt: kein
-   erfundenes Feature, sondern ein echter, kleiner Fortschritt.
+1. **"Drei Wege, eine Empfehlung" ist jetzt wirklich freigabefähig —
+   diese Woche entscheiden.** Das Stück ist fertig, zeigt einen
+   kompletten Weg im Produkt und hängt an nichts Offenem mehr. Von den
+   sieben Entwürfen ist es das aktuellste und zugleich am einfachsten zu
+   erklären (drei gleichwertige Einstiege: Chat, Flugsuche, Hotelsuche).
+   Guter Kandidat für den allerersten Post, falls ein Kanal diese Woche
+   an den Start geht.
 
-2. **Checkliste jetzt bewusst noch nicht bewerben.** Solange die 8
-   manuellen Punkte beim Wegnavigieren verschwinden, würde ein Post
-   darüber genau die "Ehrlichkeit als Feature"-Botschaft untergraben, die
-   wir gerade im neuen Content-Stück feiern. Sobald das behoben ist: eine
-   Checkliste, die wirklich hält was sie zeigt, ist ein naheliegendes
-   nächstes Stück nach demselben Muster.
+2. **Die drei kleinen Korrekturen von heute sind ein Beispiel für die
+   Positionierung, nicht nur Kleinkram.** Fehlermeldung übersetzt,
+   Mikrofon-Fehler sichtbar gemacht, "gebucht" zu "ausgewählt"
+   korrigiert — dreimal dieselbe Haltung: lieber ehrlich zeigen, was
+   gerade passiert (oder nicht funktioniert), als es zu verstecken oder
+   schönzureden. Das ist genau der Unterschied, den man gegen
+   KI-Reise-Hype setzen kann. Konkreter Vorschlag für eine Tagline/einen
+   Positionierungssatz, sobald ihr den braucht: *"travix.ai zeigt dir,
+   was wirklich passiert — nicht was gut aussehen soll."* Passt auch als
+   Überschrift für das schon vorgeschlagene monatliche
+   "Was wir ehrlicher gemacht haben"-Format.
 
-3. **Kleine ehrliche Korrekturen gebündelt statt einzeln erzählen.**
-   IATA-Hinweistexte, entschärfte Einstellungen-Texte — jede für sich zu
-   klein für einen eigenen Post, aber zusammen ein gutes Beispiel für
-   "wir polieren leise nach, bevor wir laut werden". Eignet sich als
-   kurzes Build-in-public-Format (z. B. monatlicher "Was wir diese Woche
-   ehrlicher gemacht haben"-Post), sobald die ersten Kanäle live sind.
+3. **Checkliste bleibt bewusst unbeworben, aber jetzt mit einem klaren
+   Trigger für später.** Label-Fix ist gut, aber solange die 8 manuellen
+   Punkte beim Wegnavigieren verschwinden (`ChecklistPanel.tsx`,
+   `useState`), würde ein Post die eigene "Ehrlichkeit als Feature"-
+   Botschaft untergraben. Sobald Persistenz da ist: sofort als nächstes
+   Content-Stück einplanen, nach demselben Muster wie "Drei Wege" — ein
+   echter, kleiner Fortschritt, keine Ankündigung.
 
-4. **Freigabe-Stau bleibt der eigentliche Engpass.** Die sechs fertigen
-   Entwürfe (siehe `marketing/freigabe-uebersicht.md`) plus jetzt ein
-   siebtes Stück warten weiter auf deine Entscheidung, nicht auf neue
-   Ideen. Kein neuer Reminder-Text nötig — die Übersicht steht bereit,
-   wenn du Zeit findest.
+4. **Freigabe-Stau ist weiterhin der eigentliche Engpass, nicht fehlende
+   Ideen.** Sieben fertige Entwürfe (Übersicht in
+   `marketing/freigabe-uebersicht.md`), drei offene Grundsatzfragen seit
+   dem 21.08. unbeantwortet. Kein neuer Reminder-Text nötig — nur der
+   Hinweis, dass mit "Drei Wege" jetzt ein besonders einfacher
+   Startpunkt bereitliegt, falls eine Entscheidung ansteht.
+
+_Letztes Update: 2026-08-25_
