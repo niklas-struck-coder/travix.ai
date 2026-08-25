@@ -30,7 +30,11 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
 export const isSpeechRecognitionSupported = () => getSpeechRecognition() !== null
 export const isSpeechSynthesisSupported = () => 'speechSynthesis' in window
 
-export function startListening(onResult: (transcript: string) => void, onEnd: () => void) {
+export function startListening(
+  onResult: (transcript: string) => void,
+  onEnd: () => void,
+  onError?: () => void,
+) {
   const Recognition = getSpeechRecognition()
   if (!Recognition) return null
 
@@ -44,7 +48,10 @@ export function startListening(onResult: (transcript: string) => void, onEnd: ()
     if (transcript) onResult(transcript)
   }
   recognition.onend = onEnd
-  recognition.onerror = onEnd
+  recognition.onerror = () => {
+    onError?.()
+    onEnd()
+  }
 
   recognition.start()
   return recognition

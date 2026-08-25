@@ -3669,3 +3669,94 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-25 (Auto-Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag exakt auf `origin/main` (`3b2df2d`)
+plus dem einen HotelWizard-NaN-Fix aus dem letzten Lauf (`88dc75d`), kein
+Nachziehen nötig, direkt weitergearbeitet. `main` nicht angerührt.
+
+**Ausgewählter Punkt:** aus `reports/it-chef.md` (Stand 24.08.) gemeldeter
+Bug: "Mikrofon-Fehler bleiben unsichtbar" — `src/lib/ai/speech.ts` setzte
+`recognition.onerror = onEnd`, sodass ein echter Spracherkennungsfehler
+(z. B. verweigerte Mikrofon-Berechtigung) exakt wie ein normales, absicht­
+liches Aufnahmeende behandelt wurde: der Nutzer sieht nur, dass die
+Aufnahme endet, ohne jeden Hinweis, dass etwas schiefging.
+
+Vorher geprüft und verworfen (übrige Punkte aus `reports/it-chef.md` vom
+24.08., am aktuellen Quelltext erneut bestätigt):
+- 5.7 (Zug/Bus/Fähre in KI-Chat), 4.1-4.3, Backend-/Auth-Entscheidung,
+  6.2/6.6/6.7/7.12 (fehlende Preisfelder), 6.10 (Scope-Frage
+  Aktivitäten/manuelle Checklistenpunkte): unverändert dieselben Blocker
+  wie in den zahlreichen Vorläufen (Produktentscheidung, fehlende
+  Datenquelle/Datenfelder, zu vage Beschreibung) — siehe frühere
+  Log-Einträge, nicht erneut im Detail wiederholt.
+- Flug-/Transportsuche startet im Haupt-Chat-Ablauf nie (`useChat.ts`
+  löst echte Suche nur bei `nextField === 'accommodation'` aus): weiterhin
+  eine UX-Entscheidung (fehlender Abflughafen im Hauptablauf, keine
+  API-Anbindung für Zug/Bus/Fähre/Mietwagen) — nicht ohne Annahme lösbar.
+- Automatische Unterkunftssuche hängt bei unbekanntem Ziel unsichtbar:
+  gleiche Kategorie — welches Verhalten/welcher Text bei unbekanntem Ziel
+  erscheinen soll, ist nicht vorgegeben.
+- Rohe englische Duffel-Fehlermeldungen, ausgewählter Flug fehlt im
+  Reiseplan, Duffel-Stays-Feldnamen ungetestet: jeweils entweder eine
+  Übersetzungs-/Datenmodell-Entscheidung oder ohne echten API-Key nicht
+  verifizierbar — bewusst nicht angefasst, um keinen der beiden Punkte zu
+  vermischen.
+- Ungeschützte `localStorage`-Schreibzugriffe: Fix liegt bereits fertig
+  auf PR #6 (separater Branch/PR aus früherem Autofix-Workflow) — nicht
+  dupliziert, das ist Nis/Freigabe-Chefs Merge-Entscheidung, nicht Teil
+  dieses Laufs.
+
+**Warum sicher genug:** Rein defensive Fehlerbehandlung in einer
+UI-Komponente (Mikrofon-Button im KI-Chat), kein Bezug zu Auth, Zahlungen,
+echten Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: die Frage "wie soll ein Fehler klingen" ist durch
+den bereits bestehenden Abschnitt "Fehlermeldungen (allgemein)" in
+`MARKENDESIGN.md` beantwortet ("ehrlich und konkret statt generisch...
+sag was schiefging und was als Nächstes zu tun ist"), sodass keine eigene
+Texterfindung nötig war. Ergebnis objektiv prüfbar über zwei neue
+Unit-Tests (Fehler löst Hinweistext + Rückkehr in den Nicht-Aufnahme-
+Zustand aus; ein neuer Aufnahmeversuch löscht den alten Hinweis wieder).
+
+**Umgesetzt:**
+- `src/lib/ai/speech.ts`: `startListening()` bekommt einen optionalen
+  dritten Parameter `onError`. `recognition.onerror` ruft jetzt zuerst
+  `onError?.()` und danach weiterhin `onEnd()` (bisheriges Verhalten,
+  Aufnahme-Zustand wird wie vorher zurückgesetzt) — statt beide Fälle
+  wie bisher identisch zu behandeln.
+- `src/components/chat/ChatInput.tsx`: neuer lokaler State `micError`.
+  `handleMicClick` setzt ihn vor jedem neuen Versuch zurück und übergibt
+  jetzt einen `onError`-Callback, der ihn auf den Hinweistext
+  "Spracheingabe hat nicht geklappt — bitte tippe deine Nachricht
+  stattdessen." setzt. Der Hinweis erscheint unterhalb der Eingabezeile
+  im bereits bestehenden `text-xs text-muted-foreground`-Stil (gleiches
+  Muster wie die IATA-Hinweistexte in `FlightWizard.tsx`), keine neue
+  Warnfarbe (Rot ist laut `MARKENDESIGN.md` für Fehlermeldungen
+  ohnehin nicht vorgesehen).
+- Neuer Test `src/components/chat/ChatInput.test.tsx` (2 Fälle: Fehler
+  während der Aufnahme zeigt den Hinweistext und setzt den Mikrofon-Button
+  zurück in den Nicht-Aufnahme-Zustand; ein neuer Aufnahmeversuch löscht
+  einen vorherigen Fehlertext wieder). Mockt `window.SpeechRecognition`
+  über eine einfache Klasse statt `vi.fn()` (als Konstruktor mit `new`
+  aufgerufen, `vi.fn()`-Mocks lassen sich in dieser Vitest-Version nicht
+  als Konstruktor verwenden).
+
+**Geprüft:**
+- `npm ci` (frischer Checkout, `node_modules` fehlte, 647 Pakete).
+- `npx tsc -b` → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden
+  `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`.
+- `npx vitest run` → 24 Testdateien, 99 Tests grün (97 vorher + 2 neu).
+- `npm run build` → Produktions-Build erfolgreich, gleiche vorbestehende
+  Chunk-Size-Warnung.
+
+**Hinweis:** kein Eintrag in `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+angepasst — dieser Bug war dort kein eigener nummerierter Punkt, sondern
+nur in `reports/it-chef.md` (interaktiver IT-Chef-Bericht) gemeldet.
+`reports/it-chef.md` selbst bewusst nicht angefasst — das ist bisher
+ausschließlich vom interaktiven IT-Chef-Bericht gepflegt worden, nicht vom
+autonomen Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
