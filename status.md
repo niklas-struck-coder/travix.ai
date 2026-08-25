@@ -14,14 +14,14 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-23):**
-- IT-Chef Auto: Empfohlen-Badge auf ReiseSuche.tsx repariert, Hinweistext für
-  IATA-Felder ergänzt, neue Reise-Checkliste (ChecklistPanel)
-- Support-Chef Auto: eigene UX-Analyse zur neuen Reise-Checkliste
-- Marketing-Chef Auto: Content-Stück zur Reiseplanung rund um das reparierte
-  Empfohlen-Badge
-- Freigabe-Chef hat alle diese Auto-Zweige mehrfach geprüft und nach main gemergt
+**Seit letztem Update (2026-08-24):**
+- IT-Chef Auto: Mikrofon-Fehler im KI-Chat sichtbar gemacht, rohe Duffel-
+  Fehlermeldungen im UI übersetzt, Checkliste zeigt jetzt "ausgewählt" statt
+  irreführend "gebucht"
+- Support-Chef Auto: Mikrofon-Fehleranzeige im KI-Chat geprüft
+- Marketing-Chef Auto: Freigabe-Übersicht um ein weiteres Stück nachgeführt
+- Freigabe-Chef hat alle diese Auto-Zweige geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-24_
+_Letztes Update: 2026-08-25_
