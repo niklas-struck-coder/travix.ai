@@ -846,3 +846,72 @@ ist rein clientseitig aus bereits geladenen `trip`-Daten abgeleitet, ohne
 eigenen Netzwerk-/Ladeaufruf. Der übrige Inhalt von `Buchung.tsx`
 (Buchungs-Details, `EditMode`-Dialog für Aktivitäten) war nicht
 Gegenstand dieses Laufs.
+
+---
+
+## 2026-08-25 — Mikrofon-Fehleranzeige im KI-Chat (`ChatInput.tsx`)
+
+**Geprüfter Bereich:** `src/components/chat/ChatInput.tsx` und
+`src/lib/ai/speech.ts`, laut `it-chef-auto-log.md` heute vom autonomen
+IT-Chef-Lauf neu gebaut — bisher zeigte ein echter
+Spracherkennungsfehler (z. B. verweigerte Mikrofon-Berechtigung) gar
+keinen Hinweis an, jetzt erscheint ein Hinweistext unter der
+Eingabezeile. Noch in keinem Support-Chef-Lauf geprüft. Zum Vergleich
+herangezogen: `src/components/chat/KiChat.tsx` (einzige Einbindung von
+`ChatInput` im Haupt-Chat-Ablauf, neben `src/pages/Urlaubsmodus.tsx`).
+
+### Reibungspunkte
+
+**1. Der Mikrofon-Fehlerhinweis verschwindet nie von selbst — er bleibt
+stehen, obwohl der Nutzer dem gegebenen Rat folgt und einfach tippt**
+`src/components/chat/ChatInput.tsx:17` hält `micError` in lokalem
+`useState`. Er wird nur an zwei Stellen verändert: beim nächsten
+Mikrofon-Versuch auf `null` zurückgesetzt (`:28`) oder bei einem neuen
+Fehler neu gesetzt (`:33`). `handleSend()` (`:19-24`) — also genau die
+Aktion, zu der der Hinweistext selbst rät ("bitte tippe deine Nachricht
+stattdessen") — berührt `micError` nicht. Da `ChatInput` in
+`KiChat.tsx:125` ohne `key`-Prop eingebunden ist und über die gesamte
+Chat-Sitzung dieselbe Komponenteninstanz bleibt (auch ein Klick auf
+"Neu starten", `KiChat.tsx:92-94`, setzt nur den Chat-Zustand im
+`useChat`-Hook zurück, nicht diesen lokalen State), bleibt der
+Fehlerhinweis unter der Eingabezeile stehen — auch nach jeder weiteren
+erfolgreich getippten und gesendeten Nachricht, über beliebig viele
+folgende Chat-Runden hinweg, bis der Nutzer zufällig noch einmal auf
+das Mikrofon klickt. Ein Nutzer, der einmal versehentlich das
+Mikrofon antippt, die Berechtigung verweigert und danach ganz normal
+weiter tippt, sieht also dauerhaft eine Fehlermeldung unter einem
+Gespräch, das längst reibungslos läuft.
+
+*Vorschlag:* `micError` zusätzlich in `handleSend()` auf `null` setzen
+(die Aktion, die der Hinweis selbst empfiehlt, ist das natürlichste
+Signal "Problem erledigt"), oder den Hinweis nach einer kurzen Zeit
+automatisch ausblenden (z. B. per `setTimeout`, analog zu einem
+Toast-Muster).
+
+**2. Der Fehlerhinweis wird nicht an Screenreader-Nutzer:innen
+angekündigt und ist nicht mit dem Mikrofon-Button verknüpft**
+`src/components/chat/ChatInput.tsx:74`: Das `<p>` mit dem Hinweistext
+hat weder `aria-live` noch `role="status"`, noch ist es über
+`aria-describedby` mit dem Mikrofon-Button (`:41-51`) verbunden. Anders
+als bei den bereits dokumentierten rein visuellen Zustandswechseln
+(z. B. Kalender-Monatstitel, Eintrag 2026-08-20) geht es hier um eine
+echte Fehlermeldung mit einer konkreten Handlungsanweisung ("bitte
+tippe deine Nachricht stattdessen") — wer den Mikrofon-Button per
+Screenreader bedient, bekommt den Fehler und die Handlungsanweisung
+gar nicht mit, sondern erlebt nur, dass die Aufnahme kommentarlos
+endet (fast derselbe stille Zustand, den der heutige IT-Chef-Fix
+eigentlich beheben sollte — nur jetzt für Screenreader-Nutzer:innen
+statt für alle).
+
+*Vorschlag:* `role="status"` (oder `aria-live="polite"`) auf das `<p>`
+in Zeile 74 setzen, damit der Hinweis automatisch vorgelesen wird,
+sobald er erscheint.
+
+### Nicht geprüft
+Das Verhalten von `startListening`/`recognition.onerror` selbst wurde
+nur gelesen, nicht in echten Browsern mit verweigerter
+Mikrofon-Berechtigung nachgestellt (dafür gibt es in diesem reinen
+Analyse-Lauf keine Möglichkeit). `Urlaubsmodus.tsx` als zweite
+Einbindungsstelle von `ChatInput` wurde nicht gesondert geprüft, da
+`ChatInput` dort identisch verwendet wird und dieselben zwei
+Reibungspunkte gelten würden.
