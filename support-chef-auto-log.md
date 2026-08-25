@@ -915,3 +915,74 @@ Analyse-Lauf keine Möglichkeit). `Urlaubsmodus.tsx` als zweite
 Einbindungsstelle von `ChatInput` wurde nicht gesondert geprüft, da
 `ChatInput` dort identisch verwendet wird und dieselben zwei
 Reibungspunkte gelten würden.
+
+---
+
+## 2026-08-26 — Such-Assistenten Flug/Hotel (`FlightWizard.tsx`, `HotelWizard.tsx`, Ergebniskarten)
+
+**Geprüfter Bereich:** Seit dem letzten Lauf (25.08.) ist laut
+`ZEITPLAN.md` keine neue Seite dazugekommen — der einzige frische Stand
+ist der heutige IT-Chef-Bug-Cluster rund um die Such-Assistenten
+(`reports/it-chef.md`: Checklisten-Label-Fix, Duffel-Fehlermeldungen
+übersetzt, PR #7 zur Passagierzahl-`NaN`-Absicherung in
+`FlightWizard.tsx`, noch offen). Deshalb heute an genau diesem Bereich
+weitergeprüft, statt eine beliebige alte Seite erneut anzusehen:
+
+- `src/components/search/FlightWizard.tsx`
+- `src/components/search/HotelWizard.tsx`
+- `src/components/search/FlightCard.tsx`, `HotelCard.tsx`, `TrainCard.tsx`
+- `src/lib/duffel/client.ts` (zum Abgleich, siehe unten)
+
+Die drei bereits im ersten Flugsuche-Eintrag (10.08.) gemeldeten Punkte
+sind inzwischen erledigt und im aktuellen Quelltext bestätigt: Der
+IATA-Hinweistext steht jetzt unter beiden Feldern
+(`FlightWizard.tsx:73`/`:83`), `Flugsuche.tsx:22` setzt `offers` beim
+Suchstart sofort auf `null` statt alte Ergebnisse stehen zu lassen, und
+`duffel/client.ts:30-34` zeigt bei einem API-Fehler jetzt einen
+verständlichen deutschen Fallback-Text statt der rohen Duffel-Meldung.
+Zwei neue, bisher nicht dokumentierte Punkte gefunden:
+
+### Reibungspunkte
+
+**1. Datum in der Vergangenheit lässt sich für Hin-/Check-in-Datum
+anstandslos auswählen — der Fehler danach ist nur noch allgemein**
+`FlightWizard.tsx:87-93` (Feld "Hinflug") und `HotelWizard.tsx:66-67`
+(Feld "Check-in") haben kein `min`-Attribut, während das jeweils
+abhängige zweite Datumsfeld es hat (`FlightWizard.tsx:104`:
+`min={departureDate}` fürs Rückflugdatum; `HotelWizard.tsx:76`:
+`min={checkInDate}` fürs Check-out). Ein Datumspicker lässt also für
+Hinflug/Check-in problemlos ein Datum in der Vergangenheit zu — der
+Button wird nicht deaktiviert (`isValid` prüft nur, ob überhaupt ein
+Datum gesetzt ist, nicht ob es in der Zukunft liegt). Genau dieser Fall
+landet dann bei der neu verbesserten, aber bewusst allgemein gehaltenen
+Duffel-Fehlermeldung ("bitte prüfe deine Eingaben oder versuche es
+gleich noch einmal", `duffel/client.ts:32`) — ein Nutzer, der sich nur
+im Datum vertippt hat (z. B. 2025 statt 2026), bekommt keinen Hinweis
+darauf, *welche* Eingabe das Problem ist, und muss raten.
+
+*Vorschlag:* `min={new Date().toISOString().slice(0, 10)}` (heutiges
+Datum) auf `FlightWizard.tsx:90` und `HotelWizard.tsx:67` ergänzen —
+verhindert die Vergangenheits-Eingabe direkt im Picker, analog zum
+bereits vorhandenen Muster bei Rückflug/Check-out.
+
+**2. Preise erscheinen roh und ohne deutsches Zahlenformat**
+`FlightCard.tsx:60`, `HotelCard.tsx:35` und `TrainCard.tsx:63` geben
+`{offer.totalAmount} {offer.totalCurrency}` unverändert aus — also z. B.
+"245.00 EUR" statt "245,00 €". Für eine deutschsprachige Reiseplattform,
+bei der es um echtes Geld geht, wirkt ein Preis mit Punkt statt Komma
+und ausgeschriebenem Währungscode statt Symbol unfertig und mindert das
+Vertrauen genau an der Stelle, an der Nutzer:innen am genauesten
+hinschauen. Betrifft alle drei Ergebniskarten gleichermaßen, ist also
+kein Einzelfall, sondern ein wiederkehrendes Muster.
+
+*Vorschlag:* Eine kleine gemeinsame Formatierungsfunktion (z. B.
+`formatPrice(amount, currency)` mit
+`new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(...)`)
+in allen drei Karten statt der rohen String-Verkettung verwenden.
+
+### Nicht geprüft
+Das unter PR #7 laufende Passagierzahl-`NaN`-Fix selbst wurde nicht
+erneut geprüft — das ist IT-Chefs Baustelle und noch nicht auf `main`.
+`TrainCard.tsx`/`HotelWizard.tsx` wurden nur für die zwei oben
+genannten Punkte angesehen, nicht vollständig auf weitere Reibungspunkte
+durchgegangen.
