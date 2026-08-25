@@ -3829,3 +3829,76 @@ worden, nicht vom autonomen Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-25 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` lag exakt auf `origin/main` (`3b2df2d`)
+plus den beiden Fixes aus den ersten beiden Läufen heute (Mikrofon-Fehler,
+Duffel-Fehlermeldungen), kein Nachziehen nötig, direkt weitergearbeitet.
+`main` selbst nicht angerührt.
+
+**Ausgewählter Punkt:** aus `reports/support-chef.md` (24.08.), Vorschlag 1
+— die neue Reise-Checkliste (`ChecklistPanel.tsx`/`checklistRules.ts`, am
+24.08. gebaut) hakt "Transport gebucht" und "Unterkunft gebucht" automatisch
+ab, sobald in der Chat-Planung lediglich ein Transportmodus bzw. eine
+Unterkunft *ausgewählt* wurde (`isAutoItemChecked` prüft nur
+`Boolean(trip.transportMode)`/`Boolean(trip.accommodation)`). Eine echte
+Buchung existiert in der App noch gar nicht (6.2 "Beim Anbieter buchen" ist
+weiterhin offen) — wer zwei grüne Häkchen bei "gebucht" sieht, könnte
+fälschlich annehmen, beides sei bereits fix gebucht.
+
+Vorher geprüft, was aus `reports/it-chef.md`/`reports/support-chef.md` (beide
+24.08.) noch offen war: die übrigen IT-Chef-Punkte (Flug-/Transportsuche
+startet im Hauptchat nie, automatische Unterkunftssuche hängt bei unbekanntem
+Ziel, ausgewählter Flug fehlt im Reiseplan, IATA-Hinweistext auf
+`Flugsuche.tsx`, Duffel-Stays-Feldnamen) am aktuellen Quelltext erneut
+bestätigt — alle unverändert mit denselben Blockern wie in den zahlreichen
+Vorläufen (UX-/Datenmodell-Entscheidung nötig, oder bereits durch die
+`FlightWizard`-Einbindung stillschweigend erledigt, oder ohne echten API-Key
+nicht verifizierbar). `localStorage`-Fix liegt weiterhin fertig auf PR #6,
+nicht dupliziert. Support-Chef-Vorschlag 2 (Checklisten-Haken über
+`localStorage` persistieren) geprüft: würde denselben gemeinsamen
+Persistenz-Mechanismus für alle drei betroffenen Demo-State-Seiten
+(Profil/Einstellungen/Checkliste) auf einmal einführen wollen, wie
+Support-Chef selbst vorschlägt ("gemeinsame, einfache Lösung") — das ist eine
+übergreifende Architekturentscheidung (welcher Mechanismus, welcher Scope,
+vor der eigentlichen Backend-/Nutzerkonten-Entscheidung), nicht ein einzelner
+eng abgegrenzter Punkt. Verworfen zugunsten von Vorschlag 1.
+
+**Warum sicher genug:** Reine Textänderung an zwei bestehenden UI-Labels,
+kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung — Support-Chef hat die exakte
+neue Formulierung bereits vorgeschlagen ("Transport ausgewählt" / "Unterkunft
+ausgewählt"), keine eigene Texterfindung nötig. Klar genug beschrieben (Datei,
+Zeilen und Ursache im Bericht benannt). Ergebnis objektiv prüfbar über einen
+neuen Unit-Test.
+
+**Umgesetzt:**
+- `src/lib/trip/checklistRules.ts`: Labels der beiden automatisch erkannten
+  Punkte `transport` und `accommodation` von "Transport gebucht"/"Unterkunft
+  gebucht" auf "Transport ausgewählt"/"Unterkunft ausgewählt" geändert (exakt
+  wie von Support-Chef vorgeschlagen). Die übrigen drei Auto-Punkte
+  (Reisedaten, Aktivitäten, Budget) sowie alle acht manuellen Punkte
+  unverändert — die betrafen nicht die "gebucht"-Formulierung.
+- `src/lib/trip/checklistRules.test.ts`: neuer Test, der die beiden neuen
+  Label-Texte direkt prüft, damit die Korrektur nicht versehentlich wieder
+  zurückrutscht.
+
+**Geprüft:**
+- `npm ci` (frischer Checkout, `node_modules` fehlte, 647 Pakete).
+- `npx tsc -b` → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden
+  `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`.
+- `npx vitest run` → 25 Testdateien, 102 Tests grün (101 vorher + 1 neu).
+- `npm run build` → Produktions-Build erfolgreich, gleiche vorbestehende
+  Chunk-Size-Warnung.
+
+**Hinweis:** kein Eintrag in `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+angepasst — die Checkliste selbst (6.8/6.9) war bereits als erledigt markiert,
+dies ist nur eine Korrektur am bestehenden Text, kein eigener nummerierter
+Punkt. `reports/support-chef.md` selbst bewusst nicht angefasst — das ist
+bisher ausschließlich vom Support-Chef gepflegt worden, nicht vom autonomen
+IT-Chef-Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

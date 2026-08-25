@@ -43,4 +43,11 @@ describe('checklistRules', () => {
   it('returns false for an unknown id', () => {
     expect(isAutoItemChecked(emptyTrip, 'unknown')).toBe(false)
   })
+
+  it('labels transport/accommodation as "ausgewählt", not "gebucht" — nothing is actually booked yet', () => {
+    const transport = AUTO_CHECKLIST_ITEMS.find((item) => item.id === 'transport')
+    const accommodation = AUTO_CHECKLIST_ITEMS.find((item) => item.id === 'accommodation')
+    expect(transport?.label).toBe('Transport ausgewählt')
+    expect(accommodation?.label).toBe('Unterkunft ausgewählt')
+  })
 })

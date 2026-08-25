@@ -13,9 +13,9 @@ export interface ChecklistItem {
  * instead of two separate rows.
  */
 export const AUTO_CHECKLIST_ITEMS: ChecklistItem[] = [
-  { id: 'transport', label: 'Transport gebucht' },
+  { id: 'transport', label: 'Transport ausgewählt' },
   { id: 'dates', label: 'Reisedaten festgelegt' },
-  { id: 'accommodation', label: 'Unterkunft gebucht' },
+  { id: 'accommodation', label: 'Unterkunft ausgewählt' },
   { id: 'activities', label: 'Aktivitäten geplant' },
   { id: 'budget', label: 'Budget festgelegt' },
 ]
