@@ -1113,3 +1113,52 @@ Ni-Info nicht nötig — beide Prüfungen sauber reproduziert, alle
 Datei-/Zeilenangaben und Tatsachenbehauptungen stimmen, kein
 Erfundenes gefunden, kein wiederholter Regelverstoß, kein dringlicher
 Fund.
+
+## 2026-08-25, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `origin/main` (`3b2df2d`): drei
+  code-ändernde Fixes aus den ersten drei heutigen Läufen (Mikrofon-Fehler
+  im KI-Chat sichtbar gemacht, rohe Duffel-Fehlermeldungen übersetzt,
+  Checkliste "ausgewählt" statt irreführend "gebucht") plus zwei
+  reine Log-Commits ohne Codeänderung (HotelWizard-NaN-Fix vom 24.08.,
+  ein Lauf ohne neuen sicheren Punkt).
+- `marketing-chef/auto` — keine neuen Commits gegenüber `origin/main`
+  (läuft erst um 6 Uhr). Wie vorgesehen ignoriert.
+- `support-chef/auto` — keine neuen Commits gegenüber `origin/main`
+  (läuft erst um 6 Uhr). Wie vorgesehen ignoriert.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch ausgecheckt, `npm install`,
+dann selbst ausgeführt statt nur dem Log zu glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur die 3 bekannten vorbestehenden Warnings
+  in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht
+  durch diesen Branch verursacht).
+- `npx vitest run` → 102/102 Tests grün (25 Testdateien), inkl. der drei
+  neuen Testdateien (`ChatInput.test.tsx`, `HotelWizard.test.tsx`,
+  `duffel/client.test.ts`) und der Erweiterung von
+  `checklistRules.test.ts`.
+
+**Scope-Check:** Diff (`ChatInput.tsx`, `speech.ts`, `duffel/client.ts`,
+`checklistRules.ts` je mit zugehörigem Test, plus `it-chef-auto-log.md`)
+deckt sich exakt mit den drei in `it-chef-auto-log.md` beschriebenen
+Punkten — kein Scope-Creep, jeder Commit einzeln nachvollziehbar
+begründet. Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten (im Duffel-Commit selbst explizit vermerkt). Die neue
+Duffel-Fehlermeldung ("Die Anfrage bei unserem Reise-Anbieter hat nicht
+geklappt...") folgt exakt dem in `MARKENDESIGN.md` ("Fehlermeldungen
+(allgemein)") vorgegebenen Ton — ehrlich und konkret statt generisch.
+Die Checklisten-Umbenennung "gebucht" → "ausgewählt" ist sachlich
+korrekt: eine echte Buchungsfunktion existiert im Code nachweislich noch
+nicht (6.2 "Beim Anbieter buchen" laut Log weiterhin offen).
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `3b2df2d..8fca186`, gepusht). `it-chef/auto` war danach
+bereits identisch mit dem neuen `main`-Stand, kein weiterer Sync nötig.
+
+Lokaler Nebeneffekt beim Prüfen: `npm install` hat wieder dieselbe
+kosmetische `package-lock.json`-Änderung erzeugt wie in früheren Läufen
+(npm-Versions-Artefakt) — verworfen, nicht committet.
+
+Ni-Info nicht nötig — sauberer Merge, alle Checks unabhängig reproduziert,
+kein Fund, der seine Aufmerksamkeit braucht.
