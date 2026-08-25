@@ -172,6 +172,11 @@ export function useChat(speechEnabled: boolean) {
             setStayOffers([])
             setStayLoading(false)
           })
+      } else {
+        const notice = `Für ${trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`
+        setMessages((prev) => [...prev, makeMessage('assistant', notice)])
+        setAvatarState('thinking')
+        if (speechEnabled) speak(notice)
       }
     }
   }
@@ -303,6 +308,10 @@ export function useChat(speechEnabled: boolean) {
               setStayOffers([])
               setStayLoading(false)
             })
+        } else {
+          const notice = `Für ${reply.trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`
+          setMessages((prev) => [...prev, makeMessage('assistant', notice)])
+          if (speechEnabled) speak(notice)
         }
       }
     }, 700)

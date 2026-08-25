@@ -3902,3 +3902,84 @@ IT-Chef-Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-25 (vierter Lauf)
+
+**Vorbereitung:** `it-chef/auto` war bereits vollständig in `main`
+gemerged (Freigabe-Chef-Check `3950d32` == aktueller `origin/main`-Stand
+`5d35c57` als Vorfahre) — Branch frisch von `origin/main` neu aufgesetzt,
+kein Nachziehen von Konflikten nötig. `main` selbst nicht angerührt.
+
+**Ausgewählter Punkt:** aus `reports/it-chef.md` (25.08.), Abschnitt
+"Gefundene Bugs (nicht automatisch gefixt)" — "Automatische
+Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar hängen". Sobald
+Budget erfasst ist, kündigt `getNextAdvisorStep` (`mockAdvisor.ts:104`)
+unbedingt an "Ich suche jetzt nach echten Unterkünften in {destination}",
+aber `useChat.ts` löst die echte Suche nur aus, wenn `findKnownDestination`
+das Ziel in der kuratierten Acht-Städte-Liste (`src/types/stays.ts`)
+findet — bei jedem anderen Ziel passierte danach schlicht nichts mehr,
+weder Angebote noch ein erklärender Hinweis. Denselben fehlenden
+Fallback gibt es auch im "Bearbeiten"-Pfad (`startEdit('accommodation')`
+in `useChat.ts`), wo laut Prompt "ich suche eine neue Unterkunft für
+dich" ebenfalls stillschweigend nichts folgt, wenn das Ziel unbekannt ist.
+
+Andere Punkte aus demselben Bericht geprüft und verworfen: "Flug-/
+Transportsuche startet im Hauptchat nie" ist dort selbst ausdrücklich als
+UX-/Produktentscheidung markiert, PR #7 (Passagierzahl-NaN) wartet
+weiterhin nur auf menschliches Review, PRs #1/#4/#5/#6 sind unverändert
+gemergt-bereit liegen geblieben (kein autonomer Merge-Auftrag). Aus
+`reports/support-chef.md` (24.08.): Vorschlag 1 (Checkliste
+"gebucht"→"ausgewählt") ist bereits im dritten Lauf heute erledigt,
+Vorschlag 2 (gemeinsame `localStorage`-Persistenz über drei Seiten
+hinweg) bleibt wie im dritten Lauf begründet eine übergreifende
+Architekturentscheidung, keine autonome Aufgabe.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+der Fix übernimmt exakt das bereits bestehende, bewährte Muster aus
+demselben Hook für den strukturell identischen Fall (unbekanntes Ziel bei
+der Flugsuche, `useChat.ts` Zeilen ~204-213: dort existiert der
+Hinweistext bereits, hier fehlte das Gegenstück für Unterkünfte). Klar
+genug beschrieben (Datei, exakte Zeilen und Ursache im IT-Chef-Bericht
+benannt). Ergebnis objektiv prüfbar über zwei neue Hook-Tests.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: in beiden Stellen, die eine automatische
+  Unterkunftssuche auslösen können (Haupt-Chat-Ablauf nach Budget-Eingabe,
+  und der `startEdit('accommodation')`-Bearbeiten-Pfad), einen `else`-Zweig
+  ergänzt, der bei unbekanntem Ziel (`findKnownDestination` liefert `null`)
+  eine erklärende Assistenten-Nachricht anhängt ("Für {Ziel} kenne ich noch
+  keine Unterkünfte für die automatische Suche — nutze dafür kurz die
+  manuelle Hotelsuche.") statt die Suche stillschweigend ins Leere laufen
+  zu lassen. Gleicher Wortlaut-Stil wie die bestehende Flug-Variante.
+  `stayOffers`/`stayLoading` bleiben unverändert (`null`/`false`), keine
+  neue Fehleranzeige nötig, da gar keine Suche gestartet wird.
+- `src/hooks/useChat.test.ts` (neu, da der Hook bisher komplett ungetestet
+  war — siehe Vorschlag 3 im IT-Chef-Bericht): zwei Tests mit
+  `renderHook`/Fake-Timern, die die Konversation bis zur Unterkunftssuche
+  mit einem erfundenen, garantiert unbekannten Ziel ("Musterstadt")
+  durchspielen — einmal über den normalen Chat-Ablauf, einmal zusätzlich
+  über `startEdit('accommodation')` — und prüfen, dass jeweils die neue
+  Hinweisnachricht erscheint und `stayOffers`/`stayLoading` unverändert
+  bleiben. `@/lib/duffel/client` und `@/lib/ai/speech` dafür gemockt (erste
+  Nutzung von `renderHook` im Repo, gleiche `@testing-library/react`-Version
+  wie die bestehenden Komponententests).
+
+**Geprüft:**
+- `npm ci` (frischer Checkout, `node_modules` fehlte, 647 Pakete).
+- `npx tsc -b` → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden
+  `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`.
+- `npx vitest run` → 26 Testdateien, 104 Tests grün (102 vorher + 2 neu).
+- `npm run build` → Produktions-Build erfolgreich, gleiche vorbestehende
+  Chunk-Size-Warnung.
+
+**Hinweis:** kein Eintrag in `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+angepasst — dieser Bug war dort kein eigener nummerierter Punkt, sondern
+nur in `reports/it-chef.md` gemeldet. `reports/it-chef.md` selbst bewusst
+nicht angefasst, gleiche Begründung wie in den Vorläufen: das wird bisher
+ausschließlich vom interaktiven IT-Chef-Bericht gepflegt, nicht vom
+autonomen Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
