@@ -1162,3 +1162,62 @@ kosmetische `package-lock.json`-Änderung erzeugt wie in früheren Läufen
 
 Ni-Info nicht nötig — sauberer Merge, alle Checks unabhängig reproduziert,
 kein Fund, der seine Aufmerksamkeit braucht.
+
+## 2026-08-25, Tages-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — keine neuen Commits gegenüber `main` (bereits beim
+  früheren Nacht-Check heute vollständig gemergt). Wie vorgesehen
+  übersprungen.
+- `marketing-chef/auto` — 1 Commit vor `main` (`5843cc6`): kein neues
+  Content-Stück, stattdessen `marketing/freigabe-uebersicht.md`
+  nachgeführt (siebtes Stück vom 24.08. ergänzt) plus zugehöriger
+  Log-Eintrag.
+- `support-chef/auto` — 1 Commit vor `main` (`5f3e1d4`): neuer
+  UX-Analyse-Eintrag zur Mikrofon-Fehleranzeige in `ChatInput.tsx`
+  (heutiger IT-Chef-Fix), reine Analyse ohne Codeänderung.
+
+**Prüfung `marketing-chef/auto`:** Diff (`marketing-chef-auto-log.md`,
+`marketing/freigabe-uebersicht.md`) gelesen. Kein Live-Vorgang — nur eine
+bestehende Übersichts-Markdown-Datei aktualisiert, nichts gepostet/
+angelegt/verändert am eigentlichen Content. Keine erfundenen Kennzahlen.
+Faktenchecks stichprobenartig selbst nachvollzogen statt dem Log zu
+glauben:
+- `marketing/content-stueck-reise-suchen-empfohlen.md` existiert
+  tatsächlich im Branch (siebtes Stück, wie behauptet).
+- `src/components/trip/ChecklistPanel.tsx` Zeile 20: `useState<Set
+  <string>>` ohne Persistenz — Behauptung "weiterhin reiner lokaler
+  Demo-State" stimmt.
+- `ZEITPLAN.md` führt Punkt 6.2 ("Beim Anbieter buchen"-Button)
+  tatsächlich weiterhin als offen (`- [ ]`).
+Text ist vollständig und kohärent, keine bloße Stichpunkt-Skizze.
+→ Nach `main` gemergt (Fast-Forward `da97a8a..5843cc6`).
+
+**Prüfung `support-chef/auto`:** Diff (`support-chef-auto-log.md`, neuer
+Eintrag zu `ChatInput.tsx`/`speech.ts`) gelesen und die beiden genannten
+Reibungspunkte im Code selbst nachvollzogen statt der Log-Behauptung zu
+vertrauen:
+- Reibungspunkt 1 (Fehlerhinweis verschwindet nie von selbst): Datei
+  selbst gelesen — `micError`-State in Zeile 17, Reset nur bei
+  erneutem Mikrofon-Klick (Zeile 28) oder neuem Fehler (Zeile 33),
+  `handleSend` (Zeilen 19-24) fasst `micError` tatsächlich nicht an.
+  Zeilenangaben stimmen exakt.
+- Reibungspunkt 2 (fehlendes `aria-live`): Zeile 74 (`<p>` mit
+  `micError`) hat tatsächlich weder `aria-live` noch `role="status"`.
+  Stimmt.
+- Referenzen auf `KiChat.tsx` (Zeile 92 "Neu starten", Zeile 125
+  `<ChatInput>`-Einbindung) ebenfalls per `grep` verifiziert, stimmen.
+Nichts wirkt erfunden. → Nach `main` gemergt (regulärer Merge, da
+Branch seit dem Marketing-Merge divergiert war; `d109d39`).
+
+**Nach beiden Merges:** `marketing-chef/auto` und `support-chef/auto`
+per Fast-Forward auf den neuen `main`-Stand (`d109d39`) gebracht.
+`it-chef/auto` war bereits aktuell.
+
+**Zusammenfassung:** Beide fälligen Branches (`marketing-chef/auto`,
+`support-chef/auto`) unabhängig geprüft und gemergt, keine Probleme
+gefunden. `it-chef/auto` korrekt als bereits gemergt übersprungen.
+
+Ni-Info nicht nötig — beide Prüfungen sauber reproduziert, alle Datei-/
+Zeilenangaben und Tatsachenbehauptungen stimmen, kein Erfundenes
+gefunden, kein wiederholter Regelverstoß, kein dringlicher Fund.
