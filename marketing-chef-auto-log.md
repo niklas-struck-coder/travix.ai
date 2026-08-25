@@ -4,6 +4,91 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-25
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 21.08.) nachgeführt — das
+siebte, am 24.08. entstandene Stück (`content-stueck-reise-suchen-empfohlen.md`)
+war dort noch nicht eingetragen; der 24.08.-Lauf hatte das bewusst
+zurückgestellt, um nicht zwei Dateien parallel anzufassen, und einen
+Hinweis für den nächsten Blick hinterlassen.
+
+**Warum dieser Punkt statt eines neuen Content-Stücks oder gar nichts:**
+Vor der Auswahl geprüft, ob sich seit dem 24.08. etwas an den drei
+offenen Freigabe-Fragen (Kanal-Start? 6.2 priorisiert? Tier-4-Format
+gewollt?) geändert hat: `git log` zeigt seit dem letzten Marketing-Lauf
+keine Commits außer automatisierten IT-Chef-/Support-Chef-/Freigabe-Chef-
+Läufen (`8fca186`, `011876b`, `4d72bae`, `da97a8a`) — keine Ni-Entscheidung
+dazwischen. `ZEITPLAN.md` bestätigt 6.2 weiterhin offen. Damit gilt die
+Selbstbeschränkung "kein neues Content-Stück" unverändert weiter (kein
+neuer, im Code verifizierter Anlass wie am 24.08.). Statt gar nichts zu
+tun, wurde die seit 24.08. angekündigte, aber noch nicht erledigte
+Nacharbeit an der Freigabe-Übersicht gemacht — das behebt eine echte,
+bereits selbst benannte Lücke, statt den unangetasteten Entwurfsstapel zu
+vergrößern oder die Übersicht unverändert zu lassen.
+
+Die drei heutigen IT-Chef-Commits wurden einzeln geprüft und bewusst
+nicht zu Content verarbeitet:
+- `8fca186` (Checkliste "ausgewählt" statt "gebucht"): behebt nur die
+  irreführende Beschriftung, nicht die am 24.08. vom Marketing-Bericht
+  genannte eigentliche Werbe-Sperre (die 8 manuellen Punkte bleiben ohne
+  Persistenz über Reloads hinweg, `ChecklistPanel.tsx` Zeile 20 im Code
+  geprüft) — Checkliste bleibt damit weiterhin bewusst unbeworben.
+- `011876b` (Duffel-Fehlermeldungen übersetzt) und `4d72bae`
+  (Mikrofon-Fehler sichtbar gemacht): beide wenden nur die bereits
+  bestehende `MARKENDESIGN.md`-Vorgabe "Fehlermeldungen (allgemein)" an,
+  kein neuer Design-Bedarf für `MARKENDESIGN.md`. Beide einzeln zu klein
+  für ein eigenes Content-Stück; passend zum im Bericht vom 24.08. selbst
+  skizzierten gebündelten Format ("Was wir diese Woche ehrlicher gemacht
+  haben"), das aber laut demselben Bericht erst sinnvoll ist, sobald
+  echte Kanäle live sind — bisher nicht der Fall.
+
+**Warum sicher genug:** Ergebnis ist eine reine Übersichts-/
+Dokumentaktualisierung, kein Live-Vorgang — nichts wird gepostet, kein
+Kanal angelegt, kein bestehender Text verändert oder gelöscht. Keine
+erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die
+Aktualisierung entscheidet nichts neu (insbesondere nicht, was
+tatsächlich veröffentlicht wird — das bleibt ausdrücklich Nis
+Entscheidung), sondern trägt nur bereits im Repo nachprüfbare Fakten
+nach (siebtes Stück, Checklisten-Persistenz-Status, drei kleine
+IT-Korrekturen).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes Content-Stück — hätte den von `reports/marketing-chef.md`
+  (20.08.) kritisierten, unangetasteten Entwurfsstapel weiter vergrößert,
+  ohne neuen, im Code verifizierten "gerade passiert"-Anlass (anders als
+  am 24.08. bei der Empfohlen-Badge-Bedingung).
+- Gebündeltes "Was wir diese Woche ehrlicher gemacht haben"-Stück zu den
+  drei heutigen IT-Korrekturen — laut eigenem Bericht vom 24.08. explizit
+  an "sobald die ersten Kanäle live sind" gebunden; noch kein Kanal live.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) und
+  "Launch-Kampagne vorbereiten" (Sprint 7) — beide weiterhin entweder
+  ausdrücklich ein Live-Vorgang oder an denselben ungelösten Blockern
+  (keine Landingpage, offene Freigabe-Fragen) hängend wie in den
+  bisherigen Läufen.
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — die heutigen
+  IT-Fixes wenden bereits bestehende Vorgaben an, kein neuer,
+  konkreter Design-Bedarf erkennbar.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand, entspricht dem Lauf vom 24.08.) war laut
+`git merge-base --is-ancestor` bereits vollständig in `main` gemerged
+(vom Freigabe-Chef am 24.08. bestätigt, siehe `freigabe-chef-log.md`).
+Branch daher neu von aktuellem `origin/main` (`da97a8a`, inkl. der drei
+IT-Chef-Commits vom 25.08.) angelegt, gleiches Vorgehen wie bei allen
+bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei aktualisiert und dieser Log-Eintrag — kein
+Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-24
 
 **Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
