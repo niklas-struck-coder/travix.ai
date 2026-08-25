@@ -3760,3 +3760,72 @@ autonomen Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-25 (zweiter Lauf)
+
+**Ausgewählter Punkt:** Aus `reports/it-chef.md` (24.08.) — "Rohe, englische
+Duffel-Fehlermeldungen im UI": `src/lib/duffel/client.ts` reichte
+`json?.errors` von der Duffel-API unverändert durch, in
+`Flugsuche.tsx`/`Hotelsuche.tsx`/`FlightResults.tsx` landet
+`error.message` direkt im UI.
+
+**Zuerst geprüft, was aus dem Bericht schon erledigt war:** Der ebenfalls
+im Bericht gelistete Punkt "IATA-Code-Eingabe ohne Erklärung
+(Duffel-Suchseite)" war bereits stillschweigend behoben — `Flugsuche.tsx`
+rendert direkt `<FlightWizard>`, und der Hinweistext dort wurde schon am
+24.08. ergänzt (der Bericht war an dieser Stelle veraltet). Ebenso die
+HotelWizard-NaN-Absicherung (bereits im vorherigen Lauf um 22:09 UTC
+erledigt, `Number.isNaN`-Guard in `HotelWizard.tsx` vorhanden). Beides
+nicht erneut angefasst.
+
+**Warum sicher genug:** Rein defensive Fehlerdarstellung in der
+API-Client-Schicht (`src/lib/duffel/client.ts`), kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung: der Ton ist durch den bestehenden
+Abschnitt "Fehlermeldungen (allgemein)" in `MARKENDESIGN.md` vorgegeben
+("ehrlich und konkret statt generisch ... sag was schiefging und was als
+Nächstes zu tun ist"). Ergebnis objektiv prüfbar über zwei neue
+Unit-Tests (rohe API-Fehlertexte werden nicht mehr durchgereicht;
+Statuscode-Fallback bekommt einen konkreten nächsten Schritt).
+
+**Umgesetzt:**
+- `src/lib/duffel/client.ts` (`callDuffelProxy`): bei einer
+  fehlgeschlagenen Anfrage werden rohe `json.errors`-Einträge (englischer
+  Duffel-API-Text) nicht mehr direkt an den Aufrufer weitergereicht.
+  Stattdessen: die rohen Fehler werden per `console.error` geloggt (für
+  Debugging), und in `errors` landet für jeden Eintrag eine einheitliche,
+  ehrliche deutsche Meldung mit konkretem nächsten Schritt ("Die Anfrage
+  bei unserem Reise-Anbieter hat nicht geklappt — bitte prüfe deine
+  Eingaben oder versuche es gleich noch einmal."), der optionale
+  `code`-Wert bleibt für spätere gezieltere Auswertung erhalten. Der
+  bisherige Statuscode-Fallback (wenn die API gar keine `errors` liefert)
+  bekommt ebenfalls einen konkreten nächsten Schritt angehängt.
+- Betrifft automatisch alle drei bisherigen Anzeigeorte
+  (`Flugsuche.tsx`, `Hotelsuche.tsx`, `FlightResults.tsx`), da alle
+  denselben `errors`-Rückgabewert aus `client.ts` rendern — keine
+  Änderung an diesen drei Dateien nötig.
+- Neuer Test `src/lib/duffel/client.test.ts` (2 Fälle): rohe
+  API-Fehlertexte (z. B. `slices[0].origin: could not be resolved`)
+  tauchen nicht mehr in der Nutzer-Meldung auf, der `code` bleibt
+  erhalten; ohne `errors`-Feld greift der Statuscode-Fallback mit
+  Handlungsempfehlung.
+
+**Geprüft:**
+- `npm ci` (frischer Checkout im vorherigen Lauf schon durchgeführt,
+  hier erneut ausgeführt zur Sicherheit).
+- `npx tsc -b` → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden
+  `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`.
+- `npx vitest run` → 25 Testdateien, 101 Tests grün (99 vorher + 2 neu).
+- `npm run build` → Produktions-Build erfolgreich, gleiche vorbestehende
+  Chunk-Size-Warnung.
+
+**Hinweis:** kein Eintrag in `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+angepasst — auch dieser Bug war dort kein eigener nummerierter Punkt,
+sondern nur in `reports/it-chef.md` gemeldet. `reports/it-chef.md` selbst
+bewusst nicht angefasst, gleiche Begründung wie im vorherigen Lauf: das
+ist bisher ausschließlich vom interaktiven IT-Chef-Bericht gepflegt
+worden, nicht vom autonomen Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -21,7 +21,21 @@ async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<Duf
     const json = await response.json()
 
     if (!response.ok) {
-      return { data: null, errors: json?.errors ?? [{ message: `Duffel-Anfrage fehlgeschlagen (${response.status})` }] }
+      const rawErrors: { message?: string; code?: string }[] = json?.errors ?? []
+      if (rawErrors.length > 0) {
+        // Duffel's own error text is English API jargon, not something to show
+        // travellers directly — log it for debugging, show an honest, concrete
+        // German fallback instead (see MARKENDESIGN.md "Fehlermeldungen (allgemein)").
+        console.error('Duffel-Anfrage fehlgeschlagen', response.status, rawErrors)
+      }
+      const errors: DuffelError[] =
+        rawErrors.length > 0
+          ? rawErrors.map((error) => ({
+              message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt — bitte prüfe deine Eingaben oder versuche es gleich noch einmal.',
+              code: error.code,
+            }))
+          : [{ message: `Duffel-Anfrage fehlgeschlagen (${response.status}) — bitte versuche es gleich noch einmal.` }]
+      return { data: null, errors }
     }
     return { data: json?.data ?? null, errors: [] }
   } catch (error) {
