@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, BellOff, Sparkles } from 'lucide-react'
+import { Bell, Sparkles, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -93,7 +93,7 @@ export function Preisalarme() {
                     title="Preisalarm entfernen"
                     onClick={() => removeAlert(alert.id)}
                   >
-                    <BellOff className="size-4" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
 

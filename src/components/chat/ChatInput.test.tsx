@@ -58,4 +58,34 @@ describe('ChatInput microphone errors', () => {
     fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
     expect(screen.queryByText(/Spracheingabe hat nicht geklappt/)).not.toBeInTheDocument()
   })
+
+  it('clears a previous error when the user sends a typed message instead', () => {
+    // @ts-expect-error test-only global stub
+    window.SpeechRecognition = FakeSpeechRecognition
+
+    render(<ChatInput onSend={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
+    act(() => lastInstance?.onerror?.())
+    expect(screen.getByText(/Spracheingabe hat nicht geklappt/)).toBeInTheDocument()
+
+    fireEvent.change(screen.getByPlaceholderText('Beschreibe deine Traumreise…'), {
+      target: { value: 'Hallo' },
+    })
+    fireEvent.click(screen.getByLabelText('Senden'))
+
+    expect(screen.queryByText(/Spracheingabe hat nicht geklappt/)).not.toBeInTheDocument()
+  })
+
+  it('announces the microphone error to screen readers via role="status"', () => {
+    // @ts-expect-error test-only global stub
+    window.SpeechRecognition = FakeSpeechRecognition
+
+    render(<ChatInput onSend={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
+    act(() => lastInstance?.onerror?.())
+
+    expect(screen.getByRole('status')).toHaveTextContent('Spracheingabe hat nicht geklappt')
+  })
 })

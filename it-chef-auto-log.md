@@ -4134,3 +4134,74 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf, vierte Ausführung desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `1f52875`), keine offenen Änderungen von einem vorherigen Lauf.
+`origin/main` per Fast-Forward-Merge reingebracht (acht neue Commits,
+u. a. neue Berichte von Support-/Marketing-Chef und ein Freigabe-Chef-
+Merge) — `main` selbst blieb dabei unberührt, nur lokal/auf `it-chef/auto`
+vorgespult.
+
+**Ausgewählter Punkt:** Anders als in den vorherigen drei Läufen heute gab
+es diesmal eine echte Änderung an der relevanten Quelle: `reports/support-
+chef.md` wurde um 13:34 UTC (Commit `e8235d4`) mit zwei neuen, noch nicht
+behobenen Reibungspunkten aktualisiert:
+1. `src/components/chat/ChatInput.tsx` — der Mikrofon-Fehlerhinweis
+   ("Spracheingabe hat nicht geklappt …") wird nie zurückgesetzt, wenn
+   man dem eigenen Rat folgt und stattdessen normal tippt (`handleSend`
+   ruft `setMicError` nirgends auf); zusätzlich fehlt dem Hinweis-`<p>`
+   `role="status"`/`aria-live`, sodass Screenreader-Nutzer:innen die
+   Fehlermeldung gar nicht mitbekommen.
+2. `src/pages/Preisalarme.tsx:96` — der Entfernen-Button nutzt das
+   `BellOff`-Icon (durchgestrichene Glocke), was wie "Stummschalten"
+   aussieht, tatsächlich aber unwiderruflich löscht; Vorschlag war ein
+   eindeutiges Löschen-Icon.
+
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` selbst unverändert seit
+den vorherigen Läufen — alle dort notierten Blocker (4.1-4.3 Base44/
+Gemini-Zugangsdaten; 6.2/6.6/6.7/7.12 fehlende Preis-/Item-Datenfelder in
+`TripDraft`; 7.4 fehlende Mehrfach-Trip-Chat-Historie; 7.7/8.5-8.7 zu groß/
+vage; 8.2/8.3 echter LLM-/Vision-Zugang nötig; 8.4 gleicher Erfindungs-
+Konflikt wie `mockConcierge.ts`; 8.11 blockiert auf FAQ-Inhalte) bestehen
+weiter fort, deshalb diesmal Punkt aus dem Support-Chef-Bericht statt aus
+`ZEITPLAN.md` gewählt — gleiches Muster wie die vorherigen PRs #8/#9, die
+ebenfalls aus Support-Chef-Funden entstanden sind.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten — reine UI-/Barrierefreiheits-Korrekturen an bereits
+bestehenden Demo-Seiten. Keine offene Produkt-/Architekturentscheidung
+(kein neues Datenfeld, keine neue Abhängigkeit). Klar genug beschrieben —
+Support-Chef nannte Datei, Zeile und konkreten Fix-Vorschlag. Ergebnis
+objektiv prüfbar über Tests/Typecheck/Lint plus manuelle Verifikation
+der Icon-/State-Logik.
+
+**Umgesetzt:**
+- `src/components/chat/ChatInput.tsx`: `handleSend` ruft jetzt
+  `setMicError(null)` auf, sodass eine alte Mikrofon-Fehlermeldung
+  verschwindet, sobald normal getippt und gesendet wird. Das
+  Hinweis-`<p>` hat jetzt `role="status"`, damit Screenreader die
+  Meldung automatisch ankündigen.
+- `src/pages/Preisalarme.tsx`: Entfernen-Button nutzt jetzt `Trash2`
+  statt `BellOff` (Import entsprechend angepasst) — konsistent mit dem
+  bestehenden Lösch-Icon-Muster in `Reiseentwuerfe.tsx`/`EditMode.tsx`.
+  `aria-label`/Verhalten unverändert, nur das visuell irreführende Icon
+  ersetzt.
+- Tests ergänzt: `ChatInput.test.tsx` bekommt zwei neue Fälle (Fehler
+  verschwindet beim Senden einer getippten Nachricht; Fehlermeldung ist
+  über `role="status"` auffindbar). `Preisalarme.test.tsx`
+  Testbeschreibung an das neue Icon angepasst (Verhalten/Assertions
+  unverändert, da `aria-label` gleich blieb).
+- `ZEITPLAN.md` bewusst nicht geändert — beide Punkte sind reine
+  Support-Chef-Reibungspunkte ohne eigene Checkbox dort, nicht Teil der
+  Sprint-Liste.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+dieselben 3 vorbestehenden `react-refresh`-Warnings), `npx vitest run`
+(26 Testdateien, 106 Tests — 104 vorher plus 2 neue —, alle grün),
+`npm run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
