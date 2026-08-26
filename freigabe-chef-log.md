@@ -1277,3 +1277,49 @@ gemergt, da schon Neues vorlag. `marketing-chef/auto` korrekt
 Ni-Info nicht nötig — alle Checks tatsächlich selbst ausgeführt und
 grün, Scope passt, alle Datei-/Zeilenangaben stimmen, kein Erfundenes
 gefunden, kein wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-26, autonomer Tageslauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits durch den früheren
+  Nacht-Check von heute vollständig gemergt, siehe Eintrag oben). Nichts
+  zu tun.
+- `marketing-chef/auto` — 1 Commit vor `main`: Ergänzung von
+  `marketing/freigabe-uebersicht.md` (Stand 26.08.) plus Log-Eintrag.
+- `support-chef/auto` — 1 Commit vor `main`: neuer UX-Bericht zu
+  `Preisalarme.tsx` (zweiter Lauf heute).
+
+**`marketing-chef/auto` geprüft:** Reine Dokument-Ergänzung, kein
+Live-Vorgang (nichts gepostet/versendet, kein neuer Content-Text, nur
+eine bestehende Übersicht um eine Prüf-Notiz ergänzt). Keine erfundenen
+Kennzahlen. Stichprobenartig zwei Behauptungen im Code verifiziert:
+`ChecklistPanel.tsx:13-16` bestätigt wie im Log behauptet reinen
+lokalen `useState`-Demo-State ohne Persistenz; Commit `e69a523`
+(`useChat.ts`) entspricht exakt der im Log beschriebenen
+Verhaltensänderung (Hinweistext bei unbekanntem Ziel statt
+stillschweigendem Hängenbleiben). Text vollständig und kohärent, kein
+Stichpunkt-Fragment. → Passt, gemergt.
+
+**`support-chef/auto` geprüft:** Reiner Analyse-Bericht ohne
+Code-Änderung (niedrigstes Risiko). Beide gemeldeten Reibungspunkte zu
+`Preisalarme.tsx` im aktuellen Quelltext nachvollzogen: Zeile ~38-40
+(`formatEuro` mit `toLocaleString('de-DE')`) bestätigt als positives
+Gegenbeispiel zu den früheren Preisformat-Funden; `BellOff`-Icon beim
+Entfernen-Button (Zeile ~96) und `removeAlert`, das den Alarm
+unwiderruflich aus der Liste filtert (kein Wiederherstellen-Weg),
+exakt wie beschrieben nachvollzogen. Nichts wirkt erfunden. → Passt,
+gemergt.
+
+**Merge-Vorgehen:** Beide Branches waren nach dem `it-chef/auto`-Merge
+von heute früh noch unverändert Fast-Forward-fähig zu `main`
+(`f71f0ec..93bb408` für `marketing-chef/auto`, `93bb408..b43a36f` für
+`support-chef/auto`). Gepusht.
+
+**Zusammenfassung:** Alle drei Branches geprüft. `it-chef/auto` bereits
+aktuell (nichts zu tun). `marketing-chef/auto` und `support-chef/auto`
+unabhängig verifiziert (Stichproben-Behauptungen im Code nachvollzogen,
+keine reine Log-Gläubigkeit) und beide gemergt.
+
+Ni-Info nicht nötig — alle Merges glatt, alle geprüften Behauptungen
+stimmten mit dem Code überein, kein Erfundenes gefunden, kein
+wiederholter Regelverstoß, kein dringlicher Fund.
