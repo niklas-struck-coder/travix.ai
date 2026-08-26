@@ -90,6 +90,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             type="date"
             value={departureDate}
             onChange={(event) => setDepartureDate(event.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
             required
           />
         </div>
