@@ -1221,3 +1221,59 @@ gefunden. `it-chef/auto` korrekt als bereits gemergt übersprungen.
 Ni-Info nicht nötig — beide Prüfungen sauber reproduziert, alle Datei-/
 Zeilenangaben und Tatsachenbehauptungen stimmen, kein Erfundenes
 gefunden, kein wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-26 (früher Nacht-Check, nach IT-Chefs stündlichen Läufen 0-4 Uhr)
+
+**Prüfung `it-chef/auto`:** 4 Commits ggü. `main` (`5d35c57`), davon 3
+reine Log-Einträge ohne Codeänderung ("kein neuer sicherer Punkt
+gefunden") und ein echter Fix (`e69a523`): `useChat.ts` kündigte nach
+Budget-Eingabe (Haupt-Chat-Ablauf und `startEdit('accommodation')`-Pfad)
+unbedingt eine Unterkunftssuche an, löste sie aber nur bei einem der acht
+kuratierten Ziele wirklich aus — bei jedem anderen Ziel passierte danach
+nichts mehr. Fix ergänzt in beiden Stellen einen `else`-Zweig mit
+Hinweistext auf die manuelle Hotelsuche, analog zum bestehenden Muster
+bei der Flugsuche. Unabhängig selbst verifiziert, nicht nur den Log
+geglaubt:
+- `npm install` (node_modules fehlte lokal noch).
+- `npx tsc -b` → sauber, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur 3 vorbestehende Warnings in
+  `components/ui/{badge,button,tabs}.tsx` (react-refresh, unabhängig
+  von diesem Diff).
+- `npx vitest run` → 26/26 Testdateien, 104/104 Tests grün, inkl. der
+  beiden neuen `useChat.test.ts`-Fälle (Haupt-Ablauf und
+  Bearbeiten-Pfad).
+Scope passt exakt zum beschriebenen einen Punkt, keine Berührung von
+Auth/Zahlungen/rechtlichen Texten, kein UI-/Design-Element betroffen
+(nur Chat-Text). → Nach `main` gemergt (Fast-Forward `5d35c57..fc6131a`).
+
+**Prüfung `marketing-chef/auto`:** 0 Commits ggü. `main` — bereits
+vollständig gemerged (letzter Marketing-Bericht `5d35c57` ist Teil von
+`main`). Wie angekündigt für diesen frühen Lauf übersprungen, da noch
+nichts Neues von heute; der reguläre 6-Uhr-Lauf deckt das ab.
+
+**Prüfung `support-chef/auto`:** 1 Commit ggü. `main` (`b429e5f`, reiner
+Log-Eintrag in `support-chef-auto-log.md`, keine Codeänderung) —
+trotz frühem Lauf kurz mitgeprüft, da bereits etwas Neues vorlag. Zwei
+neue Reibungspunkte zu Such-Assistenten (`FlightWizard.tsx`/
+`HotelWizard.tsx`: fehlendes `min`-Attribut bei Hinflug/Check-in erlaubt
+Vergangenheitsdatum, analog zum vorhandenen Muster bei Rückflug/
+Check-out geprüft und bestätigt; `FlightCard.tsx:60`, `HotelCard.tsx:35`,
+`TrainCard.tsx:63`: Preise ohne deutsches Zahlenformat, roh als
+`{totalAmount} {totalCurrency}` ausgegeben). Beide Datei-/
+Zeilenangaben im aktuellen Quelltext nachvollzogen, stimmen exakt.
+Nichts wirkt erfunden. → Nach `main` gemergt (regulärer Merge, da Branch
+seit dem IT-Chef-Merge divergiert war; `1fcf468`).
+
+**Nach beiden Merges:** `it-chef/auto` und `support-chef/auto` per
+Fast-Forward auf den neuen `main`-Stand (`1fcf468`) gebracht.
+`marketing-chef/auto` war bereits aktuell.
+
+**Zusammenfassung:** `it-chef/auto` unabhängig verifiziert (Build/Lint/
+Tests tatsächlich selbst ausgeführt, nicht nur Log geglaubt) und
+gemergt. `support-chef/auto` zusätzlich kurz mitgeprüft und ebenfalls
+gemergt, da schon Neues vorlag. `marketing-chef/auto` korrekt
+übersprungen (nichts Neues, regulärer Lauf erst um 6 Uhr).
+
+Ni-Info nicht nötig — alle Checks tatsächlich selbst ausgeführt und
+grün, Scope passt, alle Datei-/Zeilenangaben stimmen, kein Erfundenes
+gefunden, kein wiederholter Regelverstoß, kein dringlicher Fund.
