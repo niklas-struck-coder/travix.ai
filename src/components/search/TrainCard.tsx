@@ -2,6 +2,7 @@ import { Train, ArrowRight, Clock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { formatPrice } from '@/lib/utils'
 import type { TrainOffer } from '@/types/trains'
 
 function formatTime(isoString: string) {
@@ -60,7 +61,7 @@ export function TrainCard({ offer, onSelect }: TrainCardProps) {
         )}
         <div className="flex items-center justify-between pt-1">
           <span className="font-heading text-xl font-semibold text-navy">
-            {offer.totalAmount} {offer.totalCurrency}
+            {formatPrice(offer.totalAmount, offer.totalCurrency)}
           </span>
           {onSelect && (
             <Button size="sm" onClick={() => onSelect(offer)} className="bg-teal text-navy hover:bg-teal/90">
