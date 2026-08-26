@@ -4090,3 +4090,47 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf, dritte Ausführung desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits ausgecheckt (Stand `1f52875`,
+identisch mit `origin/it-chef/auto`), keine offenen Änderungen von einem
+vorherigen Lauf, `main` unberührt gelassen.
+
+**Kein neuer sicherer Punkt gefunden.** Relevanter Zustand seit dem
+vorherigen Eintrag (nur wenige Stunden zuvor) unverändert:
+- `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` unverändert seit
+  dem letzten Lauf.
+- `reports/it-chef.md` unverändert seit 25.08. 12:41 UTC,
+  `reports/support-chef.md` unverändert seit 24.08. 13:35 UTC.
+- PRs #1, #4, #5, #6, #7 via GitHub geprüft: alle weiterhin offen und
+  nicht gemergt, warten weiterhin auf menschliches Review. Kein neuer
+  Merge-Konflikt, keine dadurch neu freigewordene Aufgabe.
+- Alle in den vorherigen Einträgen aufgeführten Blocker (4.1-4.3 Base44/
+  Gemini-Zugangsdaten; 6.2/6.6/6.7/7.12 fehlende Preis-/Item-Datenfelder
+  in `TripDraft`; 7.4 fehlende Mehrfach-Trip-Chat-Historie; 7.7/8.5-8.7 zu
+  groß/vage ohne eigene Scope-Entscheidung; 8.2/8.3 echter LLM-/Vision-
+  Zugang nötig; 8.4 gleicher Erfindungs-Konflikt wie `mockConcierge.ts`;
+  8.11 blockiert auf FAQ-Inhalte vom Support-Chef) bestehen unverändert
+  fort.
+
+**Zusätzliche eigene Prüfung in diesem Lauf** (bisher nicht einzeln
+gegengelesene Dateien, um nicht nur die Vorläufe zu wiederholen):
+`Profil.tsx` und `Einstellungen.tsx` komplett gelesen (Toggle-Chips,
+Select-Felder, IATA-Eingabe) — kein Bug gefunden, insbesondere kein
+`NaN`-artiges Problem wie beim `FlightWizard.tsx`-Fix auf PR #7, da das
+Heimatflughafen-Feld ein reines Text-/Uppercase-Feld ohne `Number(...)`-
+Konvertierung ist. Zusätzlich Repo-weiter Grep auf `TODO`/`FIXME`/`XXX`
+und `console.log` in `src/` — keine Treffer.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings), `npx vitest run` (26
+Testdateien, 104 Tests, alle grün), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
