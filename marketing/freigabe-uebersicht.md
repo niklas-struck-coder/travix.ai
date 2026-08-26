@@ -1,10 +1,54 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-25)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-26)
 
 Kein neuer Content-Text — dieses Dokument sortiert die inzwischen sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-08-26: geprüft, alles unverändert — inklusive zweier neuer, noch offener Support-Chef-Funde
+
+Vor der Auswahl geprüft, ob sich seit dem 25.08.-Lauf etwas an den drei
+offenen Fragen unten oder an den beiden Tier-2/Tier-4-Blockern geändert
+hat. Ergebnis: nein, an keiner Stelle.
+
+- **Die drei offenen Fragen** (Kanal-Start? 6.2 priorisiert? Tier-4-Format
+  gewollt?) sind weiterhin unbeantwortet — kein neuer Commit dazu, `git
+  log` zeigt seit dem 25.08.-Marketing-Lauf nur automatisierte IT-Chef-/
+  Support-Chef-/Freigabe-Chef-Läufe (`e69a523`, `b429e5f`, drei reine
+  Log-Einträge ohne Codeänderung, `1fcf468`, `f71f0ec`).
+- **6.2 (Buchen-Button in `Warenkorb.tsx`)** laut `ZEITPLAN.md` weiterhin
+  offen — Tier 2 (`content-stueck-warenkorb-echte-summen.md`) bleibt
+  zurückgehalten.
+- **Checkliste (`ChecklistPanel.tsx`)** hat laut Code (Zeile 20,
+  `useState`) weiterhin keine Persistenz über Reloads hinweg — bleibt
+  unbeworben.
+- **Neuer IT-Fix seit gestern:** `e69a523` behebt, dass die automatische
+  Unterkunftssuche nach Budget-Eingabe bei unbekanntem Ziel (sieben der
+  acht kuratierten Ziele ausgenommen) bisher stillschweigend hängen
+  blieb — jetzt folgt ein Hinweistext auf die manuelle Hotelsuche, analog
+  zum bestehenden Flugsuche-Muster. Geprüft (`src/hooks/useChat.ts`,
+  Diff von `e69a523`): echte Verhaltensänderung, kein reines Label. Für
+  ein eigenes Content-Stück trotzdem zu klein und zu technisch, um allein
+  eine Kernaussage zu tragen — passt stattdessen zum bereits im Bericht
+  vom 24./25.08. skizzierten gebündelten Format ("Was wir diese Woche
+  ehrlicher gemacht haben"), das laut demselben Bericht erst sinnvoll
+  ist, sobald echte Kanäle live sind. Bisher kein Kanal live, daher
+  weiterhin kein eigenes Stück dazu — als weiterer Kandidat für das
+  gebündelte Format vorgemerkt.
+- **Zwei neue, aber noch ungefixte Reibungspunkte vom Support-Chef
+  (26.08., `support-chef-auto-log.md`):** fehlendes `min`-Attribut bei
+  Hinflug-/Check-in-Datum (Vergangenheitsdatum wählbar) und rohe
+  Preisdarstellung ohne deutsches Zahlenformat in den drei
+  Ergebniskarten. Beide sind reine Fehlerberichte, noch keine
+  IT-Chef-Korrektur — für Content ohnehin nicht relevant, solange nichts
+  behoben ist: ein Post über "ehrliche, saubere Preisanzeige" wäre vor
+  dem Fix schlicht falsch.
+
+Damit bleibt die Selbstbeschränkung "kein neues Content-Stück" unverändert
+bestehen — kein achtes Stück, keine neue inhaltliche Priorisierung nötig,
+da sich am zugrunde liegenden Stand nichts geändert hat, das eine
+Neubewertung rechtfertigen würde.
 
 ## Update 2026-08-25: siebter Entwurf nachgetragen, sonst unverändert
 

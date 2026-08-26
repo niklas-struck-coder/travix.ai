@@ -4,6 +4,97 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-26
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 25.08.) um eine kurze
+Prüf-Notiz vom 26.08. ergänzt — dokumentiert, dass sich seit dem letzten
+Marketing-Lauf nichts an den drei offenen Freigabe-Fragen, an Tier 2
+(Warenkorb/6.2) oder an der Checklisten-Persistenz geändert hat, und
+ordnet den neuen IT-Fix sowie zwei neue, noch ungefixte Support-Chef-
+Funde ein.
+
+**Warum dieser Punkt statt eines neuen Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`5843cc6`,
+25.08.) geprüft: fünf neue Commits, davon drei reine IT-Chef-Log-
+Einträge ohne Codeänderung ("kein neuer sicherer Punkt"), ein echter
+IT-Fix (`e69a523`, automatische Unterkunftssuche bei unbekanntem Ziel
+nicht mehr stillschweigend hängend) und ein Support-Chef-Bericht
+(`b429e5f`, zwei neue Reibungspunkte bei Datum/Preisformat, beide noch
+nicht behoben). `ZEITPLAN.md` bestätigt: 6.2 weiterhin offen, kein neuer
+Kanal live, keine Notiz von Ni zu einer der drei Fragen. Ein achtes
+Content-Stück hätte damit erneut nur den in `reports/marketing-chef.md`
+(20.08.) kritisierten, unangetasteten Entwurfsstapel vergrößert, ohne
+neuen, im Code verifizierten "gerade passiert"-Anlass, der groß genug für
+ein eigenständiges Stück ist (siehe Prüfung des IT-Fixes unten). Statt
+gar nichts zu tun, wurde die Freigabe-Übersicht um den heutigen
+Prüfstand ergänzt — echte, im Code nachvollzogene Information, kein
+bloßes Wiederholen des Vortags.
+
+`e69a523` einzeln geprüft (`src/hooks/useChat.ts`, Diff gelesen): echte
+Verhaltensänderung (Hinweistext auf manuelle Hotelsuche statt
+stillschweigendem Hängenbleiben bei sieben der acht kuratierten Ziele),
+aber für ein eigenes Content-Stück zu klein und zu technisch, um allein
+eine Kernaussage zu tragen — gleiche Einstufung wie die drei kleinen
+IT-Korrekturen vom 25.08. (`reports/marketing-chef.md`, Vorschlag 2):
+passt zum skizzierten gebündelten Format ("Was wir diese Woche ehrlicher
+gemacht haben"), das laut demselben Bericht erst sinnvoll ist, sobald
+echte Kanäle live sind — weiterhin nicht der Fall.
+
+`b429e5f` (Support-Chef, zwei neue Funde: fehlendes `min`-Attribut bei
+Hinflug-/Check-in-Datum, rohe Preisdarstellung ohne deutsches
+Zahlenformat) ist reiner Fehlerbericht ohne Code-Fix — für Content nicht
+relevant, solange nichts behoben ist: ein Post über saubere Preisanzeige
+wäre vor dem Fix schlicht falsch. In der Übersicht vermerkt, nicht zu
+Content verarbeitet.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung, kein
+Live-Vorgang — nichts wird gepostet, kein Kanal angelegt, kein
+bestehender Text verändert oder gelöscht (nur eine neue Sektion
+hinzugefügt). Keine erfundenen Kennzahlen. Keine offene
+Positionierungs-Grundsatzfrage: die Ergänzung entscheidet nichts neu
+(insbesondere nicht, was tatsächlich veröffentlicht wird — das bleibt
+ausdrücklich Nis Entscheidung), sondern trägt nur bereits im Repo
+nachprüfbare Fakten nach (Commit-Historie, Code-Diff, ZEITPLAN.md-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes Content-Stück — siehe Begründung oben, kein neuer, groß
+  genug verifizierter "gerade passiert"-Anlass; hätte den kritisierten
+  Entwurfsstapel nur vergrößert.
+- Gebündeltes "Was wir diese Woche ehrlicher gemacht haben"-Stück zu
+  `e69a523` bzw. den drei IT-Korrekturen vom 25.08. — laut eigenem
+  Bericht vom 24.08. explizit an "sobald die ersten Kanäle live sind"
+  gebunden; noch kein Kanal live.
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt weiterhin an der
+  noch nicht live geschalteten Warteliste (Sprint 2).
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) und
+  "Launch-Kampagne vorbereiten" (Sprint 7) — beide weiterhin entweder
+  ausdrücklich ein Live-Vorgang oder an denselben ungelösten Blockern
+  (keine Landingpage, offene Freigabe-Fragen) hängend wie in den
+  bisherigen Läufen.
+- Weitere `MARKENDESIGN.md`-Ergänzungen für IT-Chef — geprüft, ob
+  `e69a523` (Chat-Hinweistext) eine neue Design-Vorgabe bräuchte:
+  `MARKENDESIGN.md`, Abschnitt "Fehlermeldungen (allgemein)", deckt
+  dieses Muster (ehrlich/konkret statt generisch, analog zum bestehenden
+  Flugsuche-Hinweis) bereits ab — kein neuer Design-Bedarf.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand, entspricht dem Lauf vom 25.08., bestätigt durch
+Freigabe-Chef-Log vom 26.08. früh: "0 Commits ggü. main — bereits
+vollständig gemerged") war bereits vollständig in `main` gemerged. Branch
+daher neu von aktuellem `origin/main` (`f71f0ec`, inkl. der IT-Chef-/
+Support-Chef-/Freigabe-Chef-Läufe vom 25./26.08.) angelegt, gleiches
+Vorgehen wie bei allen bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei aktualisiert und dieser Log-Eintrag — kein
+Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-25
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
