@@ -8,20 +8,21 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
-- Interaktiver Reiseplan ("Buchung") inkl. Flugauswahl-Integration & Entwurfskarten
-- Seiten Aktivitäten, Kalender, Warenkorb, Profil, Einstellungen, Kartenansicht,
-  ReiseSuche, KI-Concierge-Chat
+- Seiten Aktivitäten, Buchung, Kalender, Warenkorb, Profil, Einstellungen,
+  Kartenansicht, Reisesuche, Preisalarme, Favoriten, KI-Concierge-Chat
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-24):**
-- IT-Chef Auto: Mikrofon-Fehler im KI-Chat sichtbar gemacht, rohe Duffel-
-  Fehlermeldungen im UI übersetzt, Checkliste zeigt jetzt "ausgewählt" statt
-  irreführend "gebucht"
-- Support-Chef Auto: Mikrofon-Fehleranzeige im KI-Chat geprüft
-- Marketing-Chef Auto: Freigabe-Übersicht um ein weiteres Stück nachgeführt
-- Freigabe-Chef hat alle diese Auto-Zweige geprüft und nach main gemergt
+**Seit letztem Update (2026-08-25):**
+- IT-Chef: PR für Bug "FlightWizard Passagierzahl NaN" eröffnet, automatische
+  Unterkunftssuche bei unbekanntem Ziel hängt nicht mehr stillschweigend;
+  mehrere Auto-Läufe fanden danach keinen weiteren sicheren Punkt (Zustand stabil)
+- Support-Chef: Reibungspunkte bei Preisalarmen gefunden (ungeschütztes
+  Vergangenheitsdatum bei Hinflug/Check-in, Preise ohne deutsches Format)
+- Marketing-Chef: ein Content-Stück als freigabefähig eingestuft, Freigabe-
+  Übersicht laufend nachgeführt
+- Freigabe-Chef hat die geprüften Auto-Zweige mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-25_
+_Letztes Update: 2026-08-26_
