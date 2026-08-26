@@ -3983,3 +3983,71 @@ autonomen Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf)
+
+**Vorbereitung:** `it-chef/auto` (`e69a523`) lag bereits vollständig in
+`main` gemerged (Freigabe-Chef hat den vierten Lauf von gestern schon
+geprüft und übernommen) — Branch frisch von `origin/main` neu aufgesetzt,
+kein Nachziehen von Konflikten nötig. `main` selbst nicht angerührt.
+
+**Geprüft und kein neuer sicherer Punkt gefunden.** `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md`, `reports/it-chef.md` (Stand 25.08.)
+und `reports/support-chef.md` (Stand 24.08.) komplett durchgesehen, dazu
+gezielt Quelltext gelesen statt nur gegrept:
+
+- **Alle in `reports/it-chef.md` gemeldeten offenen Bugs** (Flug-/
+  Transportsuche startet nie im Hauptchat-Ablauf; ausgewählter Flug fehlt
+  im Reiseplan; Duffel-Stays-Feldnamen ungetestet) sind dort selbst
+  bereits als UX-/Produktentscheidung, fehlendes Datenmodell-Feld bzw.
+  ohne echten API-Key nicht verifizierbar gekennzeichnet — am aktuellen
+  Quelltext (`useChat.ts`, `mockAdvisor.ts`) erneut bestätigt, unverändert
+  gegenüber dem Bericht. Die "automatische Unterkunftssuche hängt bei
+  unbekanntem Ziel"-Meldung im selben Bericht ist inzwischen veraltet —
+  das wurde im vierten Lauf gestern bereits gefixt und ist im aktuellen
+  `useChat.ts` vorhanden.
+- **`localStorage`-Absicherung** (PR #6) und **Passagierzahl-NaN-Fix in
+  `FlightWizard.tsx`** (PR #7) liegen beide fertig auf eigenen
+  `it-chef-autofix/*`-Branches bereit, warten nur auf menschliches Review
+  — am Quelltext geprüft, dass `FlightWizard.tsx` (Zeile 120) und
+  `tripStorage.ts`/`useChat.ts` auf `it-chef/auto` diese Fixes noch NICHT
+  enthalten. Bewusst nicht dupliziert, um keinen Merge-Konflikt mit den
+  wartenden PRs zu riskieren, sobald sie gemergt werden.
+- **Support-Chef-Vorschlag 2** (gemeinsame `localStorage`-Persistenz für
+  Profil/Einstellungen/Checkliste) bleibt wie in den Vorläufen begründet
+  eine übergreifende Architekturentscheidung, keine autonome Aufgabe.
+- **Eigene Bug-Suche** in bisher wenig geprüften Dateien
+  (`calendarUtils.ts`, `cartTotals.ts`, `checklistRules.ts`, `Kalender.tsx`,
+  `TrainCard.tsx`, `ChatInput.tsx`, `routes.tsx`) sowie ein Repo-weiter
+  Grep auf `Number(`/`parseInt`/`parseFloat` (nur die beiden bekannten,
+  bereits auf Fix-PRs bereitliegenden Stellen), `type="number"`-Felder,
+  `size="icon"`-Buttons ohne `aria-label` und verbliebene
+  "gebucht"-Formulierungen — keine neuen Treffer. Der scheinbare
+  Jahres-Unterschied beim Kyoto-Demo-Trip (`MeineReisen.tsx`/`Kalender.tsx`:
+  2026, vergangene Reise; `Reiseentwuerfe.tsx`: 2027, laufender Entwurf)
+  ist kein Bug, sondern zwei bewusst getrennte Demo-Datensätze (einmal
+  abgeschlossene Vergangenheit, einmal offener Entwurf für dieselbe Stadt).
+- **Übrige offene Checkboxen** (4.1-4.3 laut Aufgabenliste selbst
+  ausdrücklich "blocked on Base44/Gemini credentials"; 6.2/6.6/6.7/7.12
+  weiterhin ohne Preis-/Item-Datenfelder in `TripDraft`; 7.4 bräuchte
+  echte Mehrfach-Trip-Chat-Historie, die es nur für den einen aktiven
+  Trip gibt; 7.7 Dashboard und 8.5-8.7 Deal Finder zu groß/vage für einen
+  einzelnen abgegrenzten Punkt ohne eigene Scope-Entscheidung; 8.2/8.3
+  brauchen echten LLM-/Vision-Backend-Zugang; 8.4 Quick-Action-Buttons
+  hätte für "Restaurant finden" denselben Erfindungs-Konflikt, den
+  `mockConcierge.ts` bewusst vermeidet; 8.11 Hilfe blockiert auf
+  FAQ-Inhalte vom Support-Chef) — stichprobenartig gegen den aktuellen
+  Quelltext gegengeprüft, alle Blocker bestehen unverändert fort.
+
+**Ergebnis:** kein Punkt umgesetzt. Kein Produktcode geändert, nur dieser
+Log-Eintrag.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci` (frischer Checkout, `node_modules` fehlte, 647 Pakete), `npx tsc
+-b` (grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`),
+`npx vitest run` (26 Testdateien, 104 Tests, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
