@@ -1,85 +1,85 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-25
+**Datum:** 2026-08-26
 
-## Was ist seit dem letzten Eintrag (2026-08-24) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-25) passiert?
 
-Seit gestern kamen über die verschiedenen Auto-Kanäle mehrere Diffs auf main,
-die ich am aktuellen Quelltext nachvollzogen habe: Die Reise-Checkliste zeigt
-für einen ausgewählten Flug jetzt korrekt "ausgewählt" statt irreführend
-"gebucht", `src/lib/duffel/client.ts` übersetzt rohe Duffel-Fehlermeldungen
-in einen verständlichen deutschen Fallback-Text, und `src/lib/ai/speech.ts`
-behandelt Mikrofon-Fehler jetzt als eigenen Zustand statt sie wie ein
-normales Aufnahmeende zu verschlucken (samt sichtbarem Hinweistext in
-`ChatInput.tsx`). Alle drei Änderungen im aktuellen Quelltext geprüft —
-sauber, decken die jeweils gemeldeten Bugs ab. Der IATA-Hinweistext ist
-inzwischen auch in `FlightWizard.tsx` vorhanden (wird von der
-Flugsuche-Seite verwendet) und damit ebenfalls erledigt.
+Seit gestern kam über den it-chef-eigen-Auto-Kanal ein Fix auf main:
+`useChat.ts` bricht die automatische Unterkunftssuche jetzt nicht mehr
+stillschweigend ab, wenn das Ziel keines der acht kuratierten ist. Im
+aktuellen Quelltext geprüft — sauber, deckt den Bug ab.
 
 Gezielte Bug-Suche in dieser Session (nicht nur grep, einzelne Dateien
-vollständig gelesen): `useChat.ts`, `tripStorage.ts`, `duffel/client.ts`,
-`speech.ts`, `ChatInput.tsx`, `Flugsuche.tsx`, `FlightWizard.tsx`,
-`HotelWizard.tsx`, `ChecklistPanel.tsx`, `EditMode.tsx`, `Einstellungen.tsx`,
-`ReiseSuche.tsx`. TODO/FIXME- und `console.log`-Grep über `src/` weiterhin
-ohne Treffer.
+vollständig gelesen): `Preisalarme.tsx`, `FlightWizard.tsx`,
+`HotelWizard.tsx`, `FlightCard.tsx`, `HotelCard.tsx`, `TrainCard.tsx`,
+`useConcierge.ts`, `cartTotals.ts`, `calculateProgress.ts`,
+`calendarUtils.ts`. TODO/FIXME- und `console.log`-Grep über `src/`
+weiterhin ohne Treffer.
 
-Dabei einen neuen, kleinen, sicheren Bug gefunden und direkt gefixt (siehe
-unten). Die vier älteren offenen PRs (#1, #4, #5, #6) liegen weiterhin
-ungemergt, jetzt seit 13–16 Tagen.
+Dabei zwei neue, kleine, sichere Bugs gefunden und direkt gefixt (siehe
+unten) — beide auch unabhängig von Support-Chef am 26.08. als
+Reibungspunkte gemeldet, hier aber als echte Code-Bugs mit fertigem Fix
+behandelt. Die fünf älteren offenen PRs (#1, #4, #5, #6, #7) liegen
+weiterhin ungemergt, teils seit über zwei Wochen; jetzt kommen #8 und #9
+dazu.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-- **[PR #7](https://github.com/niklas-struck-coder/travix.ai/pull/7)** —
-  Passagierzahl in `FlightWizard.tsx` gegen `NaN` abgesichert. Das
-  Zahlenfeld berechnete den State direkt aus `Number(event.target.value)`
-  ohne `NaN`-Schutz; bei leerem Feld oder Zeichen wie `-`/`e` (die ein
-  `<input type="number">` clientseitig zulässt) blieb der State auf `NaN`
-  hängen. Gleicher Bug wie zuvor schon bei Zimmer-/Gästezahl in
-  `HotelWizard.tsx` gefunden und dort mit einer `clampGuestCount`-Funktion
-  behoben (Commit `88dc75d`) — im strukturell identischen Passagierfeld
-  fehlte der gleiche Schutz noch. Fix folgt exakt demselben, bereits
-  bewährten Muster (neue `clampPassengerCount`-Hilfsfunktion), daher hohe
+- **[PR #8](https://github.com/niklas-struck-coder/travix.ai/pull/8)** —
+  Datum in der Vergangenheit bei Hinflug (`FlightWizard.tsx`) und
+  Check-in (`HotelWizard.tsx`) ließ sich anstandslos auswählen, der
+  Suchen-Button wurde nicht deaktiviert. Das jeweils abhängige zweite
+  Datumsfeld (Rückflug/Check-out) hatte bereits ein `min`-Attribut —
+  beim ersten Feld fehlte das gleiche Schutzmuster. Fix ergänzt
+  `min={heute}` nach exakt diesem bereits vorhandenen Muster, daher hohe
   Konfidenz.
+- **[PR #9](https://github.com/niklas-struck-coder/travix.ai/pull/9)** —
+  Preise in `FlightCard.tsx`, `HotelCard.tsx` und `TrainCard.tsx` wurden
+  roh ausgegeben ("245.00 EUR" statt "245,00 €"). Neue
+  `formatPrice()`-Hilfsfunktion in `lib/utils.ts`
+  (`Intl.NumberFormat('de-DE', { style: 'currency' })`) ersetzt die
+  String-Verkettung in allen drei Karten. Reine, isolierte
+  Darstellungsänderung ohne Logik-Eingriff, daher hohe Konfidenz.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Unverändert gegenüber dem letzten Bericht (heute erneut am Quelltext
-bestätigt), bis auf die oben genannten drei erledigten Punkte:
+Unverändert gegenüber dem letzten Bericht, heute erneut am Quelltext
+bestätigt:
 
 - **Flug-/Transportsuche im normalen Chat-Ablauf startet nie.**
   `getNextAdvisorStep` (`mockAdvisor.ts`) kündigt nach der letzten Frage die
   Suche nach echten Flug-/Zug-/Bus-/Fähre-Verbindungen an, `useChat.ts`
   löst im linearen Haupt-Chat-Ablauf aber nur bei `nextField ===
-  'accommodation'` eine echte Suche aus (Zeile 285) — die angekündigte
+  'accommodation'` (Zeile 290) eine echte Suche aus — die angekündigte
   Transportsuche passiert nie. Der Edit-Pfad (`startEdit` /
-  `awaitingFlightOrigin`) kann inzwischen echte Flüge suchen, aber nur wenn
-  man das Transportmittel nachträglich über "Bearbeiten" ändert. UX-/
+  `awaitingFlightOrigin`) kann echte Flüge suchen, aber nur wenn man das
+  Transportmittel nachträglich über "Bearbeiten" ändert. UX-/
   Produktentscheidung nötig, daher nicht automatisch angefasst.
-- **Automatische Unterkunftssuche bleibt bei unbekanntem Ziel unsichtbar
-  hängen.** `useChat.ts` startet die Suche nur bei einem der acht
-  kuratierten Ziele, sonst passiert nach der Ankündigung nichts.
-- **Ungeschützte `localStorage`-Schreibzugriffe.** `useChat.ts` (Zeilen 126,
-  132) weiterhin ohne try/catch. Fix liegt fertig auf PR #6 bereit, nur
-  noch nicht gemergt.
-- **Ausgewählter Flug wird im Reiseplan nicht sichtbar.** `selectFlight` in
-  `useChat.ts` bestätigt Route und Preis nur im Chat-Text, speichert aber
-  nichts davon in `trip` — im Reiseplan bleibt nur `transportMode:
-  'flight'` sichtbar. Würde eine Erweiterung des `TripDraft`-Typs
-  brauchen, daher keine kleine, isolierte Änderung.
+- **Ungeschützte `localStorage`-Schreibzugriffe.** `useChat.ts` (Zeilen
+  126, 132) weiterhin ohne try/catch. Fix liegt fertig auf PR #6 bereit,
+  nur noch nicht gemergt.
+- **Ausgewählter Flug wird im Reiseplan nicht sichtbar.** `selectFlight`
+  in `useChat.ts` bestätigt Route und Preis nur im Chat-Text, speichert
+  aber nichts davon in `trip` — im Reiseplan bleibt nur
+  `transportMode: 'flight'` sichtbar. Würde eine Erweiterung des
+  `TripDraft`-Typs brauchen, daher keine kleine, isolierte Änderung.
 - **Duffel-Stays-Feldnamen weiterhin ungetestet.** `mapStayResult` rät bei
   den Feldnamen defensiv — noch kein echter API-Key zum Verifizieren.
 
 ## Weitere Vorschläge
 
-1. **Offene Auto-Fix-PRs mergen.** #1, #4, #5, #6 liegen seit über zwei
-   Wochen ungenutzt bereit, jetzt kommt #7 dazu — mit steigendem Risiko für
-   Merge-Konflikte durch weitere main-Commits.
+1. **Offene Auto-Fix-PRs mergen.** #1, #4, #5, #6, #7 liegen seit über
+   zwei Wochen (teils vier) ungenutzt bereit, jetzt kommen #8 und #9
+   dazu — mit steigendem Risiko für Merge-Konflikte durch weitere
+   main-Commits. Der Freigabe-Chef prüft aktuell nur die `*-auto`-Branches
+   der eigenen Personas, nicht diese `it-chef-autofix/*`-PRs — dafür
+   braucht es weiterhin Nis manuellen Review.
 2. **Entscheidung zum Flugsuche-Bug treffen.** Zentraler Verkaufspfad. Der
    Edit-Pfad in `useChat.ts` zeigt, dass eine echte Flugsuche technisch
-   schon funktioniert — sie müsste nur auch im Haupt-Chat-Ablauf angeboten
-   werden.
+   schon funktioniert — sie müsste nur auch im Haupt-Chat-Ablauf
+   angeboten werden.
 3. **Testabdeckung für `useChat.ts` ausbauen.** Zentraler Hook (React-State,
    localStorage-Seiteneffekte, Flug-Edit-Pfad, der Flugsuche-Bug) hat
    weiterhin keine eigenen Tests, trotz wachsender Komplexität.
 
-_Letztes Update: 2026-08-25_
+_Letztes Update: 2026-08-26_
