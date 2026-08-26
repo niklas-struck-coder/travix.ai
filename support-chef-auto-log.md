@@ -986,3 +986,67 @@ erneut geprüft — das ist IT-Chefs Baustelle und noch nicht auf `main`.
 `TrainCard.tsx`/`HotelWizard.tsx` wurden nur für die zwei oben
 genannten Punkte angesehen, nicht vollständig auf weitere Reibungspunkte
 durchgegangen.
+
+---
+
+## 2026-08-26 (zweiter Lauf) — Preisalarme (`/preisalarme`)
+
+**Geprüfter Bereich:** Seit dem obigen Eintrag von heute ist laut
+`ZEITPLAN.md` und `it-chef-auto-log.md` keine neue Seite dazugekommen —
+die drei heutigen IT-Chef-Läufe haben ausdrücklich "keinen neuen sicheren
+Punkt" umgesetzt. Die beiden oben gemeldeten offenen Punkte (fehlendes
+`min`-Attribut bei Hinflug/Check-in, rohe Preisdarstellung in
+`FlightCard.tsx`/`HotelCard.tsx`/`TrainCard.tsx`) sind am aktuellen
+Quelltext geprüft weiterhin unverändert vorhanden — nichts Neues dazu zu
+melden. Deshalb heute stattdessen `src/pages/Preisalarme.tsx` (Aufgabe
+7.10) geprüft: eine der wenigen Trip-Lifecycle-Listenseiten, die bisher
+noch keinen eigenen Eintrag in diesem Log hatte (anders als
+`Favoriten.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Warenkorb.tsx`,
+`Kalender.tsx`, `Reiseentwuerfe.tsx`).
+
+Positiv zuerst: `Preisalarme.tsx:38-40` formatiert Preise bereits korrekt
+mit `toLocaleString('de-DE')` plus `€`-Symbol — genau das Muster, das bei
+`FlightCard`/`HotelCard`/`TrainCard` oben als fehlend gemeldet wurde. Gute
+Vorlage für die dortige Korrektur.
+
+### Reibungspunkte
+
+**1. Der Entfernen-Button für einen Preisalarm nutzt das `BellOff`-Icon —
+das liest sich wie "Stummschalten", löscht aber unwiderruflich**
+`src/pages/Preisalarme.tsx:96` zeigt als einzige Aktion pro Karte einen
+Button mit `BellOff`-Icon (durchgestrichene Glocke). Dieses Icon steht in
+den meisten Apps für "Benachrichtigungen für diesen Punkt stummschalten/
+pausieren" — ein Nutzer würde erwarten, danach weiterhin einen (nur
+stillen) Preisalarm zu sehen. Tatsächlich löst der Klick `removeAlert`
+(Zeile 45-47) aus, das den Alarm komplett aus der Liste entfernt — es
+gibt keine Möglichkeit, ihn wieder zu aktivieren, weder auf dieser Seite
+noch sonst irgendwo (kein "Preisalarm erneut anlegen"-Weg außer erneut
+über den KI-Chat zu planen). `aria-label`/`title` sagen zwar korrekt
+"entfernen", aber das Icon selbst widerspricht dem und könnte zu
+versehentlichem, unumkehrbarem Löschen führen, wenn jemand nur kurz Ruhe
+vor der Benachrichtigung wollte.
+
+*Vorschlag:* Entweder das Icon auf ein eindeutiges "Löschen"-Symbol (z. B.
+`Trash2`, analog zum `X`-Icon bei `Angebote.tsx:105`) ändern, oder — besser
+für den eigentlichen Anwendungsfall eines Preisalarms — echtes
+Pausieren/Stummschalten als eigene, vom Löschen getrennte Aktion anbieten.
+
+**2. Kein Hinweis, wie aktuell der angezeigte Preis ist**
+`src/pages/Preisalarme.tsx:100-105`: Der `currentPrice` wird ohne jeden
+Zeitbezug angezeigt ("610 €" o. Ä.) — anders als z. B. bei
+`Preisalarme.tsx:107-112`, wo immerhin der Vergleich zum vorherigen Preis
+steht. Bei einer Funktion, deren gesamter Zweck "den Preis im Blick
+behalten" ist (`PageHeader`-Beschreibung, Zeile 73), fehlt die
+naheliegendste Vertrauensfrage: seit wann gilt dieser Preis? Sobald echte,
+sich laufend ändernde Preisdaten dahinterstehen (statt der aktuellen
+Demo-Werte), könnte ein Nutzer einen veralteten Preis für aktuell halten.
+
+*Vorschlag:* Einen kleinen Zeitstempel ("Zuletzt geprüft: heute, 14:32
+Uhr" o. Ä.) pro Karte ergänzen, sobald ein echtes Preis-Update-Datenfeld
+existiert — aktuell reine Beobachtung für später, kein akuter Bug, da die
+Werte ohnehin statische Demo-Daten sind.
+
+### Nicht geprüft
+`Preisalarme.test.tsx` wurde nicht als Testabdeckungs-Review gelesen,
+nur der Komponenten-Quelltext selbst. Keine Codeänderung in diesem Lauf,
+nur dieser Bericht.
