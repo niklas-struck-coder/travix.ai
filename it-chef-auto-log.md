@@ -4205,3 +4205,76 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf, fünfte Ausführung desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `20eb54d`, ein Commit vor `origin/main`), keine offenen Änderungen
+von einem vorherigen Lauf. `origin/main` war bereits vollständig enthalten
+(`git log origin/main..origin/it-chef/auto` zeigt genau den einen eigenen
+Commit, `git log origin/it-chef/auto..origin/main` ist leer) — kein Merge
+nötig, `main` selbst unberührt.
+
+**Geprüfte, aber verworfene Kandidaten:**
+- `reports/support-chef.md` (26.08.): alle drei gemeldeten Punkte
+  (Mikrofon-Fehleranzeige, Screenreader-Ankündigung, Preisalarme-Icon)
+  bereits im vorherigen Lauf heute (Commit `20eb54d`) behoben — am
+  aktuellen Quelltext verifiziert.
+- `reports/it-chef.md` (26.08.): die zwei konkret gefundenen Bugs
+  (Vergangenheitsdatum, rohes Preisformat) liegen bereits fertig auf den
+  offenen PRs #8/#9 (warten auf Nis Review, nicht Teil des autonomen
+  Kanals). Die übrigen gemeldeten Punkte sind explizit als Produkt-/
+  Architekturentscheidung markiert (Transportsuche im Haupt-Chat-Ablauf,
+  fehlendes `TripDraft`-Feld für den ausgewählten Flug) oder brauchen
+  einen echten API-Key (Duffel-Stays-Feldnamen) — keiner davon autonom
+  sicher umsetzbar.
+- 5.7 "Integrate hotel and train search results into KI-Chat response
+  rendering": Hotel-Teil ist bereits erledigt (`HotelResults` in
+  `KiChat.tsx`). Der Zug-Teil bräuchte entweder eine echte Zug-Such-API
+  (existiert nirgends im Repo, `TrainCard`/`TrainResults` sind bislang nur
+  Komponenten ohne Datenquelle) oder erfundene Demo-Daten — beides würde
+  über eine reine Umsetzung hinausgehen und eine Dateninterpretation
+  nötig machen, die laut Sicherheitskriterien nicht autonom getroffen
+  werden soll. Bleibt offen für Ni.
+
+**Ausgewählter Punkt:** 6.10 "Wire checklist items to open KI-Chat for
+planning that specific component" aus `tasks/tasks-prd-travix-platform.md`
+— die 13-Punkte-Checkliste (6.8/6.9, vom 24.08.-Lauf gebaut) zeigte die
+fünf automatisch erkannten Zeilen bisher nur als reinen Text/Icon ohne
+jede Verlinkung.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung — das
+Zielmuster (`/ki-chat?edit=<feld>`) existiert bereits identisch in den
+Section-Karten von `Buchung.tsx`, hier nur auf die Checkliste
+übertragen. Klar genug beschrieben — der Aufgabentext benennt exakt das
+Ziel ("open KI-Chat for planning that specific component"). Ergebnis
+objektiv prüfbar über die `href`-Attribute der neuen Links.
+
+**Umgesetzt:**
+- `src/components/trip/ChecklistPanel.tsx`: die fünf automatisch
+  erkannten Zeilen (Transport/Reisedaten/Unterkunft/Aktivitäten/Budget)
+  sind jetzt `react-router-dom`-Links statt reinem Text — Ziel jeweils
+  `/ki-chat?edit=<feld>` über eine neue `AUTO_ITEM_HREF`-Zuordnung, exakt
+  das Muster der Section-Karten in `Buchung.tsx`. `activities` hat kein
+  eigenes `?edit=`-Feld in `useChat.ts` (`editableFields` kennt nur
+  transportMode/dates/budget/accommodation), verlinkt daher auf einen
+  neuen Chat ohne Parameter. Verlinkung gilt für erledigte wie offene
+  Punkte gleichermaßen (analog dem "Bearbeiten"-Stift bei bereits
+  gefüllten Section-Karten), sodass ein bereits geplantes Element auch
+  erneut angepasst werden kann. Die acht manuellen Vorbereitungspunkte
+  bleiben unverändert reine Ankreuz-Buttons ohne Trip-Feld-Bezug.
+- Neue Testdatei `src/components/trip/ChecklistPanel.test.tsx`: prüft die
+  `href`-Ziele aller fünf automatischen Punkte sowohl für einen leeren
+  als auch einen vollständig ausgefüllten Trip.
+- `tasks/tasks-prd-travix-platform.md` (6.10) und `ZEITPLAN.md`
+  (Sprint 2) aktualisiert.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+dieselben 3 vorbestehenden `react-refresh`-Warnings), `npx vitest run`
+(27 Testdateien, 108 Tests — 106 vorher plus 2 neue —, alle grün),
+`npm run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
