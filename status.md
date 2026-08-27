@@ -13,16 +13,15 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-25):**
-- IT-Chef: PR für Bug "FlightWizard Passagierzahl NaN" eröffnet, automatische
-  Unterkunftssuche bei unbekanntem Ziel hängt nicht mehr stillschweigend;
-  mehrere Auto-Läufe fanden danach keinen weiteren sicheren Punkt (Zustand stabil)
-- Support-Chef: Reibungspunkte bei Preisalarmen gefunden (ungeschütztes
-  Vergangenheitsdatum bei Hinflug/Check-in, Preise ohne deutsches Format)
-- Marketing-Chef: ein Content-Stück als freigabefähig eingestuft, Freigabe-
-  Übersicht laufend nachgeführt
+**Seit letztem Update (2026-08-26):**
+- IT-Chef: Mikrofon-Fehleranzeige im KI-Chat und Preisalarme-Icon behoben (PRs #8, #9
+  eröffnet), Checklistenpunkt 6.10 mit KI-Chat verknüpft; weitere Auto-Läufe fanden
+  danach keinen neuen sicheren Punkt (Zustand stabil)
+- Support-Chef: beide gemeldeten Fehler (Mikrofon, Preisalarme-Icon) als behoben
+  bestätigt, ChecklistPanel-Links (6.10) geprüft
+- Marketing-Chef: Icon-Vorgabe für destruktive Aktionen in MARKENDESIGN.md ergänzt
 - Freigabe-Chef hat die geprüften Auto-Zweige mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-26_
+_Letztes Update: 2026-08-27_
