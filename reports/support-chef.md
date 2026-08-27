@@ -1,57 +1,37 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-26
+**Datum:** 2026-08-27
 
-## Was ist seit dem letzten Eintrag (2026-08-24) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-26) passiert?
 
-Beide Punkte aus dem letzten Bericht haben sich bewegt: Die Checkliste
-sagt jetzt ehrlich "Transport/Unterkunft ausgewählt" statt irreführend
-"gebucht" (`src/lib/trip/checklistRules.ts`) — mein Vorschlag wurde vom
-IT-Chef direkt übernommen. Die gemeinsame `localStorage`-Lösung gegen
-Formularverlust (Profil, Einstellungen, Checkliste) steht dagegen weiter
-aus, bewusst zurückgestellt bis zur Backend-/Nutzerkonten-Entscheidung.
-
-Daneben gab es seitdem drei automatische Analyse-Läufe von mir (Mikrofon-
-Fehleranzeige im KI-Chat, Such-Assistenten Flug/Hotel, Preisalarme —
-alle in `support-chef-auto-log.md` dokumentiert), plus zwei daraus
-entstandene IT-Chef-Fixes: [PR #8](https://github.com/niklas-struck-coder/travix.ai/pull/8)
-(Vergangenheitsdatum bei Hinflug/Check-in) und
-[PR #9](https://github.com/niklas-struck-coder/travix.ai/pull/9)
-(deutsches Preisformat in den Ergebniskarten) — beide noch offen, warten
-auf Review. Zwei Reibungspunkte aus den Auto-Läufen sind dadurch noch
-nicht abgedeckt und unten neu aufgeführt.
+Beide Punkte aus dem letzten Bericht sind behoben und im aktuellen Code
+bestätigt: Der Mikrofon-Fehlerhinweis im KI-Chat verschwindet jetzt beim
+Weitertippen (`src/components/chat/ChatInput.tsx:76`, `role="status"` für
+Screenreader ergänzt), und der Preisalarme-Entfernen-Button zeigt jetzt ein
+eindeutiges Löschen-Icon statt des irreführenden "Stummschalten"-Symbols
+(`src/pages/Preisalarme.tsx:96`, `Trash2` statt `BellOff`). Danach wurde
+die Reise-Checkliste (`ChecklistPanel.tsx`, Aufgabe 6.10) um Links zum
+KI-Chat ergänzt, damit man automatisch erkannte Punkte direkt bearbeiten
+kann — dabei ist ein neuer Reibungspunkt entstanden, den ich unten melde.
 
 ## Meine Vorschläge
 
-1. **Der Mikrofon-Fehlerhinweis im KI-Chat verschwindet nie von selbst —
-   auch nicht, wenn man dem eigenen Rat folgt und einfach tippt.**
-   `src/components/chat/ChatInput.tsx:19-24` (`handleSend`) setzt
-   `micError` nirgends zurück; er wird nur bei einem neuen Mikrofon-
-   Versuch gelöscht (Zeile 28). Wer einmal versehentlich das Mikrofon
-   antippt, die Berechtigung verweigert und danach ganz normal
-   weitertippt, sieht die Meldung "bitte tippe deine Nachricht
-   stattdessen" dauerhaft unter einem längst reibungslos laufenden
-   Gespräch stehen. Vorschlag: `setMicError(null)` in `handleSend`
-   ergänzen — die Aktion, die der Hinweis selbst empfiehlt, ist das
-   natürlichste Signal "Problem erledigt".
+1. **In der Reise-Checkliste sehen die klickbaren und die
+   nur-abhakbaren Zeilen komplett gleich aus, tun aber sehr
+   Unterschiedliches.** `src/components/trip/ChecklistPanel.tsx:68-87`
+   (automatisch erkannte Punkte, jetzt `<Link>` zu `/ki-chat?edit=...`)
+   und `:89-109` (manuelle Punkte, `<button>` zum lokalen Abhaken)
+   verwenden dieselben Klassen, dieselben Icons und denselben Text-Stil.
+   Ein Klick oben verlässt die Seite sofort und startet im KI-Chat eine
+   neue Bearbeiten-Nachricht — auch wenn der Punkt schon grün abgehakt
+   ist und man eigentlich nur nachsehen wollte. Ein Klick unten bleibt
+   einfach auf der Seite. Es gibt kein Icon, keinen Pfeil, keinen
+   Hinweis, der die beiden Verhaltensweisen unterscheidbar macht — für
+   Screenreader-Nutzer:innen liest sich der Linktext ("Transport
+   ausgewählt") zudem wie eine reine Status-Ansage, nicht wie ein
+   Sprung zu einer neuen Seite. Kurzfristiger Vorschlag: den
+   automatischen Zeilen dasselbe `Pencil`-Icon geben, das
+   `Buchung.tsx` für "Bearbeiten"-Links bereits nutzt, plus einen
+   `sr-only`-Zusatz im Linktext wie "Transport ausgewählt, bearbeiten".
 
-2. **Dieselbe Fehlermeldung wird Screenreader-Nutzer:innen gar nicht
-   angekündigt.** Das `<p>` mit dem Hinweistext am Ende von
-   `ChatInput.tsx` hat weder `role="status"` noch `aria-live`. Wer den
-   Mikrofon-Button per Screenreader bedient, bekommt die Fehlermeldung
-   und die Handlungsanweisung nicht mit — die Aufnahme endet für sie
-   kommentarlos, genau der stille Zustand, den der Hinweistext eigentlich
-   beheben sollte. Ein `role="status"` auf diesem `<p>` würde reichen.
-
-3. **Der Entfernen-Button bei Preisalarmen zeigt ein "Stummschalten"-
-   Icon, löscht aber unwiderruflich.** `src/pages/Preisalarme.tsx:96`
-   nutzt das `BellOff`-Icon (durchgestrichene Glocke) für `removeAlert` —
-   das liest sich wie Pausieren, tatsächlich ist der Alarm danach
-   komplett weg, ohne Weg zurück außer neuer Planung im KI-Chat. Der
-   `aria-label` sagt zwar korrekt "entfernen", das Icon selbst
-   widerspricht dem und begünstigt versehentliches, endgültiges Löschen
-   bei jemandem, der nur kurz Ruhe wollte. Vorschlag: eindeutiges
-   Löschen-Icon (z. B. `Trash2`, analog `Angebote.tsx:105`) statt
-   `BellOff`.
-
-_Letztes Update: 2026-08-26_
+_Letztes Update: 2026-08-27_
