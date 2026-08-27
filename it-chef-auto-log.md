@@ -4278,3 +4278,112 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-08-27
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `fe52024`), keine offenen Änderungen von einem vorherigen Lauf.
+`origin/main` hatte seit `e8235d4` keine neuen Commits — nichts zu
+mergen, `main` selbst wurde nicht angerührt. `it-chef/auto` liegt damit
+weiterhin zwei eigene Commits vor `main` (Ergebnisse der vierten/fünften
+Ausführung vom 26.08.), die auf den Freigabe-Chef-Merge warten.
+
+**Geprüfte, aber verworfene Kandidaten:**
+- `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` unverändert seit
+  dem letzten Lauf. Alle dort verbliebenen offenen Checkboxen erneut
+  einzeln gegen die vier Sicherheitskriterien geprüft:
+  - **2.x** Auth/Backend: explizit ausgeschlossen (Kriterium "kein Bezug
+    zu Auth"), zusätzlich blockiert von der offenen Backend-
+    Produktentscheidung.
+  - **4.1-4.3:** weiterhin "blocked on Base44/Gemini credentials" laut
+    Aufgabenliste selbst.
+  - **5.7** (Zug/Bus/Fähre in KI-Chat einbinden): am aktuellen Quelltext
+    verifiziert — weiterhin keine echte oder simulierte Zug-Datenquelle
+    im Repo (kein `searchTrains`, `TrainCard`/`TrainResults` bleiben ohne
+    Verwendungsstelle außerhalb der eigenen Dateien). Würde entweder
+    erfundene Daten oder eine Architekturentscheidung brauchen. Verworfen.
+  - **6.2/6.6/6.7:** `TripDraft` (`src/types/chat.ts`) hat weiterhin keine
+    Preis-/Item-/Provider-URL-Felder für Transport/Unterkunft — am
+    aktuellen Typ gegengeprüft. Datenmodell-Erweiterung wäre eine
+    Architekturentscheidung. Verworfen.
+  - **7.4:** `tripStorage.ts` speichert weiterhin nur einen einzigen
+    aktiven Trip unter einem globalen Schlüssel — keine Mehrfach-Entwürfe-
+    Chat-Historie zum Fortsetzen "at the exact point of interruption".
+    Verworfen.
+  - **7.7** Dashboard: aggregiert laut Aufgabe u. a. Budget- und Loyalty-
+    Daten, die im Datenmodell nicht existieren (6.6/6.7, 8.12) — weiterhin
+    zu viele fehlende Bausteine für eine reine Umsetzung ohne eigene
+    Scope-Entscheidung. Verworfen.
+  - **7.12** Reisebudget (Recharts): braucht dieselben fehlenden
+    Preisfelder wie 6.6/6.7. Verworfen.
+  - **8.1** Urlaubsmodus-Seite mit "daily itinerary display": neu und
+    eigenständig am Quelltext geprüft (`src/pages/Urlaubsmodus.tsx`
+    komplett gelesen, `src/types/chat.ts` nach Tages-/Itinerar-Feldern
+    durchsucht). Es existiert kein Datenfeld für ein Tagesitinerar
+    (`TripDraft.activities` ist eine flache Liste ohne Tageszuordnung) —
+    dieselbe Art Lücke wie bei 6.6/6.7 (fehlendes Datenmodell), nicht
+    Erfindungssache sondern echte Architekturentscheidung, welches
+    Datenformat ein Tagesitinerar haben soll. Das bestehende
+    Grundgerüst (Concierge-Chat) deckt laut `ZEITPLAN.md` bereits einen
+    Teil ab; der fehlende Rest ist nicht autonom sicher umsetzbar.
+    Verworfen.
+  - **8.2/8.3:** brauchen echten LLM-/Vision-Zugang, der nicht existiert.
+    Verworfen.
+  - **8.4:** gleicher Erfindungs-Konflikt wie bei `mockConcierge.ts`
+    bewusst vermieden (Restaurant-/Übersetzungs-Antworten ohne echte
+    Datenquelle). Verworfen.
+  - **8.5-8.7** Deal Finder: zu groß/vage für einen einzelnen abgegrenzten
+    Punkt ohne eigene Scope-Entscheidung. Verworfen.
+  - **8.9** Premium: Abo-Stufen nirgends im Repo definiert —
+    Produktentscheidung. Verworfen.
+  - **8.11** Hilfe: laut `ZEITPLAN.md` (Support-Chef Sprint 2) weiterhin
+    keine FAQ-Inhalte erarbeitet — würde erfundene FAQ-Texte brauchen.
+    Verworfen.
+  - **8.12** Rewards/Loyalty: nirgends im Repo spezifiziert. Verworfen.
+  - **8.13** Unit-Tests für calculateProgress/calculateCosts/
+    checklistRules/Schema-Validierung: neu geprüft — `calculateProgress`
+    und `checklistRules` haben bereits eigene Testdateien
+    (`calculateProgress.test.ts`, `checklistRules.test.ts`), aber
+    `calculateCosts` (hängt an 6.7) und die Schema-Validierung (hängt an
+    4.1) existieren im Code noch gar nicht, können also nicht getestet
+    werden. Punkt bleibt als Ganzes blockiert, bis 6.7/4.1 stehen.
+    Verworfen.
+- `reports/it-chef.md` unverändert seit 25.08. 12:41 UTC,
+  `reports/support-chef.md` unverändert seit 26.08. 13:34 UTC (die beiden
+  darin gemeldeten Punkte wurden bereits im vierten Lauf vom 26.08.
+  behoben, am aktuellen Quelltext von `ChatInput.tsx`/`Preisalarme.tsx`
+  gegengeprüft) — keine neuen gemeldeten Bugs oder Reibungspunkte seit
+  dem letzten Lauf.
+- Offene PRs (#1, #4, #5, #6, #7, #8, #9) via GitHub geprüft: alle
+  weiterhin offen und nicht gemergt, warten weiterhin auf menschliches
+  Review. Kein neuer Merge-Konflikt, keine dadurch neu freigewordene
+  Aufgabe.
+
+**Eigene Bug-Suche in diesem Lauf** (unabhängig von den PR-/Report-
+Funden): Repo-weiter Grep auf `size="icon"`-Buttons ohne `aria-label`
+(alle Treffer einzeln gegengelesen — `Buchung.tsx`, `Favoriten.tsx`,
+`Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Warenkorb.tsx`,
+`Reiseentwuerfe.tsx`, `Kalender.tsx`, `EditMode.tsx`, `ChatInput.tsx`,
+`KiChat.tsx` — alle haben bereits ein `aria-label`, keine Regression) und
+auf `.toFixed(`/`Number(`/`parseInt`/`parseFloat` (nur bereits bekannte,
+unauffällige Stelle in `HotelCard.tsx:23`, `offer.rating` ist laut
+`src/types/duffel.ts` ein Pflichtfeld, kein Optional-Chaining nötig).
+Keine neuen Treffer.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Heute nichts gefunden, das sicher genug für einen weiteren
+autonomen Lauf ist — alle verbliebenen offenen Punkte hängen entweder an
+Produkt-/Architekturentscheidungen, fehlenden Datenmodell-Feldern, echten
+externen Zugangsdaten oder fehlenden Inhalten (FAQ), die Ni bzw. andere
+Chef-Rollen erst liefern müssen.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b` (grün),
+`npm run lint` (0 Fehler, dieselben 3 vorbestehenden `react-refresh`-
+Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (27
+Testdateien, 108 Tests, alle grün), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
