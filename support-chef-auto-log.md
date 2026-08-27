@@ -1050,3 +1050,69 @@ Werte ohnehin statische Demo-Daten sind.
 `Preisalarme.test.tsx` wurde nicht als Testabdeckungs-Review gelesen,
 nur der Komponenten-Quelltext selbst. Keine Codeänderung in diesem Lauf,
 nur dieser Bericht.
+
+---
+
+## 2026-08-27 — Checkliste jetzt klickbar (`ChecklistPanel.tsx`, `/buchung`)
+
+**Geprüfter Bereich:** `src/components/trip/ChecklistPanel.tsx`, laut
+`ZEITPLAN.md` (Aufgabe 6.10) am 26.08. vom autonomen IT-Chef-Lauf
+("fünfter Lauf") ergänzt und seither nach `main` gemergt — die fünf
+automatisch erkannten Zeilen sind jetzt Links zu `/ki-chat?edit=<feld>`.
+Noch in keinem Support-Chef-Lauf geprüft (der Vorgänger-Stand der
+Komponente wurde bereits am 24.08. behandelt, damals ohne die Links).
+Zum Vergleich herangezogen: `src/pages/Buchung.tsx:90,117,251` (die
+etablierte "Bearbeiten"-Konvention mit `Pencil`-Icon + Textlabel für
+denselben `?edit=`-Sprung) und `src/hooks/useChat.ts:145-152`
+(`startEdit`, bestätigt: der Sprung fügt sofort eine neue Assistenten-
+Nachricht ein und wechselt in den Edit-Modus, nicht nur eine reine
+Ansicht).
+
+Positiv zuerst: Die beiden vorherigen Meldungen aus diesem Log sind seit
+gestern behoben und im aktuellen Quelltext bestätigt —
+`ChatInput.tsx:24` setzt `micError` jetzt beim Senden zurück und
+kündigt ihn per `role="status"` an (25.08.-Meldung), `Preisalarme.tsx:96`
+nutzt jetzt `Trash2` statt des irreführenden `BellOff`-Icons
+(26.08.-Meldung, zweiter Lauf).
+
+### Reibungspunkte
+
+**1. Die fünf automatischen Checklisten-Zeilen sehen identisch aus wie
+die acht manuellen darunter, lösen aber ein komplett anderes Verhalten
+aus — ohne jede visuelle Kennzeichnung**
+`ChecklistPanel.tsx:72-86` (automatische Zeilen, jetzt `<Link>`) und
+`:90-108` (manuelle Zeilen, `<button>`) verwenden praktisch dieselben
+Klassen (`flex items-center gap-2 rounded-md py-0.5 hover:bg-muted`),
+dasselbe Icon-Paar (`CheckCircle2`/`Circle`) und dieselbe Typografie.
+Ein Klick auf eine manuelle Zeile hakt sie nur lokal ab und bleibt auf
+`/buchung`. Ein Klick auf eine automatische Zeile dagegen verlässt die
+Seite komplett, springt nach `/ki-chat` und startet dort sofort
+(`useChat.ts:145-152`, `startEdit`) eine neue Assistenten-Nachricht wie
+"Klar, lass uns das Transportmittel ändern" — das passiert auch, wenn
+der Punkt bereits erledigt ist (grüner Haken) und man eigentlich nur den
+Status ansehen wollte, nicht bewusst "Ändern" angeklickt hat. Anders als
+bei der bereits etablierten "Bearbeiten"-Konvention in `Buchung.tsx`
+(`:90,117,251`), wo ein eigenes `Pencil`-Icon plus das Wort "Bearbeiten"
+klar signalisieren "das hier navigiert weg und startet eine Änderung",
+gibt es hier keinerlei Hinweis (kein Icon, kein Pfeil, kein
+unterschiedlicher Stil) darauf, dass die obere Hälfte der Liste
+navigiert und die untere nicht. Für Screenreader-Nutzer:innen kommt
+erschwerend hinzu: Der Linkname ist exakt das Label ("Transport
+ausgewählt") — das liest sich wie eine Status-Ansage, nicht wie ein
+Navigationsziel oder eine Handlungsaufforderung.
+
+*Vorschlag:* Den automatischen Zeilen ein kleines, konsistentes
+Klick-Signal geben — z. B. denselben `Pencil`-Icon wie in `Buchung.tsx`
+rechtsbündig ergänzen, oder zumindest einen `sr-only`-Zusatz im Linktext
+("Transport ausgewählt, bearbeiten") für Screenreader. Das würde die
+beiden Listenhälften visuell und akustisch klar unterscheidbar machen,
+statt optisch identischer Zeilen mit gegensätzlichem Verhalten.
+
+### Nicht geprüft
+Das bereits am 24.08. gemeldete Persistenz-Problem der manuellen Haken
+(`checkedManual` verliert seinen Zustand bei Routenwechsel) wurde nicht
+erneut vertieft — es besteht laut Quelltext (`ChecklistPanel.tsx:35`,
+weiterhin reiner `useState`) unverändert fort, aber das ist bereits
+dokumentiert und nicht Gegenstand dieses Laufs. `useChat.ts`/`KiChat.tsx`
+wurden nur so weit gelesen, wie nötig, um den Sprungmechanismus
+(`?edit=`) zu verstehen, nicht als eigenständige UX-Fläche geprüft.
