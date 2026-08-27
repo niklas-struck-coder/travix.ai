@@ -1323,3 +1323,51 @@ keine reine Log-Gläubigkeit) und beide gemergt.
 Ni-Info nicht nötig — alle Merges glatt, alle geprüften Behauptungen
 stimmten mit dem Code überein, kein Erfundenes gefunden, kein
 wiederholter Regelverstoß, kein dringlicher Fund.
+
+## 2026-08-27, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main`: zwei mit echter Code-Änderung
+  (vierter/fünfter Lauf vom 26.08.), drei reine "kein sicherer Punkt
+  gefunden"-Log-Einträge vom 27.08. ohne Codeänderung.
+- `marketing-chef/auto` — keine Commits vor `main` (nichts zu tun, läuft
+  erst um 6 Uhr).
+- `support-chef/auto` — keine Commits vor `main` (nichts zu tun, läuft
+  erst um 6 Uhr).
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch ausgecheckt, frisch
+`npm install`, dann selbst ausgeführt statt nur dem Log zu glauben):
+`npx tsc -b` grün, `npx eslint .` 0 Fehler (dieselben 3 vorbestehenden
+`react-refresh`-Warnings wie im Log behauptet), `npx vitest run` 27
+Testdateien / 108 Tests, alle grün — deckt sich exakt mit den
+Log-Behauptungen der beiden Code-Commits.
+
+**Diff-Prüfung:** Änderungen betreffen nur die zwei im Log beschriebenen
+Punkte:
+- `src/components/chat/ChatInput.tsx` — `setMicError(null)` beim Senden
+  einer getippten Nachricht, `role="status"` an der Fehlermeldung.
+- `src/pages/Preisalarme.tsx` — Entfernen-Icon `BellOff` → `Trash2`;
+  Musterabgleich bestätigt (`Trash2` bereits identisch in
+  `Reiseentwuerfe.tsx`/`EditMode.tsx` verwendet, kein neues Muster).
+- `src/components/trip/ChecklistPanel.tsx` — die fünf automatisch
+  erkannten Zeilen sind jetzt Links zu `/ki-chat?edit=<feld>`, exaktes
+  Bestandsmuster aus `Buchung.tsx`'s Section-Karten.
+Kein Bezug zu Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, kein
+Scope-Creep über die beschriebenen Punkte hinaus. `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md`-Änderungen sind reine Status-Updates
+(6.10 abgehakt), keine neuen Behauptungen. Reine Log-Einträge vom
+27.08. ohne Codeänderung bergen kein Risiko.
+
+**Ergebnis:** Alles grün, passt. Nach `main` gemerged (`--no-ff`,
+`e8235d4..ede3b2c`) und gepusht. Vom `npm install` erzeugtes,
+unbeabsichtigtes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+einiger optionaler `esbuild`-Plattformpakete, keine echte
+Abhängigkeitsänderung) vor dem Push verworfen.
+
+**Zusammenfassung:** `it-chef/auto` unabhängig geprüft und gemergt.
+`marketing-chef/auto`/`support-chef/auto` waren bereits aktuell (keine
+neuen Commits), wie für den frühen Lauf erwartet.
+
+Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
+nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
+Fund.
