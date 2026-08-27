@@ -4,6 +4,88 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-27
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen: konkrete
+neue Design-Vorgabe in `MARKENDESIGN.md` ergänzt — Abschnitt "Icons für
+destruktive Aktionen", abgeleitet aus dem am 26.08. von IT-Chef
+gefixten `Preisalarme.tsx`-Icon (`BellOff` → `Trash2` für den
+Entfernen-Button, ursprünglich vom Support-Chef gemeldet, im eigenen
+Bericht vom 26.08. als künftiger Content-Kandidat vorgemerkt).
+
+**Warum dieser Punkt statt eines neuen Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`93bb408`,
+26.08.) geprüft: acht neue Commits, davon fünf reine IT-Chef-/
+Freigabe-Chef-Log-Einträge ohne Codeänderung ("kein sicherer Punkt" x3
+am 27.08., zwei automatisierte Merges) sowie ein echter IT-Fix
+(`20eb54d`: Mikrofon-Fehleranzeige im KI-Chat + Preisalarme-Icon
+behoben) und ein zweiter (`fe52024`: Checklistenpunkte jetzt mit
+KI-Chat verlinkt, 6.10). `ZEITPLAN.md` und `marketing/freigabe-uebersicht.md`
+bestätigt: alle drei offenen Fragen an Ni (Kanal-Start? 6.2 priorisiert?
+Tier-4-Format gewollt?) weiterhin unbeantwortet seit 21.08. — die
+Selbstbeschränkung "kein neues Content-Stück" aus dem Bericht vom
+20.08. gilt damit unverändert weiter, ein neuntes Stück hätte den dort
+kritisierten Entwurfsstapel nur vergrößert.
+
+Der Preisalarme-Icon-Fix wurde einzeln geprüft (`git show 20eb54d --
+src/pages/Preisalarme.tsx`): `BellOff` (Glocke aus) wurde für einen
+unwiderruflichen Löschvorgang verwendet, jetzt `Trash2` — genau der
+Fall, den der eigene Bericht vom 26.08. als "Baustein fürs noch
+unentschiedene Tier-4-Format, nicht heute schon ein eigener Post"
+vorgemerkt hatte. Da Frage 3 (Tier-4-Format grundsätzlich gewollt?)
+weiterhin offen ist, bleibt auch das dabei — kein eigener Post, keine
+neue Tier-4-Ausgabe. Statt den Fund liegen zu lassen, aber genutzt: die
+Lücke, die den Bug erst ermöglicht hat (kein Prinzip in
+`MARKENDESIGN.md` dazu, dass Icons bei destruktiven Aktionen nicht
+mildernd wirken dürfen), tatsächlich geschlossen — das ist die
+Zusammenarbeit mit IT-Chef über `MARKENDESIGN.md`, die der Skill
+ausdrücklich vorsieht, und verhindert denselben Fehler künftig bei
+Favoriten/Angebote/Aktivitäten/Warenkorb. Vor dem Schreiben geprüft, ob
+dort schon dasselbe Problem besteht (`grep` auf die vier Seiten): alle
+vier nutzen bereits ehrliche Icons (`X` bzw. gefüllte `Heart` als
+Favoriten-Toggle) — kein akuter zweiter Fall, die neue Vorgabe ist
+vorbeugend für künftige Entfernen-Buttons gedacht.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Design-Vorgabe für IT-Chef), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Produkt-Code geändert. Keine
+erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die
+Vorgabe entscheidet nichts, was eigentlich Ni entscheiden müsste (sie
+leitet nur ein bereits im Code sichtbares, konkretes Prinzip ab, analog
+zu den bestehenden Abschnitten "Fehlermeldungen (allgemein)" und "Leere
+Zustände").
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes Content-Stück — siehe Begründung oben, Selbstbeschränkung
+  gilt unverändert, keine der drei Fragen wurde beantwortet.
+- Eigener Post oder erste Tier-4-Ausgabe zum Preisalarme-Icon-Fix — laut
+  eigenem Bericht vom 26.08. ausdrücklich an die noch offene
+  Tier-4-Grundsatzfrage gebunden, nicht heute schon fällig.
+- `marketing/freigabe-uebersicht.md` erneut nur mit "nichts geändert"
+  nachführen (wie 25./26.08.) — diesmal bewusst stattdessen die konkrete
+  `MARKENDESIGN.md`-Ergänzung gewählt, da sie tatsächlich etwas Neues für
+  IT-Chef beiträgt statt nur denselben Status ein drittes Mal zu
+  wiederholen. Freigabe-Übersicht bleibt inhaltlich beim Stand vom
+  26.08. — dort weiterhin korrekt, da sich an den drei Fragen nichts
+  geändert hat.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `93bb408`, 26.08.) war bereits vollständig in `main`
+gemerged (`git merge-base --is-ancestor` bestätigt). Branch daher neu
+von aktuellem `origin/main` (`4c17900`, inkl. IT-Chef-Läufen bis
+27.08. früh) angelegt, gleiches Vorgehen wie bei allen bisherigen
+Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur `MARKENDESIGN.md` ergänzt
+und dieser Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-26
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:

@@ -6,7 +6,7 @@ können. **Marketing-Chef pflegt diese Datei** (Markenstimme, Positionierung,
 Design-Vorgaben) — **IT-Chef liest sie vor jeder UI-/Design-Arbeit** und
 hält sich daran, statt eigene Stil-Entscheidungen zu treffen.
 
-Zuletzt aktualisiert: 2026-08-10 von Marketing-Chef
+Zuletzt aktualisiert: 2026-08-27 von Marketing-Chef
 
 ## Positionierung
 
@@ -97,6 +97,19 @@ Schritt als Button, nie ein trockenes "Keine Daten vorhanden".
 folgt demselben Prinzip wie der KI-Chat ("Ich möchte dein Transportmittel
 nicht falsch verstehen — bitte wähle eine Option aus" statt "Ungültige
 Eingabe"). Sag was schiefging und was als Nächstes zu tun ist.
+
+**Icons für destruktive Aktionen:** Ein Icon soll zeigen, was ein Button
+wirklich tut, nicht eine mildere Nebenbedeutung nahelegen. Konkreter
+Anlass: Der Entfernen-Button in `Preisalarme.tsx` nutzte bisher ein
+`BellOff`-Icon (Glocke aus) für eine unwiderrufliche Löschung — das liest
+sich wie "stummschalten", nicht wie "für immer entfernen" (gemeldet vom
+Support-Chef am 26.08., von IT-Chef am selben Tag auf `Trash2` korrigiert).
+Gleiches Prinzip wie bei Fehlermeldungen oben: ehrlich statt beschönigend,
+nur eben beim Icon statt beim Text. Für künftige Entfernen-/Löschen-Buttons
+(Favoriten, Angebote, Aktivitäten, Warenkorb-Positionen usw.) `Trash2` oder
+ein vergleichbar eindeutiges Icon verwenden — keine Icons, die eher nach
+Pause, Stummschalten oder einem reversiblen Zustand aussehen, wenn die
+Aktion tatsächlich endgültig ist.
 
 **Kartenansicht:** Marker/Highlights in Teal oder Gold auf einer
 dezenten, nicht zu bunten Kartenbasis — Navy sollte auf der Karte selbst
