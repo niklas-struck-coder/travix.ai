@@ -1,53 +1,49 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-26
+**Datum:** 2026-08-27
 
-## Was ist seit dem letzten Eintrag (2026-08-25) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-26) passiert?
 
-Auf meiner Seite nichts Neues: Der autonome Content-Lauf hat nur die
-Freigabe-Übersicht nachgeführt, kein neues Stück geschrieben — die drei
-offenen Entscheidungsfragen an dich (Kanal-Start, Warenkorb-Content erst
-nach Buchen-Button, wiederkehrendes Format ja/nein) stehen unverändert
-seit dem 21.08. im Raum. Auf der IT-Seite kamen zwei neue, kleine Fixes
-als PRs dazu, beide noch offen: #8 (Vergangenheitsdatum bei Hinflug/
-Check-in ließ sich anstandslos auswählen) und #9 (Preise liefen bisher
-als "245.00 EUR" statt "245,00 €" — jetzt mit `formatPrice()` korrekt
-formatiert). Der Support-Chef hat außerdem die Preisalarme-Seite geprüft
-und zwei Reibungspunkte gefunden, einer davon ziemlich griffig: Der
-Entfernen-Button trägt ein "Glocke aus"-Icon, das nach "stummschalten"
-aussieht, tatsächlich aber unwiderruflich löscht.
+Auf meiner Seite kein neues Content-Stück (die drei offenen
+Freigabe-Fragen an dich — Kanal-Start, Warenkorb-Content erst nach
+Buchen-Button, wiederkehrendes Format ja/nein — stehen unverändert seit
+dem 21.08.). Stattdessen habe ich aus dem Preisalarme-Icon-Fix vom 26.08.
+(`BellOff` → `Trash2`) eine dauerhafte Design-Regel abgeleitet und in
+`MARKENDESIGN.md` ergänzt: Icons bei destruktiven Aktionen dürfen keine
+mildere Nebenbedeutung ("Pause", "stummschalten") nahelegen. IT-Chef ist
+seither dreimal gelaufen und hat keinen neuen sicheren Punkt gefunden —
+der Code-Stand ist stabil. Der Support-Chef hat die ChecklistPanel-Links
+(6.10) geprüft, keine neuen Funde.
+
+Eine Sache ist mir beim Blick auf GitHub aufgefallen, die nichts mit
+Content zu tun hat, aber für unsere Positionierung relevant ist: Es
+liegen aktuell **sieben offene, ungemergte Fix-PRs**, der älteste seit
+dem 09.08. (u. a. #8 und #9 von gestern). Das ist keine erfundene
+Kennzahl, sondern einfach der GitHub-Stand gerade eben.
 
 ## Vorschläge
 
-1. **Die drei offenen Fragen sind jetzt genau fünf Tage alt — Zeit für
-   einen kleinen Schubser statt eines weiteren Wartens.** Drei
-   freigabefähige Tier-1-Stücke liegen seit über einer Woche bereit,
-   ohne dass sich an der Kanal-Frage etwas bewegt hat. Statt auf einen
-   vollen Launch (Landingpage, Warteliste) zu warten, wäre ein
-   risikoarmer Test denkbar: einen einzelnen Kanal (z. B. LinkedIn,
-   passt zum sachlichen Ton der Stücke) diese Woche anlegen und nur
-   Stück 3 ("Drei Wege, eine Empfehlung") als ersten Post raushauen —
-   kein Commitment zu einer vollen Redaktionsplan-Kadenz, nur ein Test,
-   ob das Format überhaupt zieht.
+1. **Erst mergen, dann erzählen.** Der PR-Stau ist ein Warnsignal für
+   genau die Geschichte, die wir erzählen wollen: "kleine, ehrliche
+   Korrekturen" wirkt hohl, wenn sieben davon seit bis zu drei Wochen
+   ungemergt herumliegen. Kein Content-Vorschlag hier, sondern eine
+   Bitte: bevor ein künftiges Content-Stück auf einen bestimmten Fix
+   verweist (wie bei PR #8/#9 angedacht), kurz prüfen, ob er tatsächlich
+   in main gelandet ist — sonst bewerben wir einen Zustand, den Nutzer
+   in der App gar nicht sehen.
 
-2. **Preisalarme-Reibungspunkt ist ein guter nächster Kandidat für die
-   "ehrlicher gemacht"-Reihe — sobald er gefixt ist.** Ein Icon, das
-   "Pause" verspricht und "für immer löschen" liefert, ist ein
-   greifbares Beispiel für genau die Art Detail, die eure Positionierung
-   ausmacht (siehe Vorschlag vom 25.08.: *"travix.ai zeigt dir, was
-   wirklich passiert — nicht was gut aussehen soll"*). Vormerken für den
-   Moment, in dem IT-Chef das Icon/die Aktion korrigiert — dann ist es
-   ein weiterer Baustein für das noch unentschiedene monatliche Format
-   (Tier 4), nicht heute schon ein eigener Post.
+2. **Die neue Icon-Regel ist ein guter Tier-4-Baustein, aber noch kein
+   Post.** Sie zeigt beispielhaft, wie Ehrlichkeit bei uns nicht nur ein
+   Text-, sondern auch ein Design-Prinzip ist — passend zum noch
+   unentschiedenen monatlichen Format ("Was wir diese Woche ehrlicher
+   gemacht haben"). Bleibt vorgemerkt, bis du Frage 3 beantwortest.
 
-3. **PR #8 und #9 sind noch kein Content-Stoff, aber ein Muster, das
-   sich verdichtet.** Damit sind es jetzt fünf kleine, ehrliche
-   Korrekturen in zwei Wochen (Fehlertexte, Mikrofon-Fehler, Checkliste-
-   Label, jetzt Datumsschutz und Preisformat) — alle nach demselben
-   Prinzip: lieber ein kleines, korrektes Detail als ein großes,
-   unfertiges Versprechen. Sobald #8/#9 gemerged sind, wäre das genug
-   Substanz für die erste tatsächliche Ausgabe des gebündelten Formats,
-   *falls* du dich für dessen Fortführung entscheidest (offene Frage 3
-   oben) — bis dahin sammle ich weiter, ohne selbst schon zu posten.
+3. **Mach die Kanal-Entscheidung leichter, nicht dringlicher.** Statt
+   die drei Fragen zum sechsten Mal zu wiederholen: Ein konkreter,
+   risikoarmer Vorschlag als Diskussionsgrundlage — LinkedIn allein,
+   nur mit Stück 3 ("Drei Wege, eine Empfehlung") als erstem Post, ohne
+   feste Kadenz-Zusage. Wenn das zu groß gedacht ist, sag einfach kurz
+   "nicht jetzt" — auch das ist eine Antwort, mit der ich weiterarbeiten
+   kann, statt in der Warteschleife zu bleiben.
 
-_Letztes Update: 2026-08-26_
+_Letztes Update: 2026-08-27_
