@@ -1371,3 +1371,45 @@ neuen Commits), wie für den frühen Lauf erwartet.
 Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
 nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
 Fund.
+
+## 2026-08-27, später Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — keine neuen Commits gegenüber `main` (0 im Voraus
+  laut `git rev-list --left-right --count`) — bereits im frühen Check
+  von heute gemerged, seitdem nichts Neues. Nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit vor `main`.
+- `support-chef/auto` — 1 neuer Commit vor `main`.
+
+**Prüfung `marketing-chef/auto`:** Diff betrifft nur `MARKENDESIGN.md`
+(neuer Abschnitt "Icons für destruktive Aktionen") und den eigenen
+Log-Eintrag — keine Codeänderung, keine Veröffentlichung. Kernbehauptung
+im Log stichprobenartig im Code verifiziert: `Preisalarme.tsx` nutzt auf
+`main` tatsächlich bereits `Trash2` statt `BellOff` (Zeile 96, Import
+Zeile 3) — die neue Design-Vorgabe leitet sich also von einem real
+existierenden, bereits behobenen Fall ab, keine erfundene Grundlage.
+Keine erfundenen Kennzahlen/Nutzerzahlen, kein Hinweis auf tatsächliches
+Posten, vollständiger zusammenhängender Text statt Stichpunktskizze.
+Ergebnis: passt. Nach `main` gemerged (`--no-ff`, `b1ba03d`).
+
+**Prüfung `support-chef/auto`:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (neuer Bericht zu `ChecklistPanel.tsx`,
+Aufgabe 6.10). Zentrale Behauptung im Code nachvollzogen
+(`ChecklistPanel.tsx` auf `main`, Zeilen ~68-108): die fünf
+automatischen Zeilen (`<Link>`) und die acht manuellen Zeilen
+(`<button>`) nutzen tatsächlich praktisch identische Klassen
+(`flex items-center gap-2 rounded-md py-0.5 hover:bg-muted`) und
+dieselben Icons (`CheckCircle2`/`Circle`) ohne jede visuelle
+Unterscheidung — der gemeldete Reibungspunkt ist im Code exakt so
+nachvollziehbar wie beschrieben, kein erfundener Fund. Reine
+Analyse ohne Codeänderung, damit ohnehin risikoarm.
+Ergebnis: passt. Nach `main` gemerged (`--no-ff`, `4fafb5e`).
+
+**Zusammenfassung:** `marketing-chef/auto` und `support-chef/auto`
+unabhängig geprüft und beide gemergt und gepusht
+(`4c17900..4fafb5e`). `it-chef/auto` hatte nichts Neues seit dem frühen
+Check von heute.
+
+Ni-Info nicht nötig — beide Merges glatt, Kernbehauptungen im Code
+nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
+Fund.
