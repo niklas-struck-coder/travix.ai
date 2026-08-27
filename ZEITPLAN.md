@@ -112,6 +112,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `activities` hat kein eigenes `?edit=`-Feld in `useChat.ts`, verlinkt
   daher auf einen neuen Chat statt eines Edit-Parameters. Die acht
   manuellen Vorbereitungspunkte bleiben unverändert reine Ankreuz-Buttons.
+  Vom autonomen IT-Chef-Lauf am 27.08. (vierter Lauf) nachgebessert: Support-
+  Chef meldete am 27.08., dass die klickbaren Links und die nur-abhakbaren
+  Zeilen optisch identisch aussehen, obwohl sie sehr Unterschiedliches tun
+  (Link verlässt die Seite sofort). `ChecklistPanel.tsx` zeigt den
+  automatischen Zeilen jetzt zusätzlich dasselbe `Pencil`-Icon, das
+  `Buchung.tsx` für "Bearbeiten"-Links nutzt, plus einen `sr-only`-Zusatz
+  ", bearbeiten" im Linktext für Screenreader — genau der in
+  `reports/support-chef.md` vorgeschlagene kurzfristige Fix.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/

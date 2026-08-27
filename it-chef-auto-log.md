@@ -4476,3 +4476,66 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-27 (vierter Lauf, 22:xx UTC)
+
+**Vorbereitung:** Der bisherige `it-chef/auto`-Branch (Stand der ersten
+drei Läufe von heute) war laut `git merge-base --is-ancestor` bereits
+vollständig in `origin/main` gemerged (Freigabe-Chef hat ihn zwischendurch
+freigegeben). Deshalb wie in Regel 1 des Skills frisch von `origin/main`
+neu angelegt (`git checkout -B it-chef/auto origin/main`) — `main` selbst
+wurde dabei nicht verändert, nur ausgecheckt/gefetcht.
+
+**Neuer Fund seit dem dritten Lauf:** `reports/support-chef.md` wurde
+nach dem dritten Lauf von heute auf den 27.08. aktualisiert (Commit
+`9d77124`, nach dem letzten Log-Eintrag oben) und meldet einen neuen
+Reibungspunkt: die fünf automatisch erkannten `<Link>`-Zeilen in
+`ChecklistPanel.tsx` (Aufgabe 6.10, Klick zum KI-Chat) sehen optisch
+identisch zu den acht nur-abhakbaren `<button>`-Zeilen darunter aus,
+obwohl ein Klick oben sofort die Seite verlässt. Support-Chef schlug
+konkret vor: den automatischen Zeilen dasselbe `Pencil`-Icon geben, das
+`Buchung.tsx` für "Bearbeiten"-Links bereits nutzt, plus einen
+`sr-only`-Zusatz ", bearbeiten" im Linktext.
+
+**Warum das die vier Sicherheitskriterien erfüllt:** kein Bezug zu Auth/
+Zahlungen/Nutzerdaten/rechtlichen Texten; keine offene Produkt- oder
+Architekturentscheidung (reine UI-Unterscheidbarkeit, kein neues
+Datenmodell); klar genug beschrieben (Support-Chef nennt Datei, Zeilen
+und den konkreten Fix mit Referenz auf ein bereits bestehendes Muster in
+`Buchung.tsx`); objektiv prüfbar (Typecheck/Lint/Tests, plus eine neue
+Test-Assertion für die geänderte Zugänglichkeit).
+
+**Umsetzung:** `src/components/trip/ChecklistPanel.tsx` — den fünf
+automatischen `<Link>`-Zeilen ein `Pencil`-Icon (`lucide-react`, `size-3.5
+text-muted-foreground`, `aria-hidden`) rechtsbündig hinzugefügt und dem
+sichtbaren Label einen `<span className="sr-only">, bearbeiten</span>`
+angehängt — exakt der von Support-Chef vorgeschlagene Fix, eins zu eins
+aus dem bestehenden `Pencil`-Muster in `Buchung.tsx` übernommen, keine
+Erfindung neuer Icons/Texte. Die acht manuellen Ankreuz-Buttons bleiben
+unverändert ohne Icon/Zusatz, wodurch die beiden Zeilentypen jetzt auch
+optisch unterscheidbar sind. Zusätzlich einen neuen Test in
+`ChecklistPanel.test.tsx` ergänzt, der den erweiterten Accessible Name
+("..., bearbeiten") auf einem automatischen Link prüft und sicherstellt,
+dass keiner der manuellen Buttons denselben Zusatz bekommen hat.
+`ZEITPLAN.md` (6.10) und `tasks/tasks-prd-travix-platform.md` (6.10) um
+den Nachtrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx
+tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings), `npx vitest run` (27 Testdateien, **109**
+Tests, alle grün — ein Test mehr als beim letzten Lauf durch die neue
+Assertion), `npm run build` (Produktions-Build erfolgreich, gleiche
+vorbestehende Chunk-Size-Warnung).
+
+**Zusätzlich geprüft und verworfen:** 5.7 (Zug/Bus/Fähre in KI-Chat)
+erneut am aktuellen Quelltext verifiziert (u.a. `useChat.ts`,
+`KiChat.tsx`, `src/lib/duffel/client.ts`) — weiterhin keine Zug-
+Datenquelle (Duffel bietet kein Bahn-Produkt), `TrainResults` bleibt im
+Chat ungebunden, bräuchte eine Architekturentscheidung zur Datenquelle.
+Bestätigt denselben Befund wie in den ersten drei Läufen heute, hier aus
+Sorgfalt unabhängig gegengeprüft, bevor der Support-Chef-Fund als
+heutiger Punkt gewählt wurde.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (`ChecklistPanel.tsx`,
+`ChecklistPanel.test.tsx`, `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+und dieser Log-Eintrag).

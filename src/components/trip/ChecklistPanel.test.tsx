@@ -50,4 +50,19 @@ describe('ChecklistPanel – Klick zum Weiterplanen (6.10)', () => {
       '/ki-chat?edit=accommodation',
     )
   })
+
+  it('makes the auto-detected links visually and accessibly distinguishable from the manual checkboxes below (Support-Chef 2026-08-27)', () => {
+    render(
+      <MemoryRouter>
+        <ChecklistPanel trip={emptyTrip} />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /Transport ausgewählt, bearbeiten/ })).toBeInTheDocument()
+
+    const manualButtons = screen.getAllByRole('button')
+    for (const button of manualButtons) {
+      expect(button.textContent).not.toMatch(/bearbeiten/)
+    }
+  })
 })
