@@ -4539,3 +4539,104 @@ heutiger Punkt gewählt wurde.
 **Commit:** siehe Git-Historie auf `it-chef/auto` (`ChecklistPanel.tsx`,
 `ChecklistPanel.test.tsx`, `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 und dieser Log-Eintrag).
+
+## 2026-08-27 (fünfter Lauf, 23:xx UTC — geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war laut `git log
+origin/main..origin/it-chef/auto` genau einen Commit vor `origin/main`
+(der ChecklistPanel-Fix aus dem vierten Lauf, noch nicht vom
+Freigabe-Chef gemerged) und vollständig auf dem Stand von `origin/main`
+(`git log origin/it-chef/auto..origin/main` leer) — also weitergearbeitet
+statt neu angelegt, `main` dabei nur ausgecheckt/gefetcht, nicht
+verändert.
+
+**Ausgewählter Punkt:** 7.7 `Dashboard.tsx` (`/dashboard`) aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`.
+
+**Warum das die vier Sicherheitskriterien erfüllt:** kein Bezug zu Auth/
+Zahlungen/echten Nutzerdaten/rechtlichen Texten (reine Übersichtsseite
+über bereits vorhandene Demo-Daten); keine offene Produkt- oder
+Architekturentscheidung — `MARKENDESIGN.md` enthält bereits eine
+konkrete Design-Vorgabe für genau diese Seite ("Dashboard: Kennzahlen …
+ruhig, Teal für normale Werte, Gold für Highlights, niemals Rot für
+Budget-Warnungen"), die Marketing-Chef offenbar in Vorbereitung darauf
+ergänzt hat; klar genug beschrieben (FR-903/Aufgabe 7.7: Reisen, Budgets,
+Favoriten, Prämienpunkte); objektiv prüfbar (Typecheck/Lint/Tests plus
+neue Test-Assertions).
+
+**Vorher geprüft und verworfen:**
+- 4.1-4.3 (echte KI-Anbindung) — explizit "blocked on Base44/Gemini
+  credentials" in der Aufgabenliste, keine autonome Produktentscheidung.
+- 5.7 (Zug/Bus/Fähre in KI-Chat) — am aktuellen Quelltext erneut
+  verifiziert (`useChat.ts`, `KiChat.tsx`, `src/types/trains.ts`):
+  weiterhin keine echte Zug-Datenquelle vorhanden (Duffel bietet kein
+  Bahn-Produkt, `TrainResults`/`TrainCard` haben nirgends Demo- oder
+  Live-Daten), Ergebnisse hier zu zeigen würde entweder erfundene Daten
+  brauchen (verboten laut Produktprinzip "nichts wird erfunden") oder
+  eine Architekturentscheidung zur Datenquelle — bestätigt denselben
+  Befund wie in allen vorherigen Läufen.
+- 6.2, 6.6, 6.7 — weiterhin explizit blockiert, da `TripDraft` keine
+  Item-/Provider-URL- bzw. Preisfelder für Transport/Unterkunft hat
+  (gleicher Befund wie in `tasks/tasks-prd-travix-platform.md` notiert).
+- 7.4 ("Planung fortsetzen" mit voller Chat-Historie) — genauer geprüft:
+  `tripStorage.ts`/`useChat.ts` haben nur einen einzigen globalen
+  `CHAT_STORAGE_KEY` für den aktuell aktiven Chat, keine Speicherung pro
+  Entwurf. Die Demo-Entwürfe in `Reiseentwuerfe.tsx` sind komplett
+  losgelöst von diesem echten Chat-State. Eine echte Umsetzung bräuchte
+  entweder mehrere parallele Chat-Speicher oder eine Verknüpfung
+  Entwurf-ID ↔ Chat-Historie — das ist eine Datenmodell-/
+  Architekturentscheidung, die über die reine Aufgabenbeschreibung
+  hinausgeht, deshalb nicht autonom angefasst.
+
+**Umsetzung:** Neue Seite `src/pages/Dashboard.tsx`, in `routes.tsx`
+unter `/dashboard` verdrahtet (ersetzt die bisherige `PlaceholderPage`,
+der Sidebar-Eintrag existierte in `src/lib/nav-config.ts` bereits). Vier
+Kennzahl-Kacheln:
+- **Bevorstehende Reisen** — Anzahl aus denselben Demo-Reisen wie
+  `MeineReisen.tsx` (Lissabon).
+- **Reiseentwürfe** — Durchschnitts-Fortschritt über die bestehende
+  `calculateProgress.ts`-Funktion, angewandt auf dieselben zwei
+  Demo-Entwürfe wie `Reiseentwuerfe.tsx` (Lissabon/Kyoto), inkl.
+  `Progress`-Balken; würde der Schnitt ≥80% erreichen ("fast fertig
+  geplant"), färbt sich die Kachel laut `MARKENDESIGN.md`-Vorgabe Gold
+  statt Teal.
+- **Warenkorb** — Summe über dieselben Demo-Positionen wie
+  `Warenkorb.tsx`, berechnet mit der bereits bestehenden
+  `calculateCartTotal()` aus `cartTotals.ts` (keine neue Rechenlogik).
+- **Favoriten** — Anzahl aus denselben Demo-Favoriten wie
+  `Favoriten.tsx` (Kapstadt, Reykjavik).
+
+Jede Kachel verlinkt auf die volle Seite ("Alle ansehen"). Bewusst keine
+Budget-Warnfarbe (Rot ist laut `MARKENDESIGN.md` ohnehin verboten) und
+kein Vergleich Ist/Soll, da `TripDraft` keine echten Preisfelder für
+Transport/Unterkunft hat (gleiche Lücke wie 6.6/6.7/7.12) — die
+Warenkorb-Kachel zeigt daher nur die reine Summe, keine
+Budget-Auslastung.
+
+**Prämienpunkte bewusst nicht als Zahl gezeigt:** Task 8.12 ("Implement
+rewards/loyalty program display") ist ein eigener, weiterhin offener
+Punkt, und `tasks/prd-travix-platform.md` listet unter OQ-04 explizit als
+offene Frage: "What are the exact rules for loyalty points accrual and
+redemption?" Eine erfundene Punktzahl hier wäre also entweder eine
+Vorwegnahme von 8.12 oder eine Erfindung entgegen dem Markenkern
+("nichts wird erfunden", `MARKENDESIGN.md`). Stattdessen zeigt die Seite
+einen ehrlichen Hinweis-Text, dass das Prämienprogramm noch nicht
+final entschieden ist — kein Code-Risiko, aber ein bewusster
+Scope-Cut, den Ni bei Bedarf korrigieren kann, sobald OQ-04 geklärt ist.
+
+Zusätzlich neue Testdatei `src/pages/Dashboard.test.tsx` (3 Tests: alle
+vier Kacheln mit korrekten Werten, korrekte Links, ehrlicher
+Prämienprogramm-Hinweis statt erfundener Zahl). `ZEITPLAN.md` (7.7,
+inkl. Ist-Stand-Absatz) und `tasks/tasks-prd-travix-platform.md` (7.7)
+um den Nachtrag ergänzt.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte),
+`npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings), `npx vitest run` (28
+Testdateien, 112 Tests, alle grün — 3 Tests mehr als beim letzten Lauf
+durch die neue Dashboard-Testdatei), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (`src/pages/Dashboard.tsx`,
+`src/pages/Dashboard.test.tsx`, `src/routes.tsx`, `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` und dieser Log-Eintrag).
