@@ -104,6 +104,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abhaken ist reiner lokaler Demo-State ohne Persistenz über Reloads
   hinweg, gleiches Muster wie `Profil.tsx`/`Einstellungen.tsx`, bis die
   echte Nutzerkonten-/Backend-Entscheidung gefallen ist.
+- [x] 6.10 Checklistenpunkte mit KI-Chat verknüpfen — vom autonomen
+  IT-Chef-Lauf am 26.08. (fünfter Lauf) ergänzt: die fünf automatisch
+  erkannten Zeilen in `ChecklistPanel.tsx` sind jetzt Links zu
+  `/ki-chat?edit=<feld>`, exakt das Muster, das die Section-Karten in
+  `Buchung.tsx` schon für Transport/Reisedaten/Budget/Unterkunft nutzen.
+  `activities` hat kein eigenes `?edit=`-Feld in `useChat.ts`, verlinkt
+  daher auf einen neuen Chat statt eines Edit-Parameters. Die acht
+  manuellen Vorbereitungspunkte bleiben unverändert reine Ankreuz-Buttons.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/

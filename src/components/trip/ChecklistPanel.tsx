@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { CheckCircle2, Circle, ListChecks } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -8,6 +9,20 @@ import type { TripDraft } from '@/types/chat'
 
 interface ChecklistPanelProps {
   trip: TripDraft
+}
+
+/**
+ * Where each auto-detected item's row links to for planning that component —
+ * same `/ki-chat?edit=<field>` pattern the Section cards in `Buchung.tsx`
+ * already use. `activities` has no dedicated `?edit=` field in `useChat.ts`
+ * (see `editableFields` there), so it opens a plain new chat instead.
+ */
+const AUTO_ITEM_HREF: Record<string, string> = {
+  transport: '/ki-chat?edit=transportMode',
+  dates: '/ki-chat?edit=dates',
+  accommodation: '/ki-chat?edit=accommodation',
+  budget: '/ki-chat?edit=budget',
+  activities: '/ki-chat',
 }
 
 /**
@@ -54,13 +69,18 @@ export function ChecklistPanel({ trip }: ChecklistPanelProps) {
           {AUTO_CHECKLIST_ITEMS.map((item) => {
             const checked = isAutoItemChecked(trip, item.id)
             return (
-              <li key={item.id} className="flex items-center gap-2 text-sm">
-                {checked ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-teal" />
-                ) : (
-                  <Circle className="size-4 shrink-0 text-muted-foreground" />
-                )}
-                <span className={cn(checked ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
+              <li key={item.id} className="text-sm">
+                <Link
+                  to={AUTO_ITEM_HREF[item.id] ?? '/ki-chat'}
+                  className="flex items-center gap-2 rounded-md py-0.5 hover:bg-muted"
+                >
+                  {checked ? (
+                    <CheckCircle2 className="size-4 shrink-0 text-teal" />
+                  ) : (
+                    <Circle className="size-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <span className={cn(checked ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
+                </Link>
               </li>
             )
           })}

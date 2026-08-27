@@ -4134,3 +4134,345 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf, vierte Ausführung desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `1f52875`), keine offenen Änderungen von einem vorherigen Lauf.
+`origin/main` per Fast-Forward-Merge reingebracht (acht neue Commits,
+u. a. neue Berichte von Support-/Marketing-Chef und ein Freigabe-Chef-
+Merge) — `main` selbst blieb dabei unberührt, nur lokal/auf `it-chef/auto`
+vorgespult.
+
+**Ausgewählter Punkt:** Anders als in den vorherigen drei Läufen heute gab
+es diesmal eine echte Änderung an der relevanten Quelle: `reports/support-
+chef.md` wurde um 13:34 UTC (Commit `e8235d4`) mit zwei neuen, noch nicht
+behobenen Reibungspunkten aktualisiert:
+1. `src/components/chat/ChatInput.tsx` — der Mikrofon-Fehlerhinweis
+   ("Spracheingabe hat nicht geklappt …") wird nie zurückgesetzt, wenn
+   man dem eigenen Rat folgt und stattdessen normal tippt (`handleSend`
+   ruft `setMicError` nirgends auf); zusätzlich fehlt dem Hinweis-`<p>`
+   `role="status"`/`aria-live`, sodass Screenreader-Nutzer:innen die
+   Fehlermeldung gar nicht mitbekommen.
+2. `src/pages/Preisalarme.tsx:96` — der Entfernen-Button nutzt das
+   `BellOff`-Icon (durchgestrichene Glocke), was wie "Stummschalten"
+   aussieht, tatsächlich aber unwiderruflich löscht; Vorschlag war ein
+   eindeutiges Löschen-Icon.
+
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` selbst unverändert seit
+den vorherigen Läufen — alle dort notierten Blocker (4.1-4.3 Base44/
+Gemini-Zugangsdaten; 6.2/6.6/6.7/7.12 fehlende Preis-/Item-Datenfelder in
+`TripDraft`; 7.4 fehlende Mehrfach-Trip-Chat-Historie; 7.7/8.5-8.7 zu groß/
+vage; 8.2/8.3 echter LLM-/Vision-Zugang nötig; 8.4 gleicher Erfindungs-
+Konflikt wie `mockConcierge.ts`; 8.11 blockiert auf FAQ-Inhalte) bestehen
+weiter fort, deshalb diesmal Punkt aus dem Support-Chef-Bericht statt aus
+`ZEITPLAN.md` gewählt — gleiches Muster wie die vorherigen PRs #8/#9, die
+ebenfalls aus Support-Chef-Funden entstanden sind.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten — reine UI-/Barrierefreiheits-Korrekturen an bereits
+bestehenden Demo-Seiten. Keine offene Produkt-/Architekturentscheidung
+(kein neues Datenfeld, keine neue Abhängigkeit). Klar genug beschrieben —
+Support-Chef nannte Datei, Zeile und konkreten Fix-Vorschlag. Ergebnis
+objektiv prüfbar über Tests/Typecheck/Lint plus manuelle Verifikation
+der Icon-/State-Logik.
+
+**Umgesetzt:**
+- `src/components/chat/ChatInput.tsx`: `handleSend` ruft jetzt
+  `setMicError(null)` auf, sodass eine alte Mikrofon-Fehlermeldung
+  verschwindet, sobald normal getippt und gesendet wird. Das
+  Hinweis-`<p>` hat jetzt `role="status"`, damit Screenreader die
+  Meldung automatisch ankündigen.
+- `src/pages/Preisalarme.tsx`: Entfernen-Button nutzt jetzt `Trash2`
+  statt `BellOff` (Import entsprechend angepasst) — konsistent mit dem
+  bestehenden Lösch-Icon-Muster in `Reiseentwuerfe.tsx`/`EditMode.tsx`.
+  `aria-label`/Verhalten unverändert, nur das visuell irreführende Icon
+  ersetzt.
+- Tests ergänzt: `ChatInput.test.tsx` bekommt zwei neue Fälle (Fehler
+  verschwindet beim Senden einer getippten Nachricht; Fehlermeldung ist
+  über `role="status"` auffindbar). `Preisalarme.test.tsx`
+  Testbeschreibung an das neue Icon angepasst (Verhalten/Assertions
+  unverändert, da `aria-label` gleich blieb).
+- `ZEITPLAN.md` bewusst nicht geändert — beide Punkte sind reine
+  Support-Chef-Reibungspunkte ohne eigene Checkbox dort, nicht Teil der
+  Sprint-Liste.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+dieselben 3 vorbestehenden `react-refresh`-Warnings), `npx vitest run`
+(26 Testdateien, 106 Tests — 104 vorher plus 2 neue —, alle grün),
+`npm run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-08-26 (Auto-Lauf, fünfte Ausführung desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `20eb54d`, ein Commit vor `origin/main`), keine offenen Änderungen
+von einem vorherigen Lauf. `origin/main` war bereits vollständig enthalten
+(`git log origin/main..origin/it-chef/auto` zeigt genau den einen eigenen
+Commit, `git log origin/it-chef/auto..origin/main` ist leer) — kein Merge
+nötig, `main` selbst unberührt.
+
+**Geprüfte, aber verworfene Kandidaten:**
+- `reports/support-chef.md` (26.08.): alle drei gemeldeten Punkte
+  (Mikrofon-Fehleranzeige, Screenreader-Ankündigung, Preisalarme-Icon)
+  bereits im vorherigen Lauf heute (Commit `20eb54d`) behoben — am
+  aktuellen Quelltext verifiziert.
+- `reports/it-chef.md` (26.08.): die zwei konkret gefundenen Bugs
+  (Vergangenheitsdatum, rohes Preisformat) liegen bereits fertig auf den
+  offenen PRs #8/#9 (warten auf Nis Review, nicht Teil des autonomen
+  Kanals). Die übrigen gemeldeten Punkte sind explizit als Produkt-/
+  Architekturentscheidung markiert (Transportsuche im Haupt-Chat-Ablauf,
+  fehlendes `TripDraft`-Feld für den ausgewählten Flug) oder brauchen
+  einen echten API-Key (Duffel-Stays-Feldnamen) — keiner davon autonom
+  sicher umsetzbar.
+- 5.7 "Integrate hotel and train search results into KI-Chat response
+  rendering": Hotel-Teil ist bereits erledigt (`HotelResults` in
+  `KiChat.tsx`). Der Zug-Teil bräuchte entweder eine echte Zug-Such-API
+  (existiert nirgends im Repo, `TrainCard`/`TrainResults` sind bislang nur
+  Komponenten ohne Datenquelle) oder erfundene Demo-Daten — beides würde
+  über eine reine Umsetzung hinausgehen und eine Dateninterpretation
+  nötig machen, die laut Sicherheitskriterien nicht autonom getroffen
+  werden soll. Bleibt offen für Ni.
+
+**Ausgewählter Punkt:** 6.10 "Wire checklist items to open KI-Chat for
+planning that specific component" aus `tasks/tasks-prd-travix-platform.md`
+— die 13-Punkte-Checkliste (6.8/6.9, vom 24.08.-Lauf gebaut) zeigte die
+fünf automatisch erkannten Zeilen bisher nur als reinen Text/Icon ohne
+jede Verlinkung.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung — das
+Zielmuster (`/ki-chat?edit=<feld>`) existiert bereits identisch in den
+Section-Karten von `Buchung.tsx`, hier nur auf die Checkliste
+übertragen. Klar genug beschrieben — der Aufgabentext benennt exakt das
+Ziel ("open KI-Chat for planning that specific component"). Ergebnis
+objektiv prüfbar über die `href`-Attribute der neuen Links.
+
+**Umgesetzt:**
+- `src/components/trip/ChecklistPanel.tsx`: die fünf automatisch
+  erkannten Zeilen (Transport/Reisedaten/Unterkunft/Aktivitäten/Budget)
+  sind jetzt `react-router-dom`-Links statt reinem Text — Ziel jeweils
+  `/ki-chat?edit=<feld>` über eine neue `AUTO_ITEM_HREF`-Zuordnung, exakt
+  das Muster der Section-Karten in `Buchung.tsx`. `activities` hat kein
+  eigenes `?edit=`-Feld in `useChat.ts` (`editableFields` kennt nur
+  transportMode/dates/budget/accommodation), verlinkt daher auf einen
+  neuen Chat ohne Parameter. Verlinkung gilt für erledigte wie offene
+  Punkte gleichermaßen (analog dem "Bearbeiten"-Stift bei bereits
+  gefüllten Section-Karten), sodass ein bereits geplantes Element auch
+  erneut angepasst werden kann. Die acht manuellen Vorbereitungspunkte
+  bleiben unverändert reine Ankreuz-Buttons ohne Trip-Feld-Bezug.
+- Neue Testdatei `src/components/trip/ChecklistPanel.test.tsx`: prüft die
+  `href`-Ziele aller fünf automatischen Punkte sowohl für einen leeren
+  als auch einen vollständig ausgefüllten Trip.
+- `tasks/tasks-prd-travix-platform.md` (6.10) und `ZEITPLAN.md`
+  (Sprint 2) aktualisiert.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler,
+dieselben 3 vorbestehenden `react-refresh`-Warnings), `npx vitest run`
+(27 Testdateien, 108 Tests — 106 vorher plus 2 neue —, alle grün),
+`npm run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-08-27
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `fe52024`), keine offenen Änderungen von einem vorherigen Lauf.
+`origin/main` hatte seit `e8235d4` keine neuen Commits — nichts zu
+mergen, `main` selbst wurde nicht angerührt. `it-chef/auto` liegt damit
+weiterhin zwei eigene Commits vor `main` (Ergebnisse der vierten/fünften
+Ausführung vom 26.08.), die auf den Freigabe-Chef-Merge warten.
+
+**Geprüfte, aber verworfene Kandidaten:**
+- `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` unverändert seit
+  dem letzten Lauf. Alle dort verbliebenen offenen Checkboxen erneut
+  einzeln gegen die vier Sicherheitskriterien geprüft:
+  - **2.x** Auth/Backend: explizit ausgeschlossen (Kriterium "kein Bezug
+    zu Auth"), zusätzlich blockiert von der offenen Backend-
+    Produktentscheidung.
+  - **4.1-4.3:** weiterhin "blocked on Base44/Gemini credentials" laut
+    Aufgabenliste selbst.
+  - **5.7** (Zug/Bus/Fähre in KI-Chat einbinden): am aktuellen Quelltext
+    verifiziert — weiterhin keine echte oder simulierte Zug-Datenquelle
+    im Repo (kein `searchTrains`, `TrainCard`/`TrainResults` bleiben ohne
+    Verwendungsstelle außerhalb der eigenen Dateien). Würde entweder
+    erfundene Daten oder eine Architekturentscheidung brauchen. Verworfen.
+  - **6.2/6.6/6.7:** `TripDraft` (`src/types/chat.ts`) hat weiterhin keine
+    Preis-/Item-/Provider-URL-Felder für Transport/Unterkunft — am
+    aktuellen Typ gegengeprüft. Datenmodell-Erweiterung wäre eine
+    Architekturentscheidung. Verworfen.
+  - **7.4:** `tripStorage.ts` speichert weiterhin nur einen einzigen
+    aktiven Trip unter einem globalen Schlüssel — keine Mehrfach-Entwürfe-
+    Chat-Historie zum Fortsetzen "at the exact point of interruption".
+    Verworfen.
+  - **7.7** Dashboard: aggregiert laut Aufgabe u. a. Budget- und Loyalty-
+    Daten, die im Datenmodell nicht existieren (6.6/6.7, 8.12) — weiterhin
+    zu viele fehlende Bausteine für eine reine Umsetzung ohne eigene
+    Scope-Entscheidung. Verworfen.
+  - **7.12** Reisebudget (Recharts): braucht dieselben fehlenden
+    Preisfelder wie 6.6/6.7. Verworfen.
+  - **8.1** Urlaubsmodus-Seite mit "daily itinerary display": neu und
+    eigenständig am Quelltext geprüft (`src/pages/Urlaubsmodus.tsx`
+    komplett gelesen, `src/types/chat.ts` nach Tages-/Itinerar-Feldern
+    durchsucht). Es existiert kein Datenfeld für ein Tagesitinerar
+    (`TripDraft.activities` ist eine flache Liste ohne Tageszuordnung) —
+    dieselbe Art Lücke wie bei 6.6/6.7 (fehlendes Datenmodell), nicht
+    Erfindungssache sondern echte Architekturentscheidung, welches
+    Datenformat ein Tagesitinerar haben soll. Das bestehende
+    Grundgerüst (Concierge-Chat) deckt laut `ZEITPLAN.md` bereits einen
+    Teil ab; der fehlende Rest ist nicht autonom sicher umsetzbar.
+    Verworfen.
+  - **8.2/8.3:** brauchen echten LLM-/Vision-Zugang, der nicht existiert.
+    Verworfen.
+  - **8.4:** gleicher Erfindungs-Konflikt wie bei `mockConcierge.ts`
+    bewusst vermieden (Restaurant-/Übersetzungs-Antworten ohne echte
+    Datenquelle). Verworfen.
+  - **8.5-8.7** Deal Finder: zu groß/vage für einen einzelnen abgegrenzten
+    Punkt ohne eigene Scope-Entscheidung. Verworfen.
+  - **8.9** Premium: Abo-Stufen nirgends im Repo definiert —
+    Produktentscheidung. Verworfen.
+  - **8.11** Hilfe: laut `ZEITPLAN.md` (Support-Chef Sprint 2) weiterhin
+    keine FAQ-Inhalte erarbeitet — würde erfundene FAQ-Texte brauchen.
+    Verworfen.
+  - **8.12** Rewards/Loyalty: nirgends im Repo spezifiziert. Verworfen.
+  - **8.13** Unit-Tests für calculateProgress/calculateCosts/
+    checklistRules/Schema-Validierung: neu geprüft — `calculateProgress`
+    und `checklistRules` haben bereits eigene Testdateien
+    (`calculateProgress.test.ts`, `checklistRules.test.ts`), aber
+    `calculateCosts` (hängt an 6.7) und die Schema-Validierung (hängt an
+    4.1) existieren im Code noch gar nicht, können also nicht getestet
+    werden. Punkt bleibt als Ganzes blockiert, bis 6.7/4.1 stehen.
+    Verworfen.
+- `reports/it-chef.md` unverändert seit 25.08. 12:41 UTC,
+  `reports/support-chef.md` unverändert seit 26.08. 13:34 UTC (die beiden
+  darin gemeldeten Punkte wurden bereits im vierten Lauf vom 26.08.
+  behoben, am aktuellen Quelltext von `ChatInput.tsx`/`Preisalarme.tsx`
+  gegengeprüft) — keine neuen gemeldeten Bugs oder Reibungspunkte seit
+  dem letzten Lauf.
+- Offene PRs (#1, #4, #5, #6, #7, #8, #9) via GitHub geprüft: alle
+  weiterhin offen und nicht gemergt, warten weiterhin auf menschliches
+  Review. Kein neuer Merge-Konflikt, keine dadurch neu freigewordene
+  Aufgabe.
+
+**Eigene Bug-Suche in diesem Lauf** (unabhängig von den PR-/Report-
+Funden): Repo-weiter Grep auf `size="icon"`-Buttons ohne `aria-label`
+(alle Treffer einzeln gegengelesen — `Buchung.tsx`, `Favoriten.tsx`,
+`Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Warenkorb.tsx`,
+`Reiseentwuerfe.tsx`, `Kalender.tsx`, `EditMode.tsx`, `ChatInput.tsx`,
+`KiChat.tsx` — alle haben bereits ein `aria-label`, keine Regression) und
+auf `.toFixed(`/`Number(`/`parseInt`/`parseFloat` (nur bereits bekannte,
+unauffällige Stelle in `HotelCard.tsx:23`, `offer.rating` ist laut
+`src/types/duffel.ts` ein Pflichtfeld, kein Optional-Chaining nötig).
+Keine neuen Treffer.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Heute nichts gefunden, das sicher genug für einen weiteren
+autonomen Lauf ist — alle verbliebenen offenen Punkte hängen entweder an
+Produkt-/Architekturentscheidungen, fehlenden Datenmodell-Feldern, echten
+externen Zugangsdaten oder fehlenden Inhalten (FAQ), die Ni bzw. andere
+Chef-Rollen erst liefern müssen.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci` (frischer Checkout, `node_modules` fehlte), `npx tsc -b` (grün),
+`npm run lint` (0 Fehler, dieselben 3 vorbestehenden `react-refresh`-
+Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (27
+Testdateien, 108 Tests, alle grün), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-27 (zweiter Lauf, 01:xx UTC)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `aeb9d9d`, erster Lauf von heute). `origin/main` unverändert seit
+`e8235d4` — nichts zu mergen, `main` nicht angerührt.
+
+**Kurzprüfung statt erneuter Vollanalyse:** Da der erste Lauf von heute
+(00:09 UTC) bereits alle offenen Punkte aus `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` einzeln gegen die vier Sicherheitskriterien
+geprüft und verworfen hat, wurde in diesem zweiten Lauf gezielt geprüft,
+ob sich seitdem etwas geändert hat, das einen der verworfenen Punkte neu
+freigibt:
+- `ZEITPLAN.md`/`tasks-prd-travix-platform.md`: keine neuen Commits,
+  Inhalt identisch zum ersten Lauf.
+- `reports/it-chef.md`, `reports/marketing-chef.md`,
+  `reports/support-chef.md`: alle unverändert (letzte Updates weiterhin
+  25./26.08.), keine neu gemeldeten Bugs oder Reibungspunkte.
+- Offene PRs (#1, #4, #5, #6, #7, #8, #9) via GitHub erneut geprüft: alle
+  weiterhin offen, gleicher Stand wie im ersten Lauf, kein Merge, kein
+  neuer Konflikt.
+- Repo-weiter Grep auf `TODO`/`FIXME`: keine Treffer.
+
+Da sich an keiner der zugrunde liegenden Bedingungen (Produkt-/
+Architekturentscheidungen, fehlende Datenmodell-Felder, fehlende externe
+Zugangsdaten, fehlende FAQ-Inhalte) etwas geändert hat, bleiben alle im
+ersten Lauf verworfenen Punkte weiterhin verworfen. Details siehe
+Eintrag "2026-08-27" oben — keine Wiederholung derselben Begründungen
+hier.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Nichts hat sich seit dem ersten Lauf von heute geändert, das
+einen weiteren autonomen Lauf sicher machen würde.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings), `npx vitest run` (27
+Testdateien, 108 Tests, alle grün), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-27 (dritter Lauf, 02:xx UTC)
+
+**Vorbereitung:** `it-chef/auto` war bereits auf `origin/it-chef/auto`
+(Stand `09e06c6`, zweiter Lauf von heute). `origin/main` unverändert seit
+`e8235d4` — nichts zu mergen, `main` nicht angerührt.
+
+**Kurzprüfung wie im zweiten Lauf:** `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` unverändert, `reports/it-chef.md`
+(25.08.), `reports/marketing-chef.md` (26.08. 13:06) und
+`reports/support-chef.md` (26.08. 13:34) allesamt unverändert seit dem
+letzten Lauf — keine neuen gemeldeten Bugs/Reibungspunkte. Offene PRs
+(#1, #4, #5, #6, #7, #8, #9) via GitHub erneut geprüft: alle weiterhin
+offen, kein Merge, kein neuer Konflikt, keine dadurch neu freigewordene
+Aufgabe. Alle im ersten Lauf einzeln geprüften und verworfenen
+ZEITPLAN-Punkte (4.1-4.3, 5.7, 6.2/6.6/6.7, 7.4, 7.7, 7.12, 8.1-8.13)
+bleiben aus denselben, unverändert gültigen Gründen verworfen — siehe
+Eintrag "2026-08-27" oben, keine Wiederholung derselben Begründungen
+hier.
+
+**Eigene Bug-Suche in diesem Lauf** (bewusst andere Fundstellen als in
+den ersten beiden Läufen heute, um denselben Boden nicht zweimal
+abzusuchen): interne Navigationsziele gegengeprüft — alle statischen
+`Link to="..."` (`/`, `/buchung`, `/ki-chat`, `/reise-planen`,
+`/urlaubsmodus`) und alle dynamischen `Link to={...}` in
+`ReiseSuche.tsx` (`option.path`, alle drei Werte existieren in
+`routes.tsx`) und `Buchung.tsx` (`editChoice.manualHref`/`.aiHref`/
+`editHref`, bereits bei 6.5 verifiziertes Muster) zeigen auf tatsächlich
+existierende Routen, kein toter Link. `<img>`-Tags repo-weit ohne
+`alt`-Attribut: keine Treffer. Repo-weiter Grep auf `TODO`/`FIXME`/`XXX`/
+`HACK`/"English": einziger Treffer eine harmlose Code-Kommentarzeile in
+`src/lib/duffel/client.ts:26` ("Duffel's own error text is English API
+jargon"), kein Bug. Keine neuen Funde.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Dritter Lauf in Folge ohne einen Punkt, der alle vier
+Sicherheitskriterien erfüllt — die Lage hat sich seit dem zweiten Lauf
+nicht verändert.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm ci`, `npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings), `npx vitest run` (27
+Testdateien, 108 Tests, alle grün), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).

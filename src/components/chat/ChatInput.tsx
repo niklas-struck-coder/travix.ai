@@ -21,6 +21,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
     if (!trimmed || disabled) return
     onSend(trimmed)
     setValue('')
+    setMicError(null)
   }
 
   const handleMicClick = () => {
@@ -71,7 +72,11 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
           <Send />
         </Button>
       </div>
-      {micError && <p className="text-xs text-muted-foreground">{micError}</p>}
+      {micError && (
+        <p role="status" className="text-xs text-muted-foreground">
+          {micError}
+        </p>
+      )}
     </div>
   )
 }

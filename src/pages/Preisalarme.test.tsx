@@ -19,7 +19,7 @@ describe('Preisalarme', () => {
     expect(screen.getByText(/Preis hat sich seit deiner letzten Ansicht geändert/)).toBeInTheDocument()
   })
 
-  it('removes an alert when its bell-off button is clicked, and shows the empty state once none are left', () => {
+  it('removes an alert when its delete button is clicked, and shows the empty state once none are left', () => {
     render(
       <MemoryRouter>
         <Preisalarme />
