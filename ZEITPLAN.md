@@ -222,7 +222,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ehrlicher Hinweis, dass das noch aussteht, laut der "ehrlich statt
   beschönigend"-Vorgabe in `MARKENDESIGN.md`. Keine Budget-Warnfarbe, da
   `TripDraft` weiterhin keine echten Preisfelder zum Vergleich hat (gleiche
-  Lücke wie 6.6/6.7/7.12).
+  Lücke wie 6.6/6.7/7.12). Vom autonomen IT-Chef-Lauf am 28.08. (fünfter
+  Lauf) auf zwei Hinweise aus `reports/support-chef.md` hin nachgebessert:
+  die vier "Alle ansehen"-Links haben jetzt unterscheidbare `aria-label`s
+  statt identischen Linktexts, und die gemittelte Reiseentwürfe-Prozentzahl
+  zeigt jetzt "Ø über {Anzahl} Entwürfe" statt unmarkiert als Einzelwert zu
+  wirken.
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz

@@ -4918,3 +4918,80 @@ bleiben. Für einen künftigen Lauf vorgemerkt.
 - `npm run build` — erfolgreich
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-28 (fünfter Lauf, ~23:xx UTC)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits einen ungemergten Commit
+vom vierten Lauf (`ffc0ba4`, mockAdvisor-Ehrlichkeitsfix), auf diesem
+Stand weitergearbeitet statt neu von `main` zu starten (`main` war zu
+diesem Zeitpunkt identisch mit dem Basis-Commit von `it-chef/auto`,
+also kein Merge nötig).
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks-prd-travix-platform.md`
+durchgesehen. Fast alle verbleibenden offenen Punkte scheiden laut den
+vier Sicherheitskriterien aus:
+- 4.1-4.3 (echte LLM-Anbindung): hängt an der offenen
+  Backend-Entscheidung.
+- 6.2/6.6/6.7/7.12 (Kostenübersicht, Provider-Buchungslink,
+  Reisebudget): laut `ZEITPLAN.md` explizit blockiert, da `TripDraft`
+  noch keine echten Preis-/Item-Felder hat — Ergänzung dieser Felder
+  wäre eine eigene Datenmodell-Entscheidung, keine reine Umsetzung.
+- 7.4 ("Planung fortsetzen" mit voller Chat-Historie): Entwürfe sind
+  reine Demo-Daten ohne jede gespeicherte Chat-Historie; eine "volle
+  Historie" für sie zu bauen hieße, Daten zu erfinden oder eine neue
+  Multi-Entwurf-Speicherung zu entwerfen — beides über die
+  Aufgabenbeschreibung hinaus.
+- 8.2/8.4-8.7 (Foto-Vision, Quick Actions, Deal Finder): brauchen
+  externe API-/Architektur-Entscheidungen (Kartendienst,
+  Übersetzung, Web-Suche-Agent).
+- 8.3 (kontextbezogene Antworten mit Tagesitinerar): `TripDraft` hat
+  keine Tages-Itinerar-Struktur — die müsste neu entworfen werden,
+  keine reine Umsetzung nach bestehender Spezifikation.
+- 8.9/8.12 (Premium, Prämienprogramm): Prämienregeln laut PRD (OQ-04)
+  offen bzw. Premium ist inhaltlich eine Monetarisierungs-/
+  Produktentscheidung.
+- 8.11 (Hilfe-Seite): blockiert, da FAQ-Inhalte vom Support-Chef noch
+  fehlen.
+
+Stattdessen `reports/support-chef.md` (Stand 28.08., von Support-Chef
+im heutigen dritten Bericht ergänzt) gelesen: zwei konkrete, bereits
+mit Datei/Zeile und Formulierungsvorschlag benannte Reibungspunkte auf
+der neuen Dashboard-Seite (7.7). Beide Kriterien erfüllt: kein
+Auth/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung, exakt
+beschrieben (inkl. Beispielformulierung), objektiv prüfbar über
+Tests/Typecheck.
+
+**Umgesetzt (`src/pages/Dashboard.tsx`):**
+1. Die vier "Alle ansehen"-Links (`StatTile` dreifach plus die
+   Reiseentwürfe-Kachel) hatten identischen Linktext — für
+   Screenreader/Tastatur-Nutzung nicht unterscheidbar. Jede `StatTile`
+   bekommt jetzt eine neue `linkLabel`-Prop, die als `aria-label` auf
+   dem Link landet ("Alle bevorstehenden Reisen ansehen", "Kompletten
+   Warenkorb ansehen", "Alle Favoriten ansehen"); die
+   Reiseentwürfe-Kachel bekommt direkt "Alle Reiseentwürfe ansehen".
+   Sichtbarer Linktext bleibt unverändert "Alle ansehen".
+2. Die Reiseentwürfe-Kachel zeigte den über alle Entwürfe gemittelten
+   Fortschritt (aktuell 40% aus Lissabon 60%/Kyoto 20%) ohne
+   Kennzeichnung als Durchschnitt — konnte wie ein falsch erfasster
+   Einzelfortschritt wirken. Neue Zeile "Ø über {Anzahl} Entwürfe"
+   unter dem Prozentwert (dynamisch über `draftTrips.length`, keine
+   hartkodierte "2").
+- `src/pages/Dashboard.test.tsx`: bisherigen Test auf vier identische
+  `getAllByRole('link', { name: 'Alle ansehen' })` ersetzt durch einen
+  Test auf sichtbaren Text (weiterhin 4×) plus einen neuen Test, der
+  jeden Link über seinen jetzt eindeutigen `aria-label` plus `href`
+  prüft; neuer Test für die "Ø über 2 Entwürfe"-Kennzeichnung ergänzt.
+
+**Bewusst nicht angefasst:** Keine weiteren Punkte aus
+`reports/support-chef.md` offen, keine Architektur-/Datenmodelländerung
+vorgenommen — reine UI-Textklarheit, wie von Support-Chef vorgeschlagen.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte)
+- `npm run build` (= `tsc -b && vite build`) — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis)
+- `npx vitest run` — 28 Testdateien, 115 Tests, alle grün (inkl. der
+  zwei aktualisierten/neuen `Dashboard.test.tsx`-Fälle)
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

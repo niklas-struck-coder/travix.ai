@@ -51,13 +51,14 @@ interface StatTileProps {
   label: string
   value: string
   href: string
+  linkLabel: string
 }
 
 // Ruhige Kennzahl-Kachel laut MARKENDESIGN.md ("Dashboard"-Vorgabe): Teal für
 // normale Werte, kein Rot für Warnungen — hier gibt es ohnehin keine
 // Budget-Warnung, da TripDraft keine echten Preisfelder für einen Vergleich
 // hat (gleiche Lücke wie bei CostBreakdown/Reisebudget, 6.6/6.7/7.12).
-function StatTile({ icon: Icon, label, value, href }: StatTileProps) {
+function StatTile({ icon: Icon, label, value, href, linkLabel }: StatTileProps) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-2 px-4 py-4">
@@ -66,7 +67,7 @@ function StatTile({ icon: Icon, label, value, href }: StatTileProps) {
           {label}
         </div>
         <span className="font-heading text-2xl font-semibold text-foreground">{value}</span>
-        <Link to={href} className="text-xs font-medium text-teal hover:underline">
+        <Link to={href} aria-label={linkLabel} className="text-xs font-medium text-teal hover:underline">
           Alle ansehen
         </Link>
       </CardContent>
@@ -87,7 +88,13 @@ export function Dashboard() {
       <PageHeader title="Dashboard" description="Alle Reisen, Budgets und Favoriten im Überblick" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile icon={Luggage} label="Bevorstehende Reisen" value={String(upcomingTripsCount)} href="/meine-reisen" />
+        <StatTile
+          icon={Luggage}
+          label="Bevorstehende Reisen"
+          value={String(upcomingTripsCount)}
+          href="/meine-reisen"
+          linkLabel="Alle bevorstehenden Reisen ansehen"
+        />
 
         <Card>
           <CardContent className="flex flex-col gap-2 px-4 py-4">
@@ -99,16 +106,32 @@ export function Dashboard() {
               <span className={`font-heading text-2xl font-semibold ${almostDone ? 'text-gold' : 'text-foreground'}`}>
                 {avgDraftProgress}%
               </span>
+              {/* Mittelwert über mehrere unterschiedlich weit fortgeschrittene
+                  Entwürfe kann sonst wie ein falsch erfasster Fortschritt
+                  wirken — Support-Chef-Bericht 2026-08-28. */}
+              <span className="text-xs text-muted-foreground">Ø über {draftTrips.length} Entwürfe</span>
               <Progress value={avgDraftProgress} aria-label="Durchschnittlicher Planungsfortschritt" />
             </div>
-            <Link to="/entwuerfe" className="text-xs font-medium text-teal hover:underline">
+            <Link to="/entwuerfe" aria-label="Alle Reiseentwürfe ansehen" className="text-xs font-medium text-teal hover:underline">
               Alle ansehen
             </Link>
           </CardContent>
         </Card>
 
-        <StatTile icon={ShoppingCart} label="Warenkorb" value={formatEuro(cartTotal)} href="/warenkorb" />
-        <StatTile icon={Heart} label="Favoriten" value={String(favoritesCount)} href="/favoriten" />
+        <StatTile
+          icon={ShoppingCart}
+          label="Warenkorb"
+          value={formatEuro(cartTotal)}
+          href="/warenkorb"
+          linkLabel="Kompletten Warenkorb ansehen"
+        />
+        <StatTile
+          icon={Heart}
+          label="Favoriten"
+          value={String(favoritesCount)}
+          href="/favoriten"
+          linkLabel="Alle Favoriten ansehen"
+        />
       </div>
 
       {/* Ehrlich statt erfunden (MARKENDESIGN.md): die genauen Regeln fürs
