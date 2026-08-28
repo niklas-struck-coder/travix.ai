@@ -1472,3 +1472,56 @@ nichts Neues von heute — werden im späteren Lauf (nach 6 Uhr) geprüft.
 Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
 nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
 Fund.
+
+## 2026-08-28, später Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits gegenüber `main`. Bereits im frühen
+  Check von heute geprüft und gemergt (`9d77124..34307b1`).
+- `marketing-chef/auto` — 1 neuer Commit (`2f18579`) gegenüber `main`.
+- `support-chef/auto` — 1 neuer Commit (`f9986c5`) gegenüber `main`.
+
+**Prüfung `marketing-chef/auto`:** Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` (neuer Eintrag) und
+`marketing/freigabe-uebersicht.md` (neue Update-Sektion) — kein
+Produkt-Code. Kein neues Content-Stück, stattdessen Einordnung der
+neuen `Dashboard.tsx`-Seite (7.7) und des ChecklistPanel-Fixes in die
+bestehende Freigabe-Übersicht. Begründung nachvollzogen: die
+Warenkorb-Kachel im Dashboard zeigt denselben echten €-Betrag, den
+Tier 2 (`content-stueck-warenkorb-echte-summen.md`) bereits wegen der
+fehlenden Buchungsmöglichkeit (6.2, weiterhin offen) zurückhält —
+schlüssig, warum daraus kein achtes Content-Stück wird, statt einer
+bloßen Behauptung. Keine erfundenen Kennzahlen, kein Hinweis auf
+tatsächliches Posten/Versenden. Text vollständig und kohärent, keine
+Stichpunkt-Skizze.
+Ergebnis: passt. Nach `main` gemerged (`--no-ff`).
+
+**Prüfung `support-chef/auto`:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (neuer Bericht zur `Dashboard.tsx`-Seite,
+Aufgabe 7.7). Beide gemeldeten Funde im Code auf `main` selbst
+nachvollzogen, nicht nur dem Log geglaubt:
+1. `/dashboard` steht in `nav-config.ts` tatsächlich in `extraRoutes`
+   (nicht in `navGroups`) — geprüft, dass `Sidebar.tsx`/`MobileNav.tsx`
+   ausschließlich `navGroups` rendern (`import { navGroups } from
+   '@/lib/nav-config'`, `navGroups.map(...)` je einmal), `extraRoutes`
+   also tatsächlich an keiner Stelle verlinkt wird. Die im Bericht
+   zitierte Begründung im `nav-config.ts`-Kommentar ("kontextuell
+   erreicht" / "KI-Chat deckt es ab") trifft auf einen "zentralen Hub"
+   wie das Dashboard erkennbar nicht zu — Fund ist im Code exakt so
+   nachvollziehbar wie beschrieben, keine erfundene Interpretation.
+2. Alle vier Kennzahl-Kacheln verlinken mit identischem Text
+   "Alle ansehen" — in `Dashboard.tsx` (Komponente `StatTile` sowie die
+   Entwürfe-Kachel) bestätigt, zusätzlich durch den eigenen Test
+   abgesichert (`Dashboard.test.tsx`:
+   `getAllByRole('link', { name: 'Alle ansehen' })` liefert bewusst vier
+   Treffer). Nachvollziehbarer A11y-Punkt, kein erfundener Fund.
+Reine Analyse ohne Codeänderung, damit risikoarm.
+Ergebnis: passt. Nach `main` gemerged (`--no-ff`).
+
+**Zusammenfassung:** `marketing-chef/auto` und `support-chef/auto`
+unabhängig geprüft und beide gemergt und gepusht (`7b48746..8f8ef93`).
+`it-chef/auto` hatte nichts Neues seit dem frühen Check von heute.
+
+Ni-Info nicht nötig — beide Merges glatt, Kernbehauptungen im Code
+nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
+Fund.
