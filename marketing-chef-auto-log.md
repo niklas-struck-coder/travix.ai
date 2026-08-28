@@ -4,6 +4,96 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-28
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 26.08.) um eine neue Prüfung
+vom 28.08. ergänzt — ordnet die seit dem letzten Marketing-Lauf neu
+hinzugekommene `Dashboard.tsx`-Seite (7.7) und den behobenen
+ChecklistPanel-Reibungspunkt in den bestehenden Freigabe-Rahmen ein.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`590d959`,
+27.08., 04:07 UTC) geprüft: neun neue Commits. Sieben davon reine
+Log-/Bericht-Einträge ohne Codeänderung (drei IT-Chef-Läufe heute mit
+"kein sicherer Punkt", zwei Freigabe-Chef-Merges, ein Support-Chef- und
+ein Marketing-Chef-Bericht vom 27.08. — letzterer der interaktive
+`reports/marketing-chef.md`-Eintrag, keine autonome Aktion dieses
+Skripts). Zwei echte Codeänderungen: `9e71b33` (ChecklistPanel: Pencil-
+Icon + `sr-only`-Zusatz für die automatischen Links, behebt den vom
+Support-Chef am 27.08. gemeldeten Fund) und `e9e9505` (`Dashboard.tsx`,
+Aufgabe 7.7, neue Seite `/dashboard`). `ZEITPLAN.md` und
+`marketing/freigabe-uebersicht.md` bestätigen: alle drei offenen Fragen
+an Ni (Kanal-Start? 6.2 priorisiert? Tier-4-Format gewollt?) weiterhin
+unbeantwortet seit 21.08.
+
+Beide Codeänderungen einzeln geprüft, bevor über Content entschieden
+wurde:
+- `9e71b33` (`git show`, Diff gelesen): reine Anwendung des bereits
+  bestehenden `Pencil`-Bearbeiten-Musters aus `Buchung.tsx` auf
+  `ChecklistPanel.tsx`, keine neue Design-Idee — daher keine
+  `MARKENDESIGN.md`-Ergänzung nötig (anders als beim Preisalarme-
+  Icon-Fund am 26./27.08., der ein neues Prinzip brauchte). Für Content
+  weiterhin irrelevant, da die Checkliste laut Code unverändert ohne
+  Persistenz über Reloads bleibt.
+- `e9e9505` (`src/pages/Dashboard.tsx` vollständig gelesen): vier
+  Kennzahl-Kacheln (Bevorstehende Reisen, Reiseentwürfe-Fortschritt,
+  Warenkorb-Summe, Favoriten) auf bereits vorhandenen Demo-Daten, keine
+  neu erfundenen Werte, Prämienpunkte ehrlich als "noch offen" markiert
+  statt einer erfundenen Zahl (OQ-04). Grundsätzlich ein möglicher
+  Content-Kandidat nach demselben Muster wie Tier-1-Stück 3
+  (`content-stueck-reise-suchen-empfohlen.md`, 24.08.: neues, im Code
+  verifiziertes Feature löst die Selbstbeschränkung punktuell ein). Hier
+  aber bewusst dagegen entschieden: die Warenkorb-Kachel zeigt denselben
+  echten €-Betrag, den Tier 2 (`content-stueck-warenkorb-echte-summen.md`)
+  ausdrücklich zurückhält, weil ein Post über echte Summen ohne
+  Buchungsmöglichkeit (6.2 weiterhin offen) eine Sackgasse bewirbt. Ein
+  Dashboard-Stück müsste die Kachel entweder erwähnen (dann derselbe
+  Vorbehalt wie Tier 2) oder auslassen (dann ein unvollständiges Bild
+  einer Seite, die sie tatsächlich zeigt) — anders als bei Stück 3, das
+  ohne jede Preis-/Summenanzeige auskam und sich daher sauber vom
+  Tier-2-Vorbehalt trennen ließ. Kein neuer, sauber abgrenzbarer Anlass
+  also, sondern derselbe bekannte Blocker (6.2) in neuer Verpackung.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion hinzugefügt, ältere Sektionen unverändert belassen).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+die Ergänzung entscheidet nichts neu (insbesondere nicht, was tatsächlich
+veröffentlicht wird), sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes Content-Stück zu `Dashboard.tsx` — siehe Begründung oben,
+  Warenkorb-Kachel bindet es an denselben ungelösten Tier-2-Blocker (6.2).
+- Ein Content-Stück im Bündel-/Tier-4-Format ("Was wir diese Woche
+  ehrlicher gemacht haben") zum ChecklistPanel-Fix — laut eigenem Bericht
+  vom 26./27.08. ausdrücklich an die noch offene Tier-4-Grundsatzfrage
+  (Frage 3) gebunden, die weiterhin unbeantwortet ist.
+- Weitere `MARKENDESIGN.md`-Ergänzung zum ChecklistPanel-Fix — geprüft,
+  der Fix wendet nur das bereits bestehende `Pencil`-Bearbeiten-Muster an,
+  kein neues Prinzip nötig.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `590d959`, 27.08.) war laut `git merge-base --is-ancestor`
+bereits vollständig in `main` gemerged (per Freigabe-Chef-Log vom 28.08.
+früh bestätigt: "0 neue Commits gegenüber main"). Branch daher neu von
+aktuellem `origin/main` (`7b48746`, inkl. Dashboard 7.7 und
+ChecklistPanel-Fix) angelegt, gleiches Vorgehen wie bei allen bisherigen
+Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-27
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen: konkrete

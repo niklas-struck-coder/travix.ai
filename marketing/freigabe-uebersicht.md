@@ -1,10 +1,59 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-26)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-28)
 
-Kein neuer Content-Text — dieses Dokument sortiert die inzwischen sieben
+Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-08-28: neue Dashboard-Seite (7.7) geprüft — bewusst kein achtes Content-Stück daraus, ChecklistPanel-Fund behoben
+
+Vor der Auswahl geprüft, ob sich seit dem 27.08.-Marketing-Lauf (`590d959`)
+etwas an den drei offenen Fragen unten oder an den Tier-2/Tier-4-Blockern
+geändert hat. `git log` seit diesem Commit zeigt neun neue Commits, davon
+sieben reine Log-Einträge (drei "kein sicherer Punkt"-IT-Chef-Läufe heute,
+zwei Freigabe-Chef-Merges, ein Support-Chef- und ein Marketing-Chef-Bericht
+vom 27.08. — letzterer nur ein interaktiver `reports/marketing-chef.md`-
+Eintrag, keine autonome Aktion) sowie zwei echte Codeänderungen: `9e71b33`
+(ChecklistPanel-Fix) und `e9e9505` (`Dashboard.tsx`, 7.7). Ergebnis:
+**an keiner der drei Fragen hat sich etwas geändert** — kein Kanal live,
+`ZEITPLAN.md` führt 6.2 weiterhin als offen, keine Notiz von Ni zu Frage 3.
+
+- **`9e71b33` (ChecklistPanel-Fix):** behebt genau den am 27.08. vom
+  Support-Chef gemeldeten Reibungspunkt (automatische Links optisch nicht
+  von Ankreuz-Buttons unterscheidbar) — per `git show` geprüft: reine
+  Anwendung des bereits bestehenden `Pencil`-Musters aus `Buchung.tsx`,
+  keine neue Design-Idee. Für Content weiterhin irrelevant, da die
+  Checkliste laut Code (`ChecklistPanel.tsx`, `useState`) unverändert ohne
+  Persistenz über Reloads hinweg bleibt (bereits mehrfach als Grund für
+  Zurückhaltung genannt, zuletzt 25.08.).
+- **`e9e9505` (`Dashboard.tsx`, 7.7), neue Seite `/dashboard`:** vier
+  Kennzahl-Kacheln (Bevorstehende Reisen, Reiseentwürfe-Fortschritt,
+  Warenkorb-Summe, Favoriten), jeweils mit Link zur vollen Seite. Im Code
+  gelesen (`src/pages/Dashboard.tsx`): nutzt ausschließlich bereits
+  vorhandene Demo-Daten der vier Einzelseiten, keine neu erfundenen Werte;
+  Prämienpunkte bewusst nicht gezeigt (ehrlicher Hinweis auf offene
+  PRD-Frage OQ-04 statt erfundener Zahl).
+
+  **Warum daraus trotzdem kein achtes Content-Stück wird:** Die
+  Warenkorb-Kachel zeigt denselben echten €-Betrag, der Tier 2
+  (`content-stueck-warenkorb-echte-summen.md`) bewusst zurückhält, weil
+  ein Post über echte Summen ohne Buchungsmöglichkeit eine Sackgasse
+  bewirbt (6.2 weiterhin offen). Ein Dashboard-Content-Stück müsste diese
+  Kachel entweder erwähnen (dann exakt derselbe Vorbehalt wie bei Tier 2)
+  oder bewusst auslassen (dann ein irreführend unvollständiges Bild einer
+  Seite, die die Kachel ja tatsächlich zeigt). Anders als Tier-1-Stück 3
+  (`ReiseSuche.tsx`, 24.08.), das reine Navigation ohne echte Preis-/
+  Summenanzeige war, lässt sich der Warenkorb-Bezug hier nicht sauber
+  ausklammern. Dashboard bleibt daher als eigener Kandidat vorgemerkt,
+  sobald 6.2 (Buchen-Button) existiert — dann fällt der Tier-2-Vorbehalt
+  ohnehin weg und ein gemeinsames Stück (Warenkorb + Dashboard) wird
+  möglich, statt zwei einzelner.
+
+Damit bleibt die Selbstbeschränkung "kein neues Content-Stück" unverändert
+bestehen — kein achtes Stück, da der einzige neue Anlass (Dashboard) direkt
+an denselben bereits bekannten Blocker (6.2) gebunden ist, keine
+eigenständige, sauber abgrenzbare Ausnahme wie am 24.08.
 
 ## Update 2026-08-26: geprüft, alles unverändert — inklusive zweier neuer, noch offener Support-Chef-Funde
 
