@@ -1413,3 +1413,62 @@ Check von heute.
 Ni-Info nicht nötig — beide Merges glatt, Kernbehauptungen im Code
 nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
 Fund.
+
+## 2026-08-28, früher Nacht-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits gegenüber `main` (Stand `9d77124`):
+  zwei mit echten Codeänderungen (`e9e9505` Dashboard 7.7, `9e71b33`
+  ChecklistPanel Pencil-Icon/`sr-only`-Fix), drei reine Log-Einträge ohne
+  Codeänderung ("kein sicherer Punkt gefunden", zweiter/dritter Lauf
+  heute).
+- `marketing-chef/auto` — 0 neue Commits gegenüber `main`. Wie für den
+  frühen Lauf erwartet (läuft erst um 6 Uhr), nichts zu tun.
+- `support-chef/auto` — 0 neue Commits gegenüber `main`. Ebenfalls wie
+  erwartet, nichts zu tun.
+
+**Prüfung `it-chef/auto` (unabhängig, nicht nur Log geglaubt):**
+`main` lag lokal veraltet (Divergenz zu `origin/main` nach Force-Update
+zwischendurch) — lokalen `main` per `git reset --hard origin/main` auf
+den aktuellen Remote-Stand gebracht, bevor geprüft wurde.
+
+Branch ausgecheckt, `npm install` (frischer Checkout, 647 Pakete), dann
+selbst ausgeführt statt dem Log geglaubt:
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur dieselben 3 vorbestehenden
+  `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`
+  (unverändert von diesem Diff, keine neuen Warnings).
+- `npx vitest run` → 28 Testdateien, 112 Tests, alle grün (inkl. neuer
+  `Dashboard.test.tsx`, erweiterter `ChecklistPanel.test.tsx`).
+
+Scope geprüft: Diff umfasst nur `Dashboard.tsx`/`.test.tsx` (neu),
+`ChecklistPanel.tsx`/`.test.tsx`, `routes.tsx` (neue Route
+eingetragen), plus Status-Updates in `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` und der eigene Log-Eintrag — genau die
+beiden im Log beschriebenen, klar abgegrenzten Punkte (7.7, 6.10-Fix),
+kein Scope-Creep. Kein Auth-/Zahlungs-/Rechtstext berührt.
+
+Design gegen `MARKENDESIGN.md` geprüft: `Dashboard.tsx` nutzt Teal für
+normale Werte, Gold nur beim "fast fertig"-Highlight, keine rote
+Budget-Warnfarbe (Vorgabe: nie Rot für Budget-Warnungen) — passt exakt.
+Prämienpunkte bewusst nicht als erfundene Zahl gezeigt, sondern ehrlicher
+Hinweis auf offene PRD-Frage (OQ-04) — passt zum "ehrlich statt
+beschönigend"-Grundsatz. Demo-Daten wiederverwendet aus
+`MeineReisen.tsx`/`Reiseentwuerfe.tsx`/`Warenkorb.tsx`/`Favoriten.tsx`
+statt neu erfunden. `ChecklistPanel`-Fix (Pencil-Icon + `sr-only`) ist
+der von Support-Chef am 27.08. vorgeschlagene kurzfristige Fix, exakt so
+umgesetzt.
+
+**Ergebnis:** Alles grün, passt. Nach `main` gemerged (`--no-ff`,
+`9d77124..34307b1`) und gepusht. Vom `npm install` erzeugtes,
+unbeabsichtigtes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+einiger optionaler `esbuild`-Plattformpakete, keine echte
+Abhängigkeitsänderung) vor dem Push verworfen.
+
+**Zusammenfassung:** `it-chef/auto` unabhängig geprüft und gemergt.
+`marketing-chef/auto`/`support-chef/auto` hatten wie erwartet noch
+nichts Neues von heute — werden im späteren Lauf (nach 6 Uhr) geprüft.
+
+Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
+nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
+Fund.
