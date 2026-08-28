@@ -4640,3 +4640,102 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (`src/pages/Dashboard.tsx`,
 `src/pages/Dashboard.test.tsx`, `src/routes.tsx`, `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` und dieser Log-Eintrag).
+
+## 2026-08-28 (geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` (Stand `e9e9505`) lag zwei eigene
+Commits vor `origin/main` (`9d77124`) — die ReiseSuche- bzw.
+Dashboard-Punkte (7.15, 7.7) aus den letzten beiden Läufen, weiterhin nicht
+vom Freigabe-Chef gemerged. `git log origin/it-chef/auto..origin/main` war
+leer, also nichts von `main` nachzuziehen — direkt auf `it-chef/auto`
+weitergearbeitet, `main` nur ausgecheckt/gefetcht, nicht verändert. Frischer
+Checkout: `node_modules` fehlte komplett (auch `vite`, `vitest`,
+`@types/node` etc.), `npm install` ausgeführt (647 Pakete) bevor überhaupt
+ein Typecheck möglich war.
+
+**Ausgewählter Punkt:** keiner. Alle in `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` verbliebenen offenen Punkte einzeln
+gegen die vier Sicherheitskriterien geprüft, dazu `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` und die offenen
+GitHub-PRs gegengelesen:
+
+- **4.1-4.3** (echte KI-Anbindung): weiterhin explizit "blocked on
+  Base44/Gemini credentials" in der Aufgabenliste selbst.
+- **5.7** (Zug/Bus/Fähre in KI-Chat einbinden): eigens per Unteragent noch
+  einmal am aktuellen Quelltext verifiziert (`useChat.ts`, `KiChat.tsx`,
+  `src/lib/duffel/client.ts`, `src/types/trains.ts`). `TrainCard`/
+  `TrainResults` sind fertig gebaut, aber ohne jede Verwendungsstelle
+  außerhalb der eigenen Dateien — `duffel/client.ts` exportiert weiterhin
+  nur `searchFlights`/`searchStays`, keine Zug-Datenquelle, real oder
+  simuliert. Die reine Rendering-Verdrahtung in `KiChat.tsx` wäre
+  mechanisch, aber ohne einen echten oder erfundenen `searchTrains`-Aufruf
+  gäbe es nichts anzuzeigen — bräuchte eine Architekturentscheidung zur
+  Datenquelle (echte Bahn-API vs. Demo-Fixture). Gleicher Befund wie in
+  allen bisherigen Läufen seit dem 25.08.
+- **6.2, 6.6, 6.7, 7.12:** `TripDraft` (`src/types/chat.ts`) hat weiterhin
+  keine Preis-/Item-/Provider-URL-Felder für Transport/Unterkunft —
+  Datenmodell-Erweiterung wäre eine Architekturentscheidung.
+- **7.4** ("Planung fortsetzen" mit voller Chat-Historie): `tripStorage.ts`
+  speichert weiterhin nur einen einzigen aktiven Trip unter einem globalen
+  `CHAT_STORAGE_KEY`, die Demo-Entwürfe in `Reiseentwuerfe.tsx` sind davon
+  komplett losgelöst — bräuchte eine Mehrfach-Entwürfe-Datenmodell-
+  Entscheidung.
+- **8.2/8.3:** brauchen echten LLM-/Vision-Zugang, der nicht existiert.
+- **8.4:** gleicher Erfindungs-Konflikt wie bei `mockConcierge.ts` bewusst
+  vermieden (Restaurant-/Übersetzungs-/Routen-Antworten ohne echte
+  Datenquelle).
+- **8.5-8.7** Deal Finder: zu groß/vage für einen einzelnen abgegrenzten
+  Punkt ohne eigene Scope-Entscheidung.
+- **8.9** Premium: PRD OQ-03 ("What specific features and pricing define
+  Travix Premium tier?") ist weiterhin unbeantwortet — Aufbau der Seite
+  bräuchte entweder erfundene Preise/Vorteile oder eine Produktentscheidung.
+- **8.11** Hilfe: laut `ZEITPLAN.md` (Support-Chef Sprint 2) weiterhin keine
+  FAQ-Inhalte erarbeitet.
+- **8.12** Rewards/Loyalty: PRD OQ-04 weiterhin offen, nirgends im Repo
+  spezifiziert.
+- **8.13** Unit-Tests: `calculateProgress.test.ts`/`checklistRules.test.ts`
+  existieren bereits, `calculateCosts`/Schema-Validierung existieren im
+  Code noch gar nicht (hängen an 6.7/4.1) — bleibt als Ganzes blockiert.
+
+Zusätzlich `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` gelesen: alle drei unverändert seit 27.08.,
+keine neu gemeldeten Bugs oder Reibungspunkte. Die bereits am 27.08.
+gemeldete ChecklistPanel-Unterscheidbarkeit (Pencil-Icon/`sr-only`) ist im
+aktuellen Quelltext bestätigt behoben. Das im Support-Chef-Log seit dem
+24.08. mehrfach dokumentierte Persistenz-Problem der manuellen
+Checklisten-Haken (`checkedManual` in `ChecklistPanel.tsx`, reiner
+`useState`, verliert seinen Zustand bei Routenwechsel) besteht weiterhin,
+wurde aber erneut verworfen: Support-Chef selbst schlägt dafür ausdrücklich
+eine *gemeinsame* Lösung über drei betroffene Seiten hinweg vor (Profil/
+Einstellungen/Checkliste) — welcher Persistenz-Mechanismus und Scope das
+sein soll, ist eine übergreifende Architekturentscheidung, keine einzelne,
+eng abgegrenzte Aufgabe (gleiche Begründung wie in den Läufen vom 25./26.08.
+bereits mehrfach festgehalten).
+
+Offene GitHub-PRs erneut geprüft (`#1`, `#4`, `#5`, `#6`, `#7`, `#8`, `#9`):
+alle weiterhin offen und ungemergt, keine neuen, kein neuer Merge-Konflikt —
+reines Warten auf menschliches Review, nicht autonom lösbar.
+
+Eigene Bug-Suche: Grep auf `TODO`/`FIXME`/`XXX` im gesamten `src`-Baum —
+keine Treffer.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Heute nichts gefunden, das sicher genug für einen weiteren
+autonomen Lauf ist — alle verbliebenen offenen Punkte hängen an Produkt-/
+Architekturentscheidungen, fehlenden Datenmodell-Feldern, echten externen
+Zugangsdaten oder fehlenden Inhalten (FAQ), die Ni bzw. andere Chef-Rollen
+erst liefern müssen. Größter Hebel bleibt weiterhin das manuelle Mergen der
+7 offenen Auto-Fix-PRs sowie der beiden bereits fertigen, noch ungemergten
+`it-chef/auto`-Commits (ReiseSuche 7.15, Dashboard 7.7) durch den
+Freigabe-Chef bzw. Ni selbst.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm install` (frischer Checkout, `node_modules` fehlte komplett, 647
+Pakete), `npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` (28 Testdateien, 112 Tests, alle grün), `npm
+run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
