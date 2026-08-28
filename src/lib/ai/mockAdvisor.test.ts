@@ -82,6 +82,35 @@ describe('getNextAdvisorStep', () => {
     expect(reply.nextField).toBeNull()
   })
 
+  it('promises a real search when the final step completes a flight trip, since flights are actually searched', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'flight' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).toContain('Ich suche jetzt nach echten Flug-Verbindungen')
+    expect(reply.avatarState).toBe('searching')
+  })
+
+  it('does not promise a search it cannot deliver for train/bus/ferry/car — there is no connection search for those yet', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'train' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).not.toContain('Ich suche jetzt')
+    expect(reply.content).toContain('Zug-Verbindungen')
+    expect(reply.content).toContain('Reiseplan steht')
+    expect(reply.avatarState).toBe('happy')
+    expect(reply.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
   it('announces the finished plan once every field is already filled', () => {
     const trip = {
       ...emptyTrip,

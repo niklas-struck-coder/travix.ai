@@ -4841,3 +4841,80 @@ steht bereits im Eintrag des zweiten Laufs oben.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-28 (vierter Lauf)
+
+**Ausgangslage:** Alter Branch `it-chef/auto` (bis Commit `b2e0f61`) war
+bereits vollständig in `main` gemerged (`git merge-base --is-ancestor
+origin/it-chef/auto main` → ja) — frisch von `main` neu aufgesetzt statt
+weitergearbeitet, wie in der Skill-Anleitung für diesen Fall vorgesehen.
+
+**Geprüft, warum die bisherigen Blocker weiter gelten:** 4.1-4.3 (echte
+KI) hängen weiterhin an fehlenden Base44/Gemini-Credentials; 6.2/6.6/6.7/
+7.12 weiterhin an fehlenden Preis-/Item-Feldern in `TripDraft`; 8.9/8.12
+an offenen PRD-Fragen; 8.11 an fehlenden FAQ-Inhalten vom Support-Chef.
+Für 5.7 (Integration Zug-/Bus-/Fährsuche in den KI-Chat) gilt ebenfalls
+weiterhin: es gibt keine angebundene Datenquelle für Zug-/Bus-/
+Fährverbindungen (Duffel bietet dafür nichts an), und welcher Anbieter
+das werden soll ist eine Produktentscheidung für Ni — also kein
+autonom umsetzbarer Punkt in voller Breite.
+
+**Beim Prüfen von 5.7 aber einen konkreten, klar abgegrenzten Bug
+gefunden und behoben:** In `src/lib/ai/mockAdvisor.ts` versprach der
+letzte Schritt des Haupt-Chatflows (sobald die Unterkunft gesetzt ist)
+für JEDEN Transportmodus dieselbe Nachricht: "Ich suche jetzt nach
+echten {Modus}-Verbindungen … Nichts wird erfunden." Tatsächlich läuft
+aber nur für Flug überhaupt eine echte Suche (und auch die nur über den
+separaten "Bearbeiten"-Pfad in `useChat.ts`, der nach dem
+Startflughafen fragt) — für Zug, Bus, Fähre und Mietwagen läuft diese
+Suche nie, das Versprechen blieb also für vier von fünf Modi
+unerfüllt hängen. Das widerspricht direkt der "nichts wird erfunden"-
+Zusage aus der Begrüßung und dem in `useChat.test.ts` bereits
+etablierten Grundsatz, Nutzer:innen nach einer angekündigten Suche
+nicht hängen zu lassen (dort für die Unterkunftssuche bei unbekanntem
+Ziel bereits abgedeckt).
+
+**Sicher genug, weil:** kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+rechtlichen Texten; keine neue Produkt-/Architekturentscheidung nötig
+(es wird kein Zug-Anbieter erfunden, im Gegenteil — die Änderung
+vermeidet genau das); klar abgegrenzt (eine Textverzweigung nach
+Transportmodus); Ergebnis objektiv prüfbar über neue Unit-Tests plus
+Typecheck/Lint/Build.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `getNextAdvisorStep` unterscheidet beim
+  Abschluss-Schritt jetzt nach Transportmodus — Flug behält die
+  bisherige "echte Suche läuft"-Nachricht (avatarState `searching`,
+  unverändert, da dort tatsächlich eine echte Suche folgen kann), die
+  anderen vier Modi bekommen eine ehrliche Abschlussmeldung ("noch
+  keine automatische Suche — Reiseplan steht trotzdem", avatarState
+  `happy`, Quick-Reply "Neue Reise planen", identisch zur regulären
+  "Reiseplan steht"-Nachricht am eigentlichen Ende des Flows).
+- `src/lib/ai/mockAdvisor.test.ts`: zwei neue Tests — einer bestätigt,
+  dass Flug weiterhin die "echte Suche"-Nachricht bekommt, der andere,
+  dass Zug (stellvertretend für Zug/Bus/Fähre/Mietwagen) die neue
+  ehrliche Nachricht ohne "Ich suche jetzt"-Formulierung bekommt.
+- `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`: 5.7-Notizen
+  ergänzt (Fix dokumentiert, Checkbox bewusst NICHT gesetzt — die
+  eigentliche Zug-/Bus-/Fährsuche fehlt weiterhin).
+
+**Bewusst nicht angefasst:** Der Haupt-Chatflow fragt bei Flugauswahl
+nie nach dem Startflughafen (das passiert nur im separaten
+"Bearbeiten"-Pfad) — d.h. auch beim Flug-Modus läuft die im
+Haupt-Chatflow tatsächlich erst beim übernächsten Schritt real
+angebundene Suche nicht automatisch los. Das wäre ein größerer,
+eigener Umbau (Rückfrage nach IATA-Code mitten im Hauptfluss statt nur
+im Edit-Pfad) und damit ein zweiter Punkt am selben Tag — bewusst nicht
+mit angegangen, um bei einem einzigen, klar abgegrenzten Punkt zu
+bleiben. Für einen künftigen Lauf vorgemerkt.
+
+**Geprüft (grün):**
+- `npx tsc -b` — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis,
+  nicht von dieser Änderung betroffen)
+- `npx vitest run` — 28 Testdateien, 114 Tests, alle grün (inkl. der
+  beiden neuen `mockAdvisor.test.ts`-Fälle)
+- `npm run build` — erfolgreich
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

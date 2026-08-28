@@ -39,8 +39,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
   IT-Chef-Lauf auf Branch `it-chef/auto` erledigt, aber noch nicht in
-  den KI-Chat eingebunden (5.7 offen); 5.10 (Backend-Stub)
-  anders gelöst über Vite-Proxy statt Base44
+  den KI-Chat eingebunden (5.7 weiterhin offen — es gibt schlicht noch
+  keine angebundene Zug-/Bus-/Fähr-Datenquelle, Duffel bietet dafür
+  nichts an; welcher Anbieter das werden soll ist eine Produktentscheidung
+  für Ni, kein autonom fällbarer Punkt); 5.10 (Backend-Stub)
+  anders gelöst über Vite-Proxy statt Base44. Nebenbei vom autonomen
+  IT-Chef-Lauf am 28.08. (vierter Lauf) ein konkreter Ehrlichkeits-Bug in
+  `mockAdvisor.ts` gefunden und behoben: der letzte Chat-Schritt
+  versprach für JEDEN Transportmodus "Ich suche jetzt nach echten
+  X-Verbindungen", aber nur für Flug gibt es (über den
+  "Bearbeiten"-Pfad in `useChat.ts`) überhaupt eine echte Suche — für
+  Zug/Bus/Fähre/Mietwagen blieb das Versprechen bisher immer unerfüllt
+  hängen. Jetzt bekommen diese vier Modi stattdessen eine ehrliche
+  Abschlussmeldung ("noch keine automatische Suche, Reiseplan steht
+  trotzdem"), Flug bleibt unverändert. Schließt 5.7 nicht ab (weiterhin
+  keine echte Zug-/Bus-/Fährsuche vorhanden), behebt aber die dadurch
+  entstandene Dead-End-Situation im Chat.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
