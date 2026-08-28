@@ -13,15 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-26):**
-- IT-Chef: Mikrofon-Fehleranzeige im KI-Chat und Preisalarme-Icon behoben (PRs #8, #9
-  eröffnet), Checklistenpunkt 6.10 mit KI-Chat verknüpft; weitere Auto-Läufe fanden
-  danach keinen neuen sicheren Punkt (Zustand stabil)
-- Support-Chef: beide gemeldeten Fehler (Mikrofon, Preisalarme-Icon) als behoben
-  bestätigt, ChecklistPanel-Links (6.10) geprüft
-- Marketing-Chef: Icon-Vorgabe für destruktive Aktionen in MARKENDESIGN.md ergänzt
+**Seit letztem Update (2026-08-27):**
+- Neu: Dashboard.tsx (7.7) - Kennzahl-Übersicht für Reisen/Warenkorb/Favoriten
+- ChecklistPanel: automatische Links jetzt optisch/a11y von Ankreuz-Buttons
+  unterscheidbar (Fund aus Support-Chef-Bericht behoben)
+- IT-Chef: erneuter Bug-Hunt ohne neue Funde; mehrere Auto-Läufe am 28.08. fanden
+  keinen weiteren sicheren Punkt (Zustand stabil)
+- Marketing-Chef: Icon-Design-Regel ergänzt, Dashboard geprüft
+- Support-Chef: Dashboard geprüft
 - Freigabe-Chef hat die geprüften Auto-Zweige mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-27_
+_Letztes Update: 2026-08-28_
