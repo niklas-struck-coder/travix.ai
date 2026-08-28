@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Circle, ListChecks } from 'lucide-react'
+import { CheckCircle2, Circle, ListChecks, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -79,7 +79,11 @@ export function ChecklistPanel({ trip }: ChecklistPanelProps) {
                   ) : (
                     <Circle className="size-4 shrink-0 text-muted-foreground" />
                   )}
-                  <span className={cn(checked ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
+                  <span className={cn(checked ? 'text-foreground' : 'text-muted-foreground')}>
+                    {item.label}
+                    <span className="sr-only">, bearbeiten</span>
+                  </span>
+                  <Pencil className="ml-auto size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 </Link>
               </li>
             )

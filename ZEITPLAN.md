@@ -58,7 +58,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Demo-Daten fertig; Warenkorb-Seite (7.6) seit 17.08. ebenfalls mit
   Demo-Daten und gruppierten Positionen fertig; ReiseSuche-Seite (7.15)
   seit 21.08. ebenfalls fertig (auf `it-chef/auto`, noch nicht in `main`
-  gemergt); Rest (7.4, 7.7, 7.12) komplett offen
+  gemergt); Dashboard-Seite (7.7) seit 27.08. ebenfalls fertig (auf
+  `it-chef/auto`, noch nicht in `main` gemergt); Rest (7.4, 7.12) komplett
+  offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
 
@@ -112,6 +114,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `activities` hat kein eigenes `?edit=`-Feld in `useChat.ts`, verlinkt
   daher auf einen neuen Chat statt eines Edit-Parameters. Die acht
   manuellen Vorbereitungspunkte bleiben unverändert reine Ankreuz-Buttons.
+  Vom autonomen IT-Chef-Lauf am 27.08. (vierter Lauf) nachgebessert: Support-
+  Chef meldete am 27.08., dass die klickbaren Links und die nur-abhakbaren
+  Zeilen optisch identisch aussehen, obwohl sie sehr Unterschiedliches tun
+  (Link verlässt die Seite sofort). `ChecklistPanel.tsx` zeigt den
+  automatischen Zeilen jetzt zusätzlich dasselbe `Pencil`-Icon, das
+  `Buchung.tsx` für "Bearbeiten"-Links nutzt, plus einen `sr-only`-Zusatz
+  ", bearbeiten" im Linktext für Screenreader — genau der in
+  `reports/support-chef.md` vorgeschlagene kurzfristige Fix.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/
@@ -188,7 +198,17 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   offener Punkt, und ohnehin außerhalb des Scopes laut PRD NG-01). Rein
   lokaler Demo-State, noch keine echte Warenkorb-Speicherung (Cart-Entity
   hängt an der offenen Backend-Entscheidung)
-- [ ] 7.7 Dashboard
+- [x] 7.7 `Dashboard.tsx` (`/dashboard`) — vom autonomen IT-Chef-Lauf am 27.08.
+  gebaut: vier Kennzahl-Kacheln (Bevorstehende Reisen, Reiseentwürfe-
+  Fortschritt, Warenkorb-Summe, Favoriten), jede mit Link zur vollen Seite,
+  auf denselben Demo-Daten/Hilfsfunktionen wie `MeineReisen.tsx`/
+  `Reiseentwuerfe.tsx`/`Warenkorb.tsx`/`Favoriten.tsx` statt eines neu
+  erfundenen Datensatzes. Prämienpunkte bewusst nicht als Zahl gezeigt — die
+  genauen Regeln dafür sind laut PRD (OQ-04) noch offen — stattdessen ein
+  ehrlicher Hinweis, dass das noch aussteht, laut der "ehrlich statt
+  beschönigend"-Vorgabe in `MARKENDESIGN.md`. Keine Budget-Warnfarbe, da
+  `TripDraft` weiterhin keine echten Preisfelder zum Vergleich hat (gleiche
+  Lücke wie 6.6/6.7/7.12).
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz

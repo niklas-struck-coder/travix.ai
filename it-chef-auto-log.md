@@ -4476,3 +4476,368 @@ erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-27 (vierter Lauf, 22:xx UTC)
+
+**Vorbereitung:** Der bisherige `it-chef/auto`-Branch (Stand der ersten
+drei Läufe von heute) war laut `git merge-base --is-ancestor` bereits
+vollständig in `origin/main` gemerged (Freigabe-Chef hat ihn zwischendurch
+freigegeben). Deshalb wie in Regel 1 des Skills frisch von `origin/main`
+neu angelegt (`git checkout -B it-chef/auto origin/main`) — `main` selbst
+wurde dabei nicht verändert, nur ausgecheckt/gefetcht.
+
+**Neuer Fund seit dem dritten Lauf:** `reports/support-chef.md` wurde
+nach dem dritten Lauf von heute auf den 27.08. aktualisiert (Commit
+`9d77124`, nach dem letzten Log-Eintrag oben) und meldet einen neuen
+Reibungspunkt: die fünf automatisch erkannten `<Link>`-Zeilen in
+`ChecklistPanel.tsx` (Aufgabe 6.10, Klick zum KI-Chat) sehen optisch
+identisch zu den acht nur-abhakbaren `<button>`-Zeilen darunter aus,
+obwohl ein Klick oben sofort die Seite verlässt. Support-Chef schlug
+konkret vor: den automatischen Zeilen dasselbe `Pencil`-Icon geben, das
+`Buchung.tsx` für "Bearbeiten"-Links bereits nutzt, plus einen
+`sr-only`-Zusatz ", bearbeiten" im Linktext.
+
+**Warum das die vier Sicherheitskriterien erfüllt:** kein Bezug zu Auth/
+Zahlungen/Nutzerdaten/rechtlichen Texten; keine offene Produkt- oder
+Architekturentscheidung (reine UI-Unterscheidbarkeit, kein neues
+Datenmodell); klar genug beschrieben (Support-Chef nennt Datei, Zeilen
+und den konkreten Fix mit Referenz auf ein bereits bestehendes Muster in
+`Buchung.tsx`); objektiv prüfbar (Typecheck/Lint/Tests, plus eine neue
+Test-Assertion für die geänderte Zugänglichkeit).
+
+**Umsetzung:** `src/components/trip/ChecklistPanel.tsx` — den fünf
+automatischen `<Link>`-Zeilen ein `Pencil`-Icon (`lucide-react`, `size-3.5
+text-muted-foreground`, `aria-hidden`) rechtsbündig hinzugefügt und dem
+sichtbaren Label einen `<span className="sr-only">, bearbeiten</span>`
+angehängt — exakt der von Support-Chef vorgeschlagene Fix, eins zu eins
+aus dem bestehenden `Pencil`-Muster in `Buchung.tsx` übernommen, keine
+Erfindung neuer Icons/Texte. Die acht manuellen Ankreuz-Buttons bleiben
+unverändert ohne Icon/Zusatz, wodurch die beiden Zeilentypen jetzt auch
+optisch unterscheidbar sind. Zusätzlich einen neuen Test in
+`ChecklistPanel.test.tsx` ergänzt, der den erweiterten Accessible Name
+("..., bearbeiten") auf einem automatischen Link prüft und sicherstellt,
+dass keiner der manuellen Buttons denselben Zusatz bekommen hat.
+`ZEITPLAN.md` (6.10) und `tasks/tasks-prd-travix-platform.md` (6.10) um
+den Nachtrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), `npx
+tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings), `npx vitest run` (27 Testdateien, **109**
+Tests, alle grün — ein Test mehr als beim letzten Lauf durch die neue
+Assertion), `npm run build` (Produktions-Build erfolgreich, gleiche
+vorbestehende Chunk-Size-Warnung).
+
+**Zusätzlich geprüft und verworfen:** 5.7 (Zug/Bus/Fähre in KI-Chat)
+erneut am aktuellen Quelltext verifiziert (u.a. `useChat.ts`,
+`KiChat.tsx`, `src/lib/duffel/client.ts`) — weiterhin keine Zug-
+Datenquelle (Duffel bietet kein Bahn-Produkt), `TrainResults` bleibt im
+Chat ungebunden, bräuchte eine Architekturentscheidung zur Datenquelle.
+Bestätigt denselben Befund wie in den ersten drei Läufen heute, hier aus
+Sorgfalt unabhängig gegengeprüft, bevor der Support-Chef-Fund als
+heutiger Punkt gewählt wurde.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (`ChecklistPanel.tsx`,
+`ChecklistPanel.test.tsx`, `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+und dieser Log-Eintrag).
+
+## 2026-08-27 (fünfter Lauf, 23:xx UTC — geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` war laut `git log
+origin/main..origin/it-chef/auto` genau einen Commit vor `origin/main`
+(der ChecklistPanel-Fix aus dem vierten Lauf, noch nicht vom
+Freigabe-Chef gemerged) und vollständig auf dem Stand von `origin/main`
+(`git log origin/it-chef/auto..origin/main` leer) — also weitergearbeitet
+statt neu angelegt, `main` dabei nur ausgecheckt/gefetcht, nicht
+verändert.
+
+**Ausgewählter Punkt:** 7.7 `Dashboard.tsx` (`/dashboard`) aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`.
+
+**Warum das die vier Sicherheitskriterien erfüllt:** kein Bezug zu Auth/
+Zahlungen/echten Nutzerdaten/rechtlichen Texten (reine Übersichtsseite
+über bereits vorhandene Demo-Daten); keine offene Produkt- oder
+Architekturentscheidung — `MARKENDESIGN.md` enthält bereits eine
+konkrete Design-Vorgabe für genau diese Seite ("Dashboard: Kennzahlen …
+ruhig, Teal für normale Werte, Gold für Highlights, niemals Rot für
+Budget-Warnungen"), die Marketing-Chef offenbar in Vorbereitung darauf
+ergänzt hat; klar genug beschrieben (FR-903/Aufgabe 7.7: Reisen, Budgets,
+Favoriten, Prämienpunkte); objektiv prüfbar (Typecheck/Lint/Tests plus
+neue Test-Assertions).
+
+**Vorher geprüft und verworfen:**
+- 4.1-4.3 (echte KI-Anbindung) — explizit "blocked on Base44/Gemini
+  credentials" in der Aufgabenliste, keine autonome Produktentscheidung.
+- 5.7 (Zug/Bus/Fähre in KI-Chat) — am aktuellen Quelltext erneut
+  verifiziert (`useChat.ts`, `KiChat.tsx`, `src/types/trains.ts`):
+  weiterhin keine echte Zug-Datenquelle vorhanden (Duffel bietet kein
+  Bahn-Produkt, `TrainResults`/`TrainCard` haben nirgends Demo- oder
+  Live-Daten), Ergebnisse hier zu zeigen würde entweder erfundene Daten
+  brauchen (verboten laut Produktprinzip "nichts wird erfunden") oder
+  eine Architekturentscheidung zur Datenquelle — bestätigt denselben
+  Befund wie in allen vorherigen Läufen.
+- 6.2, 6.6, 6.7 — weiterhin explizit blockiert, da `TripDraft` keine
+  Item-/Provider-URL- bzw. Preisfelder für Transport/Unterkunft hat
+  (gleicher Befund wie in `tasks/tasks-prd-travix-platform.md` notiert).
+- 7.4 ("Planung fortsetzen" mit voller Chat-Historie) — genauer geprüft:
+  `tripStorage.ts`/`useChat.ts` haben nur einen einzigen globalen
+  `CHAT_STORAGE_KEY` für den aktuell aktiven Chat, keine Speicherung pro
+  Entwurf. Die Demo-Entwürfe in `Reiseentwuerfe.tsx` sind komplett
+  losgelöst von diesem echten Chat-State. Eine echte Umsetzung bräuchte
+  entweder mehrere parallele Chat-Speicher oder eine Verknüpfung
+  Entwurf-ID ↔ Chat-Historie — das ist eine Datenmodell-/
+  Architekturentscheidung, die über die reine Aufgabenbeschreibung
+  hinausgeht, deshalb nicht autonom angefasst.
+
+**Umsetzung:** Neue Seite `src/pages/Dashboard.tsx`, in `routes.tsx`
+unter `/dashboard` verdrahtet (ersetzt die bisherige `PlaceholderPage`,
+der Sidebar-Eintrag existierte in `src/lib/nav-config.ts` bereits). Vier
+Kennzahl-Kacheln:
+- **Bevorstehende Reisen** — Anzahl aus denselben Demo-Reisen wie
+  `MeineReisen.tsx` (Lissabon).
+- **Reiseentwürfe** — Durchschnitts-Fortschritt über die bestehende
+  `calculateProgress.ts`-Funktion, angewandt auf dieselben zwei
+  Demo-Entwürfe wie `Reiseentwuerfe.tsx` (Lissabon/Kyoto), inkl.
+  `Progress`-Balken; würde der Schnitt ≥80% erreichen ("fast fertig
+  geplant"), färbt sich die Kachel laut `MARKENDESIGN.md`-Vorgabe Gold
+  statt Teal.
+- **Warenkorb** — Summe über dieselben Demo-Positionen wie
+  `Warenkorb.tsx`, berechnet mit der bereits bestehenden
+  `calculateCartTotal()` aus `cartTotals.ts` (keine neue Rechenlogik).
+- **Favoriten** — Anzahl aus denselben Demo-Favoriten wie
+  `Favoriten.tsx` (Kapstadt, Reykjavik).
+
+Jede Kachel verlinkt auf die volle Seite ("Alle ansehen"). Bewusst keine
+Budget-Warnfarbe (Rot ist laut `MARKENDESIGN.md` ohnehin verboten) und
+kein Vergleich Ist/Soll, da `TripDraft` keine echten Preisfelder für
+Transport/Unterkunft hat (gleiche Lücke wie 6.6/6.7/7.12) — die
+Warenkorb-Kachel zeigt daher nur die reine Summe, keine
+Budget-Auslastung.
+
+**Prämienpunkte bewusst nicht als Zahl gezeigt:** Task 8.12 ("Implement
+rewards/loyalty program display") ist ein eigener, weiterhin offener
+Punkt, und `tasks/prd-travix-platform.md` listet unter OQ-04 explizit als
+offene Frage: "What are the exact rules for loyalty points accrual and
+redemption?" Eine erfundene Punktzahl hier wäre also entweder eine
+Vorwegnahme von 8.12 oder eine Erfindung entgegen dem Markenkern
+("nichts wird erfunden", `MARKENDESIGN.md`). Stattdessen zeigt die Seite
+einen ehrlichen Hinweis-Text, dass das Prämienprogramm noch nicht
+final entschieden ist — kein Code-Risiko, aber ein bewusster
+Scope-Cut, den Ni bei Bedarf korrigieren kann, sobald OQ-04 geklärt ist.
+
+Zusätzlich neue Testdatei `src/pages/Dashboard.test.tsx` (3 Tests: alle
+vier Kacheln mit korrekten Werten, korrekte Links, ehrlicher
+Prämienprogramm-Hinweis statt erfundener Zahl). `ZEITPLAN.md` (7.7,
+inkl. Ist-Stand-Absatz) und `tasks/tasks-prd-travix-platform.md` (7.7)
+um den Nachtrag ergänzt.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte),
+`npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings), `npx vitest run` (28
+Testdateien, 112 Tests, alle grün — 3 Tests mehr als beim letzten Lauf
+durch die neue Dashboard-Testdatei), `npm run build` (Produktions-Build
+erfolgreich, gleiche vorbestehende Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (`src/pages/Dashboard.tsx`,
+`src/pages/Dashboard.test.tsx`, `src/routes.tsx`, `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` und dieser Log-Eintrag).
+
+## 2026-08-28 (geplanter Cloud-Lauf)
+
+**Vorbereitung:** `origin/it-chef/auto` (Stand `e9e9505`) lag zwei eigene
+Commits vor `origin/main` (`9d77124`) — die ReiseSuche- bzw.
+Dashboard-Punkte (7.15, 7.7) aus den letzten beiden Läufen, weiterhin nicht
+vom Freigabe-Chef gemerged. `git log origin/it-chef/auto..origin/main` war
+leer, also nichts von `main` nachzuziehen — direkt auf `it-chef/auto`
+weitergearbeitet, `main` nur ausgecheckt/gefetcht, nicht verändert. Frischer
+Checkout: `node_modules` fehlte komplett (auch `vite`, `vitest`,
+`@types/node` etc.), `npm install` ausgeführt (647 Pakete) bevor überhaupt
+ein Typecheck möglich war.
+
+**Ausgewählter Punkt:** keiner. Alle in `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` verbliebenen offenen Punkte einzeln
+gegen die vier Sicherheitskriterien geprüft, dazu `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` und die offenen
+GitHub-PRs gegengelesen:
+
+- **4.1-4.3** (echte KI-Anbindung): weiterhin explizit "blocked on
+  Base44/Gemini credentials" in der Aufgabenliste selbst.
+- **5.7** (Zug/Bus/Fähre in KI-Chat einbinden): eigens per Unteragent noch
+  einmal am aktuellen Quelltext verifiziert (`useChat.ts`, `KiChat.tsx`,
+  `src/lib/duffel/client.ts`, `src/types/trains.ts`). `TrainCard`/
+  `TrainResults` sind fertig gebaut, aber ohne jede Verwendungsstelle
+  außerhalb der eigenen Dateien — `duffel/client.ts` exportiert weiterhin
+  nur `searchFlights`/`searchStays`, keine Zug-Datenquelle, real oder
+  simuliert. Die reine Rendering-Verdrahtung in `KiChat.tsx` wäre
+  mechanisch, aber ohne einen echten oder erfundenen `searchTrains`-Aufruf
+  gäbe es nichts anzuzeigen — bräuchte eine Architekturentscheidung zur
+  Datenquelle (echte Bahn-API vs. Demo-Fixture). Gleicher Befund wie in
+  allen bisherigen Läufen seit dem 25.08.
+- **6.2, 6.6, 6.7, 7.12:** `TripDraft` (`src/types/chat.ts`) hat weiterhin
+  keine Preis-/Item-/Provider-URL-Felder für Transport/Unterkunft —
+  Datenmodell-Erweiterung wäre eine Architekturentscheidung.
+- **7.4** ("Planung fortsetzen" mit voller Chat-Historie): `tripStorage.ts`
+  speichert weiterhin nur einen einzigen aktiven Trip unter einem globalen
+  `CHAT_STORAGE_KEY`, die Demo-Entwürfe in `Reiseentwuerfe.tsx` sind davon
+  komplett losgelöst — bräuchte eine Mehrfach-Entwürfe-Datenmodell-
+  Entscheidung.
+- **8.2/8.3:** brauchen echten LLM-/Vision-Zugang, der nicht existiert.
+- **8.4:** gleicher Erfindungs-Konflikt wie bei `mockConcierge.ts` bewusst
+  vermieden (Restaurant-/Übersetzungs-/Routen-Antworten ohne echte
+  Datenquelle).
+- **8.5-8.7** Deal Finder: zu groß/vage für einen einzelnen abgegrenzten
+  Punkt ohne eigene Scope-Entscheidung.
+- **8.9** Premium: PRD OQ-03 ("What specific features and pricing define
+  Travix Premium tier?") ist weiterhin unbeantwortet — Aufbau der Seite
+  bräuchte entweder erfundene Preise/Vorteile oder eine Produktentscheidung.
+- **8.11** Hilfe: laut `ZEITPLAN.md` (Support-Chef Sprint 2) weiterhin keine
+  FAQ-Inhalte erarbeitet.
+- **8.12** Rewards/Loyalty: PRD OQ-04 weiterhin offen, nirgends im Repo
+  spezifiziert.
+- **8.13** Unit-Tests: `calculateProgress.test.ts`/`checklistRules.test.ts`
+  existieren bereits, `calculateCosts`/Schema-Validierung existieren im
+  Code noch gar nicht (hängen an 6.7/4.1) — bleibt als Ganzes blockiert.
+
+Zusätzlich `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` gelesen: alle drei unverändert seit 27.08.,
+keine neu gemeldeten Bugs oder Reibungspunkte. Die bereits am 27.08.
+gemeldete ChecklistPanel-Unterscheidbarkeit (Pencil-Icon/`sr-only`) ist im
+aktuellen Quelltext bestätigt behoben. Das im Support-Chef-Log seit dem
+24.08. mehrfach dokumentierte Persistenz-Problem der manuellen
+Checklisten-Haken (`checkedManual` in `ChecklistPanel.tsx`, reiner
+`useState`, verliert seinen Zustand bei Routenwechsel) besteht weiterhin,
+wurde aber erneut verworfen: Support-Chef selbst schlägt dafür ausdrücklich
+eine *gemeinsame* Lösung über drei betroffene Seiten hinweg vor (Profil/
+Einstellungen/Checkliste) — welcher Persistenz-Mechanismus und Scope das
+sein soll, ist eine übergreifende Architekturentscheidung, keine einzelne,
+eng abgegrenzte Aufgabe (gleiche Begründung wie in den Läufen vom 25./26.08.
+bereits mehrfach festgehalten).
+
+Offene GitHub-PRs erneut geprüft (`#1`, `#4`, `#5`, `#6`, `#7`, `#8`, `#9`):
+alle weiterhin offen und ungemergt, keine neuen, kein neuer Merge-Konflikt —
+reines Warten auf menschliches Review, nicht autonom lösbar.
+
+Eigene Bug-Suche: Grep auf `TODO`/`FIXME`/`XXX` im gesamten `src`-Baum —
+keine Treffer.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Heute nichts gefunden, das sicher genug für einen weiteren
+autonomen Lauf ist — alle verbliebenen offenen Punkte hängen an Produkt-/
+Architekturentscheidungen, fehlenden Datenmodell-Feldern, echten externen
+Zugangsdaten oder fehlenden Inhalten (FAQ), die Ni bzw. andere Chef-Rollen
+erst liefern müssen. Größter Hebel bleibt weiterhin das manuelle Mergen der
+7 offenen Auto-Fix-PRs sowie der beiden bereits fertigen, noch ungemergten
+`it-chef/auto`-Commits (ReiseSuche 7.15, Dashboard 7.7) durch den
+Freigabe-Chef bzw. Ni selbst.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm install` (frischer Checkout, `node_modules` fehlte komplett, 647
+Pakete), `npx tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` (28 Testdateien, 112 Tests, alle grün), `npm
+run build` (Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-28 (zweiter Lauf, ~01:xx UTC)
+
+**Vorbereitung:** `origin/it-chef/auto` war bereits auf dem Stand des
+ersten Laufs von heute (`3ca05d8`, 00:11 UTC). `origin/main` seit
+`9d77124` unverändert — nichts nachzuziehen, `main` nicht angerührt.
+
+**Kurzprüfung statt erneuter Vollanalyse:** Der erste Lauf von heute hat
+knapp eine Stunde zuvor bereits alle offenen Punkte aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` einzeln gegen die vier
+Sicherheitskriterien geprüft und samt Begründung verworfen (siehe Eintrag
+"2026-08-28 (geplanter Cloud-Lauf)" oben). In diesem zweiten Lauf gezielt
+geprüft, ob sich seitdem etwas geändert hat:
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`: keine neuen Commits
+  seit dem ersten Lauf, Inhalt identisch.
+- `reports/it-chef.md`, `reports/marketing-chef.md`,
+  `reports/support-chef.md`: alle drei unverändert seit 2026-08-27, keine
+  neu gemeldeten Bugs oder Reibungspunkte. Die drei im IT-Chef-Bericht
+  weiterhin offenen Funde (Transportsuche startet nie im Haupt-Chat-
+  Ablauf, ausgewählter Flug ohne Reiseplan-Sichtbarkeit, ungetestete
+  Duffel-Stays-Feldnamen) bleiben aus denselben Gründen wie in allen
+  Läufen seit 25.08. verworfen — jeweils Datenmodell-/UX-Entscheidung
+  oder fehlender echter API-Key, keine reine Umsetzung.
+- Offene PRs (`#1`, `#4`, `#5`, `#6`, `#7`, `#8`, `#9`) via GitHub erneut
+  geprüft: `updated_at` identisch zum Stand des ersten Laufs, kein Merge,
+  kein neuer Konflikt, keine neue PR.
+- `git log --since` gegen `origin/main` bestätigt: kein einziger neuer
+  Commit seit `9d77124` (dem Stand, den der erste Lauf bereits kannte).
+- `MARKENDESIGN.md`-Historie gegengeprüft: letzte Änderung weiterhin die
+  Icon-Vorgabe vom 27.08., keine neue Design-Vorgabe, die einen zuvor
+  verworfenen UI-Punkt jetzt freigeben würde.
+
+Da sich an keiner der zugrunde liegenden Bedingungen etwas geändert hat,
+bleiben alle im ersten Lauf verworfenen Punkte weiterhin verworfen —
+keine Wiederholung derselben Einzelbegründungen hier, siehe Eintrag
+"2026-08-28 (geplanter Cloud-Lauf)" oben.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Zweiter Lauf in Folge heute ohne einen Punkt, der alle vier
+Sicherheitskriterien erfüllt — die Lage hat sich seit dem ersten Lauf
+heute nicht verändert. Größter Hebel bleibt unverändert das manuelle
+Mergen der 7 offenen Auto-Fix-PRs sowie der beiden bereits fertigen,
+noch ungemergten `it-chef/auto`-Commits (ReiseSuche 7.15, Dashboard 7.7)
+durch den Freigabe-Chef bzw. Ni selbst.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+`npm install` (frischer Checkout, `node_modules` fehlte komplett), `npx
+tsc -b` (grün), `npm run lint` (0 Fehler, dieselben 3 vorbestehenden
+`react-refresh`-Warnings in `ui/badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (28 Testdateien, 112 Tests, alle grün), `npm run build`
+(Produktions-Build erfolgreich, gleiche vorbestehende
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-28 (dritter Lauf, ~02:xx UTC)
+
+**Vorbereitung:** `origin/it-chef/auto` bereits auf dem Stand des zweiten
+Laufs von heute (`c7ab28f`). `origin/main` weiterhin unverändert bei
+`9d77124` — nichts nachzuziehen, `main` nur ausgecheckt/gefetcht, nicht
+verändert. Working Tree war sauber, kein `npm install` nötig (Checkout
+dieses Laufs hatte `node_modules` bereits vom selben Container-Setup).
+
+**Kurzprüfung:** Gezielt geprüft, ob sich seit dem zweiten Lauf heute
+(vor ca. einer Stunde) irgendetwas an der Ausgangslage geändert hat:
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`: letzter Commit
+  weiterhin `e9e9505` (Dashboard 7.7), keine neuen Änderungen.
+- `reports/it-chef.md`, `reports/marketing-chef.md`,
+  `reports/support-chef.md`: letzter Commit weiterhin `9d77124`
+  (27.08.), keine neuen Funde.
+- `MARKENDESIGN.md`: letzter Commit weiterhin `590d959` (27.08.), keine
+  neue Design-Vorgabe.
+- Offene GitHub-PRs (`#1`, `#4`, `#5`, `#6`, `#7`, `#8`, `#9`) erneut
+  geprüft: `updated_at` identisch zum Stand der letzten beiden Läufe,
+  kein Merge, kein neuer Konflikt, keine neue PR.
+
+Keine der Bedingungen hat sich verändert — dieselben Blocker gelten
+unverändert (Backend-/Gemini-Credentials für 4.1-4.3, fehlende
+Zug-Datenquelle für 5.7, fehlende Preis-/Item-Felder in `TripDraft` für
+6.2/6.6/6.7/7.12, fehlendes Mehrfach-Entwürfe-Datenmodell für 7.4, fehlende
+echte LLM-/Vision-Zugänge für 8.2-8.4, unbeantwortete PRD-Fragen OQ-03/OQ-04
+für 8.9/8.12, fehlende FAQ-Inhalte für 8.11). Details siehe die beiden
+vorherigen Einträge von heute oben.
+
+**Ergebnis:** kein Punkt umgesetzt, kein Produktcode geändert, nur dieser
+Log-Eintrag. Dritter Lauf in Folge heute ohne einen Punkt, der alle vier
+Sicherheitskriterien erfüllt — an der Lage hat sich seit dem zweiten Lauf
+nichts geändert. Größter Hebel bleibt unverändert das manuelle Mergen der
+7 offenen Auto-Fix-PRs sowie der beiden bereits fertigen, noch ungemergten
+`it-chef/auto`-Commits (ReiseSuche 7.15, Dashboard 7.7) durch den
+Freigabe-Chef bzw. Ni selbst.
+
+**Geprüft (Status quo, keine Regressionsgefahr, da keine Codeänderung):**
+Da weder Code noch Konfiguration in diesem Lauf angefasst wurden und der
+Branch-Stand mit dem bereits im zweiten Lauf heute grün geprüften Commit
+identisch ist, wurde keine erneute volle Testsuite gefahren — dieselbe
+Prüfung (`npx tsc -b`, `npm run lint`, `npx vitest run`, `npm run build`)
+steht bereits im Eintrag des zweiten Laufs oben.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
