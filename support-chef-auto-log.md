@@ -1116,3 +1116,78 @@ weiterhin reiner `useState`) unverändert fort, aber das ist bereits
 dokumentiert und nicht Gegenstand dieses Laufs. `useChat.ts`/`KiChat.tsx`
 wurden nur so weit gelesen, wie nötig, um den Sprungmechanismus
 (`?edit=`) zu verstehen, nicht als eigenständige UX-Fläche geprüft.
+
+---
+
+## 2026-08-28 — Dashboard (`/dashboard`, `Dashboard.tsx`)
+
+**Geprüfter Bereich:** `src/pages/Dashboard.tsx` samt `Dashboard.test.tsx`,
+laut `ZEITPLAN.md` (Aufgabe 7.7) heute vom autonomen IT-Chef-Lauf gebaut
+und im selben Zug nach `main` gemergt (Merge-Commit `34307b1`) — noch in
+keinem Support-Chef-Lauf geprüft. Zum Vergleich herangezogen:
+`src/lib/nav-config.ts`, `src/components/layout/Sidebar.tsx`,
+`src/components/layout/MobileNav.tsx`, `src/routes.tsx` sowie die
+Demo-Datenquellen `MeineReisen.tsx`, `Reiseentwuerfe.tsx`, `Warenkorb.tsx`,
+`Favoriten.tsx` (Werte stimmen überein — keine Inkonsistenz gefunden, gute
+Wiederverwendung wie im Code-Kommentar `Dashboard.tsx:10-13` versprochen).
+
+### Reibungspunkte
+
+**1. Die fertige Dashboard-Seite ist im Produkt nirgends verlinkt —
+Nutzer:innen können sie praktisch nicht finden**
+`src/lib/nav-config.ts:76-88`: Der Eintrag für `/dashboard` (Zeile 80)
+steht in `extraRoutes`, nicht in `navGroups` (Zeilen 45-72). Der
+Kommentar direkt darüber (`nav-config.ts:40-44`) erklärt, warum
+`extraRoutes`-Seiten absichtlich nicht in der Sidebar erscheinen: "entweder
+weil kontextuell erreicht (Urlaubsmodus aus einer gebuchten Reise) oder
+weil der KI-Chat den Job schon abdeckt (Suche, Deals, Budget, ...)". Auf
+das Dashboard trifft aber keine der beiden Begründungen zu — es ist laut
+eigenem Code-Kommentar (`Dashboard.tsx:10-13`) ausdrücklich ein "zentraler
+Hub" über bestehende Daten, also genau die Art Seite, die man wiederholt
+und bewusst aufsuchen will, nicht zufällig kontextuell trifft. Ich habe
+`Sidebar.tsx` und `MobileNav.tsx` geprüft — beide rendern ausschließlich
+`navGroups`, `extraRoutes` (und damit Dashboard) wird an keiner Stelle
+als Link/Button dargestellt. Eine Volltextsuche über `src/` nach
+"/dashboard" findet nur drei Treffer: den `extraRoutes`-Eintrag selbst,
+den Routen-Import und die `<Route>`-Definition in `routes.tsx:74` — keinen
+einzigen `<Link>`/`<NavLink>` von einer anderen Seite aus, der dorthin
+führt. Auch `allRoutes` (`nav-config.ts:92`, in `routes.tsx:75-84`
+verwendet) dient nachweislich nur dazu, für noch nicht gebaute Seiten
+`PlaceholderPage`-Routen zu erzeugen, nicht als durchsuchbare Liste für
+Nutzer:innen. Ergebnis: Eine vollständig gebaute, getestete Seite (129
+Zeilen Code, eigene Testdatei) ist für echte Nutzer:innen nur über
+manuelles Eintippen von `/dashboard` in die Adresszeile erreichbar — das
+wird so gut wie niemand tun.
+
+*Vorschlag:* `/dashboard` aus `extraRoutes` in eine der `navGroups`
+verschieben (z. B. als erster Eintrag in "Meine Reise", da es genau diese
+Reisedaten bündelt) — oder, falls Dashboard stattdessen der neue
+Sidebar-weite Standard-Einstieg werden soll, das bei Ni/IT-Chef klären,
+bevor sich hier jemand fürs "Falsche" entscheidet.
+
+**2. Alle vier Kennzahl-Kacheln verwenden exakt denselben Linktext "Alle
+ansehen" ohne unterscheidbaren Kontext im Linktext selbst**
+`Dashboard.tsx:69-71` (in `StatTile`) und `:104-106` (Entwürfe-Kachel)
+erzeugen vier `<Link>`-Elemente mit identischem sichtbarem und
+zugänglichem Namen "Alle ansehen" (bestätigt durch den eigenen Test,
+`Dashboard.test.tsx:31`: `getAllByRole('link', { name: 'Alle ansehen' })`
+liefert bewusst eine Liste von vier gleichnamigen Links). Das ist ein
+neues Muster nur auf dieser Seite — ich habe den Rest von `src/pages/`
+nach "Alle ansehen" durchsucht und keine weiteren Treffer außer Dashboard
+selbst gefunden, es ist also keine etablierte, bereits geprüfte
+App-Konvention. Für Screenreader-Nutzer:innen, die typischerweise per
+Tab oder über eine Liste aller Links auf der Seite navigieren, sind vier
+identisch benannte Ziele ohne Unterscheidung im Linktext schwer
+auseinanderzuhalten — der Linktext allein sagt nicht, ob er zu Reisen,
+Entwürfen, Warenkorb oder Favoriten führt.
+
+*Vorschlag:* Den Linktext um das jeweilige Kachel-Label ergänzen, z. B.
+per `sr-only`-Zusatz ("Alle ansehen: Warenkorb") oder `aria-label`
+("Warenkorb: alle ansehen") an jedem der vier Links, damit sie auch außer
+Kontext eindeutig sind.
+
+### Nicht geprüft
+`calculateProgress.ts` und `cartTotals.ts` selbst wurden nicht erneut als
+eigenständige Logik geprüft (nur die Werte, die sie für die Demo-Daten
+liefern, stichprobenartig gegen die Quellseiten verglichen). Keine
+Codeänderung in diesem Lauf, nur dieser Bericht.
