@@ -123,13 +123,21 @@ export function useChat(speechEnabled: boolean) {
   useEffect(() => {
     if (messages.length === 0) return
     const state: StoredChatState = { messages, trip, quickReplies }
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+    try {
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+    } catch {
+      // Storage full/disabled — chat still works, just without persistence.
+    }
   }, [messages, trip, quickReplies])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (messages.length === 0) return
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages, trip, quickReplies }))
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages, trip, quickReplies }))
+      } catch {
+        // Storage full/disabled — nothing to persist on unload.
+      }
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
@@ -333,7 +341,11 @@ export function useChat(speechEnabled: boolean) {
   }
 
   const resetChat = () => {
-    localStorage.removeItem(CHAT_STORAGE_KEY)
+    try {
+      localStorage.removeItem(CHAT_STORAGE_KEY)
+    } catch {
+      // Storage disabled — reset the in-memory chat state regardless.
+    }
     const greeting = getGreeting()
     setMessages([makeMessage('assistant', greeting.content)])
     setTrip(greeting.trip)
