@@ -1,37 +1,40 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-27
+**Datum:** 2026-08-28
 
-## Was ist seit dem letzten Eintrag (2026-08-26) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-27) passiert?
 
-Beide Punkte aus dem letzten Bericht sind behoben und im aktuellen Code
-bestätigt: Der Mikrofon-Fehlerhinweis im KI-Chat verschwindet jetzt beim
-Weitertippen (`src/components/chat/ChatInput.tsx:76`, `role="status"` für
-Screenreader ergänzt), und der Preisalarme-Entfernen-Button zeigt jetzt ein
-eindeutiges Löschen-Icon statt des irreführenden "Stummschalten"-Symbols
-(`src/pages/Preisalarme.tsx:96`, `Trash2` statt `BellOff`). Danach wurde
-die Reise-Checkliste (`ChecklistPanel.tsx`, Aufgabe 6.10) um Links zum
-KI-Chat ergänzt, damit man automatisch erkannte Punkte direkt bearbeiten
-kann — dabei ist ein neuer Reibungspunkt entstanden, den ich unten melde.
+Der Reibungspunkt aus dem letzten Bericht ist behoben: Die automatisch
+erkannten Zeilen in der Reise-Checkliste zeigen jetzt ein `Pencil`-Icon
+und einen `sr-only`-Zusatz "bearbeiten" im Linktext
+(`src/components/trip/ChecklistPanel.tsx:84` und `:86`) — klickbare und
+nur-abhakbare Punkte sind damit klar unterscheidbar, auch für
+Screenreader-Nutzer:innen. Neu dazugekommen ist die Dashboard-Seite
+(`src/pages/Dashboard.tsx`, Aufgabe 7.7): eine Kennzahl-Übersicht über
+Reisen, Warenkorb und Favoriten. Beim Durchsehen sind mir dort zwei
+kleinere Stolpersteine aufgefallen.
 
 ## Meine Vorschläge
 
-1. **In der Reise-Checkliste sehen die klickbaren und die
-   nur-abhakbaren Zeilen komplett gleich aus, tun aber sehr
-   Unterschiedliches.** `src/components/trip/ChecklistPanel.tsx:68-87`
-   (automatisch erkannte Punkte, jetzt `<Link>` zu `/ki-chat?edit=...`)
-   und `:89-109` (manuelle Punkte, `<button>` zum lokalen Abhaken)
-   verwenden dieselben Klassen, dieselben Icons und denselben Text-Stil.
-   Ein Klick oben verlässt die Seite sofort und startet im KI-Chat eine
-   neue Bearbeiten-Nachricht — auch wenn der Punkt schon grün abgehakt
-   ist und man eigentlich nur nachsehen wollte. Ein Klick unten bleibt
-   einfach auf der Seite. Es gibt kein Icon, keinen Pfeil, keinen
-   Hinweis, der die beiden Verhaltensweisen unterscheidbar macht — für
-   Screenreader-Nutzer:innen liest sich der Linktext ("Transport
-   ausgewählt") zudem wie eine reine Status-Ansage, nicht wie ein
-   Sprung zu einer neuen Seite. Kurzfristiger Vorschlag: den
-   automatischen Zeilen dasselbe `Pencil`-Icon geben, das
-   `Buchung.tsx` für "Bearbeiten"-Links bereits nutzt, plus einen
-   `sr-only`-Zusatz im Linktext wie "Transport ausgewählt, bearbeiten".
+1. **Vier Links heißen alle exakt "Alle ansehen" — für
+   Screenreader-Nutzer:innen kaum auseinanderzuhalten.**
+   `src/pages/Dashboard.tsx:69-71` (in `StatTile`, dreifach verwendet)
+   und `:104-106` (Reiseentwürfe-Kachel) geben jedem der vier Links denselben
+   Linktext ohne Kontext. Wer per Tastatur oder Screenreader über eine
+   Linkliste springt, hört viermal hintereinander nur "Alle ansehen" und
+   muss raten, welcher Link zu Reisen, Warenkorb, Favoriten oder
+   Entwürfen führt. Vorschlag: pro Kachel einen `aria-label` ergänzen,
+   z.B. `aria-label="Alle bevorstehenden Reisen ansehen"`.
 
-_Letztes Update: 2026-08-27_
+2. **Die "Reiseentwürfe"-Kachel zeigt einen Durchschnittswert, ohne das
+   zu sagen — das kann verwirren, wenn Entwürfe unterschiedlich weit
+   sind.** `src/pages/Dashboard.tsx:78-80` mittelt den Fortschritt über
+   alle Entwürfe (aktuell Lissabon 60 % und Kyoto 20 % → angezeigt
+   werden schlicht "40 %"). Jemand, der seinen Lissabon-Trip schon fast
+   fertig geplant hat, sieht auf dem Dashboard nur die niedrigere
+   Mischzahl und könnte denken, die App hätte seinen Fortschritt nicht
+   richtig erfasst. Vorschlag: kurzer Zusatztext wie "Ø über 2 Entwürfe"
+   unter dem Prozentwert, oder den am weitesten fortgeschrittenen Entwurf
+   separat nennen.
+
+_Letztes Update: 2026-08-28_
