@@ -1,35 +1,35 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-27
+**Datum:** 2026-08-28
 
-## Was ist seit dem letzten Eintrag (2026-08-26) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-27) passiert?
 
-Seit gestern kam über den it-chef-eigen-Auto-Kanal nur noch Kleinkram auf
-main: `ChatInput.tsx` setzt den Mikrofon-Fehler jetzt beim Senden zurück
-und kündigt ihn per `role="status"` an, `Preisalarme.tsx` nutzt statt des
-irreführenden `BellOff`-Icons jetzt `Trash2`, und die fünf automatisch
-erkannten Checklistenpunkte in `ChecklistPanel.tsx` verlinken jetzt direkt
-zum passenden KI-Chat-Editierschritt. Alles im aktuellen Quelltext geprüft
-— sauber.
+Seit gestern kamen zwei neue Stücke über den separaten it-chef-eigen-
+Auto-Kanal auf `main`: das Dashboard (7.7, vier Kennzahl-Kacheln für
+Reisen/Entwürfe/Warenkorb/Favoriten) und eine optische/a11y-Korrektur an
+`ChecklistPanel.tsx` (automatische Zeilen jetzt mit Stift-Icon und
+Screenreader-Zusatz von den nur-abhakbaren Punkten unterscheidbar, nach
+Meldung vom Support-Chef). Beide Dateien heute vollständig gelesen
+(`Dashboard.tsx`, `checklistRules.ts`, `ChecklistPanel.tsx`) — keine
+Fehler gefunden, IDs zwischen Checkliste, Link-Zielen und Status-Prüfung
+stimmen überein.
 
-Gezielte Bug-Suche in dieser Session (nicht nur grep, einzelne Dateien
-vollständig gelesen): `useChat.ts`, `ChatInput.tsx`, `speech.ts`,
-`duffel/client.ts`, `tripStorage.ts`, `mockAdvisor.ts`, `mockConcierge.ts`,
-`useConcierge.ts`, `FlightWizard.tsx`, `HotelWizard.tsx`, `Flugsuche.tsx`,
-`Hotelsuche.tsx`, `EditMode.tsx`, `ChecklistPanel.tsx`, `Preisalarme.tsx`,
-`Buchung.tsx`, `Warenkorb.tsx`, `Profil.tsx`, `KiChat.tsx`,
-`FlightResults.tsx`/`HotelResults.tsx`, `calendarUtils.ts`, `cartTotals.ts`,
-`calculateProgress.ts`. Kein neuer Bug gefunden, den ich sicher genug für
-einen Auto-Fix eingestuft hätte — die drei unten gemeldeten sind alle schon
-aus früheren Berichten bekannt und heute nur erneut am Quelltext bestätigt.
+Gezielte Bug-Suche in dieser Session: da der übrige Quelltext gegenüber
+dem letzten Bericht unverändert ist (kein einziger weiterer Commit unter
+`src/` seit dem 27.8. außer den beiden oben genannten), wurden gezielt nur
+die neuen Dateien vollständig gelesen; die bereits am 27.8. einzeln
+gegengelesenen Dateien (`useChat.ts`, `mockAdvisor.ts`, `duffel/client.ts`,
+`tripStorage.ts`, Wizard-/Ergebniskarten-Komponenten u.a.) sind seitdem
+unverändert. Keine offenen TODO/FIXME im Code. Kein neuer Bug gefunden.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine — in diesem Lauf kein neuer Bug gefunden, bei dem ich mir sicher genug
-war und der Fix klein/isoliert genug gewesen wäre.
+Keine — heute kein neuer Bug gefunden, der sicher genug für einen
+Auto-Fix gewesen wäre.
 
 Der eigentliche Rückstand liegt weiterhin beim Mergen: **7 offene
-Auto-Fix-PRs**, der älteste seit 18 Tagen unbearbeitet:
+Auto-Fix-PRs**, unverändert seit dem letzten Bericht, der älteste jetzt
+seit 19 Tagen unbearbeitet:
 [PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
 (hängender Ladezustand bei Unterkunftssuche, seit 9.8.),
 [PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
@@ -50,7 +50,7 @@ steigendem Risiko für Konflikte durch weitere main-Commits.
 ## Gefundene Bugs (nicht automatisch gefixt)
 
 Unverändert gegenüber dem letzten Bericht, heute erneut am Quelltext
-bestätigt:
+bestätigt (Dateien seit 27.8. nicht angefasst):
 
 - **Flug-/Transportsuche im normalen Chat-Ablauf startet nie.**
   `getNextAdvisorStep` (`mockAdvisor.ts`) kündigt nach der letzten Frage die
@@ -73,7 +73,7 @@ bestätigt:
 ## Weitere Vorschläge
 
 1. **Die 7 offenen Auto-Fix-PRs mergen.** Größter Hebel gerade — alle sind
-   klein, geprüft und ungefährlich, der älteste liegt aber schon 18 Tage
+   klein, geprüft und ungefährlich, der älteste liegt aber schon 19 Tage
    ungenutzt. Der Freigabe-Chef prüft aktuell nur die `*-auto`-Branches der
    eigenen Personas, nicht diese `it-chef-autofix/*`-PRs — dafür braucht es
    weiterhin Nis manuellen Review.
@@ -87,4 +87,4 @@ bestätigt:
    die localStorage-Seiteneffekte oder den oben gemeldeten Flugsuche-Bug
    selbst.
 
-_Letztes Update: 2026-08-27_
+_Letztes Update: 2026-08-28_
