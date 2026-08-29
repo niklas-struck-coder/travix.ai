@@ -1,40 +1,61 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-28
+**Datum:** 2026-08-29
 
-## Was ist seit dem letzten Eintrag (2026-08-27) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-28) passiert?
 
-Der Reibungspunkt aus dem letzten Bericht ist behoben: Die automatisch
-erkannten Zeilen in der Reise-Checkliste zeigen jetzt ein `Pencil`-Icon
-und einen `sr-only`-Zusatz "bearbeiten" im Linktext
-(`src/components/trip/ChecklistPanel.tsx:84` und `:86`) — klickbare und
-nur-abhakbare Punkte sind damit klar unterscheidbar, auch für
-Screenreader-Nutzer:innen. Neu dazugekommen ist die Dashboard-Seite
-(`src/pages/Dashboard.tsx`, Aufgabe 7.7): eine Kennzahl-Übersicht über
-Reisen, Warenkorb und Favoriten. Beim Durchsehen sind mir dort zwei
-kleinere Stolpersteine aufgefallen.
+Einiges: Die beiden Dashboard-Punkte aus dem letzten Bericht sind
+behoben (`src/pages/Dashboard.tsx` hat jetzt eigene `aria-label`s pro
+Kachel und einen Hinweis "Ø über 2 Entwürfe"). Dazu kamen ein
+Ehrlichkeits-Fix im Chat (Zug/Bus/Fähre/Mietwagen versprechen keine
+Verbindungssuche mehr, die es nicht gibt), fehlende Enter-Unterstützung
+im Aktivität-hinzufügen-Formular wurde ergänzt, und sechs bisher nur per
+direkter URL erreichbare Seiten (Kalender, Karte, Aktivitäten, Angebote,
+Favoriten, Preisalarme) sind jetzt über die Navigation auffindbar. Der
+Chatflow-Text/Sidebar-Fund von gestern (Auto-Log) ist bereits an anderer
+Stelle dokumentiert, deshalb hier nicht wiederholt. Beim Durchsehen des
+heutigen Flug-Pfads und der Fehlerbehandlung bei der Unterkunftssuche
+sind mir zwei eigene, bisher nicht gemeldete Reibungspunkte aufgefallen.
 
 ## Meine Vorschläge
 
-1. **Vier Links heißen alle exakt "Alle ansehen" — für
-   Screenreader-Nutzer:innen kaum auseinanderzuhalten.**
-   `src/pages/Dashboard.tsx:69-71` (in `StatTile`, dreifach verwendet)
-   und `:104-106` (Reiseentwürfe-Kachel) geben jedem der vier Links denselben
-   Linktext ohne Kontext. Wer per Tastatur oder Screenreader über eine
-   Linkliste springt, hört viermal hintereinander nur "Alle ansehen" und
-   muss raten, welcher Link zu Reisen, Warenkorb, Favoriten oder
-   Entwürfen führt. Vorschlag: pro Kachel einen `aria-label` ergänzen,
-   z.B. `aria-label="Alle bevorstehenden Reisen ansehen"`.
+1. **Wer im Chat "Flug" wählt, landet in einer Sackgasse ohne jeden
+   Ausweg — nicht mal ein Button bleibt übrig.**
+   `src/lib/ai/mockAdvisor.ts:122-130`: Sobald die Unterkunft gewählt ist
+   und der Modus Flug ist, kündigt der Chat eine echte Flugsuche an
+   ("Ich suche jetzt nach echten Flug-Verbindungen ... Nichts wird
+   erfunden."), setzt dabei aber `quickReplies: []`. Anders als beim
+   Nicht-Flug-Fall direkt darunter (`:132-139`, dort gibt es immerhin
+   "Neue Reise planen" als Button) bekommt die Flug-Nutzerin gar keine
+   Schaltfläche mehr angezeigt. Da `useChat.ts` die echte Flugsuche im
+   Hauptablauf nie auslöst (nur über den separaten "Bearbeiten"-Pfad,
+   das hat IT-Chef heute technisch schon gemeldet), bleibt der
+   `TravixAvatar` dauerhaft im "searching"-Zustand hängen, ohne
+   Fehlermeldung und ohne Knopf, um weiterzumachen. Aus Support-Sicht
+   der schlimmere Teil des Problems: selbst wenn die Suche nie startet,
+   sollte niemand ohne jeden nächsten Schritt dastehen.
+   *Vorschlag:* Bis die Suche technisch nachgerüstet ist, wenigstens
+   `quickReplies: ['Neue Reise planen']` auch im Flug-Fall mitgeben —
+   eine Zeile Aufwand, verhindert aber, dass Nutzer:innen sich fragen,
+   ob die App abgestürzt ist.
 
-2. **Die "Reiseentwürfe"-Kachel zeigt einen Durchschnittswert, ohne das
-   zu sagen — das kann verwirren, wenn Entwürfe unterschiedlich weit
-   sind.** `src/pages/Dashboard.tsx:78-80` mittelt den Fortschritt über
-   alle Entwürfe (aktuell Lissabon 60 % und Kyoto 20 % → angezeigt
-   werden schlicht "40 %"). Jemand, der seinen Lissabon-Trip schon fast
-   fertig geplant hat, sieht auf dem Dashboard nur die niedrigere
-   Mischzahl und könnte denken, die App hätte seinen Fortschritt nicht
-   richtig erfasst. Vorschlag: kurzer Zusatztext wie "Ø über 2 Entwürfe"
-   unter dem Prozentwert, oder den am weitesten fortgeschrittenen Entwurf
-   separat nennen.
+2. **Ein Suchfehler bei der Unterkunftssuche sieht für Nutzer:innen
+   genauso aus wie "keine Unterkünfte gefunden" — beides zeigt dieselbe
+   Meldung.**
+   `src/hooks/useChat.ts:307-309`: Schlägt `searchStays(...)` fehl (z. B.
+   Netzwerkfehler, API down), wird `stayOffers` einfach auf ein leeres
+   Array gesetzt — genau wie bei einer echten Null-Treffer-Suche. In
+   `src/components/search/HotelResults.tsx:24` führt das in beiden
+   Fällen zur identischen Meldung "Keine Unterkünfte gefunden". Wer
+   Lissabon plant und diese Meldung sieht, geht davon aus, dass es dort
+   wirklich keine Unterkünfte gibt — dabei kann genauso gut nur die
+   Suche gerade nicht erreichbar gewesen sein. Das untergräbt leise das
+   Vertrauen in die "nichts wird erfunden"-Zusage aus der Begrüßung,
+   weil ein technischer Fehler wie ein echtes (falsches) Ergebnis
+   aussieht.
+   *Vorschlag:* Im `.catch`-Zweig einen eigenen Fehlerzustand setzen
+   (z. B. `stayOffers: null` plus eine separate Fehlermeldung à la
+   "Die Unterkunftssuche hat gerade nicht geklappt, versuch's gleich
+   nochmal"), statt ihn wie ein leeres Ergebnis zu behandeln.
 
-_Letztes Update: 2026-08-28_
+_Letztes Update: 2026-08-29_
