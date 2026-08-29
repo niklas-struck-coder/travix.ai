@@ -28,19 +28,34 @@ describe('Dashboard', () => {
     expect(screen.getByText('Favoriten')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
 
-    expect(screen.getAllByRole('link', { name: 'Alle ansehen' })).toHaveLength(4)
+    expect(screen.getAllByText('Alle ansehen')).toHaveLength(4)
   })
 
-  it('links each stat tile to its full page', () => {
+  it('gives each stat tile link a distinct accessible name instead of four identical "Alle ansehen" links', () => {
     render(
       <MemoryRouter>
         <Dashboard />
       </MemoryRouter>,
     )
 
-    const links = screen.getAllByRole('link', { name: 'Alle ansehen' })
-    const hrefs = links.map((link) => link.getAttribute('href'))
-    expect(hrefs).toEqual(['/meine-reisen', '/entwuerfe', '/warenkorb', '/favoriten'])
+    expect(screen.getByRole('link', { name: 'Alle bevorstehenden Reisen ansehen' })).toHaveAttribute(
+      'href',
+      '/meine-reisen',
+    )
+    expect(screen.getByRole('link', { name: 'Alle Reiseentwürfe ansehen' })).toHaveAttribute('href', '/entwuerfe')
+    expect(screen.getByRole('link', { name: 'Kompletten Warenkorb ansehen' })).toHaveAttribute('href', '/warenkorb')
+    expect(screen.getByRole('link', { name: 'Alle Favoriten ansehen' })).toHaveAttribute('href', '/favoriten')
+  })
+
+  it('labels the averaged draft progress so it is not mistaken for a single trip\'s progress', () => {
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('40%')).toBeInTheDocument()
+    expect(screen.getByText('Ø über 2 Entwürfe')).toBeInTheDocument()
   })
 
   it('shows an honest placeholder for the still-undecided loyalty program instead of a made-up number', () => {

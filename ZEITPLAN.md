@@ -39,8 +39,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
   IT-Chef-Lauf auf Branch `it-chef/auto` erledigt, aber noch nicht in
-  den KI-Chat eingebunden (5.7 offen); 5.10 (Backend-Stub)
-  anders gelöst über Vite-Proxy statt Base44
+  den KI-Chat eingebunden (5.7 weiterhin offen — es gibt schlicht noch
+  keine angebundene Zug-/Bus-/Fähr-Datenquelle, Duffel bietet dafür
+  nichts an; welcher Anbieter das werden soll ist eine Produktentscheidung
+  für Ni, kein autonom fällbarer Punkt); 5.10 (Backend-Stub)
+  anders gelöst über Vite-Proxy statt Base44. Nebenbei vom autonomen
+  IT-Chef-Lauf am 28.08. (vierter Lauf) ein konkreter Ehrlichkeits-Bug in
+  `mockAdvisor.ts` gefunden und behoben: der letzte Chat-Schritt
+  versprach für JEDEN Transportmodus "Ich suche jetzt nach echten
+  X-Verbindungen", aber nur für Flug gibt es (über den
+  "Bearbeiten"-Pfad in `useChat.ts`) überhaupt eine echte Suche — für
+  Zug/Bus/Fähre/Mietwagen blieb das Versprechen bisher immer unerfüllt
+  hängen. Jetzt bekommen diese vier Modi stattdessen eine ehrliche
+  Abschlussmeldung ("noch keine automatische Suche, Reiseplan steht
+  trotzdem"), Flug bleibt unverändert. Schließt 5.7 nicht ab (weiterhin
+  keine echte Zug-/Bus-/Fährsuche vorhanden), behebt aber die dadurch
+  entstandene Dead-End-Situation im Chat.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -158,7 +172,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Preisfeld hat. Änderungen werden über die bestehende
   `updateStoredTrip()`-Funktion echt gespeichert (kein Demo-State wie bei
   7.3), da für den einen aktiven Chat-Trip bereits echte Speicherung
-  existiert.
+  existiert. Vom autonomen IT-Chef-Lauf am 29.08. (achter Lauf)
+  nachgebessert: Name-/Preisfeld im "Neue Aktivität"-Formular hatten
+  keinen Enter-Handler und mussten per Maus über den kleinen
+  Icon-Button bestätigt werden — inkonsistent zu `ChatInput.tsx`s
+  etabliertem Muster (Enter löst Senden aus). Beide Felder lösen jetzt
+  beim Drücken von Enter `addActivity()` aus, mit derselben
+  Leer-Namen-Schutzbedingung wie der bestehende Button. Drei neue
+  Tests in `EditMode.test.tsx`.
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
@@ -208,7 +229,35 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ehrlicher Hinweis, dass das noch aussteht, laut der "ehrlich statt
   beschönigend"-Vorgabe in `MARKENDESIGN.md`. Keine Budget-Warnfarbe, da
   `TripDraft` weiterhin keine echten Preisfelder zum Vergleich hat (gleiche
-  Lücke wie 6.6/6.7/7.12).
+  Lücke wie 6.6/6.7/7.12). Vom autonomen IT-Chef-Lauf am 28.08. (fünfter
+  Lauf) auf zwei Hinweise aus `reports/support-chef.md` hin nachgebessert:
+  die vier "Alle ansehen"-Links haben jetzt unterscheidbare `aria-label`s
+  statt identischen Linktexts, und die gemittelte Reiseentwürfe-Prozentzahl
+  zeigt jetzt "Ø über {Anzahl} Entwürfe" statt unmarkiert als Einzelwert zu
+  wirken. Vom autonomen IT-Chef-Lauf am 29.08. (sechster Lauf) einen
+  dritten, von Support-Chef gemeldeten und von Freigabe-Chef im Code
+  bestätigten Befund behoben: `/dashboard` stand in `nav-config.ts` nur
+  in `extraRoutes`, das weder `Sidebar.tsx` noch `MobileNav.tsx`
+  rendern — der zentrale Hub war damit nur per direkter URL erreichbar,
+  nicht über die reguläre Navigation. Jetzt fester Eintrag in der
+  Nav-Gruppe "Meine Reise" (erster Punkt, vor "Reiseplan"), analog den
+  anderen Übersichtsseiten dort. Neue `src/lib/nav-config.test.ts` sichert
+  das gegen Rückfall ab. Vom autonomen IT-Chef-Lauf am 29.08. (siebter
+  Lauf) denselben Fund selbst noch einmal für weitere Seiten bestätigt:
+  eine Prüfung, wohin im Code tatsächlich verlinkt wird (nicht nur der
+  `nav-config.ts`-Kommentar), zeigte, dass `/kalender` (7.11), `/karte`
+  (7.14), `/aktivitaeten` (7.13), `/angebote` (7.8), `/favoriten` (7.9,
+  bisher nur über den einen Dashboard-Link erreichbar) und `/preisalarme`
+  (7.10) genau dasselbe Problem hatten wie zuvor `/dashboard` — fertig
+  gebaute Seiten, die in `extraRoutes` standen, obwohl sie (anders als
+  `/urlaubsmodus` und `/reise-planen`, die echte kontextuelle
+  Einstiegslinks in `MeineReisen.tsx`/`Home.tsx` haben) nirgends im Code
+  verlinkt sind. Alle sechs jetzt ebenfalls in die Nav-Gruppe "Meine
+  Reise" verschoben, `extraRoutes`-Kommentar entsprechend korrigiert
+  (enthält jetzt nur noch echte Kontext-Links plus die drei noch nicht
+  gebauten Seiten Deal Finder/Reisebudget/Premium). `nav-config.test.ts`
+  um eine entsprechende Regressionsprüfung für alle sechs Pfade
+  erweitert.
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz

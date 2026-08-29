@@ -111,10 +111,29 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
 
   if (!next.accommodation) {
     next.accommodation = userMessage
+
+    // Flug ist der einzige Modus mit echter automatischer Suche (über den
+    // "Bearbeiten"-Pfad in useChat.ts, der nach dem Startflughafen fragt).
+    // Für die anderen Modi gibt es noch keine angebundene Verbindungssuche
+    // (Duffel bietet keine Zug-/Bus-/Fähr-/Mietwagen-Verbindungen an) — das
+    // hier zu versprechen würde die Nutzer:innen mit einer "Suche", die nie
+    // endet, hängen lassen, und widerspräche der "nichts wird erfunden"-
+    // Zusage oben in der Begrüßung.
+    if (next.transportMode === 'flight') {
+      return {
+        content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
+        avatarState: 'searching',
+        quickReplies: [],
+        trip: next,
+        nextField: null,
+      }
+    }
+
+    const modeLabel = next.transportMode ? transportLabelsDe[next.transportMode] : 'deine Verbindung'
     return {
-      content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
-      avatarState: 'searching',
-      quickReplies: [],
+      content: `Für ${modeLabel}-Verbindungen hab ich noch keine automatische Suche — dein Reiseplan steht trotzdem! Öffne den Reiseplan, um alles im Detail zu sehen und einzelne Bausteine zu bearbeiten.`,
+      avatarState: 'happy',
+      quickReplies: ['Neue Reise planen'],
       trip: next,
       nextField: null,
     }

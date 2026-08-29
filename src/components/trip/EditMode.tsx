@@ -93,6 +93,9 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
               id="activity-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') addActivity()
+              }}
               placeholder="z. B. Stadtführung"
             />
           </div>
@@ -102,6 +105,9 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
               id="activity-price"
               value={price}
               onChange={(event) => setPrice(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') addActivity()
+              }}
               placeholder="optional"
             />
           </div>

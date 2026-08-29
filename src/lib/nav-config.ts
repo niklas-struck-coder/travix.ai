@@ -38,10 +38,11 @@ export interface NavGroup {
 }
 
 // The sidebar on purpose only lists what you can't already reach through
-// the KI-Chat conversation itself. Everything else below (extraRoutes)
-// still exists as a page — just not as a permanent nav entry — either
-// because it's reached contextually (Urlaubsmodus from a booked trip) or
-// because the AI chat already covers that job (search, deals, budget, ...).
+// the KI-Chat conversation itself, or pages that aren't built yet.
+// Everything else below (extraRoutes) still exists as a page — just not as
+// a permanent nav entry — because it's reached contextually (Urlaubsmodus
+// from a booked trip, Reise suchen from the homepage) or because it isn't
+// built yet (Deal Finder, Reisebudget, Premium are still placeholders).
 export const navGroups: NavGroup[] = [
   {
     label: 'Planen',
@@ -55,10 +56,17 @@ export const navGroups: NavGroup[] = [
   {
     label: 'Meine Reise',
     items: [
+      { path: '/dashboard', label: 'Dashboard', description: 'Alle Reisen, Budgets und Favoriten', icon: LayoutDashboard },
       { path: '/buchung', label: 'Reiseplan', description: 'Dein interaktiver Buchungsüberblick', icon: ClipboardList },
       { path: '/entwuerfe', label: 'Reiseentwürfe', description: 'Gespeicherte Planungen fortsetzen', icon: FileClock },
       { path: '/meine-reisen', label: 'Meine Reisen', description: 'Gebuchte und bestätigte Reisen', icon: Luggage },
       { path: '/warenkorb', label: 'Warenkorb', description: 'Ausgewählte Leistungen vor der Buchung', icon: ShoppingCart },
+      { path: '/kalender', label: 'Reisekalender', description: 'Alle Reisen im Kalender', icon: Calendar },
+      { path: '/karte', label: 'Kartenansicht', description: 'Reiseziele auf der Karte', icon: Map },
+      { path: '/aktivitaeten', label: 'Aktivitäten', description: 'Alle geplanten Aktivitäten', icon: Ticket },
+      { path: '/angebote', label: 'Angebote', description: 'Gespeicherte Reiseangebote', icon: Tag },
+      { path: '/favoriten', label: 'Favoriten', description: 'Gespeicherte Reiseziele', icon: Heart },
+      { path: '/preisalarme', label: 'Preisalarme', description: 'Preisänderungen im Blick behalten', icon: Bell },
     ],
   },
   {
@@ -72,19 +80,13 @@ export const navGroups: NavGroup[] = [
 ]
 
 // Still real pages, still routable — just reached contextually (a link from
-// within a trip, a chat action) instead of living in the sidebar forever.
+// within a trip, a chat action) instead of living in the sidebar forever,
+// or not built yet (still rendered via PlaceholderPage in routes.tsx).
 export const extraRoutes: NavItem[] = [
   { path: '/urlaubsmodus', label: 'Urlaubsmodus', description: 'KI-Unterstützung während der Reise', icon: Sun },
   { path: '/reise-planen', label: 'Reise suchen', description: 'Neue Reise starten', icon: Search },
   { path: '/deal-finder', label: 'Deal Finder', description: 'Automatische Angebotssuche', icon: Sparkles },
-  { path: '/dashboard', label: 'Dashboard', description: 'Alle Reisen, Budgets und Favoriten', icon: LayoutDashboard },
-  { path: '/kalender', label: 'Reisekalender', description: 'Alle Reisen im Kalender', icon: Calendar },
   { path: '/budget', label: 'Reisebudget', description: 'Kostenübersicht und Auswertungen', icon: PiggyBank },
-  { path: '/karte', label: 'Kartenansicht', description: 'Reiseziele auf der Karte', icon: Map },
-  { path: '/aktivitaeten', label: 'Aktivitäten', description: 'Alle geplanten Aktivitäten', icon: Ticket },
-  { path: '/angebote', label: 'Angebote', description: 'Gespeicherte Reiseangebote', icon: Tag },
-  { path: '/favoriten', label: 'Favoriten', description: 'Gespeicherte Reiseziele', icon: Heart },
-  { path: '/preisalarme', label: 'Preisalarme', description: 'Preisänderungen im Blick behalten', icon: Bell },
   { path: '/premium', label: 'Travix Premium', description: 'Vorteile deiner Mitgliedschaft', icon: Crown },
 ]
 

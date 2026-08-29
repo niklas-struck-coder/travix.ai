@@ -4841,3 +4841,386 @@ steht bereits im Eintrag des zweiten Laufs oben.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der einzige Inhalt dieses Commits, keine sonstigen Code-Änderungen).
+
+## 2026-08-28 (vierter Lauf)
+
+**Ausgangslage:** Alter Branch `it-chef/auto` (bis Commit `b2e0f61`) war
+bereits vollständig in `main` gemerged (`git merge-base --is-ancestor
+origin/it-chef/auto main` → ja) — frisch von `main` neu aufgesetzt statt
+weitergearbeitet, wie in der Skill-Anleitung für diesen Fall vorgesehen.
+
+**Geprüft, warum die bisherigen Blocker weiter gelten:** 4.1-4.3 (echte
+KI) hängen weiterhin an fehlenden Base44/Gemini-Credentials; 6.2/6.6/6.7/
+7.12 weiterhin an fehlenden Preis-/Item-Feldern in `TripDraft`; 8.9/8.12
+an offenen PRD-Fragen; 8.11 an fehlenden FAQ-Inhalten vom Support-Chef.
+Für 5.7 (Integration Zug-/Bus-/Fährsuche in den KI-Chat) gilt ebenfalls
+weiterhin: es gibt keine angebundene Datenquelle für Zug-/Bus-/
+Fährverbindungen (Duffel bietet dafür nichts an), und welcher Anbieter
+das werden soll ist eine Produktentscheidung für Ni — also kein
+autonom umsetzbarer Punkt in voller Breite.
+
+**Beim Prüfen von 5.7 aber einen konkreten, klar abgegrenzten Bug
+gefunden und behoben:** In `src/lib/ai/mockAdvisor.ts` versprach der
+letzte Schritt des Haupt-Chatflows (sobald die Unterkunft gesetzt ist)
+für JEDEN Transportmodus dieselbe Nachricht: "Ich suche jetzt nach
+echten {Modus}-Verbindungen … Nichts wird erfunden." Tatsächlich läuft
+aber nur für Flug überhaupt eine echte Suche (und auch die nur über den
+separaten "Bearbeiten"-Pfad in `useChat.ts`, der nach dem
+Startflughafen fragt) — für Zug, Bus, Fähre und Mietwagen läuft diese
+Suche nie, das Versprechen blieb also für vier von fünf Modi
+unerfüllt hängen. Das widerspricht direkt der "nichts wird erfunden"-
+Zusage aus der Begrüßung und dem in `useChat.test.ts` bereits
+etablierten Grundsatz, Nutzer:innen nach einer angekündigten Suche
+nicht hängen zu lassen (dort für die Unterkunftssuche bei unbekanntem
+Ziel bereits abgedeckt).
+
+**Sicher genug, weil:** kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+rechtlichen Texten; keine neue Produkt-/Architekturentscheidung nötig
+(es wird kein Zug-Anbieter erfunden, im Gegenteil — die Änderung
+vermeidet genau das); klar abgegrenzt (eine Textverzweigung nach
+Transportmodus); Ergebnis objektiv prüfbar über neue Unit-Tests plus
+Typecheck/Lint/Build.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `getNextAdvisorStep` unterscheidet beim
+  Abschluss-Schritt jetzt nach Transportmodus — Flug behält die
+  bisherige "echte Suche läuft"-Nachricht (avatarState `searching`,
+  unverändert, da dort tatsächlich eine echte Suche folgen kann), die
+  anderen vier Modi bekommen eine ehrliche Abschlussmeldung ("noch
+  keine automatische Suche — Reiseplan steht trotzdem", avatarState
+  `happy`, Quick-Reply "Neue Reise planen", identisch zur regulären
+  "Reiseplan steht"-Nachricht am eigentlichen Ende des Flows).
+- `src/lib/ai/mockAdvisor.test.ts`: zwei neue Tests — einer bestätigt,
+  dass Flug weiterhin die "echte Suche"-Nachricht bekommt, der andere,
+  dass Zug (stellvertretend für Zug/Bus/Fähre/Mietwagen) die neue
+  ehrliche Nachricht ohne "Ich suche jetzt"-Formulierung bekommt.
+- `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`: 5.7-Notizen
+  ergänzt (Fix dokumentiert, Checkbox bewusst NICHT gesetzt — die
+  eigentliche Zug-/Bus-/Fährsuche fehlt weiterhin).
+
+**Bewusst nicht angefasst:** Der Haupt-Chatflow fragt bei Flugauswahl
+nie nach dem Startflughafen (das passiert nur im separaten
+"Bearbeiten"-Pfad) — d.h. auch beim Flug-Modus läuft die im
+Haupt-Chatflow tatsächlich erst beim übernächsten Schritt real
+angebundene Suche nicht automatisch los. Das wäre ein größerer,
+eigener Umbau (Rückfrage nach IATA-Code mitten im Hauptfluss statt nur
+im Edit-Pfad) und damit ein zweiter Punkt am selben Tag — bewusst nicht
+mit angegangen, um bei einem einzigen, klar abgegrenzten Punkt zu
+bleiben. Für einen künftigen Lauf vorgemerkt.
+
+**Geprüft (grün):**
+- `npx tsc -b` — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis,
+  nicht von dieser Änderung betroffen)
+- `npx vitest run` — 28 Testdateien, 114 Tests, alle grün (inkl. der
+  beiden neuen `mockAdvisor.test.ts`-Fälle)
+- `npm run build` — erfolgreich
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-28 (fünfter Lauf, ~23:xx UTC)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits einen ungemergten Commit
+vom vierten Lauf (`ffc0ba4`, mockAdvisor-Ehrlichkeitsfix), auf diesem
+Stand weitergearbeitet statt neu von `main` zu starten (`main` war zu
+diesem Zeitpunkt identisch mit dem Basis-Commit von `it-chef/auto`,
+also kein Merge nötig).
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks-prd-travix-platform.md`
+durchgesehen. Fast alle verbleibenden offenen Punkte scheiden laut den
+vier Sicherheitskriterien aus:
+- 4.1-4.3 (echte LLM-Anbindung): hängt an der offenen
+  Backend-Entscheidung.
+- 6.2/6.6/6.7/7.12 (Kostenübersicht, Provider-Buchungslink,
+  Reisebudget): laut `ZEITPLAN.md` explizit blockiert, da `TripDraft`
+  noch keine echten Preis-/Item-Felder hat — Ergänzung dieser Felder
+  wäre eine eigene Datenmodell-Entscheidung, keine reine Umsetzung.
+- 7.4 ("Planung fortsetzen" mit voller Chat-Historie): Entwürfe sind
+  reine Demo-Daten ohne jede gespeicherte Chat-Historie; eine "volle
+  Historie" für sie zu bauen hieße, Daten zu erfinden oder eine neue
+  Multi-Entwurf-Speicherung zu entwerfen — beides über die
+  Aufgabenbeschreibung hinaus.
+- 8.2/8.4-8.7 (Foto-Vision, Quick Actions, Deal Finder): brauchen
+  externe API-/Architektur-Entscheidungen (Kartendienst,
+  Übersetzung, Web-Suche-Agent).
+- 8.3 (kontextbezogene Antworten mit Tagesitinerar): `TripDraft` hat
+  keine Tages-Itinerar-Struktur — die müsste neu entworfen werden,
+  keine reine Umsetzung nach bestehender Spezifikation.
+- 8.9/8.12 (Premium, Prämienprogramm): Prämienregeln laut PRD (OQ-04)
+  offen bzw. Premium ist inhaltlich eine Monetarisierungs-/
+  Produktentscheidung.
+- 8.11 (Hilfe-Seite): blockiert, da FAQ-Inhalte vom Support-Chef noch
+  fehlen.
+
+Stattdessen `reports/support-chef.md` (Stand 28.08., von Support-Chef
+im heutigen dritten Bericht ergänzt) gelesen: zwei konkrete, bereits
+mit Datei/Zeile und Formulierungsvorschlag benannte Reibungspunkte auf
+der neuen Dashboard-Seite (7.7). Beide Kriterien erfüllt: kein
+Auth/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung, exakt
+beschrieben (inkl. Beispielformulierung), objektiv prüfbar über
+Tests/Typecheck.
+
+**Umgesetzt (`src/pages/Dashboard.tsx`):**
+1. Die vier "Alle ansehen"-Links (`StatTile` dreifach plus die
+   Reiseentwürfe-Kachel) hatten identischen Linktext — für
+   Screenreader/Tastatur-Nutzung nicht unterscheidbar. Jede `StatTile`
+   bekommt jetzt eine neue `linkLabel`-Prop, die als `aria-label` auf
+   dem Link landet ("Alle bevorstehenden Reisen ansehen", "Kompletten
+   Warenkorb ansehen", "Alle Favoriten ansehen"); die
+   Reiseentwürfe-Kachel bekommt direkt "Alle Reiseentwürfe ansehen".
+   Sichtbarer Linktext bleibt unverändert "Alle ansehen".
+2. Die Reiseentwürfe-Kachel zeigte den über alle Entwürfe gemittelten
+   Fortschritt (aktuell 40% aus Lissabon 60%/Kyoto 20%) ohne
+   Kennzeichnung als Durchschnitt — konnte wie ein falsch erfasster
+   Einzelfortschritt wirken. Neue Zeile "Ø über {Anzahl} Entwürfe"
+   unter dem Prozentwert (dynamisch über `draftTrips.length`, keine
+   hartkodierte "2").
+- `src/pages/Dashboard.test.tsx`: bisherigen Test auf vier identische
+  `getAllByRole('link', { name: 'Alle ansehen' })` ersetzt durch einen
+  Test auf sichtbaren Text (weiterhin 4×) plus einen neuen Test, der
+  jeden Link über seinen jetzt eindeutigen `aria-label` plus `href`
+  prüft; neuer Test für die "Ø über 2 Entwürfe"-Kennzeichnung ergänzt.
+
+**Bewusst nicht angefasst:** Keine weiteren Punkte aus
+`reports/support-chef.md` offen, keine Architektur-/Datenmodelländerung
+vorgenommen — reine UI-Textklarheit, wie von Support-Chef vorgeschlagen.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte)
+- `npm run build` (= `tsc -b && vite build`) — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis)
+- `npx vitest run` — 28 Testdateien, 115 Tests, alle grün (inkl. der
+  zwei aktualisierten/neuen `Dashboard.test.tsx`-Fälle)
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (sechster Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits zwei ungemergte Commits
+vom vierten/fünften Lauf (28.08., `ffc0ba4`/`85e8c22`), noch nicht von
+Freigabe-Chef geprüft. `main` war zu diesem Zeitpunkt identisch mit dem
+Basis-Commit von `it-chef/auto` (`git log origin/main..origin/it-chef/auto`
+zeigte genau diese zwei Commits, `git merge origin/main` war ein No-Op)
+— auf diesem Stand weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks-prd-travix-platform.md`
+durchgesehen — die Analyse vom fünften Lauf (28.08.) ist einen Tag
+später weiterhin gültig, es hat sich nichts an den blockierten Punkten
+geändert (4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie für Demo-Entwürfe,
+8.2-8.7/8.9/8.12 externe Architektur-/Produktentscheidungen, 8.11
+blockiert auf FAQ-Inhalte vom Support-Chef).
+
+Stattdessen `freigabe-chef-log.md` gelesen (Eintrag "2026-08-28, später
+Check"): Freigabe-Chef hat dort einen von Support-Chef gemeldeten Befund
+zur neuen Dashboard-Seite im Code auf `main` selbst nachvollzogen (nicht
+nur dem Bericht geglaubt) und als zutreffend bestätigt: `/dashboard`
+steht in `src/lib/nav-config.ts` nur in `extraRoutes`, das laut Prüfung
+weder `Sidebar.tsx` noch `MobileNav.tsx` rendern (beide importieren und
+rendern ausschließlich `navGroups`) — der als "zentraler Hub" gedachte
+Dashboard ist damit nur per direkter URL erreichbar, nicht über die
+reguläre Seitenleiste/das Mobile-Menü. Anders als die übrigen
+`extraRoutes`-Einträge (die laut Kommentar entweder kontextuell erreicht
+werden, z.B. Urlaubsmodus aus einer gebuchten Reise, oder vom KI-Chat
+abgedeckt sind, z.B. Deal Finder) hat Dashboard keine solche Ausnahme —
+es ist reine Fehlklassifizierung. Alle vier Kriterien erfüllt: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung (die
+anderen Übersichtsseiten in "Meine Reise" zeigen dasselbe Muster), exakt
+im Code lokalisiert (Datei/Zeile über den Freigabe-Chef-Fund bekannt),
+objektiv prüfbar (neuer Test).
+
+**Umgesetzt (`src/lib/nav-config.ts`):**
+`/dashboard` aus `extraRoutes` entfernt und als ersten Eintrag in die
+Nav-Gruppe "Meine Reise" verschoben (vor "Reiseplan") — passt zur
+eigenen Beschreibung des Eintrags ("Alle Reisen, Budgets und Favoriten")
+und zu den übrigen Übersichtsseiten dieser Gruppe. Kein Eingriff in den
+erklärenden Kommentar über `navGroups`/`extraRoutes`, der bleibt
+weiterhin korrekt (beschreibt die Ausnahmen, nicht eine vollständige
+Liste).
+
+**Neu:** `src/lib/nav-config.test.ts` — zwei Tests: (1) sichert genau
+diesen Fund gegen Rückfall ab (`/dashboard` muss in `navGroups` stehen,
+nicht nur in `allRoutes`/`extraRoutes`), (2) allgemeine Konsistenzprüfung,
+dass alle `navGroups`-Pfade eindeutig sind und in `allRoutes` auftauchen.
+
+**Bewusst nicht angefasst:** Keine weitere Umsortierung der Nav-Gruppen,
+keine Änderung an `extraRoutes` selbst — nur der eine fehlklassifizierte
+Eintrag korrigiert, wie vom Freigabe-Chef-Fund exakt beschrieben.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete, keine echte
+  Abhängigkeitsänderung) vor dem Commit verworfen, gleiches Muster wie
+  beim Freigabe-Chef-Merge am 28.08.
+- `npm run build` (= `tsc -b && vite build`) — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis)
+- `npx vitest run` — 29 Testdateien, 117 Tests, alle grün (inkl. der
+  zwei neuen `nav-config.test.ts`-Fälle)
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (siebter Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits drei ungemergte Commits
+vom vierten/fünften/sechsten Lauf (28./29.08., `ffc0ba4`/`85e8c22`/
+`9d41f15`), noch nicht von Freigabe-Chef geprüft. `git merge-base
+origin/main origin/it-chef/auto` war identisch mit dem `main`-Tip
+(`ec26be9`) — also reines Fast-Forward, kein Merge nötig, auf diesem
+Stand weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+durchgesehen — die Blockierungs-Analyse vom fünften/sechsten Lauf bleibt
+gültig (4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie/Architekturentscheidung,
+8.2-8.7 externe Architekturentscheidungen, 8.9/8.12 Premium/Loyalty
+laut PRD OQ-03/OQ-04 Produktentscheidungen, 8.11 blockiert auf
+FAQ-Inhalte von Support-Chef). `reports/support-chef.md` und
+`reports/marketing-chef.md` unverändert seit 28.08. (letzter Support-
+Chef-Punkt zum Dashboard bereits im sechsten Lauf behoben).
+
+Da nichts Neues aus den Berichten vorlag, selbst aktiv nach dem exakt
+selben Bug-Muster gesucht, das der sechste Lauf für `/dashboard`
+gefunden hatte (Seite nur in `extraRoutes`, das `Sidebar.tsx`/
+`MobileNav.tsx` nicht rendern) — per Grep geprüft, wohin im Code
+tatsächlich verlinkt wird (`to="..."`, `href="..."`), nicht nur, was der
+`nav-config.ts`-Kommentar behauptet. Ergebnis: sechs weitere fertig
+gebaute Seiten (laut `tasks-prd-travix-platform.md` alle mit `[x]`)
+haben exakt dasselbe Problem — nirgends im Code verlinkt, nur über die
+direkte URL erreichbar:
+- `/kalender` (7.11), `/karte` (7.14), `/aktivitaeten` (7.13),
+  `/angebote` (7.8), `/preisalarme` (7.10) — keinerlei eingehender
+  Link im gesamten `src`-Baum gefunden.
+- `/favoriten` (7.9) — ein einziger eingehender Link von
+  `Dashboard.tsx` (`href="/favoriten"`), aber kein eigener
+  Nav-Eintrag, also für alle, die nicht über das Dashboard kommen,
+  ebenfalls faktisch unauffindbar.
+Zum Vergleich echte Gegenproben gemacht: `/urlaubsmodus` hat einen
+echten Link in `MeineReisen.tsx` ("Urlaubsmodus aktivieren"),
+`/reise-planen` einen echten Link in `Home.tsx` ("Selbst durchsuchen")
+— beide bleiben zu Recht in `extraRoutes`. `/deal-finder`, `/budget`,
+`/premium` sind laut `tasks-prd-travix-platform.md` schlicht noch nicht
+gebaut (weiterhin `[ ]`), bleiben also ebenfalls unverändert in
+`extraRoutes`. Alle vier Sicherheitskriterien erfüllt: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung (identisches
+Muster zum bereits vom Freigabe-Chef geprüften Dashboard-Fix, nur auf
+mehr Seiten mit derselben Ursache angewandt), exakt im Code lokalisiert
+(Grep-Befund je Pfad), objektiv prüfbar (Regressionstest je Pfad).
+
+**Umgesetzt (`src/lib/nav-config.ts`):**
+`/kalender`, `/karte`, `/aktivitaeten`, `/angebote`, `/favoriten`,
+`/preisalarme` aus `extraRoutes` entfernt und in die bestehende
+Nav-Gruppe "Meine Reise" verschoben (nach `/warenkorb`, gleiche Gruppe
+wie `/dashboard` seit dem sechsten Lauf) — keine neue Gruppe erfunden,
+um keine zusätzliche Informationsarchitektur-Entscheidung zu treffen.
+Kommentar über `navGroups`/`extraRoutes` korrigiert: beschreibt jetzt
+akkurat, dass `extraRoutes` nur noch echte Kontext-Links
+(Urlaubsmodus, Reise suchen) und noch nicht gebaute Seiten (Deal
+Finder, Reisebudget, Premium) enthält.
+
+**Neu/erweitert:** `src/lib/nav-config.test.ts` — bestehenden
+Dashboard-Test verallgemeinert zu einer Schleife über alle sieben
+betroffenen Pfade (`/dashboard` plus die sechs neuen), die prüft, dass
+jeder davon tatsächlich in `navGroups` steht, nicht nur in `allRoutes`.
+
+**Bewusst nicht angefasst:** Keine Änderung an Sidebar-/MobileNav-Layout,
+keine neue Nav-Gruppe, keine Reihenfolge-Optimierung über das
+Notwendige hinaus, keine Anpassung an `/urlaubsmodus`/`/reise-planen`/
+`/deal-finder`/`/budget`/`/premium` — die bleiben korrekt in
+`extraRoutes`.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 117 Tests, alle grün.
+- `npm run build` — erfolgreich.
+- Manuell mit Playwright gegen `npm run preview` geprüft: alle sieben
+  Pfade erscheinen jetzt in der Sidebar (`aside nav a`), Klick auf
+  "Reisekalender" navigiert tatsächlich zu `/kalender` und rendert die
+  echte Seite (Überschrift "Reisekalender").
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (achter Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits vier ungemergte Commits
+vom vierten/fünften/sechsten/siebten Lauf (28./29.08.,
+`ffc0ba4`/`85e8c22`/`9d41f15`/`af07472`), noch nicht von Freigabe-Chef
+geprüft (`freigabe-chef-log.md` reicht nur bis 28.08., später Check).
+`git merge-base origin/main origin/it-chef/auto` war identisch mit dem
+`main`-Tip (`ec26be9`) — reines Fast-Forward, auf diesem Stand
+weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+durchgesehen — die Blockierungs-Analyse der letzten Läufe bleibt gültig
+(4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie/Architekturentscheidung,
+8.2-8.7 externe Architekturentscheidungen, 8.9/8.12 Produktentscheidungen
+laut PRD OQ-03/OQ-04, 8.11 blockiert auf FAQ-Inhalte von Support-Chef).
+`reports/support-chef.md`/`reports/marketing-chef.md` unverändert seit
+28.08. `reports/it-chef.md` (eigener letzter Bericht, 28.08.) nennt drei
+bekannte Bugs, alle explizit als nicht klein/isoliert genug eingestuft
+(Flugsuche im Hauptchat-Ablauf braucht UX-Entscheidung zum
+Abflughafen, ausgewählter Flug bräuchte `TripDraft`-Erweiterung,
+Duffel-Stays-Feldnamen ungetestet ohne echten API-Key) — alle drei
+weiterhin nicht autonom fixbar, nicht erneut angefasst.
+
+Da nichts Neues aus den Berichten vorlag, per Explore-Subagent frisch
+nach einem neuen, klar abgegrenzten Bug/Gap gesucht (`src/`-Baum,
+nav-config vs. routes.tsx, tote Exporte, Formvalidierung,
+Barrierefreiheit, Demo-Daten-Konsistenz) — Ergebnis: Codebasis
+ungewöhnlich sauber, nichts Neues über die bereits bekannten/blockierten
+Punkte hinaus, außer einem kleinen, klar abgegrenzten UX-Konsistenz-Fund:
+`EditMode.tsx` (Aktivität-hinzufügen-Dialog auf der Buchungsseite, Teil
+von 6.12) hatte für Name- und Preisfeld keinen Enter-Handler — anders
+als `ChatInput.tsx`s etabliertes, bereits im Code vorhandenes Muster
+(Enter löst Senden aus, `onKeyDown` → `handleSend()`). Nutzer:innen
+mussten stattdessen den kleinen Icon-only "+"-Button per Maus treffen.
+Alle vier Kriterien erfüllt: kein Auth-/Zahlungs-/Rechts-/Nutzerdaten-
+bezug (rein lokaler Dialog-State), keine offene Produktentscheidung
+("Enter sendet wie überall sonst in der App" ist eindeutig, exakt
+dasselbe Muster wie `ChatInput.tsx`), klar im Code lokalisiert und ohne
+Interpretationsspielraum beschrieben, objektiv prüfbar (bestehender
+Klick-Test als Vorlage, neue Enter-Tests als Regressionsschutz).
+
+**Umgesetzt (`src/components/trip/EditMode.tsx`):**
+Name- und Preisfeld im "Neue Aktivität"-Formular bekommen je einen
+`onKeyDown`-Handler, der bei `Enter` die bestehende `addActivity()`
+aufruft — identisches Muster zu `ChatInput.tsx`. Keine neue
+Schutzbedingung nötig: `addActivity()` bricht bei leerem, getrimmtem
+Namen selbst ab (`if (!trimmedName) return`), also verhält sich Enter
+bei leerem Namen automatisch wie der `disabled`-Button.
+
+**Neu (`src/components/trip/EditMode.test.tsx`):** Drei Tests ergänzt —
+Enter im Namensfeld fügt Aktivität hinzu, Enter im Preisfeld fügt
+Aktivität (mit Preis) hinzu, Enter bei leerem Namen fügt nichts hinzu
+(`onChange` nicht aufgerufen).
+
+**Bewusst nicht angefasst:** Keine weiteren Formulare durchsucht/
+geändert über `EditMode.tsx` hinaus (der Explore-Fund war spezifisch
+dort), kein `<form>`-Wrapper eingeführt (der punktuelle Handler reicht
+für das beobachtete Problem), keine der drei bekannten `reports/
+it-chef.md`-Bugs angefasst.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 120 Tests (117 + 3 neue), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

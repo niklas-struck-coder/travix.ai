@@ -37,6 +37,37 @@ describe('EditMode', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('adds a new activity when pressing Enter in the name field', () => {
+    const onChange = renderEditMode([])
+
+    fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'Stadtführung' } })
+    fireEvent.keyDown(screen.getByLabelText('Neue Aktivität'), { key: 'Enter' })
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const [added] = onChange.mock.calls[0][0] as TripActivity[]
+    expect(added).toMatchObject({ name: 'Stadtführung', price: null })
+  })
+
+  it('adds a new activity when pressing Enter in the price field', () => {
+    const onChange = renderEditMode([])
+
+    fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'Stadtführung' } })
+    fireEvent.change(screen.getByLabelText('Preis'), { target: { value: '25 €' } })
+    fireEvent.keyDown(screen.getByLabelText('Preis'), { key: 'Enter' })
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const [added] = onChange.mock.calls[0][0] as TripActivity[]
+    expect(added).toMatchObject({ name: 'Stadtführung', price: '25 €' })
+  })
+
+  it('does not add an activity when pressing Enter with an empty name', () => {
+    const onChange = renderEditMode([])
+
+    fireEvent.keyDown(screen.getByLabelText('Neue Aktivität'), { key: 'Enter' })
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('removes an existing activity', () => {
     const onChange = renderEditMode([{ id: '1', name: 'Museum', price: '10 €' }])
 
