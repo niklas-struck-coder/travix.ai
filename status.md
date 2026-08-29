@@ -8,21 +8,23 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 
 **Aktuell in Arbeit:**
 - Flugsuche & Hotelsuche über externe Buchungs-API, Zug/Bus/Fähre-Anzeige im Aufbau
-- Seiten Aktivitäten, Buchung, Kalender, Warenkorb, Profil, Einstellungen,
+- Seiten Aktivitäten, Buchung, Kalender, Dashboard, Warenkorb, Profil, Einstellungen,
   Kartenansicht, Reisesuche, Preisalarme, Favoriten, KI-Concierge-Chat
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-27):**
-- Neu: Dashboard.tsx (7.7) - Kennzahl-Übersicht für Reisen/Warenkorb/Favoriten
-- ChecklistPanel: automatische Links jetzt optisch/a11y von Ankreuz-Buttons
-  unterscheidbar (Fund aus Support-Chef-Bericht behoben)
-- IT-Chef: erneuter Bug-Hunt ohne neue Funde; mehrere Auto-Läufe am 28.08. fanden
-  keinen weiteren sicheren Punkt (Zustand stabil)
-- Marketing-Chef: Icon-Design-Regel ergänzt, Dashboard geprüft
-- Support-Chef: Dashboard geprüft
-- Freigabe-Chef hat die geprüften Auto-Zweige mehrfach nach main gemergt
+**Seit letztem Update (2026-08-28):**
+- Navigation gefixt: Dashboard, Kalender, Karte, Aktivitäten, Angebote, Favoriten
+  und Preisalarme waren bisher nur per direkter URL erreichbar, nicht über die Navi
+- Chat-Ehrlichkeit: Zug/Bus/Fähre/Mietwagen versprachen eine echte Verbindungssuche,
+  die es noch nicht gab - Formulierung korrigiert
+- Dashboard-A11y-Fixes (unterscheidbare Links per Screenreader, markierter
+  Durchschnittswert) sowie Enter-Handler-Bug im "Aktivität hinzufügen"-Formular behoben
+- Support-Chef: Chatflow-Text und Sidebar-Gruppe "Meine Reise" geprüft, Reibungspunkte
+  übernommen
+- Marketing-Chef: Ehrlichkeits-Fix am mockAdvisor geprüft
+- Freigabe-Chef hat alle genannten Auto-Zweige mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-28_
+_Letztes Update: 2026-08-29_
