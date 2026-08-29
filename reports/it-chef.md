@@ -1,26 +1,42 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-08-28
+**Datum:** 2026-08-29
 
-## Was ist seit dem letzten Eintrag (2026-08-27) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-28) passiert?
 
-Seit gestern kamen zwei neue Stücke über den separaten it-chef-eigen-
-Auto-Kanal auf `main`: das Dashboard (7.7, vier Kennzahl-Kacheln für
-Reisen/Entwürfe/Warenkorb/Favoriten) und eine optische/a11y-Korrektur an
-`ChecklistPanel.tsx` (automatische Zeilen jetzt mit Stift-Icon und
-Screenreader-Zusatz von den nur-abhakbaren Punkten unterscheidbar, nach
-Meldung vom Support-Chef). Beide Dateien heute vollständig gelesen
-(`Dashboard.tsx`, `checklistRules.ts`, `ChecklistPanel.tsx`) — keine
-Fehler gefunden, IDs zwischen Checkliste, Link-Zielen und Status-Prüfung
-stimmen überein.
+Seit gestern kamen mehrere Stücke über den separaten it-chef-eigen-
+Auto-Kanal auf `main`: sechs bisher nur per direkter URL erreichbare,
+fertig gebaute Seiten (`/kalender`, `/karte`, `/aktivitaeten`,
+`/angebote`, `/favoriten`, `/preisalarme`) haben jetzt einen echten
+Eintrag in der Seitenleiste, ein fehlender Enter-Handler im
+"Aktivität hinzufügen"-Formular (`EditMode.tsx`) wurde ergänzt, und der
+Chat wurde für Zug/Bus/Fähre/Mietwagen ehrlicher: er verspricht dort
+keine automatische Verbindungssuche mehr, die es nicht gibt
+(`mockAdvisor.ts`).
 
-Gezielte Bug-Suche in dieser Session: da der übrige Quelltext gegenüber
-dem letzten Bericht unverändert ist (kein einziger weiterer Commit unter
-`src/` seit dem 27.8. außer den beiden oben genannten), wurden gezielt nur
-die neuen Dateien vollständig gelesen; die bereits am 27.8. einzeln
-gegengelesenen Dateien (`useChat.ts`, `mockAdvisor.ts`, `duffel/client.ts`,
-`tripStorage.ts`, Wizard-/Ergebniskarten-Komponenten u.a.) sind seitdem
-unverändert. Keine offenen TODO/FIXME im Code. Kein neuer Bug gefunden.
+Alle vier geänderten Dateien heute vollständig gelesen und die Änderungen
+im Diff seit `ec26be9` geprüft (`nav-config.ts`, `EditMode.tsx`,
+`Dashboard.tsx`, `mockAdvisor.ts`) — sauber umgesetzt, `routes.tsx` und
+`nav-config.ts` stimmen weiterhin überein.
+
+**Eine Lücke bei der Ehrlichkeits-Korrektur:** Der `mockAdvisor.ts`-Fix
+deckt nur Zug/Bus/Fähre/Mietwagen ab. Für **Flug** steht im Haupt-Chat-
+Ablauf weiterhin exakt derselbe Satz wie vorher ("Ich suche jetzt nach
+echten Flug-Verbindungen … sobald ich etwas Verifiziertes gefunden habe,
+zeige ich es dir") — aber `useChat.ts` löst eine echte Suche nur bei
+`nextField === 'accommodation'` aus, was bei dieser Antwort nie der Fall
+ist. Für Flugreisende bleibt das Versprechen also unverändert unerfüllt.
+Das ist keine neue Regression, sondern derselbe, bereits im letzten
+Bericht gemeldete Bug ("Flugsuche im Hauptchat-Ablauf startet nie") —
+nur jetzt der einzige verbliebene Fall davon.
+
+Gezielt weitergesucht (nicht nur die geänderten Dateien): `calendarUtils.ts`,
+`cartTotals.ts`, `tripStorage.ts`, `duffel/client.ts`, `useConcierge.ts`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `routes.tsx` sowie die sechs neu
+verlinkten Seiten (`Kalender.tsx` u. a.) komplett gelesen. Keine neuen
+Bugs gefunden — die dort sichtbaren Lücken (z. B. Passagierzahl in
+`FlightWizard.tsx` ohne `NaN`-Schutz) sind bereits als offene Auto-Fix-PRs
+erfasst (siehe unten). Kein offenes TODO/FIXME im Code.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -29,7 +45,7 @@ Auto-Fix gewesen wäre.
 
 Der eigentliche Rückstand liegt weiterhin beim Mergen: **7 offene
 Auto-Fix-PRs**, unverändert seit dem letzten Bericht, der älteste jetzt
-seit 19 Tagen unbearbeitet:
+seit 20 Tagen unbearbeitet:
 [PR #1](https://github.com/niklas-struck-coder/travix.ai/pull/1)
 (hängender Ladezustand bei Unterkunftssuche, seit 9.8.),
 [PR #4](https://github.com/niklas-struck-coder/travix.ai/pull/4)
@@ -49,17 +65,14 @@ steigendem Risiko für Konflikte durch weitere main-Commits.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Unverändert gegenüber dem letzten Bericht, heute erneut am Quelltext
-bestätigt (Dateien seit 27.8. nicht angefasst):
-
-- **Flug-/Transportsuche im normalen Chat-Ablauf startet nie.**
-  `getNextAdvisorStep` (`mockAdvisor.ts`) kündigt nach der letzten Frage die
-  Suche nach echten Flug-/Zug-/Bus-/Fähre-Verbindungen an, `useChat.ts`
-  löst im linearen Haupt-Chat-Ablauf aber nur bei `nextField ===
-  'accommodation'` eine echte Suche aus — die angekündigte Transportsuche
-  passiert nie. Der Edit-Pfad (`startEdit`/`awaitingFlightOrigin`) kann
-  echte Flüge suchen, aber nur wenn man das Transportmittel nachträglich
-  über "Bearbeiten" ändert. UX-/Produktentscheidung nötig (woher kommt der
+- **Flugsuche im normalen Chat-Ablauf startet nie.** `getNextAdvisorStep`
+  (`mockAdvisor.ts`) kündigt für den Modus Flug weiterhin eine echte
+  Verbindungssuche an, `useChat.ts` löst im linearen Haupt-Chat-Ablauf
+  aber nur bei `nextField === 'accommodation'` eine echte Suche aus — bei
+  Flug ist `nextField` an dieser Stelle `null`, die Suche passiert nie.
+  Der Edit-Pfad (`startEdit`/`awaitingFlightOrigin`) kann echte Flüge
+  suchen, aber nur wenn man das Transportmittel nachträglich über
+  "Bearbeiten" ändert. UX-/Produktentscheidung nötig (woher kommt der
   Abflughafen im Erstablauf?), daher nicht automatisch angefasst.
 - **Ausgewählter Flug wird im Reiseplan nicht sichtbar.** `selectFlight` in
   `useChat.ts` bestätigt Route und Preis nur im Chat-Text, speichert aber
@@ -73,11 +86,13 @@ bestätigt (Dateien seit 27.8. nicht angefasst):
 ## Weitere Vorschläge
 
 1. **Die 7 offenen Auto-Fix-PRs mergen.** Größter Hebel gerade — alle sind
-   klein, geprüft und ungefährlich, der älteste liegt aber schon 19 Tage
+   klein, geprüft und ungefährlich, der älteste liegt aber schon 20 Tage
    ungenutzt. Der Freigabe-Chef prüft aktuell nur die `*-auto`-Branches der
    eigenen Personas, nicht diese `it-chef-autofix/*`-PRs — dafür braucht es
    weiterhin Nis manuellen Review.
-2. **Entscheidung zum Flugsuche-Bug treffen.** Zentraler Verkaufspfad. Der
+2. **Entscheidung zum Flugsuche-Bug treffen.** Zentraler Verkaufspfad, und
+   nach dem heutigen Ehrlichkeits-Fix für die anderen Verkehrsmittel der
+   einzige verbliebene Fall eines nicht eingelösten Suche-Versprechens. Der
    Edit-Pfad in `useChat.ts` zeigt, dass eine echte Flugsuche technisch
    schon funktioniert — sie müsste nur auch im Haupt-Chat-Ablauf angeboten
    werden, z. B. mit dem Heimatflughafen aus `Profil.tsx` als Vorbelegung.
@@ -87,4 +102,4 @@ bestätigt (Dateien seit 27.8. nicht angefasst):
    die localStorage-Seiteneffekte oder den oben gemeldeten Flugsuche-Bug
    selbst.
 
-_Letztes Update: 2026-08-28_
+_Letztes Update: 2026-08-29_
