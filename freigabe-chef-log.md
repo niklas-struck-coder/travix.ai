@@ -1525,3 +1525,58 @@ unabhängig geprüft und beide gemergt und gepusht (`7b48746..8f8ef93`).
 Ni-Info nicht nötig — beide Merges glatt, Kernbehauptungen im Code
 nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
 Fund.
+
+## 2026-08-29, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits gegenüber `main` (`ffc0ba4`, `85e8c22`,
+  `9d41f15`, `af07472`, `fbbea3b`, aus vier Läufen zwischen 28.08.
+  ~23 Uhr und 29.08. ~02 Uhr): Chatflow-Ehrlichkeit für Zug/Bus/Fähre/
+  Mietwagen (`mockAdvisor.ts`), zwei Dashboard-A11y-Fixes (eindeutige
+  `aria-label`s, Kennzeichnung des Durchschnittswerts), sieben fehlende
+  Nav-Einträge (Dashboard, Kalender, Karte, Aktivitäten, Angebote,
+  Favoriten, Preisalarme aus `extraRoutes` in `navGroups` verschoben),
+  Enter-Handler im Aktivität-hinzufügen-Formular (`EditMode.tsx`).
+- `marketing-chef/auto` — 0 neue Commits gegenüber `main`. Wie erwartet
+  für diesen frühen Lauf ignoriert (laufen erst ab 6 Uhr, separater
+  späterer Freigabe-Chef-Lauf prüft sie).
+- `support-chef/auto` — 0 neue Commits gegenüber `main`. Ebenfalls wie
+  erwartet ignoriert.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch ausgecheckt, frisches
+`npm install`, dabei entstandenes `package-lock.json`-Rauschen — nur
+`libc`-Metadaten optionaler `esbuild`-Plattformpakete — vor der Prüfung
+verworfen, gleiches Muster wie in den vorherigen Läufen):
+- `npx tsc -b` — 0 Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 120 Tests, alle grün.
+- Alle drei Checks stimmen exakt mit den Behauptungen in
+  `it-chef-auto-log.md` überein (117+3 = 120 Tests, gleiche
+  Warning-Anzahl) — nicht nur dem Log geglaubt, tatsächlich selbst
+  ausgeführt.
+
+Diff der vier betroffenen Dateien (`mockAdvisor.ts`, `nav-config.ts`,
+`Dashboard.tsx`, `EditMode.tsx`) gegen `main` gelesen: jede Änderung
+deckt sich exakt mit der im Log beschriebenen Einzelaufgabe des
+jeweiligen Laufs, kein Scope-Creep über die fünf beschriebenen Punkte
+hinaus. Kein Auth-/Zahlungs-/Rechtsbezug in keinem der vier Files. Bei
+den Nav-Verschiebungen handelt es sich um reine Informationsarchitektur
+(Einträge zwischen bestehenden Listen verschoben, keine neue Gruppe,
+kein neues visuelles Design) — keine `MARKENDESIGN.md`-Prüfung
+notwendig; der bestehende `MARKENDESIGN.md`-Kommentar in `Dashboard.tsx`
+(Teal für normale Werte, kein Rot für Budget-Warnungen) bleibt
+unverändert korrekt.
+
+**Ergebnis:** Alles grün, passt. Nach `main` gemerged (`--no-ff`,
+`ec26be9..b7a5d95`) und gepusht. `it-chef/auto` danach per
+Fast-Forward-Push auf den neuen `main`-Stand gebracht (`fbbea3b..b7a5d95`),
+damit der nächste IT-Chef-Lauf sauber von dort weiterarbeitet.
+
+**Zusammenfassung:** `it-chef/auto` unabhängig geprüft und gemergt.
+`marketing-chef/auto`/`support-chef/auto` hatten wie erwartet noch
+nichts Neues von heute — werden im späteren Lauf (nach 6 Uhr) geprüft.
+
+Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
+nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
+Fund.
