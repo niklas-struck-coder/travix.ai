@@ -1580,3 +1580,48 @@ nichts Neues von heute — werden im späteren Lauf (nach 6 Uhr) geprüft.
 Ni-Info nicht nötig — Merge glatt, alle Behauptungen im Code
 nachvollzogen, kein Erfundenes, kein Regelverstoß, kein dringlicher
 Fund.
+
+
+## 2026-08-29, autonomer Lauf (später Check nach 6 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, aber 0 Commits vor `origin/main`: bereits
+  vollständig gemerged (früherer Lauf heute, `51ce071`). Nichts zu tun.
+- `marketing-chef/auto` — vorhanden, 1 neuer Commit (`4380852`).
+- `support-chef/auto` — vorhanden, 1 neuer Commit (`9a4480c`).
+
+**`support-chef/auto`:** Reine Analyse, kein Code geändert. Stichprobe im
+Code nachvollzogen: `mockAdvisor.ts:134`/`:144` enden beide auf "Öffne
+den Reiseplan…", der einzige dazu passende Button in
+`TripSummaryCard.tsx:50-55` heißt aber "Speichern & ansehen" — stimmt.
+`nav-config.ts` Gruppe "Meine Reise" hat jetzt tatsächlich 11 Einträge
+(vorher 4) — stimmt, `Sidebar.tsx`/`MobileNav.tsx` rendern sie ohne
+Unterteilung, wie beschrieben. Nichts wirkt erfunden. → gemerged
+(`605f33b`).
+
+**`marketing-chef/auto`:** Diff geprüft (`marketing-chef-auto-log.md`,
+`marketing/freigabe-uebersicht.md`) — reine Dokument-Ergänzung, kein
+neues Content-Stück, keine erfundenen Kennzahlen, kein Hinweis auf
+tatsächliches Posten/Veröffentlichen. Text vollständig und kohärent.
+Auffälligkeit: der Log-Eintrag behauptet, der Branch sei "neu von
+aktuellem origin/main (`51ce071`)" angelegt worden — tatsächlich ist der
+Commit-Parent weiterhin der alte Branch-Stand `2f18579` (28.08.), nicht
+`51ce071`. Deshalb vor dem Merge extra geprüft, ob ein einfacher
+Drei-Wege-Merge `main`-Inhalte (z. B. `ZEITPLAN.md`) überschreibt/
+zurückdreht: nein — der Branch selbst ändert nur
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`,
+keine Überschneidung mit den seit `2f18579` auf `main` dazugekommenen
+Dateien. Merge lief sauber ohne Konflikt, `ZEITPLAN.md`-Inhalt nach dem
+Merge stichprobenartig verglichen — unverändert vom `main`-Stand. Kein
+Build/Lint/Test nötig (nur Markdown). → gemerged (`080ebed`).
+
+**Ergebnis:** Beide neuen Branches gemerged, `it-chef/auto` war schon
+aktuell. Kein Scope-Creep, keine erfundenen Angaben, keine
+Auth-/Zahlungs-/Rechtstexte betroffen.
+
+Ni-Info nicht nötig — beide Merges glatt, alle Behauptungen im Code
+nachvollzogen. Die kleine Diskrepanz bei `marketing-chef/auto` (Log
+behauptet Rebase auf `51ce071`, tatsächlich noch auf `2f18579` basierend)
+war kein Regelverstoß und hatte keine inhaltliche Auswirkung — der Merge
+selbst war sauber und hat nichts überschrieben. Nur hier notiert, falls
+sich das Muster wiederholt.
