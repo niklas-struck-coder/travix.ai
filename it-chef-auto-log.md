@@ -5062,3 +5062,89 @@ Eintrag korrigiert, wie vom Freigabe-Chef-Fund exakt beschrieben.
   zwei neuen `nav-config.test.ts`-Fälle)
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (siebter Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits drei ungemergte Commits
+vom vierten/fünften/sechsten Lauf (28./29.08., `ffc0ba4`/`85e8c22`/
+`9d41f15`), noch nicht von Freigabe-Chef geprüft. `git merge-base
+origin/main origin/it-chef/auto` war identisch mit dem `main`-Tip
+(`ec26be9`) — also reines Fast-Forward, kein Merge nötig, auf diesem
+Stand weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+durchgesehen — die Blockierungs-Analyse vom fünften/sechsten Lauf bleibt
+gültig (4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie/Architekturentscheidung,
+8.2-8.7 externe Architekturentscheidungen, 8.9/8.12 Premium/Loyalty
+laut PRD OQ-03/OQ-04 Produktentscheidungen, 8.11 blockiert auf
+FAQ-Inhalte von Support-Chef). `reports/support-chef.md` und
+`reports/marketing-chef.md` unverändert seit 28.08. (letzter Support-
+Chef-Punkt zum Dashboard bereits im sechsten Lauf behoben).
+
+Da nichts Neues aus den Berichten vorlag, selbst aktiv nach dem exakt
+selben Bug-Muster gesucht, das der sechste Lauf für `/dashboard`
+gefunden hatte (Seite nur in `extraRoutes`, das `Sidebar.tsx`/
+`MobileNav.tsx` nicht rendern) — per Grep geprüft, wohin im Code
+tatsächlich verlinkt wird (`to="..."`, `href="..."`), nicht nur, was der
+`nav-config.ts`-Kommentar behauptet. Ergebnis: sechs weitere fertig
+gebaute Seiten (laut `tasks-prd-travix-platform.md` alle mit `[x]`)
+haben exakt dasselbe Problem — nirgends im Code verlinkt, nur über die
+direkte URL erreichbar:
+- `/kalender` (7.11), `/karte` (7.14), `/aktivitaeten` (7.13),
+  `/angebote` (7.8), `/preisalarme` (7.10) — keinerlei eingehender
+  Link im gesamten `src`-Baum gefunden.
+- `/favoriten` (7.9) — ein einziger eingehender Link von
+  `Dashboard.tsx` (`href="/favoriten"`), aber kein eigener
+  Nav-Eintrag, also für alle, die nicht über das Dashboard kommen,
+  ebenfalls faktisch unauffindbar.
+Zum Vergleich echte Gegenproben gemacht: `/urlaubsmodus` hat einen
+echten Link in `MeineReisen.tsx` ("Urlaubsmodus aktivieren"),
+`/reise-planen` einen echten Link in `Home.tsx` ("Selbst durchsuchen")
+— beide bleiben zu Recht in `extraRoutes`. `/deal-finder`, `/budget`,
+`/premium` sind laut `tasks-prd-travix-platform.md` schlicht noch nicht
+gebaut (weiterhin `[ ]`), bleiben also ebenfalls unverändert in
+`extraRoutes`. Alle vier Sicherheitskriterien erfüllt: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung (identisches
+Muster zum bereits vom Freigabe-Chef geprüften Dashboard-Fix, nur auf
+mehr Seiten mit derselben Ursache angewandt), exakt im Code lokalisiert
+(Grep-Befund je Pfad), objektiv prüfbar (Regressionstest je Pfad).
+
+**Umgesetzt (`src/lib/nav-config.ts`):**
+`/kalender`, `/karte`, `/aktivitaeten`, `/angebote`, `/favoriten`,
+`/preisalarme` aus `extraRoutes` entfernt und in die bestehende
+Nav-Gruppe "Meine Reise" verschoben (nach `/warenkorb`, gleiche Gruppe
+wie `/dashboard` seit dem sechsten Lauf) — keine neue Gruppe erfunden,
+um keine zusätzliche Informationsarchitektur-Entscheidung zu treffen.
+Kommentar über `navGroups`/`extraRoutes` korrigiert: beschreibt jetzt
+akkurat, dass `extraRoutes` nur noch echte Kontext-Links
+(Urlaubsmodus, Reise suchen) und noch nicht gebaute Seiten (Deal
+Finder, Reisebudget, Premium) enthält.
+
+**Neu/erweitert:** `src/lib/nav-config.test.ts` — bestehenden
+Dashboard-Test verallgemeinert zu einer Schleife über alle sieben
+betroffenen Pfade (`/dashboard` plus die sechs neuen), die prüft, dass
+jeder davon tatsächlich in `navGroups` steht, nicht nur in `allRoutes`.
+
+**Bewusst nicht angefasst:** Keine Änderung an Sidebar-/MobileNav-Layout,
+keine neue Nav-Gruppe, keine Reihenfolge-Optimierung über das
+Notwendige hinaus, keine Anpassung an `/urlaubsmodus`/`/reise-planen`/
+`/deal-finder`/`/budget`/`/premium` — die bleiben korrekt in
+`extraRoutes`.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 117 Tests, alle grün.
+- `npm run build` — erfolgreich.
+- Manuell mit Playwright gegen `npm run preview` geprüft: alle sieben
+  Pfade erscheinen jetzt in der Sidebar (`aside nav a`), Klick auf
+  "Reisekalender" navigiert tatsächlich zu `/kalender` und rendert die
+  echte Seite (Überschrift "Reisekalender").
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

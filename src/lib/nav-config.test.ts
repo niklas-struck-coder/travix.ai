@@ -2,12 +2,25 @@ import { describe, expect, it } from 'vitest'
 import { allRoutes, navGroups } from '@/lib/nav-config'
 
 describe('nav-config', () => {
-  it('lists the Dashboard hub page in the permanent sidebar/mobile nav, not just as a contextual route', () => {
+  it('lists every fully built, non-contextual page in the permanent sidebar/mobile nav', () => {
     // Sidebar.tsx and MobileNav.tsx only ever render navGroups, never
     // extraRoutes — a page that belongs here but only lives in extraRoutes
     // is unreachable through normal navigation, only via a direct URL.
-    const dashboardInNavGroups = navGroups.some((group) => group.items.some((item) => item.path === '/dashboard'))
-    expect(dashboardInNavGroups).toBe(true)
+    // These pages are all fully built (see tasks-prd-travix-platform.md
+    // 7.8-7.11/7.13/7.14) and, unlike Urlaubsmodus/Reise suchen, have no
+    // other in-app link leading to them, so they must live here.
+    const navGroupPaths = new Set(navGroups.flatMap((group) => group.items.map((item) => item.path)))
+    for (const path of [
+      '/dashboard',
+      '/kalender',
+      '/karte',
+      '/aktivitaeten',
+      '/angebote',
+      '/favoriten',
+      '/preisalarme',
+    ]) {
+      expect(navGroupPaths.has(path)).toBe(true)
+    }
   })
 
   it('keeps every navGroups path unique and present in allRoutes', () => {

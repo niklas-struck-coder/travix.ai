@@ -235,7 +235,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   nicht über die reguläre Navigation. Jetzt fester Eintrag in der
   Nav-Gruppe "Meine Reise" (erster Punkt, vor "Reiseplan"), analog den
   anderen Übersichtsseiten dort. Neue `src/lib/nav-config.test.ts` sichert
-  das gegen Rückfall ab.
+  das gegen Rückfall ab. Vom autonomen IT-Chef-Lauf am 29.08. (siebter
+  Lauf) denselben Fund selbst noch einmal für weitere Seiten bestätigt:
+  eine Prüfung, wohin im Code tatsächlich verlinkt wird (nicht nur der
+  `nav-config.ts`-Kommentar), zeigte, dass `/kalender` (7.11), `/karte`
+  (7.14), `/aktivitaeten` (7.13), `/angebote` (7.8), `/favoriten` (7.9,
+  bisher nur über den einen Dashboard-Link erreichbar) und `/preisalarme`
+  (7.10) genau dasselbe Problem hatten wie zuvor `/dashboard` — fertig
+  gebaute Seiten, die in `extraRoutes` standen, obwohl sie (anders als
+  `/urlaubsmodus` und `/reise-planen`, die echte kontextuelle
+  Einstiegslinks in `MeineReisen.tsx`/`Home.tsx` haben) nirgends im Code
+  verlinkt sind. Alle sechs jetzt ebenfalls in die Nav-Gruppe "Meine
+  Reise" verschoben, `extraRoutes`-Kommentar entsprechend korrigiert
+  (enthält jetzt nur noch echte Kontext-Links plus die drei noch nicht
+  gebauten Seiten Deal Finder/Reisebudget/Premium). `nav-config.test.ts`
+  um eine entsprechende Regressionsprüfung für alle sechs Pfade
+  erweitert.
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz
