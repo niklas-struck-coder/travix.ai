@@ -64,7 +64,14 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="checkin">Check-in</Label>
-          <Input id="checkin" type="date" value={checkInDate} onChange={(event) => setCheckInDate(event.target.value)} required />
+          <Input
+            id="checkin"
+            type="date"
+            value={checkInDate}
+            onChange={(event) => setCheckInDate(event.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+            required
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="checkout">Check-out</Label>
