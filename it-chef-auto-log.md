@@ -5148,3 +5148,79 @@ Notwendige hinaus, keine Anpassung an `/urlaubsmodus`/`/reise-planen`/
   echte Seite (Überschrift "Reisekalender").
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (achter Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits vier ungemergte Commits
+vom vierten/fünften/sechsten/siebten Lauf (28./29.08.,
+`ffc0ba4`/`85e8c22`/`9d41f15`/`af07472`), noch nicht von Freigabe-Chef
+geprüft (`freigabe-chef-log.md` reicht nur bis 28.08., später Check).
+`git merge-base origin/main origin/it-chef/auto` war identisch mit dem
+`main`-Tip (`ec26be9`) — reines Fast-Forward, auf diesem Stand
+weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+durchgesehen — die Blockierungs-Analyse der letzten Läufe bleibt gültig
+(4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie/Architekturentscheidung,
+8.2-8.7 externe Architekturentscheidungen, 8.9/8.12 Produktentscheidungen
+laut PRD OQ-03/OQ-04, 8.11 blockiert auf FAQ-Inhalte von Support-Chef).
+`reports/support-chef.md`/`reports/marketing-chef.md` unverändert seit
+28.08. `reports/it-chef.md` (eigener letzter Bericht, 28.08.) nennt drei
+bekannte Bugs, alle explizit als nicht klein/isoliert genug eingestuft
+(Flugsuche im Hauptchat-Ablauf braucht UX-Entscheidung zum
+Abflughafen, ausgewählter Flug bräuchte `TripDraft`-Erweiterung,
+Duffel-Stays-Feldnamen ungetestet ohne echten API-Key) — alle drei
+weiterhin nicht autonom fixbar, nicht erneut angefasst.
+
+Da nichts Neues aus den Berichten vorlag, per Explore-Subagent frisch
+nach einem neuen, klar abgegrenzten Bug/Gap gesucht (`src/`-Baum,
+nav-config vs. routes.tsx, tote Exporte, Formvalidierung,
+Barrierefreiheit, Demo-Daten-Konsistenz) — Ergebnis: Codebasis
+ungewöhnlich sauber, nichts Neues über die bereits bekannten/blockierten
+Punkte hinaus, außer einem kleinen, klar abgegrenzten UX-Konsistenz-Fund:
+`EditMode.tsx` (Aktivität-hinzufügen-Dialog auf der Buchungsseite, Teil
+von 6.12) hatte für Name- und Preisfeld keinen Enter-Handler — anders
+als `ChatInput.tsx`s etabliertes, bereits im Code vorhandenes Muster
+(Enter löst Senden aus, `onKeyDown` → `handleSend()`). Nutzer:innen
+mussten stattdessen den kleinen Icon-only "+"-Button per Maus treffen.
+Alle vier Kriterien erfüllt: kein Auth-/Zahlungs-/Rechts-/Nutzerdaten-
+bezug (rein lokaler Dialog-State), keine offene Produktentscheidung
+("Enter sendet wie überall sonst in der App" ist eindeutig, exakt
+dasselbe Muster wie `ChatInput.tsx`), klar im Code lokalisiert und ohne
+Interpretationsspielraum beschrieben, objektiv prüfbar (bestehender
+Klick-Test als Vorlage, neue Enter-Tests als Regressionsschutz).
+
+**Umgesetzt (`src/components/trip/EditMode.tsx`):**
+Name- und Preisfeld im "Neue Aktivität"-Formular bekommen je einen
+`onKeyDown`-Handler, der bei `Enter` die bestehende `addActivity()`
+aufruft — identisches Muster zu `ChatInput.tsx`. Keine neue
+Schutzbedingung nötig: `addActivity()` bricht bei leerem, getrimmtem
+Namen selbst ab (`if (!trimmedName) return`), also verhält sich Enter
+bei leerem Namen automatisch wie der `disabled`-Button.
+
+**Neu (`src/components/trip/EditMode.test.tsx`):** Drei Tests ergänzt —
+Enter im Namensfeld fügt Aktivität hinzu, Enter im Preisfeld fügt
+Aktivität (mit Preis) hinzu, Enter bei leerem Namen fügt nichts hinzu
+(`onChange` nicht aufgerufen).
+
+**Bewusst nicht angefasst:** Keine weiteren Formulare durchsucht/
+geändert über `EditMode.tsx` hinaus (der Explore-Fund war spezifisch
+dort), kein `<form>`-Wrapper eingeführt (der punktuelle Handler reicht
+für das beobachtete Problem), keine der drei bekannten `reports/
+it-chef.md`-Bugs angefasst.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 120 Tests (117 + 3 neue), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

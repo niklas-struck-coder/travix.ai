@@ -172,7 +172,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Preisfeld hat. Änderungen werden über die bestehende
   `updateStoredTrip()`-Funktion echt gespeichert (kein Demo-State wie bei
   7.3), da für den einen aktiven Chat-Trip bereits echte Speicherung
-  existiert.
+  existiert. Vom autonomen IT-Chef-Lauf am 29.08. (achter Lauf)
+  nachgebessert: Name-/Preisfeld im "Neue Aktivität"-Formular hatten
+  keinen Enter-Handler und mussten per Maus über den kleinen
+  Icon-Button bestätigt werden — inkonsistent zu `ChatInput.tsx`s
+  etabliertem Muster (Enter löst Senden aus). Beide Felder lösen jetzt
+  beim Drücken von Enter `addActivity()` aus, mit derselben
+  Leer-Namen-Schutzbedingung wie der bestehende Button. Drei neue
+  Tests in `EditMode.test.tsx`.
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
