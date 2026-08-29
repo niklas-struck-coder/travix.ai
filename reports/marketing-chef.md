@@ -1,59 +1,57 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-28
+**Datum:** 2026-08-29
 
-## Was ist seit dem letzten Eintrag (2026-08-27) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-28) passiert?
 
-Codeseitig kam die neue **Dashboard.tsx** (7.7) dazu: vier KPI-Kacheln
-(bevorstehende Reisen, Reiseentwürfe-Fortschritt, Warenkorb-Summe,
-Favoriten), jede mit Link zur vollen Seite, alle auf denselben
-Demo-Daten wie die Einzelseiten statt erfundener Zahlen. Prämienpunkte
-werden bewusst *nicht* als Zahl gezeigt, weil die Punkte-Regeln
-produktseitig noch offen sind — stattdessen ein ehrlicher Hinweis. Dazu
-ein kleiner A11y-Fix an den ChecklistPanel-Links (Stift-Icon +
-Screenreader-Text), damit klickbare Links nicht mehr wie Ankreuz-Punkte
-aussehen.
+Zwei Dinge sind aus Marketing-Sicht relevant:
 
-Die separate Marketing-Chef-Auto-Persona hat das Dashboard bereits
-geprüft und bewusst kein achtes Content-Stück daraus gemacht (an
-denselben Tier-2-Blocker gebunden wie der Warenkorb-Text: kein
-Buchen-Button). Das übernehme ich, statt es zu wiederholen.
+**Navigation nachgerüstet.** Dashboard, Kalender, Karte, Aktivitäten,
+Angebote, Favoriten und Preisalarme waren bisher nur per direkter URL
+erreichbar, jetzt stehen sie in der echten Navigation. Klingt technisch,
+ist aber für uns wichtig: Ein Produkt-Rundgang oder Demo-Video konnte
+bisher nicht zeigen, wie man von A nach B kommt, weil man die Seiten gar
+nicht hätte "entdecken" können, ohne die URL zu kennen. Das ist jetzt
+kein Blocker mehr.
 
-Die **sieben offenen PRs** aus dem letzten Bericht sind unverändert
-offen, der älteste weiterhin seit dem 09.08. Die drei Freigabe-Fragen an
-dich (Kanal-Start, Warenkorb-Content erst nach Buchen-Button,
-wiederkehrendes Format) stehen ebenfalls unverändert seit dem 21.08. Kein
-erfundener Fortschritt hier — es hat sich auf dieser Seite schlicht nichts
-bewegt.
+**Zweiter Ehrlichkeits-Fix im Chat.** `mockAdvisor.ts` hat am Ende jedes
+Chatflows für Zug/Bus/Fähre/Mietwagen "Ich suche jetzt nach echten
+X-Verbindungen" versprochen — obwohl das nur für Flug überhaupt passiert.
+Diese vier Modi bekommen jetzt eine ehrliche Abschlussmeldung statt eines
+Versprechens ins Leere. Der IT-Chef hat beim Prüfen direkt eine
+Anschluss-Lücke gefunden: Auch bei Flug fragt der Haupt-Chatflow nie nach
+dem Startflughafen, die "echte Suche" läuft also im Hauptfluss aktuell
+gar nicht automatisch los (nur über den separaten Bearbeiten-Pfad) — noch
+ungefixt.
+
+Die sieben offenen PRs sind weiterhin unverändert offen (ältester jetzt
+seit drei Wochen), keine Bewegung seit dem letzten Bericht — dazu diesmal
+kein neuer Vorschlag, das Muster ist bereits benannt.
 
 ## Vorschläge
 
-1. **Die bewusst leere Punktzahl ist dein bestes Ehrlichkeits-Beispiel
-   bisher.** Eine Kachel, die eine Zahl absichtlich *nicht* zeigt, weil
-   die Regeln noch nicht feststehen, ist greifbarer als jede Text-Aussage
-   über "keine erfundenen Daten". Sobald ein Kanal steht: Screenshot der
-   Kachel plus ein Satz dazu, was normalerweise andere Apps stattdessen
-   täten (Platzhalterzahl, "Coming soon"-Blabla).
+1. **Jetzt einen echten Produkt-Rundgang vorbereiten, nicht nur planen.**
+   Mit der Nav-Nachrüstung kannst du zum ersten Mal einen Screen-Recording
+   machen, der zeigt, wie man von der Chat-Planung zum Dashboard, zur
+   Kalenderansicht und zu Preisalarmen navigiert — ohne Schnitt-Tricks
+   oder URL-Adressleiste im Bild. Das ist die Grundlage für ein
+   glaubwürdiges "So funktioniert Travix"-Video, sobald ein Kanal steht.
 
-2. **Das Dashboard selbst ist ein guter Produkt-Tour-Baustein, kein
-   eigener Post.** Es bündelt Reisen/Warenkorb/Favoriten erstmals an
-   einer Stelle — nützlich als Screenshot für eine künftige Landingpage
-   oder als zweites Bild in einem Feature-Post, sobald Tier 1 (Aktivitäten
-   bearbeiten / Kartenansicht) tatsächlich raus ist. Für sich allein trägt
-   es aber keine Kernaussage.
+2. **"Ehrlichkeits-Log" als festes Format vorschlagen.** Das ist jetzt
+   der dritte konkrete Fall (Punktzahl-Leerstelle, Zug/Bus/Fähre-Fix,
+   und jetzt der Flug-Nachfolge-Fund) von "wir zeigen lieber ehrlich eine
+   Lücke als ein leeres Versprechen". Statt jeden Fall einzeln als Idee
+   zu bringen: das als wiederkehrendes Mini-Format vorschlagen (ein Satz
+   Vorher/Nachher pro Post) — das beantwortet nebenbei auch deine offene
+   Frage nach einem wiederkehrenden Format mit einem echten Beispiel
+   statt einer weiteren Theorie-Runde.
 
-3. **PR-Stau ist jetzt ein wiederkehrendes Muster, nicht mehr nur ein
-   Einzelbefund.** Zwei Berichte in Folge mit denselben sieben offenen
-   Fixes, der älteste seit fast drei Wochen. Statt es ein drittes Mal zu
-   wiederholen: Falls du priorisieren willst, wären #6 und #5 (12.08, seit
-   über zwei Wochen offen) die naheliegendsten Kandidaten für einen
-   ersten Merge-Schub, bevor ein Content-Stück auf einen "wir fixen
-   schnell"-Ton setzt.
+3. **Vorsicht bei der Flug-Suche-Behauptung.** Falls irgendwo schon Text
+   in Vorbereitung ist, der sinngemäß "im Chat direkt echte Flüge suchen"
+   sagt: Laut IT-Chef-Fund passiert das im Haupt-Chatflow aktuell nicht
+   automatisch (fehlender Startflughafen-Schritt). Bis das gefixt ist,
+   lieber nicht als Chat-Feature bewerben, sondern höchstens als
+   "im Bearbeiten-Modus verfügbar" — sonst bauen wir uns selbst den
+   nächsten Ehrlichkeits-Fall.
 
-4. **Kein neuer Vorschlag zur Kanal-Frage.** Die stand letzte Woche
-   schon konkret da (LinkedIn-Start mit einem einzelnen Stück, ohne feste
-   Kadenz). Sie ein drittes Mal umzuformulieren bringt nichts — sie
-   wartet einfach auf deine Antwort, ich lass sie liegen statt sie
-   aufzublähen.
-
-_Letztes Update: 2026-08-28_
+_Letztes Update: 2026-08-29_
