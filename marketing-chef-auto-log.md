@@ -4,6 +4,103 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-29
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 28.08.) um eine neue Prüfung
+vom 29.08. ergänzt — ordnet den seit dem letzten Marketing-Lauf
+hinzugekommenen Ehrlichkeitsfix in `src/lib/ai/mockAdvisor.ts`
+(Zug/Bus/Fähre/Mietwagen bekommen jetzt eine ehrliche Abschlussmeldung
+statt eines nie eingelösten "Ich suche jetzt nach echten
+X-Verbindungen"-Versprechens) sowie mehrere technische a11y-/
+Erreichbarkeits-Fixes in den bestehenden Rahmen ein.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`2f18579`,
+28.08.) geprüft: acht neue Commits. Sechs davon ohne Content-Relevanz —
+ein Support-Chef-Bericht (`ec26be9`), drei Barrierefreiheits-/
+Erreichbarkeits-Fixes (`85e8c22` Dashboard-Links per Screenreader
+unterscheidbar + Entwürfe-Durchschnitt markiert, `9d41f15` Dashboard über
+Navigation statt nur direkter URL erreichbar, `af07472` dasselbe für
+Kalender/Karte/Aktivitäten/Angebote/Favoriten/Preisalarme), ein
+Enter-Tasten-Fix im Aktivität-hinzufügen-Formular (`fbbea3b`), sowie ein
+Freigabe-Chef-Merge und -Log (`b7a5d95`, `51ce071`). `ZEITPLAN.md` und
+`marketing/freigabe-uebersicht.md` bestätigen: alle drei offenen Fragen
+an Ni (Kanal-Start? 6.2 priorisiert? Tier-4-Format gewollt?) weiterhin
+unbeantwortet seit 21.08.
+
+Der achte Commit (`ffc0ba4`, IT-Chef Auto vierter Lauf 28.08.) wurde
+einzeln geprüft (`git show`, Diff sowie `src/lib/ai/mockAdvisor.ts`
+gelesen): ein echter, im Code verifizierter Ehrlichkeits-Fix. Der letzte
+Schritt des Haupt-Chatflows versprach bisher für jeden Transportmodus
+"Ich suche jetzt nach echten X-Verbindungen" — tatsächlich läuft eine
+echte Suche aber nur für Flug (über den separaten Bearbeiten-Pfad). Für
+Zug/Bus/Fähre/Mietwagen blieb das Versprechen bisher immer unerfüllt
+hängen; jetzt bekommen diese vier Modi eine ehrliche Abschlussmeldung.
+
+Inhaltlich der bisher stärkste Treffer für Säule 1 ("Ehrlichkeit als
+Feature") — passt sogar wörtlich zur in `marketing/content-plan.md`
+(Woche 4, Post A) bereits skizzierten Idee, den Zitat-Ton aus
+`mockAdvisor.ts` als Vorlage für die Markenstimme zu nutzen. Trotzdem
+bewusst dieselbe Einstufung wie die drei vorherigen kleinen
+Ehrlichkeits-Korrekturen (25./26./27.08.) angewendet, aus
+Konsistenzgründen: es ist eine nachträglich behobene Lücke in einer
+bestehenden Funktion, kein neuer, abgeschlossener Anfang-bis-Ende-Weg wie
+die drei Tier-1-Stücke. Anders als die einzige bisherige Ausnahme
+(24.08., Reise-suchen-Stück) löst dieser Fix auch keine zuvor explizit
+an ein bestehendes, wartendes Stück gebundene Bedingung ein — er ist
+neue Information, kein eingelöstes Versprechen. Er bleibt daher im
+Tier-4-Kandidatentopf, gebunden an die weiterhin offene Frage 3, statt
+ein eigenes achtes Stück zu werden. Ein zweites achtes Content-Stück zum
+Thema wäre damit eine Inkonsistenz gegenüber der eigenen Begründung vom
+25./26./27.08. gewesen, ohne dass sich an der zugrunde liegenden
+Freigabe-Blockade etwas geändert hätte.
+
+Die drei a11y-/Erreichbarkeits-Fixes und der Enter-Tasten-Fix wurden
+ebenfalls geprüft: reine technische Korrekturen (Screenreader-Text,
+Navigations-Links, Tastatur-Bedienung), keine neue Nutzer-Geschichte und
+kein neues Design-Prinzip, das `MARKENDESIGN.md` fehlen würde — passendes
+bestehendes Muster (Fehlermeldungen/Barrierefreiheit) deckt das bereits
+ab.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+neue Sektionen hinzugefügt, ältere unverändert belassen). Keine
+erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die
+Ergänzung entscheidet nichts neu, sondern trägt nur bereits im Repo
+nachprüfbare Fakten nach (Commit-Historie, Code-Diff, `ZEITPLAN.md`- und
+`content-plan.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes, eigenständiges Content-Stück zum mockAdvisor-Ehrlichkeitsfix
+  — siehe Begründung oben, gleiche Einstufung wie die drei vorherigen
+  kleinen Ehrlichkeits-Korrekturen, aus Konsistenzgründen in den
+  Tier-4-Topf statt ein eigenes Stück.
+- Weitere `MARKENDESIGN.md`-Ergänzung zu den a11y-/Erreichbarkeits-Fixes
+  — geprüft, bestehende Abschnitte decken die angewendeten Muster bereits
+  ab, kein neues Prinzip nötig.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `2f18579`, 28.08.) war laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemerged (per
+Freigabe-Chef-Log vom 29.08. früh bestätigt: it-chef/auto geprüft und
+gemergt, `51ce071`). Branch daher neu von aktuellem `origin/main`
+(`51ce071`, inkl. mockAdvisor-Ehrlichkeitsfix und den a11y-/
+Erreichbarkeits-Fixes) angelegt, gleiches Vorgehen wie bei allen
+bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-28
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
