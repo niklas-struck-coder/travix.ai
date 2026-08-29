@@ -1,10 +1,53 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-28)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-29)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-08-29: Ehrlichkeitsfix in `mockAdvisor.ts` geprüft — stärkster bisheriger Tier-4-Baustein, aber weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`2f18579`,
+28.08.) geprüft: acht neue Commits. Sechs davon reine Log-/Fix-Einträge
+ohne Content-Relevanz — Support-Chef-Bericht (`ec26be9`), drei
+Barrierefreiheits-/Erreichbarkeits-Fixes am Dashboard und an sechs
+weiteren Seiten (`85e8c22`, `9d41f15`, `af07472`: Screenreader-
+Unterscheidbarkeit, fehlende Nav-Einträge — reine technische Korrekturen,
+keine neue Nutzer-Geschichte), ein Enter-Tasten-Fix im
+Aktivität-hinzufügen-Formular (`fbbea3b`), sowie ein Freigabe-Chef-Merge
+und -Log (`b7a5d95`, `51ce071`). Keiner davon beantwortet eine der drei
+unten offenen Fragen — `ZEITPLAN.md` führt 6.2 weiterhin als offen, keine
+Notiz von Ni.
+
+Der achte Commit (`ffc0ba4`, IT-Chef Auto vierter Lauf 28.08.) wurde
+einzeln geprüft (`git show`, Diff + `mockAdvisor.ts` gelesen): ein
+echter, im Code verifizierter Ehrlichkeits-Fix. Der letzte Schritt des
+Haupt-Chatflows versprach bisher für JEDEN Transportmodus "Ich suche
+jetzt nach echten X-Verbindungen" — tatsächlich läuft eine echte Suche
+aber nur für Flug. Zug/Bus/Fähre/Mietwagen bekommen jetzt eine ehrliche
+Abschlussmeldung statt eines Versprechens, das nie eingelöst wurde.
+
+**Warum trotzdem kein achtes Content-Stück:** Inhaltlich der bisher
+stärkste Treffer für Säule 1 ("Ehrlichkeit als Feature") — passt sogar
+wörtlich zur in `content-plan.md` (Woche 4, Post A) bereits skizzierten
+Idee, den Zitat-Ton aus `mockAdvisor.ts` als Vorlage für die Markenstimme
+zu nutzen. Trotzdem dieselbe Einstufung wie die drei vorherigen kleinen
+Ehrlichkeits-Korrekturen (25./26./27.08: übersetzte Duffel-
+Fehlermeldungen, sichtbarer Mikrofon-Fehler, ChecklistPanel-Beschriftung)
+angewendet, aus Konsistenzgründen: es ist eine nachträglich behobene
+Lücke in einer bestehenden Funktion, kein neuer, abgeschlossener
+Anfang-bis-Ende-Weg wie die drei Tier-1-Stücke (EditMode, Kartenansicht,
+ReiseSuche). Anders als die einzige bisherige Ausnahme (24.08.,
+Reise-suchen-Stück) löst dieser Fix auch keine zuvor explizit an ein
+bestehendes Stück gebundene Bedingung ein — er ist neue Information,
+kein eingelöstes Versprechen an ein wartendes Stück. Er gehört damit
+weiterhin in den Tier-4-Kandidatentopf, der an die unten unverändert
+offene Frage 3 gebunden bleibt — hier aber als bisher deutlichstes
+Beispiel vermerkt, falls Ni Frage 3 demnächst beantwortet.
+
+Damit bleibt die Selbstbeschränkung "kein neues Content-Stück"
+unverändert bestehen.
 
 ## Update 2026-08-28: neue Dashboard-Seite (7.7) geprüft — bewusst kein achtes Content-Stück daraus, ChecklistPanel-Fund behoben
 
@@ -214,7 +257,11 @@ Anfang-bis-Ende-Weg im Code.
    eines monatlichen Formats plus erste Ausgabe (August). Freigabe-Frage
    hier nicht nur "posten ja/nein", sondern ob das Format als
    wiederkehrende Rubrik überhaupt gewollt ist, bevor eine zweite Ausgabe
-   sinnvoll wäre.
+   sinnvoll wäre. Kandidaten-Bausteine für eine zweite Ausgabe sammeln
+   sich bereits: übersetzte Duffel-Fehlermeldungen und sichtbarer
+   Mikrofon-Fehler (25.08.), ChecklistPanel-Beschriftung (27.08.), und
+   seit 29.08. der bisher stärkste — der Zug/Bus/Fähre/Mietwagen-
+   Ehrlichkeitsfix in `mockAdvisor.ts` (siehe Update 2026-08-29 oben).
 
 ## Für Ni: die eigentliche Entscheidung
 
