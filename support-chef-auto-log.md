@@ -1191,3 +1191,80 @@ Kontext eindeutig sind.
 eigenständige Logik geprüft (nur die Werte, die sie für die Demo-Daten
 liefern, stichprobenartig gegen die Quellseiten verglichen). Keine
 Codeänderung in diesem Lauf, nur dieser Bericht.
+
+---
+
+## 2026-08-29 — Chatflow-Abschlussnachricht (`mockAdvisor.ts`) & Sidebar-Gruppe „Meine Reise“ (`nav-config.ts`)
+
+**Geprüfter Bereich:** Zwei Stellen aus dem heutigen it-chef-Merge
+(`b7a5d95`), noch in keinem Support-Chef-Lauf geprüft: die neue
+Chatflow-Ehrlichkeitsmeldung für Zug/Bus/Fähre/Mietwagen in
+`src/lib/ai/mockAdvisor.ts` und die sechs neu in die Sidebar
+verschobenen Seiten in `src/lib/nav-config.ts`. Zum Vergleich
+herangezogen: `src/components/chat/TripSummaryCard.tsx`,
+`src/components/chat/KiChat.tsx`, `src/components/layout/Sidebar.tsx`,
+`src/components/layout/MobileNav.tsx`.
+
+### Reibungspunkte
+
+**1. Chat-Text verspricht „Öffne den Reiseplan", der einzige dazu
+passende Button heißt aber „Speichern & ansehen" — jetzt in vier
+zusätzlichen Fällen sichtbar**
+`mockAdvisor.ts:134` (neu, heutiger Ehrlichkeits-Fix für Zug/Bus/Fähre/
+Mietwagen) und `mockAdvisor.ts:144` (unverändert, bestehender
+Abschluss-Text für den Flug-Pfad) enden beide mit demselben Satz:
+„Öffne den Reiseplan, um alles im Detail zu sehen und einzelne
+Bausteine zu bearbeiten." Die einzige tatsächliche Handlungsmöglichkeit
+dazu im Chat ist der Button in `TripSummaryCard.tsx:50-55`
+(`<Link to="/buchung">Speichern & ansehen</Link>`), der laut
+`KiChat.tsx:118` nur erscheint, wenn `hasTripData(trip)` zutrifft. Wer
+nach einem Button oder Link sucht, der wörtlich zum „Öffnen" des
+Reiseplans passt, muss selbst die Verbindung zu „Speichern & ansehen"
+herstellen — ein Label, das eher nach einer Sicherungs- als einer
+Navigationsaktion klingt. Das bestand zwar schon vorher beim
+Flug-Abschluss (`:144`), betraf bis heute aber nur den einen Pfad; durch
+den heutigen Fix (der Zug/Bus/Fähre/Mietwagen bewusst denselben Satz
+gibt, um den vorherigen Dead-End zu vermeiden) sehen jetzt vier weitere
+Nutzergruppen dieselbe Formulierungslücke.
+
+*Vorschlag:* Entweder den Chat-Satz an den Button anpassen (z. B. „Speichere
+deinen Reiseplan und sieh ihn dir an") oder den Button-Text an den
+etablierten Chat-Wortlaut angleichen (z. B. „Reiseplan öffnen"), damit
+Text und einzige echte Handlungsmöglichkeit zueinander passen.
+
+**2. Sidebar-Gruppe „Meine Reise" ist heute von 4 auf 11 gleich
+gewichtete Einträge gewachsen — keine visuelle Unterteilung**
+`nav-config.ts:60-70`: Vor dem heutigen Merge enthielt die Gruppe vier
+Einträge (Reiseplan, Reiseentwürfe, Meine Reisen, Warenkorb). Der
+heutige Fix (zu Recht, siehe die berechtigten Vorgänger-Meldungen zu
+Dashboard/Kalender/Karte/Aktivitäten/Angebote/Favoriten/Preisalarme)
+hat sechs weitere Seiten hinzugefügt, sodass die Gruppe jetzt elf
+Einträge zählt — mehr als doppelt so viele wie zuvor. `Sidebar.tsx:24-54`
+und `MobileNav.tsx:33-61` rendern alle Einträge einer Gruppe als flache,
+gleich gestaltete Liste ohne weitere Unterteilung (gleiche Schriftgröße,
+gleicher Abstand, keine Sub-Überschriften). Auf Mobilgeräten
+(`MobileNav.tsx`, Sheet-Breite 280px) bedeutet das, plus die zwei
+anderen Gruppen, eine deutlich längere Scroll-Liste im Menü, bevor
+„Konto" überhaupt sichtbar wird. Kein Absturz oder Darstellungsfehler
+(`overflow-y-auto` ist in beiden Fällen gesetzt), aber das eigentliche
+Problem von gestern (Seiten nicht auffindbar) läuft Gefahr, durch ein
+neues zu ersetzen: elf ähnlich benannte, thematisch verwandte
+Reise-bezogene Punkte (Warenkorb, Angebote, Preisalarme, Favoriten, Aktivitäten,
+Kalender, Karte, Dashboard, Reiseplan, Reiseentwürfe, Meine Reisen) ohne
+erkennbare Reihenfolge-Logik oder Zwischenüberschrift sind auf einen
+Blick schwer auseinanderzuhalten.
+
+*Vorschlag:* Keine Notwendigkeit, die Erreichbarkeit rückgängig zu
+machen — aber prüfen, ob die elf Punkte innerhalb der Gruppe eine
+zusätzliche visuelle Struktur vertragen (z. B. zwei Untergruppen wie
+„Planung" und „Verwaltung", oder eine bewusste Reihenfolge nach
+Nutzungshäufigkeit statt der aktuellen Code-Reihenfolge). Das ist ein
+Vorschlag zur Feinabstimmung, kein akuter Fehler.
+
+### Nicht geprüft
+Die übrigen heutigen Änderungen aus `b7a5d95` (`EditMode.tsx`-
+Enter-Handler, `Dashboard.tsx`-Ergänzungen) wurden nicht erneut geprüft,
+da sie exakt den bereits im gestrigen Bericht (2026-08-28) bzw. den
+vorangegangenen `it-chef-auto-log.md`-Einträgen gemeldeten Punkten
+entsprechen und laut Quelltext wie beschrieben umgesetzt sind. Keine
+Codeänderung in diesem Lauf, nur dieser Bericht.
