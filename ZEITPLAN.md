@@ -227,7 +227,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   die vier "Alle ansehen"-Links haben jetzt unterscheidbare `aria-label`s
   statt identischen Linktexts, und die gemittelte Reiseentwürfe-Prozentzahl
   zeigt jetzt "Ø über {Anzahl} Entwürfe" statt unmarkiert als Einzelwert zu
-  wirken.
+  wirken. Vom autonomen IT-Chef-Lauf am 29.08. (sechster Lauf) einen
+  dritten, von Support-Chef gemeldeten und von Freigabe-Chef im Code
+  bestätigten Befund behoben: `/dashboard` stand in `nav-config.ts` nur
+  in `extraRoutes`, das weder `Sidebar.tsx` noch `MobileNav.tsx`
+  rendern — der zentrale Hub war damit nur per direkter URL erreichbar,
+  nicht über die reguläre Navigation. Jetzt fester Eintrag in der
+  Nav-Gruppe "Meine Reise" (erster Punkt, vor "Reiseplan"), analog den
+  anderen Übersichtsseiten dort. Neue `src/lib/nav-config.test.ts` sichert
+  das gegen Rückfall ab.
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz

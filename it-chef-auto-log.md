@@ -4995,3 +4995,70 @@ vorgenommen — reine UI-Textklarheit, wie von Support-Chef vorgeschlagen.
   zwei aktualisierten/neuen `Dashboard.test.tsx`-Fälle)
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-29 (sechster Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits zwei ungemergte Commits
+vom vierten/fünften Lauf (28.08., `ffc0ba4`/`85e8c22`), noch nicht von
+Freigabe-Chef geprüft. `main` war zu diesem Zeitpunkt identisch mit dem
+Basis-Commit von `it-chef/auto` (`git log origin/main..origin/it-chef/auto`
+zeigte genau diese zwei Commits, `git merge origin/main` war ein No-Op)
+— auf diesem Stand weitergearbeitet statt neu von `main` zu starten.
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks-prd-travix-platform.md`
+durchgesehen — die Analyse vom fünften Lauf (28.08.) ist einen Tag
+später weiterhin gültig, es hat sich nichts an den blockierten Punkten
+geändert (4.1-4.3 Backend-Entscheidung, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder, 7.4 fehlende Chat-Historie für Demo-Entwürfe,
+8.2-8.7/8.9/8.12 externe Architektur-/Produktentscheidungen, 8.11
+blockiert auf FAQ-Inhalte vom Support-Chef).
+
+Stattdessen `freigabe-chef-log.md` gelesen (Eintrag "2026-08-28, später
+Check"): Freigabe-Chef hat dort einen von Support-Chef gemeldeten Befund
+zur neuen Dashboard-Seite im Code auf `main` selbst nachvollzogen (nicht
+nur dem Bericht geglaubt) und als zutreffend bestätigt: `/dashboard`
+steht in `src/lib/nav-config.ts` nur in `extraRoutes`, das laut Prüfung
+weder `Sidebar.tsx` noch `MobileNav.tsx` rendern (beide importieren und
+rendern ausschließlich `navGroups`) — der als "zentraler Hub" gedachte
+Dashboard ist damit nur per direkter URL erreichbar, nicht über die
+reguläre Seitenleiste/das Mobile-Menü. Anders als die übrigen
+`extraRoutes`-Einträge (die laut Kommentar entweder kontextuell erreicht
+werden, z.B. Urlaubsmodus aus einer gebuchten Reise, oder vom KI-Chat
+abgedeckt sind, z.B. Deal Finder) hat Dashboard keine solche Ausnahme —
+es ist reine Fehlklassifizierung. Alle vier Kriterien erfüllt: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung (die
+anderen Übersichtsseiten in "Meine Reise" zeigen dasselbe Muster), exakt
+im Code lokalisiert (Datei/Zeile über den Freigabe-Chef-Fund bekannt),
+objektiv prüfbar (neuer Test).
+
+**Umgesetzt (`src/lib/nav-config.ts`):**
+`/dashboard` aus `extraRoutes` entfernt und als ersten Eintrag in die
+Nav-Gruppe "Meine Reise" verschoben (vor "Reiseplan") — passt zur
+eigenen Beschreibung des Eintrags ("Alle Reisen, Budgets und Favoriten")
+und zu den übrigen Übersichtsseiten dieser Gruppe. Kein Eingriff in den
+erklärenden Kommentar über `navGroups`/`extraRoutes`, der bleibt
+weiterhin korrekt (beschreibt die Ausnahmen, nicht eine vollständige
+Liste).
+
+**Neu:** `src/lib/nav-config.test.ts` — zwei Tests: (1) sichert genau
+diesen Fund gegen Rückfall ab (`/dashboard` muss in `navGroups` stehen,
+nicht nur in `allRoutes`/`extraRoutes`), (2) allgemeine Konsistenzprüfung,
+dass alle `navGroups`-Pfade eindeutig sind und in `allRoutes` auftauchen.
+
+**Bewusst nicht angefasst:** Keine weitere Umsortierung der Nav-Gruppen,
+keine Änderung an `extraRoutes` selbst — nur der eine fehlklassifizierte
+Eintrag korrigiert, wie vom Freigabe-Chef-Fund exakt beschrieben.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete, keine echte
+  Abhängigkeitsänderung) vor dem Commit verworfen, gleiches Muster wie
+  beim Freigabe-Chef-Merge am 28.08.
+- `npm run build` (= `tsc -b && vite build`) — keine Fehler
+- `npx eslint .` — 0 Fehler, 3 bereits vorher bestehende Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis)
+- `npx vitest run` — 29 Testdateien, 117 Tests, alle grün (inkl. der
+  zwei neuen `nav-config.test.ts`-Fälle)
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

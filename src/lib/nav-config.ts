@@ -55,6 +55,7 @@ export const navGroups: NavGroup[] = [
   {
     label: 'Meine Reise',
     items: [
+      { path: '/dashboard', label: 'Dashboard', description: 'Alle Reisen, Budgets und Favoriten', icon: LayoutDashboard },
       { path: '/buchung', label: 'Reiseplan', description: 'Dein interaktiver Buchungsüberblick', icon: ClipboardList },
       { path: '/entwuerfe', label: 'Reiseentwürfe', description: 'Gespeicherte Planungen fortsetzen', icon: FileClock },
       { path: '/meine-reisen', label: 'Meine Reisen', description: 'Gebuchte und bestätigte Reisen', icon: Luggage },
@@ -77,7 +78,6 @@ export const extraRoutes: NavItem[] = [
   { path: '/urlaubsmodus', label: 'Urlaubsmodus', description: 'KI-Unterstützung während der Reise', icon: Sun },
   { path: '/reise-planen', label: 'Reise suchen', description: 'Neue Reise starten', icon: Search },
   { path: '/deal-finder', label: 'Deal Finder', description: 'Automatische Angebotssuche', icon: Sparkles },
-  { path: '/dashboard', label: 'Dashboard', description: 'Alle Reisen, Budgets und Favoriten', icon: LayoutDashboard },
   { path: '/kalender', label: 'Reisekalender', description: 'Alle Reisen im Kalender', icon: Calendar },
   { path: '/budget', label: 'Reisebudget', description: 'Kostenübersicht und Auswertungen', icon: PiggyBank },
   { path: '/karte', label: 'Kartenansicht', description: 'Reiseziele auf der Karte', icon: Map },
