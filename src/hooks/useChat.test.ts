@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './useChat'
+import { searchStays } from '@/lib/duffel/client'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchFlights: vi.fn(),
@@ -48,6 +49,92 @@ function completeTripUpToAccommodation() {
 
   return result
 }
+
+const KNOWN_DESTINATION = 'Lissabon'
+
+function completeTripUpToAccommodationFor(destination: string) {
+  const { result } = renderHook(() => useChat(false))
+
+  act(() => {
+    result.current.sendMessage(destination)
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+  act(() => {
+    result.current.sendMessage('Zug')
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+  act(() => {
+    result.current.sendMessage('Nächstes Wochenende')
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+  act(() => {
+    result.current.sendMessage('bis 500 €')
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+
+  return result
+}
+
+describe('useChat accommodation search failure vs. real zero results', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+    vi.mocked(searchStays).mockReset()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('sets a distinct error state when the search itself fails, instead of looking like zero results', async () => {
+    vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayOffers).toBeNull()
+    expect(result.current.stayLoading).toBe(false)
+  })
+
+  it('does not set the error state when the search genuinely returns zero offers', async () => {
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(false)
+    expect(result.current.stayOffers).toEqual([])
+    expect(result.current.stayLoading).toBe(false)
+  })
+
+  it('clears a previous error once "Neue Reise planen" restarts the chat', async () => {
+    vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(result.current.stayError).toBe(true)
+
+    act(() => {
+      result.current.resetChat()
+    })
+
+    expect(result.current.stayError).toBe(false)
+  })
+})
 
 describe('useChat accommodation search for an unknown destination', () => {
   beforeEach(() => {

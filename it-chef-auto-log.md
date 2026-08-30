@@ -5305,3 +5305,86 @@ Merge-Warten, braucht Nis manuellen Review, kein Auto-Lauf-Thema).
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-30 (zehnter Lauf)
+
+**Ausgangslage:** `it-chef/auto` hatte bereits einen unveröffentlichten
+Commit vom neunten Lauf desselben Tages (Flug-Quick-Reply-Fix) — auf
+diesem Stand weitergearbeitet statt neu von `main` aufgesetzt, `main`
+dabei unberührt gelassen.
+
+**Punkt-Suche:** Dieselbe Blockierungs-Analyse wie im neunten Lauf
+bleibt gültig (Backend-/KI-Zugangsdaten, fehlende `TripDraft`-Preis-/
+Item-Felder, offene Produktentscheidungen zu Premium/Loyalty, FAQ-
+Abhängigkeit bei 8.11). `reports/support-chef.md` (29.08.) hatte einen
+zweiten, im neunten Lauf bewusst zurückgestellten Fund (Fund 2): ein
+fehlgeschlagener `searchStays`-Aufruf in `useChat.ts` setzt
+`stayOffers` auf `[]` — optisch identisch zu einer echten
+Null-Treffer-Suche, `HotelResults.tsx` zeigt in beiden Fällen dieselbe
+Meldung "Keine Unterkünfte gefunden". Support-Chef schlug konkret vor,
+im `.catch`-Zweig einen eigenen Fehlerzustand zu setzen statt `[]`.
+Diesmal auf einen bereits bestehenden Präzedenzfall gestoßen, der die
+im neunten Lauf befürchtete Interpretationslücke schließt: die
+Flugsuche hat für genau dasselbe Problem bereits ein etabliertes
+Muster (`flightErrors`-State plus eigener Fehlerblock in
+`FlightResults.tsx`, geprüft per `errors.length > 0` vor der
+Leer-Ergebnis-Prüfung). Damit alle vier Sicherheitskriterien erfüllt:
+kein Auth-/Zahlungs-/Rechts-/Nutzerdatenbezug, keine offene
+Produktentscheidung mehr (Lösung ist durch das bestehende Flug-Muster
+vorgezeichnet, keine neue Architektur), klar genug beschrieben (exakte
+Datei/Zeilen plus konkreter Lösungsvorschlag im Bericht, Umsetzung
+mit demselben Muster wie bei Flügen), objektiv prüfbar (Fehlerfall vs.
+Null-Treffer-Fall per Test klar unterscheidbar).
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts` — neuer `stayError`-Boolean-State. In beiden
+  Stellen, die `searchStays` aufrufen (`startEdit` und `sendMessage`),
+  wird er vor jeder neuen Suche zurückgesetzt und im `.catch`-Zweig auf
+  `true` gesetzt, `stayOffers` bleibt dabei `null` (statt `[]`), damit
+  der Fehlerfall die Null-Treffer-Prüfung in `HotelResults.tsx` nicht
+  versehentlich mit auslöst. Auch in `resetChat()` zurückgesetzt.
+  `stayError` neu aus dem Hook zurückgegeben.
+- `src/components/search/HotelResults.tsx` — neue `error`-Prop, geprüft
+  direkt nach dem Lade-Zustand und vor der `!offers`/Null-Treffer-
+  Prüfung, exakt nach dem Vorbild von `FlightResults.tsx`s
+  `errors.length > 0`-Block (`AlertTriangle`-Icon, `destructive`-Farben,
+  Text "Die Unterkunftssuche hat gerade nicht geklappt — versuch's
+  gleich nochmal.").
+- `src/components/chat/KiChat.tsx` — `stayError` aus `useChat` geholt,
+  an `HotelResults` durchgereicht, Anzeige-Bedingung um `stayError`
+  ergänzt (Fehlerblock muss auch ohne `stayLoading`/`stayOffers`
+  sichtbar werden).
+- `ZEITPLAN.md` — Absatz zu Phase 5 um den heutigen Fund/Fix ergänzt.
+- `src/hooks/useChat.test.ts` — drei neue Tests: Suchfehler setzt
+  `stayError: true` und `stayOffers: null` (nicht `[]`), eine echte
+  Null-Treffer-Antwort setzt `stayError` weiterhin auf `false`, und
+  "Neue Reise planen" (`resetChat`) setzt einen vorherigen Fehlerstatus
+  zurück.
+
+**Bewusst nicht angefasst:** Derselbe Fehlerfall existiert im
+`.catch`-Zweig von `runFlightSearch` (setzt `flightOffers` auf `[]`,
+ohne `flightErrors` zu befüllen) — vermutlich derselbe Bug für Flüge,
+aber von Support-Chef nicht gemeldet und außerhalb des heutigen,
+konkret umrissenen Punkts; als möglicher Fund für einen künftigen Lauf
+oder für Support-/IT-Chef im Gespräch mit Ni vorgemerkt, nicht
+automatisch mitgefixt. Die drei bekannten Bugs aus `reports/it-chef.md`
+(Flugsuche im Hauptablauf, ausgewählter Flug nicht im Reiseplan
+sichtbar, Duffel-Stays-Feldnamen ungetestet) weiterhin nicht angefasst
+(alle drei nicht klein/isoliert genug), ebenso die 7 offenen
+`it-chef-autofix/*`-PRs (reines Merge-Warten, braucht Nis manuellen
+Review).
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 123 Tests (120 + 3 neue), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

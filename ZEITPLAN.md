@@ -67,7 +67,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   liegenden, größeren Bug, dass der Hauptchat-Ablauf die echte Flugsuche
   nie auslöst (siehe `reports/it-chef.md`, UX-Entscheidung zum
   Abflughafen nötig) — nur die daraus entstehende Sackgasse ohne jeden
-  Ausweg.
+  Ausweg. Vom autonomen IT-Chef-Lauf am 30.08. (zehnter Lauf) Fund 2 aus
+  `reports/support-chef.md` (29.08.) behoben: ein fehlgeschlagener
+  `searchStays`-Aufruf in `useChat.ts` setzte `stayOffers` bisher auf
+  `[]` — optisch identisch zu einer echten Null-Treffer-Suche, sodass
+  `HotelResults.tsx` in beiden Fällen dieselbe Meldung "Keine
+  Unterkünfte gefunden" zeigte. Neuer `stayError`-Zustand (analog dem
+  bereits bestehenden `flightErrors`/`FlightResults.tsx`-Muster für die
+  Flugsuche) unterscheidet jetzt beide Fälle: bei einem echten
+  Suchfehler bleibt `stayOffers` `null` und `HotelResults` zeigt eine
+  eigene Fehlermeldung ("... hat gerade nicht geklappt, versuch's
+  gleich nochmal"), eine echte Null-Treffer-Suche zeigt weiterhin die
+  bisherige Meldung.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

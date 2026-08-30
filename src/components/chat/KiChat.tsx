@@ -26,6 +26,7 @@ export function KiChat() {
     isThinking,
     stayOffers,
     stayLoading,
+    stayError,
     flightOffers,
     flightErrors,
     flightLoading,
@@ -107,8 +108,8 @@ export function KiChat() {
           </div>
         )}
 
-        {(stayLoading || stayOffers) && (
-          <HotelResults offers={stayOffers} loading={stayLoading} onSelect={selectHotel} />
+        {(stayLoading || stayOffers || stayError) && (
+          <HotelResults offers={stayOffers} error={stayError} loading={stayLoading} onSelect={selectHotel} />
         )}
 
         {(flightLoading || flightOffers) && (

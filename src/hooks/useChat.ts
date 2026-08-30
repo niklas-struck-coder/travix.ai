@@ -74,6 +74,7 @@ export function useChat(speechEnabled: boolean) {
   const [isThinking, setIsThinking] = useState(false)
   const [stayOffers, setStayOffers] = useState<StayOffer[] | null>(null)
   const [stayLoading, setStayLoading] = useState(false)
+  const [stayError, setStayError] = useState(false)
   const [editingField, setEditingField] = useState<EditableTripField | null>(null)
   const [flightOffers, setFlightOffers] = useState<FlightOffer[] | null>(null)
   const [flightErrors, setFlightErrors] = useState<DuffelError[]>([])
@@ -147,6 +148,7 @@ export function useChat(speechEnabled: boolean) {
     setMessages((prev) => [...prev, makeMessage('assistant', prompt.content)])
     setQuickReplies(prompt.quickReplies)
     setStayOffers(null)
+    setStayError(false)
     setEditingField(field)
     setAvatarState(field === 'accommodation' ? 'searching' : 'thinking')
     if (speechEnabled) speak(prompt.content)
@@ -169,7 +171,7 @@ export function useChat(speechEnabled: boolean) {
             setStayLoading(false)
           })
           .catch(() => {
-            setStayOffers([])
+            setStayError(true)
             setStayLoading(false)
           })
       } else {
@@ -185,6 +187,7 @@ export function useChat(speechEnabled: boolean) {
     setMessages((prev) => [...prev, makeMessage('user', content)])
     setQuickReplies([])
     setStayOffers(null)
+    setStayError(false)
     if (!awaitingFlightOrigin) setFlightOffers(null)
     setIsThinking(true)
     setAvatarState('thinking')
@@ -305,7 +308,7 @@ export function useChat(speechEnabled: boolean) {
               setStayLoading(false)
             })
             .catch(() => {
-              setStayOffers([])
+              setStayError(true)
               setStayLoading(false)
             })
         } else {
@@ -340,6 +343,7 @@ export function useChat(speechEnabled: boolean) {
     setQuickReplies(greeting.quickReplies)
     setAvatarState(greeting.avatarState)
     setStayOffers(null)
+    setStayError(false)
     setEditingField(null)
     setFlightOffers(null)
     setFlightErrors([])
@@ -354,6 +358,7 @@ export function useChat(speechEnabled: boolean) {
     isThinking,
     stayOffers,
     stayLoading,
+    stayError,
     flightOffers,
     flightErrors,
     flightLoading,
