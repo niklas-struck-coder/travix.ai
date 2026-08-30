@@ -5224,3 +5224,84 @@ it-chef.md`-Bugs angefasst.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-30 (neunter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig in `main`
+gemergt (`git log origin/main..origin/it-chef/auto` leer) — Branch
+frisch von `origin/main` neu aufgesetzt statt auf altem Stand
+weiterzuarbeiten.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+durchgesehen — die Blockierungs-Analyse der letzten Läufe bleibt
+gültig: 2.x/4.1-4.3 Backend-/KI-Zugangsdaten, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Item-Felder in `TripDraft`, 7.4 fehlende Chat-Historie pro
+Entwurf (hängt an derselben offenen Backend-Entscheidung wie 7.3),
+8.1 (Tagesitinerar) ebenfalls ohne passendes `TripDraft`-Feld, 8.2-8.7
+externe Architektur-/KI-Zugangsdaten-Entscheidungen, 8.9/8.12
+Premium/Loyalty laut PRD OQ-03/OQ-04 offene Produktentscheidungen,
+8.11 blockiert auf FAQ-Inhalte von Support-Chef, 8.13 nur zur Hälfte
+umsetzbar (`calculateProgress.ts`/`checklistRules.ts` haben bereits
+Tests, `calculateCosts`/Schema-Validierung existieren mangels 4.1/6.7
+noch gar nicht).
+
+`reports/support-chef.md` (29.08.) hatte einen neuen, konkreten,
+klein umrissenen Fund: Fund 1 beschreibt, dass der Flug-Fall in
+`mockAdvisor.ts:122-130` als einziger Transportmodus mit
+`quickReplies: []` endet, während alle anderen Modi seit dem
+28.08.-Ehrlichkeits-Fix "Neue Reise planen" als Ausweg bekommen — der
+`TravixAvatar` bleibt im Flug-Fall dauerhaft im "searching"-Zustand
+hängen, ohne jede Schaltfläche. Support-Chef schlug explizit den
+Minimal-Fix vor: auch im Flug-Fall `quickReplies: ['Neue Reise
+planen']` mitgeben. Alle vier Sicherheitskriterien erfüllt: kein
+Auth-/Zahlungs-/Rechts-/Nutzerdatenbezug (reine Chat-Antwort-Konstante),
+keine offene Produktentscheidung (identisches, bereits im Code
+vorhandenes Muster wie beim Nicht-Flug-Fall direkt darunter), exakt im
+Code lokalisiert und ohne Interpretationsspielraum beschrieben (die
+eine Zeile stand schon als Vorschlag im Bericht), objektiv prüfbar
+(bestehender Flug-Test als Vorlage, neue Assertion als
+Regressionsschutz). Fund 2 aus demselben Bericht (Suchfehler vs. "keine
+Unterkünfte gefunden" nicht unterscheidbar in `useChat.ts`/
+`HotelResults.tsx`) bewusst nicht angefasst — bräuchte einen neuen
+Fehlerzustand im `AdvisorReply`/`useChat`-Typ, damit mehr
+Interpretationsspielraum als der reine Ein-Zeilen-Fix in Fund 1, daher
+für einen separaten Lauf zurückgestellt statt in denselben Durchlauf
+gequetscht.
+
+**Umgesetzt (`src/lib/ai/mockAdvisor.ts`):** Im Flug-Zweig von
+`getNextAdvisorStep` (kurz vor der Rückgabe des letzten Schritts)
+`quickReplies: []` zu `quickReplies: ['Neue Reise planen']` geändert,
+mit Kommentar, warum das nötig ist (Hauptchat-Ablauf löst die echte
+Flugsuche nicht aus, siehe `reports/it-chef.md`). Behebt nur die
+Sackgasse, nicht den zugrunde liegenden größeren Bug (echte Flugsuche
+im Hauptablauf), der laut `reports/it-chef.md` eine UX-Entscheidung
+zum Abflughafen braucht und deshalb weiterhin nicht autonom fällbar
+ist.
+
+**Neu/erweitert:** `src/lib/ai/mockAdvisor.test.ts` — bestehendem
+Flug-Test eine Assertion hinzugefügt, die `quickReplies` gegen
+`['Neue Reise planen']` prüft (Regressionsschutz gegen erneut leere
+Quick-Replies).
+
+**`ZEITPLAN.md`:** Absatz zu Phase 5 um den heutigen Fund/Fix ergänzt.
+
+**Bewusst nicht angefasst:** Fund 2 aus `reports/support-chef.md`
+(siehe oben), die drei bekannten Bugs aus `reports/it-chef.md`
+(Flugsuche im Hauptablauf, ausgewählter Flug nicht im Reiseplan
+sichtbar, Duffel-Stays-Feldnamen ungetestet — alle weiterhin nicht
+klein/isoliert genug), die 7 offenen `it-chef-autofix/*`-PRs (reines
+Merge-Warten, braucht Nis manuellen Review, kein Auto-Lauf-Thema).
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 120 Tests, alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

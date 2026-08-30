@@ -54,7 +54,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abschlussmeldung ("noch keine automatische Suche, Reiseplan steht
   trotzdem"), Flug bleibt unverändert. Schließt 5.7 nicht ab (weiterhin
   keine echte Zug-/Bus-/Fährsuche vorhanden), behebt aber die dadurch
-  entstandene Dead-End-Situation im Chat.
+  entstandene Dead-End-Situation im Chat. Vom autonomen IT-Chef-Lauf am
+  30.08. (neunter Lauf) ergänzt: `reports/support-chef.md` meldete am
+  29.08., dass ausgerechnet der Flug-Fall (der einzige Modus mit
+  "echter Suche"-Ankündigung) mit `quickReplies: []` endet, während alle
+  anderen Modi seit dem 28.08.-Fix immerhin "Neue Reise planen"
+  bekommen — der `TravixAvatar` bleibt dabei dauerhaft im
+  "searching"-Zustand hängen, ohne jeden nächsten Schritt für die
+  Nutzerin. `mockAdvisor.ts` gibt im Flug-Fall jetzt ebenfalls
+  `quickReplies: ['Neue Reise planen']` mit (exakt der von Support-Chef
+  vorgeschlagene Minimal-Fix). Behebt weiterhin nicht den zugrunde
+  liegenden, größeren Bug, dass der Hauptchat-Ablauf die echte Flugsuche
+  nie auslöst (siehe `reports/it-chef.md`, UX-Entscheidung zum
+  Abflughafen nötig) — nur die daraus entstehende Sackgasse ohne jeden
+  Ausweg.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

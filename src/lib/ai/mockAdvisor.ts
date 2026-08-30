@@ -123,7 +123,10 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       return {
         content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
         avatarState: 'searching',
-        quickReplies: [],
+        // Der Hauptchat-Ablauf löst die echte Flugsuche aktuell nicht aus
+        // (nur der separate "Bearbeiten"-Pfad in useChat.ts tut das) — ohne
+        // Quick-Reply bliebe die Nutzerin ohne jeden nächsten Schritt hängen.
+        quickReplies: ['Neue Reise planen'],
         trip: next,
         nextField: null,
       }

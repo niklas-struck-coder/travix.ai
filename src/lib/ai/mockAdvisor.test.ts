@@ -93,6 +93,10 @@ describe('getNextAdvisorStep', () => {
     const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
     expect(reply.content).toContain('Ich suche jetzt nach echten Flug-Verbindungen')
     expect(reply.avatarState).toBe('searching')
+    // Der Hauptchat-Ablauf löst die echte Flugsuche nicht aus, also braucht
+    // es hier einen Ausweg statt einer leeren Quick-Reply-Liste (siehe
+    // reports/support-chef.md, 2026-08-29, Fund 1).
+    expect(reply.quickReplies).toEqual(['Neue Reise planen'])
   })
 
   it('does not promise a search it cannot deliver for train/bus/ferry/car — there is no connection search for those yet', () => {
