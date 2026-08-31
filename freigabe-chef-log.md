@@ -1666,3 +1666,45 @@ Fehlermeldungen ("ehrlich und konkret statt generisch").
 **Ergebnis:** Alles grün und stimmig → nach `main` gemerged (Fast-Forward
 `dd6756c..d83eaf2`, gepusht). `it-chef/auto` war danach bereits identisch
 mit dem neuen `main`-Stand, kein weiterer Sync nötig.
+
+## 2026-08-31, autonomer Tageslauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — keine neuen Commits gegenüber `main`
+  (`origin/main` = `1eda933`, bereits identisch, siehe früherer Merge
+  heute Nacht). Nichts zu prüfen, nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit (`b78378a`).
+- `support-chef/auto` — 1 neuer Commit (`f96ddbc`).
+
+**`marketing-chef/auto` geprüft:** Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md` —
+reine Dokument-Ergänzung, kein Produkt-Code. Kein Hinweis auf tatsächliches
+Posten/Veröffentlichen, kein neuer Kanal. Referenzierte Commits (`c2fff0b`,
+`dc10361`, `b9d0267`) per `git log`/`git show` verifiziert — existieren
+genau wie beschrieben. Keine erfundenen Kennzahlen oder Nutzerzahlen,
+Text ist vollständig und kohärent (Begründung, warum kein achtes
+Content-Stück, konsistent mit bisherigen Läufen). → gemerged
+(`--no-ff`, `89d13ec`).
+
+**`support-chef/auto` geprüft:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` — reiner Analysebericht, keine Codeänderung.
+Stichprobe: Kernbehauptung (beide "Bearbeiten"-Suchpfade in `useChat.ts`
+setzen bei Fehlschlag `stayError`/`flightErrors`, aber nicht
+`quickReplies`, während der Haupt-Onboarding-Pfad bereits vorher gesetzte
+Quick-Replies stehen lässt) direkt im Quelltext nachvollzogen:
+- `useChat.ts` `startEdit`/`accommodation`-Zweig: `setQuickReplies(prompt.quickReplies)`
+  mit `editPrompts.accommodation.quickReplies = []`, `.catch` setzt nur
+  `setStayError(true)` — bestätigt.
+- Flug-Editierpfad: `setQuickReplies([])` unmittelbar vor
+  `runFlightSearch(...)`; dessen `.catch` setzt nur `flightErrors`, keine
+  Quick-Replies — bestätigt.
+- Haupt-Onboarding-Pfad (`getNextAdvisorStep`/`mockAdvisor.ts`) setzt
+  Quick-Replies vor dem Suchstart und lässt sie bei Fehlschlag stehen —
+  bestätigt, echter Unterschied zu den zwei Bearbeiten-Pfaden.
+Fund wirkt nachvollziehbar und nicht erfunden, Datei-/Zeilenangaben
+stimmen. → gemerged (`--no-ff`, `ae94123`).
+
+**Ergebnis:** Beide geprüften Branches sauber, unabhängig verifiziert,
+gemerged und nach `origin/main` gepusht (`1eda933..ae94123`). `it-chef/auto`
+ohne neue Commits, nichts zu tun. Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
