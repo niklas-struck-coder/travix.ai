@@ -5653,3 +5653,64 @@ dazu, der alle vier Kriterien erfüllt.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-31 (fünfzehnter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) lag genau auf dem vierzehnten
+Lauf von heute (`7b65423`), der bereits genau auf dem damaligen `main`
+(`c4e16a5`) aufbaut — keine neuen `main`-Commits seitdem, kein neuer Merge
+nötig. `reports/support-chef.md`, `reports/it-chef.md` und
+`reports/marketing-chef.md` unverändert seit dem Stand, den der
+vierzehnte Lauf bereits kannte (kein neuer Bericht seit `c4e16a5`).
+
+**Punkt-Suche:** `ZEITPLAN.md` und die offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` erneut einzeln durchgesehen
+(2.x, 4.1-4.3, 5.7, 6.2/6.6/6.7, 7.4, 7.12, 8.1-8.7, 8.9, 8.11-8.13) —
+dieselben Blocker wie in den Läufen elf bis dreizehn: Backend-/Gemini-
+Zugangsdaten (2.x, 4.1-4.3 sind laut `tasks-prd-travix-platform.md`
+sogar explizit als "blocked on Base44/Gemini credentials" markiert),
+fehlende `TripDraft`-Preis-/Item-/Itinerar-Felder (6.2, 6.6, 6.7, 7.12,
+teilweise 8.1), offene Produktentscheidungen (5.7 Transportanbieter,
+Zahlungsprozess, Tarifstufen 8.9, Rewards-Regeln OQ-04 bei 8.12) oder zu
+vage für einen einzelnen, klar abgegrenzten Punkt ohne Interpretation
+(7.4 "volle Chat-Historie fortsetzen" bräuchte ein neues Mehrfach-Chat-
+Speichermodell, das über die Aufgabenbeschreibung hinausgeht; 8.1/8.3
+bräuchten ein neu zu erfindendes Tagesitinerar-Datenmodell). 8.13
+(Unit-Tests) ist für `calculateProgress`/`checklistRules` bereits
+abgedeckt, die verbleibenden Ziele (`calculateCosts`, Schema-Validierung)
+existieren mangels 4.1/6.6/6.7 noch gar nicht.
+
+Zusätzlich eigene Bug-Suche über die Checkliste hinaus: Die beiden vom
+vierzehnten Lauf behobenen Support-Chef-Funde (unsichtbare
+Flug-Fehlermeldung, fehlende Quick-Replies in den Bearbeiten-Pfaden)
+noch einmal im aktuellen Code nachvollzogen — beide korrekt umgesetzt.
+Dabei gezielt den dritten, strukturell ähnlichen `.catch`-Zweig in
+`useChat.ts` (automatische Unterkunftssuche direkt nach der
+Budget-Frage, Zeilen ~312-315) erneut geprüft: der setzt `quickReplies`
+im Fehlerfall zwar nicht neu, aber `reply.quickReplies` steht zu diesem
+Zeitpunkt bereits auf `['Hotel', 'Ferienwohnung', 'Hostel']` (aus der
+vorausgehenden Budget-Antwort) und bleibt dort stehen — kein Bug, exakt
+das vom vierzehnten Lauf dokumentierte, bereits vorhandene
+Sicherheitsnetz, nur noch einmal unabhängig nachvollzogen statt blind
+übernommen. `Flugsuche.tsx`/`Hotelsuche.tsx` gegen ein mögliches
+"Ladezustand hängt nach Netzwerkfehler"-Muster geprüft (Kandidat für PR
+#1): `searchFlights`/`searchStays` fangen Netzwerkfehler bereits intern
+in `callDuffelProxy` ab und lösen die Promise nie mit Reject auf, geben
+stattdessen immer `{ data: null, errors: [...] }` zurück — der
+`await`-Aufruf in beiden Seiten kann daher gar nicht in einen
+hängenden Ladezustand laufen, kein Bug hier gefunden. `grep` nach
+TODO/FIXME/XXX sowie `console.log`/`debugger` in `src/` — keine Treffer.
+
+**Ergebnis:** Kein Punkt gefunden, der alle vier Sicherheitskriterien
+erfüllt — nichts umgesetzt, nichts committet. Zustand gegenüber dem
+vierzehnten Lauf inhaltlich unverändert (nur dieser Log-Eintrag neu).
+
+**Geprüft (grün, nur zur Bestätigung des unveränderten Zustands):**
+- `npm install` (frischer Checkout) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings.
+- `npx vitest run` — 29 Testdateien, 126 Tests, alle grün.
+
+**Commit:** dieser Log-Eintrag, auf `it-chef/auto` gepusht.
