@@ -1,61 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-29
+**Datum:** 2026-08-31
 
-## Was ist seit dem letzten Eintrag (2026-08-28) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-29) passiert?
 
-Einiges: Die beiden Dashboard-Punkte aus dem letzten Bericht sind
-behoben (`src/pages/Dashboard.tsx` hat jetzt eigene `aria-label`s pro
-Kachel und einen Hinweis "Ø über 2 Entwürfe"). Dazu kamen ein
-Ehrlichkeits-Fix im Chat (Zug/Bus/Fähre/Mietwagen versprechen keine
-Verbindungssuche mehr, die es nicht gibt), fehlende Enter-Unterstützung
-im Aktivität-hinzufügen-Formular wurde ergänzt, und sechs bisher nur per
-direkter URL erreichbare Seiten (Kalender, Karte, Aktivitäten, Angebote,
-Favoriten, Preisalarme) sind jetzt über die Navigation auffindbar. Der
-Chatflow-Text/Sidebar-Fund von gestern (Auto-Log) ist bereits an anderer
-Stelle dokumentiert, deshalb hier nicht wiederholt. Beim Durchsehen des
-heutigen Flug-Pfads und der Fehlerbehandlung bei der Unterkunftssuche
-sind mir zwei eigene, bisher nicht gemeldete Reibungspunkte aufgefallen.
+Beide damals gemeldeten Punkte sind behoben: Die Flug-Sackgasse im
+Haupt-Chatflow bekommt jetzt einen "Neue Reise planen"-Button
+(`mockAdvisor.ts`), und ein echter Suchfehler bei der
+Unterkunftssuche zeigt inzwischen eine eigene Fehlermeldung statt
+"Keine Unterkünfte gefunden" (`useChat.ts`, `HotelResults.tsx`).
+Genau derselbe Fix wurde einen Tag später auch für die Flugsuche
+nachgezogen (`flightErrors`). Gut gemacht — beim Nachprüfen dieser
+frischen Fixes sind mir aber zwei neue, bisher nicht gemeldete
+Reibungspunkte aufgefallen, die genau an diesen Stellen hängen.
 
 ## Meine Vorschläge
 
-1. **Wer im Chat "Flug" wählt, landet in einer Sackgasse ohne jeden
-   Ausweg — nicht mal ein Button bleibt übrig.**
-   `src/lib/ai/mockAdvisor.ts:122-130`: Sobald die Unterkunft gewählt ist
-   und der Modus Flug ist, kündigt der Chat eine echte Flugsuche an
-   ("Ich suche jetzt nach echten Flug-Verbindungen ... Nichts wird
-   erfunden."), setzt dabei aber `quickReplies: []`. Anders als beim
-   Nicht-Flug-Fall direkt darunter (`:132-139`, dort gibt es immerhin
-   "Neue Reise planen" als Button) bekommt die Flug-Nutzerin gar keine
-   Schaltfläche mehr angezeigt. Da `useChat.ts` die echte Flugsuche im
-   Hauptablauf nie auslöst (nur über den separaten "Bearbeiten"-Pfad,
-   das hat IT-Chef heute technisch schon gemeldet), bleibt der
-   `TravixAvatar` dauerhaft im "searching"-Zustand hängen, ohne
-   Fehlermeldung und ohne Knopf, um weiterzumachen. Aus Support-Sicht
-   der schlimmere Teil des Problems: selbst wenn die Suche nie startet,
-   sollte niemand ohne jeden nächsten Schritt dastehen.
-   *Vorschlag:* Bis die Suche technisch nachgerüstet ist, wenigstens
-   `quickReplies: ['Neue Reise planen']` auch im Flug-Fall mitgeben —
-   eine Zeile Aufwand, verhindert aber, dass Nutzer:innen sich fragen,
-   ob die App abgestürzt ist.
+1. **Schlägt eine Flugsuche im Chat fehl, sieht die Nutzerin buchstäblich
+   nichts — keine Fehlermeldung, kein Hinweis, nur Stille.**
+   `src/components/chat/KiChat.tsx:115-117`: Die Bedingung, unter der
+   `<FlightResults>` überhaupt gerendert wird, lautet
+   `(flightLoading || flightOffers) &&`. Beim direkt darüber liegenden
+   Unterkunfts-Pendant (`:111-113`) wurde beim gestrigen Fix korrekt
+   `stayError` mit in die Bedingung aufgenommen. Bei der Flugsuche fehlt
+   dieser Schritt: Schlägt `runFlightSearch` fehl, wird zwar
+   `flightErrors` befüllt (`useChat.ts:98-101`), aber `flightOffers`
+   bleibt `null` und `flightLoading` wird `false` — die Bedingung ist
+   dann `false`, und die neue, extra dafür gebaute Fehlermeldung in
+   `FlightResults.tsx:24-33` wird nie angezeigt. Der "sucht"-Avatar
+   verschwindet einfach, ohne dass irgendetwas an seine Stelle tritt.
+   *Vorschlag:* `KiChat.tsx:115` um `flightErrors.length > 0` ergänzen,
+   analog zur bereits korrekten Unterkunfts-Bedingung — eine Zeile, die
+   die neue Fehlermeldung erst sichtbar macht.
 
-2. **Ein Suchfehler bei der Unterkunftssuche sieht für Nutzer:innen
-   genauso aus wie "keine Unterkünfte gefunden" — beides zeigt dieselbe
-   Meldung.**
-   `src/hooks/useChat.ts:307-309`: Schlägt `searchStays(...)` fehl (z. B.
-   Netzwerkfehler, API down), wird `stayOffers` einfach auf ein leeres
-   Array gesetzt — genau wie bei einer echten Null-Treffer-Suche. In
-   `src/components/search/HotelResults.tsx:24` führt das in beiden
-   Fällen zur identischen Meldung "Keine Unterkünfte gefunden". Wer
-   Lissabon plant und diese Meldung sieht, geht davon aus, dass es dort
-   wirklich keine Unterkünfte gibt — dabei kann genauso gut nur die
-   Suche gerade nicht erreichbar gewesen sein. Das untergräbt leise das
-   Vertrauen in die "nichts wird erfunden"-Zusage aus der Begrüßung,
-   weil ein technischer Fehler wie ein echtes (falsches) Ergebnis
-   aussieht.
-   *Vorschlag:* Im `.catch`-Zweig einen eigenen Fehlerzustand setzen
-   (z. B. `stayOffers: null` plus eine separate Fehlermeldung à la
-   "Die Unterkunftssuche hat gerade nicht geklappt, versuch's gleich
-   nochmal"), statt ihn wie ein leeres Ergebnis zu behandeln.
+2. **Beide "Bearbeiten"-Suchpfade (Unterkunft/Flug) lassen nach einem
+   Suchfehler keinen Quick-Reply-Button übrig, nur ein leeres
+   Eingabefeld.**
+   `src/hooks/useChat.ts:146-176` (Unterkunft) und `:195-230`
+   (Flug-Herkunftscode → `runFlightSearch`): In beiden Fällen wird
+   `quickReplies` auf `[]` gesetzt, bevor die Suche startet, und im
+   Fehlerfall (`.catch`, Zeilen 173-176 bzw. 98-101) nie wieder befüllt.
+   Der Haupt-Onboarding-Pfad zur Unterkunftssuche ist davon nicht
+   betroffen, weil dort vorher schon `['Hotel', 'Ferienwohnung',
+   'Hostel']` gesetzt wurde und bei einem Fehlschlag stehen bleibt —
+   genau dieses Sicherheitsnetz fehlt in den beiden "Bearbeiten"-Pfaden,
+   die man z. B. über den Bearbeiten-Stift in der Buchungs-Übersicht
+   erreicht. Wer dort landet und einen Netzwerkfehler hat, sieht (sobald
+   Punkt 1 behoben ist) zwar eine Fehlermeldung, aber keinen erkennbaren
+   nächsten Schritt außer selbst zu tippen.
+   *Vorschlag:* In beiden `.catch`-Zweigen zusätzlich
+   `setQuickReplies(['Neue Reise planen'])` setzen — dasselbe Muster,
+   das für den Haupt-Chatflow bereits existiert.
 
-_Letztes Update: 2026-08-29_
+_Letztes Update: 2026-08-31_
