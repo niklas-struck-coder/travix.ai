@@ -78,7 +78,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Suchfehler bleibt `stayOffers` `null` und `HotelResults` zeigt eine
   eigene Fehlermeldung ("... hat gerade nicht geklappt, versuch's
   gleich nochmal"), eine echte Null-Treffer-Suche zeigt weiterhin die
-  bisherige Meldung.
+  bisherige Meldung. Vom autonomen IT-Chef-Lauf am 31.08. (elfter Lauf)
+  denselben Bug für die Flugsuche behoben, der im 10.-Lauf-Log als
+  möglicher Fund für einen künftigen Lauf vorgemerkt war: ein
+  fehlgeschlagener `searchFlights`-Aufruf in `useChat.ts` setzte
+  `flightOffers` bisher auf `[]` — optisch identisch zu einer echten
+  Null-Treffer-Suche. `FlightResults.tsx` hatte für genau diesen Fall
+  bereits ein bestehendes `flightErrors`-Anzeigemuster, das nur nie
+  befüllt wurde. `runFlightSearch()` füllt im `.catch`-Zweig jetzt
+  `flightErrors` mit einer eigenen Fehlermeldung statt `flightOffers`
+  auf `[]` zu setzen.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

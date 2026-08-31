@@ -5388,3 +5388,87 @@ Review).
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-31 (elfter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) lag bereits genau auf dem
+aktuellen `main` (`dd6756c`), plus zwei vom neunten/zehnten Lauf vom
+30.08. gepushte, noch nicht gemergte Commits (Flug-Quick-Reply-Fix,
+`stayError`-Unterscheidung bei der Unterkunftssuche). Darauf
+weitergearbeitet, `main` unberührt gelassen.
+
+**Punkt-Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+geprüft — Sprint 1 (4.1-4.3) weiterhin blockiert auf Base44/Gemini-
+Zugangsdaten, Sprint 2 (6.2/6.6/6.7) weiterhin blockiert auf fehlende
+`TripDraft`-Preis-/Item-Felder, Sprint 4/5/6-Punkte weiterhin auf
+Produktentscheidungen oder externe Abhängigkeiten (Duffel Stays,
+Zahlungsprozess) blockiert, restliche Checkboxen bereits erledigt.
+`reports/it-chef.md`, `reports/support-chef.md`, `reports/marketing-chef.md`
+(alle Stand 29.08.) neu gelesen — beide von Support-Chef gemeldeten
+Funde sind bereits durch die beiden Vorlauf-Commits von heute Nacht
+behoben, kein neuer Fund seit dem letzten Bericht.
+
+Stattdessen den im zehnten-Lauf-Log unter "Bewusst nicht angefasst"
+vermerkten Kandidaten aufgegriffen: derselbe Fehlerfall wie beim
+`stayError`-Fix existiert im `.catch`-Zweig von `runFlightSearch`
+(`src/hooks/useChat.ts`) — bei einem fehlgeschlagenen `searchFlights`-
+Aufruf wurde `flightOffers` bisher auf `[]` gesetzt, ohne `flightErrors`
+zu befüllen, optisch identisch zu einer echten Null-Treffer-Suche.
+Anders als bei Stays gab es hier sogar schon ein vollständig etabliertes
+Anzeigemuster dafür: `FlightResults.tsx` prüft bereits
+`errors.length > 0` vor der Leer-Ergebnis-Prüfung (`DuffelError[]`-Array
+über `flightErrors`, seit dem echten `searchFlights`-Erfolgsfall befüllt)
+— es wurde im Fehlerfall nur nie befüllt. Damit erfüllt der Punkt alle
+vier Sicherheitskriterien: kein Auth-/Zahlungs-/Rechts-/Nutzerdatenbezug,
+keine offene Produktentscheidung (Lösung durch das bestehende
+`flightErrors`-Muster vorgezeichnet, keine neue Architektur), klar genug
+beschrieben (exakte Datei/Zeile, im letzten Lauf bereits als Kandidat
+benannt, identisches Muster wie der `stayError`-Fix von gestern), objektiv
+prüfbar (Fehlerfall vs. Null-Treffer-Fall per Test klar unterscheidbar,
+wie beim Stays-Pendant).
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts` — im `.catch`-Zweig von `runFlightSearch` wird
+  jetzt `flightErrors` mit einer eigenen deutschen Fehlermeldung ("Die
+  Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal.")
+  befüllt, statt `flightOffers` auf `[]` zu setzen. `flightOffers` bleibt
+  dadurch im Fehlerfall `null` (wird an dieser Stelle im Ablauf ohnehin
+  schon vorher auf `null` zurückgesetzt), sodass `FlightResults.tsx`s
+  bestehende `errors.length > 0`-Prüfung (die vor der Leer-Ergebnis-
+  Prüfung liegt) den Fehlerblock zeigt statt "Keine Flüge gefunden".
+  Kein neuer State nötig, da `flightErrors: DuffelError[]` bereits
+  existierte und schon für den echten Duffel-API-Fehlerfall verdrahtet
+  war.
+- `ZEITPLAN.md` — Absatz zu Phase 5 um den heutigen Fund/Fix ergänzt.
+- `src/hooks/useChat.test.ts` — neuer Test-Block ("useChat flight search
+  failure vs. real zero results") nach dem Vorbild des `stayError`-Tests:
+  ein `switchToFlightAndEnterOrigin()`-Helper durchläuft den einzigen
+  Pfad, der `runFlightSearch` tatsächlich auslöst (Bearbeiten →
+  Transportmittel → "Flug" → IATA-Herkunftscode). Zwei Tests: ein
+  abgelehntes `searchFlights`-Promise setzt `flightErrors` (nicht leer)
+  und `flightOffers` bleibt `null`; ein echtes Null-Treffer-Ergebnis
+  lässt `flightErrors` leer und setzt `flightOffers` auf `[]`.
+
+**Bewusst nicht angefasst:** Die drei bereits aus `reports/it-chef.md`
+bekannten größeren Bugs (Flugsuche im Hauptchat-Ablauf ohne
+Startflughafen-Frage — UX-/Produktentscheidung nötig; ausgewählter Flug
+nicht im Reiseplan sichtbar — bräuchte `TripDraft`-Erweiterung; Duffel-
+Stays-Feldnamen ungetestet — kein API-Key vorhanden) bleiben weiterhin
+unangetastet, ebenso die 7 offenen `it-chef-autofix/*`-PRs (reines
+Merge-Warten, braucht Nis manuellen Review, nicht Teil des autonomen
+`it-chef/auto`-Kanals).
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (nur `libc`-Metadaten
+  einiger optionaler `esbuild`-Plattformpakete) vor dem Commit
+  verworfen, gleiches Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 125 Tests (123 + 2 neue), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

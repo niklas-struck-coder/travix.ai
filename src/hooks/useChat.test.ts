@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './useChat'
-import { searchStays } from '@/lib/duffel/client'
+import { searchFlights, searchStays } from '@/lib/duffel/client'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchFlights: vi.fn(),
@@ -172,5 +172,69 @@ describe('useChat accommodation search for an unknown destination', () => {
     expect(lastMessage?.content).toContain('manuelle Hotelsuche')
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
+  })
+})
+
+// Same failure-vs-zero-results distinction as the accommodation search
+// above, but for the flight search triggered via the "Bearbeiten" ->
+// transport mode -> IATA origin path (the only place a real flight search
+// currently runs, see useChat.ts).
+function switchToFlightAndEnterOrigin(result: ReturnType<typeof completeTripUpToAccommodationFor>, origin: string) {
+  act(() => {
+    result.current.startEdit('transportMode')
+  })
+  act(() => {
+    result.current.sendMessage('Flug')
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+  act(() => {
+    result.current.sendMessage(origin)
+  })
+  act(() => {
+    vi.advanceTimersByTime(700)
+  })
+}
+
+describe('useChat flight search failure vs. real zero results', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+    vi.mocked(searchStays).mockReset()
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+    vi.mocked(searchFlights).mockReset()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('sets a distinct error state when the search itself fails, instead of looking like zero results', async () => {
+    vi.mocked(searchFlights).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.flightErrors.length).toBeGreaterThan(0)
+    expect(result.current.flightOffers).toBeNull()
+    expect(result.current.flightLoading).toBe(false)
+  })
+
+  it('does not set an error when the search genuinely returns zero offers', async () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.flightErrors).toEqual([])
+    expect(result.current.flightOffers).toEqual([])
+    expect(result.current.flightLoading).toBe(false)
   })
 })

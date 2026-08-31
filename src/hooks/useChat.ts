@@ -96,7 +96,7 @@ export function useChat(speechEnabled: boolean) {
         setFlightLoading(false)
       })
       .catch(() => {
-        setFlightOffers([])
+        setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
         setFlightLoading(false)
       })
   }
