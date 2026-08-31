@@ -1625,3 +1625,44 @@ behauptet Rebase auf `51ce071`, tatsächlich noch auf `2f18579` basierend)
 war kein Regelverstoß und hatte keine inhaltliche Auswirkung — der Merge
 selbst war sauber und hat nichts überschrieben. Nur hier notiert, falls
 sich das Muster wiederholt.
+
+## 2026-08-31, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (drei Läufe vom 30./31.08.: zwei
+  echte Fixes, zwei "kein sicherer Punkt gefunden"-Läufe ohne
+  Code-Änderung).
+- `marketing-chef/auto` — keine neuen Commits gegenüber `main` seit dem
+  letzten Merge (29.08.). Wie vorgesehen ignoriert, läuft erst um 6 Uhr.
+- `support-chef/auto` — keine neuen Commits gegenüber `main` seit dem
+  letzten Merge (29.08.). Wie vorgesehen ignoriert, läuft erst um 6 Uhr.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch frisch ausgecheckt, `npm
+install` da `node_modules` fehlte, danach selbst ausgeführt statt dem Log
+zu glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh,
+  unverändert durch diesen Branch).
+- `npx vitest run` → 29 Testdateien, 125 Tests, alle grün.
+
+Alle drei Ergebnisse decken sich exakt mit den Angaben im
+`it-chef-auto-log.md`-Eintrag des Laufs.
+
+**Scope-Check:** Effektiver Diff gegenüber `main` (abgesehen von Logs/
+Reports) betrifft nur `KiChat.tsx`, `HotelResults.tsx`, `useChat.ts`
+(+Test), `mockAdvisor.ts` (+Test) und `ZEITPLAN.md`. Deckt sich exakt mit
+den zwei im Log beschriebenen Punkten: (1) Suchfehler bei der
+Unterkunftssuche jetzt von einer echten Null-Treffer-Suche unterscheidbar
+(neuer `stayError`-State, analog zum bereits bestehenden
+`flightErrors`-Muster), (2) dieselbe Unterscheidung für die Flugsuche im
+`.catch`-Zweig von `runFlightSearch`. Kein Bezug zu Auth, Zahlungen oder
+rechtlichen Texten. UI-Element (Fehlerbox in `HotelResults.tsx`) ist eine
+exakte Übernahme des bereits bestehenden Fehler-Blocks aus
+`FlightResults.tsx` (`border-destructive/30`, `AlertTriangle`-Icon) —
+keine neue Design-Entscheidung, passt zu `MARKENDESIGN.md`s Vorgabe für
+Fehlermeldungen ("ehrlich und konkret statt generisch").
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged (Fast-Forward
+`dd6756c..d83eaf2`, gepusht). `it-chef/auto` war danach bereits identisch
+mit dem neuen `main`-Stand, kein weiterer Sync nötig.
