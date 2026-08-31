@@ -1268,3 +1268,86 @@ da sie exakt den bereits im gestrigen Bericht (2026-08-28) bzw. den
 vorangegangenen `it-chef-auto-log.md`-Einträgen gemeldeten Punkten
 entsprechen und laut Quelltext wie beschrieben umgesetzt sind. Keine
 Codeänderung in diesem Lauf, nur dieser Bericht.
+
+---
+
+## 2026-08-31 — Fehleranzeige bei Flug-/Unterkunftssuche im Chat (`useChat.ts`)
+
+**Geprüfter Bereich:** Die beiden jüngsten IT-Chef-Auto-Fixes, die echte
+Suchfehler von einer echten Null-Treffer-Suche unterscheidbar machen
+(Commit `dc10361`, 2026-08-30, Unterkunftssuche; Commit `b9d0267`,
+2026-08-31, Flugsuche) — noch in keinem Support-Chef-Lauf geprüft:
+
+- `src/hooks/useChat.ts`
+- `src/components/search/HotelResults.tsx`
+- `src/components/search/FlightResults.tsx`
+- `src/hooks/useChat.test.ts`
+
+Zum Vergleich herangezogen: `src/lib/ai/mockAdvisor.ts` (der direkt davor,
+am 2026-08-30, behobene „Sackgasse ohne Ausweg" beim Flug-Pfad des
+Haupt-Chatflows, Commit `c2fff0b`).
+
+### Reibungspunkte
+
+**1. Beide neuen Fehlermeldungen können denselben Sackgasse-Typ
+reproduzieren, den IT-Chef gerade erst im Hauptflow behoben hat — hier
+aber im „Bearbeiten"-Suchpfad**
+
+`useChat.ts:146-184` (`startEdit`, Zweig `accommodation`): Bevor die
+Unterkunftssuche startet, wird `setQuickReplies(prompt.quickReplies)`
+aufgerufen (Zeile 149) — und `editPrompts.accommodation.quickReplies`
+ist laut Zeile 28-31 eine leere Liste `[]`. Schlägt die Suche fehl
+(`.catch` in Zeile 173-176 setzt nur `setStayError(true)`), zeigt
+`HotelResults.tsx:25-31` die Meldung „Die Unterkunftssuche hat gerade
+nicht geklappt — versuch's gleich nochmal.“ — aber es gibt weder einen
+Retry-Button noch irgendeinen Quick-Reply-Chip, nur ein leeres
+Eingabefeld. Wer diesen Pfad über den „Bearbeiten"-Stift bei der
+Unterkunfts-Sektion in `Buchung.tsx` (Aufgabe 6.10) auslöst und dann
+einen Netzwerkfehler hat, sieht exakt die Art von Sackgasse, die laut
+`ZEITPLAN.md` (Zeile 164-171/`mockAdvisor.ts`) erst gestern für den
+Flug-Pfad des *Haupt*-Chatflows als Problem erkannt und behoben wurde
+— hier ist sie nur an einer anderen Stelle noch vorhanden.
+
+Derselbe Mechanismus betrifft den Flug-Suchpfad noch direkter, da er der
+*einzige* Auslöser für eine echte Flugsuche im Chat ist (siehe
+`mockAdvisor.ts:112-121`, Kommentar „Der Hauptchat-Ablauf löst die echte
+Flugsuche aktuell nicht aus“): `useChat.ts:195-231` setzt
+`setQuickReplies([])` (Zeile 225) unmittelbar bevor `runFlightSearch()`
+aufgerufen wird (Zeile 229). Schlägt die Suche fehl (`.catch` in Zeile
+98-101 von `runFlightSearch` selbst), zeigt `FlightResults.tsx:24-33`
+zwar die neue, freundliche Fehlermeldung „Die Flugsuche hat gerade nicht
+geklappt — versuch's gleich nochmal.“, aber auch hier bleiben die
+Quick-Replies leer — keine „Neue Reise planen“-Option wie sie
+`mockAdvisor.ts:126` für denselben Flug-Pfad an anderer Stelle jetzt
+bewusst ergänzt.
+
+Zum Vergleich: Der *Haupt*-Onboarding-Pfad zur Unterkunftssuche
+(`useChat.ts:284-319`, ausgelöst nach dem Budget-Schritt) ist von diesem
+Problem nicht betroffen, weil dort vor dem Suchstart bereits
+`['Hotel', 'Ferienwohnung', 'Hostel']` als Quick-Replies gesetzt wurden
+(`mockAdvisor.ts:103-108`) und bei einem Fehlschlag stehen bleiben — die
+Nutzerin kann also weiterhin manuell eine Unterkunftsart wählen, auch
+wenn die automatische Suche scheitert. Genau dieses Sicherheitsnetz
+fehlt in den beiden „Bearbeiten“-Pfaden.
+
+Auch die neuen Tests decken das nicht ab: `useChat.test.ts:105/129`
+(Unterkunft) und `:222` (Flug) prüfen jeweils nur, dass `stayError`
+bzw. `flightErrors` im Fehlerfall gesetzt werden — keiner der Tests
+prüft, welchen Zustand `quickReplies` zu diesem Zeitpunkt hat.
+
+*Vorschlag:* In beiden `.catch`-Zweigen (`useChat.ts:173-176` und
+`runFlightSearch`s `.catch` in Zeile 98-101, plus dessen Aufrufstelle
+in Zeile 225) zusätzlich `setQuickReplies(['Neue Reise planen'])`
+setzen — exakt das Muster, das `mockAdvisor.ts:126` für den strukturell
+selben Fall bereits etabliert hat. Eine Regressionsprüfung analog zu
+`mockAdvisor.test.ts` (prüft dort explizit `quickReplies` nach dem
+Flug-Ausweg-Fix) würde das künftig auch automatisiert abdecken.
+
+### Nicht geprüft
+Ein echter „Nochmal versuchen“-Button (statt nur eines textuellen
+Hinweises „versuch's gleich nochmal“) wäre die vollständigere Lösung,
+ist aber ein größerer Eingriff (müsste sich Origin/Ziel bzw.
+Such-Parameter merken) — hier bewusst nur der kleinere, mit dem
+gestrigen Fix konsistente Ausweg vorgeschlagen. Die eigentlichen
+Fehlertexte selbst (Wortlaut, Ton) wurden nicht bemängelt — sie folgen
+bereits demselben ehrlichen, undramatischen Muster wie der Rest der App.
