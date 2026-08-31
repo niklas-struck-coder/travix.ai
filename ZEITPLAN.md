@@ -87,7 +87,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bereits ein bestehendes `flightErrors`-Anzeigemuster, das nur nie
   befüllt wurde. `runFlightSearch()` füllt im `.catch`-Zweig jetzt
   `flightErrors` mit einer eigenen Fehlermeldung statt `flightOffers`
-  auf `[]` zu setzen.
+  auf `[]` zu setzen. Vom autonomen IT-Chef-Lauf am 31.08. (vierzehnter
+  Lauf) zwei von `reports/support-chef.md` (31.08.) gemeldete
+  Anschlussfehler an genau dieser Stelle behoben: Erstens blendete
+  `KiChat.tsx` die neue Flug-Fehlermeldung trotz Punkt oben nie ein, weil
+  die Render-Bedingung für `<FlightResults>` nur `flightLoading` und
+  `flightOffers` prüfte, nicht aber `flightErrors` — bei einem
+  fehlgeschlagenen `runFlightSearch()` blieb `flightOffers` `null`, die
+  Bedingung war `false`, und die Nutzerin sah nach dem
+  "sucht"-Avatar buchstäblich nichts mehr. Jetzt ergänzt um
+  `flightErrors.length > 0`, exakt analog zur bereits korrekten
+  `stayError`-Bedingung eine Zeile darüber. Zweitens ließen die beiden
+  "Bearbeiten"-Suchpfade (Unterkunft in `startEdit`, Flug in
+  `runFlightSearch`) nach einem Fehlschlag `quickReplies` leer, statt wie
+  der Hauptchat-Ablauf `['Neue Reise planen']` anzubieten — beide
+  `.catch`-Zweige setzen das jetzt zusätzlich.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

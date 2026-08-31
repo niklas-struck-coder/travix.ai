@@ -5565,3 +5565,91 @@ unverändert, daher auch kein neuer Prüf-Durchlauf von Typecheck/Lint/
 Tests nötig (keine Code-Änderung vorgenommen).
 
 **Commit:** dieser Log-Eintrag, auf `it-chef/auto` gepusht.
+
+## 2026-08-31 (vierzehnter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) lag genau auf dem dreizehnten
+Lauf von heute (`d83eaf2`), der bereits genau auf dem damaligen `main`
+(`dd6756c`) aufbaut. Seitdem sind auf `main` fünf neue Commits
+dazugekommen, u. a. ein frischer `reports/support-chef.md`-Bericht vom
+31.08. (Commit `c4e16a5`) — genau der Bericht, den die letzten beiden
+Läufe noch nicht kannten. `main` neu auf `it-chef/auto` gecheckt, da der
+alte Branch bereits vollständig gemergt war (keine Diff zwischen
+`origin/main` und `origin/it-chef/auto`).
+
+**Punkt-Suche:** Der neue Support-Chef-Bericht meldet zwei bisher nicht
+gemeldete Anschlussfehler, die genau an den Fixes vom elften Lauf
+(Flugsuchfehler-Erkennung) hängen — beide mit exakter Datei-/Zeilenangabe
+und einem naheliegenden, bereits vorgezeichneten Lösungsmuster:
+1. `KiChat.tsx:115` blendet `<FlightResults>` nur bei `flightLoading`
+   oder `flightOffers` ein, nicht bei `flightErrors` — die vom elften
+   Lauf gebaute Flug-Fehlermeldung wird dadurch nie sichtbar, obwohl
+   `flightErrors` korrekt befüllt wird. Die direkt benachbarte
+   `stayError`-Bedingung eine Zeile darüber hat exakt dieses Muster
+   bereits korrekt.
+2. Die beiden "Bearbeiten"-Suchpfade (Unterkunft in `startEdit`, Flug in
+   `runFlightSearch`) setzen `quickReplies` im Fehlerfall nicht auf
+   `['Neue Reise planen']`, anders als der Hauptchat-Ablauf, der dieses
+   Muster für andere Fehler-/Abschlussfälle bereits durchgängig nutzt.
+
+Beide Punkte erfüllen alle vier Sicherheitskriterien: kein Auth-/
+Zahlungs-/Rechts-/Nutzerdatenbezug (reine Chat-UI-Anzeigelogik), keine
+offene Produktentscheidung (beide Fixes kopieren ein im selben Code
+bereits etabliertes, akzeptiertes Muster — keine neue Architektur), klar
+genug beschrieben (exakte Datei-/Zeilenangaben im Bericht, keine
+Interpretation nötig), objektiv prüfbar (Render-Bedingung bzw.
+`quickReplies`-Zustand nach einem Suchfehler ist per Test klar
+feststellbar).
+
+**Umgesetzt:**
+- `src/components/chat/KiChat.tsx:115` — Render-Bedingung für
+  `<FlightResults>` um `flightErrors.length > 0` ergänzt, analog zur
+  bereits korrekten `stayError`-Bedingung eine Zeile darüber.
+- `src/hooks/useChat.ts` — im `.catch`-Zweig von `runFlightSearch`
+  (Flug-"Bearbeiten"-Pfad) und im `.catch`-Zweig der Unterkunftssuche in
+  `startEdit('accommodation')` (Unterkunft-"Bearbeiten"-Pfad) jeweils
+  zusätzlich `setQuickReplies(['Neue Reise planen'])` ergänzt. Der dritte,
+  strukturell identische `.catch`-Zweig im Hauptchat-Ablauf (automatische
+  Unterkunftssuche direkt nach der Budget-Frage) bleibt bewusst
+  unverändert — dort ist laut Bericht schon vorher
+  `['Hotel', 'Ferienwohnung', 'Hostel']` gesetzt und bleibt im Fehlerfall
+  stehen, exakt das vom Bericht beschriebene, bereits vorhandene
+  Sicherheitsnetz.
+- `ZEITPLAN.md` — Absatz zu Phase 5 um den heutigen Fund/Fix ergänzt.
+- `src/hooks/useChat.test.ts` — zwei neue Test-Assertionen: ein neuer
+  Test ("offers 'Neue Reise planen' as a next step when a retry via
+  'Bearbeiten' fails too") prüft den Unterkunft-"Bearbeiten"-Pfad
+  gesondert von der bestehenden Haupt-Ablauf-Fehler-Prüfung (die bewusst
+  weiterhin `['Hotel', 'Ferienwohnung', 'Hostel']` erwartet, nicht
+  `['Neue Reise planen']` — beim ersten Versuch hätte das den
+  bestehenden Test fälschlich zum Scheitern gebracht, weil er über den
+  Hauptablauf läuft, nicht über `startEdit`); der bestehende
+  Flug-Fehlerfall-Test bekam eine zusätzliche Assertion für
+  `quickReplies`, da `switchToFlightAndEnterOrigin` bereits exakt den
+  betroffenen "Bearbeiten"-Pfad durchläuft. Der reine Render-Bedingung-Fix
+  in `KiChat.tsx` bekam keinen neuen Test — es existiert im Repo bisher
+  kein Komponenten-Render-Test für `KiChat.tsx`, auch nicht für die
+  bereits identische, längst gemergte `stayError`-Bedingung eine Zeile
+  darüber; ein neues Test-Setup dafür aufzubauen wäre über den
+  vorgegebenen, engen Punkt hinausgegangen.
+
+**Bewusst nicht angefasst:** Alle in den vorherigen Läufen dokumentierten
+Blocker (Backend-/Gemini-Zugangsdaten, fehlende `TripDraft`-Preis-/
+Item-/Itinerar-Felder, offene Produktentscheidungen, die 7 offenen
+`it-chef-autofix/*`-PRs) bleiben unverändert bestehen — heute kam mit dem
+neuen Support-Chef-Bericht einfach ein neuer, klar abgegrenzter Punkt
+dazu, der alle vier Kriterien erfüllt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — dabei
+  entstandenes `package-lock.json`-Rauschen (`libc`-Metadaten einiger
+  optionaler `esbuild`-Plattformpakete) vor dem Commit verworfen, gleiches
+  Muster wie in den vorherigen Läufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien (Fast-Refresh-Hinweis).
+- `npx vitest run` — 29 Testdateien, 126 Tests (124 + 2 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

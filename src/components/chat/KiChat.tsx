@@ -112,7 +112,7 @@ export function KiChat() {
           <HotelResults offers={stayOffers} error={stayError} loading={stayLoading} onSelect={selectHotel} />
         )}
 
-        {(flightLoading || flightOffers) && (
+        {(flightLoading || flightOffers || flightErrors.length > 0) && (
           <FlightResults offers={flightOffers} errors={flightErrors} loading={flightLoading} onSelect={selectFlight} />
         )}
 

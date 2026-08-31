@@ -98,6 +98,7 @@ export function useChat(speechEnabled: boolean) {
       .catch(() => {
         setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
         setFlightLoading(false)
+        setQuickReplies(['Neue Reise planen'])
       })
   }
 
@@ -173,6 +174,7 @@ export function useChat(speechEnabled: boolean) {
           .catch(() => {
             setStayError(true)
             setStayLoading(false)
+            setQuickReplies(['Neue Reise planen'])
           })
       } else {
         const notice = `Für ${trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`

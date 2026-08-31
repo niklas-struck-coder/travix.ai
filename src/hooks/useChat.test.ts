@@ -120,6 +120,25 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayLoading).toBe(false)
   })
 
+  it('offers "Neue Reise planen" as a next step when a retry via "Bearbeiten" fails too', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockRejectedValueOnce(new Error('network down'))
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
   it('clears a previous error once "Neue Reise planen" restarts the chat', async () => {
     vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
     const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
@@ -222,6 +241,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightErrors.length).toBeGreaterThan(0)
     expect(result.current.flightOffers).toBeNull()
     expect(result.current.flightLoading).toBe(false)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
   it('does not set an error when the search genuinely returns zero offers', async () => {
