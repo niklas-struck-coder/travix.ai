@@ -4,6 +4,95 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-08-31
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 29.08.) um eine neue Prüfung
+vom 31.08. ergänzt — ordnet drei seit dem letzten Marketing-Lauf neu
+hinzugekommene Ehrlichkeits-/Fehler-Fixes (Flug-Sackgasse ohne Ausweg
+behoben, Unterkunfts- und Flugsuche-Fehler jetzt von echter
+Null-Treffer-Suche unterscheidbar) in den bestehenden Tier-4-
+Kandidatentopf ein.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`4380852`,
+29.08.) geprüft: 21 neue Commits. Der Großteil ohne Content-Relevanz —
+ein Daily-Status-Update, mehrere Freigabe-Chef-Merges/-Logs, ein
+IT-Chef-Bericht (`91b3f39`) und ein Support-Chef-Bericht (`dd6756c`,
+beide rein interaktiv), sowie zwei IT-Chef-Auto-Läufe ohne sicheren
+Punkt (`756c85b`, `d83eaf2`). Der eigene interaktive Bericht vom 29.08.
+(`ab38efd`) wurde gelesen: schlägt ein "Ehrlichkeits-Log"-Format vor
+(Vorher/Nachher pro Fund) und warnt vor verfrühter Werbung für die
+Chat-Flugsuche — beides bereits bekannt, keine neue Entscheidung von Ni
+darin. `ZEITPLAN.md` und `marketing/freigabe-uebersicht.md` bestätigen:
+alle drei offenen Fragen an Ni (Kanal-Start? 6.2 priorisiert?
+Tier-4-Format gewollt?) weiterhin unbeantwortet seit 21.08. — 6.2
+(`ZEITPLAN.md` Zeile 139) weiterhin offen, kein neuer Kanal/keine
+Landingpage live (Zeile 409), keine Notiz von Ni in `status.md` oder
+sonstwo im Repo.
+
+Drei echte Codeänderungen wurden einzeln geprüft (`git show`, Diffs
+gelesen), bevor über Content entschieden wurde:
+- `c2fff0b` (30.08.): `mockAdvisor.ts` ließ den Flug-Chatflow bisher mit
+  `quickReplies: []` enden, während die anderen vier Transportmodi seit
+  dem 28.08.-Fix "Neue Reise planen" als Ausweg bekommen — jetzt auch
+  Flug. Direkte Folge eines Support-Chef-Fundes vom 29.08.
+- `dc10361` (30.08.): ein fehlgeschlagener `searchStays`-Aufruf setzte
+  `stayOffers` bisher auf `[]`, optisch identisch zu einer echten
+  Null-Treffer-Suche. Neuer `stayError`-State plus eigene Fehlermeldung
+  in `HotelResults.tsx`, analog zum bestehenden `flightErrors`-Muster.
+- `b9d0267` (31.08.): derselbe Fix jetzt auch für die Flugsuche —
+  `FlightResults.tsx` hatte das Anzeigemuster bereits, es wurde im
+  Fehlerfall nur nie befüllt.
+
+Alle drei passen inhaltlich zum bereits skizzierten "Ehrlichkeits-Log"-
+Format (ehrlicher Fehler statt irreführendem "keine Treffer"- bzw.
+Sackgassen-Zustand), sind aber jede für sich zu klein und zu technisch
+für ein eigenständiges Content-Stück — gleiche Einstufung wie alle
+bisherigen kleinen Ehrlichkeits-Korrekturen seit 25.08. Sie bleiben daher
+im Tier-4-Kandidatentopf, gebunden an die weiterhin offene Frage 3
+(Tier-4-Format grundsätzlich gewollt?), statt ein eigenes achtes Stück zu
+werden — dieselbe Konsistenzbegründung wie am 29.08. beim
+Zug/Bus/Fähre-Fix.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion sowie eine Ergänzung im bestehenden Tier-4-Punkt
+hinzugefügt, ältere Abschnitte unverändert belassen). Keine erfundenen
+Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die Ergänzung
+entscheidet nichts neu, sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`- und
+`reports/marketing-chef.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes, eigenständiges Content-Stück zu einem der drei Fixes — siehe
+  Begründung oben, gleiche Einstufung wie alle bisherigen kleinen
+  Ehrlichkeits-Korrekturen, aus Konsistenzgründen in den Tier-4-Topf statt
+  ein eigenes Stück.
+- Weitere `MARKENDESIGN.md`-Ergänzung zu den drei Fixes — geprüft: alle
+  drei wenden nur das bereits bestehende Fehlermeldungs-Muster
+  (`flightErrors`/`FlightResults.tsx`) bzw. das bestehende
+  Quick-Reply-Muster an, kein neues Prinzip nötig.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `4380852`, 29.08.) war laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemerged. Branch daher neu
+von aktuellem `origin/main` (`1eda933`, inkl. der drei geprüften Fixes
+sowie IT-/Support-/Freigabe-Chef-Läufen bis 31.08. früh) angelegt,
+gleiches Vorgehen wie bei allen bisherigen Läufen.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-29
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:

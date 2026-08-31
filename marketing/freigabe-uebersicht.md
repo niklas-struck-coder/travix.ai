@@ -1,10 +1,66 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-29)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-31)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-08-31: drei weitere Ehrlichkeits-/Fehler-Fixes geprüft — Tier-4-Kandidatentopf wächst weiter, weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`4380852`,
+29.08., bereits vollständig in `main` gemerged) geprüft: 21 neue Commits.
+Der größte Teil ohne Content-Relevanz — Daily-Status-Update, mehrere
+Freigabe-Chef-Merges/-Logs, ein IT-Chef-Bericht (`91b3f39`) und ein
+Support-Chef-Bericht (`dd6756c`, beide rein interaktiv, keine
+Codeänderung) sowie zwei IT-Chef-Auto-Läufe ohne sicheren Punkt
+(`756c85b`, `d83eaf2`). Der eigene interaktive Bericht vom 29.08.
+(`ab38efd`/`reports/marketing-chef.md`) wurde ebenfalls gelesen: er hatte
+eine "Ehrlichkeits-Log"-Formatidee vorgeschlagen (siehe unten) und vor
+verfrühter Werbung für die Chat-Flugsuche gewarnt — beides bereits
+bekannt, keine neue Entscheidung von Ni darin.
+
+Drei echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`c2fff0b` (30.08., Flug-Sackgasse behoben):** `mockAdvisor.ts` ließ den
+  Chatflow für Flug bisher mit `quickReplies: []` enden — anders als die
+  anderen vier Transportmodi, die seit dem 28.08.-Fix "Neue Reise planen"
+  als Ausweg bekommen. Flug bekommt jetzt denselben Ausweg. Direkte Folge
+  eines vom Support-Chef am 29.08. gemeldeten Fundes.
+- **`dc10361` (30.08., Unterkunftssuche-Fehler unterscheidbar):** ein
+  fehlgeschlagener `searchStays`-Aufruf setzte `stayOffers` bisher auf
+  `[]` — optisch identisch zu einer echten Null-Treffer-Suche. Neuer
+  `stayError`-State (`useChat.ts`) plus eigene Fehlermeldung in
+  `HotelResults.tsx`, analog zum bereits bestehenden `flightErrors`-Muster.
+- **`b9d0267` (31.08., Flugsuche-Fehler unterscheidbar):** derselbe Fix
+  jetzt auch für `searchFlights` — `FlightResults.tsx` hatte das
+  Anzeigemuster (`flightErrors`) bereits, es wurde im Fehlerfall nur nie
+  befüllt; jetzt wird es befüllt statt `flightOffers` auf `[]` zu setzen.
+
+Alle drei sind im selben Muster wie die bisherigen Tier-4-Kandidaten:
+eine bereits verifizierte, ehrlich behobene Lücke ("wir zeigen einen
+echten Fehler statt eines irreführenden 'keine Treffer'-Zustands" bzw.
+"wir lassen niemanden ohne nächsten Schritt hängen"), aber jede für sich
+zu klein und zu technisch, um allein ein eigenständiges Content-Stück zu
+tragen — passend zur bereits im Bericht vom 29.08. vorgeschlagenen
+Bündelidee ("Ehrlichkeits-Log" als wiederkehrendes Vorher/Nachher-Format).
+
+**Warum trotzdem kein achtes Content-Stück:** Dieselbe Prüfung wie bei
+jedem bisherigen Lauf — `ZEITPLAN.md` führt 6.2 (Buchen-Button) weiterhin
+als offen (Zeile 139), kein neuer Kanal/keine Landingpage live (Zeile
+409), und `status.md`/dieses Dokument enthalten keine Notiz von Ni zu
+einer der drei unten offenen Fragen. Alle drei Bedingungen für ein neues,
+eigenständiges Stück bleiben damit unverändert unerfüllt. Die drei neuen
+Fixes werden stattdessen unten im Tier-4-Kandidatentopf (Punkt 7)
+ergänzt.
+
+**Warum sicher genug für eine Dokument-Ergänzung:** reine
+Übersichts-Aktualisierung, kein Live-Vorgang — nichts gepostet, kein
+Kanal angelegt, kein bestehender Abschnitt verändert oder gelöscht (nur
+diese neue Sektion und eine Ergänzung im bestehenden Tier-4-Punkt).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+trägt nur bereits im Repo nachprüfbare Fakten nach (Commit-Historie,
+Code-Diffs, `ZEITPLAN.md`-Stand).
 
 ## Update 2026-08-29: Ehrlichkeitsfix in `mockAdvisor.ts` geprüft — stärkster bisheriger Tier-4-Baustein, aber weiterhin kein achtes Content-Stück
 
@@ -259,9 +315,15 @@ Anfang-bis-Ende-Weg im Code.
    wiederkehrende Rubrik überhaupt gewollt ist, bevor eine zweite Ausgabe
    sinnvoll wäre. Kandidaten-Bausteine für eine zweite Ausgabe sammeln
    sich bereits: übersetzte Duffel-Fehlermeldungen und sichtbarer
-   Mikrofon-Fehler (25.08.), ChecklistPanel-Beschriftung (27.08.), und
-   seit 29.08. der bisher stärkste — der Zug/Bus/Fähre/Mietwagen-
-   Ehrlichkeitsfix in `mockAdvisor.ts` (siehe Update 2026-08-29 oben).
+   Mikrofon-Fehler (25.08.), ChecklistPanel-Beschriftung (27.08.), der
+   Zug/Bus/Fähre/Mietwagen-Ehrlichkeitsfix in `mockAdvisor.ts` (29.08.),
+   sowie seit 30./31.08. drei weitere: die behobene Flug-Sackgasse ohne
+   Ausweg, und die jetzt unterscheidbaren echten Suchfehler bei
+   Unterkunfts- und Flugsuche statt eines irreführenden "keine
+   Treffer"-Zustands (siehe Update 2026-08-31 oben). Der eigene Bericht
+   vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
+   konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
+   Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
 
 ## Für Ni: die eigentliche Entscheidung
 
