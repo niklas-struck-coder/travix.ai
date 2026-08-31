@@ -13,18 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-08-28):**
-- Navigation gefixt: Dashboard, Kalender, Karte, Aktivitäten, Angebote, Favoriten
-  und Preisalarme waren bisher nur per direkter URL erreichbar, nicht über die Navi
-- Chat-Ehrlichkeit: Zug/Bus/Fähre/Mietwagen versprachen eine echte Verbindungssuche,
-  die es noch nicht gab - Formulierung korrigiert
-- Dashboard-A11y-Fixes (unterscheidbare Links per Screenreader, markierter
-  Durchschnittswert) sowie Enter-Handler-Bug im "Aktivität hinzufügen"-Formular behoben
-- Support-Chef: Chatflow-Text und Sidebar-Gruppe "Meine Reise" geprüft, Reibungspunkte
-  übernommen
-- Marketing-Chef: Ehrlichkeits-Fix am mockAdvisor geprüft
-- Freigabe-Chef hat alle genannten Auto-Zweige mehrfach nach main gemergt
+**Seit letztem Update (2026-08-29):**
+- Fehleranzeige im Chat verbessert: Ein echter Suchfehler bei Flug- und
+  Unterkunftssuche ist jetzt von einer echten Null-Treffer-Suche unterscheidbar
+  (vorher wirkten beide Fälle für Nutzer gleich)
+- Eine Sackgasse ohne Ausweg im Flug-Chatpfad wurde behoben
+- Support-Chef hat die Fehleranzeige-Situation im Chat geprüft und einen
+  UX-Bericht dazu geliefert
+- Marketing-Chef hat die genannten Ehrlichkeits-/Fehler-Fixes geprüft, kein
+  neues Content-Stück in dieser Phase
+- Freigabe-Chef hat die geprüften Änderungen mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-08-29_
+_Letztes Update: 2026-08-31_
