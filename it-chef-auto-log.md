@@ -5472,3 +5472,69 @@ Merge-Warten, braucht Nis manuellen Review, nicht Teil des autonomen
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-08-31 (zwölfter Lauf)
+
+**Ausgangslage:** `it-chef/auto` (origin) lag genau auf dem elften Lauf
+von heute (`b9d0267`), der bereits genau auf dem aktuellen `main`
+(`dd6756c`) aufbaut. Keine neuen Commits auf `main` seit dem letzten
+Lauf, keine neuen Berichte seit 29.08.
+
+**Punkt-Suche — heute nichts gefunden, das sicher genug ist:**
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` komplett neu
+  durchgesehen (alle offenen Checkboxen einzeln geprüft, nicht nur die
+  ZEITPLAN-Zusammenfassung): Sprint 1 (4.1-4.3) weiterhin blockiert auf
+  Base44/Gemini-Zugangsdaten; Sprint 2 (6.2/6.6/6.7) weiterhin blockiert
+  auf fehlende `TripDraft`-Preis-/Item-Felder; 2.x blockiert auf
+  Backend-Entscheidung; 7.4 ("Planung fortsetzen") bräuchte echte
+  Mehrfach-Chat-Historien pro Entwurf statt des einzigen
+  `CHAT_STORAGE_KEY` — das ist eine Datenmodell-/Architekturfrage, kein
+  kleiner isolierter Fix; 7.12 weiterhin blockiert (fehlende Preisfelder);
+  8.2/8.5-8.7 blockiert auf Backend/KI; 8.3 zu vage für einen einzelnen
+  klar abgegrenzten Punkt; 8.4 (Quick-Action-Buttons Restaurant/Schild-
+  übersetzen/Route) würde ohne echte Backend-Anbindung entweder erfundene
+  Ergebnisse zeigen (verstößt gegen das "nichts wird erfunden"-Prinzip,
+  siehe `mockConcierge.ts`) oder bräuchte eine eigene Scope-Entscheidung,
+  was eine "ehrliche" Variante davon überhaupt anzeigen soll; 8.9
+  (Premium-Seite mit Tarif-Vorteilen) hat Bezug zu einem Bezahl-/
+  Mitgliedschaftsmodell und erfundene Tarifstufen wären eine
+  Produktentscheidung; 8.11 blockiert auf FAQ-Inhalte von Support-Chef;
+  8.12 blockiert auf offene PRD-Frage OQ-04; 8.13 ist nur teilweise
+  umsetzbar — `calculateProgress.test.ts` und `checklistRules.test.ts`
+  existieren bereits mit solider Abdeckung, `calculateCosts` und die
+  Schema-Validierung existieren aber noch nicht (hängen an 6.7 bzw.
+  4.1), macht den Punkt als Ganzes nicht abschließbar.
+- `reports/it-chef.md`, `reports/support-chef.md`,
+  `reports/marketing-chef.md` sowie `support-chef-auto-log.md` erneut
+  gelesen — alle weiterhin Stand 29.08., keine neuen Funde seit dem
+  letzten Lauf, beide dort gemeldeten Support-Chef-Punkte bereits durch
+  die Läufe vom 30./31.08. behoben.
+- Eigene Fehlersuche über die bekannten Berichte hinaus: alle drei
+  `.catch`-Zweige in `src/hooks/useChat.ts` (Zeilen 98, 173, 310) auf das
+  "Fehler sieht aus wie Null-Treffer"-Muster geprüft, das die letzten
+  beiden Läufe behoben haben — alle drei sind bereits korrekt (setzen
+  `flightErrors`/`stayError`, keine offene Instanz dieses Musters mehr).
+  `nav-config.ts` gegen `routes.tsx` auf das "Seite fertig, aber nicht
+  verlinkt"-Muster der Läufe vom 28./29.08. geprüft — alle Einträge
+  stimmen überein, `/hilfe` korrekt als `PlaceholderPage` (8.11 nicht
+  gebaut). Nach TODO/FIXME und fehlenden `alt`-Attributen gesucht — keine
+  Treffer. Die drei aus `reports/it-chef.md` bekannten größeren Bugs
+  (Flugsuche im Hauptchat-Ablauf ohne Startflughafen-Frage,
+  ausgewählter Flug im Reiseplan nicht sichtbar, ungetestete
+  Duffel-Stays-Feldnamen) bleiben unverändert — jeweils Produkt-
+  entscheidung, `TripDraft`-Erweiterung bzw. fehlender API-Key nötig,
+  wie in den Vorläufen begründet.
+
+**Ergebnis:** Kein Punkt gefunden, der alle vier Sicherheitskriterien
+erfüllt — nichts umgesetzt, nichts committet, `main` und `it-chef/auto`
+unverändert gegenüber dem elften Lauf.
+
+**Geprüft (grün, nur zur Bestätigung des unveränderten Zustands):**
+- `npm install` (frischer Checkout) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen, da
+  ohnehin nichts committet wird.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings.
+
+**Commit:** keiner — reiner Log-Eintrag ohne Code-/Checkbox-Änderung,
+noch nicht gepusht.
