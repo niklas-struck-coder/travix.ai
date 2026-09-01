@@ -1762,3 +1762,49 @@ danach per Fast-Forward-Push auf den neuen `main`-Stand gebracht
 weiterarbeitet. `marketing-chef/auto`/`support-chef/auto` ohne neue
 Commits, nichts zu tun. Keine Auffälligkeiten, kein Scope-Verstoß, keine
 Info an Ni nötig.
+
+## 2026-09-01, automatischer Lauf (Cloud, scheduled)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, aber **keine neuen Commits** gegenüber
+  `main` (Branch-Spitze `5864c0d` == `main`-Spitze zu Laufbeginn, laut
+  vorherigem Log-Eintrag bereits am selben Tag früher gemergt und auf
+  den neuen `main`-Stand gebracht). Kein Build/Lint/Test nötig, nichts
+  zu tun.
+- `marketing-chef/auto` — 1 neuer Commit (`ac4df57`).
+- `support-chef/auto` — 1 neuer Commit (`365ce60`).
+
+**Prüfung `marketing-chef/auto`:** Diff nur `marketing-chef-auto-log.md`
+und `marketing/freigabe-uebersicht.md` (Update-Sektion 2026-09-01).
+Kein neues eigenständiges Content-Stück — Ergänzung zweier bereits
+gemergter IT-Chef-Fixes (Flug-Fehleranzeige jetzt sichtbar,
+Hotelsuche-Stale-Ergebnisse-Fix) in den bestehenden Tier-4-Kandidatentopf,
+inkl. nachvollziehbarer Begründung, warum zwei weitere Fixes (HotelCard-
+Auswahlanzeige, Sidebar-A11y) bewusst nicht aufgenommen wurden. Keine
+erfundenen Kennzahlen/Nutzerzahlen, kein Hinweis auf tatsächliches
+Posten/Veröffentlichen — reine Dokument-Ergänzung, Text ist vollständig
+und kohärent, keine Stichpunkt-Skizze. Passt zu Marketing-Chefs eigenen
+Grundsätzen.
+→ Gemergt (`--no-ff`) nach `main`.
+
+**Prüfung `support-chef/auto`:** Diff nur `support-chef-auto-log.md`
+(neuer Abschnitt "Hotelsuche-Auswahl-Parität"). Stichprobe: Fund bezieht
+sich auf `Hotelsuche.tsx:31-35` (`handleSelect` ruft
+`setSelectedOfferId(offer.id)` unabhängig vom Ergebnis von
+`updateStoredTrip`), `tripStorage.ts:26-33` (`updateStoredTrip` gibt
+`null` zurück, wenn kein Chat-State existiert) und
+`HotelCard.tsx:38-53`/`42` (`disabled={selected}`, "Ausgewählt"-Anzeige)
+— selbst im aktuellen `main`-Stand nachgelesen: Datei/Zeilen und
+beschriebenes Verhalten stimmen exakt überein, nichts erfunden. Reine
+Analyse ohne Code-Änderung, niedrigstes Risiko.
+→ Gemergt (`--no-ff`) nach `main`.
+
+**Nach den Merges:** `main` nach `origin/main` gepusht
+(`5864c0d..b51a8bf`). Beide Branches `marketing-chef/auto` und
+`support-chef/auto` per Fast-Forward-Push auf den neuen `main`-Stand
+gebracht, damit die nächsten Läufe sauber von dort weiterarbeiten.
+`it-chef/auto` unverändert (bereits auf `main`-Stand).
+
+**Ergebnis:** Beide geprüften Branches sauber, unabhängig verifiziert,
+gemergt und gepusht. Keine Auffälligkeiten, kein Scope-Verstoß, keine
+Info an Ni nötig.
