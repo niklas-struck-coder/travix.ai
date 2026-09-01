@@ -1,0 +1,58 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { describe, expect, it, vi } from 'vitest'
+import { Hotelsuche } from './Hotelsuche'
+import { searchStays } from '@/lib/duffel/client'
+import type { StayOffer } from '@/types/stays'
+
+vi.mock('@/lib/duffel/client', () => ({
+  searchStays: vi.fn(),
+}))
+
+// Real HotelWizard requires picking a destination from a Radix Select and
+// filling two date inputs — none of that matters for this bug, which lives
+// entirely in Hotelsuche's own offer state, so it's swapped for a plain
+// button that fires the same onSearch callback with fixed params.
+vi.mock('@/components/search/HotelWizard', () => ({
+  HotelWizard: ({ onSearch, loading }: { onSearch: (params: unknown) => void; loading: boolean }) => (
+    <button
+      onClick={() =>
+        onSearch({ latitude: 0, longitude: 0, checkInDate: '2026-01-01', checkOutDate: '2026-01-05', rooms: 1, guests: 1 })
+      }
+      disabled={loading}
+    >
+      Hotels suchen
+    </button>
+  ),
+}))
+
+function makeOffer(id: string, name: string): StayOffer {
+  return { id, accommodationName: name, rating: null, address: '', totalAmount: '100', totalCurrency: 'EUR', photoUrl: null }
+}
+
+describe('Hotelsuche', () => {
+  it('clears previous offers as soon as a new search starts, instead of leaving them visible during loading', async () => {
+    const searchStaysMock = vi.mocked(searchStays)
+    let resolveSecondSearch: (value: { offers: StayOffer[]; errors: never[] }) => void = () => {}
+
+    searchStaysMock.mockResolvedValueOnce({ offers: [makeOffer('1', 'Hotel Alfama Suites')], errors: [] })
+    searchStaysMock.mockImplementationOnce(
+      () => new Promise((resolve) => (resolveSecondSearch = resolve)),
+    )
+
+    render(
+      <MemoryRouter>
+        <Hotelsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+    await waitFor(() => expect(screen.getByText('Hotel Alfama Suites')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+    expect(screen.queryByText('Hotel Alfama Suites')).not.toBeInTheDocument()
+
+    resolveSecondSearch({ offers: [makeOffer('2', 'Ryokan Kyoto')], errors: [] })
+    await waitFor(() => expect(screen.getByText('Ryokan Kyoto')).toBeInTheDocument())
+  })
+})

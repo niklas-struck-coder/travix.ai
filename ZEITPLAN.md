@@ -147,7 +147,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   suchen"-Button unter 3 Zeichen in Von/Nach ohne jede Erklärung
   deaktiviert (vom IT-Chef-Bericht 23.08. gemeldet) — jetzt mit
   Hinweistext "3-stelliger Flughafencode, z. B. BER/LIS" unter beiden
-  Feldern.
+  Feldern. Vom autonomen IT-Chef-Lauf am 01.09. (sechzehnter Lauf) einen
+  weiteren Fund ergänzt: `Hotelsuche.tsx` setzte `offers` vor einer neuen
+  Suche anders als das strukturell identische `Flugsuche.tsx` nicht auf
+  `null` zurück — eine zweite Suche zeigte dadurch bis zum Antworteintreffen
+  weiterhin die alten Hotelkarten der ersten Suche an (bei einer echten
+  Null-Treffer-zweiten-Suche blieben sogar dauerhaft veraltete Karten
+  stehen). Jetzt setzt `handleSearch` `offers` genau wie in `Flugsuche.tsx`
+  zu Beginn auf `null`. Neuer Regressionstest in `Hotelsuche.test.tsx`
+  (bisher gab es dort noch keine Tests).
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

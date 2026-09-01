@@ -5714,3 +5714,73 @@ vierzehnten Lauf inhaltlich unverändert (nur dieser Log-Eintrag neu).
 - `npx vitest run` — 29 Testdateien, 126 Tests, alle grün.
 
 **Commit:** dieser Log-Eintrag, auf `it-chef/auto` gepusht.
+
+## 2026-09-01 (sechzehnter Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag genau auf dem fünfzehnten Lauf
+von gestern (`044b289`), der bereits auf dem damaligen `main` (`c4e16a5`)
+aufbaut — kein neuer `main`-Commit seitdem, kein Merge nötig.
+`reports/it-chef.md` (29.08.) und `reports/support-chef.md` (31.08.)
+unverändert, keine neuen Berichte.
+
+**Punkt-Suche:** `ZEITPLAN.md` und die offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` erneut einzeln durchgesehen
+(2.x, 4.1-4.3, 5.7, 6.2/6.6/6.7, 7.4, 7.12, 8.1-8.7, 8.9, 8.11-8.13) —
+dieselben Blocker wie in den Läufen elf bis fünfzehn (Backend-/Gemini-
+Zugangsdaten, fehlende `TripDraft`-Preis-/Item-/Itinerar-Felder, offene
+Produktentscheidungen wie Transportanbieter/Zahlungsprozess/Tarifstufen/
+Rewards-Regeln OQ-04, oder zu vage ohne neues Datenmodell wie 7.4/8.1/8.3).
+Die beiden offenen Funde aus `reports/it-chef.md` (Flugsuche im
+Hauptchat-Ablauf, ausgewählter Flug im Reiseplan unsichtbar) bleiben aus
+denselben, dort bereits dokumentierten Gründen nicht autonom umsetzbar
+(UX-/Produktentscheidung bzw. `TripDraft`-Erweiterung nötig). Die 7 offenen
+`it-chef-autofix/*`-PRs bleiben unverändert Nis manuellem Review
+vorbehalten (kein main-Zugriff in diesem Modus).
+
+Zusätzlich eine unabhängige, über die Checkliste hinausgehende Bug-Suche
+per Subagent über bisher nicht im Log erwähnte Dateien (`Home.tsx`,
+`Flugsuche.tsx`/`Hotelsuche.tsx` samt Wizards, `Profil.tsx`,
+`Einstellungen.tsx`, Chat-Komponenten, `MeineReisen.tsx`, `Warenkorb.tsx`,
+die vier `lib/trip`-Hilfsdateien) — dabei einen Fund bestätigt, der alle
+vier Kriterien erfüllt (siehe unten). Ein zweiter Kandidat (fehlende
+Catch-all-Route für unbekannte URLs) wurde verworfen: welcher Text/welches
+Verhalten dafür passend wäre, ist eine kleine Interpretationsfrage, die
+laut Kriterium 3 lieber Ni überlassen bleibt, statt sie zu erraten.
+
+**Ausgewählter Punkt:** `Hotelsuche.tsx` setzte `offers` beim Start einer
+neuen Suche (`handleSearch`) anders als das strukturell identische
+`Flugsuche.tsx` nicht auf `null` zurück. Eine zweite Suche zeigte dadurch
+bis zum Eintreffen der Antwort weiterhin die Hotelkarten der ersten Suche
+an — bei einer echten Null-Treffer-zweiten-Suche blieben sogar dauerhaft
+veraltete Karten stehen, ohne dass "Keine Unterkünfte gefunden" je
+sichtbar wurde. Deckt sich inhaltlich mit dem seit 11.08. offenen
+Auto-Fix-PR #4 (`it-chef-autofix/hotelsuche-missing-offers-reset-2026-08-11`,
+laut `reports/it-chef.md` weiterhin unbearbeitet) — der läuft über einen
+anderen, hier nicht zugänglichen Mechanismus, der Fix hier ist unabhängig
+davon direkt auf `it-chef/auto` umgesetzt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig
+(reine State-Reset-Korrektur, keine neuen Felder). Klar beschrieben und
+durch direkten Vergleich mit `Flugsuche.tsx` ohne Interpretation
+umsetzbar. Objektiv prüfbar (neuer Test).
+
+**Umsetzung:** `handleSearch` in `src/pages/Hotelsuche.tsx` ruft jetzt
+zu Beginn `setOffers(null)` auf, exakt wie `Flugsuche.tsx`. Neue
+`src/pages/Hotelsuche.test.tsx` (bisher gab es dort keinen Test) prüft,
+dass die alten Hotelkarten sofort nach Start einer zweiten Suche
+verschwinden und erst die neuen Ergebnisse wieder etwas anzeigen.
+`ZEITPLAN.md` (Sprint-1-Notiz zu 5.11) entsprechend ergänzt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen danach verworfen, gleiches Muster wie in
+  den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 30 Testdateien, 127 Tests (126 + 1 neuer), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
