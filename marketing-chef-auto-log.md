@@ -4,6 +4,98 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-01
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 31.08.) um eine neue Prüfung
+vom 01.09. ergänzt — ordnet zwei seit dem letzten Marketing-Lauf neu
+hinzugekommene Ehrlichkeits-Fixes (Flug-Fehlermeldung jetzt tatsächlich
+sichtbar statt nur intern gesetzt; Hotelsuche zeigt bei einer zweiten
+Suche keine veralteten Ergebnisse der ersten mehr) in den bestehenden
+Tier-4-Kandidatentopf ein. Zwei weitere geprüfte Fixes (HotelCard-
+Auswahlanzeige, Sidebar-Barrierefreiheit) bewusst nicht aufgenommen, da
+reine UI-Paritäts- bzw. A11y-Korrekturen ohne Ehrlichkeits-/
+Irreführungs-Erzählung.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`b78378a`,
+31.08.) geprüft: 12 neue Commits. Der Großteil ohne Content-Relevanz —
+ein Daily-Status-Update, drei Freigabe-Chef-Merges/-Logs, ein
+Support-Chef-Bericht (`c4e16a5`) sowie -Auto-Log (`f96ddbc`, beide zur
+selben Fehleranzeige-Situation wie unten, keine eigene neue Information)
+und ein IT-Chef-Auto-Lauf ohne sicheren Punkt (`044b289`). `ZEITPLAN.md`,
+`status.md` und `marketing/freigabe-uebersicht.md` bestätigen: alle drei
+offenen Fragen an Ni (Kanal-Start? 6.2 priorisiert? Tier-4-Format
+gewollt?) weiterhin unbeantwortet seit 21.08. — 6.2 weiterhin offen, kein
+neuer Kanal/keine Landingpage live, keine Notiz von Ni in `status.md`
+(Stand 31.08.) oder sonstwo im Repo.
+
+Vier echte Codeänderungen wurden einzeln geprüft (`git show`, Diffs
+gelesen), bevor über Content entschieden wurde:
+- `7b65423` (31.08., vierzehnter IT-Chef-Lauf): direkte Fortsetzung des
+  bereits am 31.08. dokumentierten Fixes `b9d0267` — der dortige
+  `flightErrors`-Zustand wurde zwar korrekt gesetzt, aber `KiChat.tsx`
+  prüfte beim Rendern von `<FlightResults>` diesen Zustand nie, sodass
+  die Nutzerin nach einem echten Suchfehler buchstäblich nichts mehr sah.
+  Zusätzlich bekommen die beiden "Bearbeiten"-Fehlerpfade jetzt ebenfalls
+  `['Neue Reise planen']` statt leerer `quickReplies`.
+- `0042f68` (01.09., sechzehnter IT-Chef-Lauf): `Hotelsuche.tsx` setzte
+  `offers` vor einer neuen Suche bisher nicht auf `null` zurück — eine
+  zweite Suche zeigte bis zur Antwort weiterhin die alten Hotelkarten der
+  ersten, bei einer echten Null-Treffer-zweiten-Suche blieben sogar
+  dauerhaft veraltete Karten stehen.
+- `ce59905` (01.09., siebzehnter IT-Chef-Lauf): `HotelCard` bekam nie mit,
+  ob ihr Angebot ausgewählt ist (Paritätslücke zu `FlightCard`) — reine
+  UI-Korrektur, keine irreführende Aussage gegenüber der Nutzerin.
+- `ef5c69c` (01.09., achtzehnter IT-Chef-Lauf): Sidebar-Einklappen-Button
+  ohne erreichbaren Namen im eingeklappten Zustand — reiner
+  Barrierefreiheits-Fix.
+
+Die ersten beiden passen inhaltlich zum bereits skizzierten
+"Ehrlichkeits-Log"-Format (echte Fehleranzeige bzw. keine veralteten
+Ergebnisse als aktuelle ausgeben) und wandern in den Tier-4-
+Kandidatentopf, gebunden an die weiterhin offene Frage 3 — dieselbe
+Einstufung wie alle bisherigen kleinen Ehrlichkeits-Korrekturen. Die
+letzten beiden sind reine UI-Paritäts-/A11y-Fixes ohne diese Erzählung,
+gleiche Einstufung wie z. B. die A11y-Fixes vom 29.08. oder der
+ChecklistPanel-Icon-Fix vom 28.08. (beide damals ebenfalls "ohne
+Content-Relevanz").
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion sowie eine Ergänzung im bestehenden Tier-4-Punkt
+hinzugefügt, ältere Abschnitte unverändert belassen). Keine erfundenen
+Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die Ergänzung
+entscheidet nichts neu, sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`- und
+`reports/marketing-chef.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes, eigenständiges Content-Stück zu einem der beiden
+  Ehrlichkeits-Fixes — siehe Begründung oben, gleiche Einstufung wie alle
+  bisherigen kleinen Ehrlichkeits-Korrekturen, aus Konsistenzgründen in
+  den Tier-4-Topf statt ein eigenes Stück.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `b78378a`, 31.08.) war laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemerged. Branch daher per
+`git merge --ff-only origin/main` auf den aktuellen `origin/main`-Stand
+(`5864c0d`, inkl. IT-/Support-/Freigabe-Chef-Läufen bis 01.09. früh)
+gebracht — reiner Fast-Forward, keine eigenen Commits gingen dabei
+verloren.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-08-31
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
