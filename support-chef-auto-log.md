@@ -1351,3 +1351,85 @@ Such-Parameter merken) — hier bewusst nur der kleinere, mit dem
 gestrigen Fix konsistente Ausweg vorgeschlagen. Die eigentlichen
 Fehlertexte selbst (Wortlaut, Ton) wurden nicht bemängelt — sie folgen
 bereits demselben ehrlichen, undramatischen Muster wie der Rest der App.
+
+---
+
+## 2026-09-01 — Hotelsuche-Auswahl-Parität (`Hotelsuche.tsx`, `HotelCard.tsx`)
+
+**Geprüfter Bereich:** Die drei jüngsten autonomen IT-Chef-Fixes von
+heute (Commits `0042f68`, sechzehnter Lauf; `ce59905`, siebzehnter Lauf;
+`ef5c69c`, achtzehnter Lauf — laut `ZEITPLAN.md` alle bereits über den
+Freigabe-Chef nach `main` gemergt):
+
+- `src/pages/Hotelsuche.tsx`
+- `src/components/search/HotelCard.tsx`
+- `src/pages/Flugsuche.tsx` (zum Vergleich, da `HotelCard`s neue
+  `selected`-Prop laut ZEITPLAN.md bewusst analog zu `FlightCard`
+  gebaut wurde)
+- `src/lib/trip/tripStorage.ts`
+- `src/components/layout/Sidebar.tsx`
+
+Die Ergebnis-Reset-Korrektur (sechzehnter Lauf) und die Angleichung von
+`ChevronsLeft`-Button-Labeling in `Sidebar.tsx` (achtzehnter Lauf) sind
+sauber umgesetzt und decken sich mit dem bereits bestehenden,
+funktionierenden Muster aus `Flugsuche.tsx` bzw. dem `title`-Fallback,
+der die Sidebar-Links im eingeklappten Zustand schon vorher zugänglich
+gehalten hat — dort kein weiterer Punkt.
+
+### Reibungspunkte
+
+**1. "Ausgewählt"-Häkchen bleibt stehen, obwohl die Auswahl laut
+eigener Warnmeldung gerade NICHT gespeichert wurde**
+
+`Hotelsuche.tsx:31-35` (`handleSelect`) ruft `updateStoredTrip(...)` auf
+und zeigt bei `updated === null` eine eigene Warnung an
+(`Hotelsuche.tsx:63-71`): "Es gibt noch keine aktive Reiseplanung, in
+die ich diese Unterkunft übernehmen kann. Starte zuerst im KI-Chat,
+dann kannst du hier auswählen." `updateStoredTrip` liefert laut
+`tripStorage.ts:26-33` exakt dann `null`, wenn `loadStoredChat()`
+nichts findet — also wenn noch nie im KI-Chat eine Reise begonnen
+wurde.
+
+Das Problem: `setSelectedOfferId(offer.id)` in Zeile 33 wird
+unabhängig vom Ergebnis von `updateStoredTrip` gesetzt — also auch im
+Fehlerfall. Die angeklickte `HotelCard` schaltet damit trotzdem sofort
+auf den erfolgreichen Zustand um (`HotelCard.tsx:38-53`: Button
+deaktiviert, Text "Ausgewählt" mit grünem Häkchen-Icon), obwohl im
+selben Moment die Warnmeldung direkt darüber sagt, dass nichts
+übernommen wurde. Wer die Meldung überfliegt (oder die Karte zuerst
+anschaut), sieht nur ein abgehaktes "Ausgewählt" und geht vernünftigerweise
+davon aus, die Unterkunft sei gespeichert — bis sie später in `/buchung`
+fehlt. Der Button lässt sich wegen `disabled={selected}`
+(`HotelCard.tsx:42`) auch nicht erneut anklicken, es gibt also innerhalb
+derselben Kartenansicht keinen Weg, es nach dem Start einer Reise im
+KI-Chat noch einmal zu versuchen — nur ein kompletter Reload/Neubesuch
+der Seite setzt den lokalen State zurück.
+
+Derselbe Mechanismus besteht identisch (und unverändert seit dem
+10.08.-Bericht) in `Flugsuche.tsx:30-34`, da beide Seiten exakt dasselbe
+`handleSelect`-Muster teilen — durch den heutigen Fix (siebzehnter Lauf)
+ist er jetzt aber erstmals auch auf der Hotelsuche-Seite sichtbar, da
+`HotelCard` vorher gar keinen visuellen "Ausgewählt"-Zustand kannte und
+das Problem dort noch gar nicht auftreten konnte.
+
+Auch die neuen Tests decken nur den Erfolgsfall ab: `Hotelsuche.test.tsx:59-81`
+prüft ausschließlich, dass der Button bei einer erfolgreichen Auswahl
+"Ausgewählt" wird — der Fall ohne aktive Reiseplanung (`updated === null`)
+wird in keinem Test simuliert.
+
+*Vorschlag:* `setSelectedOfferId(offer.id)` nur setzen, wenn
+`updated !== null` ist — analog dazu, wie `selectionHasTrip` schon
+jetzt den Erfolg abbildet. Im Fehlerfall bleibt der Button dann
+weiterhin "Auswählen" und ist erneut klickbar, sobald über den
+Warnhinweis eine Reise im KI-Chat begonnen wurde. Ein Regressionstest
+analog zu `Hotelsuche.test.tsx:59-81`, aber mit `updateStoredTrip`
+gemockt auf `null`, würde beide Fälle künftig unterscheiden. Da der
+Fehler identisch in `Flugsuche.tsx` besteht, gehört derselbe Fix dort
+mit dazu.
+
+### Nicht geprüft
+`HotelResults.tsx` (die Variante von `HotelCard`, die im KI-Chat selbst
+statt auf der eigenständigen `/hotelsuche`-Seite verwendet wird) reicht
+gar keine `selected`-Prop durch und zeigt daher nie einen
+"Ausgewählt"-Zustand — das ist unverändert zum bisherigen Verhalten und
+kein neuer Punkt aus dem heutigen Fix, daher hier nicht vertieft.
