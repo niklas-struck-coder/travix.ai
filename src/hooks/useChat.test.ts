@@ -120,6 +120,44 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayLoading).toBe(false)
   })
 
+  // searchStays (src/lib/duffel/client.ts) catches its own fetch/HTTP errors
+  // and resolves with a non-empty `errors` array instead of rejecting — a
+  // real Duffel failure looks exactly like this, not like a rejected
+  // promise. Both accommodation-search call sites must treat that the same
+  // as a thrown error, or a real failure renders as "no hotels found".
+  it('sets the error state when the search resolves with errors instead of throwing, in the main chat flow', async () => {
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [{ message: 'Duffel-Anfrage fehlgeschlagen' }] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayOffers).toBeNull()
+    expect(result.current.stayLoading).toBe(false)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
+  it('sets the error state when a retry via "Bearbeiten" resolves with errors instead of throwing', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [{ message: 'Duffel-Anfrage fehlgeschlagen' }] })
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
   it('offers "Neue Reise planen" as a next step when a retry via "Bearbeiten" fails too', async () => {
     vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
     const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
