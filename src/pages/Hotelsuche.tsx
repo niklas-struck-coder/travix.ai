@@ -77,7 +77,7 @@ export function Hotelsuche() {
       {offers && offers.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {offers.map((offer) => (
-            <HotelCard key={offer.id} offer={offer} onSelect={handleSelect} />
+            <HotelCard key={offer.id} offer={offer} onSelect={handleSelect} selected={offer.id === selectedOfferId} />
           ))}
         </div>
       )}

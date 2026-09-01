@@ -1,4 +1,4 @@
-import { Star, MapPin } from 'lucide-react'
+import { Star, MapPin, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { StayOffer } from '@/types/stays'
@@ -6,9 +6,10 @@ import type { StayOffer } from '@/types/stays'
 interface HotelCardProps {
   offer: StayOffer
   onSelect?: (offer: StayOffer) => void
+  selected?: boolean
 }
 
-export function HotelCard({ offer, onSelect }: HotelCardProps) {
+export function HotelCard({ offer, onSelect, selected }: HotelCardProps) {
   return (
     <Card className="overflow-hidden py-0">
       {offer.photoUrl && (
@@ -35,8 +36,19 @@ export function HotelCard({ offer, onSelect }: HotelCardProps) {
             {offer.totalAmount} {offer.totalCurrency}
           </span>
           {onSelect && (
-            <Button size="sm" onClick={() => onSelect(offer)} className="bg-teal text-navy hover:bg-teal/90">
-              Auswählen
+            <Button
+              size="sm"
+              onClick={() => onSelect(offer)}
+              disabled={selected}
+              className="bg-teal text-navy hover:bg-teal/90"
+            >
+              {selected ? (
+                <>
+                  <Check /> Ausgewählt
+                </>
+              ) : (
+                'Auswählen'
+              )}
             </Button>
           )}
         </div>

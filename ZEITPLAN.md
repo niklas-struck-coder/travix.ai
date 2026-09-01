@@ -155,7 +155,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Null-Treffer-zweiten-Suche blieben sogar dauerhaft veraltete Karten
   stehen). Jetzt setzt `handleSearch` `offers` genau wie in `Flugsuche.tsx`
   zu Beginn auf `null`. Neuer Regressionstest in `Hotelsuche.test.tsx`
-  (bisher gab es dort noch keine Tests).
+  (bisher gab es dort noch keine Tests). Vom autonomen IT-Chef-Lauf am 01.09.
+  (siebzehnter Lauf) einen weiteren Paritäts-Fund zwischen den beiden
+  strukturell identischen Seiten behoben: Anders als `FlightCard` (über
+  `Flugsuche.tsx`) bekam `HotelCard` nie mit, ob ihr Angebot gerade
+  ausgewählt ist — `Hotelsuche.tsx` berechnete `selectedOfferId` zwar
+  genauso wie `Flugsuche.tsx`, reichte es aber nie als Prop durch.
+  Ergebnis: nach einer Hotelauswahl blieb jede Karte (auch die gewählte)
+  mit aktivem "Auswählen"-Button stehen, ein erneuter Klick schrieb das
+  Trip-Feld wiederholt neu. `HotelCard` hat jetzt genau wie `FlightCard`
+  eine `selected`-Prop, die den Button deaktiviert und auf "Ausgewählt"
+  samt Häkchen-Icon umschaltet; `Hotelsuche.tsx` reicht `selected={offer.id
+  === selectedOfferId}` durch. Neuer Regressionstest in
+  `Hotelsuche.test.tsx`.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

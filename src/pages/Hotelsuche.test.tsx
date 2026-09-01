@@ -55,4 +55,28 @@ describe('Hotelsuche', () => {
     resolveSecondSearch({ offers: [makeOffer('2', 'Ryokan Kyoto')], errors: [] })
     await waitFor(() => expect(screen.getByText('Ryokan Kyoto')).toBeInTheDocument())
   })
+
+  it('marks the chosen hotel as selected and disables its button, leaving the other cards untouched', async () => {
+    const searchStaysMock = vi.mocked(searchStays)
+    searchStaysMock.mockResolvedValueOnce({
+      offers: [makeOffer('1', 'Hotel Alfama Suites'), makeOffer('2', 'Ryokan Kyoto')],
+      errors: [],
+    })
+
+    render(
+      <MemoryRouter>
+        <Hotelsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+    await waitFor(() => expect(screen.getByText('Hotel Alfama Suites')).toBeInTheDocument())
+
+    const selectButtons = screen.getAllByRole('button', { name: 'Auswählen' })
+    expect(selectButtons).toHaveLength(2)
+    fireEvent.click(selectButtons[0])
+
+    expect(await screen.findByRole('button', { name: 'Ausgewählt' })).toBeDisabled()
+    expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(1)
+  })
 })

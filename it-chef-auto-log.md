@@ -5784,3 +5784,72 @@ verschwinden und erst die neuen Ergebnisse wieder etwas anzeigen.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-01 (siebzehnter Lauf)
+
+Branch `it-chef/auto` war beim Start dieses Laufs bereits identisch mit
+dem Stand nach dem sechzehnten Lauf von heute (Commit zum
+`Hotelsuche.tsx`-Reset-Fix, ~52 Minuten zuvor) und enthielt alle
+`main`-Commits bis einschließlich des Support-Chef-Berichts vom 31.08. —
+direkt darauf weitergearbeitet, kein Merge nötig.
+
+`ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` erneut durchgesehen:
+dieselben Blocker wie in den Läufen elf bis sechzehn bei 2.x, 4.1-4.3, 5.7,
+6.2/6.6/6.7, 7.4, 7.12, 8.1-8.7, 8.9, 8.11-8.13 (Backend-/Gemini-
+Zugangsdaten, fehlende `TripDraft`-Preis-/Item-/Itinerar-Felder, offene
+Produktentscheidungen). Die beiden offenen Funde aus `reports/it-chef.md`
+(Flugsuche im Hauptchat-Ablauf, ausgewählter Flug im Reiseplan unsichtbar)
+bleiben aus denselben, dort dokumentierten Gründen nicht autonom
+umsetzbar. Die 7 offenen `it-chef-autofix/*`-PRs bleiben unverändert Nis
+manuellem Review vorbehalten (kein main-Zugriff in diesem Modus).
+
+Zusätzlich eine unabhängige Bug-Suche per Subagent über
+`src/components/search/*`, `src/hooks/useChat.ts`,
+`src/lib/ai/mockAdvisor.ts`, `src/lib/trip/*.ts`,
+`src/components/chat/*.tsx`, `src/components/results/*.tsx` und
+`src/lib/tripStorage.ts` — mit dem expliziten Hinweis, bereits gemeldete
+oder bereits als nicht-autonom-sicher eingestufte Funde nicht erneut zu
+melden. Ein Fund bestätigt, der alle vier Kriterien erfüllt (siehe unten).
+
+**Ausgewählter Punkt:** `HotelCard` (`src/components/search/HotelCard.tsx`)
+bekam anders als das strukturell identische `FlightCard`
+(`src/components/search/FlightCard.tsx`) nie mit, ob ihr Angebot gerade
+ausgewählt ist. `Hotelsuche.tsx` berechnete `selectedOfferId` genauso wie
+`Flugsuche.tsx`, reichte es aber nie als Prop an `HotelCard` durch (Zeile
+80: `<HotelCard key={offer.id} offer={offer} onSelect={handleSelect} />`,
+ohne `selected`). Ergebnis: nach einer Hotelauswahl blieb jede Karte —
+auch die gerade gewählte — mit aktivem "Auswählen"-Button stehen, ein
+erneuter Klick schrieb dasselbe Trip-Feld wiederholt neu, ohne dass für
+die Nutzerin erkennbar war, welche Unterkunft schon übernommen wurde.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig —
+reine Prop-Durchreichung nach bereits bestehendem, funktionierendem Muster
+in derselben Komponenten-Familie (`FlightCard`), keine neuen Felder oder
+Designentscheidungen. Klar beschrieben und durch direkten Vergleich mit
+`FlightCard`/`Flugsuche.tsx` ohne Interpretation umsetzbar. Objektiv
+prüfbar (neuer Test).
+
+**Umsetzung:** `HotelCard` hat jetzt genau wie `FlightCard` eine
+`selected?: boolean`-Prop, die den "Auswählen"-Button deaktiviert und auf
+"Ausgewählt" samt `Check`-Icon umschaltet. `Hotelsuche.tsx` reicht
+`selected={offer.id === selectedOfferId}` durch. Neuer Test in
+`Hotelsuche.test.tsx`: wählt bei zwei angezeigten Angeboten eines aus und
+prüft, dass genau dieses auf einen deaktivierten "Ausgewählt"-Button
+wechselt, während das andere weiterhin einen aktiven "Auswählen"-Button
+zeigt. `ZEITPLAN.md` (Sprint-1-Notiz zu 5.11) entsprechend ergänzt; keine
+Checkbox-Änderung nötig, da 5.1/5.3 bereits `[x]` waren.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen danach verworfen, gleiches Muster wie in
+  den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (`vitest run`) — 30 Testdateien, 128 Tests (127 + 1 neuer),
+  alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
