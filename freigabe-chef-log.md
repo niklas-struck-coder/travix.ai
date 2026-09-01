@@ -1756,6 +1756,9 @@ bestehende Farb-/Interaktionsmuster (Teal/Navy-Button-Stil von
 
 **Ergebnis:** `it-chef/auto` sauber, unabhängig verifiziert, per
 Fast-Forward nach `main` gemergt und nach `origin/main` gepusht
-(`c4e16a5..ef5c69c`). `marketing-chef/auto`/`support-chef/auto` ohne neue
+(`c4e16a5..ef5c69c`, plus dieser Log-Eintrag `..a2d6187`). `it-chef/auto`
+danach per Fast-Forward-Push auf den neuen `main`-Stand gebracht
+(`ef5c69c..a2d6187`), damit der nächste IT-Chef-Lauf sauber von dort
+weiterarbeitet. `marketing-chef/auto`/`support-chef/auto` ohne neue
 Commits, nichts zu tun. Keine Auffälligkeiten, kein Scope-Verstoß, keine
 Info an Ni nötig.
