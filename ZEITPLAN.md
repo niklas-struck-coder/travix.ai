@@ -176,7 +176,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   eine `selected`-Prop, die den Button deaktiviert und auf "Ausgewählt"
   samt Häkchen-Icon umschaltet; `Hotelsuche.tsx` reicht `selected={offer.id
   === selectedOfferId}` durch. Neuer Regressionstest in
-  `Hotelsuche.test.tsx`.
+  `Hotelsuche.test.tsx`. Vom autonomen IT-Chef-Lauf am 01.09. (neunzehnter
+  Lauf) einen weiteren, strukturell verwandten Fund im Hauptchat-Ablauf
+  (`useChat.ts`) behoben: `sendMessage` setzte beim Start jeder neuen
+  Chat-Nachricht zwar `stayError` und (außerhalb der IATA-Code-Abfrage)
+  `flightOffers` zurück, aber nie `flightErrors` — anders als beim
+  bereits bestehenden `stayError`-Muster eine Zeile darüber. Nach einer
+  fehlgeschlagenen Flugsuche blieb die rote Fehlerbox in
+  `FlightResults`/`KiChat.tsx` (Bedingung `flightErrors.length > 0`)
+  dauerhaft sichtbar, sobald die Nutzerin statt auf "Neue Reise planen"
+  zu klicken einfach normal weiterschrieb — einziger Ausweg war bisher
+  ein kompletter Chat-Neustart über `resetChat`. `sendMessage` löscht
+  `flightErrors` jetzt zusammen mit `flightOffers` (gleiche
+  `awaitingFlightOrigin`-Schutzbedingung, damit während der laufenden
+  IATA-Code-Abfrage nichts vorzeitig verschwindet). Neuer Regressionstest
+  in `useChat.test.ts`.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

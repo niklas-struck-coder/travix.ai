@@ -5929,3 +5929,77 @@ auffindbar bleibt. `ZEITPLAN.md` (Phase-3-Notiz) entsprechend ergänzt.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-01 (neunzehnter Lauf)
+
+`it-chef/auto` war beim Start hinter `main` (4 Commits: neue Berichte von
+IT-Chef/Marketing-Chef/Support-Chef sowie ein `status.md`-Update) —
+per Fast-Forward auf den aktuellen `main`-Stand gebracht und zuerst
+gepusht, bevor der eigentliche Punkt gesucht wurde. `main` blieb dabei
+unberührt, es wurde nur `it-chef/auto` aktualisiert.
+
+Für die Punktsuche zunächst `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` durchgesehen: alle offenen Punkte
+dort bleiben unverändert an denselben Blockern wie in den Vorläufen
+hängen (Backend-/Auth-Entscheidung, echte LLM-Anbindung, fehlende
+Zug/Bus/Fähre-Datenquelle, fehlende `TripDraft`-Preis-/Item-/
+Itinerar-Felder, offene Produktentscheidungen wie Premium-Preismodell
+OQ-03). Da das bereits der 19. Lauf an diesem Tag ist und die
+naheliegenden Checkbox-Punkte alle blockiert oder erledigt sind, wurde
+zusätzlich ein Subagent für eine gezielte, frische Bug-Suche über bisher
+seltener geprüfte Bereiche eingesetzt (`src/hooks/*`, `src/lib/trip/*`,
+`src/components/chat/*`, `src/components/search/*`, Formular-
+Validierungen, Datums-/Zeitzonen-Handling, Barrierefreiheit, tote Links,
+Zustands-Paritäten zwischen strukturell ähnlichen Komponenten) mit der
+expliziten Vorgabe, bereits bekannte/blockierte Themen sowie die in den
+letzten drei Läufen (16.-18.) bereits gefixten Stellen nicht erneut zu
+meiden, aber auch nicht erneut oberflächlich abzugrasen.
+
+**Ausgewählter Punkt:** `src/hooks/useChat.ts`, Funktion `sendMessage`
+(Zeilen 188-196). Beim Senden einer neuen Chat-Nachricht setzte
+`sendMessage` konsequent `stayOffers`/`stayError` zurück sowie (außerhalb
+der laufenden IATA-Code-Abfrage) `flightOffers` — `flightErrors` jedoch
+nie. Einzige Stellen, die `flightErrors` bisher leerten, waren der Start
+einer neuen echten Flugsuche (`runFlightSearch`) und ein kompletter
+`resetChat()`. Folge: Schlägt eine Flugsuche fehl, füllt der `.catch`-Zweig
+`flightErrors`, und `KiChat.tsx` zeigt darauf dauerhaft die rote
+Fehlerbox von `FlightResults` (Bedingung `flightErrors.length > 0`).
+Schreibt die Nutzerin danach normal weiter, statt auf "Neue Reise
+planen" zu klicken, blieb diese veraltete Fehlermeldung für den Rest der
+Sitzung stehen, obwohl `flightOffers` korrekt geleert wurde und der Chat
+inhaltlich längst weitergezogen war — einziger Ausweg war bisher ein
+kompletter Neustart über `resetChat`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig
+— das Muster "bei neuer Nachricht alten Such-Fehlerzustand löschen"
+existiert bereits exakt für `stayError` eine Zeile darüber, der Fix
+kopiert nur dieses etablierte Verhalten auf `flightErrors`. Exakt
+lokalisiert (`useChat.ts:188-196`), keine Interpretation nötig. Objektiv
+prüfbar: bestehendes Testmuster für `stayError` (`useChat.test.ts`,
+"clears a previous error once ... restarts the chat") ließ sich direkt
+auf einen neuen Test für `flightErrors` nach einer normalen `sendMessage`
+übertragen.
+
+**Umsetzung:** In `sendMessage` wird `flightErrors` jetzt zusammen mit
+`flightOffers` geleert, mit derselben `awaitingFlightOrigin`-Schutz-
+bedingung wie zuvor schon für `flightOffers`, damit während der laufenden
+IATA-Code-Abfrage nichts vorzeitig verschwindet. Neuer Test
+`useChat.test.ts`: "clears a stale flight error once the chat moves on
+with a normal message" — löst zunächst eine fehlschlagende Flugsuche
+aus, prüft `flightErrors.length > 0`, ruft dann `sendMessage` mit einer
+normalen Nachricht auf und erwartet `flightErrors` als geleert.
+`ZEITPLAN.md` (5.11-Notiz) entsprechend ergänzt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 31 Testdateien, 131 Tests (130 + 1 neuer), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

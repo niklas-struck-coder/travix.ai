@@ -190,7 +190,10 @@ export function useChat(speechEnabled: boolean) {
     setQuickReplies([])
     setStayOffers(null)
     setStayError(false)
-    if (!awaitingFlightOrigin) setFlightOffers(null)
+    if (!awaitingFlightOrigin) {
+      setFlightOffers(null)
+      setFlightErrors([])
+    }
     setIsThinking(true)
     setAvatarState('thinking')
 

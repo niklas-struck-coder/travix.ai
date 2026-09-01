@@ -257,4 +257,21 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
   })
+
+  it('clears a stale flight error once the chat moves on with a normal message', async () => {
+    vi.mocked(searchFlights).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(result.current.flightErrors.length).toBeGreaterThan(0)
+
+    act(() => {
+      result.current.sendMessage('Danke, das passt so.')
+    })
+
+    expect(result.current.flightErrors).toEqual([])
+  })
 })
