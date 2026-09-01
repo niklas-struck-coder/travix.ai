@@ -1,57 +1,48 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-08-29
+**Datum:** 2026-09-01
 
-## Was ist seit dem letzten Eintrag (2026-08-28) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-29) passiert?
 
-Zwei Dinge sind aus Marketing-Sicht relevant:
+Drei Tage lang ging's fast ausschließlich um dasselbe Thema, das wir letztes
+Mal schon "Ehrlichkeits-Log" getauft haben — diesmal aber mit klarem
+Schwerpunkt: **echte Fehler von "keine Treffer" unterscheiden.**
 
-**Navigation nachgerüstet.** Dashboard, Kalender, Karte, Aktivitäten,
-Angebote, Favoriten und Preisalarme waren bisher nur per direkter URL
-erreichbar, jetzt stehen sie in der echten Navigation. Klingt technisch,
-ist aber für uns wichtig: Ein Produkt-Rundgang oder Demo-Video konnte
-bisher nicht zeigen, wie man von A nach B kommt, weil man die Seiten gar
-nicht hätte "entdecken" können, ohne die URL zu kennen. Das ist jetzt
-kein Blocker mehr.
+- Flug-Chat hatte eine Sackgasse ohne Ausweg — behoben.
+- Unterkunftssuche und Flugsuche zeigten bei einem echten Suchfehler (Timeout,
+  API kaputt, etc.) bisher dasselbe wie bei "keine Angebote gefunden" — jetzt
+  unterscheidbar, inklusive sichtbarer Fehleranzeige und Quick-Replies zum
+  Weitermachen (bisher nur im Bearbeiten-Pfad).
+- Dazu drei reine UI-Bugs gefixt: Hotelsuche zeigte nach neuer Suche noch alte
+  Treffer, die Hotelkarte zeigte nie an, welches Hotel ausgewählt ist, und der
+  Sidebar-Einklappen-Button war für Screenreader nicht benannt.
 
-**Zweiter Ehrlichkeits-Fix im Chat.** `mockAdvisor.ts` hat am Ende jedes
-Chatflows für Zug/Bus/Fähre/Mietwagen "Ich suche jetzt nach echten
-X-Verbindungen" versprochen — obwohl das nur für Flug überhaupt passiert.
-Diese vier Modi bekommen jetzt eine ehrliche Abschlussmeldung statt eines
-Versprechens ins Leere. Der IT-Chef hat beim Prüfen direkt eine
-Anschluss-Lücke gefunden: Auch bei Flug fragt der Haupt-Chatflow nie nach
-dem Startflughafen, die "echte Suche" läuft also im Hauptfluss aktuell
-gar nicht automatisch los (nur über den separaten Bearbeiten-Pfad) — noch
-ungefixt.
-
-Die sieben offenen PRs sind weiterhin unverändert offen (ältester jetzt
-seit drei Wochen), keine Bewegung seit dem letzten Bericht — dazu diesmal
-kein neuer Vorschlag, das Muster ist bereits benannt.
+Wichtig für uns: Zwei neue Fixes (PR #10, #11) sind noch **nicht gemerged** —
+sie beheben denselben Fehler-vs-Nulltreffer-Bug jetzt auch im Haupt-Chatablauf
+der Unterkunftssuche (bisher nur der Bearbeiten-Pfad war repariert). Bis die
+gemerged sind, gilt die Ehrlichkeits-Geschichte für Hotels im Hauptablauf noch
+nicht vollständig.
 
 ## Vorschläge
 
-1. **Jetzt einen echten Produkt-Rundgang vorbereiten, nicht nur planen.**
-   Mit der Nav-Nachrüstung kannst du zum ersten Mal einen Screen-Recording
-   machen, der zeigt, wie man von der Chat-Planung zum Dashboard, zur
-   Kalenderansicht und zu Preisalarmen navigiert — ohne Schnitt-Tricks
-   oder URL-Adressleiste im Bild. Das ist die Grundlage für ein
-   glaubwürdiges "So funktioniert Travix"-Video, sobald ein Kanal steht.
+1. **Das "Ehrlichkeits-Log" jetzt tatsächlich starten — mit echtem Material.**
+   Wir haben nicht mehr nur ein Beispiel, sondern eine ganze Serie: Zug/Bus/
+   Fähre-Versprechen korrigiert, Flug-Sackgasse behoben, jetzt Fehler vs.
+   Nulltreffer bei Flug und Unterkunft. Das ist genug Stoff für 3-4 kurze
+   Vorher/Nachher-Posts ("Travix hat gesagt X, jetzt sagt es ehrlich Y") ohne
+   erfundene Zahlen — nur echte, im Code sichtbare Verbesserungen.
 
-2. **"Ehrlichkeits-Log" als festes Format vorschlagen.** Das ist jetzt
-   der dritte konkrete Fall (Punktzahl-Leerstelle, Zug/Bus/Fähre-Fix,
-   und jetzt der Flug-Nachfolge-Fund) von "wir zeigen lieber ehrlich eine
-   Lücke als ein leeres Versprechen". Statt jeden Fall einzeln als Idee
-   zu bringen: das als wiederkehrendes Mini-Format vorschlagen (ein Satz
-   Vorher/Nachher pro Post) — das beantwortet nebenbei auch deine offene
-   Frage nach einem wiederkehrenden Format mit einem echten Beispiel
-   statt einer weiteren Theorie-Runde.
+2. **Erst auf PR #10/#11 warten, bevor du den Hotel-Teil davon bewirbst.**
+   Der Fehler-vs-Nulltreffer-Fix für Unterkünfte ist im Hauptablauf noch offen.
+   Wenn ein Post sinngemäß "Travix sagt dir ehrlich, wenn die Hotelsuche
+   fehlschlägt" behauptet, warte bis diese zwei PRs gemerged sind — sonst
+   ist die Behauptung im Hauptchat noch nicht ganz wahr.
 
-3. **Vorsicht bei der Flug-Suche-Behauptung.** Falls irgendwo schon Text
-   in Vorbereitung ist, der sinngemäß "im Chat direkt echte Flüge suchen"
-   sagt: Laut IT-Chef-Fund passiert das im Haupt-Chatflow aktuell nicht
-   automatisch (fehlender Startflughafen-Schritt). Bis das gefixt ist,
-   lieber nicht als Chat-Feature bewerben, sondern höchstens als
-   "im Bearbeiten-Modus verfügbar" — sonst bauen wir uns selbst den
-   nächsten Ehrlichkeits-Fall.
+3. **Kein Demo-Material zur Hotelauswahl vor dem 2026-09-01-Fix nutzen.**
+   Bis eben zeigte die Hotelkarte nie an, welches Hotel man ausgewählt hat,
+   und die Suche zeigte teils veraltete Treffer. Falls irgendwo schon
+   Screenshots oder ein Recording der Hotelsuche kursieren: die sind jetzt
+   veraltet und sollten nicht mehr verwendet werden — neues Material ab
+   heute ist zuverlässiger.
 
-_Letztes Update: 2026-08-29_
+_Letztes Update: 2026-09-01_
