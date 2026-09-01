@@ -1708,3 +1708,54 @@ stimmen. → gemerged (`--no-ff`, `ae94123`).
 gemerged und nach `origin/main` gepusht (`1eda933..ae94123`). `it-chef/auto`
 ohne neue Commits, nichts zu tun. Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-01, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (fünfzehnter bis achtzehnter
+  Lauf vom 31.08./01.09.; fünfzehnter Lauf ist ein reiner Log-Eintrag
+  ohne Codeänderung).
+- `marketing-chef/auto` — keine neuen Commits gegenüber `main` (bereits
+  gemerged, läuft erst um 6 Uhr). Ignoriert wie vorgesehen.
+- `support-chef/auto` — keine neuen Commits gegenüber `main` (bereits
+  gemerged, läuft erst um 6 Uhr). Ignoriert wie vorgesehen.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch ausgecheckt, frisch
+`npm install`, dann selbst ausgeführt statt nur dem Log zu glauben):
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx`.
+- `npx vitest run` — 31 Testdateien, 130 Tests, alle grün.
+Ergebnisse decken sich mit den Angaben im `it-chef-auto-log.md`
+(sechzehnter bis achtzehnter Lauf).
+
+**Diff zu `main` durchgesehen** (`ZEITPLAN.md`, `it-chef-auto-log.md`,
+`KiChat.tsx`, `Sidebar.tsx`/`.test.tsx`, `HotelCard.tsx`, `useChat.ts`/
+`.test.ts`, `Hotelsuche.tsx`/`.test.tsx`): vier eigenständige, klar
+abgegrenzte Bugfixes, jeder mit neuem Test:
+1. `useChat.ts` — Quick-Replies wurden nach fehlgeschlagener Flug-/
+   Unterkunftssuche in den "Bearbeiten"-Pfaden nicht zurückgesetzt,
+   sodass keine Weiterführung ("Neue Reise planen") angeboten wurde
+   (`KiChat.tsx`-Anzeigebedingung entsprechend ergänzt).
+2. `Hotelsuche.tsx` — `offers` wurde beim Start einer neuen Suche nicht
+   auf `null` zurückgesetzt (alte Karten blieben sichtbar), analog zu
+   `Flugsuche.tsx` korrigiert.
+3. `HotelCard.tsx` — bekam den Auswahlstatus nie durchgereicht (anders
+   als `FlightCard`), Button blieb nach Auswahl aktiv; jetzt analog zu
+   `FlightCard` mit `selected`-Prop.
+4. `Sidebar.tsx` — Einklappen-Button hatte im eingeklappten Zustand kein
+   `aria-label`, dadurch für Screenreader unbeschriftet; jetzt analog
+   zum bestehenden Muster bei den `NavLink`-Einträgen ergänzt.
+
+Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder rechtlichen Texten. Kein
+Scope-Creep — jeder Commit betrifft genau den im Log beschriebenen
+einzelnen Punkt. UI-Änderungen (`HotelCard`, `Sidebar`) übernehmen exakt
+bestehende Farb-/Interaktionsmuster (Teal/Navy-Button-Stil von
+`FlightCard`, `aria-label`-Muster von `NavLink`) — passt zu
+`MARKENDESIGN.md`.
+
+**Ergebnis:** `it-chef/auto` sauber, unabhängig verifiziert, per
+Fast-Forward nach `main` gemergt und nach `origin/main` gepusht
+(`c4e16a5..ef5c69c`). `marketing-chef/auto`/`support-chef/auto` ohne neue
+Commits, nichts zu tun. Keine Auffälligkeiten, kein Scope-Verstoß, keine
+Info an Ni nötig.
