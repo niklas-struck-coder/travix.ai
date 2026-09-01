@@ -1,10 +1,79 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-08-31)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-01)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-01: Flug-Fehleranzeige-Nachfolgefix und Hotelsuche-Stale-Ergebnisse geprüft — zwei weitere Tier-4-Kandidaten, zwei reine UI-/A11y-Fixes ohne Content-Relevanz, weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`b78378a`,
+31.08., laut `git merge-base --is-ancestor` bereits vollständig in `main`
+gemerged) geprüft: zwölf neue Commits. Der größte Teil ohne
+Content-Relevanz — ein Daily-Status-Update, drei Freigabe-Chef-Merges/
+-Logs, ein Support-Chef-Bericht (`c4e16a5`) und -Auto-Log (`f96ddbc`,
+beide zur selben Fehleranzeige-Situation wie unten, keine eigene neue
+Information für Content) sowie ein IT-Chef-Auto-Lauf ohne sicheren Punkt
+(`044b289`).
+
+Vier echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`7b65423` (31.08., vierzehnter IT-Chef-Lauf, Flug-Fehleranzeige
+  tatsächlich sichtbar gemacht):** Direkte Fortsetzung des bereits am
+  31.08. dokumentierten Fixes `b9d0267` (Flugsuche-Fehler jetzt in
+  `flightErrors` statt `flightOffers: []`) — der Zustand wurde zwar seit
+  `b9d0267` korrekt gesetzt, aber `KiChat.tsx` prüfte beim Rendern von
+  `<FlightResults>` nur `flightLoading`/`flightOffers`, nicht
+  `flightErrors`. Ergebnis: nach einem echten Suchfehler sah die Nutzerin
+  nach dem "sucht"-Avatar buchstäblich nichts mehr — die Fehlermeldung
+  aus `b9d0267` existierte im State, kam aber nie auf dem Bildschirm an.
+  Zusätzlich bekamen die beiden "Bearbeiten"-Fehlerpfade (Unterkunft,
+  Flug) nach einem Fehlschlag jetzt ebenfalls `['Neue Reise planen']`
+  statt leerer `quickReplies`, analog dem Hauptchat-Ausweg aus `c2fff0b`.
+  Schließt damit die Lücke, die der eigene Eintrag vom 31.08. noch nicht
+  kennen konnte (der Fix kam erst danach).
+- **`0042f68` (01.09., sechzehnter IT-Chef-Lauf, Hotelsuche zeigte
+  veraltete Ergebnisse als aktuelle):** `Hotelsuche.tsx` setzte `offers`
+  vor einer neuen Suche anders als das strukturell identische
+  `Flugsuche.tsx` nicht auf `null` zurück — eine zweite Suche zeigte bis
+  zur Antwort weiterhin die alten Hotelkarten der ersten Suche, bei einer
+  echten Null-Treffer-zweiten-Suche blieben sogar dauerhaft veraltete
+  Karten stehen. Im Kern derselbe Ehrlichkeits-Charakter wie die bereits
+  gelisteten Fehler-/Null-Treffer-Fixes: eine Nutzerin sah Ergebnisse, die
+  nicht zu ihrer aktuellen Suche gehörten, ohne das erkennen zu können.
+
+Zwei weitere Codeänderungen geprüft, aber bewusst **nicht** in den
+Tier-4-Kandidatentopf aufgenommen, da reine UI-Paritäts- bzw.
+Barrierefreiheits-Korrekturen ohne "ehrlich vs. irreführend"-Erzählung
+(gleiche Einstufung wie z. B. die drei A11y-Fixes vom 29.08. oder der
+ChecklistPanel-Icon-Fix vom 28.08., beide damals ebenfalls als "ohne
+Content-Relevanz" eingestuft):
+
+- **`ce59905` (01.09., siebzehnter IT-Chef-Lauf):** `HotelCard` bekam nie
+  mit, ob ihr Angebot ausgewählt ist (Paritätslücke zu `FlightCard`) —
+  jetzt korrigiert. Kein irreführender Zustand für die Nutzerin, nur ein
+  wiederholt klickbarer Button ohne visuelles Feedback.
+- **`ef5c69c` (01.09., achtzehnter IT-Chef-Lauf):** Sidebar-Einklappen-
+  Button hatte im eingeklappten Zustand keinen erreichbaren Namen mehr —
+  reiner Barrierefreiheits-Fix, kein Content-Anlass.
+
+**Warum trotzdem kein achtes Content-Stück:** Dieselbe Prüfung wie bei
+jedem bisherigen Lauf — `ZEITPLAN.md` führt 6.2 (Buchen-Button) weiterhin
+als offen (Zeile 182), kein neuer Kanal/keine Landingpage live (Zeile
+452), und `status.md` (Stand 31.08.) sowie dieses Dokument enthalten
+keine Notiz von Ni zu einer der drei unten offenen Fragen. Alle drei
+Bedingungen für ein neues, eigenständiges Stück bleiben damit unverändert
+unerfüllt. Die zwei neuen Fixes werden stattdessen unten im
+Tier-4-Kandidatentopf (Punkt 7) ergänzt.
+
+**Warum sicher genug für eine Dokument-Ergänzung:** reine
+Übersichts-Aktualisierung, kein Live-Vorgang — nichts gepostet, kein
+Kanal angelegt, kein bestehender Abschnitt verändert oder gelöscht (nur
+diese neue Sektion und eine Ergänzung im bestehenden Tier-4-Punkt).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+trägt nur bereits im Repo nachprüfbare Fakten nach (Commit-Historie,
+Code-Diffs, `ZEITPLAN.md`-Stand).
 
 ## Update 2026-08-31: drei weitere Ehrlichkeits-/Fehler-Fixes geprüft — Tier-4-Kandidatentopf wächst weiter, weiterhin kein achtes Content-Stück
 
@@ -320,7 +389,12 @@ Anfang-bis-Ende-Weg im Code.
    sowie seit 30./31.08. drei weitere: die behobene Flug-Sackgasse ohne
    Ausweg, und die jetzt unterscheidbaren echten Suchfehler bei
    Unterkunfts- und Flugsuche statt eines irreführenden "keine
-   Treffer"-Zustands (siehe Update 2026-08-31 oben). Der eigene Bericht
+   Treffer"-Zustands (siehe Update 2026-08-31 oben), sowie seit
+   31.08./01.09. zwei weitere: die jetzt tatsächlich sichtbare
+   Flug-Fehlermeldung (der 31.08.-Fix hatte den Zustand nur gesetzt, nicht
+   angezeigt) und die Hotelsuche, die eine zweite Suche nicht mehr mit
+   veralteten Ergebnissen der ersten verwechselbar macht (siehe Update
+   2026-09-01 oben). Der eigene Bericht
    vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
    Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
