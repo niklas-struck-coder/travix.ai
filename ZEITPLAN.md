@@ -110,7 +110,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   "Bearbeiten"-Suchpfade (Unterkunft in `startEdit`, Flug in
   `runFlightSearch`) nach einem Fehlschlag `quickReplies` leer, statt wie
   der Hauptchat-Ablauf `['Neue Reise planen']` anzubieten — beide
-  `.catch`-Zweige setzen das jetzt zusätzlich.
+  `.catch`-Zweige setzen das jetzt zusätzlich. Vom autonomen IT-Chef-Lauf
+  am 01.09. (zwanzigster Lauf) einen von `reports/support-chef.md`
+  (01.09.) gemeldeten Fund auf den eigenständigen `/hotelsuche`- und
+  `/flugsuche`-Seiten behoben: `handleSelect` markierte die angeklickte
+  Karte über `selectedOfferId` immer sofort als "Ausgewählt" (grünes
+  Häkchen, Button deaktiviert) — unabhängig davon, ob `updateStoredTrip()`
+  wirklich erfolgreich war. Schlug die Übernahme fehl (keine im KI-Chat
+  begonnene Reiseplanung), zeigte die Seite zwar korrekt den Warnhinweis
+  darunter, die Karte selbst suggerierte aber weiterhin eine gespeicherte
+  Auswahl und ließ sich nicht erneut anklicken. Beide Seiten reichen
+  `selected` an `HotelCard`/`FlightCard` jetzt zusätzlich mit
+  `&& selectionHasTrip` durch, sodass der Button im Fehlerfall auf
+  "Auswählen" stehen und klickbar bleibt, exakt wie im Warnhinweis
+  beschrieben. Neue Regressionstests in `Hotelsuche.test.tsx` sowie eine
+  neue `Flugsuche.test.tsx` (bisher gab es dort noch keine Tests).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

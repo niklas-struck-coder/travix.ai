@@ -1,13 +1,21 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Hotelsuche } from './Hotelsuche'
 import { searchStays } from '@/lib/duffel/client'
+import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
+import { emptyTrip } from '@/lib/ai/mockAdvisor'
+import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { StayOffer } from '@/types/stays'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchStays: vi.fn(),
 }))
+
+function seedStoredChat() {
+  const state: StoredChatState = { messages: [], trip: { ...emptyTrip, destination: 'Lissabon' }, quickReplies: [] }
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+}
 
 // Real HotelWizard requires picking a destination from a Radix Select and
 // filling two date inputs — none of that matters for this bug, which lives
@@ -31,6 +39,10 @@ function makeOffer(id: string, name: string): StayOffer {
 }
 
 describe('Hotelsuche', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it('clears previous offers as soon as a new search starts, instead of leaving them visible during loading', async () => {
     const searchStaysMock = vi.mocked(searchStays)
     let resolveSecondSearch: (value: { offers: StayOffer[]; errors: never[] }) => void = () => {}
@@ -57,6 +69,7 @@ describe('Hotelsuche', () => {
   })
 
   it('marks the chosen hotel as selected and disables its button, leaving the other cards untouched', async () => {
+    seedStoredChat()
     const searchStaysMock = vi.mocked(searchStays)
     searchStaysMock.mockResolvedValueOnce({
       offers: [makeOffer('1', 'Hotel Alfama Suites'), makeOffer('2', 'Ryokan Kyoto')],
@@ -78,5 +91,29 @@ describe('Hotelsuche', () => {
 
     expect(await screen.findByRole('button', { name: 'Ausgewählt' })).toBeDisabled()
     expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(1)
+  })
+
+  it('does not mark a hotel as selected when there is no active trip to save it into, and keeps the button clickable', async () => {
+    const searchStaysMock = vi.mocked(searchStays)
+    searchStaysMock.mockResolvedValueOnce({
+      offers: [makeOffer('1', 'Hotel Alfama Suites'), makeOffer('2', 'Ryokan Kyoto')],
+      errors: [],
+    })
+
+    render(
+      <MemoryRouter>
+        <Hotelsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+    await waitFor(() => expect(screen.getByText('Hotel Alfama Suites')).toBeInTheDocument())
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Auswählen' })[0])
+
+    await screen.findByText(/gibt noch keine aktive Reiseplanung/)
+    expect(screen.queryByRole('button', { name: 'Ausgewählt' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Auswählen' })[0]).not.toBeDisabled()
   })
 })

@@ -6003,3 +6003,81 @@ normalen Nachricht auf und erwartet `flightErrors` als geleert.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-01 (zwanzigster Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag genau auf dem neunzehnten Lauf
+von heute (Fix des veralteten `flightErrors`-Zustands in `useChat.ts`),
+der bereits auf dem aktuellen `main` (`81e000b`) aufbaut — kein neuer
+`main`-Commit seitdem, kein Merge nötig.
+
+**Punkt-Suche:** `ZEITPLAN.md` und die offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — unverändert
+dieselben Blocker wie in den Vorläufen (Backend-/Auth-Entscheidung, echte
+LLM-Anbindung, fehlende Zug/Bus/Fähre-Datenquelle, fehlende
+`TripDraft`-Preis-/Item-/Itinerar-Felder, offene Produktentscheidungen).
+Diesmal aber ein konkreter, bereits fertig analysierter Fund direkt in
+`reports/support-chef.md` (01.09., letzter Eintrag) verfügbar, samt
+präzisem Fundort und Fix-Vorschlag — keine eigene Bug-Suche per Subagent
+nötig.
+
+**Ausgewählter Punkt:** `src/pages/Hotelsuche.tsx` und
+`src/pages/Flugsuche.tsx`, jeweils `handleSelect`. Support-Chef meldete:
+Ein Klick auf "Auswählen" setzt `selectedOfferId` unabhängig davon, ob
+`updateStoredTrip(...)` erfolgreich war (`updated !== null`). Schlägt die
+Übernahme fehl (keine im KI-Chat begonnene Reiseplanung), zeigt die Seite
+zwar korrekt den Warnhinweis ("Es gibt noch keine aktive Reiseplanung …"),
+die angeklickte Karte (`HotelCard`/`FlightCard`) schaltet aber trotzdem
+sofort auf den grünen "Ausgewählt"-Zustand um (`disabled={selected}`) und
+lässt sich nicht erneut anklicken — wer die Warnung überliest, denkt, die
+Auswahl sei gespeichert.
+
+Support-Chefs eigener Formulierungsvorschlag (`setSelectedOfferId` nur
+bei Erfolg setzen) hätte allerdings einen Nebeneffekt gehabt: Der gesamte
+Warnhinweis-Block ist selbst an `selectedOfferId` geknüpft
+(`{selectedOfferId && (...)}`) — ohne das Setzen wäre auch der Warnhinweis
+nie mehr erschienen, der Fehlerfall also komplett stumm geblieben. Beim
+Umsetzen deshalb bewusst abgewichen: `selectedOfferId`/`selectionHasTrip`
+bleiben wie bisher gesetzt (der Warnhinweis funktioniert weiterhin exakt
+wie gebaut), stattdessen wird nur die an `HotelCard`/`FlightCard`
+durchgereichte `selected`-Prop um `&& selectionHasTrip` ergänzt. Ergebnis:
+Warnhinweis erscheint wie gewohnt, die Karte bleibt im Fehlerfall aber auf
+"Auswählen" stehen und klickbar — exakt das von Support-Chef beschriebene
+Zielverhalten, nur ohne den Warnhinweis kaputtzumachen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — reiner Bugfix nach bereits von
+Support-Chef exakt lokalisiertem, im Code nachvollziehbarem Fund. Klar
+beschrieben und ohne Interpretation über den gemeldeten Fund hinaus
+umsetzbar (die einzige Abweichung vom wörtlichen Formulierungsvorschlag
+ist durch den bestehenden Code selbst erzwungen, keine eigene Annahme).
+Objektiv prüfbar (neue Tests für Erfolgs- und Fehlerfall auf beiden
+Seiten).
+
+**Umsetzung:** In `Hotelsuche.tsx` und `Flugsuche.tsx` wird die
+`selected`-Prop jetzt als `offer.id === selectedOfferId && selectionHasTrip`
+berechnet statt nur `offer.id === selectedOfferId`. Bestehender Test in
+`Hotelsuche.test.tsx` ("marks the chosen hotel as selected …") jetzt mit
+`seedStoredChat()` (gleiches Muster wie in `Buchung.test.tsx`) versehen,
+da er implizit den Erfolgsfall prüft und ohne hinterlegten Trip in
+`localStorage` durch den Fix sonst fehlgeschlagen wäre. Neuer Test prüft
+den Fehlerfall (kein hinterlegter Trip): Warnhinweis erscheint, kein
+"Ausgewählt"-Button, beide Karten bleiben mit aktivem "Auswählen"-Button
+stehen. Für `Flugsuche.tsx` gab es bisher keine Testdatei — neue
+`Flugsuche.test.tsx` nach exakt demselben Muster wie
+`Hotelsuche.test.tsx` (Erfolgs- und Fehlerfall). `ZEITPLAN.md`
+(5.11-Notiz) entsprechend ergänzt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 32 Testdateien, 134 Tests (131 + 3 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

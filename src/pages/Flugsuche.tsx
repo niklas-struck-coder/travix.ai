@@ -76,7 +76,12 @@ export function Flugsuche() {
       {offers && offers.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {offers.map((offer) => (
-            <FlightCard key={offer.id} offer={offer} onSelect={handleSelect} selected={offer.id === selectedOfferId} />
+            <FlightCard
+              key={offer.id}
+              offer={offer}
+              onSelect={handleSelect}
+              selected={offer.id === selectedOfferId && selectionHasTrip}
+            />
           ))}
         </div>
       )}
