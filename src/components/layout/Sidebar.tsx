@@ -56,6 +56,7 @@ export function Sidebar() {
 
       <button
         onClick={() => setCollapsed((value) => !value)}
+        aria-label={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen'}
         className="flex items-center gap-2 border-t border-sidebar-border px-4 py-3 text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground"
       >
         {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}

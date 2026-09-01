@@ -32,7 +32,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - ✅ Phase 1 Scaffolding (Vite, Tailwind, shadcn/ui, Routing)
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
-  nicht nach `main` gemerged)
+  nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
+  (achtzehnter Lauf) ein Barrierefreiheits-Fund behoben: Der Einklappen-
+  Button in `Sidebar.tsx` hatte im eingeklappten Zustand keinen
+  erreichbaren Namen mehr (nur noch das Icon, der Text "Einklappen" wird
+  dann ausgeblendet) — Screenreader kündigten ihn als unbeschrifteten
+  Button an. Jetzt ein `aria-label`, das sich analog zum bestehenden
+  Muster in `Kalender.tsx`/`Reiseentwuerfe.tsx` mit dem Zustand ändert
+  ("Seitenleiste einklappen"/"Seitenleiste ausklappen"). Neue
+  `Sidebar.test.tsx` (bisher gab es dort keinen Test) prüft beide
+  Zustände.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.)
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,

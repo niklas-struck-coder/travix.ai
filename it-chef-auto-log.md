@@ -5853,3 +5853,79 @@ Checkbox-Änderung nötig, da 5.1/5.3 bereits `[x]` waren.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-01 (achtzehnter Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag genau auf dem siebzehnten Lauf
+von heute (Commit zum `HotelCard`-`selected`-Prop-Fix), der bereits auf
+dem aktuellen `main` (`c4e16a5`) aufbaut — kein neuer `main`-Commit
+seitdem, kein Merge nötig.
+
+**Punkt-Suche:** `ZEITPLAN.md` und die offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` erneut einzeln durchgesehen
+(2.x, 4.1-4.3, 5.7, 6.2/6.6/6.7, 7.4, 7.12, 8.1-8.7, 8.9, 8.11-8.13) —
+dieselben Blocker wie in den Läufen elf bis siebzehn (Backend-/Gemini-
+Zugangsdaten, fehlende `TripDraft`-Preis-/Item-/Itinerar-Felder, offene
+Produktentscheidungen). Zusätzlich `tasks/prd-travix-platform.md` gezielt
+auf 8.9 (Premium-Seite) geprüft: OQ-03 dort ("What specific features and
+pricing define Travix Premium tier?") ist weiterhin offen — 8.9 bleibt
+daher wie in den Vorläufen eine Produktentscheidung, kein autonom
+umsetzbarer Punkt. Die beiden offenen Funde aus `reports/it-chef.md`
+(Flugsuche im Hauptchat-Ablauf, ausgewählter Flug im Reiseplan unsichtbar)
+sowie die zwei Funde aus `reports/support-chef.md` (31.08., beide bereits
+im vierzehnten Lauf behoben) bleiben unverändert. Die 7 offenen
+`it-chef-autofix/*`-PRs bleiben unverändert Nis manuellem Review
+vorbehalten (kein main-Zugriff in diesem Modus).
+
+Zusätzlich eine unabhängige Bug-Suche per Subagent über bisher nicht im
+Log erwähnte Dateien (Layout-Komponenten, `TripSummaryCard.tsx`,
+`ChecklistPanel.tsx`/`EditMode.tsx`, alle bisher ungeprüften Seiten,
+`routes.tsx`, `nav-config.ts`, `useConcierge.ts`, `mockConcierge.ts`,
+`speech.ts`, `duffel/client.ts`, `src/types/*.ts`) mit dem expliziten
+Hinweis, bereits gemeldete oder bereits als nicht-autonom-sicher
+eingestufte Funde nicht erneut zu melden. Ein Fund bestätigt, der alle
+vier Kriterien erfüllt (siehe unten); ein zweiter Kandidat (Jahres-
+Unstimmigkeit 2026 vs. 2027 bei der Kyoto-Demo-Reise zwischen
+`MeineReisen.tsx`/`Kalender.tsx` und `Dashboard.tsx`/`Reiseentwuerfe.tsx`)
+wurde verworfen: das kann genauso gut zwei unterschiedliche Reisen (eine
+vergangene, ein künftiger Entwurf) darstellen wie ein echter Fehler —
+ohne Rückfrage bei Ni wäre jede Korrektur eine Annahme, kein reiner
+Faktenabgleich.
+
+**Ausgewählter Punkt:** Der Einklappen-Button in
+`src/components/layout/Sidebar.tsx` (Zeilen 57-63) verlor im
+eingeklappten Zustand jeden erreichbaren Namen. Der sichtbare Text
+"Einklappen" wird per `{!collapsed && 'Einklappen'}` ausgeblendet, übrig
+bleibt nur das nackte `ChevronsRight`-Icon ohne jedes `aria-label` — ein
+Screenreader kündigt den Button dann unbeschriftet an. Die Sidebar zeigt
+für die `NavLink`-Einträge direkt daneben bereits Bewusstsein für genau
+dieses Problem (`title={collapsed ? item.label : undefined}`, Zeile 38),
+wendet dieselbe Behandlung aber nie auf den eigenen Toggle-Button an.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig —
+reine Barrierefreiheits-Korrektur nach bereits bestehendem, etabliertem
+Muster im selben Codebase (dynamisches `aria-label` je nach Zustand, exakt
+wie beim Pause/Play-Button in `Reiseentwuerfe.tsx` und den Monats-Pfeilen
+in `Kalender.tsx`). Klar beschrieben und ohne Interpretation umsetzbar.
+Objektiv prüfbar (neuer Test für beide Zustände).
+
+**Umsetzung:** `Sidebar.tsx`s Einklappen-Button hat jetzt ein
+`aria-label={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste
+einklappen'}`. Neue `src/components/layout/Sidebar.test.tsx` (bisher gab
+es dort keinen Test) prüft, dass der Button sowohl im ausgeklappten als
+auch im eingeklappten Zustand über `getByRole('button', { name: ... })`
+auffindbar bleibt. `ZEITPLAN.md` (Phase-3-Notiz) entsprechend ergänzt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 31 Testdateien, 130 Tests (128 + 2 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
