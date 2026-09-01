@@ -1,55 +1,44 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-08-31
+**Datum:** 2026-09-01
 
-## Was ist seit dem letzten Eintrag (2026-08-29) passiert?
+## Was ist seit dem letzten Eintrag (2026-08-31) passiert?
 
-Beide damals gemeldeten Punkte sind behoben: Die Flug-Sackgasse im
-Haupt-Chatflow bekommt jetzt einen "Neue Reise planen"-Button
-(`mockAdvisor.ts`), und ein echter Suchfehler bei der
-Unterkunftssuche zeigt inzwischen eine eigene Fehlermeldung statt
-"Keine Unterkünfte gefunden" (`useChat.ts`, `HotelResults.tsx`).
-Genau derselbe Fix wurde einen Tag später auch für die Flugsuche
-nachgezogen (`flightErrors`). Gut gemacht — beim Nachprüfen dieser
-frischen Fixes sind mir aber zwei neue, bisher nicht gemeldete
-Reibungspunkte aufgefallen, die genau an diesen Stellen hängen.
+Beide zuletzt gemeldeten Punkte sind sauber behoben: Ein Suchfehler bei
+der Flugsuche im Chat zeigt jetzt endlich die dafür gebaute
+Fehlermeldung an (`KiChat.tsx:115`), und beide "Bearbeiten"-Suchpfade
+(Unterkunft/Flug) lassen nach einem Fehler wieder einen "Neue Reise
+planen"-Button stehen statt einer Sackgasse (`useChat.ts`). Gut gemacht.
 
-## Meine Vorschläge
+Daneben hat IT-Chef drei weitere Bugs auf der Hotelsuche-Seite und in
+der Sidebar behoben (alte Ergebnisse blieben bei neuer Suche stehen,
+`HotelCard` zeigte den Auswahlstatus nie an, der Sidebar-Einklappen-
+Button hatte im eingeklappten Zustand keinen erreichbaren Namen für
+Screenreader). Beim Prüfen dieser frischen Fixes ist mir aber ein neuer,
+noch nicht gemeldeter Reibungspunkt aufgefallen, der genau durch einen
+davon erst sichtbar wurde.
 
-1. **Schlägt eine Flugsuche im Chat fehl, sieht die Nutzerin buchstäblich
-   nichts — keine Fehlermeldung, kein Hinweis, nur Stille.**
-   `src/components/chat/KiChat.tsx:115-117`: Die Bedingung, unter der
-   `<FlightResults>` überhaupt gerendert wird, lautet
-   `(flightLoading || flightOffers) &&`. Beim direkt darüber liegenden
-   Unterkunfts-Pendant (`:111-113`) wurde beim gestrigen Fix korrekt
-   `stayError` mit in die Bedingung aufgenommen. Bei der Flugsuche fehlt
-   dieser Schritt: Schlägt `runFlightSearch` fehl, wird zwar
-   `flightErrors` befüllt (`useChat.ts:98-101`), aber `flightOffers`
-   bleibt `null` und `flightLoading` wird `false` — die Bedingung ist
-   dann `false`, und die neue, extra dafür gebaute Fehlermeldung in
-   `FlightResults.tsx:24-33` wird nie angezeigt. Der "sucht"-Avatar
-   verschwindet einfach, ohne dass irgendetwas an seine Stelle tritt.
-   *Vorschlag:* `KiChat.tsx:115` um `flightErrors.length > 0` ergänzen,
-   analog zur bereits korrekten Unterkunfts-Bedingung — eine Zeile, die
-   die neue Fehlermeldung erst sichtbar macht.
+## Mein Vorschlag
 
-2. **Beide "Bearbeiten"-Suchpfade (Unterkunft/Flug) lassen nach einem
-   Suchfehler keinen Quick-Reply-Button übrig, nur ein leeres
-   Eingabefeld.**
-   `src/hooks/useChat.ts:146-176` (Unterkunft) und `:195-230`
-   (Flug-Herkunftscode → `runFlightSearch`): In beiden Fällen wird
-   `quickReplies` auf `[]` gesetzt, bevor die Suche startet, und im
-   Fehlerfall (`.catch`, Zeilen 173-176 bzw. 98-101) nie wieder befüllt.
-   Der Haupt-Onboarding-Pfad zur Unterkunftssuche ist davon nicht
-   betroffen, weil dort vorher schon `['Hotel', 'Ferienwohnung',
-   'Hostel']` gesetzt wurde und bei einem Fehlschlag stehen bleibt —
-   genau dieses Sicherheitsnetz fehlt in den beiden "Bearbeiten"-Pfaden,
-   die man z. B. über den Bearbeiten-Stift in der Buchungs-Übersicht
-   erreicht. Wer dort landet und einen Netzwerkfehler hat, sieht (sobald
-   Punkt 1 behoben ist) zwar eine Fehlermeldung, aber keinen erkennbaren
-   nächsten Schritt außer selbst zu tippen.
-   *Vorschlag:* In beiden `.catch`-Zweigen zusätzlich
-   `setQuickReplies(['Neue Reise planen'])` setzen — dasselbe Muster,
-   das für den Haupt-Chatflow bereits existiert.
+1. **"Ausgewählt"-Häkchen erscheint auch dann, wenn die Auswahl laut
+   eigener Warnmeldung gerade NICHT übernommen wurde.**
+   `src/pages/Hotelsuche.tsx:30-34` (`handleSelect`) setzt
+   `setSelectedOfferId(offer.id)` unabhängig davon, ob
+   `updateStoredTrip(...)` erfolgreich war. Schlägt das fehl (keine
+   aktive Reiseplanung im KI-Chat begonnen), zeigt die Seite zwar korrekt
+   eine Warnung ("Es gibt noch keine aktive Reiseplanung …",
+   `Hotelsuche.tsx:63-71`) — die angeklickte `HotelCard` schaltet aber
+   trotzdem sofort auf den grünen "Ausgewählt"-Zustand um und lässt sich
+   danach nicht erneut anklicken (`disabled={selected}`,
+   `HotelCard.tsx:42`). Wer die Warnung überliest, denkt vernünftigerweise,
+   die Unterkunft sei gespeichert — bis sie später in `/buchung` fehlt.
+   Genau dasselbe Muster steckt identisch in `Flugsuche.tsx:30-34`. Neu
+   sichtbar wurde das erst durch den gestrigen Fix, der `HotelCard`
+   überhaupt einen "Ausgewählt"-Zustand gegeben hat — vorher konnte man
+   das Problem an der Hotelsuche gar nicht bemerken.
+   *Vorschlag:* `setSelectedOfferId(offer.id)` nur setzen, wenn
+   `updated !== null` ist, in beiden Dateien. Dann bleibt der Button im
+   Fehlerfall auf "Auswählen" stehen und ist erneut klickbar, sobald über
+   den Warnhinweis eine Reise im KI-Chat begonnen wurde.
 
-_Letztes Update: 2026-08-31_
+_Letztes Update: 2026-09-01_
