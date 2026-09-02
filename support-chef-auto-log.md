@@ -1433,3 +1433,101 @@ statt auf der eigenständigen `/hotelsuche`-Seite verwendet wird) reicht
 gar keine `selected`-Prop durch und zeigt daher nie einen
 "Ausgewählt"-Zustand — das ist unverändert zum bisherigen Verhalten und
 kein neuer Punkt aus dem heutigen Fix, daher hier nicht vertieft.
+
+---
+
+## 2026-09-02 — Urlaubsmodus-Concierge (`Urlaubsmodus.tsx`, `mockConcierge.ts`)
+
+**Geprüfter Bereich:** Der Urlaubsmodus-Chat, laut `ZEITPLAN.md` (Phase 8,
+Grundgerüst bereits länger fertig) heute Nacht vom autonomen IT-Chef-Lauf
+(`e796c69`, dreiundzwanzigster Lauf) zuletzt angefasst — ein
+Wortgrenzen-Bugfix in `findFacts()`, analog zum Vortags-Fix in
+`findKnownDestination()` (`src/types/stays.ts`, zweiundzwanzigster Lauf).
+Dieser Bereich stand bisher in keinem Support-Chef-Lauf mit Dateibezug:
+
+- `src/pages/Urlaubsmodus.tsx`
+- `src/hooks/useConcierge.ts`
+- `src/lib/ai/mockConcierge.ts`
+- `src/lib/ai/mockConcierge.test.ts`
+
+Zum Vergleich herangezogen: `src/pages/Buchung.tsx` (Einstiegspunkt "Bereit
+für die Reise?") und `src/pages/MeineReisen.tsx` (zweiter Einstiegspunkt
+"Urlaubsmodus aktivieren").
+
+### Reibungspunkte
+
+**1. Ehrliche Konzierge-Antwort ist bei einem echten, aber nicht kuratierten
+Reiseziel schlicht falsch**
+
+`mockConcierge.ts:16-25` (`destinationFacts`) kennt nur acht kuratierte
+Ziele (Lissabon, Kyoto, Kapstadt, Reykjavik, Paris, Rom, Barcelona, New
+York). `findFacts()` (`:27-35`) liefert für jedes andere Ziel `null`, und
+`getConciergeReply()` (`:44-63`) fällt dann auf denselben Satz zurück wie
+im Fall ganz ohne Reiseziel: „Dafür brauche ich eine geplante Reise mit
+Reiseziel — plane zuerst im KI-Chat, dann kann ich gezielter helfen."
+(`:49`). Das ist bei einem Nutzer mit einer echten, im KI-Chat frei
+eingetippten Reise nach z. B. „Bali" oder „Thailand" schlicht unwahr — eine
+Reise mit Ziel existiert ja bereits.
+
+Der Weg dorthin ist kein Randfall: `Buchung.tsx:273-289` zeigt die Karte
+„Bereit für die Reise? … Aktiviere den Urlaubsmodus" mit dem Button
+„Urlaubsmodus aktivieren" (`:286`), sobald `isTripComplete(trip)` zutrifft
+— unabhängig davon, ob `trip.destination` einer der acht kuratierten Namen
+ist. Das ist genau der vorgesehene, prominent beworbene Haupteinstieg in
+den Urlaubsmodus für jede fertig geplante Reise, nicht nur für die
+Demo-Ziele.
+
+Verschärft wird das dadurch, dass `getConciergeGreeting()` (`:37-42`) und
+die Quick-Replies in `useConcierge.ts:12` (`destination ? conciergeQuickReplies
+: []`) beide nur prüfen, ob überhaupt ein `destination`-String vorhanden
+ist — nicht, ob er in `destinationFacts` bekannt ist. Ein Nutzer mit Ziel
+„Bali" sieht also zuerst die persönliche Begrüßung „Willkommen im
+Urlaubsmodus für deine Reise nach Bali! Frag mich zu Währung,
+Notrufnummern, Begrüßungsfloskeln …" inklusive der drei Quick-Reply-Chips
+„Währung?"/„Notrufnummer?"/„Wie sage ich Hallo?" — und bekommt bei jedem
+einzelnen Klick darauf exakt die Antwort, dass angeblich noch gar keine
+Reise mit Reiseziel geplant sei. Die Begrüßung verspricht also etwas, das
+die Antwortlogik im selben Atemzug dementiert.
+
+`mockConcierge.test.ts:20-24` deckt nur den Fall „gar kein Ziel" (`null`)
+mit demselben Fallback-Satz ab; ein Test für „echtes, aber nicht
+kuratiertes Ziel" existiert nicht.
+
+*Vorschlag:* Getrennte Texte für „kein Ziel geplant" und „Ziel geplant,
+aber (noch) nicht in der kuratierten Liste" — z. B. für Letzteres „Für
+{destination} habe ich noch keine hinterlegten Fakten, aber sobald die
+echte KI-Anbindung aktiv ist, kann ich dir auch dazu helfen." Zusätzlich
+`getConciergeGreeting()` und die Quick-Reply-Bedingung in
+`useConcierge.ts:12`/`:26` auf `findFacts(destination) !== null` statt nur
+auf `destination` selbst prüfen, damit Begrüßung und Chips nicht mehr
+etwas ankündigen, das die Antwortlogik direkt danach verneint.
+
+**2. Der Avatar wirkt bei den zwei ehrlichen Ausweich-Antworten unpassend
+fröhlich**
+
+`useConcierge.ts:25` setzt nach *jeder* Konzierge-Antwort unbedingt
+`setAvatarState('happy')` — auch für die beiden Fälle in
+`mockConcierge.ts`, in denen die Antwort inhaltlich eine Einschränkung
+oder Ausweichung ist: den oben beschriebenen „kein/unbekanntes Ziel"-Fall
+(`:49`) und die generische „Das ist eine Demo-Antwort … sobald die echte
+KI-Anbindung aktiv ist" (`:62`). `TravixAvatar.tsx:5,13-14` hat mit
+`'error'` bereits einen dafür passenderen, im Rest des Chats schon
+etablierten Zustand (genutzt z. B. bei echten Suchfehlern in `useChat.ts`).
+Der breit lächelnde „happy"-Avatar direkt neben einem Satz, der im Kern
+sagt „das kann ich hier gerade nicht", wirkt inkonsistent zum sonst
+ehrlichen, undramatischen Ton der App.
+
+*Vorschlag:* In `useConcierge.ts:23-27` unterscheiden, ob `getConciergeReply`
+eine der beiden Ausweich-Antworten oder eine echte Fakten-Antwort geliefert
+hat (z. B. `getConciergeReply` einen kleinen `{ text, matched }`-Rückgabewert
+geben lassen), und bei den Ausweich-Fällen einen neutraleren Avatar-Zustand
+statt `'happy'` setzen.
+
+### Nicht geprüft
+Die Barrierefreiheit des Chat-Verlaufs (`aria-live` beim Eintreffen neuer
+Nachrichten) wurde nicht gesondert untersucht — das fehlende `aria-live`
+codebase-weit ist bereits seit dem Eintrag vom 20.08. (Kalender) bekannt
+und kein neuer, hier eigenständiger Punkt. `ChatInput.tsx`/`ChatMessage.tsx`
+selbst wurden nur als bereits an anderer Stelle geprüfte Bausteine
+mitgelesen (Mikrofon-Fehleranzeige bereits am 25.08. behandelt), nicht
+erneut vertieft.
