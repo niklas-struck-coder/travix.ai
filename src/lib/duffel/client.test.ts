@@ -51,4 +51,18 @@ describe('searchFlights error handling', () => {
       { message: 'Duffel-Anfrage fehlgeschlagen (500) — bitte versuche es gleich noch einmal.' },
     ])
   })
+
+  it('replaces a raw network/parse error with an honest German fallback instead of showing it verbatim', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
+    )
+
+    const result = await searchFlights(baseParams)
+
+    expect(result.offers).toEqual([])
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).not.toMatch(/Failed to fetch/)
+    expect(result.errors[0].message).toContain('Reise-Anbieter')
+  })
 })
