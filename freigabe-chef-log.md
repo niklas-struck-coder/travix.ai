@@ -1808,3 +1808,50 @@ gebracht, damit die nächsten Läufe sauber von dort weiterarbeiten.
 **Ergebnis:** Beide geprüften Branches sauber, unabhängig verifiziert,
 gemergt und gepusht. Keine Auffälligkeiten, kein Scope-Verstoß, keine
 Info an Ni nötig.
+
+## 2026-09-02, automatischer Lauf (Cloud, scheduled, früher Nacht-Check)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits gegenüber `main` (`81e000b`):
+  neunzehnter Lauf (01.09., `flightErrors` bei normaler Nachricht nicht
+  geleert), zwanzigster Lauf (01.09., Auswahl-Häkchen auf
+  Hotelsuche/Flugsuche trotz fehlgeschlagenem `updateStoredTrip`),
+  einundzwanzigster Lauf (02.09., `resetChat()` setzte
+  `stayLoading`/`flightLoading` nicht zurück), zweiundzwanzigster Lauf
+  (02.09., `findKnownDestination()` ohne Wortgrenzen), dreiundzwanzigster
+  Lauf (02.09., derselbe Wortgrenzen-Bug unabhängig in `findFacts()` des
+  Urlaubsmodus-Concierge).
+- `marketing-chef/auto` — keine neuen Commits gegenüber `main`, nichts zu
+  tun (Marketing-Chefs 6-Uhr-Lauf steht noch aus).
+- `support-chef/auto` — keine neuen Commits gegenüber `main`, nichts zu
+  tun (Support-Chefs 6-Uhr-Lauf steht noch aus).
+
+**Prüfung `it-chef/auto`:** Diff angeschaut (`ZEITPLAN.md`,
+`it-chef-auto-log.md`, `useChat.ts`+Test, `mockConcierge.ts`+neuem Test,
+`Flugsuche.tsx`+neuer Testdatei, `Hotelsuche.tsx`+Test, `stays.ts`+neuem
+Test — 12 Dateien, 743 Zeilen, überwiegend Doku/Tests). Unabhängig selbst
+verifiziert, nicht nur dem Log geglaubt: frischer `npm install`, danach
+`npx tsc -b` (fehlerfrei), `npx eslint .` (0 Fehler, dieselben 3
+vorbestehenden `react-refresh`-Warnings in `src/components/ui/*`, exakt
+wie im Log behauptet), `npx vitest run` (34 Testdateien, 144 Tests, alle
+grün — passt zum Log). `package-lock.json`-Rauschen aus `npm install`
+danach verworfen.
+
+Jeder der 5 Commits betrifft genau den im jeweiligen Log-Eintrag
+beschriebenen einzelnen Punkt, kein Scope-Creep. Kein Bezug zu Auth,
+Zahlungen, Nutzerdaten oder rechtlichen Texten. Kein UI-/Design-Aspekt
+betroffen (reine Zustands-/Logik-Fixes: fehlende Resets, Wortgrenzen bei
+String-Matching, eine zusätzliche Bedingung an eine bestehende Prop) —
+`MARKENDESIGN.md` nicht einschlägig. Die beiden Wortgrenzen-Fixes
+(`findKnownDestination`, `findFacts`) sind inhaltlich sauber begründet
+und mit Vorher/Nachher-Tests belegt.
+
+→ Per Fast-Forward nach `main` gemergt (`81e000b..e796c69`) und nach
+`origin/main` gepusht. `it-chef/auto` lag danach bereits exakt auf dem
+neuen `main`-Stand (identischer Commit `e796c69`, da reiner
+Fast-Forward) — kein separater Branch-Update-Push nötig.
+
+**Ergebnis:** `it-chef/auto` sauber, unabhängig verifiziert, gemergt und
+gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
+nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
+Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
