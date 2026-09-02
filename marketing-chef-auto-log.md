@@ -4,6 +4,98 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-02
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 01.09.) um eine neue Prüfung
+vom 02.09. ergänzt — ordnet vier seit dem letzten Marketing-Lauf neu
+hinzugekommene Ehrlichkeits-/Konsistenz-Fixes in den bestehenden
+Tier-4-Kandidatentopf ein (stale Flug-Fehlermeldung nach normaler
+Chat-Nachricht, hängender Lade-Zustand samt Ergebnissen der verworfenen
+vorherigen Planung nach "Neue Reise planen", sowie zwei baugleiche
+Wortgrenzen-Bugs bei der Zielname-Erkennung in `stays.ts` und
+`mockConcierge.ts`, die sonst stille falsche Suchen bzw. erfundene
+Fakten für ein nie genanntes Ziel ausgelöst hätten). Ein fünfter
+geprüfter Fix (Auswahl-Häkchen-Konsistenz bei fehlgeschlagenem
+`updateStoredTrip`) bewusst nicht aufgenommen, da reine
+UI-Konsistenzkorrektur ohne Ehrlichkeits-/Irreführungs-Erzählung.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`ac4df57`,
+01.09.) geprüft: 13 neue Commits. Der Großteil ohne Content-Relevanz —
+zwei Merge-Commits, zwei Freigabe-Chef-Logs, ein Daily-Status-Update, ein
+Support-Chef-Auto-Log/-Bericht (dieselbe Hotelsuche-Auswahl-Situation wie
+bereits im letzten Update erfasst) sowie ein eigener interaktiver
+Marketing-Chef-Bericht (`6634362`, nur Einordnung im Chat, keine autonome
+Aktion). `ZEITPLAN.md`, `status.md` und `marketing/freigabe-uebersicht.md`
+bestätigen: alle drei offenen Fragen an Ni (Kanal-Start? 6.2 priorisiert?
+Tier-4-Format gewollt?) weiterhin unbeantwortet seit 21.08. — 6.2
+weiterhin offen, kein neuer Kanal/keine Landingpage live, keine Notiz von
+Ni in `status.md` (Stand 01.09.) oder sonstwo im Repo.
+
+Fünf echte Codeänderungen wurden einzeln geprüft (`git show`, Diffs
+gelesen), bevor über Content entschieden wurde:
+- `4a8a573` (01.09., neunzehnter IT-Chef-Lauf): `flightErrors` wurde bei
+  einer normalen Chat-Nachricht bisher nicht geleert — die rote
+  Fehlerbox blieb nach einer fehlgeschlagenen Flugsuche stehen, obwohl
+  die Nutzerin längst normal weitergeschrieben hatte.
+- `69bcba5` (01.09., zwanzigster IT-Chef-Lauf): Auswahl-Häkchen schaltete
+  auch bei fehlgeschlagenem `updateStoredTrip` auf "Ausgewählt" um —
+  reine UI-Korrektur, keine irreführende Aussage gegenüber der Nutzerin.
+- `d947bf1` (02.09., einundzwanzigster IT-Chef-Lauf): `resetChat()`
+  setzte `stayLoading`/`flightLoading` nicht zurück — ein Neustart
+  während einer laufenden Suche zeigte danach Ergebnisse/Fehler der
+  eigentlich verworfenen vorherigen Planung.
+- `8eca941` (02.09., zweiundzwanzigster IT-Chef-Lauf): `findKnownDestination`
+  matchte Zielnamen ohne Wortgrenzen — "Rom" matchte auch in
+  "romantisch", konnte also stille, falsche Hotel-/Flugsuchen auslösen.
+- `e796c69` (02.09., dreiundzwanzigster IT-Chef-Lauf): derselbe
+  Wortgrenzen-Bug unabhängig im Urlaubsmodus-Concierge, dort noch direkter
+  Ehrlichkeits-relevant — hätte sonst erfundene Fakten für ein nie
+  genanntes Ziel geliefert.
+
+Vier der fünf passen inhaltlich zum bereits skizzierten
+"Ehrlichkeits-Log"-Format und wandern in den Tier-4-Kandidatentopf,
+gebunden an die weiterhin offene Frage 3 — dieselbe Einstufung wie alle
+bisherigen kleinen Ehrlichkeits-Korrekturen. Der fünfte (`69bcba5`) ist
+reiner UI-Paritäts-Fix ohne diese Erzählung, gleiche Einstufung wie z. B.
+der HotelCard-Paritätsfix vom 01.09.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion sowie eine Ergänzung im bestehenden Tier-4-Punkt
+hinzugefügt, ältere Abschnitte unverändert belassen). Keine erfundenen
+Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die Ergänzung
+entscheidet nichts neu, sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`- und
+`status.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes, eigenständiges Content-Stück zu einem der vier
+  Ehrlichkeits-Fixes — siehe Begründung oben, gleiche Einstufung wie alle
+  bisherigen kleinen Ehrlichkeits-Korrekturen, aus Konsistenzgründen in
+  den Tier-4-Topf statt ein eigenes Stück.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(Remote-Stand `ac4df57`, 01.09.) war laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemerged. Branch daher neu
+von `origin/main` (`bc92db5`, inkl. IT-/Freigabe-Chef-Läufen bis 02.09.
+früh) aufgesetzt, wie in den Session-Regeln für bereits gemergte
+Branches vorgesehen — keine eigenen Commits gingen dabei verloren, da
+der alte Branch-Stand bereits vollständig in `main` enthalten war.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-01
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:

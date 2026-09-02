@@ -1,10 +1,90 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-01)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-02)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-02: drei weitere Ehrlichkeits-/Konsistenz-Fixes geprüft (stale Flug-Fehlermeldung, hängender Lade-Zustand nach Neustart, zwei baugleiche Wortgrenzen-Bugs bei Zielname-Erkennung) — drei weitere Tier-4-Kandidaten, ein reiner UI-Fix ohne Content-Relevanz, weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`ac4df57`,
+01.09., laut `git merge-base --is-ancestor` bereits vollständig in `main`
+gemerged) geprüft: 13 neue Commits. Der größte Teil ohne Content-Relevanz
+— zwei Merge-Commits (die eigene 01.09.-Ergänzung sowie den
+Support-Chef-Fund derselben Runde nach `main`), zwei Freigabe-Chef-Logs,
+ein Daily-Status-Update, ein Support-Chef-Auto-Log und -Bericht (gleiche
+Hotelsuche-Auswahl-Situation wie im letzten Update bereits erfasst, keine
+neue Information) sowie ein eigener interaktiver Marketing-Chef-Bericht
+(`6634362`, nur Einordnung im Chat, keine autonome Aktion).
+
+Fünf echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`4a8a573` (01.09., neunzehnter IT-Chef-Lauf):** direkte Fortsetzung
+  der bereits erfassten Flug-Fehleranzeige-Serie — `flightErrors` wurde
+  bei einer normalen Chat-Nachricht bisher nicht geleert (anders als
+  `flightOffers`), sodass die rote Fehlerbox nach einer fehlgeschlagenen
+  Suche stehen blieb, obwohl die Nutzerin längst normal weitergeschrieben
+  hatte. Einziger bisheriger Ausweg war ein kompletter Neustart über
+  "Neue Reise planen".
+- **`69bcba5` (01.09., zwanzigster IT-Chef-Lauf):** Auswahl-Häkchen auf
+  Hotel-/Flugkarte schaltete bisher auch dann auf "Ausgewählt" um, wenn
+  das eigentliche Speichern (`updateStoredTrip`) fehlschlug — der
+  Warnhinweis darunter widersprach dann dem Kartenzustand. Reine
+  UI-Konsistenzkorrektur ohne eigene Ehrlichkeits-Erzählung, gleiche
+  Einstufung wie der HotelCard-Paritätsfix vom 01.09. (bereits im letzten
+  Update als "ohne Content-Relevanz" eingestuft).
+- **`d947bf1` (02.09., einundzwanzigster IT-Chef-Lauf):** `resetChat()`
+  setzte `stayLoading`/`flightLoading` bisher nicht zurück — ein Klick auf
+  "Neue Reise planen" während eine Suche noch lief, ließ den neu
+  gestarteten Chat im "sucht"-Zustand hängen und zeigte anschließend
+  Ergebnisse/Fehler der vorherigen, eigentlich verworfenen Reiseplanung.
+  Im Kern derselbe Charakter wie der bereits gelistete
+  Hotelsuche-Stale-Ergebnisse-Fix vom 01.09. (`0042f68`): eine Nutzerin
+  hätte Informationen gesehen, die nicht zu ihrer aktuellen, bewusst neu
+  begonnenen Planung gehörten.
+- **`8eca941` (02.09., zweiundzwanzigster IT-Chef-Lauf):**
+  `findKnownDestination()` verglich Zielnamen bisher per rohem
+  Teilstring-Vergleich ohne Wortgrenzen — kurze Namen wie "Rom" matchten
+  dadurch auch mitten in unbeteiligten Wörtern ("romantisch", "Romania").
+  Da diese Funktion die automatische Hotel-/Flugsuche sowie den Kartenpin
+  in `Kartenansicht.tsx` steuert, konnte ein Satz wie "etwas Romantisches
+  am Meer" still eine echte, aber falsche Suche für Rom auslösen — eine
+  Nutzerin hätte Ergebnisse für ein Ziel bekommen, das sie nie genannt
+  hat, ohne das erkennen zu können.
+- **`e796c69` (02.09., dreiundzwanzigster IT-Chef-Lauf):** derselbe
+  Wortgrenzen-Bug, unabhängig im Urlaubsmodus-Concierge
+  (`mockConcierge.ts`) gefunden und behoben — dort noch direkter
+  Ehrlichkeits-relevant, weil die Funktion laut eigenem Code-Prinzip
+  keine erfundenen Fakten liefern soll: ohne den Fix hätte der Concierge
+  auf eine Frage zu "Romantikurlaub" mit echten, aber falschen
+  Rom-Fakten geantwortet, statt ehrlich nach dem geplanten Reiseziel zu
+  fragen.
+
+Vier der fünf (`4a8a573`, `d947bf1`, `8eca941`, `e796c69`) passen inhaltlich
+zum bereits skizzierten "Ehrlichkeits-Log"-Format — jeweils eine Situation,
+in der die Nutzerin ohne den Fix falsche, veraltete oder erfundene
+Informationen präsentiert bekommen hätte, ohne das erkennen zu können —
+und wandern in den Tier-4-Kandidatentopf, gebunden an die weiterhin offene
+Frage 3 unten. `69bcba5` ist wie `ce59905` (01.09.) eine reine
+UI-Konsistenzkorrektur ohne diese Erzählung.
+
+**Warum trotzdem kein achtes Content-Stück:** Dieselbe Prüfung wie bei
+jedem bisherigen Lauf — `ZEITPLAN.md` führt 6.2 (Buchen-Button) weiterhin
+als offen (Zeile 249), kein neuer Kanal/keine Landingpage live (Zeile
+519), und `status.md` (Stand 2026-09-01) sowie dieses Dokument enthalten
+keine Notiz von Ni zu einer der drei unten offenen Fragen. Alle drei
+Bedingungen für ein neues, eigenständiges Stück bleiben damit unverändert
+unerfüllt. Die vier neuen Ehrlichkeits-Kandidaten werden stattdessen unten
+im Tier-4-Kandidatentopf (Punkt 7) ergänzt.
+
+**Warum sicher genug für eine Dokument-Ergänzung:** reine
+Übersichts-Aktualisierung, kein Live-Vorgang — nichts gepostet, kein
+Kanal angelegt, kein bestehender Abschnitt verändert oder gelöscht (nur
+diese neue Sektion und eine Ergänzung im bestehenden Tier-4-Punkt).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+trägt nur bereits im Repo nachprüfbare Fakten nach (Commit-Historie,
+Code-Diffs, `ZEITPLAN.md`-Stand).
 
 ## Update 2026-09-01: Flug-Fehleranzeige-Nachfolgefix und Hotelsuche-Stale-Ergebnisse geprüft — zwei weitere Tier-4-Kandidaten, zwei reine UI-/A11y-Fixes ohne Content-Relevanz, weiterhin kein achtes Content-Stück
 
@@ -394,7 +474,17 @@ Anfang-bis-Ende-Weg im Code.
    Flug-Fehlermeldung (der 31.08.-Fix hatte den Zustand nur gesetzt, nicht
    angezeigt) und die Hotelsuche, die eine zweite Suche nicht mehr mit
    veralteten Ergebnissen der ersten verwechselbar macht (siehe Update
-   2026-09-01 oben). Der eigene Bericht
+   2026-09-01 oben), sowie seit 01./02.09. vier weitere: die
+   Flug-Fehlermeldung bleibt nicht mehr fälschlich stehen, wenn die
+   Nutzerin nach einem Fehler normal weiterschreibt statt neu zu starten;
+   ein Neustart über "Neue Reise planen" zeigt nach einer noch laufenden
+   Suche nicht mehr Ergebnisse/Fehler der eigentlich verworfenen
+   vorherigen Planung; und zwei baugleiche Wortgrenzen-Bugs bei der
+   Zielname-Erkennung (`findKnownDestination`, `mockConcierge.ts`), durch
+   die kurze Namen wie "Rom" mitten in unbeteiligten Wörtern
+   ("romantisch") matchten und so stille falsche Suchen bzw. erfundene
+   Fakten für ein nie genanntes Ziel ausgelöst hätten (siehe Update
+   2026-09-02 oben). Der eigene Bericht
    vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
    Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
