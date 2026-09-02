@@ -6412,3 +6412,73 @@ vorherigen Wortgrenzen-Fixes in diesem Modul.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-02 (fünfundzwanzigster Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag einen Commit vor `origin/main`
+(der vierundzwanzigste Lauf von heute war noch nicht über Freigabe-Chef
+nach `main` gemerged). Branch `it-chef/auto` von `origin/it-chef/auto`
+ausgecheckt und darauf weitergearbeitet — `main` bleibt unberührt.
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+durchgesehen — unverändert dieselben Blocker wie in den Vorläufen (4.1-4.3
+Base44/Gemini-Zugangsdaten, 6.2/6.6/6.7/7.12 fehlende `TripDraft`-Felder,
+7.4 echte geteilte Chat-Historie, 8.2-8.7/8.9/8.12 KI-/Zahlungsanbindung
+bzw. offene PRD-Frage, 8.11 FAQ-Inhalte vom Support-Chef). Der
+vierundzwanzigste Lauf hatte bereits einen konkreten, noch offenen
+Kandidaten für heute vorgemerkt: Punkt 2 aus `reports/support-chef.md`
+(02.09.), bewusst nicht mitgenommen, um bei einem einzigen Punkt pro Lauf
+zu bleiben.
+
+**Ausgewählter Punkt:** Punkt 2 aus `reports/support-chef.md` —
+`useConcierge.ts` setzte nach jeder Concierge-Antwort unbedingt
+`setAvatarState('happy')`, auch bei den Fällen, in denen die Antwort
+inhaltlich eine Einschränkung ist (kein/unbekanntes Reiseziel, oder die
+generische Demo-Antwort in `mockConcierge.ts`). Ein breit lächelnder
+Avatar neben einer ehrlichen "das kann ich hier nicht"-Antwort wirkt
+inkonsistent zum sonst ehrlichen Ton der App.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung
+nötig — Support-Chef hatte den Fix bereits konkret vorgeschlagen
+(`getConciergeReply` einen `{ text, matched }`-Rückgabewert geben lassen,
+bei den Ausweich-Fällen einen neutraleren Avatar-Zustand als `'happy'`
+setzen) und sogar den passenden, bereits bestehenden Design-Token
+benannt (`'error'` in `TravixAvatar.tsx`) — kein neuer Zustand nötig,
+im Sinne der Design-Vorgabe in `.claude/skills/it-chef-eigen/SKILL.md`,
+bei bestehenden Tokens zu bleiben. `MARKENDESIGN.md` enthält keine
+abweichende Vorgabe zu Avatar-Zuständen. Objektiv prüfbar: Avatar-Zustand
+nach einer Antwort ist für bekanntes/unbekanntes/fehlendes Ziel eindeutig
+definiert und per Unit-Test reproduzierbar.
+
+**Umsetzung:** `getConciergeReply()` in `mockConcierge.ts` liefert jetzt
+ein `ConciergeReply`-Objekt (`{ text: string; matched: boolean }`) statt
+eines reinen `string`. `matched` ist `false` in den drei
+"Einschränkung"-Fällen (kein Ziel, unbekanntes Ziel, generische
+Demo-Antwort bei nicht erkannter Frage), sonst `true` (Währungs-,
+Notruf-, Begrüßungs-Antworten). `useConcierge.ts` liest `reply.text` für
+die Chat-Nachricht und setzt `avatarState` auf `reply.matched ? 'happy'
+: 'error'` statt immer auf `'happy'`. Bestehende Tests in
+`mockConcierge.test.ts` auf das neue Rückgabeformat (`.text` bzw.
+`toEqual({ text, matched })`) angepasst, zwei neue Tests ergänzt
+(`matched: true` bei Faktenantwort, `matched: false` beim generischen
+Fallback). Drei neue Tests in `useConcierge.test.ts`: Avatar `'happy'`
+nach Faktenantwort, Avatar `'error'` statt `'happy'` nach Antwort ohne
+Ziel bzw. mit unbekanntem Ziel. `ZEITPLAN.md` (Ist-Stand-Notiz bei
+Phase 8) entsprechend ergänzt. Keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` umgestellt — der Fix schließt weder
+8.1 noch 8.3 vollständig ab, gleiches Muster wie die vorherigen
+Concierge-Fixes.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 157 Tests (152 + 5 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

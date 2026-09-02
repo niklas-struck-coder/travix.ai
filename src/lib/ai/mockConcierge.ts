@@ -45,29 +45,45 @@ export function getConciergeGreeting(destination: string | null): string {
   return `Willkommen im Urlaubsmodus für deine Reise nach ${destination}! Frag mich zu Währung, Notrufnummern, Begrüßungsfloskeln oder anderen Fragen rund um deinen Trip.`
 }
 
-export function getConciergeReply(destination: string | null, userMessage: string): string {
+export interface ConciergeReply {
+  /** The reply text shown in the chat. */
+  text: string
+  /** False for "I can't really help with that" replies (no/unknown destination, generic fallback) — true for a real, fact-based answer. */
+  matched: boolean
+}
+
+export function getConciergeReply(destination: string | null, userMessage: string): ConciergeReply {
   const facts = findFacts(destination)
   const lower = userMessage.toLowerCase()
 
   if (!destination) {
-    return 'Dafür brauche ich eine geplante Reise mit Reiseziel — plane zuerst im KI-Chat, dann kann ich gezielter helfen.'
+    return {
+      text: 'Dafür brauche ich eine geplante Reise mit Reiseziel — plane zuerst im KI-Chat, dann kann ich gezielter helfen.',
+      matched: false,
+    }
   }
 
   if (!facts) {
-    return `Für ${destination} habe ich noch keine hinterlegten Fakten — das funktioniert bisher nur für eine kleine Auswahl an Zielen. Frag mich gerne trotzdem, ich sag dir ehrlich, wenn ich's nicht weiß.`
+    return {
+      text: `Für ${destination} habe ich noch keine hinterlegten Fakten — das funktioniert bisher nur für eine kleine Auswahl an Zielen. Frag mich gerne trotzdem, ich sag dir ehrlich, wenn ich's nicht weiß.`,
+      matched: false,
+    }
   }
 
   if (/währung|geld|bezahl|euro|preis/.test(lower)) {
-    return `Vor Ort zahlst du in ${facts.currency}. Am besten mit Karte oder etwas Bargeld für Kleinigkeiten.`
+    return { text: `Vor Ort zahlst du in ${facts.currency}. Am besten mit Karte oder etwas Bargeld für Kleinigkeiten.`, matched: true }
   }
   if (/notruf|notfall|polizei|hilfe|unfall/.test(lower)) {
-    return `Die Notrufnummer lautet: ${facts.emergencyNumber}.`
+    return { text: `Die Notrufnummer lautet: ${facts.emergencyNumber}.`, matched: true }
   }
   if (/sprache|begrüß|hallo|hi\b/.test(lower)) {
-    return facts.greeting
+    return { text: facts.greeting, matched: true }
   }
 
-  return 'Das ist eine Demo-Antwort im Urlaubsmodus — sobald die echte KI-Anbindung aktiv ist, bekommst du hier fundierte, aktuelle Antworten. Frag mich gerne nach Währung, Notrufnummer oder einer Begrüßungsfloskel.'
+  return {
+    text: 'Das ist eine Demo-Antwort im Urlaubsmodus — sobald die echte KI-Anbindung aktiv ist, bekommst du hier fundierte, aktuelle Antworten. Frag mich gerne nach Währung, Notrufnummer oder einer Begrüßungsfloskel.',
+    matched: false,
+  }
 }
 
 export const conciergeQuickReplies = ['Währung?', 'Notrufnummer?', 'Wie sage ich Hallo?']

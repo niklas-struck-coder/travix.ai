@@ -53,4 +53,43 @@ describe('useConcierge', () => {
 
     expect(result.current.quickReplies).toEqual(conciergeQuickReplies)
   })
+
+  it('sets the avatar to "happy" after a real, fact-based answer', () => {
+    const { result } = renderHook(() => useConcierge('Rom'))
+
+    act(() => {
+      result.current.sendMessage('Welche Währung brauche ich?')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.avatarState).toBe('happy')
+  })
+
+  it('sets the avatar to "error" instead of "happy" after an honest limitation reply (no destination)', () => {
+    const { result } = renderHook(() => useConcierge(null))
+
+    act(() => {
+      result.current.sendMessage('Welche Währung brauche ich?')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
+
+  it('sets the avatar to "error" instead of "happy" after an honest limitation reply (uncurated destination)', () => {
+    const { result } = renderHook(() => useConcierge('Bali'))
+
+    act(() => {
+      result.current.sendMessage('Welche Währung brauche ich?')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
 })

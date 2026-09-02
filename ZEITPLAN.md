@@ -196,6 +196,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zwei neue Tests dort (unbekanntes echtes Ziel, `hasKnownDestination`)
   sowie eine neue `src/hooks/useConcierge.test.ts` (bisher gab es dort
   keine Tests) für die korrigierte Quick-Replies-Logik.
+  Vom autonomen IT-Chef-Lauf am 02.09. (fünfundzwanzigster Lauf) den
+  zweiten, bis dahin offen gelassenen Punkt aus `reports/support-chef.md`
+  (02.09.) behoben: Der Avatar sprang nach jeder Concierge-Antwort
+  unbedingt auf `'happy'` — auch bei den ehrlichen Ausweich-Antworten
+  (kein/unbekanntes Ziel, generische Demo-Antwort), was neben "das kann
+  ich hier gerade nicht" unpassend fröhlich wirkte. `getConciergeReply`
+  liefert jetzt `{ text, matched }` statt reinem `string` (`matched` ist
+  `false` bei den drei Ausweich-Fällen, sonst `true`); `useConcierge.ts`
+  setzt den Avatar entsprechend auf den bereits bestehenden, bisher aber
+  ungenutzten `'error'`-Zustand (`TravixAvatar.tsx`) statt auf `'happy'`.
+  Bestehende Tests in `mockConcierge.test.ts` auf das neue
+  Rückgabeformat angepasst, neue Tests dort (matched-Flag pro Fall)
+  sowie drei neue Tests in `useConcierge.test.ts` für den Avatar-Zustand
+  nach Antworten mit bekanntem/unbekanntem/fehlendem Ziel.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
