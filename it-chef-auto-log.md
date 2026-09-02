@@ -6149,3 +6149,98 @@ war der einzige Kandidat, der alle vier Kriterien zweifelsfrei erfüllte.
 - `npx vitest run` — 32 Testdateien, 136 Tests (134 + 2 neue), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-02 (zweiundzwanzigster Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag genau auf dem einundzwanzigsten
+Lauf von heute (`resetChat()`-Fix), der bereits auf dem aktuellen `main`
+(`81e000b`) aufbaut — kein neuer `main`-Commit seitdem, kein Merge nötig.
+
+**Punkt-Suche:** `ZEITPLAN.md` und die offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — unverändert
+dieselben Blocker wie in den Vorläufen (Backend-/Auth-Entscheidung, echte
+LLM-Anbindung, fehlende Zug/Bus/Fähre-Datenquelle, fehlende
+`TripDraft`-Preis-/Item-/Itinerar-Felder, offene Produktentscheidungen).
+Auch `reports/it-chef.md` und `reports/support-chef.md` (beide 01.09.)
+brachten keinen neuen, noch offenen Fund — der dort gemeldete
+Auswahl-Häkchen-Bug wurde bereits im zwanzigsten Lauf behoben. Ein
+Explore-Subagent hat deshalb erneut gezielt nach neuen, in keiner Liste
+stehenden Bugs gesucht, diesmal mit expliziter Ausschlussliste der in den
+letzten Läufen bereits geprüften/gefixten Muster (State-Resets in
+`useChat.ts`, Auswahl-/Reset-Paritäten auf Hotelsuche/Flugsuche,
+Sidebar-a11y, Navigation, `EditMode`-Enter-Handler, `mockAdvisor`-
+Ehrlichkeits-Fix) sowie der bekannten blockierten Themen, mit dem
+Auftrag, seltener geprüfte Bereiche zu lesen (`src/lib/duffel/*`,
+`src/lib/trip/*.ts`, weitere `src/components/**`, weitere `src/pages/*.tsx`,
+Formular-Validierungen, Datums-/Zeitzonen-Handling, Berechnungs-Edge-Cases).
+
+**Ausgewählter Punkt:** `findKnownDestination()` in `src/types/stays.ts`
+(Zeilen 41-44). Der Abgleich des freien Zieltexts gegen die kuratierte
+Liste bekannter Reiseziele (`knownDestinations`) nutzte rohes
+`String.includes()` ohne Wortgrenzen: `normalized.includes(d.name.toLowerCase())`.
+
+**Warum der Bug real ist:** `trip.destination` wird in `mockAdvisor.ts`
+direkt und ungeprüft aus der Freitextantwort der Nutzerin auf die erste
+Chat-Frage ("Wohin soll es gehen?") übernommen. `findKnownDestination`
+wird auf diesen Text an drei Stellen in `useChat.ts` angewendet (zweimal
+für die automatische Hotelsuche, einmal für die automatische
+Flughafen-Erkennung der Flugsuche) sowie in `Kartenansicht.tsx` für den
+Kartenpin. Da `String.includes` keine Wortgrenzen kennt, matchen kurze/
+generische Zielnamen wie "Rom" oder "Paris" auch mitten in unbeteiligten
+Wörtern: `findKnownDestination('Ich würde gerne einen romantischen
+Kurztrip machen')` und `findKnownDestination('Romania')` lieferten beide
+fälschlich "Rom", `findKnownDestination('ein Vergleich (comparison) wäre
+gut')` fälschlich "Paris" (vor dem Fix per Node-Test nachgestellt, siehe
+unten). Konkretes Szenario: Antwortet die Nutzerin auf die Zielfrage z. B.
+"etwas Romantisches am Meer", löst der Chat still eine echte Hotel-/
+Flugsuche für Rom aus bzw. zeigt Rom auf der Karte an — ohne dass sie das
+gewählt hat oder es kenntlich gemacht wird. Das ist kein harmloser
+Nulltreffer, sondern ein echtes, aber falsches Ergebnis, das als passend
+präsentiert wird.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — reiner String-Matching-Fix innerhalb
+einer bestehenden, klar abgegrenzten Funktion, kein neues Verhalten
+erfunden (exakte Ziel-Sätze wie "Ich möchte nach Lissabon" matchen
+unverändert). Exakt lokalisiert (`src/types/stays.ts:41-44`), keine
+Interpretation nötig. Objektiv prüfbar: Verhalten bei Wortgrenzen-Fällen
+ist eindeutig definiert und per Unit-Test reproduzierbar.
+
+**Umsetzung:** `findKnownDestination` vergleicht jetzt per
+Wortgrenzen-Regex (`\b<escaped-name>\b`, case-insensitive über vorheriges
+`toLowerCase()`) statt per rohem `String.includes`. Der Zielname wird vor
+dem Einsetzen in die Regex escaped (`.replace(/[.*+?^${}()|[\]\\]/g,
+'\\$&')`), damit ein Ziel mit Regex-Sonderzeichen im Namen nicht versehentlich
+als Muster interpretiert würde (aktuell kein Name betroffen, aber robust
+gegen künftige Erweiterungen der Liste). Neue `src/types/stays.test.ts`
+(bisher gab es dort keine Tests): prüft exakten Treffer ("Ich möchte nach
+Lissabon" → Lissabon), Groß-/Kleinschreibung und Leerraum, die drei oben
+genannten Wortgrenzen-Fälle (alle erwartungsgemäß `null`) sowie ein
+generisches "kein Treffer"-Beispiel. Vor dem Fix per `git stash` gegen die
+alte `stays.ts` verifiziert: genau der Wortgrenzen-Test schlägt
+reproduzierbar fehl (`Rom` statt `null`), danach zurückgeholt. `ZEITPLAN.md`
+(Sprint-1-Notiz bei 5.11) entsprechend ergänzt.
+
+**Warum kein anderer Punkt gewählt wurde:** Wie in den Vorläufen bleiben
+4.1-4.3 (Base44/Gemini-Zugangsdaten), 6.2/6.6/6.7/7.12 (fehlende
+`TripDraft`-Felder), 7.4 (echte geteilte Chat-Historie), 8.2-8.7/8.9/8.12
+(KI-/Zahlungsanbindung bzw. offene PRD-Frage) und 8.11 (FAQ-Inhalte vom
+Support-Chef) blockiert. Der Explore-Subagent hat gezielt in bisher
+seltener geprüften Bereichen gesucht (u. a. `src/lib/duffel/*`,
+`src/lib/trip/*.ts`, weitere Seiten/Komponenten, Berechnungs-Edge-Cases)
+und den `findKnownDestination`-Fund als einzigen Kandidaten identifiziert,
+der alle vier Kriterien zweifelsfrei erfüllt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 33 Testdateien, 140 Tests (136 + 4 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

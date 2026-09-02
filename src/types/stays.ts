@@ -40,5 +40,10 @@ export const knownDestinations: KnownDestination[] = [
 
 export function findKnownDestination(query: string): KnownDestination | null {
   const normalized = query.trim().toLowerCase()
-  return knownDestinations.find((d) => normalized.includes(d.name.toLowerCase())) ?? null
+  return (
+    knownDestinations.find((d) => {
+      const name = d.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      return new RegExp(`\\b${name}\\b`).test(normalized)
+    }) ?? null
+  )
 }

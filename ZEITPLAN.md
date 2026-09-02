@@ -212,7 +212,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `flightErrors` jetzt zusammen mit `flightOffers` (gleiche
   `awaitingFlightOrigin`-Schutzbedingung, damit während der laufenden
   IATA-Code-Abfrage nichts vorzeitig verschwindet). Neuer Regressionstest
-  in `useChat.test.ts`.
+  in `useChat.test.ts`. Vom autonomen IT-Chef-Lauf am 02.09.
+  (zweiundzwanzigster Lauf) einen eigenständig gefundenen Bug in
+  `findKnownDestination()` (`src/types/stays.ts`) behoben: Der Abgleich
+  des freien Zieltexts gegen die kuratierte Zielliste nutzte rohes
+  `String.includes` ohne Wortgrenzen — bei kurzen/generischen Namen wie
+  "Rom" oder "Paris" matchte das auch mitten in unbeteiligten Wörtern
+  ("romantisch", "Romania", "comparison"). Da `trip.destination` direkt
+  aus der ungeprüften Freitextantwort auf die erste Chat-Frage stammt und
+  `findKnownDestination` daraus in `useChat.ts` (automatische Hotel-/
+  Flugsuche) sowie `Kartenansicht.tsx` (Kartenpin) echte Koordinaten/
+  IATA-Codes ableitet, konnte ein Satz wie "etwas Romantisches am Meer"
+  still echte, aber falsche Hotel-/Flugergebnisse für Rom auslösen bzw.
+  den Kartenpin falsch setzen — ohne dass die Nutzerin das gewählt hat
+  oder es kenntlich gemacht wird. Fix: Abgleich jetzt mit Wortgrenzen-
+  Regex (`\b...\b`, Name escaped) statt rohem Teilstring-Vergleich, exakte
+  Ziel-Sätze wie "Ich möchte nach Lissabon" matchen weiterhin. Neue
+  `src/types/stays.test.ts` (bisher gab es dort keine Tests) mit
+  Regressionstests für Wortgrenzen-Fälle, vor dem Fix reproduzierbar rot
+  verifiziert.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,
