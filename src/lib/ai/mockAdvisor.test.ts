@@ -17,6 +17,12 @@ describe('detectTransportMode', () => {
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
+
+  it('does not match a keyword that only occurs as a substring of an unrelated word', () => {
+    expect(detectTransportMode('Ich möchte einen Ausflug machen')).toBeNull()
+    expect(detectTransportMode('Kein Zugriff auf meine Unterlagen')).toBeNull()
+    expect(detectTransportMode('Das geht automatisch, oder?')).toBeNull()
+  })
 })
 
 describe('getGreeting', () => {
