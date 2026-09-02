@@ -34,6 +34,10 @@ function findFacts(destination: string | null): DestinationFacts | null {
   return match ? destinationFacts[match] : null
 }
 
+export function hasKnownDestination(destination: string | null): boolean {
+  return findFacts(destination) !== null
+}
+
 export function getConciergeGreeting(destination: string | null): string {
   if (!destination) {
     return 'Willkommen im Urlaubsmodus! Sobald eine Reise geplant ist, helfe ich dir hier mit Fragen rund um Kultur, Sprache und deinen Trip.'
@@ -45,8 +49,12 @@ export function getConciergeReply(destination: string | null, userMessage: strin
   const facts = findFacts(destination)
   const lower = userMessage.toLowerCase()
 
-  if (!facts) {
+  if (!destination) {
     return 'Dafür brauche ich eine geplante Reise mit Reiseziel — plane zuerst im KI-Chat, dann kann ich gezielter helfen.'
+  }
+
+  if (!facts) {
+    return `Für ${destination} habe ich noch keine hinterlegten Fakten — das funktioniert bisher nur für eine kleine Auswahl an Zielen. Frag mich gerne trotzdem, ich sag dir ehrlich, wenn ich's nicht weiß.`
   }
 
   if (/währung|geld|bezahl|euro|preis/.test(lower)) {

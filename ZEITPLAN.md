@@ -168,6 +168,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   "no fabricated data"-Grundsatz, den die Datei selbst im Kopfkommentar
   festhält. Fix: gleiche Wortgrenzen-Regex wie in `findKnownDestination`.
   Neue `src/lib/ai/mockConcierge.test.ts` (bisher gab es dort keine Tests).
+  Vom autonomen IT-Chef-Lauf am 02.09. (vierundzwanzigster Lauf) einen von
+  `reports/support-chef.md` (02.09.) gemeldeten Fund behoben: Für ein
+  echtes, im KI-Chat eingetipptes Reiseziel, das einfach nicht in der
+  kleinen kuratierten Liste in `mockConcierge.ts` steht (z. B. "Bali"),
+  antwortete der Concierge mit demselben Satz wie ganz ohne geplante
+  Reise ("Dafür brauche ich eine geplante Reise mit Reiseziel …") — fachlich
+  falsch, da ja sehr wohl eine Reise geplant ist. Zusätzlich zeigten
+  Begrüßung und Quick-Replies in `useConcierge.ts` in diesem Fall trotzdem
+  die drei themenbezogenen Chips an, die dann bei jedem Klick dieselbe
+  irreführende "kein Ziel geplant"-Antwort auslösten. Neue exportierte
+  `hasKnownDestination()` in `mockConcierge.ts` (nutzt intern dieselbe
+  `findFacts()`-Logik) ersetzt die bisherige reine
+  Wahrheitswert-Prüfung von `destination` in `useConcierge.ts` (initiale
+  Quick-Replies und nach jeder Antwort). `getConciergeReply` unterscheidet
+  jetzt drei Fälle statt zwei: kein Ziel gesetzt (unverändert alter Satz),
+  Ziel gesetzt aber nicht kuratiert (neuer, ehrlicher Satz "Für {Ziel}
+  habe ich noch keine hinterlegten Fakten …"), Ziel bekannt (unverändert
+  faktenbasierte Antworten). Der zweite, ebenfalls im selben
+  Support-Chef-Bericht gemeldete Punkt (Avatar bleibt bei Ausweich-Antworten
+  fälschlich `'happy'` statt eines neutraleren Zustands) bleibt für einen
+  künftigen Lauf offen — hätte zusätzlich zur reinen Bugfix-Änderung hier
+  eine zweite, eigenständige Änderung an `getConciergeReply`s Rückgabewert
+  (Text + Match-Status) gebraucht, siehe "Einen einzigen Punkt aussuchen"
+  in `.claude/skills/it-chef-eigen/SKILL.md`. Bestehender Test in
+  `mockConcierge.test.ts` für den alten Zwei-Fälle-Fallback angepasst,
+  zwei neue Tests dort (unbekanntes echtes Ziel, `hasKnownDestination`)
+  sowie eine neue `src/hooks/useConcierge.test.ts` (bisher gab es dort
+  keine Tests) für die korrigierte Quick-Replies-Logik.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

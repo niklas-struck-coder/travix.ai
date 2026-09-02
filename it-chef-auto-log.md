@@ -6337,3 +6337,78 @@ Kriterien zweifelsfrei erfüllt.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-02 (vierundzwanzigster Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag exakt auf `origin/main`
+(`4dbdec6`) — der dreiundzwanzigste Lauf von heute war bereits über
+Freigabe-Chef nach `main` gemerged. Branch `it-chef/auto` frisch von
+`main` neu ausgecheckt, kein Merge nötig.
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+durchgesehen — unverändert dieselben Blocker wie in den Vorläufen (4.1-4.3
+Base44/Gemini-Zugangsdaten, 6.2/6.6/6.7/7.12 fehlende `TripDraft`-Felder,
+7.4 echte geteilte Chat-Historie, 8.2-8.7/8.9/8.12 KI-/Zahlungsanbindung
+bzw. offene PRD-Frage, 8.11 FAQ-Inhalte vom Support-Chef). Diesmal aber ein
+frischer, konkreter Fund in `reports/support-chef.md` (02.09., Commit
+`4dbdec6`): zwei neue, noch offene Reibungspunkte im bisher ungeprüften
+Urlaubsmodus-Concierge.
+
+**Ausgewählter Punkt:** Punkt 1 aus diesem Bericht — `getConciergeReply()`
+in `src/lib/ai/mockConcierge.ts` behandelte "kein Reiseziel geplant" und
+"Reiseziel geplant, aber nicht in der kuratierten 8-Ziele-Liste" (z. B.
+"Bali") identisch: beide Fälle bekamen exakt denselben Satz "Dafür brauche
+ich eine geplante Reise mit Reiseziel …", obwohl im zweiten Fall sehr wohl
+eine Reise geplant ist — fachlich falsch. Zusätzlich zeigten Begrüßung und
+Quick-Replies in `useConcierge.ts` in diesem Fall trotzdem die drei
+themenbezogenen Chips, die dann bei jedem Klick dieselbe irreführende
+Antwort auslösten.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung
+nötig — Support-Chef hatte den Fix bereits konkret vorgeschlagen
+(eigener ehrlicher Text für "Ziel geplant, aber nicht kuratiert";
+Begrüßung/Quick-Replies auf `findFacts(destination) !== null` statt nur
+`destination` prüfen), exakt lokalisiert in zwei bereits bekannten
+Dateien, keine Interpretation nötig. Objektiv prüfbar: Verhalten für
+bekanntes/unbekanntes/fehlendes Ziel ist eindeutig definiert und per
+Unit-Test reproduzierbar. Punkt 2 aus demselben Bericht (Avatar-Zustand
+bei Ausweich-Antworten) bewusst nicht mitgenommen, um bei einem einzigen
+Punkt zu bleiben (siehe SKILL.md) — bleibt für einen künftigen Lauf offen.
+
+**Umsetzung:** Neue exportierte `hasKnownDestination()` in
+`mockConcierge.ts` (nutzt intern die bestehende `findFacts()`-Logik
+inkl. Wortgrenzen-Regex). `getConciergeReply` unterscheidet jetzt drei
+Fälle: kein Ziel gesetzt (unveränderter Satz), Ziel gesetzt aber nicht
+kuratiert (neuer Satz "Für {Ziel} habe ich noch keine hinterlegten
+Fakten — das funktioniert bisher nur für eine kleine Auswahl an Zielen.
+Frag mich gerne trotzdem, ich sag dir ehrlich, wenn ich's nicht weiß."),
+Ziel bekannt (unverändert). `useConcierge.ts` prüft die initialen
+Quick-Replies sowie die Quick-Replies nach jeder Antwort jetzt über
+`hasKnownDestination(destination)` statt über reines `destination`-
+Truthy-Check. Bestehender Substring-Fallback-Test in
+`mockConcierge.test.ts` an das neue Verhalten angepasst (Substring-Fälle
+wie "Romantikurlaub" lösen jetzt korrekt den neuen "unbekanntes Ziel"-Satz
+statt des alten "kein Ziel"-Satzes aus), zwei neue Tests ergänzt
+(unbekanntes echtes Ziel "Bali", `hasKnownDestination` direkt). Neue
+`src/hooks/useConcierge.test.ts` (bisher gab es dort keine Tests, sechs
+Tests: Quick-Replies initial für bekanntes/unbekanntes/fehlendes Ziel,
+Quick-Replies-Verhalten nach einer Antwort in beiden Fällen).
+`ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 8) entsprechend ergänzt. Keine
+Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt — der Fix
+schließt weder 8.1 noch 8.3 vollständig ab (Tagesitinerar bzw. volle
+kontextbezogene Antworten bleiben offen), gleiches Muster wie die
+vorherigen Wortgrenzen-Fixes in diesem Modul.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 152 Tests (144 + 8 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

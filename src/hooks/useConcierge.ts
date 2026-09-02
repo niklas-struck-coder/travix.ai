@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { AvatarState } from '@/components/chat/TravixAvatar'
-import { conciergeQuickReplies, getConciergeGreeting, getConciergeReply } from '@/lib/ai/mockConcierge'
+import { conciergeQuickReplies, getConciergeGreeting, getConciergeReply, hasKnownDestination } from '@/lib/ai/mockConcierge'
 import type { ChatMessage } from '@/types/chat'
 
 function makeMessage(role: ChatMessage['role'], content: string): ChatMessage {
@@ -9,7 +9,7 @@ function makeMessage(role: ChatMessage['role'], content: string): ChatMessage {
 
 export function useConcierge(destination: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [makeMessage('assistant', getConciergeGreeting(destination))])
-  const [quickReplies, setQuickReplies] = useState<string[]>(destination ? conciergeQuickReplies : [])
+  const [quickReplies, setQuickReplies] = useState<string[]>(hasKnownDestination(destination) ? conciergeQuickReplies : [])
   const [avatarState, setAvatarState] = useState<AvatarState>('greeting')
   const [isThinking, setIsThinking] = useState(false)
 
@@ -23,7 +23,7 @@ export function useConcierge(destination: string | null) {
       const reply = getConciergeReply(destination, content)
       setMessages((prev) => [...prev, makeMessage('assistant', reply)])
       setAvatarState('happy')
-      setQuickReplies(destination ? conciergeQuickReplies : [])
+      setQuickReplies(hasKnownDestination(destination) ? conciergeQuickReplies : [])
       setIsThinking(false)
     }, 600)
   }
