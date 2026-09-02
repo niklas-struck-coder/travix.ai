@@ -1,44 +1,54 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-01
+**Datum:** 2026-09-02
 
-## Was ist seit dem letzten Eintrag (2026-08-31) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-01) passiert?
 
-Beide zuletzt gemeldeten Punkte sind sauber behoben: Ein Suchfehler bei
-der Flugsuche im Chat zeigt jetzt endlich die dafür gebaute
-Fehlermeldung an (`KiChat.tsx:115`), und beide "Bearbeiten"-Suchpfade
-(Unterkunft/Flug) lassen nach einem Fehler wieder einen "Neue Reise
-planen"-Button stehen statt einer Sackgasse (`useChat.ts`). Gut gemacht.
+Der zuletzt gemeldete Punkt ist behoben: Das "Ausgewählt"-Häkchen auf der
+Hotel-/Flugsuche-Seite bleibt jetzt korrekt auf "Auswählen" stehen, wenn
+`updateStoredTrip` fehlschlägt (`Hotelsuche.tsx`/`Flugsuche.tsx`,
+`selected` ist jetzt zusätzlich an `selectionHasTrip` geknüpft). Daneben
+hat IT-Chef zwei Wortgrenzen-Bugs behoben, die kurze Zielnamen wie "Rom"
+mitten in unbeteiligten Wörtern (z. B. "romantisch") matchen ließen
+(`stays.ts`, `mockConcierge.ts`).
 
-Daneben hat IT-Chef drei weitere Bugs auf der Hotelsuche-Seite und in
-der Sidebar behoben (alte Ergebnisse blieben bei neuer Suche stehen,
-`HotelCard` zeigte den Auswahlstatus nie an, der Sidebar-Einklappen-
-Button hatte im eingeklappten Zustand keinen erreichbaren Namen für
-Screenreader). Beim Prüfen dieser frischen Fixes ist mir aber ein neuer,
-noch nicht gemeldeter Reibungspunkt aufgefallen, der genau durch einen
-davon erst sichtbar wurde.
+Bei der Gelegenheit wurde erstmals der bisher ungeprüfte
+Urlaubsmodus-Concierge (`Urlaubsmodus.tsx`, `mockConcierge.ts`,
+`useConcierge.ts`) angeschaut. Dabei sind zwei neue, noch offene
+Reibungspunkte aufgefallen.
 
-## Mein Vorschlag
+## Meine Vorschläge
 
-1. **"Ausgewählt"-Häkchen erscheint auch dann, wenn die Auswahl laut
-   eigener Warnmeldung gerade NICHT übernommen wurde.**
-   `src/pages/Hotelsuche.tsx:30-34` (`handleSelect`) setzt
-   `setSelectedOfferId(offer.id)` unabhängig davon, ob
-   `updateStoredTrip(...)` erfolgreich war. Schlägt das fehl (keine
-   aktive Reiseplanung im KI-Chat begonnen), zeigt die Seite zwar korrekt
-   eine Warnung ("Es gibt noch keine aktive Reiseplanung …",
-   `Hotelsuche.tsx:63-71`) — die angeklickte `HotelCard` schaltet aber
-   trotzdem sofort auf den grünen "Ausgewählt"-Zustand um und lässt sich
-   danach nicht erneut anklicken (`disabled={selected}`,
-   `HotelCard.tsx:42`). Wer die Warnung überliest, denkt vernünftigerweise,
-   die Unterkunft sei gespeichert — bis sie später in `/buchung` fehlt.
-   Genau dasselbe Muster steckt identisch in `Flugsuche.tsx:30-34`. Neu
-   sichtbar wurde das erst durch den gestrigen Fix, der `HotelCard`
-   überhaupt einen "Ausgewählt"-Zustand gegeben hat — vorher konnte man
-   das Problem an der Hotelsuche gar nicht bemerken.
-   *Vorschlag:* `setSelectedOfferId(offer.id)` nur setzen, wenn
-   `updated !== null` ist, in beiden Dateien. Dann bleibt der Button im
-   Fehlerfall auf "Auswählen" stehen und ist erneut klickbar, sobald über
-   den Warnhinweis eine Reise im KI-Chat begonnen wurde.
+1. **Der Concierge behauptet fälschlich "keine Reise geplant", wenn das
+   Reiseziel echt, aber einfach nicht in der Demo-Liste ist.**
+   `mockConcierge.ts:16-25` kennt nur acht kuratierte Ziele (Lissabon,
+   Kyoto, Kapstadt, Reykjavik, Paris, Rom, Barcelona, New York). Für jedes
+   andere echte Ziel liefert `findFacts()` `null`, und `getConciergeReply()`
+   (`:49`) antwortet dann mit demselben Satz wie ganz ohne geplante Reise:
+   "Dafür brauche ich eine geplante Reise mit Reiseziel …" — das ist bei
+   einer Nutzerin mit einer echten, im KI-Chat eingetippten Reise nach z. B.
+   "Bali" schlicht falsch. Verschärft wird das dadurch, dass die Begrüßung
+   (`getConciergeGreeting`) und die Quick-Reply-Chips in `useConcierge.ts:12`
+   nur prüfen, ob überhaupt ein Zielname vorhanden ist — nicht, ob er bekannt
+   ist. Wer "Bali" geplant hat, sieht also erst eine persönliche Begrüßung
+   samt drei Quick-Replies und bekommt bei jedem Klick darauf die Antwort,
+   es sei angeblich noch gar keine Reise geplant.
+   *Vorschlag:* Für "Ziel geplant, aber nicht kuratiert" einen eigenen,
+   ehrlichen Text statt des "kein Ziel"-Satzes, z. B. "Für {destination}
+   habe ich noch keine hinterlegten Fakten." Begrüßung und Quick-Replies in
+   `useConcierge.ts` auf `findFacts(destination) !== null` statt nur auf
+   `destination` prüfen.
 
-_Letztes Update: 2026-09-01_
+2. **Der Avatar wirkt bei ehrlichen Ausweich-Antworten unpassend fröhlich.**
+   `useConcierge.ts:25` setzt nach jeder Concierge-Antwort unbedingt
+   `setAvatarState('happy')` — auch bei den beiden Fällen, in denen die
+   Antwort inhaltlich eine Einschränkung ist (kein/unbekanntes Ziel, oder
+   die generische Demo-Antwort in `mockConcierge.ts:62`). `TravixAvatar.tsx`
+   hat mit `'error'` bereits einen dafür passenderen, an anderer Stelle
+   etablierten Zustand. Ein breit lächelnder Avatar neben "das kann ich hier
+   gerade nicht" wirkt inkonsistent zum sonst ehrlichen Ton der App.
+   *Vorschlag:* `getConciergeReply` z. B. einen `{ text, matched }`-Rückgabewert
+   geben lassen und bei den Ausweich-Fällen einen neutraleren Avatar-Zustand
+   statt `'happy'` setzen.
+
+_Letztes Update: 2026-09-02_
