@@ -153,6 +153,18 @@ describe('useChat accommodation search failure vs. real zero results', () => {
 
     expect(result.current.stayError).toBe(false)
   })
+
+  it('clears a still-pending stayLoading when the chat is reset mid-search', () => {
+    vi.mocked(searchStays).mockReturnValue(new Promise(() => {}))
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    expect(result.current.stayLoading).toBe(true)
+
+    act(() => {
+      result.current.resetChat()
+    })
+
+    expect(result.current.stayLoading).toBe(false)
+  })
 })
 
 describe('useChat accommodation search for an unknown destination', () => {
@@ -273,5 +285,19 @@ describe('useChat flight search failure vs. real zero results', () => {
     })
 
     expect(result.current.flightErrors).toEqual([])
+  })
+
+  it('clears a still-pending flightLoading when the chat is reset mid-search', () => {
+    vi.mocked(searchFlights).mockReturnValue(new Promise(() => {}))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    expect(result.current.flightLoading).toBe(true)
+
+    act(() => {
+      result.current.resetChat()
+    })
+
+    expect(result.current.flightLoading).toBe(false)
   })
 })

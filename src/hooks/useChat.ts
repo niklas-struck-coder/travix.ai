@@ -348,10 +348,12 @@ export function useChat(speechEnabled: boolean) {
     setQuickReplies(greeting.quickReplies)
     setAvatarState(greeting.avatarState)
     setStayOffers(null)
+    setStayLoading(false)
     setStayError(false)
     setEditingField(null)
     setFlightOffers(null)
     setFlightErrors([])
+    setFlightLoading(false)
     setAwaitingFlightOrigin(false)
   }
 

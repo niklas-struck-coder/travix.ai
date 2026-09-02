@@ -6081,3 +6081,71 @@ stehen. Für `Flugsuche.tsx` gab es bisher keine Testdatei — neue
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-02 (einundzwanzigster Lauf)
+
+**Ausgewählter Punkt:** `resetChat()` in `src/hooks/useChat.ts` (Zeile
+343-356) setzt beim Neustart des Chats zwar `stayOffers`, `stayError`,
+`editingField`, `flightOffers`, `flightErrors` und `awaitingFlightOrigin`
+zurück — die beiden strukturell gleichrangigen Ladezustände `stayLoading`
+und `flightLoading` aber nicht. Kein Eintrag in `ZEITPLAN.md`/Aufgabenliste,
+sondern ein eigenständig bei der Codesuche nach einem sicheren
+Tagespunkt gefundener, klar lokaler Bug (kein offener TODO/FIXME im Code,
+`ZEITPLAN.md`/`tasks-prd-travix-platform.md` boten sonst nur noch
+blockierte oder bereits erledigte Punkte, siehe unten).
+
+**Warum der Bug real ist:** Läuft beim Klick auf "Neue Reise planen" (oder
+jeden anderen `resetChat()`-Aufruf) noch eine Unterkunfts- oder
+Flugsuche (`startEdit('accommodation')`, die automatische Suche in
+`sendMessage`, oder `runFlightSearch`), bleibt `stayLoading`/
+`flightLoading` `true`. `KiChat.tsx` rendert die Ergebnis-Panels u.a. auf
+`stayLoading`/`flightLoading`, sodass der frisch zurückgesetzte
+Begrüßungsbildschirm weiterhin "Travix sucht echte Unterkünfte/Flüge …"
+zeigt. Löst sich das alte Promise danach auf, schreibt sein `.then`/
+`.catch` die Ergebnisse/den Fehler der VORHERIGEN Reiseplanung in die neu
+gestartete Chat-Session.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — zwei fehlende Zeilen nach exakt dem
+Muster der Zeile direkt daneben. Eindeutig, keine Interpretation nötig
+(die Asymmetrie zu den übrigen Reset-Zeilen macht die Absicht klar).
+Objektiv prüfbar über einen neuen Unit-Test pro Suchart (nie auflösendes
+Promise + `resetChat()` + Assertion auf `stayLoading`/`flightLoading`).
+
+**Umsetzung:** `resetChat()` ruft jetzt zusätzlich `setStayLoading(false)`
+und `setFlightLoading(false)` auf, an derselben Stelle wie die übrigen
+Resets der jeweiligen Suche. Zwei neue Tests in `useChat.test.ts`
+("clears a still-pending stayLoading/flightLoading when the chat is
+reset mid-search") mocken `searchStays`/`searchFlights` mit einem nie
+auflösenden Promise, lösen die Suche aus, rufen `resetChat()` und prüfen,
+dass der jeweilige Ladezustand sofort `false` ist. Vor dem Fix beide
+Tests reproduzierbar rot (`expected true to be false`) — zur eigenen
+Kontrolle mit `git stash` gegen die alte `useChat.ts` verifiziert, danach
+zurückgeholt.
+
+**Warum kein anderer Punkt gewählt wurde:** `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` enthalten aktuell keinen offenen
+Programmierungs-Punkt, der alle vier Sicherheitskriterien erfüllt — 4.1-4.3
+sind laut Task-Datei explizit auf Base44/Gemini-Zugangsdaten blockiert,
+6.2/6.6/6.7/7.12 brauchen neue `TripDraft`-Felder (Datenmodell-
+Entscheidung), 7.4 bräuchte echte geteilte Chat-Historie pro Entwurf
+statt des bisherigen Demo-States, 8.2-8.7/8.9/8.12 brauchen entweder eine
+echte KI-/Zahlungsanbindung oder eine noch offene Produktentscheidung
+(PRD OQ-04), und 8.11 ist explizit auf FAQ-Inhalte vom Support-Chef
+blockiert. Ein Explore-Agent hat den Rest des Codes gezielt nach weiteren,
+in keiner Liste stehenden aber klar lokalen Bugs durchsucht (u.a.
+`useChat.ts`, `mockAdvisor.ts`, `src/lib/trip/*.ts`, alle `src/pages/*.tsx`,
+`src/components/chat/*`, `src/lib/duffel/*`) — der `resetChat`-Fund oben
+war der einzige Kandidat, der alle vier Kriterien zweifelsfrei erfüllte.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 32 Testdateien, 136 Tests (134 + 2 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

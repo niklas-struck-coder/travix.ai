@@ -43,7 +43,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Sidebar.test.tsx` (bisher gab es dort keinen Test) prüft beide
   Zustände.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
-  lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.)
+  lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
+  autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
+  eigenständig gefundener Bug in `useChat.ts` behoben: `resetChat()`
+  setzte `stayLoading`/`flightLoading` nicht zurück — lief beim Klick auf
+  "Neue Reise planen" noch eine Unterkunfts-/Flugsuche, blieb der frisch
+  gestartete Chat im "sucht"-Zustand hängen und bekam später sogar die
+  Ergebnisse/den Fehler der vorherigen Reiseplanung angezeigt. Beide
+  fehlenden Resets ergänzt, zwei neue Regressionstests in
+  `useChat.test.ts`.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
