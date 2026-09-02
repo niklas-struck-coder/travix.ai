@@ -154,7 +154,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `it-chef/auto`, noch nicht in `main` gemergt); Rest (7.4, 7.12) komplett
   offen
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
-  Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen
+  Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
+  Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
+  eigenständig gefundenen Bug in `findFacts()` (`src/lib/ai/mockConcierge.ts`)
+  behoben: derselbe Wortgrenzen-Bug, der bereits in `findKnownDestination()`
+  (`src/types/stays.ts`) gefixt wurde, steckte unabhängig davon auch in der
+  Concierge-Antwortlogik — `destination.toLowerCase().includes(name)` ohne
+  Wortgrenzen matchte kurze Zielnamen wie "Rom" mitten in unbeteiligten
+  Wörtern (z. B. "Romantikurlaub" als Antwort auf die Zielfrage). Die
+  Concierge-Antwort im Urlaubsmodus zeigte dadurch für Fragen wie "Welche
+  Währung brauche ich?" still erfundene Rom-Fakten statt der ehrlichen
+  Rückmeldung, dass noch kein bekanntes Reiseziel vorliegt — genau der
+  "no fabricated data"-Grundsatz, den die Datei selbst im Kopfkommentar
+  festhält. Fix: gleiche Wortgrenzen-Regex wie in `findKnownDestination`.
+  Neue `src/lib/ai/mockConcierge.test.ts` (bisher gab es dort keine Tests).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

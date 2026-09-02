@@ -6244,3 +6244,96 @@ der alle vier Kriterien zweifelsfrei erfüllt.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-02 (dreiundzwanzigster Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` lag genau auf dem zweiundzwanzigsten
+Lauf von heute (`findKnownDestination`-Fix), der bereits auf dem aktuellen
+`main` (`81e000b`) aufbaut — kein neuer `main`-Commit seitdem, kein Merge
+nötig.
+
+**Punkt-Suche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+erneut durchgesehen — unverändert dieselben Blocker wie in den Vorläufen
+(Backend-/Auth-Entscheidung, echte LLM-Anbindung, fehlende Zug/Bus/Fähre-
+Datenquelle, fehlende `TripDraft`-Preis-/Item-/Itinerar-Felder, offene
+Produktentscheidungen). `reports/it-chef.md` und `reports/support-chef.md`
+(beide 01.09.) brachten keinen neuen, noch offenen Fund. Ein
+Explore-Subagent hat deshalb erneut gezielt nach neuen Bugs gesucht, mit
+expliziter Ausschlussliste aller in den letzten Läufen bereits geprüften/
+gefixten Muster, Fokus auf bisher seltener geprüfte Bereiche (`src/lib/
+duffel/*`, `src/lib/trip/*.ts`, weitere Seiten/Komponenten, Formular-
+Validierungen, Datums-/Zeitzonen-Handling, Berechnungs-Edge-Cases).
+
+**Ausgewählter Punkt:** `findFacts()` in `src/lib/ai/mockConcierge.ts`
+(Zeilen 27-31, vor dem Fix). Der Abgleich des `destination`-Strings gegen
+die kuratierte Liste bekannter Reiseziele in `destinationFacts` nutzte
+rohes `String.includes()` ohne Wortgrenzen:
+`destination.toLowerCase().includes(name.toLowerCase())`.
+
+**Warum der Bug real ist:** Exakt derselbe Bug-Typ, der im
+einundzwanzigsten Lauf bereits in `findKnownDestination()`
+(`src/types/stays.ts`) gefixt wurde, steckte unabhängig davon auch in
+dieser zweiten, separaten Funktion mit einer eigenen, ähnlichen
+Ziel-Liste. `trip.destination` stammt weiterhin ungeprüft aus der
+Freitextantwort der Nutzerin auf die erste Chat-Frage und wird im
+Urlaubsmodus an `getConciergeReply` (über `useConcierge.ts`) durchgereicht.
+Da `"Rom"` ein sehr kurzer Schlüssel ist, matcht `String.includes` auch
+mitten in unbeteiligten Wörtern: `getConciergeReply('Romantikurlaub',
+'Welche Währung brauche ich?')` lieferte vor dem Fix reproduzierbar die
+Rom-Währungsantwort ("Euro (€)"), obwohl "Romantikurlaub" gar keinen
+Zielort benennt. Genau das widerspricht dem im Datei-Kopfkommentar von
+`mockConcierge.ts` selbst festgehaltenen "no fabricated data"-Grundsatz —
+statt der vorgesehenen ehrlichen Rückmeldung ("Dafür brauche ich eine
+geplante Reise mit Reiseziel …") bekommt die Nutzerin eine erfundene,
+falsche Antwort präsentiert, ohne dass sie ein Ziel gewählt hat.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — der korrekte Fix-Ansatz ist im
+Codebase bereits etabliert und akzeptiert (`findKnownDestination`), hier
+nur auf eine zweite, strukturell identische Funktion angewendet. Exakt
+lokalisiert, keine Interpretation nötig. Objektiv prüfbar: Verhalten bei
+Wortgrenzen-Fällen ist eindeutig definiert und per Unit-Test
+reproduzierbar.
+
+**Umsetzung:** `findFacts` vergleicht jetzt per Wortgrenzen-Regex
+(`\b<escaped-name>\b`, gegen den bereits kleingeschriebenen
+`destination`-String) statt per rohem `String.includes`, mit Escaping von
+Regex-Sonderzeichen im Namen — identisches Muster zu
+`findKnownDestination` in `src/types/stays.ts`. Neue
+`src/lib/ai/mockConcierge.test.ts` (bisher gab es für dieses Modul
+überhaupt keine Tests): prüft eine korrekte Treffer-Antwort ("Rom" →
+Euro-Antwort), Groß-/Kleinschreibung und umgebenden Text ("Meine Reise
+nach ROM"), die drei Wortgrenzen-Fälle (alle erwartungsgemäß die ehrliche
+Fallback-Antwort statt erfundener Fakten) sowie den bereits bestehenden
+Fall ohne Ziel (`null`). Vor dem Fix per `git stash` gegen die alte
+`mockConcierge.ts` verifiziert: genau der Wortgrenzen-Test schlägt
+reproduzierbar fehl (Rom-Antwort statt ehrlicher Fallback), danach
+zurückgeholt. `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 8) entsprechend
+ergänzt.
+
+**Warum kein anderer Punkt gewählt wurde:** Wie in den Vorläufen bleiben
+4.1-4.3 (Base44/Gemini-Zugangsdaten), 6.2/6.6/6.7/7.12 (fehlende
+`TripDraft`-Felder), 7.4 (echte geteilte Chat-Historie), 8.2-8.7/8.9/8.12
+(KI-/Zahlungsanbindung bzw. offene PRD-Frage) und 8.11 (FAQ-Inhalte vom
+Support-Chef) blockiert. Der Explore-Subagent hat gezielt in `src/lib/
+duffel/*`, `src/lib/trip/*.ts`, `tripStorage.ts`, `useChat.ts`,
+`mockAdvisor.ts` sowie allen bisher seltener geprüften Seiten/Komponenten
+gesucht (u. a. Warenkorb, Kalender, Dashboard, Buchung, MeineReisen,
+Reiseentwuerfe, Angebote, Favoriten, Preisalarme, Aktivitaeten,
+ReiseSuche, Kartenansicht, Profil, Einstellungen) und den
+`findFacts`-Fund als einzigen Kandidaten identifiziert, der alle vier
+Kriterien zweifelsfrei erfüllt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) — entstandenes
+  `package-lock.json`-Rauschen (`libc`-Metadaten) danach verworfen,
+  gleiches Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 34 Testdateien, 144 Tests (140 + 4 neue), alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende Chunk-Size-Warnung,
+  unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

@@ -26,7 +26,11 @@ const destinationFacts: Record<string, DestinationFacts> = {
 
 function findFacts(destination: string | null): DestinationFacts | null {
   if (!destination) return null
-  const match = Object.keys(destinationFacts).find((name) => destination.toLowerCase().includes(name.toLowerCase()))
+  const normalized = destination.toLowerCase()
+  const match = Object.keys(destinationFacts).find((name) => {
+    const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`\\b${escaped}\\b`).test(normalized)
+  })
   return match ? destinationFacts[match] : null
 }
 
