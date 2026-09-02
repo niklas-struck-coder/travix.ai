@@ -1855,3 +1855,45 @@ Fast-Forward) — kein separater Branch-Update-Push nötig.
 gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
 nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
 Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-02, zweiter Lauf (Tagesrunde)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Nacht-Lauf
+  heute per Fast-Forward gemergt, siehe Eintrag oben), nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit (`c0a4227`, kein neues
+  Content-Stück, stattdessen Ergänzung von
+  `marketing/freigabe-uebersicht.md` um die vier seit dem letzten
+  Marketing-Lauf neu hinzugekommenen IT-Chef-Ehrlichkeits-/Konsistenz-Fixes).
+- `support-chef/auto` — 1 neuer Commit (`094a659`, UX-Analyse des
+  Urlaubsmodus-Concierge, reiner Log-Eintrag, kein Code geändert).
+
+**Prüfung `marketing-chef/auto`:** Diff angeschaut (`marketing-chef-auto-log.md`
++ `marketing/freigabe-uebersicht.md`, reine Markdown-Ergänzung, kein
+Produktcode). Die fünf referenzierten Commits (`4a8a573`, `69bcba5`,
+`d947bf1`, `8eca941`, `e796c69`) per `git show` einzeln gegengeprüft —
+Commit-Botschaften und Inhalt stimmen exakt mit der Beschreibung im Diff
+überein. Kein Hinweis auf tatsächliches Posten/Veröffentlichen, keine
+erfundenen Kennzahlen oder Nutzerzahlen, Text ist vollständig begründet
+(nicht nur eine Stichpunkt-Skizze).
+
+→ Nach `main` gemergt.
+
+**Prüfung `support-chef/auto`:** Diff angeschaut (`support-chef-auto-log.md`,
+neuer Abschnitt zum Urlaubsmodus-Concierge, zwei Reibungspunkte). Stichprobe
+gegen den tatsächlichen Code geprüft: `mockConcierge.ts` (Zeilen 16-63,
+`destinationFacts`/`findFacts`/`getConciergeGreeting`/`getConciergeReply`),
+`useConcierge.ts` (Zeilen 12, 23-27), `Buchung.tsx` (Zeilen 165, 202,
+273-289) — alle zitierten Zeilennummern und Code-Zitate stimmen exakt.
+Die Kernbehauptung (Karte "Bereit für die Reise?" erscheint allein über
+`isTripComplete(trip)`, unabhängig davon ob das Ziel in der kuratierten
+`destinationFacts`-Liste ist, während Begrüßung und Quick-Replies dasselbe
+nicht prüfen) ist im Code nachvollziehbar, nicht erfunden. Reine Analyse
+ohne Code-Änderung — niedrigstes Risiko.
+
+→ Nach `main` gemergt.
+
+**Ergebnis:** `it-chef/auto` bereits aktuell, nichts zu tun.
+`marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
+beide nach `main` gemergt. Keine Auffälligkeiten, kein Scope-Verstoß,
+keine Info an Ni nötig.
