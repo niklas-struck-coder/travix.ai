@@ -39,9 +39,20 @@ async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<Duf
     }
     return { data: json?.data ?? null, errors: [] }
   } catch (error) {
+    // Same reasoning as the response.ok === false branch above: a raw
+    // network/parse error (e.g. "Failed to fetch", "Unexpected end of JSON
+    // input") is English engineering jargon, not something to show
+    // travellers directly — log it for debugging, show an honest, concrete
+    // German fallback instead (see MARKENDESIGN.md "Fehlermeldungen (allgemein)").
+    console.error('Duffel-Anfrage fehlgeschlagen (Netzwerkfehler)', error)
     return {
       data: null,
-      errors: [{ message: error instanceof Error ? error.message : 'Unbekannter Netzwerkfehler' }],
+      errors: [
+        {
+          message:
+            'Die Verbindung zu unserem Reise-Anbieter ist gerade fehlgeschlagen — bitte prüfe deine Internetverbindung oder versuche es gleich noch einmal.',
+        },
+      ],
     }
   }
 }
