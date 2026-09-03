@@ -39,8 +39,10 @@ Gezielte Bug-Suche in dieser Session: `useChat.ts`, `mockAdvisor.ts`,
 `tripStorage.ts`, `types/stays.ts`, `routes.tsx`, `KiChat.tsx`,
 `Urlaubsmodus.tsx`, `Flugsuche.tsx`, `Hotelsuche.tsx`, `Dashboard.tsx`,
 `Home.tsx`, die Ergebnis- und Karten-Komponenten sowie beide Wizards
-vollständig gelesen. Kein offenes TODO/FIXME im Code. Zwei neue Bugs
-gefunden und gefixt.
+vollständig gelesen, dazu per Subagent alle übrigen Seiten und die
+`lib/trip`-Helfer. Kein offenes TODO/FIXME im Code, keine toten Links
+(alle `to="…"`-Ziele existieren in `routes.tsx`), keine Tippfehler in
+Nutzer-Texten. Drei neue Bugs gefunden und gefixt.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -67,6 +69,15 @@ gefunden und gefixt.
   gewählt, für die die automatische Suche danach auch funktioniert.
   Inhaltlich die Neuauflage des nicht mehr mergebaren PR #5, frisch
   gegen den aktuellen `main`.
+- [PR #16](https://github.com/niklas-struck-coder/travix.ai/pull/16) —
+  **Sprachausgabe lässt sich nicht stoppen.** `stopSpeaking()`
+  (`src/lib/ai/speech.ts`) existiert für den Abbruch, wurde aber nirgends
+  aufgerufen — toter Export. `speak()` läuft dagegen an neun Stellen.
+  Folge: "Sprachausgabe deaktivieren" beendet die laufende Vorlesung
+  nicht, "Neu starten" auch nicht, und beim Wechsel auf Reiseplan oder
+  Warenkorb redet die Stimme dort weiter, wo es keinen Aus-Schalter mehr
+  gibt. Fix: `stopSpeaking()` beim Abschalten, beim Neustart und als
+  Unmount-Cleanup in `KiChat.tsx`.
 
 In dieser Session war kein `node_modules` vorhanden, `npm test` konnte
 also nicht laufen (kein `npm install` laut Sicherheitsregeln). Beide
@@ -84,8 +95,38 @@ gegen alle relevanten Treffer- und Fehltreffer-Fälle.
   Reines Wegfangen wäre klein, reicht aber nicht: die Nutzerin verlöre
   ihren Chat stillschweigend, und `updateStoredTrip` würde `null`
   zurückgeben, was die Oberfläche heute als "keine aktive Reiseplanung"
-  formuliert — eine falsche Begründung. Braucht eine eigene, ehrliche
-  Fehlermeldung, deshalb keine automatische Änderung.
+  formuliert — eine falsche Begründung. Dazu passt ein konkreter Fall aus
+  dem Reiseplan: Liefert `updateStoredTrip` `null` (z. B. weil der Chat
+  in einem anderen Tab neu gestartet wurde), leert `Buchung.tsx` das
+  Eingabefeld trotzdem und zeigt nichts an — die Aktivität ist einfach
+  weg. `Flugsuche`/`Hotelsuche` behandeln denselben Fall bereits ehrlich.
+  Braucht eine eigene, ehrliche Fehlermeldung, deshalb keine
+  automatische Änderung.
+- **Kaputter Reiseplan-Zustand kann die App weiß machen.**
+  `loadStoredChat()` castet den geparsten localStorage-Wert nur
+  (`as StoredChatState`), ohne ihn zu prüfen. `hasTripData()` liest
+  danach `activities.length` — fehlt das Feld (Alt-Daten aus einer
+  früheren Version, halb geschriebener Wert), gibt es einen `TypeError`
+  mitten im Rendern von `Buchung.tsx` bzw. `Kartenansicht.tsx`. Eine
+  ErrorBoundary gibt es nicht, die Seite ist dann komplett leer und nur
+  über Löschen der Browserdaten wieder erreichbar. Der Ein-Zeilen-Fix
+  (`Array.isArray`) wäre klein, die saubere Lösung ist aber ein
+  normalisierendes Laden — das berührt mehrere Stellen, deshalb nur
+  gemeldet.
+- **Mikrofon-Knopf kann dauerhaft hängen bleiben.** `startListening()`
+  gibt das Recognition-Objekt zurück, damit der Aufrufer es stoppen kann;
+  `ChatInput.tsx` ignoriert den Rückgabewert. Zusätzlich steht
+  `recognition.start()` ungeschützt: wirft es (Chrome:
+  `InvalidStateError`), bleibt `listening` auf `true` und der eigene
+  Klick-Guard blockiert jeden weiteren Versuch — ohne Fehlermeldung,
+  weil `onerror` in dem Fall nie feuert. Der Wurf-Pfad ist schwer
+  reproduzierbar, daher nicht automatisch angefasst.
+- **IATA-Feld in der Flugsuche ohne Buchstabenprüfung.** `isValid`
+  (`FlightWizard.tsx`) prüft nur `length === 3`, während der Chat für
+  dieselbe Eingabe `/^[a-zA-Z]{3}$/` verlangt. "1 2" oder "B3R" startet
+  also eine Suche, die mit der generischen Anbieter-Fehlermeldung endet
+  statt mit einem Hinweis auf den Code. Fix bräuchte eine eigene
+  Fehlermeldung, sonst wird nur stumm der Button deaktiviert.
 - **Passagierzahl im `FlightWizard` ohne NaN-Schutz.**
   `FlightWizard.tsx:120` klammert mit `Math.min/Math.max` um `Number(...)`,
   ohne `Number.isNaN`-Prüfung; das Schwester-File `HotelWizard.tsx:11`
