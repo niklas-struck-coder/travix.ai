@@ -1942,3 +1942,52 @@ kein separater Branch-Update-Push nötig.
 gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
 nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
 Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-03, 6-Uhr-Lauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Nacht-Lauf
+  heute gemergt, siehe Eintrag oben), nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit (`dfb31cb`): reine
+  Doku-Ergänzung in `marketing/freigabe-uebersicht.md`, kein neues
+  Content-Stück.
+- `support-chef/auto` — 1 neuer Commit (`07d47e6`): neuer UX-Bericht zur
+  Fehleranzeige bei Flug-/Unterkunftssuche im Chat, reine Analyse ohne
+  Code-Änderung.
+
+**Prüfung `marketing-chef/auto`:** Diff angeschaut (`marketing-chef-auto-log.md`
++ `marketing/freigabe-uebersicht.md`, reine Markdown-Ergänzung, kein
+Produktcode geändert, daher kein Build/Lint/Test nötig). Die fünf
+referenzierten Commits (`e5f11c9`, `5127b9f`, `1f0641b`, `b6bc2f3`,
+`89f63c2`) per `git log`/`git merge-base --is-ancestor` einzeln
+gegengeprüft — alle existieren, liegen bereits auf `main` und die
+zitierten Commit-Botschaften stimmen exakt mit der Beschreibung im Diff
+überein. Kein Hinweis auf tatsächliches Posten/Veröffentlichen, keine
+erfundenen Kennzahlen oder Nutzerzahlen, Text ist vollständig begründet
+(nicht nur eine Stichpunkt-Skizze).
+
+→ Per Fast-Forward nach `main` gemergt (`003b464..dfb31cb`).
+
+**Prüfung `support-chef/auto`:** Diff angeschaut (`support-chef-auto-log.md`,
+neuer Abschnitt zur Fehleranzeige bei Flug-/Unterkunftssuche, Nachwirkung
+des 31.08.-Fixes). Kernbehauptung unabhängig gegen den echten Code
+verifiziert: `src/lib/duffel/client.ts` (`callDuffelProxy()`, Zeilen
+15-53) fängt jeden Fehler selbst per `try`/`catch` ab und gibt immer ein
+aufgelöstes `{ data, errors }` zurück, wirft also nie — bestätigt durch
+Quellcode-Lektüre. Die drei zitierten Stellen in `src/hooks/useChat.ts`
+(`runFlightSearch` ~Z. 88-103, `startEdit`-Zweig `accommodation` ~Z.
+157-178, Haupt-Onboarding-Pfad ~Z. 289-325) wurden gelesen: die
+`.catch()`-Zweige mit `setQuickReplies`/`setStayError` sind tatsächlich
+unerreichbar, und die beiden `searchStays()`-Aufrufstellen lesen
+`result.errors` im `.then()`-Zweig tatsächlich nicht aus — Behauptung
+stimmt exakt mit dem Code überein, nicht erfunden. Reine Analyse ohne
+Code-Änderung — niedrigstes Risiko.
+
+→ Nach `main` gemergt (`003b464..07d47e6`, da `main` durch den
+Marketing-Merge inzwischen divergiert war, per regulärem Merge-Commit
+`233340f`).
+
+**Ergebnis:** `it-chef/auto` bereits aktuell, nichts zu tun.
+`marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
+beide nach `main` gemergt. Keine Auffälligkeiten, kein Scope-Verstoß,
+keine Info an Ni nötig.
