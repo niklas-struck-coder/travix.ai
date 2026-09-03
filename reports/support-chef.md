@@ -1,54 +1,62 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-02
+**Datum:** 2026-09-03
 
-## Was ist seit dem letzten Eintrag (2026-09-01) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-02) passiert?
 
-Der zuletzt gemeldete Punkt ist behoben: Das "Ausgewählt"-Häkchen auf der
-Hotel-/Flugsuche-Seite bleibt jetzt korrekt auf "Auswählen" stehen, wenn
-`updateStoredTrip` fehlschlägt (`Hotelsuche.tsx`/`Flugsuche.tsx`,
-`selected` ist jetzt zusätzlich an `selectionHasTrip` geknüpft). Daneben
-hat IT-Chef zwei Wortgrenzen-Bugs behoben, die kurze Zielnamen wie "Rom"
-mitten in unbeteiligten Wörtern (z. B. "romantisch") matchen ließen
-(`stays.ts`, `mockConcierge.ts`).
+Beide zuletzt gemeldeten Punkte sind behoben: Der Urlaubsmodus-Concierge
+gibt jetzt eine ehrliche eigene Antwort, wenn eine Reise zwar geplant,
+das Ziel aber nicht in der kleinen kuratierten Liste ist ("Für Bali habe
+ich noch keine hinterlegten Fakten …", `mockConcierge.ts`), und Begrüßung
+sowie Quick-Replies berücksichtigen das jetzt korrekt (`useConcierge.ts`).
+Der Avatar zeigt bei diesen Ausweich-Antworten außerdem nicht mehr
+fälschlich `'happy'`, sondern den bereits bestehenden `'error'`-Zustand.
 
-Bei der Gelegenheit wurde erstmals der bisher ungeprüfte
-Urlaubsmodus-Concierge (`Urlaubsmodus.tsx`, `mockConcierge.ts`,
-`useConcierge.ts`) angeschaut. Dabei sind zwei neue, noch offene
-Reibungspunkte aufgefallen.
+Bei der Gelegenheit habe ich mir angeschaut, wie Suchfehler beim Duffel-
+Anbieter durch die App laufen — Anlass war, dass IT-Chef dort kürzlich
+rohe englische Fehlertexte durch ehrliche deutsche Meldungen ersetzt hat
+(`client.ts`). Dabei sind zwei konkrete, noch offene Reibungspunkte in der
+Chat-Oberfläche aufgefallen (die separaten manuellen Suchseiten sind
+davon nicht betroffen).
 
 ## Meine Vorschläge
 
-1. **Der Concierge behauptet fälschlich "keine Reise geplant", wenn das
-   Reiseziel echt, aber einfach nicht in der Demo-Liste ist.**
-   `mockConcierge.ts:16-25` kennt nur acht kuratierte Ziele (Lissabon,
-   Kyoto, Kapstadt, Reykjavik, Paris, Rom, Barcelona, New York). Für jedes
-   andere echte Ziel liefert `findFacts()` `null`, und `getConciergeReply()`
-   (`:49`) antwortet dann mit demselben Satz wie ganz ohne geplante Reise:
-   "Dafür brauche ich eine geplante Reise mit Reiseziel …" — das ist bei
-   einer Nutzerin mit einer echten, im KI-Chat eingetippten Reise nach z. B.
-   "Bali" schlicht falsch. Verschärft wird das dadurch, dass die Begrüßung
-   (`getConciergeGreeting`) und die Quick-Reply-Chips in `useConcierge.ts:12`
-   nur prüfen, ob überhaupt ein Zielname vorhanden ist — nicht, ob er bekannt
-   ist. Wer "Bali" geplant hat, sieht also erst eine persönliche Begrüßung
-   samt drei Quick-Replies und bekommt bei jedem Klick darauf die Antwort,
-   es sei angeblich noch gar keine Reise geplant.
-   *Vorschlag:* Für "Ziel geplant, aber nicht kuratiert" einen eigenen,
-   ehrlichen Text statt des "kein Ziel"-Satzes, z. B. "Für {destination}
-   habe ich noch keine hinterlegten Fakten." Begrüßung und Quick-Replies in
-   `useConcierge.ts` auf `findFacts(destination) !== null` statt nur auf
-   `destination` prüfen.
+1. **Ein echter Hotelsuchfehler im Chat sieht für die Nutzerin wie "keine
+   Treffer" aus, nicht wie ein Fehler.** `callDuffelProxy()` (`client.ts`)
+   lehnt ihre Promise nie ab — auch bei einem echten Suchfehler liefert sie
+   immer ein Ergebnisobjekt mit `errors`. Die beiden Stellen im Chat, die
+   Unterkünfte suchen (`useChat.ts`, in `startEdit()` und im
+   Haupt-Onboarding-Pfad), werten dieses `result.errors` in ihrem `.then()`
+   aber nicht aus — nur der zugehörige `.catch()` setzt `stayError`, der
+   bei einem echten Duffel-Fehler nie erreicht wird. Die Nutzerin bekommt
+   also "Keine Unterkünfte gefunden" (`NoResultsMessage`) angezeigt, obwohl
+   die Suche eigentlich fehlgeschlagen ist — sie erfährt nicht, dass es an
+   einem technischen Problem lag, und bekommt keinen Hinweis, es einfach
+   nochmal zu versuchen. Die manuellen Suchseiten `Hotelsuche.tsx` und
+   `Flugsuche.tsx` machen das schon richtig (sie prüfen `errors.length`
+   separat von `offers.length`).
+   *Vorschlag:* In beiden `.then()`-Zweigen in `useChat.ts` `result.errors`
+   auswerten und bei Fehlern `stayError` setzen, statt sich auf das nie
+   erreichte `.catch()` zu verlassen.
 
-2. **Der Avatar wirkt bei ehrlichen Ausweich-Antworten unpassend fröhlich.**
-   `useConcierge.ts:25` setzt nach jeder Concierge-Antwort unbedingt
-   `setAvatarState('happy')` — auch bei den beiden Fällen, in denen die
-   Antwort inhaltlich eine Einschränkung ist (kein/unbekanntes Ziel, oder
-   die generische Demo-Antwort in `mockConcierge.ts:62`). `TravixAvatar.tsx`
-   hat mit `'error'` bereits einen dafür passenderen, an anderer Stelle
-   etablierten Zustand. Ein breit lächelnder Avatar neben "das kann ich hier
-   gerade nicht" wirkt inkonsistent zum sonst ehrlichen Ton der App.
-   *Vorschlag:* `getConciergeReply` z. B. einen `{ text, matched }`-Rückgabewert
-   geben lassen und bei den Ausweich-Fällen einen neutraleren Avatar-Zustand
-   statt `'happy'` setzen.
+2. **Nach einem echten Flugsuchfehler im Chat gibt es keine klickbare
+   Option mehr, wie es weitergeht.** Direkt vor dem Suchaufruf setzt
+   `useChat.ts` die Quick-Replies auf leer. In `runFlightSearch()` wird bei
+   einem echten Suchfehler zwar korrekt die Fehlermeldung angezeigt (via
+   `flightErrors`, das `.then()` wertet `result.errors` hier bereits
+   richtig aus), die Quick-Replies bleiben aber leer — den hilfreichen Chip
+   "Neue Reise planen" gibt es nur im (aus demselben Grund wie oben nie
+   erreichten) `.catch()`. Die Nutzerin sieht also die ehrliche
+   Fehlermeldung, landet danach aber in einer Sackgasse ohne Chip, mit dem
+   sie im Chat weitermachen kann.
+   *Vorschlag:* Im `.then()` von `runFlightSearch()` bei
+   `result.errors.length > 0` ebenfalls `setQuickReplies(['Neue Reise
+   planen'])` setzen.
 
-_Letztes Update: 2026-09-02_
+Beide Punkte haben dieselbe Ursache: `callDuffelProxy()` löst nie eine
+abgelehnte Promise aus, wodurch die dafür vorgesehenen `.catch()`-Zweige
+in `useChat.ts` toter Code sind. Ein gemeinsamer Fix (z. B. `.then()` und
+`.catch()` in beiden Fällen konsequent gleich behandeln) würde vermutlich
+beide Stellen auf einmal lösen.
+
+_Letztes Update: 2026-09-03_
