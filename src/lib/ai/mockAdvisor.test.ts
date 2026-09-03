@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { detectTransportMode, emptyTrip, getGreeting, getNextAdvisorStep } from '@/lib/ai/mockAdvisor'
+import { knownDestinations } from '@/types/stays'
 
 describe('detectTransportMode', () => {
   it('detects each transport mode from its German keywords, case-insensitively', () => {
@@ -42,6 +43,13 @@ describe('getNextAdvisorStep', () => {
     const reply = getNextAdvisorStep(emptyTrip, 'Lissabon')
     expect(reply.trip.destination).toBe('Lissabon')
     expect(reply.nextField).toBe('transportMode')
+  })
+
+  it('picks a curated destination instead of taking the "Überrasch mich" quick reply literally', () => {
+    const reply = getNextAdvisorStep(emptyTrip, 'Überrasch mich')
+    expect(reply.trip.destination).not.toBe('Überrasch mich')
+    expect(knownDestinations.map((destination) => destination.name)).toContain(reply.trip.destination)
+    expect(reply.content).toContain(reply.trip.destination as string)
   })
 
   it('re-asks for transport mode without advancing when the message has no recognizable mode', () => {
