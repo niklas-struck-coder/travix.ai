@@ -6603,3 +6603,78 @@ bestehende Funktion korrigiert.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (achtundzwanzigster Lauf)
+
+**Ausgangslage:** Alle offenen ZEITPLAN-Punkte im Programmierungs-Bereich
+weiterhin blockiert (unverändert zum letzten Lauf). Deshalb erneut gezielt
+nach einem eigenständigen, aktuell auslösbaren Bug gesucht — diesmal u. a.
+`src/lib/trip/*` (`checklistRules.ts`, `calculateProgress.ts`,
+`cartTotals.ts`, `calendarUtils.ts`, `tripStorage.ts`), `useConcierge.ts`,
+`mockConcierge.ts`, `speech.ts` sowie bisher wenig geprüfte Chat-
+Komponenten (`ChatInput.tsx`, `QuickReplies.tsx`, `ChatMessage.tsx`,
+`TripSummaryCard.tsx`, `EditMode.tsx`, `ChecklistPanel.tsx`) komplett
+gelesen — keiner davon zeigte einen eigenständigen Bug. Fündig geworden
+beim erneuten vollständigen Lesen von `src/lib/duffel/client.ts`.
+
+**Ausgewählter Punkt:** `callDuffelProxy()` in `src/lib/duffel/client.ts`
+— der `catch`-Block für Netzwerk-/Parse-Fehler reicht weiterhin die rohe
+`error.message` durch, obwohl der benachbarte `!response.ok`-Zweig in
+derselben Funktion bereits am 25.08. (zweiter Lauf) auf eine ehrliche
+deutsche Meldung umgestellt wurde.
+
+**Warum sicher genug:** Rein defensive Fehlerdarstellung in der
+API-Client-Schicht, kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung:
+Ton und Muster sind durch `MARKENDESIGN.md` ("Fehlermeldungen
+(allgemein)") und den bereits bestehenden Fix im Nachbar-Zweig derselben
+Funktion vorgegeben — hier nur konsequent auf den zweiten, bisher
+übersehenen Fehlerpfad derselben Funktion übertragen. Klar lokalisiert
+(ein `catch`-Block), keine Interpretation nötig. Objektiv prüfbar: fester
+Input (abgelehntes `fetch()`, werfendes `response.json()`) → eindeutig
+falsche/rohe Meldung vorher, ehrliche deutsche Meldung nachher, per
+Regressionstest abgesichert.
+
+**Konkreter, reproduzierbarer Ablauf vor dem Fix:** Auf `/flugsuche` oder
+`/hotelsuche` eine Suche starten, während `fetch()` fehlschlägt (z. B.
+kein Netz) — `callDuffelProxy()` fängt das im `catch`-Block ab, gibt aber
+`error.message` unverändert zurück (bei einem echten Browser-Fetch-Fehler
+z. B. "Failed to fetch", bei einer kaputten JSON-Antwort vom Dev-Proxy
+z. B. "Unexpected token < in JSON at position 0"). `FlightResults.tsx`
+bzw. die Fehleranzeige auf `Flugsuche.tsx`/`Hotelsuche.tsx` rendert
+`error.message` direkt — die Nutzerin sieht rohen, englischen
+Technik-Jargon statt einer verständlichen deutschen Meldung mit
+Handlungsempfehlung. Verifiziert über den neuen Testfall (abgelehntes
+`fetch`-Promise mit `TypeError('Failed to fetch')` sowie ein
+`response.json()`, das einen `SyntaxError` wirft) — beide landeten vor
+dem Fix unverändert als Fehlertext im Ergebnis.
+
+**Umsetzung:** Im `catch`-Block von `callDuffelProxy()` wird der rohe
+Fehler jetzt per `console.error` geloggt (Debugging bleibt möglich) und
+`errors` bekommt stattdessen exakt dieselbe Textbausteine-Logik wie der
+`!response.ok`-Zweig: eine einheitliche, ehrliche deutsche Meldung mit
+konkretem nächsten Schritt ("Die Anfrage bei unserem Reise-Anbieter hat
+gerade nicht geklappt — bitte prüfe deine Internetverbindung oder
+versuche es gleich noch einmal."). Zwei neue Regressionstests in
+`client.test.ts`: ein abgelehntes `fetch()`-Promise (`TypeError('Failed
+to fetch')`) und ein `response.json()`, das einen `SyntaxError` wirft —
+beide erwarten jetzt die ehrliche deutsche Meldung statt des rohen
+Fehlertexts. `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5, direkt nach dem
+`selectionHasTrip`-Eintrag vom zwanzigsten Lauf) entsprechend ergänzt.
+Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt, da
+dieser Fix keinen neuen Punkt abschließt, sondern eine bestehende
+Funktion korrigiert.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) —
+  entstandenes `package-lock.json`-Rauschen danach verworfen, gleiches
+  Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 161 Tests (159 + 2 neue), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

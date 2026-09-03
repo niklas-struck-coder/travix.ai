@@ -132,7 +132,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `&& selectionHasTrip` durch, sodass der Button im Fehlerfall auf
   "Auswählen" stehen und klickbar bleibt, exakt wie im Warnhinweis
   beschrieben. Neue Regressionstests in `Hotelsuche.test.tsx` sowie eine
-  neue `Flugsuche.test.tsx` (bisher gab es dort noch keine Tests).
+  neue `Flugsuche.test.tsx` (bisher gab es dort noch keine Tests). Vom
+  autonomen IT-Chef-Lauf am 03.09. (achtundzwanzigster Lauf) eine Lücke im
+  bereits am 25.08. (zweiter Lauf) begonnenen Ehrlichkeits-Fix in
+  `callDuffelProxy()` (`src/lib/duffel/client.ts`) geschlossen: der
+  damalige Fix deckte nur den `!response.ok`-Zweig ab (Duffel liefert
+  einen HTTP-Fehler); der separate `catch`-Block direkt darunter — für
+  einen fehlgeschlagenen `fetch()` selbst (z. B. offline, "Failed to
+  fetch") oder eine kaputte JSON-Antwort (`response.json()` wirft) — gab
+  weiterhin `error.message` roh durch, landet ungefiltert in
+  `Flugsuche.tsx`/`Hotelsuche.tsx`/`FlightResults.tsx`. Jetzt nach
+  demselben Muster: roher Fehler per `console.error` geloggt, Nutzerin
+  sieht eine ehrliche deutsche Meldung mit konkretem nächsten Schritt.
+  Zwei neue Regressionstests in `client.test.ts` (abgelehntes
+  `fetch()`-Promise, werfendes `response.json()`).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

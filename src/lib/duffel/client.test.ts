@@ -51,4 +51,43 @@ describe('searchFlights error handling', () => {
       { message: 'Duffel-Anfrage fehlgeschlagen (500) — bitte versuche es gleich noch einmal.' },
     ])
   })
+
+  it('replaces a raw fetch failure (e.g. offline) with an honest German fallback', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = await searchFlights(baseParams)
+
+    expect(result.offers).toEqual([])
+    expect(result.errors).toEqual([
+      {
+        message:
+          'Die Anfrage bei unserem Reise-Anbieter hat gerade nicht geklappt — bitte prüfe deine Internetverbindung oder versuche es gleich noch einmal.',
+      },
+    ])
+  })
+
+  it('replaces a broken JSON response with an honest German fallback', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON at position 0')
+        },
+      }),
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = await searchFlights(baseParams)
+
+    expect(result.offers).toEqual([])
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).not.toMatch(/JSON/)
+    expect(result.errors[0].message).toContain('Reise-Anbieter')
+  })
 })
