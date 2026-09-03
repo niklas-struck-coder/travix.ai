@@ -6678,3 +6678,95 @@ Funktion korrigiert.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (neunundzwanzigster Lauf)
+
+**Ausgangslage:** Alle offenen ZEITPLAN-Punkte im Programmierungs-Bereich
+weiterhin blockiert (Backend-/Produktentscheidungen). Vor der eigenen
+Bug-Suche zuerst `reports/support-chef.md` gelesen (aktuelles Muster
+für autonome Läufe, wenn andere Chefs bereits konkrete, gut beschriebene
+Funde gemeldet haben) — dort stand ein neuer, vom 03.09. datierter
+Bericht mit zwei konkreten Reibungspunkten inkl. vorgeschlagenem Fix.
+
+**Ausgewählter Punkt:** Beide von Support-Chef gemeldeten Punkte in
+`src/hooks/useChat.ts` (Chat-Suchergebnisse nach einer echten
+Duffel-API-Fehlermeldung) — laut Bericht dieselbe Ursache: seit dem
+zweiten/siebenundzwanzigsten Lauf lehnt `callDuffelProxy()`
+(`src/lib/duffel/client.ts`) ihre Promise bei einem echten Suchfehler
+nie mehr ab, sondern löst sie mit einem befüllten `errors`-Feld auf. Die
+drei Suchaufrufe im Chat (automatische Unterkunftssuche im
+Hauptonboarding, Unterkunftssuche über den "Bearbeiten"-Pfad,
+`runFlightSearch`) prüften `result.errors` in ihrem `.then()` aber nicht
+oder nicht vollständig — sie verließen sich auf die dafür vorgesehenen
+`.catch()`-Zweige, die dadurch bei einem echten API-Fehler nie mehr
+erreicht werden.
+
+**Warum sicher genug:** Rein defensive Fehlerdarstellung in der
+Chat-Hook-Schicht, kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung:
+Support-Chef hatte den exakten Fix bereits vorgeschlagen, und das
+korrekte Muster existiert schon in `Hotelsuche.tsx`/`Flugsuche.tsx`
+(separate `errors`- und `offers`-Prüfung) sowie im bereits laufenden
+`.catch()`-Zweig der "Bearbeiten"-Unterkunftssuche selbst — hier nur
+konsequent auf die drei Stellen übertragen, an denen es noch fehlte.
+Klar lokalisiert (drei benannte `.then()`-Zweige in einer Datei), keine
+Interpretation über den Berichtsvorschlag hinaus nötig. Objektiv
+prüfbar: fester Input (`searchStays`/`searchFlights` lösen mit
+`errors`-Array statt leer auf) → vorher fälschlich "keine Treffer" bzw.
+Sackgasse ohne nächsten Schritt, nachher korrekte Fehleranzeige bzw.
+"Neue Reise planen"-Chip, per Regressionstest abgesichert. Bewusst als
+ein einziger, zusammenhängender Punkt behandelt (nicht als zwei
+getrennte autonome Läufe), da beide Fundstellen exakt dieselbe Ursache
+und dasselbe Fix-Muster haben, wie im Support-Chef-Bericht selbst schon
+so eingeordnet.
+
+**Konkreter, reproduzierbarer Ablauf vor dem Fix:**
+1. Unterkunft (Hauptablauf und "Bearbeiten"): Im Chat ein Ziel aus der
+   kuratierten Liste angeben, während `searchStays()` mit einem echten
+   Duffel-Fehler auflöst (`{ offers: [], errors: [...] }`, kein
+   abgelehntes Promise). `HotelResults` zeigte "Keine Unterkünfte
+   gefunden" statt der eigentlich vorgesehenen Fehlermeldung — die
+   Nutzerin erfuhr nicht, dass es an einem technischen Problem lag.
+2. Flug (über "Bearbeiten" → Transportmittel → IATA-Code): Bei einem
+   ebenso echten Fehler zeigte `FlightResults` zwar korrekt die
+   Fehlermeldung (dieser Teil war schon richtig), aber `quickReplies`
+   blieb leer — keine Möglichkeit, ohne kompletten Chat-Neustart
+   weiterzumachen.
+   Verifiziert über drei neue Testfälle (`mockResolvedValue` mit
+   befülltem `errors`-Array statt `mockRejectedValue`) — alle drei vor
+   dem Fix reproduzierbar rot (per `git stash` der Fix-Änderung isoliert
+   bestätigt), erst danach grün.
+
+**Umsetzung:** In allen drei betroffenen `.then()`-Zweigen in
+`useChat.ts` wird jetzt `result.errors` ausgewertet, bevor `offers`
+gesetzt wird: Unterkunft (beide Suchaufrufe) setzt bei Fehlern
+`stayError` statt `stayOffers`; die "Bearbeiten"-Variante setzt
+zusätzlich `quickReplies` auf `['Neue Reise planen']` (analog dem
+bestehenden `.catch()`-Zweig direkt daneben); `runFlightSearch` setzt
+bei Fehlern zusätzlich `quickReplies` auf `['Neue Reise planen']`. Die
+bestehenden `.catch()`-Zweige bleiben unverändert als Absicherung für
+echte JS-Fehler (z. B. während des Testens per `mockRejectedValue`
+weiterhin genutzt). Drei neue Regressionstests in `useChat.test.ts`
+(zwei für Unterkunft, einer für Flug), die den zuvor ungetesteten,
+tatsächlich auftretenden Fall abdecken (`callDuffelProxy()` löst auf,
+statt abzulehnen). `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5, direkt
+nach dem `callDuffelProxy()`-Eintrag vom achtundzwanzigsten Lauf)
+entsprechend ergänzt. Keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+neuen Punkt abschließt, sondern eine bestehende Funktion korrigiert.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) —
+  entstandenes `package-lock.json`-Rauschen danach verworfen, gleiches
+  Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 164 Tests (161 + 3 neue), alle
+  grün. Die drei neuen Tests vorab isoliert (per `git stash` nur der
+  Fix-Änderung) gegen den alten Code laufen lassen — alle drei
+  reproduzierbar rot, danach mit dem Fix wieder grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

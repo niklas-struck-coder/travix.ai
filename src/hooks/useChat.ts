@@ -94,6 +94,9 @@ export function useChat(speechEnabled: boolean) {
         setFlightOffers(result.offers)
         setFlightErrors(result.errors)
         setFlightLoading(false)
+        if (result.errors.length > 0) {
+          setQuickReplies(['Neue Reise planen'])
+        }
       })
       .catch(() => {
         setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
@@ -168,7 +171,12 @@ export function useChat(speechEnabled: boolean) {
           guests: 1,
         })
           .then((result) => {
-            setStayOffers(result.offers)
+            if (result.errors.length > 0) {
+              setStayError(true)
+              setQuickReplies(['Neue Reise planen'])
+            } else {
+              setStayOffers(result.offers)
+            }
             setStayLoading(false)
           })
           .catch(() => {
@@ -309,7 +317,11 @@ export function useChat(speechEnabled: boolean) {
             guests: 1,
           })
             .then((result) => {
-              setStayOffers(result.offers)
+              if (result.errors.length > 0) {
+                setStayError(true)
+              } else {
+                setStayOffers(result.offers)
+              }
               setStayLoading(false)
             })
             .catch(() => {

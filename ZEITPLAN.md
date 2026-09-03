@@ -146,6 +146,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   sieht eine ehrliche deutsche Meldung mit konkretem nächsten Schritt.
   Zwei neue Regressionstests in `client.test.ts` (abgelehntes
   `fetch()`-Promise, werfendes `response.json()`).
+  Vom autonomen IT-Chef-Lauf am 03.09. (neunundzwanzigster Lauf) einen von
+  `reports/support-chef.md` (03.09.) gemeldeten Fund in `useChat.ts`
+  behoben: `callDuffelProxy()` lehnt seine Promise bei einem echten
+  Duffel-Fehler nie ab, sondern löst sie mit einem `errors`-Feld auf
+  (siehe Fix im siebenundzwanzigsten/zweiten Lauf oben) — die drei
+  Suchaufrufe im Chat (automatische Unterkunftssuche im Hauptablauf,
+  Unterkunftssuche über "Bearbeiten", `runFlightSearch`) werteten
+  `result.errors` in ihrem `.then()` aber nicht (oder nicht vollständig)
+  aus und verließen sich auf die dafür vorgesehenen, aber nie erreichten
+  `.catch()`-Zweige. Eine echte Suchpanne sah dadurch für die Nutzerin wie
+  eine ehrliche Null-Treffer-Suche aus (Unterkunft) bzw. endete ohne
+  jeden klickbaren nächsten Schritt (Flug) — die manuellen Suchseiten
+  `Hotelsuche.tsx`/`Flugsuche.tsx` hatten dieselbe Unterscheidung schon
+  richtig. Fix: alle drei `.then()`-Zweige prüfen jetzt `result.errors`
+  genau wie die manuellen Suchseiten (Unterkunft: `stayError` statt
+  `stayOffers` setzen plus `quickReplies` auf "Neue Reise planen" bei der
+  "Bearbeiten"-Suche; Flug: zusätzlich `quickReplies` auf "Neue Reise
+  planen" setzen). Die bisherigen `.catch()`-Zweige bleiben als
+  Absicherung für echte JS-Fehler unverändert bestehen. Drei neue
+  Regressionstests in `useChat.test.ts`, die die Suche mit
+  `mockResolvedValue({ offers: [], errors: [...] })` statt
+  `mockRejectedValue` simulieren (das bisher ungetestete, tatsächlich
+  auftretende Verhalten) — vor dem Fix reproduzierbar rot verifiziert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
