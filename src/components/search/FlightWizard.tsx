@@ -32,7 +32,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
     origin.trim().length === 3 &&
     destination.trim().length === 3 &&
     departureDate &&
-    (tripType === 'oneway' || returnDate)
+    (tripType === 'oneway' || (returnDate && returnDate >= departureDate))
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()

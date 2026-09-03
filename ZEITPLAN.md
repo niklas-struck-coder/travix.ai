@@ -210,6 +210,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Rückgabeformat angepasst, neue Tests dort (matched-Flag pro Fall)
   sowie drei neue Tests in `useConcierge.test.ts` für den Avatar-Zustand
   nach Antworten mit bekanntem/unbekanntem/fehlendem Ziel.
+  Vom autonomen IT-Chef-Lauf am 03.09. (sechsundzwanzigster Lauf) einen
+  eigenständig gefundenen Bug in `FlightWizard.tsx` behoben: `isValid`
+  prüfte bei "Hin- und Rückflug" nur, ob überhaupt ein Rückflugdatum
+  gesetzt ist, nicht ob es nach dem Hinflugdatum liegt — anders als beim
+  strukturell identischen `HotelWizard.tsx`, das `checkOutDate >
+  checkInDate` bereits korrekt prüft. Der einzige Schutz war das
+  `min`-Attribut am Rückflug-Feld, das nicht rückwirkend greift, wenn
+  danach das Hinflugdatum auf einen späteren Zeitpunkt geändert wird:
+  Rückflug erst setzen, dann Hinflug nach hinten verschieben, und der
+  "Flüge suchen"-Button blieb für eine unmögliche Reise (Rückflug vor
+  Hinflug) anklickbar, ohne jede Fehlermeldung. Fix: `isValid` prüft
+  jetzt zusätzlich `returnDate >= departureDate` (Gleichheit erlaubt,
+  anders als beim Hotel-Checkout, da ein Flug am selben Tag hin und
+  zurück technisch möglich ist). Neuer Regressionstest in
+  `FlightWizard.test.tsx`.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

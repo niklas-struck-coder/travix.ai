@@ -6482,3 +6482,62 @@ Concierge-Fixes.
   unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (sechsundzwanzigster Lauf)
+
+**Ausgangslage:** Alle offenen ZEITPLAN-Punkte im Programmierungs-Bereich
+geprüft — durchweg blockiert (4.1-4.3 Base44/Gemini-Zugangsdaten,
+6.2/6.6/6.7/7.12 fehlende `TripDraft`-Felder, 7.4 bräuchte eine echte
+Multi-Entwurf-Chat-Historie statt der aktuellen einzelnen
+`CHAT_STORAGE_KEY`, 8.2-8.7/8.9/8.12 KI-/Zahlungsanbindung bzw. offene
+PRD-Frage, 8.11 FAQ-Inhalte vom Support-Chef). Deshalb wie in mehreren
+früheren Läufen gezielt nach einem eigenständigen, aktuell auslösbaren
+Bug gesucht (bislang wenig geprüfte Dateien, u. a. Formular-Wizards).
+
+**Ausgewählter Punkt:** `FlightWizard.tsx` — `isValid` bei "Hin- und
+Rückflug" prüfte nur, ob ein Rückflugdatum gesetzt ist, nicht ob es
+nach dem Hinflugdatum liegt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung — das strukturell identische `HotelWizard.tsx`
+hat das etablierte Muster (`checkOutDate > checkInDate`) bereits
+vorgegeben, hier nur konsequent auf Flüge übertragen. Klar beschrieben,
+keine Interpretation nötig. Objektiv prüfbar: fester reproduzierbarer
+Input (Rückflug setzen, danach Hinflug nach hinten verschieben) und
+erwartetes Verhalten (Button deaktiviert) sind eindeutig, per
+Regressionstest abgesichert.
+
+**Konkreter, reproduzierbarer Ablauf vor dem Fix:** `/flugsuche`, Tab
+"Hin- und Rückflug", Von BER, Nach LIS, Hinflug 2026-09-05, Rückflug
+2026-09-10 (zu dem Zeitpunkt gültig), danach Hinflug auf 2026-09-20
+geändert — `returnDate` blieb unverändert bei 09-10, `isValid` weiterhin
+`true`, "Flüge suchen"-Button blieb anklickbar für eine unmögliche Reise
+(Rückflug vor Hinflug), ohne jede Fehlermeldung in der App. Das einzige
+vorhandene `min`-Attribut am Rückflug-Feld schützt nur beim manuellen
+Auswählen im Datepicker, nicht rückwirkend bei einer späteren
+Änderung des Hinflugdatums.
+
+**Umsetzung:** `isValid` prüft bei Rundreisen jetzt zusätzlich
+`returnDate >= departureDate` (Gleichheit erlaubt — anders als beim
+Hotel-Checkout, da ein Flug am selben Tag hin und zurück technisch
+möglich ist). Neuer Regressionstest in `FlightWizard.test.tsx`, der
+genau den oben beschriebenen Ablauf nachstellt. `ZEITPLAN.md`
+(Ist-Stand-Notiz bei Phase 5) entsprechend ergänzt. Keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` umgestellt, da 5.8/5.9/5.11 bereits
+als erledigt markiert sind und dieser Fix keinen neuen Punkt abschließt,
+sondern einen bestehenden korrigiert.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) —
+  entstandenes `package-lock.json`-Rauschen danach verworfen, gleiches
+  Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 159 Tests (158 + 1 neuer), alle
+  grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
