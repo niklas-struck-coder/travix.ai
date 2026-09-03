@@ -4,6 +4,102 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-03
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 02.09.) um eine neue Prüfung
+vom 03.09. ergänzt — ordnet vier seit dem letzten Marketing-Lauf neu
+hinzugekommene Ehrlichkeits-Fixes in den bestehenden Tier-4-
+Kandidatentopf ein (Urlaubsmodus-Concierge antwortet für ein echtes, aber
+nicht kuratiertes Reiseziel jetzt fachlich korrekt statt irreführend;
+Avatar wirkt bei ehrlichen Ausweich-Antworten nicht mehr fälschlich
+fröhlich; derselbe Wortgrenzen-Bug wie bei der Zielname-Erkennung steckte
+unabhängig auch in der Transportmittel-Erkennung; rohe Duffel-Fehlertexte
+bei Netzwerk-/Parse-Fehlern durch eine ehrliche deutsche Meldung
+ersetzt). Ein fünfter geprüfter Fix (Rückflugdatum-Validierung in
+`FlightWizard.tsx`) bewusst nicht aufgenommen, da reine
+Validierungskorrektur ohne Ehrlichkeits-/Irreführungs-Erzählung.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`c0a4227`,
+02.09.) geprüft: 13 neue Commits. Der Großteil ohne Content-Relevanz —
+zwei Merge-Commits, ein Freigabe-Chef-Log, ein Daily-Status-Update, ein
+Support-Chef-Bericht (dieselben zwei Concierge-Funde wie unten, keine
+neue Information) sowie ein eigener interaktiver Marketing-Chef-Bericht
+und ein IT-Chef-Bericht (beide vor diesem Auto-Lauf entstanden, nur
+Einordnung im Chat, keine autonome Aktion). `ZEITPLAN.md`, `status.md`
+und `marketing/freigabe-uebersicht.md` bestätigen: alle drei offenen
+Fragen an Ni (Kanal-Start? 6.2 priorisiert? Tier-4-Format gewollt?)
+weiterhin unbeantwortet seit 21.08. — 6.2 weiterhin offen, kein neuer
+Kanal/keine Landingpage live, keine Notiz von Ni in `status.md` (Stand
+02.09.) oder sonstwo im Repo.
+
+Fünf echte Codeänderungen wurden einzeln geprüft (`git show`, Diffs
+gelesen), bevor über Content entschieden wurde:
+- `e5f11c9` (02.09., vierundzwanzigster IT-Chef-Lauf): der
+  Urlaubsmodus-Concierge antwortete für ein echtes, aber nicht
+  kuratiertes Reiseziel (z. B. "Bali") bisher mit demselben Satz wie ganz
+  ohne geplante Reise — fachlich falsch. Neue `hasKnownDestination()`
+  unterscheidet jetzt drei statt zwei Fälle.
+- `5127b9f` (02.09., fünfundzwanzigster IT-Chef-Lauf): direkte
+  Fortsetzung — der Avatar sprang nach jeder Concierge-Antwort unbedingt
+  auf `'happy'`, auch bei ehrlichen Ausweich-Antworten. Wechselt jetzt bei
+  `matched: false` auf den bestehenden `'error'`-Zustand.
+- `1f0641b` (03.09., siebenundzwanzigster IT-Chef-Lauf): derselbe
+  Wortgrenzen-Bug wie bei `findKnownDestination()`/`findFacts()`, diesmal
+  in `detectTransportMode()` — "Business Class" matchte fälschlich das
+  Bus-Keyword, "Zimmerservice" fälschlich das Zug-Keyword "ice".
+- `b6bc2f3` (03.09., achtundzwanzigster IT-Chef-Lauf): schließt eine
+  Lücke im bereits am 25.08. begonnenen Duffel-Fehlermeldungs-Fix — der
+  separate `catch`-Block für einen fehlgeschlagenen `fetch()` selbst oder
+  kaputte JSON-Antwort gab weiterhin rohe Fehlertexte durch.
+- `89f63c2` (03.09., sechsundzwanzigster IT-Chef-Lauf): `isValid` in
+  `FlightWizard.tsx` prüfte nur, ob ein Rückflugdatum gesetzt ist, nicht
+  ob es nach dem Hinflugdatum liegt — reine UI-Validierungskorrektur,
+  keine irreführende Aussage gegenüber der Nutzerin.
+
+Vier der fünf passen inhaltlich zum bereits skizzierten
+"Ehrlichkeits-Log"-Format und wandern in den Tier-4-Kandidatentopf,
+gebunden an die weiterhin offene Frage 3 — dieselbe Einstufung wie alle
+bisherigen kleinen Ehrlichkeits-Korrekturen. Der fünfte (`89f63c2`) ist
+reiner Validierungs-Fix ohne diese Erzählung, gleiche Einstufung wie z. B.
+der Auswahl-Häkchen-Fix vom 01.09.
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion sowie eine Ergänzung im bestehenden Tier-4-Punkt
+hinzugefügt, ältere Abschnitte unverändert belassen). Keine erfundenen
+Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die Ergänzung
+entscheidet nichts neu, sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`- und
+`status.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes, eigenständiges Content-Stück zu einem der vier
+  Ehrlichkeits-Fixes — siehe Begründung oben, gleiche Einstufung wie alle
+  bisherigen kleinen Ehrlichkeits-Korrekturen, aus Konsistenzgründen in
+  den Tier-4-Topf statt ein eigenes Stück.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand
+`c0a4227`, 02.09.) war laut `git merge-base --is-ancestor` bereits
+vollständig in `main` gemerged. Branch daher neu von `origin/main`
+(`003b464`, inkl. IT-/Support-/Freigabe-Chef-Läufen bis 03.09. früh)
+aufgesetzt, wie in den Session-Regeln für bereits gemergte Branches
+vorgesehen — keine eigenen Commits gingen dabei verloren, da der alte
+Branch-Stand bereits vollständig in `main` enthalten war.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-02
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:

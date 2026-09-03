@@ -1,10 +1,89 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-02)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-03)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-03: vier weitere Ehrlichkeits-Fixes geprüft (nicht-kuriertes Reiseziel im Concierge, Avatar-Zustand bei Ausweich-Antworten, Transportmittel-Erkennung ohne Wortgrenzen, rohe Duffel-Fehlertexte bei Netzwerk-/Parse-Fehlern) — vier weitere Tier-4-Kandidaten, ein reiner Validierungs-Fix ohne Content-Relevanz, weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`c0a4227`,
+02.09., laut `git merge-base --is-ancestor` bereits vollständig in `main`
+gemerged) geprüft: 13 neue Commits. Der größte Teil ohne Content-Relevanz
+— zwei Merge-Commits, ein Freigabe-Chef-Log, ein Daily-Status-Update, ein
+Support-Chef-Bericht (`4dbdec6`, dieselben zwei Concierge-Funde wie unten,
+keine neue Information) sowie ein eigener interaktiver
+Marketing-Chef-Bericht und ein IT-Chef-Bericht (`8fa6a0a`, `f5a9046`, beide
+vor diesem Auto-Lauf entstanden, reine Einordnung im Chat, keine autonome
+Aktion dieses Skripts).
+
+Fünf echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`e5f11c9` (02.09., vierundzwanzigster IT-Chef-Lauf):** Der
+  Urlaubsmodus-Concierge antwortete für ein echtes, im KI-Chat geplantes
+  Reiseziel außerhalb der kleinen kuratierten Liste (z. B. "Bali") bisher
+  mit demselben Satz wie ganz ohne geplante Reise — fachlich falsch, da ja
+  sehr wohl eine Reise geplant ist. Neue `hasKnownDestination()`
+  unterscheidet jetzt drei statt zwei Fälle (kein Ziel / Ziel gesetzt aber
+  nicht kuratiert / Ziel bekannt), inklusive der Quick-Replies in
+  `useConcierge.ts`, die vorher trotzdem die drei themenbezogenen Chips
+  zeigten und bei jedem Klick dieselbe irreführende Antwort auslösten.
+- **`5127b9f` (02.09., fünfundzwanzigster IT-Chef-Lauf):** direkte
+  Fortsetzung von `e5f11c9` — der Avatar sprang nach jeder
+  Concierge-Antwort unbedingt auf `'happy'`, auch bei den ehrlichen
+  Ausweich-Antworten (kein/unbekanntes Ziel, generische Demo-Antwort).
+  `getConciergeReply()` liefert jetzt `{ text, matched }` statt reinem
+  String, der Avatar wechselt bei `matched: false` auf den bereits
+  bestehenden `'error'`-Zustand statt fälschlich fröhlich zu wirken.
+- **`1f0641b` (03.09., siebenundzwanzigster IT-Chef-Lauf):** derselbe
+  Wortgrenzen-Bug wie bei `findKnownDestination()`/`findFacts()` (siehe
+  Update 2026-09-02), diesmal in `detectTransportMode()`
+  (`mockAdvisor.ts`) — reiner `String.includes()`-Vergleich matchte
+  Transport-Keywords auch mitten in unbeteiligten Wörtern ("Business
+  Class bitte" fälschlich als Bus, "Zimmerservice" fälschlich als Zug/ICE
+  erkannt). Der Bot bestätigte dadurch ein falsches Transportmittel, ohne
+  dass die Nutzerin das leicht korrigieren konnte.
+- **`b6bc2f3` (03.09., achtundzwanzigster IT-Chef-Lauf):** schließt eine
+  Lücke im bereits am 25.08. begonnenen Duffel-Fehlermeldungs-Fix
+  (`callDuffelProxy()`, `src/lib/duffel/client.ts`) — der damalige Fix
+  deckte nur den `!response.ok`-Zweig ab, der separate `catch`-Block für
+  einen fehlgeschlagenen `fetch()` selbst (offline, "Failed to fetch")
+  oder eine kaputte JSON-Antwort gab weiterhin den rohen `error.message`
+  ungefiltert durch. Jetzt nach demselben Muster eine ehrliche deutsche
+  Meldung mit konkretem nächsten Schritt.
+- **`89f63c2` (03.09., sechsundzwanzigster IT-Chef-Lauf):** `isValid` in
+  `FlightWizard.tsx` prüfte bei "Hin- und Rückflug" bisher nur, ob
+  überhaupt ein Rückflugdatum gesetzt ist, nicht ob es nach dem
+  Hinflugdatum liegt — der "Flüge suchen"-Button blieb für eine
+  unmögliche Reise anklickbar. Reine Validierungskorrektur ohne eigene
+  Ehrlichkeits-Erzählung, gleiche Einstufung wie `69bcba5` (01.09.).
+
+Vier der fünf (`e5f11c9`, `5127b9f`, `1f0641b`, `b6bc2f3`) passen
+inhaltlich zum bereits skizzierten "Ehrlichkeits-Log"-Format — jeweils
+eine Situation, in der die Nutzerin ohne den Fix falsche, irreführende
+oder unpassend fröhlich wirkende Informationen präsentiert bekommen
+hätte, ohne das erkennen zu können — und wandern in den
+Tier-4-Kandidatentopf, gebunden an die weiterhin offene Frage 3 unten.
+`89f63c2` ist wie `69bcba5` (01.09.) eine reine Validierungs-/
+UI-Korrektur ohne diese Erzählung.
+
+**Warum trotzdem kein achtes Content-Stück:** Dieselbe Prüfung wie bei
+jedem bisherigen Lauf — `ZEITPLAN.md` führt 6.2 (Buchen-Button) weiterhin
+als offen, kein neuer Kanal/keine Landingpage live, und `status.md`
+(Stand 2026-09-02) sowie dieses Dokument enthalten keine Notiz von Ni zu
+einer der drei unten offenen Fragen. Alle drei Bedingungen für ein neues,
+eigenständiges Stück bleiben damit unverändert unerfüllt. Die vier neuen
+Ehrlichkeits-Kandidaten werden stattdessen unten im Tier-4-Kandidatentopf
+(Punkt 7) ergänzt.
+
+**Warum sicher genug für eine Dokument-Ergänzung:** reine
+Übersichts-Aktualisierung, kein Live-Vorgang — nichts gepostet, kein
+Kanal angelegt, kein bestehender Abschnitt verändert oder gelöscht (nur
+diese neue Sektion und eine Ergänzung im bestehenden Tier-4-Punkt).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+trägt nur bereits im Repo nachprüfbare Fakten nach (Commit-Historie,
+Code-Diffs, `ZEITPLAN.md`-Stand).
 
 ## Update 2026-09-02: drei weitere Ehrlichkeits-/Konsistenz-Fixes geprüft (stale Flug-Fehlermeldung, hängender Lade-Zustand nach Neustart, zwei baugleiche Wortgrenzen-Bugs bei Zielname-Erkennung) — drei weitere Tier-4-Kandidaten, ein reiner UI-Fix ohne Content-Relevanz, weiterhin kein achtes Content-Stück
 
@@ -484,7 +563,17 @@ Anfang-bis-Ende-Weg im Code.
    die kurze Namen wie "Rom" mitten in unbeteiligten Wörtern
    ("romantisch") matchten und so stille falsche Suchen bzw. erfundene
    Fakten für ein nie genanntes Ziel ausgelöst hätten (siehe Update
-   2026-09-02 oben). Der eigene Bericht
+   2026-09-02 oben), sowie seit 02./03.09. vier weitere: der
+   Urlaubsmodus-Concierge gibt für ein echtes, aber nicht kuratiertes
+   Reiseziel jetzt eine fachlich korrekte statt einer irreführenden
+   "kein Ziel geplant"-Antwort; der Avatar wirkt bei ehrlichen
+   Ausweich-Antworten nicht mehr fälschlich fröhlich; derselbe
+   Wortgrenzen-Bug wie bei der Zielname-Erkennung steckte unabhängig auch
+   in der Transportmittel-Erkennung ("Business Class" wurde fälschlich als
+   Bus erkannt); und rohe Duffel-Fehlertexte bei einem fehlgeschlagenen
+   `fetch()` selbst oder kaputter JSON-Antwort sind jetzt ebenfalls durch
+   die ehrliche deutsche Fallback-Meldung ersetzt (siehe Update 2026-09-03
+   oben). Der eigene Bericht
    vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
    Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
