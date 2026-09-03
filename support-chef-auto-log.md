@@ -1531,3 +1531,118 @@ und kein neuer, hier eigenständiger Punkt. `ChatInput.tsx`/`ChatMessage.tsx`
 selbst wurden nur als bereits an anderer Stelle geprüfte Bausteine
 mitgelesen (Mikrofon-Fehleranzeige bereits am 25.08. behandelt), nicht
 erneut vertieft.
+
+---
+
+## 2026-09-03 — Fehleranzeige bei Flug-/Unterkunftssuche im Chat, zweite Prüfung (`useChat.ts`, `src/lib/duffel/client.ts`)
+
+**Geprüfter Bereich:** Der heute zuletzt vom autonomen IT-Chef-Lauf
+angefasste `src/lib/duffel/client.ts` (Commit `b6bc2f3`, achtundzwanzigster
+Lauf — Netzwerk-/Parse-Fehler in `callDuffelProxy()` bekommen jetzt
+dieselbe ehrliche deutsche Fallback-Meldung wie der `!response.ok`-Zweig).
+Da dieser Fix genau die Fehlerquelle betrifft, die mein eigener Bericht
+vom 31.08. ("Fehleranzeige bei Flug-/Unterkunftssuche im Chat") bereits
+untersucht hatte, habe ich dort nachgeprüft, ob der damals vorgeschlagene
+Fix (fehlende Quick-Replies im Fehlerfall) tatsächlich so wirkt wie
+angenommen — mit einem unerwarteten Ergebnis:
+
+- `src/lib/duffel/client.ts`
+- `src/hooks/useChat.ts`
+- `src/hooks/useChat.test.ts`
+- `src/components/search/HotelResults.tsx`
+- `src/components/search/FlightResults.tsx`
+
+### Reibungspunkte
+
+**1. `callDuffelProxy()` wirft nie — die `.catch()`-Zweige in `useChat.ts`,
+in denen der 31.08.-Fix (Quick-Replies bei Suchfehler) tatsächlich landete,
+sind seitdem toter Code und laufen nie**
+
+`callDuffelProxy()` (`client.ts:15-53`) fängt jeden Fehler bereits selbst
+per `try`/`catch` ab (Zeile 41-52, heute nur der Meldungstext geändert,
+das `try`/`catch` an sich existierte schon vorher) und gibt in jedem Fall
+ein aufgelöstes `{ data, errors }`-Objekt zurück — nie eine abgelehnte
+Promise. `searchFlights()` (`:114-137`) und `searchStays()` (`:178-202`)
+reichen dieses Verhalten unverändert durch: beide `await`en nur
+`callDuffelProxy` und mappen das Ergebnis synchron ohne eigene
+Fehlerbehandlung, können also selbst ebenfalls nie ablehnen.
+
+Genau das habe ich in meinem Bericht vom 31.08. übersehen — dort ging ich
+(wie offenbar auch der spätere Fix) implizit davon aus, dass ein
+Netzwerk-/API-Fehler die von `searchFlights`/`searchStays` zurückgegebene
+Promise ablehnt, und schlug vor, in den jeweiligen `.catch()`-Zweigen
+zusätzlich `setQuickReplies(['Neue Reise planen'])` zu setzen. Das wurde
+seitdem tatsächlich umgesetzt (`useChat.ts:98-102` für Flug, `:174-178`
+und `:315-318` für Unterkunft) — landet aber in einem Zweig, der bei der
+echten Implementierung nie erreicht wird. `useChat.test.ts` bestätigt
+denselben blinden Fleck: alle Fehlerfall-Tests mocken
+`searchFlights`/`searchStays` mit `mockRejectedValue(new Error('network
+down'))` (z. B. Zeilen 98, 130, 143, 245, 274) — ein Verhalten, das die
+echte `client.ts`-Funktion so nie zeigt, wodurch die Tests grün bleiben,
+obwohl der produktive Code den Fehlerfall anders behandelt.
+
+Konkret betroffen sind drei Aufrufstellen:
+
+- **`runFlightSearch()` (`useChat.ts:88-103`, Flugsuche im
+  "Bearbeiten"-Pfad):** Der `.then()`-Zweig (Zeile 93-97) liest
+  `result.errors` immerhin korrekt aus und setzt `flightErrors` — die
+  Fehlermeldung in `FlightResults.tsx:25-36` erscheint also weiterhin
+  korrekt. Aber `setQuickReplies(['Neue Reise planen'])` steht nur im
+  unerreichbaren `.catch()` (Zeile 101) — der `.then()`-Erfolgszweig
+  setzt bei einem Fehler keine Quick-Replies. Ergebnis: Nach einem echten
+  Netzwerk-/API-Fehler bei der Flugsuche sieht die Nutzerin die ehrliche
+  Fehlermeldung, aber keinen einzigen Quick-Reply-Chip — exakt die
+  Sackgasse, die der 31.08.-Bericht als behoben markiert glaubte.
+
+- **`startEdit()`, Zweig `accommodation` (`useChat.ts:157-178`,
+  Unterkunftssuche im "Bearbeiten"-Pfad):** Hier liest der
+  `.then()`-Zweig (Zeile 170-173) `result.errors` gar nicht erst aus,
+  setzt nur `setStayOffers(result.offers)`. Bei einem echten Suchfehler
+  ist `result.offers` eine leere Liste `[]` (siehe `searchStays()`,
+  `result.data` ist dann `null` → `rawResults.map(...)` auf `[]`) —
+  optisch nicht von einer echten Null-Treffer-Suche unterscheidbar.
+  `stayError` bleibt `false`, weil das nur der unerreichbare `.catch()`
+  (Zeile 175) setzt. `HotelResults.tsx:25-35` prüft `error` vor
+  `offers.length === 0` — bei `error === false` und `offers === []`
+  zeigt die Komponente also `NoResultsMessage` ("Keine Unterkünfte
+  gefunden") statt der ehrlichen Fehlermeldung. Das ist exakt der Bug,
+  den der IT-Chef-Fix vom 30.08. (Commit `dc10361`, neunter Lauf,
+  eigens für "echter Fehler optisch identisch zu Null-Treffern" gebaut)
+  beheben sollte — hier über einen anderen Pfad still wieder da, nur
+  ohne fehlende Fehlermeldung diesmal mit einer aktiv irreführenden
+  ("keine Unterkünfte gefunden", obwohl die Suche gar nicht durchlief).
+
+- **Haupt-Onboarding-Pfad zur Unterkunftssuche (`useChat.ts:289-325`,
+  ausgelöst nach dem Budget-Schritt):** Derselbe Fehler wie beim
+  vorigen Punkt — der `.then()`-Zweig (Zeile 311-314) liest ebenfalls
+  nur `result.offers`, nie `result.errors`; `stayError` bleibt bei
+  einem echten Fehler `false`. Hier stehen zwar vorher gesetzte
+  Quick-Replies (`['Hotel', 'Ferienwohnung', 'Hostel']` aus
+  `mockAdvisor.ts`) weiterhin zur Verfügung, sodass keine reine
+  Sackgasse entsteht — die Nutzerin sieht aber weiterhin fälschlich
+  "Keine Unterkünfte gefunden" statt eines Hinweises, dass die Suche
+  selbst fehlgeschlagen ist.
+
+*Vorschlag:* In allen drei `.then()`-Zweigen zusätzlich `result.errors`
+auswerten statt sich auf die (nie erreichten) `.catch()`-Zweige zu
+verlassen — analog zu `runFlightSearch()`s bereits vorhandenem
+`setFlightErrors(result.errors)`, aber ergänzt um die fehlenden
+Quick-Replies bzw. `setStayError(result.errors.length > 0)` für die
+beiden `searchStays()`-Aufrufstellen. Die drei `.catch()`-Zweige können
+danach entfernt werden (echter toter Code) oder als reine
+Sicherheitsnetze stehen bleiben. Wichtiger als der Code selbst: die
+Tests in `useChat.test.ts` sollten den Fehlerfall über
+`mockResolvedValue({ offers: [], errors: [{ message: '...' }] })`
+simulieren statt über `mockRejectedValue` — das entspricht dem echten
+Vertrag von `client.ts` und hätte diesen Fund vermutlich schon beim
+31.08.-Fix selbst aufgedeckt.
+
+### Nicht geprüft
+Der Wortlaut der Fehlermeldungen selbst und der `!response.ok`-Zweig in
+`callDuffelProxy()` wurden nicht erneut geprüft — beide waren bereits
+Gegenstand früherer Läufe (25.08. IT-Chef-Fix, heutiger 28.-Lauf-Fix) und
+sind inhaltlich unverändert ehrlich formuliert. Die eigenständige
+Hotelsuche-/Flugsuche-Seiten (`/hotelsuche`, `/flugsuche`) sind von diesem
+Fund nicht betroffen — `Flugsuche.tsx`/`Hotelsuche.tsx` rufen
+`searchFlights`/`searchStays` direkt per `await` auf (kein `.then`/`.catch`)
+und lesen `result.errors` dort korrekt aus (siehe `Flugsuche.tsx:24-27`).
