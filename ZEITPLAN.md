@@ -225,6 +225,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   anders als beim Hotel-Checkout, da ein Flug am selben Tag hin und
   zurück technisch möglich ist). Neuer Regressionstest in
   `FlightWizard.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 03.09. (siebenundzwanzigster Lauf) einen
+  weiteren eigenständig gefundenen Bug in `mockAdvisor.ts` behoben:
+  `detectTransportMode()` erkannte Transportmittel per reinem
+  `String.includes()` ohne Wortgrenzen — dasselbe Muster, das zuvor schon
+  in `findFacts()`/`findKnownDestination()` gefunden und mit
+  Wortgrenzen-Regex behoben wurde, hier aber noch nicht geprüft. Dadurch
+  matchte z. B. "Business Class bitte" fälschlich das Bus-Keyword `bus`
+  (in "Business") und "Ich hätte gern einen Zimmerservice" fälschlich das
+  Zug-Keyword `ice` (in "Service") — der Bot bestätigte dann ein falsches
+  Transportmittel, ohne dass die Nutzerin das korrigieren konnte, außer
+  über eine neue Antwort. Fix: `detectTransportMode()` prüft jedes
+  Keyword jetzt per `\b`-umrandetem Regex (Sonderzeichen escaped) statt
+  per reinem Teilstring-Vergleich, analog zum bestehenden Muster in
+  `mockConcierge.ts`. Zwei neue Regressionstests in
+  `mockAdvisor.test.ts` (die beiden oben genannten Fälle).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

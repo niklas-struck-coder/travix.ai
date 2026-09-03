@@ -6541,3 +6541,65 @@ sondern einen bestehenden korrigiert.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (siebenundzwanzigster Lauf)
+
+**Ausgangslage:** Alle offenen ZEITPLAN-Punkte im Programmierungs-Bereich
+weiterhin blockiert (unverändert zum letzten Lauf). Deshalb wieder gezielt
+nach einem eigenständigen, aktuell auslösbaren Bug gesucht — diesmal in
+bisher weniger geprüften Bereichen (Chat-Hooks/-Komponenten, `src/lib/trip/*`,
+Ergebnis-/Karten-Komponenten der Suche, `duffel/client.ts`).
+
+**Ausgewählter Punkt:** `detectTransportMode()` in `src/lib/ai/mockAdvisor.ts`
+— Transportmittel-Erkennung per reinem `String.includes()` ohne
+Wortgrenzen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Chat-Textlogik. Keine offene Produkt-/
+Architekturentscheidung: das Wortgrenzen-Muster (`\b`-Regex mit
+escapten Sonderzeichen) ist im selben Repo für `findFacts()`
+(`mockConcierge.ts`) und `findKnownDestination()` (`stays.ts`) bereits
+etabliert, hier nur konsequent auf die Transport-Keywords übertragen.
+Klar lokalisiert (eine Funktion, zwei Zeilen geändert), keine
+Interpretation nötig. Objektiv prüfbar: fester Input → eindeutig
+falscher `transportMode`, per Regressionstest abgesichert.
+
+**Konkreter, reproduzierbarer Ablauf vor dem Fix:** `/ki-chat` → Ziel
+eingeben (z. B. "Lissabon") → auf "Wie möchtest du anreisen?" antwortet
+die Nutzerin z. B. mit "Business Class bitte" — `lower.includes('bus')`
+matcht den Teilstring "bus" in "Business", `transportMode` wird
+fälschlich auf `'bus'` gesetzt, der Bot bestätigt "Verstanden — nur
+Bus-Verbindungen, wie gewünscht." Ebenso matcht das Keyword `'ice'`
+(fürs Zug-/ICE-Erkennen) jeden Text mit dem Teilstring "ice", z. B.
+"Ich hätte gern einen Zimmerservice" → fälschlich `'train'`. Beide
+Fälle mit `node -e` verifiziert, bevor der Fix geschrieben wurde
+(`'business class bitte'.includes('bus')` → `true`; `'ich hätte gern
+einen zimmerservice'.includes('ice')` → `true`).
+
+**Umsetzung:** `detectTransportMode()` in `mockAdvisor.ts` prüft jedes
+Keyword jetzt per `new RegExp(\`\\b${escapeRegExp(keyword)}\\b\`)`
+statt per `lower.includes(keyword)` — neue lokale `escapeRegExp()`-
+Hilfsfunktion, Escaping-Logik identisch zu der bereits in
+`mockConcierge.ts`/`stays.ts` verwendeten. Alle bestehenden
+Keyword-Tests bleiben grün, da sie ausschließlich vollständige Wörter
+als Input verwenden. Zwei neue Regressionstests in
+`mockAdvisor.test.ts` für genau die beiden oben beschriebenen
+Fehlerfälle ("Business Class bitte" / "Zimmerservice" → jetzt `null`
+statt fälschlich `'bus'`/`'train'`). `ZEITPLAN.md` (Ist-Stand-Notiz bei
+Phase 5, direkt nach dem FlightWizard-Eintrag vom Vorlauf) entsprechend
+ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+bestehende Funktion korrigiert.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) —
+  entstandenes `package-lock.json`-Rauschen danach verworfen, gleiches
+  Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 159 Tests, alle grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

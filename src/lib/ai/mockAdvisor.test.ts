@@ -17,6 +17,14 @@ describe('detectTransportMode', () => {
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
+
+  it('does not match a keyword that only occurs as a substring inside another word', () => {
+    // "bus" steckt in "Business", "ice" steckt in "Zimmerservice" — beides
+    // darf ohne Wortgrenzen-Prüfung fälschlich als Bus- bzw. Zug-Wunsch
+    // erkannt werden.
+    expect(detectTransportMode('Business Class bitte')).toBeNull()
+    expect(detectTransportMode('Ich hätte gern einen Zimmerservice')).toBeNull()
+  })
 })
 
 describe('getGreeting', () => {
