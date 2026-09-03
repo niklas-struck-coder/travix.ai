@@ -6770,3 +6770,53 @@ neuen Punkt abschließt, sondern eine bestehende Funktion korrigiert.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (dreißigster Lauf)
+
+**Ausgewählter Punkt:** aus `reports/it-chef.md` (03.09., Abschnitt
+"Gefundene Bugs (nicht automatisch gefixt)") den Fund "Datum in der
+Vergangenheit weiterhin wählbar": Hinflug (`FlightWizard.tsx`) und
+Check-in (`HotelWizard.tsx`) hatten kein `min`-Attribut auf das heutige
+Datum — nur die jeweils zweiten Felder (Rückflug/Check-out) waren gegen
+das erste Datum abgesichert.
+
+**Warum sicher genug:** Rein clientseitige Formularvalidierung ohne
+Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung nötig — der Fix folgt
+exakt dem bereits bestehenden Muster der Nachbarfelder (Rückflug/
+Check-out haben bereits `min={...Date || undefined}`). Klar genug
+beschrieben (Fund war im gestrigen IT-Chef-Bericht bereits konkret
+benannt, inkl. betroffener Dateien/Zeilen). Ergebnis objektiv prüfbar
+über einen Regressionstest pro Feld (`min`-Attribut-Wert).
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: neue lokale
+  `getTodayIso()`-Hilfsfunktion (liefert das heutige Datum in
+  `YYYY-MM-DD`, über lokale `Date`-Komponenten statt `toISOString()`, um
+  Zeitzonen-Verschiebung zu vermeiden), als `min` auf dem
+  Hinflug-Datumsfeld gesetzt. Rückflug-Feld unverändert (hat bereits
+  `min={departureDate || undefined}`, das jetzt transitiv auch nie mehr
+  vor heute liegen kann).
+- `src/components/search/HotelWizard.tsx`: dieselbe lokale
+  `getTodayIso()`-Hilfsfunktion (analog zum bereits bestehenden Muster
+  lokaler Hilfsfunktionen in derselben Datei, z. B. `clampGuestCount`),
+  als `min` auf dem Check-in-Datumsfeld gesetzt. Check-out-Feld
+  unverändert (hat bereits `min={checkInDate || undefined}`).
+- Je ein neuer Regressionstest in `FlightWizard.test.tsx` und
+  `HotelWizard.test.tsx`, der das `min`-Attribut des jeweiligen ersten
+  Datumsfelds gegen das lokal berechnete heutige Datum prüft.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Funktion korrigiert (gleiche Einordnung wie beim
+  neunundzwanzigsten Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — vollständige Suite: 35 Testdateien, 166 Tests (164
+  + 2 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

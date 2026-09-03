@@ -12,6 +12,14 @@ interface FlightWizardProps {
   loading: boolean
 }
 
+function getTodayIso(): string {
+  const now = new Date()
+  const y = String(now.getFullYear()).padStart(4, '0')
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 const cabinOptions: { value: CabinClass; label: string }[] = [
   { value: 'economy', label: 'Economy' },
   { value: 'premium_economy', label: 'Premium Economy' },
@@ -90,6 +98,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             type="date"
             value={departureDate}
             onChange={(event) => setDepartureDate(event.target.value)}
+            min={getTodayIso()}
             required
           />
         </div>

@@ -24,4 +24,12 @@ describe('FlightWizard', () => {
 
     expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeDisabled()
   })
+
+  it('does not allow picking a departure date before today', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    expect(screen.getByLabelText('Hinflug')).toHaveAttribute('min', today)
+  })
 })

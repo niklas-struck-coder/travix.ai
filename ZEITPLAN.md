@@ -169,6 +169,17 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `mockResolvedValue({ offers: [], errors: [...] })` statt
   `mockRejectedValue` simulieren (das bisher ungetestete, tatsächlich
   auftretende Verhalten) — vor dem Fix reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 03.09. (dreißigster Lauf) einen von
+  `reports/it-chef.md` (03.09.) gemeldeten Fund behoben: Hinflug
+  (`FlightWizard.tsx`) und Check-in (`HotelWizard.tsx`) hatten kein
+  `min`-Attribut auf das heutige Datum — nur die jeweils zweiten Felder
+  (Rückflug/Check-out) waren bereits gegen das erste Datum abgesichert,
+  ein Datum in der Vergangenheit ließ sich also weiterhin als Hinflug/
+  Check-in wählen. Beide Dateien bekommen jetzt eine lokale
+  `getTodayIso()`-Hilfsfunktion (heutiges Datum über lokale
+  `Date`-Komponenten statt `toISOString()`, um Zeitzonen-Verschiebung zu
+  vermeiden), als `min` auf dem jeweils ersten Datumsfeld gesetzt. Neuer
+  Regressionstest pro Datei.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
