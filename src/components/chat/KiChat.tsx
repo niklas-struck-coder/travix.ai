@@ -10,7 +10,7 @@ import { HotelResults } from '@/components/search/HotelResults'
 import { FlightResults } from '@/components/search/FlightResults'
 import { Button } from '@/components/ui/button'
 import { useChat } from '@/hooks/useChat'
-import { isSpeechSynthesisSupported } from '@/lib/ai/speech'
+import { isSpeechSynthesisSupported, stopSpeaking } from '@/lib/ai/speech'
 import { hasTripData } from '@/lib/trip/tripStorage'
 import type { EditableTripField } from '@/types/chat'
 
@@ -60,9 +60,24 @@ export function KiChat() {
     setSearchParams({}, { replace: true })
   }, [searchParams, trip, startEdit, setSearchParams])
 
+  // Ohne das läuft eine bereits gestartete Vorlesung weiter, auch wenn die
+  // Sprachausgabe abgeschaltet oder der Chat verlassen wird — auf den anderen
+  // Seiten gibt es dann keinen Aus-Schalter mehr.
+  useEffect(() => stopSpeaking, [])
+
+  const toggleSpeech = () => {
+    if (speechEnabled) stopSpeaking()
+    setSpeechEnabled((value) => !value)
+  }
+
+  const handleReset = () => {
+    stopSpeaking()
+    resetChat()
+  }
+
   const handleQuickReply = (option: string) => {
     if (option === 'Neue Reise planen') {
-      resetChat()
+      handleReset()
       return
     }
     sendMessage(option)
@@ -83,14 +98,14 @@ export function KiChat() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSpeechEnabled((value) => !value)}
+              onClick={toggleSpeech}
               aria-label={speechEnabled ? 'Sprachausgabe deaktivieren' : 'Sprachausgabe aktivieren'}
               title={speechEnabled ? 'Sprachausgabe deaktivieren' : 'Sprachausgabe aktivieren'}
             >
               {speechEnabled ? <Volume2 className="text-teal" /> : <VolumeX />}
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={resetChat} aria-label="Neu starten" title="Neu starten">
+          <Button variant="ghost" size="icon" onClick={handleReset} aria-label="Neu starten" title="Neu starten">
             <RotateCcw />
           </Button>
         </div>
