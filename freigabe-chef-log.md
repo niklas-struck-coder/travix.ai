@@ -1897,3 +1897,48 @@ ohne Code-Änderung — niedrigstes Risiko.
 `marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
 beide nach `main` gemergt. Keine Auffälligkeiten, kein Scope-Verstoß,
 keine Info an Ni nötig.
+
+## 2026-09-03, früher Nacht-Lauf (0-4-Uhr-Runde)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (`e5f11c9` bis `b6bc2f3`,
+  vierundzwanzigster bis achtundzwanzigster Lauf von IT-Chef).
+- `marketing-chef/auto` — 0 neue Commits vor `main`, nichts zu tun (läuft
+  erst um 6 Uhr, separater späterer Freigabe-Chef-Lauf zuständig).
+- `support-chef/auto` — 0 neue Commits vor `main`, nichts zu tun (gleicher
+  Grund).
+
+**Prüfung `it-chef/auto`:** Branch ausgecheckt, Diff zu `main` angeschaut
+(12 Dateien: `FlightWizard.tsx`, `useConcierge.ts`, `mockAdvisor.ts`,
+`mockConcierge.ts`, `duffel/client.ts` + zugehörige Tests, plus
+`ZEITPLAN.md`/`it-chef-auto-log.md`). Unabhängig selbst verifiziert (nicht
+nur den Log-Eintrag geglaubt):
+- `npm install` (frischer Checkout) — entstandenes `package-lock.json`-
+  Metadaten-Rauschen danach verworfen, wie in den Log-Einträgen
+  beschrieben.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 161 Tests, alle grün.
+
+Inhaltlich geprüft: jeder der 5 Commits deckt genau den im jeweiligen
+`it-chef-auto-log.md`-Eintrag beschriebenen einzelnen Punkt ab, kein
+Scope-Creep. Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten. UI-/Avatar-Aspekt (`useConcierge.ts`/`mockConcierge.ts`:
+`avatarState` auf `'error'` statt `'happy'` bei Ausweich-Antworten) nutzt
+einen bereits bestehenden Design-Token aus `TravixAvatar.tsx` (`AvatarState`
+enthält `'error'` bereits) — kein neuer Zustand, passt zu `MARKENDESIGN.md`
+(keine abweichende Vorgabe zu Avatar-Zuständen). Duffel-Fehlermeldung
+(`callDuffelProxy`) folgt demselben bereits etablierten Prinzip wie der
+`!response.ok`-Zweig (ehrliche, konkrete deutsche Fallback-Meldung statt
+roher Fetch-/Parse-Fehlertext).
+
+→ Per Fast-Forward nach `main` gemergt (`4dbdec6..b6bc2f3`) und nach
+`origin/main` gepusht. `it-chef/auto` lag danach bereits exakt auf dem
+neuen `main`-Stand (identischer Commit `b6bc2f3`, reiner Fast-Forward) —
+kein separater Branch-Update-Push nötig.
+
+**Ergebnis:** `it-chef/auto` sauber, unabhängig verifiziert, gemergt und
+gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
+nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
+Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
