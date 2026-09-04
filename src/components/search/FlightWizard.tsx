@@ -20,6 +20,11 @@ function getTodayIso(): string {
   return `${y}-${m}-${d}`
 }
 
+function clampPassengerCount(value: string) {
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
+}
+
 const cabinOptions: { value: CabinClass; label: string }[] = [
   { value: 'economy', label: 'Economy' },
   { value: 'premium_economy', label: 'Premium Economy' },
@@ -126,7 +131,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             min={1}
             max={9}
             value={passengers}
-            onChange={(event) => setPassengers(Math.min(9, Math.max(1, Number(event.target.value))))}
+            onChange={(event) => setPassengers(clampPassengerCount(event.target.value))}
           />
         </div>
         <div className="flex flex-col gap-1.5">

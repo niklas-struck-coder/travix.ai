@@ -32,4 +32,24 @@ describe('FlightWizard', () => {
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     expect(screen.getByLabelText('Hinflug')).toHaveAttribute('min', today)
   })
+
+  it('falls back to 1 instead of NaN for a non-numeric passenger count', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    const passengers = screen.getByLabelText('Passagiere')
+    fireEvent.change(passengers, { target: { value: 'abc' } })
+
+    expect(passengers).toHaveValue(1)
+  })
+
+  it('clamps passenger count to the 1-9 range', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    const passengers = screen.getByLabelText('Passagiere')
+    fireEvent.change(passengers, { target: { value: '20' } })
+    expect(passengers).toHaveValue(9)
+
+    fireEvent.change(passengers, { target: { value: '0' } })
+    expect(passengers).toHaveValue(1)
+  })
 })

@@ -180,6 +180,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Date`-Komponenten statt `toISOString()`, um Zeitzonen-Verschiebung zu
   vermeiden), als `min` auf dem jeweils ersten Datumsfeld gesetzt. Neuer
   Regressionstest pro Datei.
+  Vom autonomen IT-Chef-Lauf am 04.09. (einunddreißigster Lauf) einen
+  weiteren von `reports/it-chef.md` (03.09.) gemeldeten Fund behoben:
+  Die Passagierzahl in `FlightWizard.tsx` klammerte mit `Math.min`/
+  `Math.max` direkt um `Number(event.target.value)`, ohne
+  `Number.isNaN`-Prüfung — das strukturell identische
+  `Gäste`/`Zimmer`-Feld in `HotelWizard.tsx` schützt sich bereits über
+  `clampGuestCount()` davor. Bei einem nicht-numerischen Wert (z. B.
+  durch Einfügen von Text ins Zahlenfeld) wurde `passengers` zu `NaN`,
+  das dann ungeprüft in die Flugsuche ging. Fix: neue lokale
+  `clampPassengerCount()`-Hilfsfunktion in `FlightWizard.tsx`, exakt
+  analog zu `clampGuestCount()` in `HotelWizard.tsx`. Zwei neue
+  Regressionstests in `FlightWizard.test.tsx` (NaN-Fallback auf 1,
+  Begrenzung auf 1-9), analog den bereits bestehenden Tests in
+  `HotelWizard.test.tsx`.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

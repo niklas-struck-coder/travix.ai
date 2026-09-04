@@ -6820,3 +6820,57 @@ benannt, inkl. betroffener Dateien/Zeilen). Ergebnis objektiv prüfbar
   + 2 neue), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (einunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten keinen einzigen offenen Punkt, der alle vier Sicherheitskriterien
+erfüllt (fast alles hängt an der offenen Backend-Entscheidung, fehlenden
+`TripDraft`-Preisfeldern oder ist eine Produktentscheidung). Stattdessen
+aus `reports/it-chef.md` (03.09., Abschnitt "Gefundene Bugs (nicht
+automatisch gefixt)") den Fund "Passagierzahl im `FlightWizard` ohne
+NaN-Schutz" umgesetzt: `FlightWizard.tsx:129` klammerte mit
+`Math.min`/`Math.max` um `Number(event.target.value)`, ohne
+`Number.isNaN`-Prüfung — das strukturell identische Gäste-/Zimmer-Feld
+in `HotelWizard.tsx` schützt sich bereits über `clampGuestCount()`
+davor.
+
+**Warum sicher genug:** Rein clientseitige Formularvalidierung eines
+Zahlenfelds, kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig
+— der Fix übernimmt exakt das bereits bestehende, im selben Repo
+etablierte Muster aus `HotelWizard.tsx` (Parität zwischen zwei
+strukturell identischen Wizard-Komponenten, wie schon bei mehreren
+früheren Läufen). Klar genug beschrieben (Fund war im gestrigen
+IT-Chef-Bericht bereits konkret benannt, inkl. Datei/Zeile und
+Vergleichsmuster). Ergebnis objektiv prüfbar über zwei
+Regressionstests (NaN-Fallback auf 1, Begrenzung auf 1-9), analog den
+bestehenden `HotelWizard.test.tsx`-Tests.
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: neue lokale
+  `clampPassengerCount()`-Hilfsfunktion (exakt analog zu
+  `clampGuestCount()` in `HotelWizard.tsx`), im `onChange`-Handler des
+  Passagiere-Felds statt der bisherigen ungeschützten
+  `Math.min(9, Math.max(1, Number(...)))`-Inline-Rechnung verwendet.
+- Zwei neue Regressionstests in `FlightWizard.test.tsx` ("falls back to
+  1 instead of NaN for a non-numeric passenger count", "clamps
+  passenger count to the 1-9 range"), 1:1 analog zu den bestehenden
+  Tests in `HotelWizard.test.tsx`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Funktion korrigiert (gleiche Einordnung wie beim
+  neunundzwanzigsten/dreißigsten Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; dieses Mal war
+  der npm-Registry-Zugriff über den Proxy erreichbar, Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (`vitest run`) — vollständige Suite: 35 Testdateien, 168
+  Tests (166 + 2 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
