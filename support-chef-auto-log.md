@@ -1646,3 +1646,85 @@ Hotelsuche-/Flugsuche-Seiten (`/hotelsuche`, `/flugsuche`) sind von diesem
 Fund nicht betroffen — `Flugsuche.tsx`/`Hotelsuche.tsx` rufen
 `searchFlights`/`searchStays` direkt per `await` auf (kein `.then`/`.catch`)
 und lesen `result.errors` dort korrekt aus (siehe `Flugsuche.tsx:24-27`).
+
+---
+
+## 2026-09-04 — Preisformatierung in Flug-/Hotelkarten (`src/lib/format.ts`, `FlightCard.tsx`, `HotelCard.tsx`)
+
+**Geprüfter Bereich:** Die neue `formatOfferPrice()`-Hilfsfunktion und ihre
+Einbindung in `FlightCard.tsx`/`HotelCard.tsx`, laut `ZEITPLAN.md` heute
+vom autonomen IT-Chef-Lauf gebaut (zweiunddreißigster Lauf, Commit
+`f56b9a8`) und heute Abend von Freigabe-Chef nach `main` gemergt. Betroffene
+Seiten: `/flugsuche`, `/hotelsuche` sowie der Haupt-KI-Chat (`FlightResults.tsx`
+und `HotelResults.tsx` rendern dieselben Karten).
+
+- `src/lib/format.ts`
+- `src/components/search/FlightCard.tsx`
+- `src/components/search/HotelCard.tsx`
+- `src/lib/duffel/client.ts`
+- `src/components/search/FlightWizard.tsx`
+
+### Reibungspunkte
+
+**1. Ein leeres/ungültiges `totalCurrency` lässt `formatOfferPrice()` ungefangen
+werfen — die Seite bleibt dann komplett leer, ohne jede Fehlermeldung**
+
+`format.ts:2-5` prüft nur den Betrag gegen `NaN` und fällt dafür sauber auf
+die Rohwerte zurück (`n/a EUR`) — aber die `currency` selbst wird nirgends
+geprüft. `Intl.NumberFormat('de-DE', { style: 'currency', currency })` wirft
+laut Spezifikation einen `RangeError`, sobald `currency` kein gültiger
+3-Buchstaben-ISO-4217-Code ist (leerer String, `undefined`, oder ein
+Tippfehler/nicht standardisierter Code) — selbst ausprobiert:
+`new Intl.NumberFormat('de-DE', { style: 'currency', currency: '' })` wirft
+`RangeError: Invalid currency code`.
+
+Das ist kein theoretischer Fall: `client.ts:109` (`searchFlights`) und
+`client.ts:173` (`searchStays`) setzen `totalCurrency` bei einer
+Duffel-Antwort ohne Währungsfeld bereits heute explizit auf einen leeren
+String (`offer.total_currency ?? ''` bzw.
+`result.cheapest_rate_currency ?? result.total_currency ?? ''`) — genau der
+Wert, an dem `Intl.NumberFormat` bricht. `FlightCard.tsx:61` und
+`HotelCard.tsx:37` rufen `formatOfferPrice()` direkt im Render-Pfad auf,
+ungefangen. Die Codebase hat aktuell keine einzige `ErrorBoundary`
+(codebase-weite Suche ohne Treffer) — ein solcher Fehler reißt also die
+komplette Flug-/Hotelsuche-Seite bzw. den ganzen KI-Chat mit, und die
+Nutzerin sieht eine leere weiße Seite ohne jeden Hinweis, was passiert ist.
+Das ist genau das Blank-Page-Risiko, das laut `ZEITPLAN.md` (Eintrag zum
+33. IT-Chef-Lauf, `tripStorage.ts`) an anderer Stelle in derselben Codebase
+bereits als bekanntes Muster erkannt und dort behoben wurde — hier an einer
+neuen Stelle unbehandelt.
+
+*Vorschlag:* In `formatOfferPrice()` das `Intl.NumberFormat`-Konstruieren in
+ein eigenes `try`/`catch` nehmen (oder `currency` vorab gegen ein simples
+`/^[A-Z]{3}$/`-Muster prüfen) und im Fehlerfall denselben Rohwert-Fallback
+wie beim ungültigen Betrag liefern (`"${amount} ${currency}"` bzw. bei
+leerem `currency` z. B. nur `amount`). Ergänzend ein Testfall in
+`format.test.ts` für leeren/ungültigen Währungscode, analog zum bereits
+bestehenden Test für den ungültigen Betrag.
+
+**2. `FlightWizard.tsx` lässt identischen Start- und Zielflughafen zu, ohne
+jeden Hinweis**
+
+`isValid` (`FlightWizard.tsx:44-48`) prüft Länge von `origin`/`destination`
+(je 3 Zeichen) und die Datumslogik, aber nie `origin !== destination`. Tippt
+eine Nutzerin z. B. aus Versehen denselben Code in beide Felder (z. B. beim
+schnellen Kopieren), bleibt der "Flüge suchen"-Button anklickbar und die
+Suche läuft für eine unmögliche Reise (Hinflug = Zielflughafen) — ohne
+Warnung, ohne Tausch-Button für Von/Nach. Kein Absturz, aber eine
+vermeidbare Sackgasse, die erst nach der Suche selbst auffällt (falls die
+Duffel-API dafür überhaupt sinnvolle Ergebnisse/Fehler liefert).
+
+*Vorschlag:* `isValid` um `origin.trim() !== destination.trim()` ergänzen
+und bei Gleichheit einen kurzen Hinweistext unter einem der beiden Felder
+anzeigen (analog zum bestehenden Hinweistext-Muster darunter), oder
+alternativ einen kleinen Tausch-Button zwischen den Feldern ergänzen.
+
+### Nicht geprüft
+Die `hasTripData()`-Absicherung aus demselben heutigen Freigabe-Chef-Merge
+(33. IT-Chef-Lauf, `tripStorage.ts`) wurde nicht erneut geprüft — sie ist
+bereits im `ZEITPLAN.md`-Eintrag selbst als bewusst kleiner Teilfix
+dokumentiert, das größere "normalisierende Laden" bleibt dort ausdrücklich
+für einen künftigen eigenständigen Lauf offen. `TrainCard.tsx` hat laut
+`reports/it-chef.md` denselben Rohformat-Bug wie `FlightCard`/`HotelCard`
+hatte, ist aber laut demselben Bericht toter, nirgends importierter Code —
+dafür also kein eigener Punkt hier.
