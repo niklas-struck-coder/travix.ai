@@ -1,62 +1,60 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-03
+**Datum:** 2026-09-04
 
-## Was ist seit dem letzten Eintrag (2026-09-02) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-03) passiert?
 
-Beide zuletzt gemeldeten Punkte sind behoben: Der Urlaubsmodus-Concierge
-gibt jetzt eine ehrliche eigene Antwort, wenn eine Reise zwar geplant,
-das Ziel aber nicht in der kleinen kuratierten Liste ist ("Für Bali habe
-ich noch keine hinterlegten Fakten …", `mockConcierge.ts`), und Begrüßung
-sowie Quick-Replies berücksichtigen das jetzt korrekt (`useConcierge.ts`).
-Der Avatar zeigt bei diesen Ausweich-Antworten außerdem nicht mehr
-fälschlich `'happy'`, sondern den bereits bestehenden `'error'`-Zustand.
+Beide zuletzt gemeldeten Punkte sind behoben: In `useChat.ts` werten jetzt
+alle drei Suchaufrufe (Unterkunft im Hauptablauf, Unterkunft über
+"Bearbeiten", Flugsuche) `result.errors` korrekt aus, bevor Ergebnisse
+angezeigt werden — ein echter Suchfehler wird nicht mehr fälschlich als
+"keine Treffer" dargestellt, und nach einem Flugsuchfehler gibt es jetzt
+den Chip "Neue Reise planen" statt einer Sackgasse.
 
-Bei der Gelegenheit habe ich mir angeschaut, wie Suchfehler beim Duffel-
-Anbieter durch die App laufen — Anlass war, dass IT-Chef dort kürzlich
-rohe englische Fehlertexte durch ehrliche deutsche Meldungen ersetzt hat
-(`client.ts`). Dabei sind zwei konkrete, noch offene Reibungspunkte in der
-Chat-Oberfläche aufgefallen (die separaten manuellen Suchseiten sind
-davon nicht betroffen).
+Außerdem wurde heute ein Absturzrisiko gefunden und bereits mit einem PR
+behoben (noch nicht gemerged): Ein leerer/ungültiger Währungscode ließ
+`formatOfferPrice()` in Flug-/Hotelkarten crashen. Dazu von mir keine
+eigene Meldung nötig, das ist schon in Bearbeitung.
+
+Bei einer eigenen Prüfung der Chat- und Flugsuche-Oberfläche sind mir drei
+weitere, bisher nicht gemeldete Reibungspunkte aufgefallen.
 
 ## Meine Vorschläge
 
-1. **Ein echter Hotelsuchfehler im Chat sieht für die Nutzerin wie "keine
-   Treffer" aus, nicht wie ein Fehler.** `callDuffelProxy()` (`client.ts`)
-   lehnt ihre Promise nie ab — auch bei einem echten Suchfehler liefert sie
-   immer ein Ergebnisobjekt mit `errors`. Die beiden Stellen im Chat, die
-   Unterkünfte suchen (`useChat.ts`, in `startEdit()` und im
-   Haupt-Onboarding-Pfad), werten dieses `result.errors` in ihrem `.then()`
-   aber nicht aus — nur der zugehörige `.catch()` setzt `stayError`, der
-   bei einem echten Duffel-Fehler nie erreicht wird. Die Nutzerin bekommt
-   also "Keine Unterkünfte gefunden" (`NoResultsMessage`) angezeigt, obwohl
-   die Suche eigentlich fehlgeschlagen ist — sie erfährt nicht, dass es an
-   einem technischen Problem lag, und bekommt keinen Hinweis, es einfach
-   nochmal zu versuchen. Die manuellen Suchseiten `Hotelsuche.tsx` und
-   `Flugsuche.tsx` machen das schon richtig (sie prüfen `errors.length`
-   separat von `offers.length`).
-   *Vorschlag:* In beiden `.then()`-Zweigen in `useChat.ts` `result.errors`
-   auswerten und bei Fehlern `stayError` setzen, statt sich auf das nie
-   erreichte `.catch()` zu verlassen.
+1. **Nach einem echten Unterkunftssuchfehler im Haupt-Chat-Ablauf gibt es
+   keinen Weg zurück.** In `useChat.ts` (Zeile 306-330, `nextField ===
+   'accommodation'`) wird bei einem echten Duffel-Fehler zwar `stayError`
+   gesetzt, die `quickReplies` bleiben aber auf dem Stand des vorherigen
+   Chat-Schritts — anders als im "Bearbeiten"-Pfad (`startEdit`), wo dieser
+   Fall bereits behoben ist. Die Nutzerin sieht die Fehlermeldung, hat aber
+   keinen Chip, um es nochmal zu versuchen oder neu zu planen.
+   *Vorschlag:* Im `.then()`/`.catch()` dieses Suchaufrufs zusätzlich
+   `setQuickReplies(['Neue Reise planen'])` setzen, analog zu den bereits
+   behobenen Stellen.
 
-2. **Nach einem echten Flugsuchfehler im Chat gibt es keine klickbare
-   Option mehr, wie es weitergeht.** Direkt vor dem Suchaufruf setzt
-   `useChat.ts` die Quick-Replies auf leer. In `runFlightSearch()` wird bei
-   einem echten Suchfehler zwar korrekt die Fehlermeldung angezeigt (via
-   `flightErrors`, das `.then()` wertet `result.errors` hier bereits
-   richtig aus), die Quick-Replies bleiben aber leer — den hilfreichen Chip
-   "Neue Reise planen" gibt es nur im (aus demselben Grund wie oben nie
-   erreichten) `.catch()`. Die Nutzerin sieht also die ehrliche
-   Fehlermeldung, landet danach aber in einer Sackgasse ohne Chip, mit dem
-   sie im Chat weitermachen kann.
-   *Vorschlag:* Im `.then()` von `runFlightSearch()` bei
-   `result.errors.length > 0` ebenfalls `setQuickReplies(['Neue Reise
-   planen'])` setzen.
+2. **Die Flugsuche lässt identischen Start- und Zielflughafen zu.**
+   `FlightWizard.tsx:44-48` prüft in `isValid` nur Zeichenlänge und
+   Datumslogik, nicht `origin !== destination`. Eine Nutzerin, die aus
+   Versehen zweimal denselben Code einträgt, bekommt keinen Hinweis und
+   landet nach dem Absenden vermutlich vor einer leeren oder verwirrenden
+   Ergebnisliste, ohne zu verstehen, warum.
+   *Vorschlag:* `isValid` um `origin.trim().toUpperCase() !==
+   destination.trim().toUpperCase()` ergänzen und bei Verstoß einen kurzen
+   Hinweistext anzeigen (z. B. "Start und Ziel dürfen nicht gleich sein").
 
-Beide Punkte haben dieselbe Ursache: `callDuffelProxy()` löst nie eine
-abgelehnte Promise aus, wodurch die dafür vorgesehenen `.catch()`-Zweige
-in `useChat.ts` toter Code sind. Ein gemeinsamer Fix (z. B. `.then()` und
-`.catch()` in beiden Fällen konsequent gleich behandeln) würde vermutlich
-beide Stellen auf einmal lösen.
+3. **Der Mikrofon-Knopf im Chat kann dauerhaft hängen bleiben, ohne dass
+   die Nutzerin etwas davon erfährt.** In `ChatInput.tsx` (`handleMicClick`)
+   wird `listening` auf `true` gesetzt, bevor `startListening()`
+   (`speech.ts`) aufgerufen wird. `recognition.start()` dort ist ungeschützt
+   — wirft der Browser hier (z. B. bei verweigerter Mikrofonberechtigung),
+   greift weder `onerror` noch `onend`, und `listening` bleibt für immer
+   `true`. Der Knopf sieht dann dauerhaft nach "Aufnahme läuft" aus,
+   reagiert aber auf nichts mehr — ohne jede Fehlermeldung, obwohl es dafür
+   mit `micError` (Zeile 75-79) bereits eine passende, sogar
+   screenreader-freundliche Anzeige gibt.
+   *Vorschlag:* `recognition.start()` in `startListening()` in ein
+   `try`/`catch` packen und im Fehlerfall `onError`/`onEnd` trotzdem
+   auslösen, damit `ChatInput` `listening` zurücksetzt und `micError`
+   anzeigt.
 
-_Letztes Update: 2026-09-03_
+_Letztes Update: 2026-09-04_
