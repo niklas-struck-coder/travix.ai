@@ -168,6 +168,12 @@ export function useChat(speechEnabled: boolean) {
           guests: 1,
         })
           .then((result) => {
+            if (result.errors.length > 0) {
+              setStayError(true)
+              setStayLoading(false)
+              setQuickReplies(['Neue Reise planen'])
+              return
+            }
             setStayOffers(result.offers)
             setStayLoading(false)
           })
@@ -309,6 +315,12 @@ export function useChat(speechEnabled: boolean) {
             guests: 1,
           })
             .then((result) => {
+              if (result.errors.length > 0) {
+                setStayError(true)
+                setStayLoading(false)
+                setQuickReplies(['Neue Reise planen'])
+                return
+              }
               setStayOffers(result.offers)
               setStayLoading(false)
             })
