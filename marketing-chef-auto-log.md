@@ -4,6 +4,115 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-04
+
+**Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
+`marketing/freigabe-uebersicht.md` (zuletzt 03.09.) um eine neue Prüfung
+vom 04.09. ergänzt — ordnet zwei seit dem letzten Marketing-Lauf neu
+hinzugekommene Ehrlichkeits-/Zuverlässigkeits-Fixes in den bestehenden
+Tier-4-Kandidatentopf ein (ein echter Suchfehler bei Unterkunft/Flug im
+Chat sah bisher wie eine ehrliche Null-Treffer-Suche bzw. eine Sackgasse
+ohne nächsten Schritt aus; kaputte Alt-Trip-Daten im localStorage
+konnten die Buchungs-/Chat-/Kartenseite durch einen ungefangenen
+`TypeError` komplett leer lassen). Drei weitere geprüfte Fixes
+(Passagierzahl-NaN-Schutz, Vergangenheitsdatum bei Hinflug/Check-in,
+deutsches Preisformat in Flug-/Hotelkarten) bewusst nicht aufgenommen,
+da reine Validierungs- bzw. Formatierungskorrekturen ohne
+Ehrlichkeits-/Irreführungs-Erzählung.
+
+**Warum dieser Punkt statt eines achten Content-Stücks oder gar nichts:**
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`dfb31cb`,
+03.09.) geprüft: 14 neue Commits. Der Großteil ohne Content-Relevanz —
+zwei Freigabe-Chef-Merges/-Logs, ein Daily-Status-Update, ein
+Support-Chef-Bericht (dieselben Fehleranzeige-Funde wie unten, keine
+neue Information) sowie ein eigener interaktiver Marketing-Chef-Bericht
+und zwei IT-Chef-Berichte (alle vor diesem Auto-Lauf entstanden, nur
+Einordnung im Chat, keine autonome Aktion). Der eigene interaktive
+Bericht vom 03.09. rät zusätzlich davon ab, die Sprachfunktion schon
+jetzt zu bewerben (fehlender Stopp-Knopf) — keine neue Entscheidung von
+Ni, nur eine Warnung. `ZEITPLAN.md`, `status.md` und
+`marketing/freigabe-uebersicht.md` bestätigen: alle drei offenen Fragen
+an Ni (Kanal-Start? 6.2 priorisiert? Tier-4-Format gewollt?) weiterhin
+unbeantwortet seit 21.08. — 6.2 weiterhin offen, kein neuer Kanal/keine
+Landingpage live, keine Notiz von Ni in `status.md` (Stand 03.09.) oder
+sonstwo im Repo.
+
+Fünf echte Codeänderungen wurden einzeln geprüft (`git show`, Diffs
+gelesen), bevor über Content entschieden wurde:
+- `7a13a42` (03.09., neunundzwanzigster IT-Chef-Lauf): `callDuffelProxy()`
+  löst seine Promise bei einem echten Duffel-Fehler mit einem
+  `errors`-Feld auf statt sie abzulehnen — drei Suchaufrufe in
+  `useChat.ts` werteten `result.errors` bisher nicht vollständig aus. Eine
+  echte Suchpanne sah dadurch wie ein ehrliches Null-Treffer-Ergebnis
+  bzw. eine Sackgasse ohne nächsten Schritt aus.
+- `8e52f6f` (04.09., dreiunddreißigster IT-Chef-Lauf): `hasTripData()`
+  griff ungeschützt auf `activities.length` zu — bei kaputten/alten
+  localStorage-Daten ohne `activities`-Feld ein `TypeError` mitten im
+  Rendern, ohne ErrorBoundary blieb die Seite komplett leer.
+- `f56b9a8` (04.09., zweiunddreißigster IT-Chef-Lauf): Preise in
+  `FlightCard.tsx`/`HotelCard.tsx` jetzt im deutschen Format statt roh
+  ("249.00 EUR"). Reine Formatierungskorrektur, der Betrag war vorher
+  schon korrekt.
+- `ab7f4e6` (03.09., dreißigster IT-Chef-Lauf): fehlendes `min`-Attribut
+  auf dem heutigen Datum bei Hinflug/Check-in — reine
+  Validierungskorrektur.
+- `4ee4b4a` (04.09., einunddreißigster IT-Chef-Lauf): Passagierzahl
+  konnte bei nicht-numerischer Eingabe zu `NaN` werden — reine
+  Validierungskorrektur nach bestehendem `HotelWizard.tsx`-Muster.
+
+Die ersten beiden (`7a13a42`, `8e52f6f`) passen inhaltlich zum bereits
+skizzierten "Ehrlichkeits-Log"-Format und wandern in den
+Tier-4-Kandidatentopf, gebunden an die weiterhin offene Frage 3. Die
+übrigen drei sind reine Validierungs-/Formatierungskorrekturen ohne
+diese Erzählung, gleiche Einstufung wie z. B. `89f63c2` (03.09.).
+
+**Warum sicher genug:** Ergebnis ist eine reine Dokument-Ergänzung
+(Freigabe-Übersicht für Ni), kein Live-Vorgang — nichts wird gepostet,
+kein Kanal angelegt, kein bestehender Text verändert oder gelöscht (nur
+eine neue Sektion sowie eine Ergänzung im bestehenden Tier-4-Punkt
+hinzugefügt, ältere Abschnitte unverändert belassen). Keine erfundenen
+Kennzahlen. Keine offene Positionierungs-Grundsatzfrage: die Ergänzung
+entscheidet nichts neu, sondern trägt nur bereits im Repo nachprüfbare
+Fakten nach (Commit-Historie, Code-Diffs, `ZEITPLAN.md`- und
+`status.md`-Stand).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein achtes, eigenständiges Content-Stück zu einem der beiden
+  Ehrlichkeits-Fixes — siehe Begründung oben, gleiche Einstufung wie alle
+  bisherigen kleinen Ehrlichkeits-Korrekturen, aus Konsistenzgründen in
+  den Tier-4-Topf statt ein eigenes Stück.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  gleiche Blocker wie in allen bisherigen Läufen (Live-Vorgang bzw.
+  ungelöste Freigabe-Fragen).
+
+**Hinweis zur Wiederholung:** Dies ist inzwischen der neunte Lauf in
+Folge (seit 26.08.) mit demselben Ergebnis "kein neues Content-Stück,
+stattdessen Freigabe-Übersicht ergänzt". Das ist keine neue Erkenntnis
+aus diesem Lauf, sondern soll offen benannt werden: der Tier-4-
+Kandidatentopf wächst mit jedem Lauf um weitere Einzelfunde, ohne
+dass Ni bisher eine der drei Fragen beantwortet hat. Am eigentlichen
+Engpass (Freigabe/Priorisierung durch Ni, nicht fehlende Ideen) ändert
+ein zehnter, elfter usw. gleichlautender Lauf nichts — das kann nur Ni
+lösen. Keine Änderung an der Selbstbeschränkung aus dem Bericht vom
+20.08. in diesem Lauf, nur diese Beobachtung für den nächsten Blick
+(egal ob durch Ni oder einen künftigen Lauf) festgehalten.
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (Remote-Stand
+`dfb31cb`, 03.09.) war laut `git merge-base --is-ancestor` bereits
+vollständig in `main` gemerged. Branch daher neu von `origin/main`
+(`7e052de`, inkl. IT-/Freigabe-Chef-Läufen bis 04.09. früh) aufgesetzt,
+wie in den Session-Regeln für bereits gemergte Branches vorgesehen —
+keine eigenen Commits gingen dabei verloren, da der alte Branch-Stand
+bereits vollständig in `main` enthalten war.
+
+**Geprüft:** Kein Produkt-Code geändert, nur eine bestehende
+Markdown-Datei (`marketing/freigabe-uebersicht.md`) ergänzt und dieser
+Log-Eintrag — kein Build/Lint/Test nötig.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-03
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:

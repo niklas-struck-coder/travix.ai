@@ -1,10 +1,87 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-03)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-04)
 
 Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
 fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
 neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
 ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-04: zwei weitere Ehrlichkeits-/Zuverlässigkeits-Fixes geprüft (Chat-Suchfehler bei Unterkunft/Flug sahen wie Null-Treffer bzw. Sackgasse aus, TypeError bei kaputten Alt-Trip-Daten konnte Buchungs-/Chat-/Kartenseite leer lassen) — zwei weitere Tier-4-Kandidaten, drei reine Validierungs-/Formatierungs-Fixes ohne Content-Relevanz, weiterhin kein achtes Content-Stück
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`dfb31cb`,
+03.09., laut `git merge-base --is-ancestor` bereits vollständig in `main`
+gemerged) geprüft: 14 neue Commits. Der größte Teil ohne Content-Relevanz
+— zwei Freigabe-Chef-Merges/-Logs, ein Daily-Status-Update, ein
+Support-Chef-Bericht (`caf9f4b`, dieselben Fehleranzeige-Funde wie unten,
+keine neue Information), ein eigener interaktiver Marketing-Chef-Bericht
+(`9050392`, nur Einordnung im Chat, rät von verfrühtem
+Sprachfunktions-Marketing ab — keine neue Entscheidung von Ni) sowie zwei
+IT-Chef-Berichte (`4d1ec69`, `88adaae`, beide vor diesem Auto-Lauf
+entstanden, reine Einordnung im Chat).
+
+Fünf echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`7a13a42` (03.09., neunundzwanzigster IT-Chef-Lauf):** `callDuffelProxy()`
+  lehnt seine Promise bei einem echten Duffel-Fehler nicht ab, sondern löst
+  sie mit einem `errors`-Feld auf — die drei Suchaufrufe in `useChat.ts`
+  (automatische Unterkunftssuche, Unterkunftssuche über "Bearbeiten",
+  `runFlightSearch`) werteten `result.errors` in ihrem `.then()` aber nicht
+  oder nicht vollständig aus. Eine echte Suchpanne sah dadurch für die
+  Nutzerin wie eine ehrliche Null-Treffer-Suche aus (Unterkunft) bzw.
+  endete ohne jeden klickbaren nächsten Schritt (Flug) — die manuellen
+  Suchseiten `Hotelsuche.tsx`/`Flugsuche.tsx` hatten diese Unterscheidung
+  bereits richtig. Jetzt prüfen alle drei `.then()`-Zweige `result.errors`
+  genau wie die manuellen Suchseiten.
+- **`8e52f6f` (04.09., dreiunddreißigster IT-Chef-Lauf):** `loadStoredChat()`
+  castet den geparsten localStorage-Wert nur, ohne ihn zu validieren —
+  `hasTripData()` griff danach ungeschützt auf `activities.length` zu.
+  Fehlt `activities` (Alt-Daten aus einer früheren Version), wirft das
+  einen `TypeError` mitten im Rendern von `KiChat.tsx`, `Buchung.tsx` und
+  `Kartenansicht.tsx` — ohne ErrorBoundary bleibt die Seite dann komplett
+  leer, keine Fehlermeldung, kein nächster Schritt. Jetzt zusätzlich
+  `Array.isArray(activities)`-Prüfung vor dem `.length`-Zugriff.
+- **`f56b9a8` (04.09., zweiunddreißigster IT-Chef-Lauf):** `FlightCard.tsx`/
+  `HotelCard.tsx` zeigten Preise unformatiert ("249.00 EUR") statt im
+  deutschen Format. Neue `formatOfferPrice()`-Hilfsfunktion
+  (`Intl.NumberFormat('de-DE', ...)`). Reine Formatierungskorrektur, keine
+  vorher irreführende oder falsche Information — der Betrag selbst war
+  schon richtig, nur die Darstellung unpoliert.
+- **`ab7f4e6` (03.09., dreißigster IT-Chef-Lauf):** Hinflug-/Check-in-Datum
+  hatten kein `min`-Attribut auf das heutige Datum, ein Datum in der
+  Vergangenheit ließ sich wählen. Reine Validierungskorrektur ohne eigene
+  Ehrlichkeits-Erzählung, gleiche Einstufung wie `89f63c2` (03.09.).
+- **`4ee4b4a` (04.09., einunddreißigster IT-Chef-Lauf):** Passagierzahl im
+  `FlightWizard.tsx` konnte bei nicht-numerischer Eingabe zu `NaN` werden,
+  ungeprüft in die Flugsuche gegeben. Reine Validierungskorrektur nach
+  demselben Muster wie das bereits bestehende `HotelWizard.tsx`, keine
+  eigene Ehrlichkeits-Erzählung.
+
+`7a13a42` und `8e52f6f` passen inhaltlich zum bereits skizzierten
+"Ehrlichkeits-Log"-Format — beide verhindern, dass eine Nutzerin eine
+falsche oder gar keine Information bekommt, ohne das erkennen zu können
+(eine echte Suchpanne, die wie ein ehrliches Null-Ergebnis aussah; eine
+komplett leere Seite ohne jeden Hinweis bei kaputten Alt-Daten) — und
+wandern in den Tier-4-Kandidatentopf, gebunden an die weiterhin offene
+Frage 3 unten. `f56b9a8`, `ab7f4e6` und `4ee4b4a` sind reine
+Validierungs-/Formatierungskorrekturen ohne diese Erzählung, gleiche
+Einstufung wie z. B. `89f63c2` (03.09.) und `69bcba5` (01.09.).
+
+**Warum trotzdem kein achtes Content-Stück:** Dieselbe Prüfung wie bei
+jedem bisherigen Lauf — `ZEITPLAN.md` führt 6.2 (Buchen-Button) weiterhin
+als offen, kein neuer Kanal/keine Landingpage live, und `status.md`
+(Stand 2026-09-03) sowie dieses Dokument enthalten keine Notiz von Ni zu
+einer der drei unten offenen Fragen. Alle drei Bedingungen für ein neues,
+eigenständiges Stück bleiben damit unverändert unerfüllt. Die zwei neuen
+Ehrlichkeits-Kandidaten werden stattdessen unten im Tier-4-Kandidatentopf
+(Punkt 7) ergänzt.
+
+**Warum sicher genug für eine Dokument-Ergänzung:** reine
+Übersichts-Aktualisierung, kein Live-Vorgang — nichts gepostet, kein
+Kanal angelegt, kein bestehender Abschnitt verändert oder gelöscht (nur
+diese neue Sektion und eine Ergänzung im bestehenden Tier-4-Punkt).
+Keine erfundenen Kennzahlen. Keine offene Positionierungs-Grundsatzfrage:
+trägt nur bereits im Repo nachprüfbare Fakten nach (Commit-Historie,
+Code-Diffs, `ZEITPLAN.md`-Stand).
 
 ## Update 2026-09-03: vier weitere Ehrlichkeits-Fixes geprüft (nicht-kuriertes Reiseziel im Concierge, Avatar-Zustand bei Ausweich-Antworten, Transportmittel-Erkennung ohne Wortgrenzen, rohe Duffel-Fehlertexte bei Netzwerk-/Parse-Fehlern) — vier weitere Tier-4-Kandidaten, ein reiner Validierungs-Fix ohne Content-Relevanz, weiterhin kein achtes Content-Stück
 
@@ -573,7 +650,13 @@ Anfang-bis-Ende-Weg im Code.
    Bus erkannt); und rohe Duffel-Fehlertexte bei einem fehlgeschlagenen
    `fetch()` selbst oder kaputter JSON-Antwort sind jetzt ebenfalls durch
    die ehrliche deutsche Fallback-Meldung ersetzt (siehe Update 2026-09-03
-   oben). Der eigene Bericht
+   oben), sowie seit 03./04.09. zwei weitere: ein echter Suchfehler bei
+   Unterkunft/Flug im Chat sah zuvor wie ein ehrliches Null-Treffer-
+   Ergebnis bzw. eine Sackgasse ohne nächsten Schritt aus, jetzt wird die
+   echte Fehlermeldung angezeigt; und kaputte Alt-Trip-Daten im
+   localStorage konnten die Buchungs-/Chat-/Kartenseite bisher komplett
+   leer lassen (`TypeError` ohne ErrorBoundary), jetzt fängt eine
+   Array-Prüfung das ab (siehe Update 2026-09-04 oben). Der eigene Bericht
    vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
    Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
