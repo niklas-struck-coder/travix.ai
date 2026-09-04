@@ -2034,3 +2034,53 @@ bestätigt) und keine echte Divergenz/History-Neuschreibung vorlag.
 gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
 nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
 Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-04, später Auto-Lauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (bereits im früheren
+  Nacht-Check gemergt), nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (Ergänzung
+  `marketing-chef-auto-log.md` + `marketing/freigabe-uebersicht.md` um
+  zwei neu eingeordnete Ehrlichkeits-/Zuverlässigkeits-Fixes, kein neues
+  Content-Stück).
+- `support-chef/auto` — 1 neuer Commit vor `main` (neuer Eintrag in
+  `support-chef-auto-log.md`: Preisformatierungs-Analyse
+  `FlightCard`/`HotelCard`/`format.ts` — `Intl.NumberFormat`-Risiko bei
+  leerem Währungscode; fehlende Start=Ziel-Prüfung im `FlightWizard`).
+
+**Prüfung `marketing-chef/auto`:** Diff besteht ausschließlich aus
+Markdown-Ergänzungen an zwei bestehenden Dokumenten, kein Produkt-Code
+berührt. Keine erfundenen Kennzahlen/Nutzerzahlen/Kampagnen-Ergebnisse —
+alle genannten Commits (`7a13a42`, `8e52f6f`, `f56b9a8`, `ab7f4e6`,
+`4ee4b4a`) existieren tatsächlich in der Historie mit passenden
+Beschreibungen. Kein Hinweis auf tatsächliches Posten/Versenden/
+Veröffentlichen — reine interne Einordnung/Übersicht für Ni. Text
+vollständig und kohärent, keine bloße Stichpunkt-Skizze.
+
+→ Nach `main` gemergt (Fast-Forward, `7e052de..8242a53`).
+
+**Prüfung `support-chef/auto`:** Diff besteht nur aus einem neuen
+Log-Eintrag in `support-chef-auto-log.md`, keine Code-Änderung.
+Stichprobenartig gegen den tatsächlichen Code auf `main` verifiziert:
+- `src/lib/format.ts` — `formatOfferPrice()` prüft tatsächlich nur den
+  Betrag gegen `NaN`, die `currency` wird nirgends validiert, exakt wie
+  behauptet.
+- `FlightCard.tsx` und `HotelCard.tsx` rufen `formatOfferPrice()`
+  tatsächlich ungefangen im Render-Pfad auf (Zeilen wie beschrieben).
+- `src/lib/duffel/client.ts` setzt `totalCurrency` bei fehlendem
+  Währungsfeld tatsächlich auf einen leeren String (`?? ''`), exakt an
+  den genannten Stellen.
+- `FlightWizard.tsx`: `isValid` prüft tatsächlich nur Länge von
+  `origin`/`destination`, keine `origin !== destination`-Prüfung.
+
+Alle Datei-/Zeilenangaben stimmen mit dem Code überein, nichts wirkt
+erfunden. Reine Analyse ohne Code-Änderung — niedrigstes Risiko.
+
+→ Nach `main` gemergt (regulärer Merge-Commit `24daeec`, da
+divergierender Branch-Ursprung; Fast-Forward nicht möglich).
+
+**Ergebnis:** Alle drei Branches geprüft. `it-chef/auto` bereits aktuell.
+`marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
+beide nach `main` gemergt und gepusht (`24daeec`). Keine Auffälligkeiten,
+kein Scope-Verstoß, keine Info an Ni nötig.
