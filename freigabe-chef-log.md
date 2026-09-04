@@ -1991,3 +1991,46 @@ Marketing-Merge inzwischen divergiert war, per regulärem Merge-Commit
 `marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
 beide nach `main` gemergt. Keine Auffälligkeiten, kein Scope-Verstoß,
 keine Info an Ni nötig.
+
+## 2026-09-04, früher Nacht-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (29. bis 33. Lauf,
+  2026-09-03/09-04): Chat-Suchfehler-Anzeige, vergangenes Datum bei
+  Hinflug/Check-in, Passagierzahl-NaN-Schutz, Preise im deutschen Format,
+  `hasTripData()`-Absicherung gegen fehlendes `activities`-Feld.
+- `marketing-chef/auto` — 0 neue Commits vor `main`, nichts zu tun (läuft
+  erst um 6 Uhr, separater späterer Freigabe-Chef-Lauf).
+- `support-chef/auto` — 0 neue Commits vor `main`, nichts zu tun (läuft
+  erst um 6 Uhr, separater späterer Freigabe-Chef-Lauf).
+
+**Prüfung `it-chef/auto`:** Branch ausgecheckt, Diff zu `main`
+angeschaut (14 Dateien, siehe `it-chef-auto-log.md`-Einträge zum
+29.–33. Lauf). Unabhängig selbst verifiziert (nicht nur den Log-Eintrag
+geglaubt):
+- `npm install` (frischer Checkout) — lief durch.
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 36 Testdateien, 175 Tests, alle grün.
+
+Inhaltlich geprüft: jeder der 5 Commits deckt genau den im jeweiligen
+`it-chef-auto-log.md`-Eintrag beschriebenen einzelnen Punkt ab (Diff der
+Code-Dateien einzeln gelesen), kein Scope-Creep. Kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Preis-Formatierung
+(`formatOfferPrice()` in `src/lib/format.ts`) folgt dem bereits
+etablierten Muster (`toLocaleString('de-DE')` in `Angebote.tsx`), passt
+zu `MARKENDESIGN.md` (keine abweichende Preisformat-Vorgabe gefunden).
+Vor dem Merge zusätzlich geprüft, dass lokales `main` (Container-Altstand
+vom 28.08.) tatsächlich nur ein Fast-Forward-Rückstand zu `origin/main`
+war (`git merge-base --is-ancestor` nach `git fetch --unshallow`
+bestätigt) und keine echte Divergenz/History-Neuschreibung vorlag.
+
+→ Nach `main` gemergt (Merge-Commit, `caf9f4b..7f2cdce`) und nach
+`origin/main` gepusht. Merge-Ergebnis erneut vollständig verifiziert
+(`npx tsc -b`, `npx vitest run` — 36 Testdateien, 175 Tests, alle grün).
+
+**Ergebnis:** `it-chef/auto` sauber, unabhängig verifiziert, gemergt und
+gepusht. `marketing-chef/auto`/`support-chef/auto` ohne neue Commits,
+nichts zu tun (folgen im späteren 6-Uhr-Freigabe-Chef-Lauf). Keine
+Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
