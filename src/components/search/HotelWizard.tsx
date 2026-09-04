@@ -13,6 +13,14 @@ function clampGuestCount(value: string) {
   return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
 }
 
+function getTodayIso(): string {
+  const now = new Date()
+  const y = String(now.getFullYear()).padStart(4, '0')
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 interface HotelWizardProps {
   onSearch: (params: StaySearchParams) => void
   loading: boolean
@@ -64,7 +72,14 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="checkin">Check-in</Label>
-          <Input id="checkin" type="date" value={checkInDate} onChange={(event) => setCheckInDate(event.target.value)} required />
+          <Input
+            id="checkin"
+            type="date"
+            value={checkInDate}
+            onChange={(event) => setCheckInDate(event.target.value)}
+            min={getTodayIso()}
+            required
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="checkout">Check-out</Label>

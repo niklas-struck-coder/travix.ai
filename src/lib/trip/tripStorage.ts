@@ -39,7 +39,10 @@ export function isTripComplete(trip: TripDraft): boolean {
   return Boolean(trip.destination && trip.transportMode && trip.dates && trip.budget && trip.accommodation)
 }
 
+// `activities` is cast, not validated, when a stored trip is loaded from
+// localStorage (see loadStoredChat) — legacy or corrupted data can be
+// missing it entirely, so this can't assume it's always an array.
 export function hasTripData(trip: TripDraft): boolean {
   const { activities, ...fields } = trip
-  return Object.values(fields).some(Boolean) || activities.length > 0
+  return Object.values(fields).some(Boolean) || (Array.isArray(activities) && activities.length > 0)
 }

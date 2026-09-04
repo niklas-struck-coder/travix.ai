@@ -12,6 +12,19 @@ interface FlightWizardProps {
   loading: boolean
 }
 
+function getTodayIso(): string {
+  const now = new Date()
+  const y = String(now.getFullYear()).padStart(4, '0')
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function clampPassengerCount(value: string) {
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
+}
+
 const cabinOptions: { value: CabinClass; label: string }[] = [
   { value: 'economy', label: 'Economy' },
   { value: 'premium_economy', label: 'Premium Economy' },
@@ -90,6 +103,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             type="date"
             value={departureDate}
             onChange={(event) => setDepartureDate(event.target.value)}
+            min={getTodayIso()}
             required
           />
         </div>
@@ -117,7 +131,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             min={1}
             max={9}
             value={passengers}
-            onChange={(event) => setPassengers(Math.min(9, Math.max(1, Number(event.target.value))))}
+            onChange={(event) => setPassengers(clampPassengerCount(event.target.value))}
           />
         </div>
         <div className="flex flex-col gap-1.5">

@@ -51,7 +51,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gestartete Chat im "sucht"-Zustand hängen und bekam später sogar die
   Ergebnisse/den Fehler der vorherigen Reiseplanung angezeigt. Beide
   fehlenden Resets ergänzt, zwei neue Regressionstests in
-  `useChat.test.ts`.
+  `useChat.test.ts`. Vom autonomen IT-Chef-Lauf am 04.09.
+  (dreiunddreißigster Lauf) einen von `reports/it-chef.md` (03.09.)
+  gemeldeten Fund gezielt entschärft: `loadStoredChat()`
+  (`tripStorage.ts`) castet den geparsten localStorage-Wert nur (`as
+  StoredChatState`), ohne ihn zu prüfen — `hasTripData()` griff danach
+  ungeschützt auf `activities.length` zu. Fehlt `activities` (Alt-Daten
+  aus einer früheren Version, halb geschriebener Wert), wirft das einen
+  `TypeError` mitten im Rendern von `KiChat.tsx`, `Buchung.tsx` und
+  `Kartenansicht.tsx` — ohne ErrorBoundary bleibt die Seite dann leer.
+  Nur der im Bericht selbst als klein markierte Teilfix: `hasTripData`
+  prüft jetzt zusätzlich `Array.isArray(activities)`, bevor auf
+  `.length` zugegriffen wird. Das von `reports/it-chef.md` ebenfalls
+  vorgeschlagene "normalisierende Laden" (mehrere Stellen betroffen,
+  eigene Design-Entscheidung nötig) bleibt bewusst offen für einen
+  künftigen, eigenständigen Lauf. Drei neue Regressionstests in
+  `tripStorage.test.ts` (fehlendes `activities`-Feld wirft nicht mehr,
+  liefert `false` bzw. weiterhin `true`, wenn echte Aktivitäten
+  vorhanden sind).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -146,6 +163,54 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   sieht eine ehrliche deutsche Meldung mit konkretem nächsten Schritt.
   Zwei neue Regressionstests in `client.test.ts` (abgelehntes
   `fetch()`-Promise, werfendes `response.json()`).
+  Vom autonomen IT-Chef-Lauf am 03.09. (neunundzwanzigster Lauf) einen von
+  `reports/support-chef.md` (03.09.) gemeldeten Fund in `useChat.ts`
+  behoben: `callDuffelProxy()` lehnt seine Promise bei einem echten
+  Duffel-Fehler nie ab, sondern löst sie mit einem `errors`-Feld auf
+  (siehe Fix im siebenundzwanzigsten/zweiten Lauf oben) — die drei
+  Suchaufrufe im Chat (automatische Unterkunftssuche im Hauptablauf,
+  Unterkunftssuche über "Bearbeiten", `runFlightSearch`) werteten
+  `result.errors` in ihrem `.then()` aber nicht (oder nicht vollständig)
+  aus und verließen sich auf die dafür vorgesehenen, aber nie erreichten
+  `.catch()`-Zweige. Eine echte Suchpanne sah dadurch für die Nutzerin wie
+  eine ehrliche Null-Treffer-Suche aus (Unterkunft) bzw. endete ohne
+  jeden klickbaren nächsten Schritt (Flug) — die manuellen Suchseiten
+  `Hotelsuche.tsx`/`Flugsuche.tsx` hatten dieselbe Unterscheidung schon
+  richtig. Fix: alle drei `.then()`-Zweige prüfen jetzt `result.errors`
+  genau wie die manuellen Suchseiten (Unterkunft: `stayError` statt
+  `stayOffers` setzen plus `quickReplies` auf "Neue Reise planen" bei der
+  "Bearbeiten"-Suche; Flug: zusätzlich `quickReplies` auf "Neue Reise
+  planen" setzen). Die bisherigen `.catch()`-Zweige bleiben als
+  Absicherung für echte JS-Fehler unverändert bestehen. Drei neue
+  Regressionstests in `useChat.test.ts`, die die Suche mit
+  `mockResolvedValue({ offers: [], errors: [...] })` statt
+  `mockRejectedValue` simulieren (das bisher ungetestete, tatsächlich
+  auftretende Verhalten) — vor dem Fix reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 03.09. (dreißigster Lauf) einen von
+  `reports/it-chef.md` (03.09.) gemeldeten Fund behoben: Hinflug
+  (`FlightWizard.tsx`) und Check-in (`HotelWizard.tsx`) hatten kein
+  `min`-Attribut auf das heutige Datum — nur die jeweils zweiten Felder
+  (Rückflug/Check-out) waren bereits gegen das erste Datum abgesichert,
+  ein Datum in der Vergangenheit ließ sich also weiterhin als Hinflug/
+  Check-in wählen. Beide Dateien bekommen jetzt eine lokale
+  `getTodayIso()`-Hilfsfunktion (heutiges Datum über lokale
+  `Date`-Komponenten statt `toISOString()`, um Zeitzonen-Verschiebung zu
+  vermeiden), als `min` auf dem jeweils ersten Datumsfeld gesetzt. Neuer
+  Regressionstest pro Datei.
+  Vom autonomen IT-Chef-Lauf am 04.09. (einunddreißigster Lauf) einen
+  weiteren von `reports/it-chef.md` (03.09.) gemeldeten Fund behoben:
+  Die Passagierzahl in `FlightWizard.tsx` klammerte mit `Math.min`/
+  `Math.max` direkt um `Number(event.target.value)`, ohne
+  `Number.isNaN`-Prüfung — das strukturell identische
+  `Gäste`/`Zimmer`-Feld in `HotelWizard.tsx` schützt sich bereits über
+  `clampGuestCount()` davor. Bei einem nicht-numerischen Wert (z. B.
+  durch Einfügen von Text ins Zahlenfeld) wurde `passengers` zu `NaN`,
+  das dann ungeprüft in die Flugsuche ging. Fix: neue lokale
+  `clampPassengerCount()`-Hilfsfunktion in `FlightWizard.tsx`, exakt
+  analog zu `clampGuestCount()` in `HotelWizard.tsx`. Zwei neue
+  Regressionstests in `FlightWizard.test.tsx` (NaN-Fallback auf 1,
+  Begrenzung auf 1-9), analog den bereits bestehenden Tests in
+  `HotelWizard.test.tsx`.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -253,6 +318,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   per reinem Teilstring-Vergleich, analog zum bestehenden Muster in
   `mockConcierge.ts`. Zwei neue Regressionstests in
   `mockAdvisor.test.ts` (die beiden oben genannten Fälle).
+  Vom autonomen IT-Chef-Lauf am 04.09. (zweiunddreißigster Lauf) einen
+  weiteren von `reports/it-chef.md` (03.09.) gemeldeten Fund behoben:
+  „Preise im Rohformat" — `FlightCard.tsx` und `HotelCard.tsx` rendern
+  `{offer.totalAmount} {offer.totalCurrency}` unformatiert (z. B.
+  "249.00 EUR") statt im deutschen Format. Inhaltlich der Nachzieher des
+  nicht mehr mergebaren PR #9. Neue `formatOfferPrice()`-Hilfsfunktion in
+  `src/lib/format.ts` (`Intl.NumberFormat('de-DE', { style: 'currency',
+  currency })`, mit Fallback auf den Rohwert bei nicht-numerischem
+  Betrag) ersetzt die rohe Konkatenation in beiden Karten. `TrainCard.tsx`
+  hat denselben Bug, bleibt aber bewusst unangetastet — sie ist laut
+  `reports/it-chef.md` (Vorschlag 4) toter Code, der nirgends importiert
+  wird, und ihre Zukunft (anbinden oder löschen) war nicht Teil dieses
+  einen, klar abgegrenzten Punkts. Neue `src/lib/format.test.ts`
+  (bisher gab es dort keine Tests) mit vier Fällen (EUR, Beträge mit
+  Cent-Anteil, andere Währung, nicht-numerischer Fallback).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

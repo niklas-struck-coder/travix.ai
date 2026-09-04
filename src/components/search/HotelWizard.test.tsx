@@ -22,4 +22,12 @@ describe('HotelWizard', () => {
     fireEvent.change(rooms, { target: { value: '0' } })
     expect(rooms).toHaveValue(1)
   })
+
+  it('does not allow picking a check-in date before today', () => {
+    render(<HotelWizard onSearch={vi.fn()} loading={false} />)
+
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    expect(screen.getByLabelText('Check-in')).toHaveAttribute('min', today)
+  })
 })

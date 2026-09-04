@@ -6678,3 +6678,331 @@ Funktion korrigiert.
   Chunk-Size-Warnung, unverändert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (neunundzwanzigster Lauf)
+
+**Ausgangslage:** Alle offenen ZEITPLAN-Punkte im Programmierungs-Bereich
+weiterhin blockiert (Backend-/Produktentscheidungen). Vor der eigenen
+Bug-Suche zuerst `reports/support-chef.md` gelesen (aktuelles Muster
+für autonome Läufe, wenn andere Chefs bereits konkrete, gut beschriebene
+Funde gemeldet haben) — dort stand ein neuer, vom 03.09. datierter
+Bericht mit zwei konkreten Reibungspunkten inkl. vorgeschlagenem Fix.
+
+**Ausgewählter Punkt:** Beide von Support-Chef gemeldeten Punkte in
+`src/hooks/useChat.ts` (Chat-Suchergebnisse nach einer echten
+Duffel-API-Fehlermeldung) — laut Bericht dieselbe Ursache: seit dem
+zweiten/siebenundzwanzigsten Lauf lehnt `callDuffelProxy()`
+(`src/lib/duffel/client.ts`) ihre Promise bei einem echten Suchfehler
+nie mehr ab, sondern löst sie mit einem befüllten `errors`-Feld auf. Die
+drei Suchaufrufe im Chat (automatische Unterkunftssuche im
+Hauptonboarding, Unterkunftssuche über den "Bearbeiten"-Pfad,
+`runFlightSearch`) prüften `result.errors` in ihrem `.then()` aber nicht
+oder nicht vollständig — sie verließen sich auf die dafür vorgesehenen
+`.catch()`-Zweige, die dadurch bei einem echten API-Fehler nie mehr
+erreicht werden.
+
+**Warum sicher genug:** Rein defensive Fehlerdarstellung in der
+Chat-Hook-Schicht, kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung:
+Support-Chef hatte den exakten Fix bereits vorgeschlagen, und das
+korrekte Muster existiert schon in `Hotelsuche.tsx`/`Flugsuche.tsx`
+(separate `errors`- und `offers`-Prüfung) sowie im bereits laufenden
+`.catch()`-Zweig der "Bearbeiten"-Unterkunftssuche selbst — hier nur
+konsequent auf die drei Stellen übertragen, an denen es noch fehlte.
+Klar lokalisiert (drei benannte `.then()`-Zweige in einer Datei), keine
+Interpretation über den Berichtsvorschlag hinaus nötig. Objektiv
+prüfbar: fester Input (`searchStays`/`searchFlights` lösen mit
+`errors`-Array statt leer auf) → vorher fälschlich "keine Treffer" bzw.
+Sackgasse ohne nächsten Schritt, nachher korrekte Fehleranzeige bzw.
+"Neue Reise planen"-Chip, per Regressionstest abgesichert. Bewusst als
+ein einziger, zusammenhängender Punkt behandelt (nicht als zwei
+getrennte autonome Läufe), da beide Fundstellen exakt dieselbe Ursache
+und dasselbe Fix-Muster haben, wie im Support-Chef-Bericht selbst schon
+so eingeordnet.
+
+**Konkreter, reproduzierbarer Ablauf vor dem Fix:**
+1. Unterkunft (Hauptablauf und "Bearbeiten"): Im Chat ein Ziel aus der
+   kuratierten Liste angeben, während `searchStays()` mit einem echten
+   Duffel-Fehler auflöst (`{ offers: [], errors: [...] }`, kein
+   abgelehntes Promise). `HotelResults` zeigte "Keine Unterkünfte
+   gefunden" statt der eigentlich vorgesehenen Fehlermeldung — die
+   Nutzerin erfuhr nicht, dass es an einem technischen Problem lag.
+2. Flug (über "Bearbeiten" → Transportmittel → IATA-Code): Bei einem
+   ebenso echten Fehler zeigte `FlightResults` zwar korrekt die
+   Fehlermeldung (dieser Teil war schon richtig), aber `quickReplies`
+   blieb leer — keine Möglichkeit, ohne kompletten Chat-Neustart
+   weiterzumachen.
+   Verifiziert über drei neue Testfälle (`mockResolvedValue` mit
+   befülltem `errors`-Array statt `mockRejectedValue`) — alle drei vor
+   dem Fix reproduzierbar rot (per `git stash` der Fix-Änderung isoliert
+   bestätigt), erst danach grün.
+
+**Umsetzung:** In allen drei betroffenen `.then()`-Zweigen in
+`useChat.ts` wird jetzt `result.errors` ausgewertet, bevor `offers`
+gesetzt wird: Unterkunft (beide Suchaufrufe) setzt bei Fehlern
+`stayError` statt `stayOffers`; die "Bearbeiten"-Variante setzt
+zusätzlich `quickReplies` auf `['Neue Reise planen']` (analog dem
+bestehenden `.catch()`-Zweig direkt daneben); `runFlightSearch` setzt
+bei Fehlern zusätzlich `quickReplies` auf `['Neue Reise planen']`. Die
+bestehenden `.catch()`-Zweige bleiben unverändert als Absicherung für
+echte JS-Fehler (z. B. während des Testens per `mockRejectedValue`
+weiterhin genutzt). Drei neue Regressionstests in `useChat.test.ts`
+(zwei für Unterkunft, einer für Flug), die den zuvor ungetesteten,
+tatsächlich auftretenden Fall abdecken (`callDuffelProxy()` löst auf,
+statt abzulehnen). `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5, direkt
+nach dem `callDuffelProxy()`-Eintrag vom achtundzwanzigsten Lauf)
+entsprechend ergänzt. Keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+neuen Punkt abschließt, sondern eine bestehende Funktion korrigiert.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte) —
+  entstandenes `package-lock.json`-Rauschen danach verworfen, gleiches
+  Muster wie in den Vorläufen.
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 35 Testdateien, 164 Tests (161 + 3 neue), alle
+  grün. Die drei neuen Tests vorab isoliert (per `git stash` nur der
+  Fix-Änderung) gegen den alten Code laufen lassen — alle drei
+  reproduzierbar rot, danach mit dem Fix wieder grün.
+- `npm run build` — erfolgreich (bereits vorbestehende
+  Chunk-Size-Warnung, unverändert).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-03 (dreißigster Lauf)
+
+**Ausgewählter Punkt:** aus `reports/it-chef.md` (03.09., Abschnitt
+"Gefundene Bugs (nicht automatisch gefixt)") den Fund "Datum in der
+Vergangenheit weiterhin wählbar": Hinflug (`FlightWizard.tsx`) und
+Check-in (`HotelWizard.tsx`) hatten kein `min`-Attribut auf das heutige
+Datum — nur die jeweils zweiten Felder (Rückflug/Check-out) waren gegen
+das erste Datum abgesichert.
+
+**Warum sicher genug:** Rein clientseitige Formularvalidierung ohne
+Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung nötig — der Fix folgt
+exakt dem bereits bestehenden Muster der Nachbarfelder (Rückflug/
+Check-out haben bereits `min={...Date || undefined}`). Klar genug
+beschrieben (Fund war im gestrigen IT-Chef-Bericht bereits konkret
+benannt, inkl. betroffener Dateien/Zeilen). Ergebnis objektiv prüfbar
+über einen Regressionstest pro Feld (`min`-Attribut-Wert).
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: neue lokale
+  `getTodayIso()`-Hilfsfunktion (liefert das heutige Datum in
+  `YYYY-MM-DD`, über lokale `Date`-Komponenten statt `toISOString()`, um
+  Zeitzonen-Verschiebung zu vermeiden), als `min` auf dem
+  Hinflug-Datumsfeld gesetzt. Rückflug-Feld unverändert (hat bereits
+  `min={departureDate || undefined}`, das jetzt transitiv auch nie mehr
+  vor heute liegen kann).
+- `src/components/search/HotelWizard.tsx`: dieselbe lokale
+  `getTodayIso()`-Hilfsfunktion (analog zum bereits bestehenden Muster
+  lokaler Hilfsfunktionen in derselben Datei, z. B. `clampGuestCount`),
+  als `min` auf dem Check-in-Datumsfeld gesetzt. Check-out-Feld
+  unverändert (hat bereits `min={checkInDate || undefined}`).
+- Je ein neuer Regressionstest in `FlightWizard.test.tsx` und
+  `HotelWizard.test.tsx`, der das `min`-Attribut des jeweiligen ersten
+  Datumsfelds gegen das lokal berechnete heutige Datum prüft.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Funktion korrigiert (gleiche Einordnung wie beim
+  neunundzwanzigsten Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — vollständige Suite: 35 Testdateien, 166 Tests (164
+  + 2 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (einunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten keinen einzigen offenen Punkt, der alle vier Sicherheitskriterien
+erfüllt (fast alles hängt an der offenen Backend-Entscheidung, fehlenden
+`TripDraft`-Preisfeldern oder ist eine Produktentscheidung). Stattdessen
+aus `reports/it-chef.md` (03.09., Abschnitt "Gefundene Bugs (nicht
+automatisch gefixt)") den Fund "Passagierzahl im `FlightWizard` ohne
+NaN-Schutz" umgesetzt: `FlightWizard.tsx:129` klammerte mit
+`Math.min`/`Math.max` um `Number(event.target.value)`, ohne
+`Number.isNaN`-Prüfung — das strukturell identische Gäste-/Zimmer-Feld
+in `HotelWizard.tsx` schützt sich bereits über `clampGuestCount()`
+davor.
+
+**Warum sicher genug:** Rein clientseitige Formularvalidierung eines
+Zahlenfelds, kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig
+— der Fix übernimmt exakt das bereits bestehende, im selben Repo
+etablierte Muster aus `HotelWizard.tsx` (Parität zwischen zwei
+strukturell identischen Wizard-Komponenten, wie schon bei mehreren
+früheren Läufen). Klar genug beschrieben (Fund war im gestrigen
+IT-Chef-Bericht bereits konkret benannt, inkl. Datei/Zeile und
+Vergleichsmuster). Ergebnis objektiv prüfbar über zwei
+Regressionstests (NaN-Fallback auf 1, Begrenzung auf 1-9), analog den
+bestehenden `HotelWizard.test.tsx`-Tests.
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: neue lokale
+  `clampPassengerCount()`-Hilfsfunktion (exakt analog zu
+  `clampGuestCount()` in `HotelWizard.tsx`), im `onChange`-Handler des
+  Passagiere-Felds statt der bisherigen ungeschützten
+  `Math.min(9, Math.max(1, Number(...)))`-Inline-Rechnung verwendet.
+- Zwei neue Regressionstests in `FlightWizard.test.tsx` ("falls back to
+  1 instead of NaN for a non-numeric passenger count", "clamps
+  passenger count to the 1-9 range"), 1:1 analog zu den bestehenden
+  Tests in `HotelWizard.test.tsx`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Funktion korrigiert (gleiche Einordnung wie beim
+  neunundzwanzigsten/dreißigsten Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; dieses Mal war
+  der npm-Registry-Zugriff über den Proxy erreichbar, Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (`vitest run`) — vollständige Suite: 35 Testdateien, 168
+  Tests (166 + 2 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (zweiunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten wie schon beim vorherigen Lauf keinen einzigen offenen
+Checklisten-Punkt, der alle vier Sicherheitskriterien erfüllt. Stattdessen
+aus `reports/it-chef.md` (03.09., Abschnitt "Gefundene Bugs (nicht
+automatisch gefixt)") den Fund "Preise im Rohformat" umgesetzt:
+`FlightCard.tsx` und `HotelCard.tsx` rendern `{offer.totalAmount}
+{offer.totalCurrency}` unformatiert (z. B. "249.00 EUR") statt im
+deutschen Format — inhaltlich der Nachzieher des laut demselben Bericht
+nicht mehr mergebaren PR #9.
+
+**Warum sicher genug:** Reine Anzeige-Formatierung bereits vorhandener
+Preisdaten (aus echten Duffel-Testangeboten), kein neuer Zahlungsfluss
+und keine Änderung an echten Nutzerdaten oder rechtlichen Texten. Keine
+offene Produkt-/Architekturentscheidung nötig — der Bericht benennt Datei
+und Symptom bereits konkret, die deutsche Formatierung folgt dem im Repo
+bereits etablierten Muster (`formatPrice()` in `Angebote.tsx`, ebenfalls
+`toLocaleString('de-DE')`). Ergebnis objektiv prüfbar über neue
+Unit-Tests der Formatierungsfunktion.
+
+**Umgesetzt:**
+- Neue `src/lib/format.ts` mit `formatOfferPrice(amount, currency)`:
+  nutzt `Intl.NumberFormat('de-DE', { style: 'currency', currency })`
+  (liefert z. B. "249,00 €"), mit Fallback auf den unveränderten
+  Rohwert bei einem nicht-numerischen `amount` (defensiv, falls die
+  Duffel-Antwort einmal kein Zahlenformat liefert).
+- `src/components/search/FlightCard.tsx` und
+  `src/components/search/HotelCard.tsx` nutzen `formatOfferPrice()`
+  jetzt statt der rohen `{amount} {currency}`-Konkatenation.
+- `src/components/search/TrainCard.tsx` hat denselben Rohformat-Bug,
+  bleibt aber bewusst unangetastet: laut `reports/it-chef.md` (Vorschlag
+  4) ist die Komponente toter Code (nirgends importiert, 5.7 weiterhin
+  offen) — ob sie angebunden oder gelöscht wird, ist eine offene Frage,
+  keine reine Formatierungskorrektur, und war nicht Teil dieses einen,
+  klar abgegrenzten Punkts.
+- Neue `src/lib/format.test.ts` (bisher gab es dort keine Tests): vier
+  Fälle — EUR-Betrag, Betrag mit Cent-Anteil, andere Währung (USD),
+  nicht-numerischer Fallback. Dabei eine Eigenheit von
+  `Intl.NumberFormat` entdeckt und in den Erwartungswerten
+  berücksichtigt: zwischen Betrag und Symbol steht ein geschütztes
+  Leerzeichen (U+00A0), kein normales Leerzeichen — ein erster
+  Testentwurf mit normalem Leerzeichen schlug deshalb fehl.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Anzeige korrigiert (gleiche Einordnung wie bei den
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — vollständige Suite: 36 Testdateien (35 + 1 neue),
+  172 Tests (168 + 4 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (dreiunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten wieder keinen offenen Checklisten-Punkt, der alle vier
+Sicherheitskriterien erfüllt (Backend-/Auth-Entscheidung weiterhin
+blockiert; 4.1-4.3 brauchen einen echten LLM-Anbieter, also eine
+Produktentscheidung; 6.6/6.7/7.12 hängen an fehlenden Preisfeldern in
+`TripDraft`). Stattdessen aus `reports/it-chef.md` (03.09., Abschnitt
+"Gefundene Bugs (nicht automatisch gefixt)") den Fund "Kaputter
+Reiseplan-Zustand kann die App weiß machen" umgesetzt — genauer: den
+darin bereits als klein markierten Teil davon.
+
+**Warum sicher genug:** Reine Robustheits-/Defensiv-Korrektur an einer
+bestehenden Hilfsfunktion (`hasTripData()` in `tripStorage.ts`), kein
+Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung nötig — der Bericht
+benennt Datei, Zeile und Symptom bereits konkret und markiert den
+Ein-Zeilen-Teil davon (`Array.isArray`-Prüfung) ausdrücklich als
+"klein", getrennt von der als größer/mehrstellig eingeordneten
+"sauberen Lösung" (normalisierendes Laden), die ich bewusst nicht
+angefasst habe. Ergebnis objektiv prüfbar über neue Unit-Tests, die den
+vorher reproduzierbaren `TypeError` gezielt auslösen.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `hasTripData()` prüfte bisher
+  ungeschützt `activities.length` auf dem aus `localStorage` geladenen
+  und nur gecasteten (`as StoredChatState`), nie validierten Trip-Objekt.
+  Fehlt `activities` (Alt-Daten aus einer früheren Version, halb
+  geschriebener Wert, manuelle Bearbeitung im DevTools), wirft der
+  Zugriff einen `TypeError` — ungefangen, weil es keine ErrorBoundary
+  gibt, mitten im Rendern von `KiChat.tsx`, `Buchung.tsx` und
+  `Kartenansicht.tsx` (alle drei nutzen `hasTripData`). Die Seite bleibt
+  dann komplett leer, einzig behebbar durch Löschen der Browserdaten.
+  Fix: zusätzliche `Array.isArray(activities)`-Prüfung, bevor auf
+  `.length` zugegriffen wird — exakt der im Bericht als "klein"
+  vorgeschlagene Fix.
+- Bewusst nicht angefasst: das im selben Bericht beschriebene
+  "normalisierende Laden" beim eigentlichen Parsen in `loadStoredChat()`
+  (würde mehrere Stellen/Felder betreffen und eine eigene Entscheidung
+  brauchen, wie mit anderen fehlenden/kaputten Feldern als `activities`
+  umzugehen ist) sowie der zweite, im selben Bericht beschriebene
+  localStorage-Fund (ungeschützte `setItem`-Aufrufe, braucht laut
+  Bericht selbst eine neue, ehrliche Fehlermeldung statt reinem
+  Wegfangen) — beides bleibt für einen künftigen, eigenständigen Lauf
+  offen.
+- Drei neue Regressionstests in `src/lib/trip/tripStorage.test.ts`
+  (`hasTripData`-Describe-Block, bisher gab es dort keinen): fehlendes
+  `activities`-Feld wirft nicht mehr und liefert `true`, wenn andere
+  Trip-Felder gesetzt sind; liefert `false` bei sonst leerem Trip ohne
+  `activities`; liefert weiterhin `true`, wenn echte Aktivitäten
+  vorhanden sind (Bestandsverhalten unverändert). Vor dem Fix isoliert
+  gegen die alte Implementierung geprüft, dass der erste Test dort wirft.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4 KI-Chat) und dieser
+  Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+  eigenen PRD-Punkt abschließt, sondern eine bestehende, quer genutzte
+  Hilfsfunktion robuster macht (gleiche Einordnung wie bei den
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm run build` (`tsc -b && vite build`) — erfolgreich.
+- `npx vitest run` — vollständige Suite: 36 Testdateien (unverändert,
+  Erweiterung einer bestehenden Datei), 175 Tests (172 + 3 neue), alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
