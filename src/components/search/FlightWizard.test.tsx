@@ -52,4 +52,15 @@ describe('FlightWizard', () => {
     fireEvent.change(passengers, { target: { value: '0' } })
     expect(passengers).toHaveValue(1)
   })
+
+  it('keeps the search button disabled for a non-letter airport code', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    fireEvent.change(screen.getByLabelText('Von (IATA)'), { target: { value: '123' } })
+    fireEvent.change(screen.getByLabelText('Nach (IATA)'), { target: { value: 'LIS' } })
+    fireEvent.change(screen.getByLabelText('Hinflug'), { target: { value: '2026-09-05' } })
+    fireEvent.change(screen.getByLabelText('Rückflug'), { target: { value: '2026-09-10' } })
+
+    expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeDisabled()
+  })
 })

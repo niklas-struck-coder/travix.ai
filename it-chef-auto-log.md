@@ -7065,3 +7065,51 @@ objektiv prüfbar über neue Unit-Tests, die den vorher fehlenden
   grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (fünfunddreißigster Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/`tasks-prd-travix-platform.md`,
+sondern der von `reports/it-chef.md` (04.09.) unter "Gefundene Bugs (nicht
+automatisch gefixt)" gemeldete Fund: "IATA-Feld in der Flugsuche ohne
+Buchstabenprüfung".
+
+**Warum sicher genug:** Rein technischer Konsistenz-Fix zwischen zwei
+Stellen, die denselben Eingabewert (3-stelliger IATA-Code) validieren,
+kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung nötig — der Bericht benennt
+Datei und Symptom bereits konkret, und der Fix übernimmt exakt das bereits
+im Code vorhandene, strengere Muster aus `useChat.ts`. Ergebnis objektiv
+prüfbar über einen neuen Unit-Test, der den vorher nicht abgefangenen
+Fall (nicht-alphabetische Zeichen) gezielt abfragt.
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: `isValid` prüfte für Von-/
+  Nach-Feld bisher nur `.length === 3`, akzeptierte also auch Ziffern oder
+  Sonderzeichen (z. B. "123" oder "!!!") als gültigen Flughafencode — der
+  Haupt-Chat-Ablauf verlangt für dieselbe Eingabe (Abflughafen-Frage in
+  `useChat.ts`) bereits zusätzlich `IATA_CODE_PATTERN = /^[a-zA-Z]{3}$/`.
+  Neue gleichlautende lokale Konstante `IATA_CODE_PATTERN` in
+  `FlightWizard.tsx` (analog zum bestehenden Muster mehrfach lokal
+  definierter Hilfsfunktionen wie `getTodayIso`/`clampPassengerCount` statt
+  eines gemeinsamen Exports), `isValid` prüft Von-/Nach-Feld jetzt über
+  `IATA_CODE_PATTERN.test(...)` statt nur der Länge.
+- Neuer Regressionstest in `FlightWizard.test.tsx` ("keeps the search
+  button disabled for a non-letter airport code"): mit `origin = '123'`
+  bleibt der "Flüge suchen"-Button trotz sonst vollständig gültiger
+  Eingabe deaktiviert.
+- Kein Eintrag in `tasks/tasks-prd-travix-platform.md`, da dieser Fix
+  keinen eigenen PRD-Punkt abschließt, sondern einen von
+  `reports/it-chef.md` gemeldeten Bug behebt (gleiche Einordnung wie beim
+  34. Lauf oben).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — vollständige Suite: 36 Testdateien (unverändert,
+  Erweiterung einer bestehenden Datei), 179 Tests (178 + 1 neuer), alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

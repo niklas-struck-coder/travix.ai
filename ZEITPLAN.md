@@ -347,6 +347,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zum bereits korrekten `startEdit`-Pfad. Zwei neue Regressionstests in
   `useChat.test.ts` für den Haupt-Chat-Ablauf (aufgelöster Fehler,
   abgelehntes Promise).
+  Vom autonomen IT-Chef-Lauf am 04.09. (fünfunddreißigster Lauf) einen
+  weiteren von `reports/it-chef.md` (04.09.) gemeldeten Fund behoben:
+  `FlightWizard.tsx`s `isValid` prüfte das Von-/Nach-Feld nur auf
+  `.length === 3`, ohne Buchstabenprüfung — anders als die strengere
+  `IATA_CODE_PATTERN`-Prüfung (`/^[a-zA-Z]{3}$/`) für dieselbe Eingabe im
+  Haupt-Chat-Ablauf (`useChat.ts`). Ziffern/Sonderzeichen wie "123" wurden
+  bisher als gültiger Flughafencode akzeptiert. Neue gleichlautende lokale
+  `IATA_CODE_PATTERN`-Konstante in `FlightWizard.tsx`, `isValid` prüft
+  jetzt beide Felder darüber. Neuer Regressionstest in
+  `FlightWizard.test.tsx`.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

@@ -25,6 +25,8 @@ function clampPassengerCount(value: string) {
   return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
 }
 
+const IATA_CODE_PATTERN = /^[a-zA-Z]{3}$/
+
 const cabinOptions: { value: CabinClass; label: string }[] = [
   { value: 'economy', label: 'Economy' },
   { value: 'premium_economy', label: 'Premium Economy' },
@@ -42,8 +44,8 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
   const [cabinClass, setCabinClass] = useState<CabinClass>('economy')
 
   const isValid =
-    origin.trim().length === 3 &&
-    destination.trim().length === 3 &&
+    IATA_CODE_PATTERN.test(origin.trim()) &&
+    IATA_CODE_PATTERN.test(destination.trim()) &&
     departureDate &&
     (tripType === 'oneway' || (returnDate && returnDate >= departureDate))
 
