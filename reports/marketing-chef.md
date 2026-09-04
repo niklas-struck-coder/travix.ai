@@ -1,61 +1,62 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-03
+**Datum:** 2026-09-04
 
-## Was ist seit dem letzten Eintrag (2026-09-02) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-03) passiert?
 
-Der Ehrlichkeits-Kurs läuft weiter, diesmal komplett auf main gemergt:
+Überwiegend Aufräumarbeit, kein neuer Positionierungs-Impuls:
 
-- Der Urlaubsmodus-Concierge erkennt jetzt echte, aber nicht kuratierte
-  Reiseziele korrekt (vorher: pauschales "kein Ziel geplant"), und der
-  Avatar wirkt bei ehrlichen Ausweich-Antworten nicht mehr fälschlich
-  fröhlich.
-- Rückflug vor Hinflug ist im Flug-Assistenten jetzt technisch
-  unmöglich statt nur optisch falsch.
-- Derselbe Wortgrenzen-Bug wie bei der Zielname-Erkennung steckte auch
-  in der Verkehrsmittel-Erkennung ("Business Class" wurde als Bus
-  gelesen) — behoben.
-- Rohe, englische Fehlertexte bei Netzwerk-/Verbindungsproblemen zeigen
-  jetzt ebenfalls die ehrliche deutsche Fallback-Meldung.
-
-Neu und **noch nicht gemergt**: PR #14/#15 (zwei weitere Wortgrenzen-/
-Ehrlichkeits-Fixes im Concierge) sowie PR #16 — dort kam ans Licht, dass
-die Sprachausgabe-Funktion (Vorlesen) keinen "Stopp"-Befehl hatte,
-`stopSpeaking()` wurde im Code nie aufgerufen. Der IT-Chef-Bericht von
-heute nennt außerdem zwei noch offene, nicht automatisch gefixte
-Reibungspunkte: ein hängender Mikrofon-Knopf und ein IATA-Eingabefeld
-ohne Buchstabenprüfung.
-
-Kein neues Content-Stück heute — die drei offenen Freigabe-Fragen an Ni
-(Kanäle anlegen, Warenkorb-Content zurückhalten, Tier-4-Format ja/nein)
-sind weiterhin unbeantwortet, siehe `marketing/freigabe-uebersicht.md`.
+- Zwei weitere Ehrlichkeits-Fixes sind gemergt: Ein echter Suchfehler bei
+  Unterkunft/Flug im Chat sah bisher wie eine ehrliche Null-Treffer-Suche
+  bzw. eine Sackgasse aus. Und kaputte Alt-Trip-Daten im Browser-Speicher
+  konnten Buchungs-/Chat-/Kartenseite durch einen ungefangenen Fehler
+  komplett leer lassen. Beide wandern (wie schon die letzten Wochen) in
+  den Tier-4-Kandidatentopf für ein wiederkehrendes "Ehrlichkeits-Log"-
+  Format — noch ohne Freigabe von dir.
+- Drei weitere Fixes (Passagierzahl-Absicherung, Vergangenheitsdatum,
+  deutsches Preisformat) sind reine Korrekturen ohne Marken-Erzählung.
+- Neuer Fund, **noch nicht gemergt**: PR #17 behebt einen Absturz bei
+  leerem/ungültigem Währungscode in den Preisanzeigen. Der IT-Chef hat
+  außerdem den PR-Stau aufgeräumt — 7 von 16 offenen Auto-Fix-PRs waren
+  inhaltlich überholt.
+- PR #16 (Stopp-Knopf für die Vorlesen-Funktion) ist weiterhin **nicht**
+  gemerged, seit dem letzten Bericht unverändert.
+- Die drei offenen Freigabe-Fragen an dich (Kanäle anlegen, Warenkorb-
+  Content zurückhalten, Tier-4-Format ja/nein) sind seit dem 21.08.
+  unbeantwortet. Der automatische Marketing-Lauf von heute hat das zum
+  neunten Mal in Folge festgestellt — an der Ideenlage ändert ein
+  zehnter gleichlautender Lauf nichts, das kann nur deine Entscheidung
+  lösen.
 
 ## Vorschläge
 
-1. **Sprachfunktion jetzt noch nicht bewerben.** Bevor PR #16
-   (Stopp-Knopf für Vorlesen) gemergt ist und der hängende Mikrofon-Knopf
-   behoben ist, wäre ein Post über "sprich einfach mit Travix" riskant —
-   genau das Gegenteil vom Ehrlichkeits-Versprechen, wenn Nutzer:innen
-   die Funktion antesten und sie hakt. Erst nach beiden Fixes als
-   Content-Kandidat aufnehmen.
+1. **Sprachfunktion weiterhin nicht bewerben.** PR #16 ist immer noch
+   offen — der Stopp-Knopf fehlt nach wie vor. Solange das nicht gemergt
+   ist, bleibt "sprich einfach mit Travix" ein Risiko fürs
+   Ehrlichkeits-Versprechen. Unveränderte Empfehlung aus dem letzten
+   Bericht.
 
-2. **Konkretes Beispiel für den ersten Ehrlichkeits-Log-Post: der
-   Concierge-Fix.** "Du hast Bali als Ziel geplant, aber unser
-   Reise-Concierge hat trotzdem 'kein Ziel geplant' gesagt? Jetzt nicht
-   mehr." Greifbarer, nutzernaher Aufhänger als ein reiner Bugfix-Satz —
-   zeigt das Markenversprechen "wir verstehen dein Ziel, statt zu raten"
-   an einem echten Fall. Bleibt aber an die offene Tier-4-Frage gebunden.
+2. **Tier-4-Frage nicht komplett entscheiden müssen — erst einen
+   Testlauf machen.** Statt auf eine grundsätzliche Ja/Nein-Antwort zum
+   wiederkehrenden Format zu warten: Nimm den bereits fertigen
+   Concierge-Beispiel-Post ("Du hast Bali als Ziel geplant, aber der
+   Concierge hat trotzdem 'kein Ziel geplant' gesagt? Jetzt nicht mehr.")
+   als einmaligen Testpost, ohne dich auf ein Format festzulegen. Zeigt
+   dir, ob das Prinzip funktioniert, bevor du eine dauerhafte
+   Content-Schiene freigibst.
 
-3. **Positionierung erneut bestätigt: "Der Concierge, der nachfragt statt
-   rät."** Der Vorschlag aus dem 02.09.-Bericht bekommt mit dem
-   Concierge-Fix jetzt einen zweiten, unabhängigen Beleg (Wortgrenzen-Bug
-   bei Zielnamen UND bei Verkehrsmitteln, beide auf dieselbe Ursache
-   zurückgeführt und behoben). Für die nächste Positionierungs-Runde ein
-   stärkeres Argument als noch letzte Woche.
+3. **Neue Idee: öffentlicher Mini-Changelog auf der Seite selbst statt
+   nur Social-Posts.** Die Häufung an Ehrlichkeits-/Zuverlässigkeits-
+   Fixes plus die aufgeräumte PR-Historie sind ein gutes Rohmaterial für
+   eine schlichte "Was wurde diese Woche besser"-Liste direkt im Produkt
+   (z. B. Footer-Link), kuratiert und in Alltagssprache statt
+   Bug-Tracker-Jargon. Wirkt glaubwürdiger als Kampagnen-Content, weil es
+   kein Werbeversprechen ist, sondern nachprüfbar — und würde die
+   wachsende Tier-4-Liste endlich sichtbar machen, ganz ohne die
+   Kanal-Frage zu berühren.
 
-4. **Kein Wunschdenken bei Kennzahlen.** Weiterhin keine mir bekannten
-   Nutzungs- oder Erfolgszahlen zu diesen Fixes — Content bei "was wurde
-   ehrlicher/verlässlicher" halten, nicht bei Reichweiten- oder
-   Nutzerzahlen, die ich nicht kenne.
+4. **Keine erfundenen Kennzahlen.** Weiterhin keine mir bekannten
+   Nutzungs- oder Erfolgszahlen — Content bleibt bei "was wurde ehrlicher/
+   verlässlicher", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-03_
+_Letztes Update: 2026-09-04_
