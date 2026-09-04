@@ -319,6 +319,7 @@ export function useChat(speechEnabled: boolean) {
             .then((result) => {
               if (result.errors.length > 0) {
                 setStayError(true)
+                setQuickReplies(['Neue Reise planen'])
               } else {
                 setStayOffers(result.offers)
               }
@@ -327,6 +328,7 @@ export function useChat(speechEnabled: boolean) {
             .catch(() => {
               setStayError(true)
               setStayLoading(false)
+              setQuickReplies(['Neue Reise planen'])
             })
         } else {
           const notice = `Für ${reply.trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`

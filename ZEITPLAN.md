@@ -333,6 +333,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   einen, klar abgegrenzten Punkts. Neue `src/lib/format.test.ts`
   (bisher gab es dort keine Tests) mit vier Fällen (EUR, Beträge mit
   Cent-Anteil, andere Währung, nicht-numerischer Fallback).
+  Vom autonomen IT-Chef-Lauf am 04.09. (vierunddreißigster Lauf) einen von
+  `reports/it-chef.md` (04.09.) als "guter Kandidat für den nächsten Lauf"
+  gemeldeten Fund behoben: Bei einem echten Suchfehler in der
+  automatischen Unterkunftssuche des linearen Haupt-Chat-Ablaufs
+  (`useChat.ts`, `nextField === 'accommodation'`-Zweig um Zeile 320) setzte
+  der Code `stayError`, aber anders als der strukturell identische
+  "Bearbeiten"-Pfad (`startEdit`, Zeile 174) keine `quickReplies` — die
+  Nutzerin sah die Fehlermeldung, hatte aber keinen Chip zum Weitermachen,
+  einziger Ausweg war ein kompletter Chat-Neustart. Beide betroffenen
+  Zweige (`.then()` bei `result.errors.length > 0` sowie `.catch()`) setzen
+  jetzt zusätzlich `setQuickReplies(['Neue Reise planen'])`, exakt analog
+  zum bereits korrekten `startEdit`-Pfad. Zwei neue Regressionstests in
+  `useChat.test.ts` für den Haupt-Chat-Ablauf (aufgelöster Fehler,
+  abgelehntes Promise).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

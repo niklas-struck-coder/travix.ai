@@ -133,6 +133,30 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayLoading).toBe(false)
   })
 
+  it('offers "Neue Reise planen" as a next step when the automatic search in the main chat flow resolves with errors', async () => {
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [{ message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt.' }] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
+  it('offers "Neue Reise planen" as a next step when the automatic search in the main chat flow rejects', async () => {
+    vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(true)
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
   it('sets the error state on the "Bearbeiten" (startEdit) path too when the search resolves with errors', async () => {
     vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
     const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)

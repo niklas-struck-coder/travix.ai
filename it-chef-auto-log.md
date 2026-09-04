@@ -7006,3 +7006,62 @@ vorher reproduzierbaren `TypeError` gezielt auslösen.
   grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (vierunddreißigster Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/`tasks-prd-travix-platform.md`,
+sondern der von `reports/it-chef.md` (04.09.) unter "Gefundene Bugs (nicht
+automatisch gefixt)" explizit als "guter Kandidat für den nächsten Lauf"
+markierte Fund: "Sackgasse nach echtem Suchfehler im Haupt-Chat-Ablauf
+(Unterkunft)".
+
+**Warum sicher genug:** Rein technischer Konsistenz-Fix zwischen zwei
+strukturell identischen Code-Pfaden in `useChat.ts` (linearer
+Haupt-Chat-Ablauf vs. "Bearbeiten"-Pfad `startEdit`), kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung nötig — der Bericht benennt Datei, Zeile
+und Symptom bereits konkret, und der Fix übernimmt exakt das bereits im
+Code vorhandene, korrekte Muster aus `startEdit` (Zeile 174-186). Ergebnis
+objektiv prüfbar über neue Unit-Tests, die den vorher fehlenden
+`quickReplies`-Zustand gezielt abfragen.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: Im linearen Haupt-Chat-Ablauf
+  (`nextField === 'accommodation'`-Zweig, um Zeile 306) setzte ein
+  fehlgeschlagener automatischer `searchStays()`-Aufruf zwar `stayError`
+  (sowohl im `.then()`-Zweig bei `result.errors.length > 0` als auch im
+  `.catch()`-Zweig), anders als der strukturell identische
+  "Bearbeiten"-Pfad (`startEdit`, Zeile 174-186) aber nie `quickReplies` —
+  die Nutzerin sah nach einem echten Suchfehler die Fehlermeldung, hatte
+  aber keinen anklickbaren nächsten Schritt mehr, außer über
+  `resetChat()` (Chat komplett neu starten). Beide betroffenen Zweige
+  setzen jetzt zusätzlich `setQuickReplies(['Neue Reise planen'])`, exakt
+  analog zum bereits korrekten `startEdit`-Pfad.
+- Zwei neue Regressionstests in `src/hooks/useChat.test.ts` (bestehender
+  `describe`-Block "useChat accommodation search failure vs. real zero
+  results"): einer für den `.then()`-Fehlerzweig (Suche löst mit
+  `errors`-Feld auf, wie bei einem echten Duffel-API-Fehler), einer für
+  den `.catch()`-Zweig (abgelehntes Promise, z. B. Netzwerkfehler) — beide
+  prüfen `quickReplies` im Haupt-Chat-Ablauf, was vorher dort ungetestet
+  war (nur die analogen `startEdit`-Fälle hatten bereits eine
+  `quickReplies`-Prüfung).
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5 Suche) und dieser
+  Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+  eigenen PRD-Punkt abschließt, sondern einen von `reports/it-chef.md`
+  gemeldeten Bug behebt (gleiche Einordnung wie bei den meisten
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm run build` (`tsc -b && vite build`) — erfolgreich (unveränderte
+  Chunk-Size-Warnung, nicht durch diesen Change verursacht).
+- `npx vitest run` — vollständige Suite: 36 Testdateien (unverändert,
+  Erweiterung einer bestehenden Datei), 179 Tests (177 + 2 neue), alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
