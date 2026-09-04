@@ -6934,3 +6934,75 @@ Unit-Tests der Formatierungsfunktion.
   172 Tests (168 + 4 neue), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (dreiunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten wieder keinen offenen Checklisten-Punkt, der alle vier
+Sicherheitskriterien erfüllt (Backend-/Auth-Entscheidung weiterhin
+blockiert; 4.1-4.3 brauchen einen echten LLM-Anbieter, also eine
+Produktentscheidung; 6.6/6.7/7.12 hängen an fehlenden Preisfeldern in
+`TripDraft`). Stattdessen aus `reports/it-chef.md` (03.09., Abschnitt
+"Gefundene Bugs (nicht automatisch gefixt)") den Fund "Kaputter
+Reiseplan-Zustand kann die App weiß machen" umgesetzt — genauer: den
+darin bereits als klein markierten Teil davon.
+
+**Warum sicher genug:** Reine Robustheits-/Defensiv-Korrektur an einer
+bestehenden Hilfsfunktion (`hasTripData()` in `tripStorage.ts`), kein
+Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Keine offene Produkt-/Architekturentscheidung nötig — der Bericht
+benennt Datei, Zeile und Symptom bereits konkret und markiert den
+Ein-Zeilen-Teil davon (`Array.isArray`-Prüfung) ausdrücklich als
+"klein", getrennt von der als größer/mehrstellig eingeordneten
+"sauberen Lösung" (normalisierendes Laden), die ich bewusst nicht
+angefasst habe. Ergebnis objektiv prüfbar über neue Unit-Tests, die den
+vorher reproduzierbaren `TypeError` gezielt auslösen.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `hasTripData()` prüfte bisher
+  ungeschützt `activities.length` auf dem aus `localStorage` geladenen
+  und nur gecasteten (`as StoredChatState`), nie validierten Trip-Objekt.
+  Fehlt `activities` (Alt-Daten aus einer früheren Version, halb
+  geschriebener Wert, manuelle Bearbeitung im DevTools), wirft der
+  Zugriff einen `TypeError` — ungefangen, weil es keine ErrorBoundary
+  gibt, mitten im Rendern von `KiChat.tsx`, `Buchung.tsx` und
+  `Kartenansicht.tsx` (alle drei nutzen `hasTripData`). Die Seite bleibt
+  dann komplett leer, einzig behebbar durch Löschen der Browserdaten.
+  Fix: zusätzliche `Array.isArray(activities)`-Prüfung, bevor auf
+  `.length` zugegriffen wird — exakt der im Bericht als "klein"
+  vorgeschlagene Fix.
+- Bewusst nicht angefasst: das im selben Bericht beschriebene
+  "normalisierende Laden" beim eigentlichen Parsen in `loadStoredChat()`
+  (würde mehrere Stellen/Felder betreffen und eine eigene Entscheidung
+  brauchen, wie mit anderen fehlenden/kaputten Feldern als `activities`
+  umzugehen ist) sowie der zweite, im selben Bericht beschriebene
+  localStorage-Fund (ungeschützte `setItem`-Aufrufe, braucht laut
+  Bericht selbst eine neue, ehrliche Fehlermeldung statt reinem
+  Wegfangen) — beides bleibt für einen künftigen, eigenständigen Lauf
+  offen.
+- Drei neue Regressionstests in `src/lib/trip/tripStorage.test.ts`
+  (`hasTripData`-Describe-Block, bisher gab es dort keinen): fehlendes
+  `activities`-Feld wirft nicht mehr und liefert `true`, wenn andere
+  Trip-Felder gesetzt sind; liefert `false` bei sonst leerem Trip ohne
+  `activities`; liefert weiterhin `true`, wenn echte Aktivitäten
+  vorhanden sind (Bestandsverhalten unverändert). Vor dem Fix isoliert
+  gegen die alte Implementierung geprüft, dass der erste Test dort wirft.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4 KI-Chat) und dieser
+  Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+  eigenen PRD-Punkt abschließt, sondern eine bestehende, quer genutzte
+  Hilfsfunktion robuster macht (gleiche Einordnung wie bei den
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm run build` (`tsc -b && vite build`) — erfolgreich.
+- `npx vitest run` — vollständige Suite: 36 Testdateien (unverändert,
+  Erweiterung einer bestehenden Datei), 175 Tests (172 + 3 neue), alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

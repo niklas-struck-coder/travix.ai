@@ -51,7 +51,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gestartete Chat im "sucht"-Zustand hängen und bekam später sogar die
   Ergebnisse/den Fehler der vorherigen Reiseplanung angezeigt. Beide
   fehlenden Resets ergänzt, zwei neue Regressionstests in
-  `useChat.test.ts`.
+  `useChat.test.ts`. Vom autonomen IT-Chef-Lauf am 04.09.
+  (dreiunddreißigster Lauf) einen von `reports/it-chef.md` (03.09.)
+  gemeldeten Fund gezielt entschärft: `loadStoredChat()`
+  (`tripStorage.ts`) castet den geparsten localStorage-Wert nur (`as
+  StoredChatState`), ohne ihn zu prüfen — `hasTripData()` griff danach
+  ungeschützt auf `activities.length` zu. Fehlt `activities` (Alt-Daten
+  aus einer früheren Version, halb geschriebener Wert), wirft das einen
+  `TypeError` mitten im Rendern von `KiChat.tsx`, `Buchung.tsx` und
+  `Kartenansicht.tsx` — ohne ErrorBoundary bleibt die Seite dann leer.
+  Nur der im Bericht selbst als klein markierte Teilfix: `hasTripData`
+  prüft jetzt zusätzlich `Array.isArray(activities)`, bevor auf
+  `.length` zugegriffen wird. Das von `reports/it-chef.md` ebenfalls
+  vorgeschlagene "normalisierende Laden" (mehrere Stellen betroffen,
+  eigene Design-Entscheidung nötig) bleibt bewusst offen für einen
+  künftigen, eigenständigen Lauf. Drei neue Regressionstests in
+  `tripStorage.test.ts` (fehlendes `activities`-Feld wirft nicht mehr,
+  liefert `false` bzw. weiterhin `true`, wenn echte Aktivitäten
+  vorhanden sind).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
