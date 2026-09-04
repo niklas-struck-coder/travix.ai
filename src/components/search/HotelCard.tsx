@@ -1,6 +1,7 @@
 import { Star, MapPin, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { formatOfferPrice } from '@/lib/format'
 import type { StayOffer } from '@/types/stays'
 
 interface HotelCardProps {
@@ -33,7 +34,7 @@ export function HotelCard({ offer, onSelect, selected }: HotelCardProps) {
         )}
         <div className="mt-1 flex items-center justify-between">
           <span className="font-heading text-lg font-semibold text-navy">
-            {offer.totalAmount} {offer.totalCurrency}
+            {formatOfferPrice(offer.totalAmount, offer.totalCurrency)}
           </span>
           {onSelect && (
             <Button

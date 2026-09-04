@@ -301,6 +301,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   per reinem Teilstring-Vergleich, analog zum bestehenden Muster in
   `mockConcierge.ts`. Zwei neue Regressionstests in
   `mockAdvisor.test.ts` (die beiden oben genannten Fälle).
+  Vom autonomen IT-Chef-Lauf am 04.09. (zweiunddreißigster Lauf) einen
+  weiteren von `reports/it-chef.md` (03.09.) gemeldeten Fund behoben:
+  „Preise im Rohformat" — `FlightCard.tsx` und `HotelCard.tsx` rendern
+  `{offer.totalAmount} {offer.totalCurrency}` unformatiert (z. B.
+  "249.00 EUR") statt im deutschen Format. Inhaltlich der Nachzieher des
+  nicht mehr mergebaren PR #9. Neue `formatOfferPrice()`-Hilfsfunktion in
+  `src/lib/format.ts` (`Intl.NumberFormat('de-DE', { style: 'currency',
+  currency })`, mit Fallback auf den Rohwert bei nicht-numerischem
+  Betrag) ersetzt die rohe Konkatenation in beiden Karten. `TrainCard.tsx`
+  hat denselben Bug, bleibt aber bewusst unangetastet — sie ist laut
+  `reports/it-chef.md` (Vorschlag 4) toter Code, der nirgends importiert
+  wird, und ihre Zukunft (anbinden oder löschen) war nicht Teil dieses
+  einen, klar abgegrenzten Punkts. Neue `src/lib/format.test.ts`
+  (bisher gab es dort keine Tests) mit vier Fällen (EUR, Beträge mit
+  Cent-Anteil, andere Währung, nicht-numerischer Fallback).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

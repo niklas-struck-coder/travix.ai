@@ -2,6 +2,7 @@ import { Plane, ArrowRight, Clock, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { formatOfferPrice } from '@/lib/format'
 import type { FlightOffer } from '@/types/duffel'
 
 function formatTime(isoString: string) {
@@ -57,7 +58,7 @@ export function FlightCard({ offer, onSelect, selected }: FlightCardProps) {
         <div className="flex items-center justify-between pt-1">
           <span className="text-xs text-muted-foreground">Gesamtpreis</span>
           <span className="font-heading text-xl font-semibold text-navy">
-            {offer.totalAmount} {offer.totalCurrency}
+            {formatOfferPrice(offer.totalAmount, offer.totalCurrency)}
           </span>
         </div>
         {onSelect && (

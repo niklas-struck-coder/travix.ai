@@ -6874,3 +6874,63 @@ bestehenden `HotelWizard.test.tsx`-Tests.
   Tests (166 + 2 neue), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-04 (zweiunddreißigster Lauf)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+hatten wie schon beim vorherigen Lauf keinen einzigen offenen
+Checklisten-Punkt, der alle vier Sicherheitskriterien erfüllt. Stattdessen
+aus `reports/it-chef.md` (03.09., Abschnitt "Gefundene Bugs (nicht
+automatisch gefixt)") den Fund "Preise im Rohformat" umgesetzt:
+`FlightCard.tsx` und `HotelCard.tsx` rendern `{offer.totalAmount}
+{offer.totalCurrency}` unformatiert (z. B. "249.00 EUR") statt im
+deutschen Format — inhaltlich der Nachzieher des laut demselben Bericht
+nicht mehr mergebaren PR #9.
+
+**Warum sicher genug:** Reine Anzeige-Formatierung bereits vorhandener
+Preisdaten (aus echten Duffel-Testangeboten), kein neuer Zahlungsfluss
+und keine Änderung an echten Nutzerdaten oder rechtlichen Texten. Keine
+offene Produkt-/Architekturentscheidung nötig — der Bericht benennt Datei
+und Symptom bereits konkret, die deutsche Formatierung folgt dem im Repo
+bereits etablierten Muster (`formatPrice()` in `Angebote.tsx`, ebenfalls
+`toLocaleString('de-DE')`). Ergebnis objektiv prüfbar über neue
+Unit-Tests der Formatierungsfunktion.
+
+**Umgesetzt:**
+- Neue `src/lib/format.ts` mit `formatOfferPrice(amount, currency)`:
+  nutzt `Intl.NumberFormat('de-DE', { style: 'currency', currency })`
+  (liefert z. B. "249,00 €"), mit Fallback auf den unveränderten
+  Rohwert bei einem nicht-numerischen `amount` (defensiv, falls die
+  Duffel-Antwort einmal kein Zahlenformat liefert).
+- `src/components/search/FlightCard.tsx` und
+  `src/components/search/HotelCard.tsx` nutzen `formatOfferPrice()`
+  jetzt statt der rohen `{amount} {currency}`-Konkatenation.
+- `src/components/search/TrainCard.tsx` hat denselben Rohformat-Bug,
+  bleibt aber bewusst unangetastet: laut `reports/it-chef.md` (Vorschlag
+  4) ist die Komponente toter Code (nirgends importiert, 5.7 weiterhin
+  offen) — ob sie angebunden oder gelöscht wird, ist eine offene Frage,
+  keine reine Formatierungskorrektur, und war nicht Teil dieses einen,
+  klar abgegrenzten Punkts.
+- Neue `src/lib/format.test.ts` (bisher gab es dort keine Tests): vier
+  Fälle — EUR-Betrag, Betrag mit Cent-Anteil, andere Währung (USD),
+  nicht-numerischer Fallback. Dabei eine Eigenheit von
+  `Intl.NumberFormat` entdeckt und in den Erwartungswerten
+  berücksichtigt: zwischen Betrag und Symbol steht ein geschütztes
+  Leerzeichen (U+00A0), kein normales Leerzeichen — ein erster
+  Testentwurf mit normalem Leerzeichen schlug deshalb fehl.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen neuen Punkt abschließt, sondern eine
+  bestehende Anzeige korrigiert (gleiche Einordnung wie bei den
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — vollständige Suite: 36 Testdateien (35 + 1 neue),
+  172 Tests (168 + 4 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
