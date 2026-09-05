@@ -1728,3 +1728,94 @@ für einen künftigen eigenständigen Lauf offen. `TrainCard.tsx` hat laut
 `reports/it-chef.md` denselben Rohformat-Bug wie `FlightCard`/`HotelCard`
 hatte, ist aber laut demselben Bericht toter, nirgends importierter Code —
 dafür also kein eigener Punkt hier.
+
+---
+
+## 2026-09-05 — Lokales Speichern des Chat-Fortschritts (`tripStorage.ts`, `useChat.ts`)
+
+**Geprüfter Bereich:** Der heute vom autonomen IT-Chef-Lauf gebaute Schutz
+gegen abstürzende `localStorage.setItem()`-Aufrufe (38. Lauf, Commit
+`add329b`, laut `ZEITPLAN.md` bereits nach `main` gemergt) sowie die beiden
+Stellen im Haupt-KI-Chat, die davon abhängen. Betroffene Seite: `/ki-chat`
+(jede Seite, die den Chat-Fortschritt über einen Reload hinweg erwartet).
+
+- `src/lib/trip/tripStorage.ts:20-29` (`saveStoredChat`)
+- `src/hooks/useChat.ts:128-141` (Persistenz-Effect nach jeder Nachricht,
+  `beforeunload`-Handler)
+- `src/components/chat/KiChat.tsx:70-79` (Chat-Kopfzeile, einzige aktuell
+  vorhandene feste UI-Fläche im Chat außerhalb der Nachrichtenliste)
+- `src/components/chat/ChatInput.tsx:17,75-79` (bestehendes, vergleichbares
+  `micError`-Anzeigemuster)
+
+### Reibungspunkt
+
+**Ein fehlgeschlagenes lokales Speichern verliert den ganzen geplanten Trip
+lautlos — die Nutzerin erfährt erst beim nächsten Seitenaufruf davon, ohne
+jede Erklärung, warum**
+
+`saveStoredChat()` (`tripStorage.ts:23-29`) fängt einen werfenden
+`localStorage.setItem()` (voller Speicher/`QuotaExceededError`, privater
+Modus in Safari, vom Nutzer deaktivierter Web-Speicher) jetzt sauber ab —
+das verhindert den Absturz, den `ZEITPLAN.md` für den 38. Lauf beschreibt.
+Aber der Fehler landet ausschließlich in `console.error` (Zeile 27), die
+kein Mensch beim normalen Benutzen öffnet. `useChat.ts:128-132` ruft
+`saveStoredChat()` nach *jeder* Chat-Nachricht auf, ohne den Rückgabewert
+zu prüfen (die Funktion liefert `void`) — es gibt für den Aufrufer also gar
+keine Möglichkeit zu merken, dass etwas schiefging.
+
+Konkreter Ablauf, der dadurch entsteht: Eine Nutzerin plant im Chat einen
+kompletten Trip (Ziel, Termine, Unterkunft, Budget — mehrere Nachrichten
+hin und her). Ist der `localStorage` gerade voll (z. B. durch andere
+Websites im selben Browser — codebase-weite Suche zeigt, dass aktuell nur
+`useChat.ts`/`tripStorage.ts` überhaupt `localStorage` benutzen, die
+übrigen Demo-Seiten wie `Reiseentwuerfe.tsx`/`Warenkorb.tsx` laufen laut
+`ZEITPLAN.md` bewusst auf reinem In-Memory-State) oder sie im privaten
+Modus unterwegs ist, sieht der Chat währenddessen völlig normal aus — jede
+Nachricht, jede Antwort,
+jeder Zwischenstand wirkt gespeichert, weil im UI nichts anders reagiert.
+Schließt sie den Tab oder lädt die Seite neu (z. B. nach einem Absturz des
+Browsers, oder weil sie später weiterplanen wollte), ist der komplette
+Trip weg — `loadStoredChat()` findet nichts, der Chat startet wieder bei
+der Begrüßung. Es gibt keinerlei Hinweis, dass das Speichern je
+fehlgeschlagen ist, weder vorher noch nachher. Das ist derselbe
+"Nutzerin merkt nichts vom Datenverlust"-Effekt, den frühere Einträge in
+diesem Log für andere Stellen bereits als Reibungspunkt markiert haben,
+nur diesmal mit dem größtmöglichen Schaden (der gesamte Trip statt nur ein
+einzelnes Feld).
+
+Der `beforeunload`-Handler (`useChat.ts:134-141`) kann dabei technisch gar
+keine Abhilfe schaffen — die Seite verschwindet in genau dem Moment, es
+gibt keine Zeit mehr für eine UI-Reaktion. Der Persistenz-Effect nach jeder
+Nachricht (Zeile 128-132) läuft dagegen mitten in der normalen Nutzung und
+könnte durchaus etwas anzeigen.
+
+*Vorschlag:* `saveStoredChat()` einen einfachen Erfolgs-/Fehler-Rückgabewert
+geben (z. B. `boolean` statt `void`), den `useChat.ts` im Persistenz-Effect
+auswertet und in einen neuen, kleinen State (z. B. `storageWarning`)
+überführt. Anzeigen ließe sich das mit demselben leichten Muster, das
+`ChatInput.tsx:75-79` für `micError` bereits nutzt (`role="status"`, kleiner
+`text-muted-foreground`-Hinweis) — platziert z. B. unter der Chat-Kopfzeile
+in `KiChat.tsx:70-79`, der einzigen festen Fläche oberhalb der
+Nachrichtenliste. Wichtig für den Text: ehrlich sagen, dass die Reise
+gerade *nicht* dauerhaft gespeichert wird und ein Reload sie verwerfen
+würde — nicht nur ein generisches "Fehler beim Speichern", damit klar wird,
+was auf dem Spiel steht. Das deckt sich mit der im `ZEITPLAN.md`-Eintrag
+zum 38. Lauf selbst offen gelassenen Frage ("eine eigene, nutzersichtbare
+Fehlermeldung … ist eine eigene Design-Entscheidung").
+
+### Andere heutige Fixes verifiziert (kein neuer Punkt)
+- `FlightWizard.tsx:46-56,105-107` (37. Lauf, identischer Start-/
+  Zielflughafen): Umsetzung geprüft und für stimmig befunden — deckt sich
+  mit dem hier im Log am 04.09. gemachten Vorschlag, inklusive sichtbarem
+  Hinweistext unter dem "Nach"-Feld und Einbindung in `isValid`. Kein
+  weiterer Reibungspunkt gefunden.
+- `speech.ts:56-62`/`ChatInput.tsx:27-36` (36. Lauf, `try`/`catch` um
+  `recognition.start()`): Der bestehende `micError`-Anzeigepfad (zuletzt am
+  25.08. in diesem Log geprüft) greift für den neuen Fehlerfall korrekt,
+  keine Lücke gefunden.
+
+### Nicht geprüft
+Der Wortlaut und die Anzeigedauer eines möglichen künftigen
+`storageWarning`-Hinweises wurden nicht weiter ausgearbeitet — das ist
+bewusst Teil der oben vorgeschlagenen, eigenen Design-Entscheidung für den
+nächsten IT-Chef-Lauf, nicht dieses Berichts.
