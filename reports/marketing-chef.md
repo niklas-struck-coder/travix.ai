@@ -1,62 +1,56 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-04
+**Datum:** 2026-09-05
 
-## Was ist seit dem letzten Eintrag (2026-09-03) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-04) passiert?
 
-Überwiegend Aufräumarbeit, kein neuer Positionierungs-Impuls:
+Wieder überwiegend Stabilität statt neuer Positionierung, aber mit zwei
+Punkten, die für dich relevant sind:
 
-- Zwei weitere Ehrlichkeits-Fixes sind gemergt: Ein echter Suchfehler bei
-  Unterkunft/Flug im Chat sah bisher wie eine ehrliche Null-Treffer-Suche
-  bzw. eine Sackgasse aus. Und kaputte Alt-Trip-Daten im Browser-Speicher
-  konnten Buchungs-/Chat-/Kartenseite durch einen ungefangenen Fehler
-  komplett leer lassen. Beide wandern (wie schon die letzten Wochen) in
-  den Tier-4-Kandidatentopf für ein wiederkehrendes "Ehrlichkeits-Log"-
-  Format — noch ohne Freigabe von dir.
-- Drei weitere Fixes (Passagierzahl-Absicherung, Vergangenheitsdatum,
-  deutsches Preisformat) sind reine Korrekturen ohne Marken-Erzählung.
-- Neuer Fund, **noch nicht gemergt**: PR #17 behebt einen Absturz bei
-  leerem/ungültigem Währungscode in den Preisanzeigen. Der IT-Chef hat
-  außerdem den PR-Stau aufgeräumt — 7 von 16 offenen Auto-Fix-PRs waren
-  inhaltlich überholt.
-- PR #16 (Stopp-Knopf für die Vorlesen-Funktion) ist weiterhin **nicht**
-  gemerged, seit dem letzten Bericht unverändert.
+- Vier weitere Ehrlichkeits-/Zuverlässigkeits-Fixes sind gemergt: hängender
+  Mikrofon-Knopf bei Fehlern, identischer Start-/Zielflughafen ohne Hinweis,
+  IATA-Feld ohne Buchstabenprüfung, und Chat-/Reisedaten, die bei vollem
+  Browser-Speicher unbemerkt verloren gehen konnten. Alles Kandidaten für
+  den wachsenden Tier-4-Themenpool.
+- **Neu gefunden, noch nicht gemerged:** PR #18 behebt einen Absturz der
+  ganzen Reiseplan-Seite, wenn ein alter/korrupter Trip ohne
+  "Aktivitäten"-Feld geladen wird. PR #17 (Währungscode-Absturz) und PR #16
+  (Stopp-Knopf Vorlesen-Funktion) sind weiterhin offen.
+- **Neu gefunden, bewusst nicht automatisch gefixt:** Eine Suche mit null
+  Treffern zeigt keine "Neue Reise planen"-Chips mehr an — anders als jeder
+  andere Chat-Endzustand. Kein Absturz, aber dieselbe Ehrlichkeits-Lücke
+  wie die bereits gefixten Sackgassen-Bugs, nur beim Erfolgsfall übersehen.
+- Über den separaten `marketing-chef-eigen`-Kanal ist inzwischen ein
+  konkreter Entwurf für den öffentlichen Mini-Changelog entstanden
+  (`marketing/mini-changelog-konzept.md`) — genau die Idee aus meinem
+  letzten Bericht, jetzt als fertiger Text statt nur als Konzept. Das ist
+  nicht mein Kanal, aber relevant für Vorschlag 2 unten.
 - Die drei offenen Freigabe-Fragen an dich (Kanäle anlegen, Warenkorb-
   Content zurückhalten, Tier-4-Format ja/nein) sind seit dem 21.08.
-  unbeantwortet. Der automatische Marketing-Lauf von heute hat das zum
-  neunten Mal in Folge festgestellt — an der Ideenlage ändert ein
-  zehnter gleichlautender Lauf nichts, das kann nur deine Entscheidung
-  lösen.
+  weiterhin unbeantwortet.
 
 ## Vorschläge
 
-1. **Sprachfunktion weiterhin nicht bewerben.** PR #16 ist immer noch
-   offen — der Stopp-Knopf fehlt nach wie vor. Solange das nicht gemergt
-   ist, bleibt "sprich einfach mit Travix" ein Risiko fürs
-   Ehrlichkeits-Versprechen. Unveränderte Empfehlung aus dem letzten
-   Bericht.
+1. **Sprachfunktion weiterhin nicht bewerben.** PR #16 (Stopp-Knopf) ist
+   immer noch offen. Unveränderte Empfehlung, bis das gemergt ist.
 
-2. **Tier-4-Frage nicht komplett entscheiden müssen — erst einen
-   Testlauf machen.** Statt auf eine grundsätzliche Ja/Nein-Antwort zum
-   wiederkehrenden Format zu warten: Nimm den bereits fertigen
-   Concierge-Beispiel-Post ("Du hast Bali als Ziel geplant, aber der
-   Concierge hat trotzdem 'kein Ziel geplant' gesagt? Jetzt nicht mehr.")
-   als einmaligen Testpost, ohne dich auf ein Format festzulegen. Zeigt
-   dir, ob das Prinzip funktioniert, bevor du eine dauerhafte
-   Content-Schiene freigibst.
+2. **Mini-Changelog-Entwurf ist jetzt entscheidungsreif — schau ihn dir an.**
+   Statt weiter auf eine grundsätzliche Tier-4-Ja/Nein-Antwort zu warten:
+   Der fertige Entwurf in `marketing/mini-changelog-konzept.md` bündelt
+   genau die Art Fixes, die sich seit Wochen häufen (inkl. der heutigen
+   Nulltreffer- und Absturz-Funde). Wenn er dir gefällt, ist das dein
+   Testlauf für das Format — ohne dass ich hier eine neue Idee draufsetzen
+   muss.
 
-3. **Neue Idee: öffentlicher Mini-Changelog auf der Seite selbst statt
-   nur Social-Posts.** Die Häufung an Ehrlichkeits-/Zuverlässigkeits-
-   Fixes plus die aufgeräumte PR-Historie sind ein gutes Rohmaterial für
-   eine schlichte "Was wurde diese Woche besser"-Liste direkt im Produkt
-   (z. B. Footer-Link), kuratiert und in Alltagssprache statt
-   Bug-Tracker-Jargon. Wirkt glaubwürdiger als Kampagnen-Content, weil es
-   kein Werbeversprechen ist, sondern nachprüfbar — und würde die
-   wachsende Tier-4-Liste endlich sichtbar machen, ganz ohne die
-   Kanal-Frage zu berühren.
+3. **Die Nulltreffer-Lücke als Content-Baustein vormerken, nicht extra
+   bewerben.** Sobald IT-Chef entschieden hat, welcher Text/welche Chips
+   bei "erfolgreiche Suche, aber nichts gefunden" erscheinen, ist das ein
+   weiterer guter Eintrag für den Mini-Changelog — kein eigenes
+   Kampagnen-Thema, aber ein Beleg mehr für "wir polieren die
+   Kleinigkeiten, die sonst niemand zeigt".
 
-4. **Keine erfundenen Kennzahlen.** Weiterhin keine mir bekannten
-   Nutzungs- oder Erfolgszahlen — Content bleibt bei "was wurde ehrlicher/
+4. **Keine erfundenen Kennzahlen.** Weiterhin keine mir bekannten Nutzungs-
+   oder Erfolgszahlen — Content bleibt bei "was wurde ehrlicher/
    verlässlicher", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-04_
+_Letztes Update: 2026-09-05_
