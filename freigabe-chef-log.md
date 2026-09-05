@@ -2122,3 +2122,46 @@ identischem Start-/Zielflughafen) nutzt das bereits vorhandene
 **Ergebnis:** Alles grün und stimmig → nach `main` gemerged
 (Fast-Forward `98c263f..add329b`, gepusht). Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-05, Tages-Check (Skill-Auto-Lauf)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, aber 0 Commits vor `main` (Tipp
+  `add329b` ist laut `git merge-base --is-ancestor` bereits Vorfahre von
+  `main` — wurde im früheren Nacht-Check heute bereits gemergt, siehe
+  Eintrag oben). Nichts Neues zu prüfen, übersprungen.
+- `marketing-chef/auto` — 1 Commit vor `main`.
+- `support-chef/auto` — 1 Commit vor `main`.
+
+**Prüfung `marketing-chef/auto`:**
+Diff: `marketing/mini-changelog-konzept.md` (neu), `marketing/
+freigabe-uebersicht.md`, `ZEITPLAN.md`, `marketing-chef-auto-log.md`.
+Reiner Entwurf (Konzept + Text für eine künftige "Was wurde besser"-
+Produktseite), keine erfundenen Kennzahlen, kein Hinweis auf tatsächliches
+Posten/Veröffentlichen/Bauen — der Log-Eintrag benennt selbst explizit,
+dass die Umsetzung erst nach Nis Freigabe durch IT-Chef erfolgen würde.
+Die drei zugrundeliegenden neuen Commits (`d34796f`, `acc9ae8`, `add329b`)
+per `git show` stichprobenartig gegengeprüft — Beschreibung im Dokument
+deckt sich mit dem tatsächlichen Commit-Inhalt. Text ist vollständig
+ausgearbeitet, keine bloße Stichpunkt-Skizze. Keine der drei offenen
+Fragen an Ni wird stillschweigend vorweggenommen; eine vierte, neue Frage
+wird sauber als solche markiert. Design-Brief folgt den in
+`MARKENDESIGN.md` festgelegten Farb-/Ton-Vorgaben (kein Rot, Teal-Akzente).
+Keine erneute Prüfung von `npx tsc -b`/`eslint`/`vitest` nötig, da keine
+Codeänderung (nur Markdown).
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `6c5fbce..2e28606`).
+
+**Prüfung `support-chef/auto`:**
+Diff: nur `support-chef-auto-log.md`, neuer Eintrag zu lautlosem
+Trip-Datenverlust bei vollem `localStorage`. Alle zitierten Datei-/
+Zeilenverweise (`tripStorage.ts:20-29`, `useChat.ts:125-141`,
+`KiChat.tsx:68-80`, `ChatInput.tsx:15-20,73-80`) im aktuellen Code
+gegengeprüft — stimmen exakt. Der beschriebene Reibungspunkt (Fehler beim
+Speichern landet nur in `console.error`, kein sichtbares Signal für die
+Nutzerin) ist im Code nachvollziehbar und keine Erfindung. Reine Analyse,
+keine Codeänderung.
+→ **Alles passt, nach `main` gemergt** (Merge-Commit über
+`68157a4`).
+
+**Ergebnis:** Beide geprüften Branches bestanden, gemergt und gepusht.
+Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
