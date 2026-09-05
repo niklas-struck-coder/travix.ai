@@ -489,6 +489,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   eine UI-Entscheidung" zurückgestellt) macht der Bericht selbst bereits
   Feld, Prüfung und exakten Hinweistext konkret — keine eigene Annahme
   darüber hinaus nötig. Neuer Regressionstest in `FlightWizard.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 05.09. (weiterer Lauf) einen bereits über
+  einen offenen, aber noch nicht gemergten Auto-Fix-PR (#17,
+  `it-chef-autofix/currency-format-crash-2026-09-04`) vollständig
+  diagnostizierten Bug direkt auf `it-chef/auto` behoben:
+  `formatOfferPrice()` (`src/lib/format.ts`) übergab `currency` ungeprüft
+  an `Intl.NumberFormat`, das bei einem fehlenden/ungültigen
+  ISO-4217-Code (z. B. leerer String aus einer Duffel-Antwort) eine
+  `RangeError` wirft und damit `FlightCard.tsx`/`HotelCard.tsx` beim
+  Rendern abstürzen lässt. Fix: Aufruf jetzt in `try`/`catch`, Fallback auf
+  `${amount} ${currency}` — exakt dasselbe Muster wie der bestehende
+  Fallback für nicht-numerische Beträge eine Zeile darüber. Zwei neue
+  Regressionstests in `format.test.ts` (leerer bzw. ungültiger
+  Währungscode).
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

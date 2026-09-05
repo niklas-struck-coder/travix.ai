@@ -7302,3 +7302,59 @@ offen für einen künftigen Lauf mit expliziter Design-Vorgabe.
   diesem Lauf), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-05 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md`, sondern der in `reports/it-chef.md`
+(05.09.) erwähnte, weiterhin offene Fund aus PR #17
+(`it-chef-autofix/currency-format-crash-2026-09-04`): "leerer/ungültiger
+Währungscode lässt `formatOfferPrice()` crashen".
+
+**Warum sicher genug:** Der PR-Branch hatte den Bug bereits vollständig
+diagnostiziert, den exakten Fix und passende Tests fertig ausformuliert —
+lediglich noch nicht gemergt. `formatOfferPrice()` (`src/lib/format.ts`)
+übergibt `currency` ungeprüft an `Intl.NumberFormat`, das bei einem
+fehlenden/ungültigen ISO-4217-Code (z. B. leerer String aus einer
+Duffel-Antwort ohne Währungsfeld, oder ein kaputter Wert) eine
+`RangeError` wirft — ungefangen reißt das den Render von `FlightCard.tsx`/
+`HotelCard.tsx` ab. Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten (reine Formatierungsfunktion). Keine offene Produkt-/
+Architekturentscheidung nötig — gleiches, bereits etabliertes
+try/catch-Fallback-Muster wie bei `duffel/client.ts`,
+`tripStorage.ts`/`loadStoredChat()` und dem nicht-numerischen
+Betrags-Fallback eine Zeile darüber in derselben Funktion. Klar genug
+beschrieben (fertiger Fix + Tests im PR-Branch, keine eigene Annahme
+nötig). Ergebnis objektiv prüfbar über Typecheck/Lint/Tests.
+
+**Umgesetzt:**
+- `src/lib/format.ts`: `formatOfferPrice()` packt den
+  `Intl.NumberFormat(...).format(value)`-Aufruf jetzt in ein `try`/`catch`
+  und fällt im Fehlerfall auf `${amount} ${currency}` zurück — exakt
+  dasselbe Rückgabeformat wie beim bestehenden Fallback für
+  nicht-numerische Beträge.
+- Zwei neue Regressionstests in `src/lib/format.test.ts`: leerer
+  Währungscode (`''`) und ein ungültiger Code (`'XXXX'`) lösen jetzt
+  denselben Fallback aus, statt zu werfen.
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 5) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt —
+  dieser Fix schließt keinen eigenen PRD-Punkt ab, sondern behebt einen
+  von `reports/it-chef.md` gemeldeten, bereits in einem Auto-Fix-PR
+  vordiagnostizierten Bug.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (vollständige Suite) — 37 Testdateien, 190 Tests (188 + 2
+  neue aus diesem Lauf), alle grün.
+
+**Hinweis:** Der ursprüngliche PR #17
+(`it-chef-autofix/currency-format-crash-2026-09-04`) bleibt als eigener,
+jetzt inhaltlich überholter Auto-Fix-PR stehen — der Fix ist stattdessen
+direkt auf `it-chef/auto` gelandet. Freigabe-Chef bzw. Ni können den
+PR-Branch bei Gelegenheit schließen.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
