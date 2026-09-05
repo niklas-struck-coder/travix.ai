@@ -7358,3 +7358,51 @@ direkt auf `it-chef/auto` gelandet. Freigabe-Chef bzw. Ni können den
 PR-Branch bei Gelegenheit schließen.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-05 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` (dort verbleiben nur an Ni-Entscheidungen
+gebundene oder bereits erledigte Punkte), sondern Vorschlag 3 aus
+`reports/support-chef.md` (05.09.): "Voller Browser-Speicher: Der geplante
+Trip verschwindet leise beim nächsten Laden."
+
+**Warum sicher genug:** Reine UX-/Robustheits-Lücke ohne Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-
+oder Architekturentscheidung — der Bericht nennt bereits den exakten
+Hinweistext, die Platzierung (unter der Chat-Kopfzeile in `KiChat.tsx`) und
+das nachzuahmende Muster (`micError` in `ChatInput.tsx`, Zeile 75-79,
+`role="status"`), keine eigene Annahme darüber hinaus nötig. Ergebnis
+objektiv prüfbar über Typecheck/Lint/Tests plus einem neuen Komponententest,
+der das Ein-/Ausblenden des Hinweises verifiziert.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `saveStoredChat()` gibt jetzt `boolean`
+  zurück (Erfolg/Misserfolg des Schreibzugriffs) statt `void`.
+- `src/hooks/useChat.ts`: neuer `storageWarning`-Zustand, gesetzt in der
+  bestehenden Persistenz-Effect anhand des Rückgabewerts von
+  `saveStoredChat()`. Der `beforeunload`-Handler bleibt unverändert (die
+  Seite entlädt dort ohnehin gerade, ein State-Update hätte keine
+  sichtbare Wirkung mehr) und wird im Hook-Rückgabewert mit exportiert.
+- `src/components/chat/KiChat.tsx`: zeigt bei `storageWarning` den vom
+  Bericht vorgeschlagenen Text ("Dein Fortschritt kann gerade nicht
+  dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.") unter
+  der Chat-Kopfzeile, exakt im bestehenden `micError`-Muster
+  (`role="status"`, `text-muted-foreground`).
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 4) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt —
+  reiner Bugfix/UX-Nachzieher, kein eigener PRD-Punkt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (vollständige Suite) — 38 Testdateien, 196 Tests (190 + 6
+  neue aus diesem Lauf), alle grün. Neue `KiChat.test.tsx` brauchte
+  zusätzlich einen lokalen `Element.prototype.scrollTo`-Stub (jsdom kennt
+  `scrollTo` nicht; betrifft nur die Testumgebung, keine
+  Produktionsänderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

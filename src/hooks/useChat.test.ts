@@ -399,6 +399,31 @@ describe('useChat persistence resilience', () => {
     expect(result.current.messages.length).toBeGreaterThan(0)
   })
 
+  it('sets storageWarning when localStorage.setItem throws', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+
+    const { result } = renderHook(() => useChat(false))
+
+    act(() => {
+      result.current.sendMessage(KNOWN_DESTINATION)
+    })
+
+    expect(result.current.storageWarning).toBe(true)
+  })
+
+  it('leaves storageWarning false when localStorage works normally', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    act(() => {
+      result.current.sendMessage(KNOWN_DESTINATION)
+    })
+
+    expect(result.current.storageWarning).toBe(false)
+  })
+
   it('does not throw from the beforeunload handler when localStorage.setItem throws', () => {
     const { result } = renderHook(() => useChat(false))
     act(() => {

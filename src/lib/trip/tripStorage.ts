@@ -20,11 +20,15 @@ export function loadStoredChat(): StoredChatState | null {
 // Full storage (quota exceeded) or private browsing can make setItem throw.
 // Same fallback approach as loadStoredChat's catch above: the chat keeps
 // working from in-memory state, it just won't survive a reload this time.
-export function saveStoredChat(state: StoredChatState): void {
+// Returns whether the write succeeded, so callers can warn the user instead
+// of only logging the failure silently.
+export function saveStoredChat(state: StoredChatState): boolean {
   try {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+    return true
   } catch (error) {
     console.error('Lokales Speichern des Chat-Zustands fehlgeschlagen', error)
+    return false
   }
 }
 

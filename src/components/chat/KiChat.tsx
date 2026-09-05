@@ -30,6 +30,7 @@ export function KiChat() {
     flightOffers,
     flightErrors,
     flightLoading,
+    storageWarning,
     sendMessage,
     selectHotel,
     selectFlight,
@@ -95,6 +96,12 @@ export function KiChat() {
           </Button>
         </div>
       </div>
+
+      {storageWarning && (
+        <p role="status" className="border-b border-border px-4 py-2 text-xs text-muted-foreground">
+          Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.
+        </p>
+      )}
 
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
         {messages.map((message) => (

@@ -68,6 +68,20 @@ describe('saveStoredChat', () => {
     expect(() => saveStoredChat(state)).not.toThrow()
   })
 
+  it('returns false when localStorage.setItem throws (e.g. quota exceeded)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+    const state: StoredChatState = {
+      messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
+      trip: { ...emptyTrip, destination: 'Lissabon' },
+      quickReplies: [],
+    }
+
+    expect(saveStoredChat(state)).toBe(false)
+  })
+
   it('still writes normally when localStorage works', () => {
     const state: StoredChatState = {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
@@ -78,6 +92,16 @@ describe('saveStoredChat', () => {
     saveStoredChat(state)
 
     expect(loadStoredChat()).toEqual(state)
+  })
+
+  it('returns true when localStorage works', () => {
+    const state: StoredChatState = {
+      messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
+      trip: { ...emptyTrip, destination: 'Lissabon' },
+      quickReplies: [],
+    }
+
+    expect(saveStoredChat(state)).toBe(true)
   })
 })
 

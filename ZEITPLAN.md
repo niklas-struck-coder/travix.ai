@@ -397,6 +397,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `useChat.test.ts` für die Persistenz-Effect und den
   `beforeunload`-Handler), die `Storage.prototype.setItem` mit einem
   `QuotaExceededError` mocken und prüfen, dass nichts mehr wirft.
+  Vom autonomen IT-Chef-Lauf am 05.09. (weiterer Lauf) den von
+  `reports/support-chef.md` (05.09., Vorschlag 3) gemeldeten Anschlussfund
+  behoben: Ein fehlgeschlagenes Speichern (voller `localStorage`) blieb für
+  die Nutzerin unsichtbar — jede Chat-Nachricht wirkte gespeichert, aber bei
+  einem späteren Neuladen war der ganze geplante Trip stillschweigend weg.
+  `saveStoredChat()` (`tripStorage.ts`) gibt jetzt zurück, ob der Schreib-
+  zugriff geklappt hat, statt reinem `void`. `useChat.ts` hält das Ergebnis
+  in einem neuen `storageWarning`-Zustand (nur in der Persistenz-Effect
+  gesetzt, nicht im `beforeunload`-Handler — die Seite entlädt dort ohnehin
+  gerade). `KiChat.tsx` zeigt bei `storageWarning` denselben, vom Bericht
+  vorgeschlagenen Hinweistext unter der Chat-Kopfzeile, exakt nach dem
+  bestehenden `micError`-Muster in `ChatInput.tsx` (`role="status"`,
+  dezenter `text-muted-foreground`-Text). Zwei neue Tests in
+  `tripStorage.test.ts` (Rückgabewert bei Erfolg/Fehlschlag), zwei neue
+  Tests in `useChat.test.ts` (`storageWarning` true/false) sowie eine neue
+  `KiChat.test.tsx` (bisher gab es dort keine Tests; mockt `useChat`, prüft
+  Ein-/Ausblenden des Hinweistexts).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

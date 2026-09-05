@@ -83,6 +83,7 @@ export function useChat(speechEnabled: boolean) {
   // the next message is then treated as the departure airport, not as a
   // fresh transport-mode answer, so a real Duffel search can run.
   const [awaitingFlightOrigin, setAwaitingFlightOrigin] = useState(false)
+  const [storageWarning, setStorageWarning] = useState(false)
   const initialized = useRef(false)
 
   const runFlightSearch = (origin: string, destinationIata: string) => {
@@ -128,7 +129,7 @@ export function useChat(speechEnabled: boolean) {
   useEffect(() => {
     if (messages.length === 0) return
     const state: StoredChatState = { messages, trip, quickReplies }
-    saveStoredChat(state)
+    setStorageWarning(!saveStoredChat(state))
   }, [messages, trip, quickReplies])
 
   useEffect(() => {
@@ -383,6 +384,7 @@ export function useChat(speechEnabled: boolean) {
     flightOffers,
     flightErrors,
     flightLoading,
+    storageWarning,
     sendMessage,
     selectHotel,
     selectFlight,
