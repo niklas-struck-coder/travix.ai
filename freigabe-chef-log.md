@@ -2084,3 +2084,41 @@ divergierender Branch-Ursprung; Fast-Forward nicht möglich).
 `marketing-chef/auto` und `support-chef/auto` unabhängig verifiziert und
 beide nach `main` gemergt und gepusht (`24daeec`). Keine Auffälligkeiten,
 kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-05, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (fünf Läufe vom 04./05.09.:
+  Sackgasse nach Suchfehler in automatischer Unterkunftssuche, IATA-Feld
+  ohne Buchstabenprüfung, hängender Mikrofon-Knopf bei Fehler, identischer
+  Start-/Zielflughafen in der Flugsuche, ungeschützte
+  `localStorage`-Schreibzugriffe).
+- `marketing-chef/auto` — keine neuen Commits vor `main` seit dem letzten
+  Merge. Wie vorgesehen für diesen frühen Lauf ignoriert (läuft erst um
+  6 Uhr).
+- `support-chef/auto` — keine neuen Commits vor `main` seit dem letzten
+  Merge. Ebenfalls ignoriert (läuft erst um 6 Uhr).
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch in separatem Worktree
+ausgecheckt, frisch `npm install`, danach selbst ausgeführt statt nur dem
+Log zu glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur die 3 bekannten vorbestehenden Warnings
+  in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht
+  durch diesen Branch verursacht).
+- `npx vitest run` → 188/188 Tests grün (37 Testdateien), deckt sich mit
+  der im `it-chef-auto-log.md` behaupteten Zahl.
+
+**Scope-Check:** Code-Diff (`FlightWizard.tsx`, `useChat.ts`, `speech.ts`,
+`tripStorage.ts` plus zugehörige Tests, `ZEITPLAN.md`,
+`it-chef-auto-log.md`) deckt sich exakt mit den fünf im
+`it-chef-auto-log.md` beschriebenen Einzelpunkten (36.-38. sowie
+34./35. Lauf) — kein Scope-Creep. Kein Bezug zu Auth, Zahlungen oder
+rechtlichen Texten. Die einzige sichtbare UI-Änderung (Hinweistext bei
+identischem Start-/Zielflughafen) nutzt das bereits vorhandene
+`text-xs text-destructive`-Muster aus `FlightResults.tsx`/
+`HotelResults.tsx`, keine neue Design-Entscheidung nötig.
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `98c263f..add329b`, gepusht). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
