@@ -13,17 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-03):**
-- Preise in Flug-/Hotelkarten werden jetzt im deutschen Zahlenformat statt roh angezeigt
-- Passagierzahl im FlightWizard gegen ungültige Eingaben (NaN) abgesichert
-- Robustheits-Fix: gespeicherte Reisepläne mit fehlendem activities-Feld verursachen
-  keinen Absturz mehr
-- Support-Chef hat die neue Preisformatierung geprüft und dabei ein Absturzrisiko
-  bei leerem Währungscode gefunden
-- Marketing-Chef hat zwei neue Ehrlichkeits-/Zuverlässigkeits-Fixes eingeordnet
-- Freigabe-Chef hat mehrere geprüfte Änderungen (IT-, Support-, Marketing-Chef)
-  nach main gemergt
+**Seit letztem Update (2026-09-04):**
+- Robustheits-Fixes: localStorage-Schreibzugriffe gegen volle Speicher abgesichert,
+  IATA-Feld in Flugsuche korrigiert, identischer Start-/Zielflughafen wird verhindert,
+  Mikrofon-Knopf bleibt bei Fehlern nicht mehr hängen
+- Support-Chef hat einen stillen Reiseplan-Datenverlust bei vollem localStorage
+  gefunden (Fix ist in Arbeit)
+- Marketing-Chef arbeitet an einem neuen Mini-Changelog-Konzept für öffentliche
+  Transparenz statt nur interner Übersicht
+- Freigabe-Chef hat mehrere geprüfte Änderungen (IT-, Marketing-, Support-Chef)
+  unabhängig verifiziert und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-04_
+_Letztes Update: 2026-09-05_
