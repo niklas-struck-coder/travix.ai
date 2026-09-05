@@ -1,60 +1,64 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-04
+**Datum:** 2026-09-05
 
-## Was ist seit dem letzten Eintrag (2026-09-03) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-04) passiert?
 
-Beide zuletzt gemeldeten Punkte sind behoben: In `useChat.ts` werten jetzt
-alle drei Suchaufrufe (Unterkunft im Hauptablauf, Unterkunft über
-"Bearbeiten", Flugsuche) `result.errors` korrekt aus, bevor Ergebnisse
-angezeigt werden — ein echter Suchfehler wird nicht mehr fälschlich als
-"keine Treffer" dargestellt, und nach einem Flugsuchfehler gibt es jetzt
-den Chip "Neue Reise planen" statt einer Sackgasse.
+Alle drei zuletzt gemeldeten Punkte sind behoben: Nach einem echten
+Suchfehler im Haupt-Chat-Ablauf gibt es jetzt den Chip "Neue Reise planen"
+statt einer Sackgasse; die Flugsuche verhindert jetzt identische
+Start-/Zielflughäfen mit einem eigenen Hinweistext; und der
+Mikrofon-Knopf bleibt bei einem Fehler (z. B. verweigerter
+Mikrofon-Berechtigung) nicht mehr für immer auf "Aufnahme läuft" hängen.
+Danke fürs schnelle Umsetzen!
 
-Außerdem wurde heute ein Absturzrisiko gefunden und bereits mit einem PR
-behoben (noch nicht gemerged): Ein leerer/ungültiger Währungscode ließ
-`formatOfferPrice()` in Flug-/Hotelkarten crashen. Dazu von mir keine
-eigene Meldung nötig, das ist schon in Bearbeitung.
-
-Bei einer eigenen Prüfung der Chat- und Flugsuche-Oberfläche sind mir drei
-weitere, bisher nicht gemeldete Reibungspunkte aufgefallen.
+Zusätzlich ist bereits bekannt: Ist der Browser-Speicher (localStorage)
+voll, crasht das Speichern des Chat-Fortschritts nicht mehr — aber die
+Nutzerin bekommt weiterhin keinen Hinweis, dass ihr geplanter Trip bei
+einem Reload verloren geht (siehe Vorschlag 3 unten).
 
 ## Meine Vorschläge
 
-1. **Nach einem echten Unterkunftssuchfehler im Haupt-Chat-Ablauf gibt es
-   keinen Weg zurück.** In `useChat.ts` (Zeile 306-330, `nextField ===
-   'accommodation'`) wird bei einem echten Duffel-Fehler zwar `stayError`
-   gesetzt, die `quickReplies` bleiben aber auf dem Stand des vorherigen
-   Chat-Schritts — anders als im "Bearbeiten"-Pfad (`startEdit`), wo dieser
-   Fall bereits behoben ist. Die Nutzerin sieht die Fehlermeldung, hat aber
-   keinen Chip, um es nochmal zu versuchen oder neu zu planen.
-   *Vorschlag:* Im `.then()`/`.catch()` dieses Suchaufrufs zusätzlich
-   `setQuickReplies(['Neue Reise planen'])` setzen, analog zu den bereits
-   behobenen Stellen.
+1. **Nach einer erfolgreichen Suche mit null Treffern bleiben die
+   Chat-Chips leer.** In `useChat.ts` werden `quickReplies` nur gesetzt,
+   wenn ein echter Suchfehler auftritt (`result.errors.length > 0`).
+   Meldet die Suche dagegen ganz normal "keine Angebote gefunden"
+   (`offers.length === 0`), zeigt zwar `NoResultsMessage` die passende
+   Nachricht an, aber es gibt keinen Chip, um weiterzumachen. Betroffen:
+   Flugsuche (um Zeile 93), Unterkunft im Bearbeiten-Pfad (um Zeile 172)
+   und Unterkunft im Hauptablauf (um Zeile 318). *Vorschlag:* Auch im
+   Nulltreffer-Fall `setQuickReplies(['Neue Reise planen', 'Andere Daten
+   versuchen'])` setzen, damit für die Nutzerin klar ist, wie es
+   weitergeht — konsistent mit jedem anderen Chat-Endzustand.
 
-2. **Die Flugsuche lässt identischen Start- und Zielflughafen zu.**
-   `FlightWizard.tsx:44-48` prüft in `isValid` nur Zeichenlänge und
-   Datumslogik, nicht `origin !== destination`. Eine Nutzerin, die aus
-   Versehen zweimal denselben Code einträgt, bekommt keinen Hinweis und
-   landet nach dem Absenden vermutlich vor einer leeren oder verwirrenden
-   Ergebnisliste, ohne zu verstehen, warum.
-   *Vorschlag:* `isValid` um `origin.trim().toUpperCase() !==
-   destination.trim().toUpperCase()` ergänzen und bei Verstoß einen kurzen
-   Hinweistext anzeigen (z. B. "Start und Ziel dürfen nicht gleich sein").
+2. **Kennt travix.ai dein Reiseziel nicht für die automatische
+   Unterkunftssuche, bleiben alte Chips stehen, und die Ankündigung davor
+   war schon falsch.** `mockAdvisor.ts:108` lässt die Bestätigungsnachricht
+   immer "Ich suche jetzt nach echten Unterkünften in [Ziel]" sagen —
+   unabhängig davon, ob das technisch überhaupt möglich ist. Kennt
+   `findKnownDestination()` das Ziel nicht (`useChat.ts:333-337`), folgt
+   direkt danach eine zweite Nachricht ("kenne ich noch keine
+   Unterkünfte … nutze die manuelle Hotelsuche") — die vorherigen Chips
+   ("Hotel", "Ferienwohnung", "Hostel") bleiben aber anklickbar, obwohl
+   ein Klick keine echte Suche auslöst, sondern nur so wirkt, als hätte
+   die Nutzerin bereits eine Unterkunft ausgewählt. Für eine
+   Erstnutzerin fühlt sich das wie ein Widerspruch an: erst "ich suche",
+   dann "kann ich nicht" — aber die Buttons von vorher scheinen noch zu
+   funktionieren. *Vorschlag:* Bei fehlendem Ziel-Match `setQuickReplies([])`
+   setzen (oder direkt einen Chip zur manuellen Hotelsuche anbieten), und
+   die Bestätigungsnachricht in `mockAdvisor.ts` nur dann "ich suche
+   jetzt" sagen lassen, wenn das Ziel tatsächlich bekannt ist.
 
-3. **Der Mikrofon-Knopf im Chat kann dauerhaft hängen bleiben, ohne dass
-   die Nutzerin etwas davon erfährt.** In `ChatInput.tsx` (`handleMicClick`)
-   wird `listening` auf `true` gesetzt, bevor `startListening()`
-   (`speech.ts`) aufgerufen wird. `recognition.start()` dort ist ungeschützt
-   — wirft der Browser hier (z. B. bei verweigerter Mikrofonberechtigung),
-   greift weder `onerror` noch `onend`, und `listening` bleibt für immer
-   `true`. Der Knopf sieht dann dauerhaft nach "Aufnahme läuft" aus,
-   reagiert aber auf nichts mehr — ohne jede Fehlermeldung, obwohl es dafür
-   mit `micError` (Zeile 75-79) bereits eine passende, sogar
-   screenreader-freundliche Anzeige gibt.
-   *Vorschlag:* `recognition.start()` in `startListening()` in ein
-   `try`/`catch` packen und im Fehlerfall `onError`/`onEnd` trotzdem
-   auslösen, damit `ChatInput` `listening` zurücksetzt und `micError`
-   anzeigt.
+3. **Voller Browser-Speicher: Der geplante Trip verschwindet leise beim
+   nächsten Laden.** Das Speichern crasht mittlerweile nicht mehr, wenn
+   `localStorage` voll ist — aber während des Chattens merkt die
+   Nutzerin nichts davon, jede Nachricht wirkt gespeichert. Schließt sie
+   den Tab und kommt später wieder, ist der ganze geplante Trip weg, ohne
+   jede Vorwarnung. *Vorschlag:* Nach demselben, bereits etablierten
+   Muster wie beim `micError`-Hinweis in `ChatInput.tsx` (Zeile 75-79,
+   dezenter `role="status"`-Text) einen kurzen, ehrlichen Hinweis
+   einblenden, z. B. "Dein Fortschritt kann gerade nicht dauerhaft
+   gespeichert werden — ein Neuladen würde ihn verwerfen." — platziert
+   z. B. unter der Chat-Kopfzeile in `KiChat.tsx`.
 
-_Letztes Update: 2026-09-04_
+_Letztes Update: 2026-09-05_
