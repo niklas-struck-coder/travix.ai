@@ -784,7 +784,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `marketing/content-stueck-reise-suchen-empfohlen.md` zur neuen
   `/reise-planen`-Seite, nachdem der zuvor gemeldete "Empfohlen"-Badge-Bug
   (siehe `reports/marketing-chef.md`, 22./23.08.) heute vom IT-Chef
-  behoben wurde.
+  behoben wurde. Neuester Zugang am 05.09.: `marketing/mini-changelog-
+  konzept.md` — kein Social-Post, sondern Konzept + fertige erste
+  Ausgabe für eine öffentliche "Was wurde besser"-Seite im Produkt
+  selbst, wartet auf Nis Freigabe (siehe
+  `marketing/freigabe-uebersicht.md`, Tier 5).
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)

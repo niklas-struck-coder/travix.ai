@@ -1,10 +1,73 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-04)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-05)
 
-Kein neuer Content-Text — dieses Dokument sortiert die weiterhin sieben
-fertigen Entwürfe in `marketing/`, damit die eigentliche Bremse (nicht
-neue Ideen, sondern Freigabe/Priorisierung durch Ni) leichter zu lösen
-ist. Erstellt/aktualisiert werden nur diese Übersicht, nichts wird
+Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
+`marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
+Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
+aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-05: erstmals ein neuer, eigenständiger Entwurf statt nur einer Übersichts-Ergänzung — Mini-Changelog-Konzept umgesetzt, drei weitere Tier-4-Kandidaten geprüft
+
+Statt zum elften Mal in Folge nur diese Übersicht zu ergänzen, setzt
+dieser Lauf die bereits im eigenen interaktiven Bericht vom 2026-09-04
+vorgeschlagene, aber noch nicht umgesetzte Idee tatsächlich um: ein
+öffentlicher Mini-Changelog *im Produkt* (Footer-Seite), der die
+wachsende Tier-4-Liste unten sichtbar macht, ohne die drei Fragen unten
+zu berühren (kein Social-Kanal, kein Bezug zu 6.2, keine Entscheidung
+zum wiederkehrenden *Social*-Format nötig — siehe Begründung im
+Dokument selbst). Neuer Entwurf:
+**`marketing/mini-changelog-konzept.md`** — Konzept, Design-Brief für
+IT-Chef und eine vollständig ausgearbeitete erste Ausgabe (Fixes vom
+25.08. bis 05.09., alle bereits in `main` gemergt, kuratiert in fünf
+Themenblöcke statt einer technischen Liste).
+
+Vor der Auswahl `git log` seit dem letzten Marketing-Lauf (`8242a53`,
+04.09.) geprüft: 13 neue Commits. Fünf echte Codeänderungen einzeln per
+`git show` geprüft — drei davon content-relevant und neu in die erste
+Mini-Changelog-Ausgabe sowie den Tier-4-Kandidatentopf (Punkt 7)
+aufgenommen:
+
+- **`d34796f` (04.09.):** automatische Unterkunftssuche im
+  Haupt-Chat-Ablauf bot nach einem echten Suchfehler keinen anklickbaren
+  nächsten Schritt mehr, nur ein kompletter Neustart half — jetzt wie
+  der "Bearbeiten"-Pfad mit "Neue Reise planen" als Ausweg.
+- **`acc9ae8` (05.09.):** Mikrofon-Knopf im Chat konnte bei einem
+  Browser-Fehler (z. B. verweigerte Berechtigung) dauerhaft im
+  "Aufnahme läuft"-Zustand hängen bleiben, ohne dass die bereits
+  vorhandene Fehlermeldung je erschien.
+- **`add329b` (05.09.):** Speichern des Chat-Zustands in `localStorage`
+  konnte bei vollem Speicher oder im privaten Modus den ganzen Chat
+  abstürzen lassen — jetzt abgefangen, analog zum bereits bestehenden
+  Lesezugriffs-Schutz.
+
+Zwei weitere geprüft, aber **nicht** aufgenommen (reine
+Validierungskorrekturen ohne "falsche Information ohne
+Erkennbarkeit"-Erzählung, gleiche Einstufung wie z. B. `89f63c2`/
+`ab7f4e6`/`4ee4b4a`):
+- **`2e09258` (04.09.):** IATA-Feld im Flug-Assistenten ohne
+  Buchstabenprüfung.
+- **`26f7edd` (05.09.):** Flugsuche verhinderte identischen
+  Start-/Zielflughafen nicht.
+
+**Zur Sprachfunktion (weiterhin nicht bewerben):** `acc9ae8` behebt
+einen der beiden Gründe, die gegen eine Bewerbung von "sprich einfach
+mit Travix" genannt wurden (hängender Mikrofon-Knopf). Der zweite Grund
+(PR #16, fehlender Stopp-Knopf) ist laut `git merge-base
+--is-ancestor` weiterhin nicht in `main` gemergt — Zurückhaltung bleibt
+unverändert, solange nicht beide behoben sind.
+
+**Warum sicher genug für einen neuen, eigenständigen Entwurf statt nur
+einer Übersichts-Ergänzung:** Ergebnis ist weiterhin ein reines
+Entwurfsdokument, kein Live-Vorgang — keine Seite wurde tatsächlich
+gebaut, nichts gepostet. Keine erfundenen Kennzahlen — jeder Punkt in
+der ersten Ausgabe stammt aus bereits verifizierten Commits. Keine
+offene Positionierungs-Grundsatzfrage: wendet nur die bestehende
+Positionierung an. Berührt bewusst keine der drei unten offenen Fragen
+(siehe Begründung im neuen Dokument) — die einzige neue Frage an Ni ist,
+ob das Format überhaupt gebaut werden soll, was den autonomen Lauf nicht
+daran hindert, den Entwurf schon jetzt bereitzustellen (gleiche Logik
+wie bei `kampagnen-konzept-ads.md`/`presse-multiplikatoren-strategie.md`,
+die ebenfalls vor einer Ni-Entscheidung als fertige Vorlage entstanden).
 
 ## Update 2026-09-04: zwei weitere Ehrlichkeits-/Zuverlässigkeits-Fixes geprüft (Chat-Suchfehler bei Unterkunft/Flug sahen wie Null-Treffer bzw. Sackgasse aus, TypeError bei kaputten Alt-Trip-Daten konnte Buchungs-/Chat-/Kartenseite leer lassen) — zwei weitere Tier-4-Kandidaten, drei reine Validierungs-/Formatierungs-Fixes ohne Content-Relevanz, weiterhin kein achtes Content-Stück
 
@@ -661,28 +724,46 @@ Anfang-bis-Ende-Weg im Code.
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
    Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
 
+### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
+
+8. **`mini-changelog-konzept.md`** (05.09.) — Konzept + fertige erste
+   Ausgabe für einen öffentlichen Mini-Changelog *im Produkt* (Footer-
+   Seite), nicht für Social Media gedacht. Bündelt den gesamten
+   Tier-4-Kandidatentopf (Punkt 7 oben) in fünf kuratierten
+   Themenblöcken. Berührt bewusst keine der drei Fragen unten — hat
+   dafür eine eigene, vierte Frage (siehe unten).
+
 ## Für Ni: die eigentliche Entscheidung
 
 Keine dieser Prioritäten ersetzt Nis Freigabe — das kann und soll der
 autonome Lauf nicht vorwegnehmen. Konkret zu entscheiden bleibt
-(unverändert seit 21.08.):
+(die ersten drei unverändert seit 21.08., die vierte neu seit 05.09.):
 - Sollen LinkedIn/Instagram als Kanäle jetzt angelegt werden (die drei
   Tier-1-Stücke sind dafür bereit), oder wartet das noch auf die
   Landingpage/Warteliste (Sprint 2, weiterhin offen)?
 - Bleibt Warenkorb-Content zurückgehalten, bis 6.2 existiert — oder soll
   6.2 (Buchen-Button) priorisiert werden, damit der bereits geschriebene
   Text nutzbar wird?
-- Ist das wiederkehrende Format (Tier 4) grundsätzlich gewollt?
+- Ist das wiederkehrende Format (Tier 4, Social Media) grundsätzlich
+  gewollt?
+- **Neu:** Soll der Mini-Changelog (Tier 5, Seite im Produkt statt
+  Social) gebaut werden? Unabhängig von den drei Fragen oben zu
+  beantworten — braucht weder Kanal noch 6.2 noch eine Social-Format-
+  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite.
 
 ## Nächster autonomer Lauf
-Solange sich an diesen drei Punkten nichts ändert, bleibt die
-Selbstbeschränkung "kein neues Content-Stück" aus dem Bericht vom
-20.08. bestehen (die einzige bisherige Ausnahme war Tier-1-Stück 3,
-weil es am 24.08. eine selbst gesetzte, im Code verifizierte Bedingung
-einlöste — kein Bruch der Selbstbeschränkung, siehe
-`marketing-chef-auto-log.md`, 24.08.). Der nächste Lauf sollte zuerst
-prüfen, ob Ni zwischenzeitlich eine der drei Fragen beantwortet hat
-(z. B. neue Kanal-Links, ein Commit zu 6.2, oder eine Notiz in diesem
-Dokument) oder ob die Checkliste inzwischen echte Persistenz hat (dann
-wird sie laut Bericht vom 24.08. selbst zum nächsten Content-Kandidaten),
-bevor er wieder einen neuen Text schreibt.
+Die Selbstbeschränkung "kein neues *Social*-Content-Stück" aus dem
+Bericht vom 20.08. gilt für die ersten drei Fragen unverändert weiter
+(die einzige bisherige Ausnahme war Tier-1-Stück 3, siehe
+`marketing-chef-auto-log.md`, 24.08.). Der Mini-Changelog (05.09.) ist
+kein Bruch dieser Regel, sondern ein bewusst anderer Kanal, der genau
+deshalb heute umgesetzt wurde. Der nächste Lauf sollte zuerst prüfen,
+ob Ni zwischenzeitlich eine der vier Fragen beantwortet hat (z. B. neue
+Kanal-Links, ein Commit zu 6.2, eine Notiz in diesem Dokument, oder ein
+Commit von IT-Chef zur Mini-Changelog-Seite) oder ob die Checkliste
+inzwischen echte Persistenz hat (dann wird sie laut Bericht vom 24.08.
+selbst zum nächsten Content-Kandidaten), bevor er wieder einen neuen
+Social-Text schreibt. Falls weiterhin keine der vier Fragen beantwortet
+ist: eine zweite Mini-Changelog-Ausgabe ist erst sinnvoll, sobald sich
+seit dem 05.09. wieder genug neue, verifizierte Tier-4-Kandidaten
+angesammelt haben (nicht nach jedem einzelnen neuen Fix).

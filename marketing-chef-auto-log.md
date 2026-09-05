@@ -4,6 +4,114 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-05
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`8242a53` (04.09.) hängengeblieben, dessen Inhalt laut `git log
+origin/marketing-chef/auto ^origin/main` bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`6c5fbce`) aus angelegt, wie in
+den Session-Regeln für bereits gemergte Branches vorgesehen.
+
+**Ausgewählter Punkt:** Erstmals seit zehn Läufen in Folge (26.08.-04.09.)
+kein reines "Übersicht ergänzen", sondern ein neuer, eigenständiger
+Entwurf: `marketing/mini-changelog-konzept.md` — Konzept und fertig
+ausgearbeitete erste Ausgabe für einen öffentlichen Mini-Changelog *im
+Produkt* (Footer-Seite "Was wurde besser"), der die seit 25.08.
+gesammelten kleinen Ehrlichkeits-/Zuverlässigkeits-Fixes kuratiert in
+fünf Themenblöcken zusammenfasst.
+
+**Warum dieser Punkt statt wieder nur einer Übersichts-Ergänzung:** Die
+Idee stammt nicht von mir neu erfunden, sondern aus dem eigenen
+interaktiven Bericht vom 2026-09-04
+(`reports/marketing-chef.md`, Vorschlag 3) — dort zum ersten Mal
+vorgeschlagen, aber noch nicht umgesetzt. Der Grund, warum die letzten
+zehn autonomen Läufe kein neues Content-Stück produziert haben, ist
+unverändert: die drei offenen Fragen an Ni (Kanal-Start? 6.2
+priorisiert? wiederkehrendes Social-Format gewollt?) sind seit dem
+21.08. unbeantwortet, geprüft in `status.md` (Stand 04.09.) und
+`marketing/freigabe-uebersicht.md` — kein neuer Commit dazu. Der
+Mini-Changelog ist aber gezielt so konzipiert, dass er **keine** dieser
+drei Fragen berührt: er braucht keinen Social-Kanal, keinen Bezug zu
+6.2/Warenkorb, und entscheidet nicht über das wiederkehrende
+*Social*-Format — es ist eine Seite im Produkt selbst, kein Post. Statt
+also zum elften Mal denselben Befund zu wiederholen (der Engpass ist
+Freigabe, nicht Ideenmangel), setzt dieser Lauf die einzige bereits
+vorgeschlagene Idee um, die diesen Engpass umgeht, statt an ihm
+anzustehen.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist ein reines
+Entwurfsdokument, kein Live-Vorgang — keine Seite wurde tatsächlich im
+Produkt gebaut, nichts gepostet oder versendet. Keine erfundenen
+Kennzahlen — jeder der zwölf Punkte in der ersten Ausgabe stammt aus
+bereits einzeln per `git show` verifizierten Commits (teils aus früheren
+Läufen übernommen, drei davon neu in diesem Lauf selbst geprüft, siehe
+unten). Keine offene Positionierungs-Grundsatzfrage: das Format wendet
+nur die bereits in `MARKENDESIGN.md` festgelegte Positionierung
+("Ehrlichkeit als Feature") an, entscheidet sie nicht neu. Klar genug
+beschrieben — direkt auf dem eigenen Vorschlag vom 04.09. aufbauend,
+keine neue, ungeprüfte Idee.
+
+**Vor der Auswahl geprüft:** `git log 8242a53..origin/main` zeigt 13 neue
+Commits seit dem letzten Marketing-Lauf. Der größte Teil ohne
+Content-Relevanz (Freigabe-Chef-Merges/-Logs, Daily-Status-Update,
+Support-Chef-Bericht, der eigene interaktive Bericht vom 04.09. selbst,
+ein IT-Chef-Bericht). Fünf echte Codeänderungen einzeln per `git show`
+geprüft:
+- `d34796f` (04.09.): automatische Unterkunftssuche im Haupt-Chat-Ablauf
+  bot nach einem echten Suchfehler keinen anklickbaren nächsten Schritt
+  mehr — jetzt behoben (analog zum bereits bekannten Flug-Sackgassen-Fix
+  vom 30./31.08.). **Content-relevant**, in die erste Ausgabe
+  aufgenommen.
+- `acc9ae8` (05.09.): Mikrofon-Knopf im Chat konnte bei einem
+  Browser-Fehler dauerhaft hängen bleiben, ohne dass die vorhandene
+  Fehlermeldung je erschien. **Content-relevant**, aufgenommen. Behebt
+  außerdem einen der beiden Gründe (hängender Mikrofon-Knopf), die der
+  eigene Bericht vom 03./04.09. gegen eine Bewerbung der Sprachfunktion
+  genannt hat — der zweite Grund (PR #16, Stopp-Knopf) ist laut
+  `git merge-base --is-ancestor` weiterhin nicht in `main` gemergt, die
+  Zurückhaltung bleibt daher unverändert bestehen.
+- `add329b` (05.09.): Speichern des Chat-Zustands in `localStorage`
+  konnte bei vollem Speicher/privatem Modus abstürzen — jetzt
+  abgefangen. **Content-relevant**, aufgenommen.
+- `2e09258` (04.09.) und `26f7edd` (05.09.): reine
+  Validierungskorrekturen (IATA-Buchstabenprüfung im Flug-Assistenten,
+  identischer Start-/Zielflughafen) ohne "falsche Information ohne
+  Erkennbarkeit"-Erzählung — **nicht** aufgenommen, gleiche Einstufung
+  wie frühere reine Validierungsfixes.
+
+**Umgesetzt:**
+- Neue Datei `marketing/mini-changelog-konzept.md` — Konzept (Titel,
+  Platzierung als Footer-Seite, Rhythmus, Tonfall, Leitplanken),
+  Design-Brief für IT-Chef (folgt `MARKENDESIGN.md`: kein Rot, Teal-
+  Akzente, schlichte Liste ohne Icon-Overkill), und eine vollständig
+  ausgearbeitete erste Ausgabe mit zwölf kuratierten Punkten in fünf
+  Themenblöcken (ehrliche Fehler statt Null-Treffer, genauere
+  Ziel-/Transportmittel-Erkennung, deutsche statt rohe
+  Fehlermeldungen, Absturz-Robustheit, ehrliche Abschlussmeldungen).
+- `marketing/freigabe-uebersicht.md` aktualisiert: neue Update-Sektion
+  2026-09-05 mit der vollständigen Prüf-Historie oben, neuer Tier-5-
+  Eintrag für das neue Dokument, vierte offene Frage an Ni ergänzt
+  (unabhängig von den drei bestehenden), Hinweis für den nächsten Lauf
+  angepasst.
+- `ZEITPLAN.md` (Marketing Sprint 4, Ist-Stand-Notiz) um den neuen
+  Zugang ergänzt.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück zu einem der drei
+  neuen Fixes — weiterhin an dieselbe unbeantwortete Frage 3 gebunden
+  wie alle bisherigen kleinen Ehrlichkeits-Fixes, aus Konsistenzgründen
+  nicht gewählt.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Geprüft:** Kein Code geändert, daher kein Build/Lint/Test nötig — reine
+Markdown-Ergänzungen/-Neuanlage.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-04
 
 **Ausgewählter Punkt:** Kein neues Content-Stück. Stattdessen:
