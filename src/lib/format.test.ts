@@ -21,4 +21,12 @@ describe('formatOfferPrice', () => {
   it('falls back to the raw amount and currency for a non-numeric amount', () => {
     expect(formatOfferPrice('n/a', 'EUR')).toBe('n/a EUR')
   })
+
+  it('falls back to the raw amount and currency for an empty currency code instead of throwing', () => {
+    expect(formatOfferPrice('249.00', '')).toBe('249.00 ')
+  })
+
+  it('falls back to the raw amount and currency for an invalid currency code instead of throwing', () => {
+    expect(formatOfferPrice('249.00', 'XXXX')).toBe('249.00 XXXX')
+  })
 })
