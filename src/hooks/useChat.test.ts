@@ -373,3 +373,43 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightLoading).toBe(false)
   })
 })
+
+describe('useChat persistence resilience', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('keeps working when localStorage.setItem throws (e.g. full storage or private mode)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+
+    const { result } = renderHook(() => useChat(false))
+
+    expect(() => {
+      act(() => {
+        result.current.sendMessage(KNOWN_DESTINATION)
+      })
+    }).not.toThrow()
+    expect(result.current.messages.length).toBeGreaterThan(0)
+  })
+
+  it('does not throw from the beforeunload handler when localStorage.setItem throws', () => {
+    const { result } = renderHook(() => useChat(false))
+    act(() => {
+      result.current.sendMessage(KNOWN_DESTINATION)
+    })
+
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+
+    expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow()
+  })
+})

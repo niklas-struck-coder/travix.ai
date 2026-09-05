@@ -6,7 +6,7 @@ import { searchFlights, searchStays } from '@/lib/duffel/client'
 import { findKnownDestination } from '@/types/stays'
 import type { StayOffer } from '@/types/stays'
 import type { DuffelError, FlightOffer } from '@/types/duffel'
-import { CHAT_STORAGE_KEY, loadStoredChat } from '@/lib/trip/tripStorage'
+import { CHAT_STORAGE_KEY, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
 
@@ -128,13 +128,13 @@ export function useChat(speechEnabled: boolean) {
   useEffect(() => {
     if (messages.length === 0) return
     const state: StoredChatState = { messages, trip, quickReplies }
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+    saveStoredChat(state)
   }, [messages, trip, quickReplies])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (messages.length === 0) return
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages, trip, quickReplies }))
+      saveStoredChat({ messages, trip, quickReplies })
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)

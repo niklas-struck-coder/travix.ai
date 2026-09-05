@@ -17,6 +17,17 @@ export function loadStoredChat(): StoredChatState | null {
   }
 }
 
+// Full storage (quota exceeded) or private browsing can make setItem throw.
+// Same fallback approach as loadStoredChat's catch above: the chat keeps
+// working from in-memory state, it just won't survive a reload this time.
+export function saveStoredChat(state: StoredChatState): void {
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+  } catch (error) {
+    console.error('Lokales Speichern des Chat-Zustands fehlgeschlagen', error)
+  }
+}
+
 /**
  * Merges a partial trip update (e.g. a flight selected outside the chat, on
  * the standalone Flugsuche page) into the currently stored trip. No-op if no
@@ -28,7 +39,7 @@ export function updateStoredTrip(patch: Partial<TripDraft>): StoredChatState | n
   if (!stored) return null
 
   const updated: StoredChatState = { ...stored, trip: { ...stored.trip, ...patch } }
-  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(updated))
+  saveStoredChat(updated)
   return updated
 }
 

@@ -7238,3 +7238,67 @@ nötig. Ergebnis objektiv prüfbar über einen neuen Unit-Test.
   grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-05 (achtunddreißigster Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md`, sondern der von `reports/it-chef.md`
+(04.09.) gemeldete Fund: "`localStorage`-Schreibzugriffe weiterhin
+ungeschützt" (`useChat.ts:131/137`, `tripStorage.ts:31`).
+
+**Warum sicher genug (und was bewusst offen bleibt):** Der Bericht selbst
+stufte den vollständigen Fund als nicht automatisch fixbar ein, weil eine
+"eigene, ehrliche Fehlermeldung statt reinem Wegfangen" nötig sei — das
+wäre tatsächlich eine Design-Entscheidung (wo/wie zeigt man einen Hinweis
+nach jeder Chat-Nachricht an?). Beim Lesen des Codes zeigte sich aber, dass
+sich der reine Crash-verhindernde Teil sauber davon abtrennen lässt, exakt
+nach demselben Muster wie beim bereits (33. Lauf) teilbehobenen
+`hasTripData()`-Fund: `loadStoredChat()` (Lesezugriff, `tripStorage.ts`)
+fängt Fehler schon heute standardmäßig ab und fällt sicher zurück (`null`),
+ohne jede nutzersichtbare Meldung — exakt dasselbe, etablierte Muster lässt
+sich 1:1 auf die drei Schreibzugriffe übertragen, ohne irgendeine neue
+Design-Entscheidung zu treffen. Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten (nur lokaler Demo-Chat-Zustand im Browser) oder rechtlichen
+Texten. Ergebnis objektiv prüfbar: neue Tests simulieren einen werfenden
+`localStorage.setItem` (`QuotaExceededError`) und prüfen, dass nichts mehr
+crasht. Der im Bericht geforderte nutzersichtbare Hinweis bleibt bewusst
+offen für einen künftigen Lauf mit expliziter Design-Vorgabe.
+
+**Umgesetzt:**
+- Neue `saveStoredChat()`-Hilfsfunktion in `src/lib/trip/tripStorage.ts`:
+  packt `localStorage.setItem()` in `try`/`catch`, loggt im Fehlerfall nur
+  `console.error('Lokales Speichern des Chat-Zustands fehlgeschlagen',
+  error)` — gleiches Muster wie die bestehenden `console.error`-Aufrufe in
+  `duffel/client.ts`. `updateStoredTrip()` nutzt sie jetzt statt des
+  direkten `localStorage.setItem()`-Aufrufs.
+- `src/hooks/useChat.ts`: die beiden verbleibenden direkten
+  `localStorage.setItem()`-Aufrufe (Persistenz-`useEffect` und der
+  `beforeunload`-Handler) rufen jetzt ebenfalls `saveStoredChat()` auf.
+  `CHAT_STORAGE_KEY`-Import bleibt (weiterhin für `removeItem()` in
+  `resetChat()` gebraucht).
+- Fünf neue Regressionstests: drei in `tripStorage.test.ts`
+  (`saveStoredChat` wirft nicht bei einem werfenden `setItem`, schreibt
+  aber normal bei funktionierendem `localStorage`; `updateStoredTrip`
+  liefert weiterhin den gemergten Trip zurück, auch wenn das Persistieren
+  fehlschlägt), zwei in `useChat.test.ts` (Persistenz-Effect nach
+  `sendMessage` wirft nicht; `beforeunload`-Handler wirft nicht) — alle
+  mocken `Storage.prototype.setItem` mit einem geworfenen
+  `DOMException('QuotaExceededError')`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 3/allgemein, direkt nach dem
+  37.-Lauf-Eintrag) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — dieser Fix schließt
+  keinen eigenen PRD-Punkt ab, sondern behebt einen von
+  `reports/it-chef.md` gemeldeten Bug (gleiche Einordnung wie beim 37.
+  Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 37 Testdateien (unverändert,
+  Erweiterung zweier bestehender Dateien), 188 Tests (183 + 5 neue aus
+  diesem Lauf), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

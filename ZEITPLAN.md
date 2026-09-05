@@ -373,6 +373,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gab es dort keine Tests): deckt den neuen Fehlerfall (Start wirft,
   `onError`/`onEnd` werden aufgerufen, Rückgabewert `null`), den
   Erfolgsfall und den Fall ohne Browser-Unterstützung ab.
+  Vom autonomen IT-Chef-Lauf am 05.09. (achtunddreißigster Lauf) den in
+  `reports/it-chef.md` (04.09.) gemeldeten Fund "ungeschützte
+  `localStorage`-Schreibzugriffe" für den crash-verhindernden Teil behoben:
+  `localStorage.setItem()` in `useChat.ts` (zwei Stellen: die Persistenz-
+  Effect und der `beforeunload`-Handler) sowie in `updateStoredTrip()`
+  (`tripStorage.ts`) stand bisher ungeschützt — bei vollem Speicher oder im
+  privaten Modus wirft der Browser dort einen `DOMException`, der
+  ungefangen aus einem `useEffect` bzw. Klick-Handler nach oben durchschlägt
+  und die Seite abstürzen lassen kann (gleiche Fehlerklasse wie der bereits
+  behobene `hasTripData()`-Fund). Fix: neue `saveStoredChat()`-Hilfsfunktion
+  in `tripStorage.ts`, die den Schreibzugriff in ein `try`/`catch` packt und
+  im Fehlerfall nur `console.error` loggt — exakt dasselbe Muster, das
+  `loadStoredChat()` (Lesezugriff) und `duffel/client.ts` (Netzwerkfehler)
+  bereits nutzen. Alle drei betroffenen Schreibstellen rufen jetzt diese
+  Funktion statt `localStorage.setItem()` direkt auf. Der vom Bericht
+  zusätzlich vorgeschlagene Teil — eine eigene, nutzersichtbare
+  Fehlermeldung statt reinem Loggen — bleibt bewusst offen: die
+  Persistenz-Effect läuft nach jeder Chat-Nachricht ohne bestehende
+  UI-Stelle dafür, welche Meldung dort wie lange angezeigt würde ist eine
+  eigene Design-Entscheidung. Fünf neue Regressionstests (drei in
+  `tripStorage.test.ts` für `saveStoredChat`/`updateStoredTrip`, zwei in
+  `useChat.test.ts` für die Persistenz-Effect und den
+  `beforeunload`-Handler), die `Storage.prototype.setItem` mit einem
+  `QuotaExceededError` mocken und prüfen, dass nichts mehr wirft.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

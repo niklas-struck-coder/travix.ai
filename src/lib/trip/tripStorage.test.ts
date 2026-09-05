@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { CHAT_STORAGE_KEY, hasTripData, loadStoredChat, updateStoredTrip } from '@/lib/trip/tripStorage'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { CHAT_STORAGE_KEY, hasTripData, loadStoredChat, saveStoredChat, updateStoredTrip } from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 
@@ -42,6 +42,64 @@ describe('updateStoredTrip', () => {
 
     expect(result?.messages).toEqual(seeded.messages)
     expect(result?.quickReplies).toEqual(seeded.quickReplies)
+  })
+})
+
+describe('saveStoredChat', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('does not throw when localStorage.setItem throws (e.g. quota exceeded)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+    const state: StoredChatState = {
+      messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
+      trip: { ...emptyTrip, destination: 'Lissabon' },
+      quickReplies: [],
+    }
+
+    expect(() => saveStoredChat(state)).not.toThrow()
+  })
+
+  it('still writes normally when localStorage works', () => {
+    const state: StoredChatState = {
+      messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
+      trip: { ...emptyTrip, destination: 'Lissabon' },
+      quickReplies: [],
+    }
+
+    saveStoredChat(state)
+
+    expect(loadStoredChat()).toEqual(state)
+  })
+})
+
+describe('updateStoredTrip resilience', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('still returns the merged trip even when persisting it fails', () => {
+    seedStoredChat()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+
+    const result = updateStoredTrip({ transportMode: 'flight' })
+
+    expect(result?.trip.transportMode).toBe('flight')
   })
 })
 
