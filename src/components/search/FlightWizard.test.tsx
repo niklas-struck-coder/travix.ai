@@ -63,4 +63,21 @@ describe('FlightWizard', () => {
 
     expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeDisabled()
   })
+
+  it('rejects an identical origin and destination airport with a hint', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    fireEvent.change(screen.getByLabelText('Von (IATA)'), { target: { value: 'BER' } })
+    fireEvent.change(screen.getByLabelText('Nach (IATA)'), { target: { value: 'ber' } })
+    fireEvent.change(screen.getByLabelText('Hinflug'), { target: { value: '2026-09-05' } })
+    fireEvent.change(screen.getByLabelText('Rückflug'), { target: { value: '2026-09-10' } })
+
+    expect(screen.getByText('Start und Ziel dürfen nicht gleich sein')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeDisabled()
+
+    fireEvent.change(screen.getByLabelText('Nach (IATA)'), { target: { value: 'LIS' } })
+
+    expect(screen.queryByText('Start und Ziel dürfen nicht gleich sein')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeEnabled()
+  })
 })

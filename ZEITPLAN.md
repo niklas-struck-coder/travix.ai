@@ -449,6 +449,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `src/types/stays.test.ts` (bisher gab es dort keine Tests) mit
   Regressionstests für Wortgrenzen-Fälle, vor dem Fix reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 05.09. (siebenunddreißigster Lauf) einen
+  von `reports/support-chef.md` (04.09., Vorschlag 2) gemeldeten Fund
+  behoben: `FlightWizard.tsx`s `isValid` prüfte Von-/Nach-Feld nur auf
+  Länge und Buchstaben, nie ob beide identisch sind — ein versehentlich
+  zweimal derselbe Flughafencode (z. B. "BER"/"BER") ließ den Button
+  aktiv, ohne jeden Hinweis, warum die Suche danach leer/verwirrend
+  aussehen würde. Neue lokale `sameAirport`-Prüfung
+  (`origin.trim().toUpperCase() === destination.trim().toUpperCase()`)
+  fließt jetzt zusätzlich in `isValid` ein; bei Verstoß erscheint unter
+  dem "Nach"-Feld derselbe Hinweistext, den der Bericht bereits konkret
+  vorschlug ("Start und Ziel dürfen nicht gleich sein"), im bestehenden
+  `text-destructive`-Muster (siehe `FlightResults.tsx`/`HotelResults.tsx`).
+  Anders als beim 36. Lauf (identischer Fund, damals als "braucht noch
+  eine UI-Entscheidung" zurückgestellt) macht der Bericht selbst bereits
+  Feld, Prüfung und exakten Hinweistext konkret — keine eigene Annahme
+  darüber hinaus nötig. Neuer Regressionstest in `FlightWizard.test.tsx`.
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

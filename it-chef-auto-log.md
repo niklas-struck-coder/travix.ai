@@ -7181,3 +7181,60 @@ Ergebnis objektiv prüfbar über neue Unit-Tests.
   182 Tests (178 + 4 neue), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-05 (siebenunddreißigster Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md`, sondern der von `reports/support-chef.md`
+(04.09., Vorschlag 2) gemeldete Fund: "Die Flugsuche lässt identischen
+Start- und Zielflughafen zu" (`FlightWizard.tsx:44-48`).
+
+**Warum sicher genug (und warum abweichend vom 36. Lauf heute):** Der 36.
+Lauf hatte denselben Fund heute bereits geprüft und als "braucht noch eine
+UI-Entscheidung (Hinweistext/Tauschbutton)" zurückgestellt. Beim erneuten
+Lesen des Berichts stellte sich heraus, dass Support-Chef bereits einen
+vollständig konkreten Vorschlag macht: exakte Prüfung
+(`origin.trim().toUpperCase() !== destination.trim().toUpperCase()`) UND
+exakter Hinweistext ("Start und Ziel dürfen nicht gleich sein"). Damit
+bleibt keine eigene Interpretation/Annahme mehr übrig, die über den
+Bericht hinausgeht — der Tauschbutton aus dem 36.-Lauf-Log war eine vom
+36. Lauf selbst hinzugedachte, im Bericht gar nicht geforderte Option, kein
+tatsächliches Hindernis. Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Der Hinweistext folgt dem bereits im
+Code vorhandenen `text-destructive`-Muster für Fehlermeldungen
+(`FlightResults.tsx`/`HotelResults.tsx`), keine neue Design-Entscheidung
+nötig. Ergebnis objektiv prüfbar über einen neuen Unit-Test.
+
+**Umgesetzt:**
+- `src/components/search/FlightWizard.tsx`: neue lokale
+  `sameAirport`-Prüfung vergleicht die getrimmten, großgeschriebenen
+  Von-/Nach-Werte; `isValid` schließt jetzt zusätzlich `!sameAirport` ein.
+  Bei Verstoß erscheint unter dem "Nach"-Feld ein Hinweistext ("Start und
+  Ziel dürfen nicht gleich sein") im bestehenden
+  `text-xs text-destructive`-Muster, direkt unter dem bereits vorhandenen
+  IATA-Hinweistext.
+- Neuer Regressionstest in `FlightWizard.test.tsx` ("rejects an identical
+  origin and destination airport with a hint"): prüft, dass der Hinweis
+  bei identischem Von-/Nach-Code (case-insensitiv) erscheint und der
+  Button deaktiviert bleibt, und dass beides nach Änderung auf ein anderes
+  Ziel wieder verschwindet/aktiviert wird.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5 Suche, Sprint-1-Bullet zu
+  5.11) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt, da dieser Fix keinen
+  eigenen PRD-Punkt abschließt, sondern einen von `reports/support-chef.md`
+  gemeldeten Bug behebt (gleiche Einordnung wie bei den meisten
+  vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm run build` (`tsc -b && vite build`) — erfolgreich (unveränderte
+  Chunk-Size-Warnung, nicht durch diesen Change verursacht).
+- `npx vitest run` — vollständige Suite: 37 Testdateien (unverändert,
+  Erweiterung einer bestehenden Datei), 183 Tests (182 + 1 neuer), alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

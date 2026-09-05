@@ -43,9 +43,14 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
   const [passengers, setPassengers] = useState(1)
   const [cabinClass, setCabinClass] = useState<CabinClass>('economy')
 
+  const sameAirport =
+    origin.trim().length === 3 &&
+    origin.trim().toUpperCase() === destination.trim().toUpperCase()
+
   const isValid =
     IATA_CODE_PATTERN.test(origin.trim()) &&
     IATA_CODE_PATTERN.test(destination.trim()) &&
+    !sameAirport &&
     departureDate &&
     (tripType === 'oneway' || (returnDate && returnDate >= departureDate))
 
@@ -97,6 +102,9 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             required
           />
           <p className="text-xs text-muted-foreground">3-stelliger Flughafencode, z. B. LIS</p>
+          {sameAirport && (
+            <p className="text-xs text-destructive">Start und Ziel dürfen nicht gleich sein</p>
+          )}
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="departure">Hinflug</Label>
