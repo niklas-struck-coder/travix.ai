@@ -53,7 +53,13 @@ export function startListening(
     onEnd()
   }
 
-  recognition.start()
+  try {
+    recognition.start()
+  } catch {
+    onError?.()
+    onEnd()
+    return null
+  }
   return recognition
 }
 

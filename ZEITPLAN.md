@@ -357,6 +357,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `IATA_CODE_PATTERN`-Konstante in `FlightWizard.tsx`, `isValid` prüft
   jetzt beide Felder darüber. Neuer Regressionstest in
   `FlightWizard.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 05.09. (sechsunddreißigster Lauf) einen
+  von `reports/support-chef.md` (04.09.) gemeldeten Fund behoben: Der
+  Mikrofon-Knopf im Chat (`ChatInput.tsx`) konnte dauerhaft hängen
+  bleiben, ohne dass die Nutzerin etwas davon erfährt. `startListening()`
+  (`src/lib/ai/speech.ts`) rief `recognition.start()` bisher ungeschützt
+  auf — wirft der Browser hier (z. B. bei verweigerter
+  Mikrofonberechtigung oder einem doppelten Start), griffen weder
+  `onerror` noch `onend`, `listening` blieb in `ChatInput` für immer
+  `true` und die bereits vorhandene `micError`-Anzeige erschien nie.
+  `recognition.start()` steht jetzt in einem `try`/`catch`, das im
+  Fehlerfall dieselben `onError`/`onEnd`-Callbacks auslöst wie der
+  bestehende `onerror`-Handler (`ChatInput.tsx` setzt darüber `listening`
+  zurück und zeigt `micError`). Neue `src/lib/ai/speech.test.ts` (bisher
+  gab es dort keine Tests): deckt den neuen Fehlerfall (Start wirft,
+  `onError`/`onEnd` werden aufgerufen, Rückgabewert `null`), den
+  Erfolgsfall und den Fall ohne Browser-Unterstützung ab.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

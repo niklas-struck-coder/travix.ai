@@ -7113,3 +7113,71 @@ Fall (nicht-alphabetische Zeichen) gezielt abfragt.
   grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-05 (sechsunddreißigster Lauf)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/`tasks-prd-travix-platform.md`,
+sondern der von `reports/support-chef.md` (04.09., Vorschlag 3) gemeldete
+Fund: "Der Mikrofon-Knopf im Chat kann dauerhaft hängen bleiben, ohne
+dass die Nutzerin etwas davon erfährt." Geprüfte Alternativen aus
+demselben Bericht bzw. `reports/it-chef.md` (04.09.) waren nicht sicher
+genug für einen autonomen Lauf: der Fund zu identischem Start-/
+Zielflughafen in `FlightWizard.tsx` (Vorschlag 2) und die ungeschützten
+`localStorage`-Schreibzugriffe brauchen laut den Berichten selbst noch
+eine UI-Entscheidung (Hinweistext/Tausch-Button bzw. eine eigene, noch
+nicht festgelegte Fehlermeldung) — beides über das hinausgehend, was in
+den Berichten bereits konkret vorgegeben ist. Das IATA-Feld ohne
+Buchstabenprüfung war laut `ZEITPLAN.md` bereits im
+fünfunddreißigsten Lauf behoben (Commit `2e09258`).
+
+**Warum sicher genug:** Rein technischer Robustheits-Fix in
+`src/lib/ai/speech.ts`, kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig — der Bericht benennt Datei und Symptom
+bereits konkret und schlägt exakt die umgesetzte Lösung vor
+(`recognition.start()` in `try`/`catch` nehmen, im Fehlerfall
+`onError`/`onEnd` trotzdem auslösen), die zudem eine bereits im Code
+vorhandene, korrekte Fehlerbehandlung (`micError`-Anzeige in
+`ChatInput.tsx`) einfach erreichbar macht statt neue UI zu erfinden.
+Ergebnis objektiv prüfbar über neue Unit-Tests.
+
+**Umgesetzt:**
+- `src/lib/ai/speech.ts`: `startListening()` rief `recognition.start()`
+  bisher ungeschützt auf. Wirft der Browser hier (z. B. bei verweigerter
+  Mikrofonberechtigung, oder wenn `start()` aufgerufen wird während
+  bereits eine Erkennung läuft — beides je nach Browser eine synchrone
+  `DOMException`), griffen weder der bereits vorhandene `onerror`-Handler
+  noch `onend` — der aufrufende `ChatInput.tsx` setzt `listening` nie
+  zurück und zeigt nie die eigentlich schon vorhandene, screenreader-
+  freundliche `micError`-Meldung an. Der Knopf blieb dauerhaft im
+  "Aufnahme läuft"-Zustand hängen, ohne jede Fehlermeldung und ohne
+  weitere Reaktion auf Klicks. Fix: `recognition.start()` steht jetzt in
+  einem `try`/`catch`; im Fehlerfall werden `onError`/`onEnd` genauso
+  aufgerufen wie im bestehenden `onerror`-Zweig, `startListening` gibt
+  dann `null` zurück (analog zum bereits bestehenden `null`-Rückgabewert
+  bei fehlender Browser-Unterstützung).
+- Neue `src/lib/ai/speech.test.ts` (bisher gab es dort keine Tests): vier
+  Fälle — kein Browser-Support (`null`, `start()` nicht aufgerufen),
+  `start()` wirft synchron (Rückgabewert `null`, `onError`/`onEnd` je
+  einmal aufgerufen), `start()` wirft ohne übergebenen `onError`-Callback
+  (kein Absturz, `onEnd` trotzdem aufgerufen), Erfolgsfall (Instanz wird
+  zurückgegeben, `onEnd` nicht aufgerufen).
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4 KI-Chat, wo `ChatInput`/
+  `useChat`-Fixes bereits dokumentiert sind) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt, da dieser Fix keinen eigenen PRD-Punkt abschließt, sondern
+  einen von `reports/support-chef.md` gemeldeten Bug behebt (gleiche
+  Einordnung wie bei den meisten vorherigen Läufen zu diesem Bericht).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm run build` (`tsc -b && vite build`) — erfolgreich (unveränderte
+  Chunk-Size-Warnung, nicht durch diesen Change verursacht).
+- `npx vitest run` — vollständige Suite: 37 Testdateien (36 + 1 neue),
+  182 Tests (178 + 4 neue), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
