@@ -103,6 +103,25 @@ describe('updateStoredTrip resilience', () => {
   })
 })
 
+describe('loadStoredChat', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('normalizes a missing activities field to an empty array (legacy/corrupted stored trip)', () => {
+    const { activities, ...tripWithoutActivities } = { ...emptyTrip, destination: 'Lissabon' }
+    void activities
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({ messages: [], trip: tripWithoutActivities, quickReplies: [] }),
+    )
+
+    const loaded = loadStoredChat()
+
+    expect(loaded?.trip.activities).toEqual([])
+  })
+})
+
 describe('hasTripData', () => {
   it('does not throw when activities is missing (legacy/corrupted stored trip)', () => {
     const { activities, ...tripWithoutActivities } = { ...emptyTrip, destination: 'Lissabon' }
