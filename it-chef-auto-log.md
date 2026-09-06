@@ -7651,3 +7651,81 @@ Regressionstest.
 - `npm run build` (`tsc -b && vite build`) — keine Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-06 (weiterer Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits auf dem aktuellen `main`-Stand
+(kein Rückstand, keine offenen eigenen Änderungen). Alle offenen
+ZEITPLAN-Punkte im Programmierungs-Bereich weiterhin blockiert
+(Backend-/Produktentscheidungen). Nach dem Muster der vorherigen Läufe
+heute zuerst `reports/it-chef.md` (06.09.) gelesen: dort werden nur noch
+zwei real offene, bereits fertig diagnostizierte Auto-Fix-PRs genannt —
+#15 ("Überrasch mich", bereits im vorherigen Lauf heute übernommen) und
+#16 (Sprachausgabe lässt sich nicht stoppen).
+
+**Ausgewählter Punkt:** PR #16
+(`it-chef-autofix/sprachausgabe-stoppt-nicht-2026-09-03`): `stopSpeaking()`
+(`src/lib/ai/speech.ts:74`) existiert, wird aber im gesamten Code
+nirgends aufgerufen. Selbst verifiziert (`grep` über `src/` nach
+`stopSpeaking`, einziger Treffer die Definition selbst) — Bug an exakt
+der im Bericht genannten Stelle unverändert reproduzierbar.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Chat-UI-Interaktion (Sprachausgabe-Toggle,
+Neu-starten-Button, Seiten-Unmount). Keine offene Produkt-/
+Architekturentscheidung: der ursprüngliche Auto-Fix-PR-Branch nennt exakte
+Stelle und exakten Fix, den betroffenen Aufruferkreis (Sprachausgabe
+ausschalten, Chat zurücksetzen, Seite verlassen) gibt der bestehende Code
+selbst vor (`speechEnabled`-Toggle, `resetChat`, Komponenten-Lebenszyklus).
+Der PR-Branch selbst war allerdings seit dem 03.09. so weit divergiert,
+dass ein direkter Merge/Cherry-Pick mehrere seither auf `it-chef/auto`
+gelandete Fixes rückgängig gemacht hätte (u. a. `formatOfferPrice()`,
+`min`-Datumsgrenzen bei Hin-/Rückflug, Passagier-NaN-Schutz, die
+`useChat.ts`-Fehlerbehandlung für aufgelöste statt abgelehnte
+Duffel-Fehler) — deshalb stattdessen derselbe, im Bericht bereits
+identifizierte Fix frisch gegen den aktuellen Stand von `KiChat.tsx`
+umgesetzt, keine eigene Interpretation über die Diagnose hinaus nötig.
+Ergebnis objektiv prüfbar: `stopSpeaking()` wird jetzt in allen drei
+identifizierten Fällen tatsächlich aufgerufen, per Regressionstest
+abgesichert.
+
+**Umgesetzt:**
+- `src/components/chat/KiChat.tsx`: `stopSpeaking` zusätzlich zu
+  `isSpeechSynthesisSupported` aus `@/lib/ai/speech` importiert. Neue
+  `toggleSpeech()`-Funktion ruft `stopSpeaking()` auf, bevor die
+  Sprachausgabe deaktiviert wird (ersetzt den bisherigen inline
+  `onClick`-Handler am Lautsprecher-Button). Neue `handleReset()`-Funktion
+  ruft `stopSpeaking()` vor `resetChat()` auf, genutzt sowohl vom
+  "Neu starten"-Button als auch vom "Neue Reise
+  planen"-Quick-Reply-Zweig in `handleQuickReply` (ersetzt dort den
+  direkten `resetChat()`-Aufruf). Neuer `useEffect(() => stopSpeaking,
+  [])` stoppt eine laufende Ansage zusätzlich beim Verlassen der
+  Chat-Seite (Unmount-Cleanup).
+- Drei neue Regressionstests in `src/components/chat/KiChat.test.tsx`
+  (neue `describe`-Gruppe "KiChat speech synthesis stop"; bisher gab es
+  dort nur die beiden `storageWarning`-Tests): `@/lib/ai/speech` wird
+  jetzt vollständig gemockt (`isSpeechSynthesisSupported`,
+  `isSpeechRecognitionSupported` — Letzteres wird von `ChatInput.tsx`
+  benötigt, sonst schlägt das Rendern fehl —, `stopSpeaking` als
+  `vi.fn()`). Tests prüfen: Ausschalten der Sprachausgabe ruft
+  `stopSpeaking()` auf; Klick auf "Neu starten" ruft `stopSpeaking()` vor
+  `resetChat()` auf; Unmount der Komponente ruft `stopSpeaking()` auf.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4/5, direkt nach dem
+  `selectFlight()`-Preisformat-Eintrag von heute) und dieser Log-Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  umgestellt — reiner Bugfix, kein eigener PRD-Punkt. Der ursprüngliche
+  Auto-Fix-PR #16 bleibt als überholt zurück (kann bei nächster
+  PR-Hygiene-Aufräumung geschlossen werden, wie in `reports/it-chef.md`
+  bereits für andere Altbranches vorgeschlagen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 204 Tests (201 +
+  3 neue aus diesem Lauf), alle grün.
+- `npm run build` (`tsc -b && vite build`) — keine Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

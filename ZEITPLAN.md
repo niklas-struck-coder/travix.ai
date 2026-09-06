@@ -589,6 +589,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `formatOfferPrice()` statt der rohen Feld-Interpolation. Neuer
   Regressionstest in `useChat.test.ts` (Bestätigungstext enthält das
   formatierte "249,00 €", nicht mehr das rohe "249.00 EUR").
+  Vom autonomen IT-Chef-Lauf am 06.09. (weiterer Lauf) einen bereits über
+  einen offenen, aber noch nicht gemergten Auto-Fix-PR (#16,
+  `it-chef-autofix/sprachausgabe-stoppt-nicht-2026-09-03`) diagnostizierten
+  Bug frisch gegen den aktuellen Stand umgesetzt (der PR-Branch selbst war
+  seit dem 03.09. zu stark divergiert, um ihn direkt zu übernehmen — er
+  hätte mehrere seither gelandete Fixes wieder rückgängig gemacht, u. a.
+  `formatOfferPrice()` und die `min`-Datumsgrenzen): `stopSpeaking()`
+  (`src/lib/ai/speech.ts`) existierte bereits, wurde aber im gesamten Code
+  nirgends aufgerufen. Eine per Sprachausgabe vorgelesene Bot-Nachricht
+  lief dadurch immer vollständig zu Ende — weder das Abschalten des
+  Lautsprecher-Buttons in `KiChat.tsx`, noch "Neu starten", noch das
+  Verlassen der Chat-Seite stoppten eine laufende Ansage. Fix:
+  `KiChat.tsx` ruft `stopSpeaking()` jetzt an den drei Stellen auf, an
+  denen eine laufende Vorlesung sonst weiterläuft, obwohl sie es nicht
+  mehr sollte — beim Ausschalten der Sprachausgabe (neue
+  `toggleSpeech()`), bei "Neu starten"/dem "Neue Reise
+  planen"-Quick-Reply (neue `handleReset()`) und beim Verlassen der Seite
+  (`useEffect`-Cleanup beim Unmount). Drei neue Regressionstests in
+  `KiChat.test.tsx` (bisher gab es dort nur die beiden
+  `storageWarning`-Tests), die `@/lib/ai/speech` mocken und prüfen, dass
+  `stopSpeaking()` in allen drei Fällen aufgerufen wird. Der ursprüngliche
+  Auto-Fix-PR #16 bleibt als überholt zurück (kann bei nächster
+  PR-Hygiene-Aufräumung geschlossen werden, wie in `reports/it-chef.md`
+  bereits für andere Altbranches vorgeschlagen).
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

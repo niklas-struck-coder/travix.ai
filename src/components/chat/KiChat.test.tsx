@@ -1,11 +1,17 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { KiChat } from './KiChat'
 import { useChat } from '@/hooks/useChat'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
+import { stopSpeaking } from '@/lib/ai/speech'
 
 vi.mock('@/hooks/useChat')
+vi.mock('@/lib/ai/speech', () => ({
+  isSpeechSynthesisSupported: () => true,
+  isSpeechRecognitionSupported: () => false,
+  stopSpeaking: vi.fn(),
+}))
 
 // jsdom doesn't implement Element.scrollTo — KiChat's auto-scroll effect
 // calls it unconditionally on every render.
@@ -61,5 +67,39 @@ describe('KiChat storage warning', () => {
         'Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.',
       ),
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('KiChat speech synthesis stop', () => {
+  it('stops speaking when turning speech output off', () => {
+    vi.mocked(stopSpeaking).mockClear()
+    renderKiChat()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sprachausgabe aktivieren' }))
+    vi.mocked(stopSpeaking).mockClear()
+    fireEvent.click(screen.getByRole('button', { name: 'Sprachausgabe deaktivieren' }))
+
+    expect(stopSpeaking).toHaveBeenCalled()
+  })
+
+  it('stops speaking when the chat is reset', () => {
+    vi.mocked(stopSpeaking).mockClear()
+    const resetChat = vi.fn()
+    renderKiChat({ resetChat })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
+
+    expect(stopSpeaking).toHaveBeenCalled()
+    expect(resetChat).toHaveBeenCalled()
+  })
+
+  it('stops speaking when leaving the chat (unmount)', () => {
+    vi.mocked(stopSpeaking).mockClear()
+    const { unmount } = renderKiChat()
+    vi.mocked(stopSpeaking).mockClear()
+
+    unmount()
+
+    expect(stopSpeaking).toHaveBeenCalled()
   })
 })
