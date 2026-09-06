@@ -2165,3 +2165,52 @@ keine Codeänderung.
 
 **Ergebnis:** Beide geprüften Branches bestanden, gemergt und gepusht.
 Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-06, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, 5 Commits vor `main`.
+- `marketing-chef/auto` — 0 Commits vor `main` (läuft erst um 6 Uhr,
+  separater späterer Lauf). Übersprungen wie vorgesehen.
+- `support-chef/auto` — 0 Commits vor `main` (läuft erst um 6 Uhr,
+  separater späterer Lauf). Übersprungen wie vorgesehen.
+
+**Unabhängige Prüfung `it-chef/auto`** (Branch-Inhalt in den Arbeitsbaum
+geholt, frisch `npm install`, dann selbst ausgeführt statt nur dem Log zu
+glauben):
+- `npx tsc -b` → grün, keine Fehler.
+- `npx eslint .` → 0 Fehler, nur die 3 bekannten vorbestehenden Warnings
+  in `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, nicht
+  durch diesen Branch verursacht).
+- `npx vitest run` → 200/200 Tests grün (38 Testdateien), deckt sich mit
+  der im `it-chef-auto-log.md` behaupteten Zahl.
+
+**Scope-Check:** Die 5 Commits decken sich exakt mit den 5 im
+`it-chef-auto-log.md` beschriebenen Einzelpunkten:
+1. `formatOfferPrice()` gegen ungültigen Währungscode abgesichert
+   (`format.ts`, try/catch um `Intl.NumberFormat`).
+2. Stiller Trip-Verlust bei vollem `localStorage` jetzt sichtbar
+   (`tripStorage.ts` gibt Erfolg/Misserfolg zurück, `useChat.ts`/
+   `KiChat.tsx` zeigen einen Hinweistext).
+3. Flugauswahl-Bestätigung im Chat nutzt jetzt `formatOfferPrice()` statt
+   roher Zahl/Währungscode-Interpolation.
+4. Concierge-Wortgrenzen-Bug behoben (`euro`/`hi` matchten bisher auch
+   mitten in Wörtern wie "Europa"/"Sushi").
+5. `trip.activities` beim Laden aus `localStorage` auf Array normalisiert
+   (verhindert `TypeError` bei Alt-/korrupten Reiseplänen ohne dieses
+   Feld).
+
+Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten.
+Kein Scope-Creep — Diff (`ZEITPLAN.md`, `it-chef-auto-log.md`,
+`KiChat.tsx`/`.test.tsx`, `useChat.ts`/`.test.ts`, `mockConcierge.ts`/
+`.test.ts`, `format.ts`/`.test.ts`, `tripStorage.ts`/`.test.ts`) passt
+exakt zu den 5 beschriebenen Punkten. Einzige sichtbare UI-Änderung ist
+der neue Speicher-Warnhinweis in `KiChat.tsx` (dezenter
+`text-xs text-muted-foreground`-Text, kein Rot) — passt zu
+`MARKENDESIGN.md` (ehrlich/konkret statt generisch, kein Rot-Schock).
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `56efea2..2483ce4`, gepusht). `marketing-chef/auto` und
+`support-chef/auto` heute noch nichts Neues, für den späteren
+6-Uhr-Freigabe-Lauf offen gelassen. Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
