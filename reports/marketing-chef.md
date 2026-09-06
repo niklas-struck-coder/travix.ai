@@ -1,56 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-05
+**Datum:** 2026-09-06
 
-## Was ist seit dem letzten Eintrag (2026-09-04) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-05) passiert?
 
-Wieder überwiegend Stabilität statt neuer Positionierung, aber mit zwei
-Punkten, die für dich relevant sind:
+Ein technisch produktiver Tag, aber wieder ohne neue Entscheidung von dir
+zu den offenen Freigabe-Fragen:
 
-- Vier weitere Ehrlichkeits-/Zuverlässigkeits-Fixes sind gemergt: hängender
-  Mikrofon-Knopf bei Fehlern, identischer Start-/Zielflughafen ohne Hinweis,
-  IATA-Feld ohne Buchstabenprüfung, und Chat-/Reisedaten, die bei vollem
-  Browser-Speicher unbemerkt verloren gehen konnten. Alles Kandidaten für
-  den wachsenden Tier-4-Themenpool.
-- **Neu gefunden, noch nicht gemerged:** PR #18 behebt einen Absturz der
-  ganzen Reiseplan-Seite, wenn ein alter/korrupter Trip ohne
-  "Aktivitäten"-Feld geladen wird. PR #17 (Währungscode-Absturz) und PR #16
-  (Stopp-Knopf Vorlesen-Funktion) sind weiterhin offen.
-- **Neu gefunden, bewusst nicht automatisch gefixt:** Eine Suche mit null
-  Treffern zeigt keine "Neue Reise planen"-Chips mehr an — anders als jeder
-  andere Chat-Endzustand. Kein Absturz, aber dieselbe Ehrlichkeits-Lücke
-  wie die bereits gefixten Sackgassen-Bugs, nur beim Erfolgsfall übersehen.
-- Über den separaten `marketing-chef-eigen`-Kanal ist inzwischen ein
-  konkreter Entwurf für den öffentlichen Mini-Changelog entstanden
-  (`marketing/mini-changelog-konzept.md`) — genau die Idee aus meinem
-  letzten Bericht, jetzt als fertiger Text statt nur als Konzept. Das ist
-  nicht mein Kanal, aber relevant für Vorschlag 2 unten.
-- Die drei offenen Freigabe-Fragen an dich (Kanäle anlegen, Warenkorb-
-  Content zurückhalten, Tier-4-Format ja/nein) sind seit dem 21.08.
-  weiterhin unbeantwortet.
+- **PR #18 ist gemergt:** Der Absturz der Reiseplan-Seite bei alten/
+  korrupten Trips ohne "Aktivitäten"-Feld, den ich letztes Mal noch als
+  offen gemeldet hatte, ist jetzt behoben.
+- **Neuer Fund, noch offen (PR #19):** Wenn ein Trip nicht gespeichert
+  werden kann (z. B. voller Browser-Speicher), zeigte die App bisher trotz
+  Fehlschlag "gespeichert" an — der Nutzer merkt den Datenverlust also gar
+  nicht. Gleiche Fehlerklasse wie die bereits behobenen Sackgassen-Bugs,
+  nur beim Speichern statt beim Laden.
+- **Kleine, aber charmante Detailkorrektur:** Die Preisbestätigung bei
+  Flugauswahl im Chat zeigt Beträge jetzt im deutschen Zahlenformat
+  (Komma statt Punkt) statt im rohen US-Format.
+- Der PR-Stau wurde aufgeräumt: von 18 offenen Auto-Fix-PRs sind nur noch
+  3 wirklich relevant, der Rest war längst anderweitig gemerged.
+- Die vier offenen Fragen an dich (Kanäle anlegen, Warenkorb-Content,
+  Tier-4-Format, und jetzt auch: soll der fertige Mini-Changelog-Entwurf
+  als Footer-Seite gebaut werden) sind weiterhin unbeantwortet — teils
+  seit dem 21.08.
 
 ## Vorschläge
 
-1. **Sprachfunktion weiterhin nicht bewerben.** PR #16 (Stopp-Knopf) ist
-   immer noch offen. Unveränderte Empfehlung, bis das gemergt ist.
+1. **Die deutsche Zahlenformat-Korrektur als kleinen Beleg mitnehmen.**
+   Kein eigenes Kampagnenthema, aber ein gutes zusätzliches Beispiel für
+   "für den deutschen Markt gebaut, nicht nur oberflächlich übersetzt" —
+   gehört in den nächsten Mini-Changelog-Durchgang, sobald der freigegeben
+   ist.
 
-2. **Mini-Changelog-Entwurf ist jetzt entscheidungsreif — schau ihn dir an.**
-   Statt weiter auf eine grundsätzliche Tier-4-Ja/Nein-Antwort zu warten:
-   Der fertige Entwurf in `marketing/mini-changelog-konzept.md` bündelt
-   genau die Art Fixes, die sich seit Wochen häufen (inkl. der heutigen
-   Nulltreffer- und Absturz-Funde). Wenn er dir gefällt, ist das dein
-   Testlauf für das Format — ohne dass ich hier eine neue Idee draufsetzen
-   muss.
+2. **Eine der vier offenen Fragen entblocken, am besten die einfachste.**
+   Der Mini-Changelog-Entwurf liegt fertig da (Text + Design-Brief), braucht
+   keinen neuen Kanal und keine 6.2-Priorisierung — nur ein Ja/Nein von dir,
+   ob IT-Chef die Footer-Seite bauen soll. Das würde den am längsten
+   liegenden Content-Baustein endlich nutzbar machen, ohne dass irgendwo
+   sonst etwas verändert werden muss.
 
-3. **Die Nulltreffer-Lücke als Content-Baustein vormerken, nicht extra
-   bewerben.** Sobald IT-Chef entschieden hat, welcher Text/welche Chips
-   bei "erfolgreiche Suche, aber nichts gefunden" erscheinen, ist das ein
-   weiterer guter Eintrag für den Mini-Changelog — kein eigenes
-   Kampagnen-Thema, aber ein Beleg mehr für "wir polieren die
-   Kleinigkeiten, die sonst niemand zeigt".
+3. **Sprachfunktion weiterhin nicht bewerben.** PR #16 (Stopp-Knopf für die
+   Vorlesen-Funktion) ist immer noch offen. Unveränderte Empfehlung.
 
-4. **Keine erfundenen Kennzahlen.** Weiterhin keine mir bekannten Nutzungs-
-   oder Erfolgszahlen — Content bleibt bei "was wurde ehrlicher/
-   verlässlicher", nicht bei Reichweite oder Nutzerzahlen.
+4. **Keine erfundenen Kennzahlen.** Mir liegen weiterhin keine Nutzungs-
+   oder Erfolgszahlen vor — Content bleibt bei "was wurde ehrlicher und
+   zuverlässiger", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-05_
+_Letztes Update: 2026-09-06_
