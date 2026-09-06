@@ -40,6 +40,16 @@ describe('getConciergeReply', () => {
   it('marks the generic demo fallback for an unrecognized question as unmatched', () => {
     expect(getConciergeReply('Rom', 'Was ist dein Lieblingsrestaurant?').matched).toBe(false)
   })
+
+  it('does not answer with a fact when a question keyword only occurs inside another word', () => {
+    expect(getConciergeReply('Kyoto', 'Wo finde ich gutes Sushi?').matched).toBe(false)
+    expect(getConciergeReply('Rom', 'Wann fliegen wir nach Europa?').text).not.toContain('Euro (€)')
+  })
+
+  it('still answers when the keyword is a real word', () => {
+    expect(getConciergeReply('Kyoto', 'Hi!').text).toContain('Konnichiwa')
+    expect(getConciergeReply('Rom', 'Nehmen die hier Euros?').text).toContain('Euro (€)')
+  })
 })
 
 describe('hasKnownDestination', () => {

@@ -7466,3 +7466,64 @@ exakter Fix). Ergebnis objektiv prüfbar über einen neuen Regressionstest.
   neuer aus diesem Lauf), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-06 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein offener Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` (dort verbleiben nur an Ni-Entscheidungen
+gebundene oder bereits erledigte Punkte), sondern ein bereits über einen
+offenen, aber noch nicht gemergten Auto-Fix-PR-Branch
+(`it-chef-autofix/concierge-question-word-boundary-2026-09-03`) vollständig
+diagnostizierter Bug, dessen Fix noch nicht auf `main`/`it-chef/auto`
+angekommen war: `getConciergeReply()` (`src/lib/ai/mockConcierge.ts`) erkennt
+Themen wie "Währung" oder "Begrüßung" über rohe `String`-Keyword-Regexe ohne
+Wortgrenzen. Bei den beiden kurzen, vollständigen Wörtern "euro" und "hi"
+matchte das mitten in unbeteiligten Wörtern — z. B. "Wann fliegen wir nach
+Europa?" löste fälschlich die Währungsantwort aus (Treffer in "Europa"), "Wo
+finde ich gutes Sushi?" fälschlich die Begrüßungsfloskel (Treffer in
+"Sushi"). Exakt dieselbe Fehlerklasse, die in diesem Repo bereits dreimal
+unabhängig gefunden und behoben wurde (`findFacts()`/`findKnownDestination()`
+am 02.09., `detectTransportMode()` am 03.09.) — hier lag sie unabhängig
+davon noch offen in derselben Datei.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Chat-Antwortlogik im Demo-Concierge. Keine
+offene Produkt-/Architekturentscheidung: der Fix wendet exakt dasselbe,
+bereits etablierte Wortgrenzen-Muster an, das an drei anderen Stellen im
+Code bereits Präzedenzfall ist. Klar genug beschrieben — der bereits
+existierende, vollständig ausgearbeitete Auto-Fix-Branch nennt exakte Zeile,
+exakten Fix und exakte Tests, keine eigene Interpretation nötig, nur
+Übernahme und Verifikation gegen den aktuellen Stand. Ergebnis objektiv
+prüfbar über neue Regressionstests.
+
+**Umgesetzt:**
+- `src/lib/ai/mockConcierge.ts`: Keyword-Regex für Währung/Bezahlen von
+  `/währung|geld|bezahl|euro|preis/` auf
+  `/währung|geld|bezahl|\beuros?\b|preis/` geändert, Keyword-Regex für
+  Begrüßung von `/sprache|begrüß|hallo|hi\b/` auf
+  `/sprache|begrüß|hallo|\bhi\b/` — beide jetzt mit vollständigen
+  Wortgrenzen um "euro(s)"/"hi". Die übrigen Einträge (z. B. "währung",
+  "hallo") bleiben bewusst unverändert, da es sich um Wortstämme handelt,
+  die weiterhin auch als Teil längerer Wörter ("Währungen") matchen sollen.
+  Kurzer Kommentar ergänzt, der diese Unterscheidung erklärt.
+- Zwei neue Regressionstests in `src/lib/ai/mockConcierge.test.ts`: einer
+  prüft, dass ein Keyword, das nur als Teilwort vorkommt ("Sushi", "Europa"),
+  keinen Fakt mehr auslöst; der andere prüft, dass dieselben Keywords als
+  eigenständige Wörter ("Hi!", "Euros?") weiterhin korrekt matchen.
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 8) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt — reiner
+  Bugfix, kein eigener PRD-Punkt. Der ursprüngliche Auto-Fix-PR-Branch bleibt
+  als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
+  werden, wie in `reports/it-chef.md` bereits für andere Altbranches
+  vorgeschlagen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npm run build` (`tsc -b && vite build`) — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npm test` (vollständige Vitest-Suite) — 38 Testdateien, 199 Tests (197 +
+  2 neue aus diesem Lauf), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

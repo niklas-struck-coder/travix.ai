@@ -288,6 +288,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Rückgabeformat angepasst, neue Tests dort (matched-Flag pro Fall)
   sowie drei neue Tests in `useConcierge.test.ts` für den Avatar-Zustand
   nach Antworten mit bekanntem/unbekanntem/fehlendem Ziel.
+  Vom autonomen IT-Chef-Lauf am 06.09. (weiterer Lauf) einen bereits über
+  einen offenen, aber noch nicht gemergten Auto-Fix-PR
+  (`it-chef-autofix/concierge-question-word-boundary-2026-09-03`)
+  vollständig diagnostizierten Bug direkt auf `it-chef/auto` behoben:
+  `getConciergeReply()` (`mockConcierge.ts`) erkannte die Themen
+  "Währung"/"Begrüßung" per rohem `String`-Keyword-Match ohne Wortgrenzen
+  bei den kurzen, vollständigen Wörtern "euro" und "hi" — dieselbe
+  Fehlerklasse, die bereits in `findFacts()`, `findKnownDestination()` und
+  `detectTransportMode()` gefunden und behoben wurde, hier aber
+  unabhängig davon noch offen war. Dadurch beantwortete der Concierge z. B.
+  "Wann fliegen wir nach Europa?" fälschlich mit einem Währungs-Fakt (Treffer
+  mitten in "Europa") und "Wo finde ich gutes Sushi?" fälschlich mit der
+  Begrüßungsfloskel (Treffer mitten in "Sushi") — erfundene Themenbezüge
+  entgegen dem im Datei-Kopfkommentar selbst festgehaltenen
+  "no fabricated data"-Grundsatz. Fix: beide Keywords jetzt mit
+  `\b`-Wortgrenzen (`\beuros?\b`, `\bhi\b`), die übrigen Einträge bleiben
+  bewusst unverändert, da es sich um Wortstämme handelt (z. B. "währung" soll
+  weiterhin "Währungen" matchen). Zwei neue Regressionstests in
+  `mockConcierge.test.ts` (Keyword nur als Teilwort löst keinen Fakt aus;
+  Keyword als eigenständiges Wort funktioniert weiterhin).
   Vom autonomen IT-Chef-Lauf am 03.09. (sechsundzwanzigster Lauf) einen
   eigenständig gefundenen Bug in `FlightWizard.tsx` behoben: `isValid`
   prüfte bei "Hin- und Rückflug" nur, ob überhaupt ein Rückflugdatum

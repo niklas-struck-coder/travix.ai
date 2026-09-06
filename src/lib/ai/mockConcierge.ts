@@ -70,13 +70,17 @@ export function getConciergeReply(destination: string | null, userMessage: strin
     }
   }
 
-  if (/währung|geld|bezahl|euro|preis/.test(lower)) {
+  // Kurze, vollständige Wörter ("euro", "hi") brauchen Wortgrenzen, sonst
+  // matchen sie mitten in unbeteiligten Wörtern ("Europa", "Sushi") und der
+  // Concierge antwortet mit einem Fakt, der nichts mit der Frage zu tun hat.
+  // Die übrigen Einträge sind bewusst Wortstämme ("währung" → "Währungen").
+  if (/währung|geld|bezahl|\beuros?\b|preis/.test(lower)) {
     return { text: `Vor Ort zahlst du in ${facts.currency}. Am besten mit Karte oder etwas Bargeld für Kleinigkeiten.`, matched: true }
   }
   if (/notruf|notfall|polizei|hilfe|unfall/.test(lower)) {
     return { text: `Die Notrufnummer lautet: ${facts.emergencyNumber}.`, matched: true }
   }
-  if (/sprache|begrüß|hallo|hi\b/.test(lower)) {
+  if (/sprache|begrüß|hallo|\bhi\b/.test(lower)) {
     return { text: facts.greeting, matched: true }
   }
 
