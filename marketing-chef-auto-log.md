@@ -4,6 +4,93 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-06
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`2e28606` (05.09.) hängengeblieben, dessen Inhalt laut `git log
+origin/main ^origin/marketing-chef/auto` bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`b94811d`) aus angelegt, wie in
+den Session-Regeln für bereits gemergte Branches vorgesehen.
+
+**Ausgewählter Punkt:** Kein neues Content-Stück und keine zweite
+Mini-Changelog-Ausgabe. Stattdessen: `marketing/freigabe-uebersicht.md`
+(zuletzt 05.09.) um eine neue Prüfung vom 06.09. ergänzt — ordnet vier
+seit dem letzten Marketing-Lauf neu hinzugekommene Codeänderungen in den
+bestehenden Tier-4-Kandidatentopf ein und hält fest, dass zwei der drei
+zum 05.09. noch offenen Auto-Fix-PRs (#17, #18) inzwischen gemergt sind.
+
+**Warum dieser Punkt statt eines neuen Entwurfs:** Der eigene Vorlauf vom
+05.09. (`marketing/freigabe-uebersicht.md`, Abschnitt "Nächster autonomer
+Lauf") gibt für diesen Lauf explizit vor: zuerst prüfen, ob eine der vier
+offenen Fragen an Ni beantwortet wurde, bevor irgendein neuer Text
+entsteht, und eine zweite Mini-Changelog-Ausgabe erst schreiben, wenn sich
+seit dem 05.09. "genug" neue Kandidaten angesammelt haben, statt nach
+jedem einzelnen neuen Fix. Beides direkt geprüft: `git log` zeigt keinen
+Commit zu neuen Kanal-Links, zu 6.2 oder zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite, und `git log -- marketing/freigabe-uebersicht.md`
+zeigt seit dem 05.09. nur eigene autonome Commits, keine Notiz von Ni —
+keine der vier Fragen ist beantwortet. Mit vier neuen Kandidaten (davon
+zwei bereits als PR #17/#18 aus der ersten Ausgabe bekannt, jetzt nur
+gemerged statt neu) ist die Menge nicht größer als an früheren
+reinen Übersichts-Tagen (z. B. 02.09., 03.09.: je vier) — eine zweite
+Ausgabe vor Beantwortung von Frage 4 würde außerdem an derselben Bremse
+vorbeiproduzieren wie ein neuntes Social-Stück vor den ersten drei
+Fragen. Konsequente Fortsetzung des seit dem 25.08. etablierten Musters.
+
+**Vor der Auswahl geprüft:** `git log 2e28606..origin/main` zeigt 13 neue
+Commits seit dem letzten Marketing-Lauf. Der größte Teil ohne
+Content-Relevanz (ein Freigabe-Chef-Merge/-Log, ein Support-Chef-Bericht,
+der eigene interaktive Marketing-Chef-Bericht vom 05.09., ein
+IT-Chef-Bericht, ein Daily-Status-Update). Fünf echte Codeänderungen
+einzeln per `git show` geprüft:
+- `2483ce4` (06.09.): `trip.activities` wird beim Laden auf ein leeres
+  Array normalisiert, statt ungeprüft durchgereicht zu werden — behebt
+  einen Absturz von Buchungs-/Checklisten-/Bearbeiten-Ansicht bei altem/
+  korruptem Reiseplan. **Content-relevant** — löst PR #18, das die erste
+  Mini-Changelog-Ausgabe noch als offen gelistet hatte.
+- `404935c` (05.09.): `formatOfferPrice()` gegen fehlenden/ungültigen
+  Währungscode abgesichert (`RangeError` in `Intl.NumberFormat` fing
+  bisher Flug-/Hotelkarten zum Absturz). **Content-relevant** — löst
+  PR #17, ebenfalls in der ersten Ausgabe noch als offen notiert.
+- `0b28d39` (05.09.): setzt Vorschlag 3 aus `reports/support-chef.md`
+  (05.09.) um — ein fehlgeschlagenes Speichern des Chat-Fortschritts bei
+  vollem `localStorage` blieb bisher unbemerkt, jetzt gibt es einen
+  sichtbaren Hinweis statt eines lautlosen künftigen Datenverlusts.
+  **Content-relevant.**
+- `bf20ae3` (06.09.): "euro"/"hi" ohne Wortgrenzen im Concierge matchte
+  fälschlich mitten in "Europa"/"Sushi" — gleiche Fehlerklasse wie die
+  bereits gelisteten Wortgrenzen-Bugs bei Zielname-/
+  Transportmittel-Erkennung. **Content-relevant.**
+- `2daeb05` (06.09.): Flugauswahl-Bestätigung im Chat zeigt den Preis
+  jetzt wie die Karten über `formatOfferPrice()` lokalisiert statt roh
+  ("249,00 €" statt "249.00 EUR"). **Nicht** aufgenommen — reine
+  Konsistenzkorrektur zwischen zwei bereits korrekten Darstellungen, der
+  Rohwert war zuvor numerisch richtig, nur nicht lokalisiert; keine
+  "falsche Information ohne Erkennbarkeit"-Erzählung wie bei den übrigen
+  Punkten.
+
+Zusätzlich per `git merge-base --is-ancestor` geprüft: PR #16
+(Sprachausgabe-Stopp-Knopf) ist weiterhin **nicht** gemergt — die
+bestehende Zurückhaltung bei der Bewerbung der Sprachfunktion bleibt
+unverändert, auch wenn zwei der drei zum 05.09. offenen PRs jetzt zu sind.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine zweite Mini-Changelog-Ausgabe — siehe Begründung oben, an Frage 4
+  und "genug neue Kandidaten" gebunden, beides (noch) nicht erfüllt.
+- Ein neuntes eigenständiges Social-Content-Stück — weiterhin an
+  dieselben drei unbeantworteten Fragen gebunden wie alle bisherigen
+  kleinen Ehrlichkeits-Fixes.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-05
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf

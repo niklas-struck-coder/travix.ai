@@ -1,10 +1,94 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-05)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-06)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-06: vier weitere Tier-4-Kandidaten geprüft, PR #17 und #18 jetzt gemergt (waren in der ersten Mini-Changelog-Ausgabe noch "offen"), weiterhin kein achtes Content-Stück bzw. keine zweite Mini-Changelog-Ausgabe
+
+**Erst die vier offenen Fragen aus dem Update vom 05.09. geprüft, bevor
+irgendein neuer Text entsteht:** keine davon wurde seither beantwortet.
+`git log` zeigt keinen Commit zu neuen Kanal-Links, zu 6.2
+(Buchen-Button/Warenkorb) oder zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite selbst; `git log -- marketing/freigabe-uebersicht.md`
+zeigt außerdem, dass seit dem 05.09. ausschließlich der eigene autonome
+Lauf diese Datei verändert hat, keine Notiz von Ni. Die Selbstauflage aus
+dem letzten Update — vor einer zweiten Mini-Changelog-Ausgabe erst wieder
+"genug" neue Kandidaten sammeln statt nach jedem einzelnen Fix neu zu
+schreiben — bleibt daher der Maßstab für die Entscheidung unten.
+
+Vor der Auswahl `git log 2e28606..origin/main` geprüft (letzter
+Marketing-Lauf, 05.09.): `marketing-chef/auto` war seit `2e28606`
+unverändert und dessen Inhalt laut `git log origin/main
+^origin/marketing-chef/auto` bereits vollständig in `main` gemergt —
+Branch also nur veraltet, nicht mehr in Arbeit, neu von aktuellem
+`origin/main` (`b94811d`) aus angelegt. 13 neue Commits seit `2e28606`,
+davon ohne Content-Relevanz: ein Freigabe-Chef-Merge/-Log, ein
+Support-Chef-Bericht, ein eigener interaktiver Marketing-Chef-Bericht
+(der die erste Mini-Changelog-Ausgabe als "entscheidungsreif" einordnet
+und die Nulltreffer-Lücke unten als künftigen Baustein vormerkt, aber
+selbst nichts Neues umsetzt), ein IT-Chef-Bericht und ein Daily-Status-
+Update.
+
+Fünf echte Codeänderungen einzeln per `git show` geprüft:
+
+- **`2483ce4` (06.09., IT-Chef 39. Lauf):** `loadStoredChat()` gab
+  `trip.activities` bisher ungeprüft durch; `Buchung.tsx`,
+  `checklistRules.ts` und `EditMode.tsx` lesen `activities.length`
+  unguarded und konnten bei einem alten/korrupten Reiseplan ohne dieses
+  Feld abstürzen. **Content-relevant** — löst **PR #18**, das die erste
+  Mini-Changelog-Ausgabe (Stand 05.09.) noch als offen gelistet hatte
+  (siehe `reports/marketing-chef.md`, 05.09.); gleiche Fehlerklasse wie
+  der bereits gelistete `hasTripData()`-Fix.
+- **`404935c` (05.09., IT-Chef 40. Lauf):** `formatOfferPrice()` warf bei
+  fehlendem/ungültigem ISO-4217-Währungscode eine `RangeError` und ließ
+  `FlightCard.tsx`/`HotelCard.tsx` abstürzen. **Content-relevant** — löst
+  **PR #17**, ebenfalls in der ersten Ausgabe noch als offen notiert.
+  Damit sind zwei der drei zum 05.09. noch offenen Auto-Fix-PRs jetzt
+  gemergt; nur **PR #16** (Sprachausgabe-Stopp-Knopf) bleibt laut
+  `git merge-base --is-ancestor` weiterhin **nicht** gemergt — die
+  bestehende Zurückhaltung bei der Sprachfunktion ändert sich dadurch
+  nicht.
+- **`0b28d39` (05.09., IT-Chef 41. Lauf):** setzt exakt Vorschlag 3 aus
+  `reports/support-chef.md` (05.09.) um — ein fehlgeschlagenes Speichern
+  des Chat-Fortschritts (voller `localStorage`/privater Modus) blieb
+  bisher unbemerkt, der geplante Trip verschwand beim nächsten Laden ohne
+  Vorwarnung. `saveStoredChat()` meldet Erfolg/Misserfolg jetzt als
+  Rückgabewert, `KiChat.tsx` zeigt bei Fehlschlag einen Hinweis, analog
+  zum bestehenden `micError`-Muster. **Content-relevant** — eigene, neue
+  Facette (ehrlicher Hinweis auf einen *möglichen künftigen* Datenverlust,
+  nicht nur ein behobener Absturz).
+- **`bf20ae3` (06.09., IT-Chef 42. Lauf):** `getConciergeReply()`
+  erkannte "euro"/"hi" ohne Wortgrenzen, matchte also fälschlich mitten in
+  "Europa"/"Sushi" — gleiche Fehlerklasse wie die bereits gelisteten
+  Wortgrenzen-Bugs bei Zielname- und Transportmittel-Erkennung.
+  **Content-relevant**, gehört zum selben Themenblock wie
+  "Rom"/"romantisch" und "Business Class"/"Bus".
+- **`2daeb05` (06.09.):** Die Flugauswahl-Bestätigung im Chat zeigte den
+  Preis bisher roh interpoliert ("249.00 EUR") statt wie `FlightCard.tsx`/
+  `HotelCard.tsx` über `formatOfferPrice()` korrekt formatiert
+  ("249,00 €"). **Nicht** in den Kandidatentopf aufgenommen: reine
+  Konsistenzkorrektur zwischen zwei bereits vorhandenen, beide schon
+  korrekten Darstellungen — anders als bei den übrigen Punkten oben gab
+  es hier keinen Moment, in dem eine Nutzerin eine falsche oder
+  irreführende Information gesehen hätte (der Rohwert war numerisch
+  korrekt, nur nicht lokalisiert), daher keine "falsche Information ohne
+  Erkennbarkeit"-Erzählung wie bei den bereits etablierten
+  Aufnahmekriterien.
+
+**Warum trotzdem keine zweite Mini-Changelog-Ausgabe heute:** Die erste
+Ausgabe (05.09.) ist erst einen Tag alt und wartet noch auf Nis
+Grundsatz-Entscheidung, ob das Format überhaupt gebaut wird (Frage 4
+unten) — eine zweite Ausgabe zu schreiben, bevor diese Frage überhaupt
+beantwortet ist, würde an derselben Bremse vorbeiproduzieren wie ein
+neuntes Social-Content-Stück vor Beantwortung der ersten drei Fragen.
+Die eigene Selbstauflage aus dem letzten Update (nicht nach jedem
+einzelnen neuen Fix eine neue Ausgabe) bleibt daher der Maßstab; die vier
+neuen Kandidaten wandern stattdessen in den Tier-4-Kandidatentopf (Punkt 7
+unten) für die nächste Ausgabe, sobald Frage 4 beantwortet ist oder sich
+weiter genug ansammelt.
 
 ## Update 2026-09-05: erstmals ein neuer, eigenständiger Entwurf statt nur einer Übersichts-Ergänzung — Mini-Changelog-Konzept umgesetzt, drei weitere Tier-4-Kandidaten geprüft
 
@@ -722,7 +806,19 @@ Anfang-bis-Ende-Weg im Code.
    Array-Prüfung das ab (siehe Update 2026-09-04 oben). Der eigene Bericht
    vom 29.08. (`reports/marketing-chef.md`) hat dafür bereits einen
    konkreten Formatnamen vorgeschlagen: "Ehrlichkeits-Log", ein Satz
-   Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden.
+   Vorher/Nachher pro Fund — bleibt an Frage 3 unten gebunden. Seit
+   05./06.09. vier weitere, noch nicht in eine Ausgabe aufgenommene
+   Kandidaten (siehe Update 2026-09-06 oben): ein alter/korrupter
+   Reiseplan ohne `activities`-Feld ließ Buchungs-/Checklisten-/
+   Bearbeiten-Ansicht abstürzen, jetzt wird das Feld beim Laden auf ein
+   leeres Array normalisiert (PR #18); ein fehlender/ungültiger
+   Währungscode ließ Flug-/Hotelkarten abstürzen, jetzt fängt
+   `formatOfferPrice()` das ab (PR #17); ein fehlgeschlagenes Speichern
+   des Chat-Fortschritts bei vollem Speicher blieb bisher unbemerkt, jetzt
+   gibt es einen sichtbaren Hinweis statt eines lautlosen künftigen
+   Datenverlusts; und derselbe Wortgrenzen-Bug wie bei Zielname-/
+   Transportmittel-Erkennung steckte unabhängig auch in der
+   Concierge-Themenerkennung ("euro"/"hi" mitten in "Europa"/"Sushi").
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -757,8 +853,8 @@ Bericht vom 20.08. gilt für die ersten drei Fragen unverändert weiter
 (die einzige bisherige Ausnahme war Tier-1-Stück 3, siehe
 `marketing-chef-auto-log.md`, 24.08.). Der Mini-Changelog (05.09.) ist
 kein Bruch dieser Regel, sondern ein bewusst anderer Kanal, der genau
-deshalb heute umgesetzt wurde. Der nächste Lauf sollte zuerst prüfen,
-ob Ni zwischenzeitlich eine der vier Fragen beantwortet hat (z. B. neue
+deshalb umgesetzt wurde. Der nächste Lauf sollte zuerst prüfen, ob Ni
+zwischenzeitlich eine der vier Fragen beantwortet hat (z. B. neue
 Kanal-Links, ein Commit zu 6.2, eine Notiz in diesem Dokument, oder ein
 Commit von IT-Chef zur Mini-Changelog-Seite) oder ob die Checkliste
 inzwischen echte Persistenz hat (dann wird sie laut Bericht vom 24.08.
@@ -766,4 +862,12 @@ selbst zum nächsten Content-Kandidaten), bevor er wieder einen neuen
 Social-Text schreibt. Falls weiterhin keine der vier Fragen beantwortet
 ist: eine zweite Mini-Changelog-Ausgabe ist erst sinnvoll, sobald sich
 seit dem 05.09. wieder genug neue, verifizierte Tier-4-Kandidaten
-angesammelt haben (nicht nach jedem einzelnen neuen Fix).
+angesammelt haben (nicht nach jedem einzelnen neuen Fix) — Stand 06.09.
+sind das vier (siehe Update 2026-09-06 oben und Punkt 7 oben), noch
+bewusst nicht als ausreichend gewertet, solange Frage 4 unbeantwortet
+ist und die erste Ausgabe erst einen Tag alt ist. Zusätzlich lohnt ein
+Blick, ob IT-Chef inzwischen die beiden Nulltreffer-/Chip-Lücken aus
+`reports/support-chef.md` (05.09., Vorschlag 1+2) behoben hat — die
+wären laut dem eigenen Bericht vom 05.09. (`reports/marketing-chef.md`,
+Vorschlag 3) ein weiterer guter Baustein für die nächste Ausgabe, sobald
+IT-Chef entschieden hat, welcher Text/welche Chips erscheinen.
