@@ -11,7 +11,16 @@ export interface StoredChatState {
 export function loadStoredChat(): StoredChatState | null {
   try {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as StoredChatState) : null
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as StoredChatState
+    // Legacy/corrupted stored trips can be missing `activities` entirely (see
+    // hasTripData below). Every consumer of the loaded trip (Buchung.tsx,
+    // ChecklistPanel, EditMode) reads `trip.activities.length` unguarded, so
+    // this must always come back as an array.
+    return {
+      ...parsed,
+      trip: { ...parsed.trip, activities: Array.isArray(parsed.trip.activities) ? parsed.trip.activities : [] },
+    }
   } catch {
     return null
   }

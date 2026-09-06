@@ -7527,3 +7527,65 @@ prüfbar über neue Regressionstests.
   2 neue aus diesem Lauf), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-06 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Wie im vorherigen Lauf heute kein offener Punkt aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` (dort verbleiben nur an
+Ni-Entscheidungen gebundene oder bereits erledigte Punkte), sondern ein
+bereits über einen offenen, aber noch nicht gemergten Auto-Fix-PR (#18,
+`it-chef-autofix/trip-activities-undefined-2026-09-05`) vollständig
+diagnostizierter Bug, dessen Fix noch nicht auf `main`/`it-chef/auto`
+angekommen war: `loadStoredChat()` (`src/lib/trip/tripStorage.ts`) gibt
+`trip.activities` nach `JSON.parse` bisher ungeprüft durch. Ein früherer
+Teilfix (siehe Phase-4-Notiz vom 04.09. in `ZEITPLAN.md`) schützte nur
+`hasTripData()` selbst gegen ein fehlendes `activities`-Feld, nicht aber
+die eigentlichen Konsumenten des geladenen Trips. Sobald `hasTripData()`
+`true` liefert (reicht z. B. schon, wenn nur `destination` gesetzt ist),
+lesen `Buchung.tsx:255`, `checklistRules.ts:48` und `EditMode.tsx`
+weiterhin ungeschützt `trip.activities.length` — bei einem Alt- oder
+korrupten Reiseplan ohne dieses Feld (z. B. aus einer früheren
+App-Version) ein `TypeError`, der die Buchungsseite mitten im Rendern
+abreißen lässt, ohne ErrorBoundary bleibt die Seite dann leer.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine defensive Normalisierung eines aus dem
+lokalen Browser-Speicher geladenen Werts. Keine offene Produkt-/
+Architekturentscheidung: der bereits existierende, vollständig
+ausgearbeitete Auto-Fix-PR-Branch nennt exakte Zeile, exakten Fix und
+exakten Test, keine eigene Interpretation nötig, nur Übernahme und
+Verifikation gegen den aktuellen Stand (`it-chef/auto` hatte sich seit
+Erstellung des PRs an anderer Stelle weiterentwickelt, der Fix selbst
+war noch unverändert anwendbar). Keine Verhaltensänderung für normale,
+vollständige Trips. Ergebnis objektiv prüfbar über einen neuen
+Regressionstest.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `loadStoredChat()` normalisiert
+  `trip.activities` beim Laden jetzt immer auf ein Array
+  (`Array.isArray(parsed.trip.activities) ? parsed.trip.activities : []`),
+  statt den rohen `JSON.parse`-Wert durchzureichen — behebt damit alle
+  drei betroffenen Konsumenten (`Buchung.tsx`, `checklistRules.ts`,
+  `EditMode.tsx`) an der gemeinsamen Datenquelle.
+- Neuer Regressionstest in `src/lib/trip/tripStorage.test.ts`: seedet
+  `localStorage` mit einem gespeicherten Chat-Zustand, dessen `trip` kein
+  `activities`-Feld hat, und prüft, dass `loadStoredChat()` dafür `[]`
+  liefert statt `undefined`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 4) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt —
+  reiner Bugfix, kein eigener PRD-Punkt. Der ursprüngliche Auto-Fix-PR
+  #18 bleibt als überholt zurück (kann bei nächster PR-Hygiene-
+  Aufräumung geschlossen werden, wie in `reports/it-chef.md` bereits für
+  andere Altbranches vorgeschlagen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run build` (`tsc -b && vite build`) — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 200 Tests (199 +
+  1 neuer aus diesem Lauf), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

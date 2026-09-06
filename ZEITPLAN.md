@@ -69,6 +69,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `tripStorage.test.ts` (fehlendes `activities`-Feld wirft nicht mehr,
   liefert `false` bzw. weiterhin `true`, wenn echte Aktivitäten
   vorhanden sind).
+  Vom autonomen IT-Chef-Lauf am 06.09. (weiterer Lauf) das damals offen
+  gelassene "normalisierende Laden" nachgeholt: ein bereits über einen
+  offenen, aber noch nicht gemergten Auto-Fix-PR (#18,
+  `it-chef-autofix/trip-activities-undefined-2026-09-05`) vollständig
+  diagnostizierter Bug direkt auf `it-chef/auto` behoben.
+  `loadStoredChat()` (`tripStorage.ts`) gab `trip.activities` bisher
+  ungeprüft durch — der frühere Teilfix (33. Lauf) schützte nur
+  `hasTripData()` selbst, nicht die eigentlichen Konsumenten. Sobald
+  `hasTripData()` `true` liefert (reicht z. B. schon, wenn nur
+  `destination` gesetzt ist), lasen `Buchung.tsx:255`,
+  `checklistRules.ts:48` und `EditMode.tsx` weiterhin ungeschützt
+  `trip.activities.length` — bei einem Alt-/korrupten Reiseplan ohne
+  dieses Feld ein `TypeError`, der die Buchungsseite mitten im Rendern
+  abreißen ließ. Fix: `loadStoredChat()` normalisiert `trip.activities`
+  beim Laden jetzt immer auf ein Array (`Array.isArray(...) ? ... : []`),
+  statt den rohen `JSON.parse`-Wert durchzureichen — behebt damit alle
+  drei Konsumenten an der gemeinsamen Datenquelle, keine
+  Verhaltensänderung für normale (vollständige) Trips. Neuer
+  Regressionstest in `tripStorage.test.ts` (fehlendes `activities`-Feld
+  im gespeicherten Zustand wird beim Laden zu `[]` normalisiert). Der
+  ursprüngliche Auto-Fix-PR #18 bleibt als überholt zurück (kann bei
+  nächster PR-Hygiene-Aufräumung geschlossen werden, wie in
+  `reports/it-chef.md` bereits für andere Altbranches vorgeschlagen).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
