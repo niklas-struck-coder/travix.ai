@@ -1,4 +1,5 @@
 import type { AdvisorReply, TransportMode, TripDraft } from '@/types/chat'
+import { knownDestinations } from '@/types/stays'
 
 /**
  * Local stand-in for the real AI engine (Base44 InvokeLLM + gemini_3_flash +
@@ -23,6 +24,10 @@ const transportLabelsDe: Record<TransportMode, string> = {
   ferry: 'Fähre',
   car: 'Mietwagen',
 }
+
+// Deckt den Quick-Reply-Text selbst und die naheliegenden Tippvarianten ab
+// ("überrasch mich", "Überrasche mich").
+const SURPRISE_ME_PATTERN = /^überrasche? mich$/i
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -60,9 +65,15 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
   const next = { ...trip }
 
   if (!next.destination) {
-    next.destination = userMessage
+    // "Überrasch mich" ist ein Quick-Reply aus der Begrüßung, kein Ortsname —
+    // wörtlich übernommen wäre es ein Reiseziel, das weder die Unterkunfts-
+    // noch die Flugsuche noch die Kartenansicht je auflösen können.
+    const destination = SURPRISE_ME_PATTERN.test(userMessage.trim())
+      ? knownDestinations[Math.floor(Math.random() * knownDestinations.length)].name
+      : userMessage
+    next.destination = destination
     return {
-      content: `${userMessage} klingt nach einer großartigen Idee! Wie möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?`,
+      content: `${destination} klingt nach einer großartigen Idee! Wie möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?`,
       avatarState: 'happy',
       quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre'],
       trip: next,

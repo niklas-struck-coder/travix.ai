@@ -7589,3 +7589,65 @@ Regressionstest.
   1 neuer aus diesem Lauf), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-06 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Frischen `main`-Stand per Fast-Forward in
+`it-chef/auto` gemergt (9 Commits Rückstand, keine eigenen offenen
+Änderungen auf dem Branch), dann wie in den vorherigen Läufen heute kein
+offener Punkt aus `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+(dort verbleiben nur an Ni-Entscheidungen gebundene oder bereits erledigte
+Punkte), sondern ein bereits über einen offenen, aber noch nicht
+gemergten Auto-Fix-PR (#15,
+`it-chef-autofix/ueberrasch-mich-zufallsziel-2026-09-03`) vollständig
+diagnostizierter Bug, der laut `reports/it-chef.md` (06.09.) als einer von
+nur zwei noch real offenen PRs bestätigt war: Der Quick-Reply "Überrasch
+mich" aus der Begrüßung landet in `getNextAdvisorStep()`
+(`src/lib/ai/mockAdvisor.ts`) unverändert als `trip.destination` — die
+Antwort lautet dann "Überrasch mich klingt nach einer großartigen Idee!",
+und der Wert wandert als nicht auflösbares "Reiseziel" weiter in
+Unterkunfts-/Flugsuche (`findKnownDestination` schlägt fehl),
+Kartenansicht und Reiseplan.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Chat-Antwortlogik im Demo-Advisor. Keine
+offene Produkt-/Architekturentscheidung: der bereits existierende,
+vollständig ausgearbeitete Auto-Fix-PR-Branch nennt exakte Zeile, exakten
+Fix und exakten Test, keine eigene Interpretation nötig — nur Übernahme
+und Verifikation gegen den aktuellen Stand (Bug an exakt derselben Stelle
+unverändert reproduzierbar, `knownDestinations` in `src/types/stays.ts`
+unverändert vorhanden). Ergebnis objektiv prüfbar über einen neuen
+Regressionstest.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: neuer Import von `knownDestinations` aus
+  `@/types/stays`, neue `SURPRISE_ME_PATTERN`-Regex (deckt "Überrasch
+  mich"/"Überrasche mich" ab). `getNextAdvisorStep()` wählt beim ersten
+  Nutzer-Text, wenn er dieser Regex entspricht, jetzt zufällig eines der
+  kuratierten `knownDestinations` als `trip.destination` statt den
+  Quick-Reply-Text wörtlich zu übernehmen — genau die Ziele, für die die
+  automatische Unterkunfts- und Flugsuche danach auch wirklich
+  funktioniert. Die Antwort-Nachricht nennt jetzt das gewählte Ziel statt
+  des rohen Nutzertexts.
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts`: ruft
+  `getNextAdvisorStep(emptyTrip, 'Überrasch mich')` auf und prüft, dass
+  `trip.destination` nicht mehr der wörtliche Text ist, sondern eines der
+  `knownDestinations`, und dass die Antwort-Nachricht dieses Ziel enthält.
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 5) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt —
+  reiner Bugfix, kein eigener PRD-Punkt. Der ursprüngliche Auto-Fix-PR #15
+  bleibt als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
+  geschlossen werden, wie in `reports/it-chef.md` bereits für andere
+  Altbranches vorgeschlagen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 201 Tests (200 +
+  1 neuer aus diesem Lauf), alle grün.
+- `npm run build` (`tsc -b && vite build`) — keine Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

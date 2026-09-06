@@ -457,6 +457,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Tests in `useChat.test.ts` (`storageWarning` true/false) sowie eine neue
   `KiChat.test.tsx` (bisher gab es dort keine Tests; mockt `useChat`, prüft
   Ein-/Ausblenden des Hinweistexts).
+  Vom autonomen IT-Chef-Lauf am 06.09. (weiterer Lauf) einen bereits über
+  einen offenen, aber noch nicht gemergten Auto-Fix-PR (#15,
+  `it-chef-autofix/ueberrasch-mich-zufallsziel-2026-09-03`) vollständig
+  diagnostizierten Bug direkt auf `it-chef/auto` behoben: Der Quick-Reply
+  "Überrasch mich" aus der Begrüßung landete in `getNextAdvisorStep()`
+  (`mockAdvisor.ts`) unverändert als `trip.destination` — die Antwort
+  lautete dann "Überrasch mich klingt nach einer großartigen Idee!", und
+  der Wert wanderte als nicht auflösbares "Reiseziel" weiter in
+  Unterkunfts-/Flugsuche (`findKnownDestination` schlägt fehl),
+  Kartenansicht und Reiseplan. Fix: Bei diesem Text (per Regex erkannt,
+  deckt auch "Überrasche mich" ab) wird jetzt stattdessen zufällig eines
+  der kuratierten `knownDestinations` gewählt — genau die Ziele, für die
+  die automatische Unterkunfts- und Flugsuche danach auch wirklich
+  funktioniert. Neuer Regressionstest in `mockAdvisor.test.ts`.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
