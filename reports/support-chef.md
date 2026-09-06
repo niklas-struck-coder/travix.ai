@@ -1,64 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-05
+**Datum:** 2026-09-06
 
-## Was ist seit dem letzten Eintrag (2026-09-04) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-05) passiert?
 
-Alle drei zuletzt gemeldeten Punkte sind behoben: Nach einem echten
-Suchfehler im Haupt-Chat-Ablauf gibt es jetzt den Chip "Neue Reise planen"
-statt einer Sackgasse; die Flugsuche verhindert jetzt identische
-Start-/Zielflughäfen mit einem eigenen Hinweistext; und der
-Mikrofon-Knopf bleibt bei einem Fehler (z. B. verweigerter
-Mikrofon-Berechtigung) nicht mehr für immer auf "Aufnahme läuft" hängen.
-Danke fürs schnelle Umsetzen!
+Der Speicher-Warnhinweis, den ich zuletzt vorgeschlagen hatte, ist jetzt
+live: Läuft der Browser-Speicher voll, zeigt `KiChat.tsx` (Zeile 100-104)
+direkt unter der Chat-Kopfzeile den Hinweis "Dein Fortschritt kann gerade
+nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen."
+Genau das ehrliche Signal, das vorher gefehlt hat — danke fürs Umsetzen!
 
-Zusätzlich ist bereits bekannt: Ist der Browser-Speicher (localStorage)
-voll, crasht das Speichern des Chat-Fortschritts nicht mehr — aber die
-Nutzerin bekommt weiterhin keinen Hinweis, dass ihr geplanter Trip bei
-einem Reload verloren geht (siehe Vorschlag 3 unten).
+Beim Nachprüfen ist mir aufgefallen, dass derselbe Speicherfehler noch an
+anderer Stelle unentdeckt durchschlägt: Wählst du auf der Flug- oder
+Hotelsuche-Seite ein Angebot aus, oder bearbeitest du in `Buchung.tsx`
+deine Aktivitäten, läuft das über `updateStoredTrip()`
+(`tripStorage.ts:50-57`) — und die zeigt "ausgewählt"/"gespeichert" an,
+auch wenn das eigentliche Schreiben in den Speicher fehlgeschlagen ist.
+Das ist bereits gefunden und eingeordnet (IT-Chef hat dafür PR #19
+eröffnet), hier also keine neue Baustelle von mir, nur zur Einordnung.
+
+Meine zwei Vorschläge von letztem Mal (Nulltreffer-Chips in `useChat.ts`
+und die widersprüchliche Ziel-Ankündigung in `mockAdvisor.ts`) sind nach
+Code-Check unverändert noch offen — deshalb bleiben sie unten stehen,
+diesmal ohne neue Punkte dazu.
 
 ## Meine Vorschläge
 
 1. **Nach einer erfolgreichen Suche mit null Treffern bleiben die
-   Chat-Chips leer.** In `useChat.ts` werden `quickReplies` nur gesetzt,
-   wenn ein echter Suchfehler auftritt (`result.errors.length > 0`).
-   Meldet die Suche dagegen ganz normal "keine Angebote gefunden"
-   (`offers.length === 0`), zeigt zwar `NoResultsMessage` die passende
-   Nachricht an, aber es gibt keinen Chip, um weiterzumachen. Betroffen:
-   Flugsuche (um Zeile 93), Unterkunft im Bearbeiten-Pfad (um Zeile 172)
-   und Unterkunft im Hauptablauf (um Zeile 318). *Vorschlag:* Auch im
-   Nulltreffer-Fall `setQuickReplies(['Neue Reise planen', 'Andere Daten
-   versuchen'])` setzen, damit für die Nutzerin klar ist, wie es
-   weitergeht — konsistent mit jedem anderen Chat-Endzustand.
+   Chat-Chips leer.** In `useChat.ts` wird `quickReplies` nur gesetzt,
+   wenn ein echter Suchfehler auftritt (`result.errors.length > 0`,
+   z. B. Zeile 99 und 322). Kommen dagegen einfach null Angebote zurück,
+   bekommt die Nutzerin zwar die richtige "keine Angebote"-Nachricht,
+   aber keinen Chip, um weiterzumachen — eine kleine Sackgasse mitten im
+   sonst so flüssigen Chat. *Vorschlag:* Auch im Nulltreffer-Fall
+   `setQuickReplies(['Neue Reise planen', 'Andere Daten versuchen'])`
+   setzen, konsistent mit jedem anderen Chat-Endzustand.
 
 2. **Kennt travix.ai dein Reiseziel nicht für die automatische
-   Unterkunftssuche, bleiben alte Chips stehen, und die Ankündigung davor
-   war schon falsch.** `mockAdvisor.ts:108` lässt die Bestätigungsnachricht
-   immer "Ich suche jetzt nach echten Unterkünften in [Ziel]" sagen —
-   unabhängig davon, ob das technisch überhaupt möglich ist. Kennt
-   `findKnownDestination()` das Ziel nicht (`useChat.ts:333-337`), folgt
-   direkt danach eine zweite Nachricht ("kenne ich noch keine
-   Unterkünfte … nutze die manuelle Hotelsuche") — die vorherigen Chips
-   ("Hotel", "Ferienwohnung", "Hostel") bleiben aber anklickbar, obwohl
-   ein Klick keine echte Suche auslöst, sondern nur so wirkt, als hätte
-   die Nutzerin bereits eine Unterkunft ausgewählt. Für eine
-   Erstnutzerin fühlt sich das wie ein Widerspruch an: erst "ich suche",
-   dann "kann ich nicht" — aber die Buttons von vorher scheinen noch zu
-   funktionieren. *Vorschlag:* Bei fehlendem Ziel-Match `setQuickReplies([])`
-   setzen (oder direkt einen Chip zur manuellen Hotelsuche anbieten), und
-   die Bestätigungsnachricht in `mockAdvisor.ts` nur dann "ich suche
-   jetzt" sagen lassen, wenn das Ziel tatsächlich bekannt ist.
+   Unterkunftssuche, wirkt die Chat-Antwort widersprüchlich.**
+   `mockAdvisor.ts:108` lässt die Bestätigungsnachricht immer "Ich suche
+   jetzt nach echten Unterkünften in [Ziel]" sagen — unabhängig davon,
+   ob `findKnownDestination()` das Ziel überhaupt kennt. Ist das nicht
+   der Fall, folgt in `useChat.ts` (um Zeile 336) sofort eine zweite
+   Nachricht ("kenne ich noch keine Unterkünfte … nutze die manuelle
+   Hotelsuche"), aber die alten Hotel-Chips davor bleiben anklickbar,
+   obwohl ein Klick keine echte Suche mehr auslöst. Für eine
+   Erstnutzerin liest sich das wie "ich suche" gefolgt von "ich kann
+   nicht" — bei scheinbar weiter aktiven Buttons. *Vorschlag:* Bei
+   fehlendem Ziel-Match direkt `setQuickReplies([])` setzen (oder einen
+   Chip zur manuellen Hotelsuche anbieten), und die Ankündigung in
+   `mockAdvisor.ts` nur dann "ich suche jetzt" sagen lassen, wenn das
+   Ziel wirklich bekannt ist.
 
-3. **Voller Browser-Speicher: Der geplante Trip verschwindet leise beim
-   nächsten Laden.** Das Speichern crasht mittlerweile nicht mehr, wenn
-   `localStorage` voll ist — aber während des Chattens merkt die
-   Nutzerin nichts davon, jede Nachricht wirkt gespeichert. Schließt sie
-   den Tab und kommt später wieder, ist der ganze geplante Trip weg, ohne
-   jede Vorwarnung. *Vorschlag:* Nach demselben, bereits etablierten
-   Muster wie beim `micError`-Hinweis in `ChatInput.tsx` (Zeile 75-79,
-   dezenter `role="status"`-Text) einen kurzen, ehrlichen Hinweis
-   einblenden, z. B. "Dein Fortschritt kann gerade nicht dauerhaft
-   gespeichert werden — ein Neuladen würde ihn verwerfen." — platziert
-   z. B. unter der Chat-Kopfzeile in `KiChat.tsx`.
-
-_Letztes Update: 2026-09-05_
+_Letztes Update: 2026-09-06_
