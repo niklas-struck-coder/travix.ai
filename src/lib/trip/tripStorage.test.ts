@@ -125,6 +125,26 @@ describe('updateStoredTrip resilience', () => {
 
     expect(result?.trip.transportMode).toBe('flight')
   })
+
+  it('reports saved: false when persisting the update fails, instead of a silent false success', () => {
+    seedStoredChat()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+
+    const result = updateStoredTrip({ transportMode: 'flight' })
+
+    expect(result?.saved).toBe(false)
+  })
+
+  it('reports saved: true when persisting the update succeeds', () => {
+    seedStoredChat()
+
+    const result = updateStoredTrip({ transportMode: 'flight' })
+
+    expect(result?.saved).toBe(true)
+  })
 })
 
 describe('loadStoredChat', () => {

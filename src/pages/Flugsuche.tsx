@@ -15,6 +15,7 @@ export function Flugsuche() {
   const [loading, setLoading] = useState(false)
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
   const [selectionHasTrip, setSelectionHasTrip] = useState(true)
+  const [storageWarning, setStorageWarning] = useState(false)
 
   const handleSearch = async (params: FlightSearchParams) => {
     setLoading(true)
@@ -31,6 +32,7 @@ export function Flugsuche() {
     const updated = updateStoredTrip({ transportMode: 'flight' })
     setSelectedOfferId(offer.id)
     setSelectionHasTrip(updated !== null)
+    setStorageWarning(updated !== null && !updated.saved)
   }
 
   return (
@@ -52,22 +54,29 @@ export function Flugsuche() {
       {selectedOfferId && (
         <div className="flex items-start gap-2 rounded-xl border border-teal/30 bg-teal/5 p-4 text-sm text-foreground">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-teal" />
-          {selectionHasTrip ? (
-            <span>
-              Flug in deinen Reiseplan übernommen.{' '}
-              <Link to="/buchung" className="font-medium underline underline-offset-2">
-                Reiseplan ansehen
-              </Link>
-            </span>
-          ) : (
-            <span>
-              Es gibt noch keine aktive Reiseplanung, in die ich diesen Flug übernehmen kann. Starte zuerst im{' '}
-              <Link to="/ki-chat" className="font-medium underline underline-offset-2">
-                KI-Chat
-              </Link>
-              , dann kannst du hier auswählen.
-            </span>
-          )}
+          <div className="flex flex-col gap-1">
+            {selectionHasTrip ? (
+              <span>
+                Flug in deinen Reiseplan übernommen.{' '}
+                <Link to="/buchung" className="font-medium underline underline-offset-2">
+                  Reiseplan ansehen
+                </Link>
+              </span>
+            ) : (
+              <span>
+                Es gibt noch keine aktive Reiseplanung, in die ich diesen Flug übernehmen kann. Starte zuerst im{' '}
+                <Link to="/ki-chat" className="font-medium underline underline-offset-2">
+                  KI-Chat
+                </Link>
+                , dann kannst du hier auswählen.
+              </span>
+            )}
+            {storageWarning && (
+              <span role="status" className="text-xs text-muted-foreground">
+                Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.
+              </span>
+            )}
+          </div>
         </div>
       )}
 
