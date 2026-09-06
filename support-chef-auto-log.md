@@ -1819,3 +1819,99 @@ Der Wortlaut und die Anzeigedauer eines möglichen künftigen
 `storageWarning`-Hinweises wurden nicht weiter ausgearbeitet — das ist
 bewusst Teil der oben vorgeschlagenen, eigenen Design-Entscheidung für den
 nächsten IT-Chef-Lauf, nicht dieses Berichts.
+
+---
+
+## 2026-09-06 — `updateStoredTrip()` und seine drei Aufrufstellen (`tripStorage.ts`, `Hotelsuche.tsx`, `Flugsuche.tsx`, `Buchung.tsx`)
+
+**Geprüfter Bereich:** Der oben (05.09.) vorgeschlagene und seither vom
+autonomen IT-Chef-Lauf umgesetzte `storageWarning`-Hinweis (Commit
+`0b28d39`, laut `ZEITPLAN.md` inzwischen nach `main` gemergt) deckt nur den
+Persistenz-Pfad in `useChat.ts` ab. Geprüft, ob dieselbe Absicherung auch
+für den zweiten, unabhängigen Speicherpfad über `updateStoredTrip()`
+gilt — den nutzen die drei Seiten, auf denen eine Reise *nachträglich*
+verändert wird (Hotel-/Flugauswahl auf den eigenständigen Suchseiten,
+Aktivitäten-Bearbeitung auf der Buchungsseite):
+
+- `src/lib/trip/tripStorage.ts:34-42,50-57` (`saveStoredChat`,
+  `updateStoredTrip`)
+- `src/pages/Hotelsuche.tsx:31-35,53-73` (`handleSelect`,
+  Erfolgs-/Warnhinweis)
+- `src/pages/Flugsuche.tsx:30-33` (`handleSelect`)
+- `src/pages/Buchung.tsx:141-144` (`handleActivitiesChange`)
+- `src/lib/trip/tripStorage.test.ts:108-128` (bestehender Test, der das
+  unten beschriebene Verhalten bereits absichtlich abdeckt)
+
+### Reibungspunkt
+
+**Bei vollem `localStorage` zeigt die Hotel-/Flugsuche eine falsche
+Erfolgsmeldung — genau der Fall, den `storageWarning` im Chat gerade erst
+verhindert hat, hier aber weiterhin unsichtbar**
+
+`updateStoredTrip()` (`tripStorage.ts:50-57`) ruft `saveStoredChat(updated)`
+auf, wertet dessen Rückgabewert aber nicht aus — die Zeile ignoriert ihn
+komplett und gibt danach immer das im Arbeitsspeicher zusammengeführte
+`updated`-Objekt zurück, unabhängig davon, ob der Schreibzugriff geklappt
+hat. Das ist kein Versehen, sondern bewusst so gebaut und sogar per Test
+festgehalten: `tripStorage.test.ts:117-127` heißt wörtlich "still returns
+the merged trip even when persisting it fails" und simuliert genau den
+`QuotaExceededError`-Fall.
+
+Das Problem liegt nicht in `tripStorage.ts` selbst, sondern darin, dass
+alle drei Aufrufer diesen absichtlich immer-truthy-bei-Erfolg wirkenden
+Rückgabewert als "wirklich gespeichert" interpretieren:
+
+- `Hotelsuche.tsx:32-34` prüft nur `updated !== null`, um zwischen "kein
+  aktiver Trip" (`selectionHasTrip = false`, Warnhinweis) und "übernommen"
+  zu unterscheiden. Bei vollem Speicher ist `updated` aber trotzdem nicht
+  `null` (es gibt ja einen Trip, nur das Schreiben schlägt fehl) — die
+  Seite zeigt darum den grünen Erfolgshinweis "Unterkunft in deinen
+  Reiseplan übernommen" (`Hotelsuche.tsx:56-62`) samt Link zum Reiseplan.
+  `Flugsuche.tsx:30-33` hat exakt dasselbe Muster für die Flugauswahl.
+- `Buchung.tsx:141-144` (`handleActivitiesChange`, von `EditMode.tsx`
+  aufgerufen) prüft nur `if (updated)` und übernimmt den Wert dann direkt
+  in den React-State (`setStored(updated)`) — die Aktivitätenliste in der
+  UI sieht danach exakt so aus, als wäre die Änderung dauerhaft
+  gespeichert.
+
+Konkreter Ablauf: Der `localStorage` ist voll (derselbe Auslöser, den der
+Bericht vom 05.09. für den Chat beschrieben hat). Eine Nutzerin hat im
+KI-Chat bereits eine Reise begonnen, geht danach auf `/hotelsuche`, sucht
+und klickt "Auswählen" bei einem Angebot. Die Seite bestätigt fröhlich
+"Unterkunft übernommen", der `localStorage`-Schreibzugriff schlägt aber
+lautlos fehl (nur `console.error`, `tripStorage.ts:39`). Lädt sie später
+`/buchung` neu oder öffnet die Seite an einem anderen Tag, fehlt die
+Unterkunft im Reiseplan — ohne dass die Bestätigung von vorhin je einen
+Hinweis darauf gegeben hätte, dass das passieren könnte. Dieselbe Falle
+greift für eine per `EditMode.tsx` hinzugefügte/entfernte Aktivität auf der
+Buchungsseite: Die Liste aktualisiert sich sichtbar, verschwindet aber
+beim nächsten Laden wieder.
+
+Das ist dieselbe Fehlerklasse wie der bereits behobene Chat-Fund vom
+05.09. — nur an drei Stellen, die der damalige Fix nicht mit abgedeckt
+hat, weil er ausschließlich am Persistenz-Effect in `useChat.ts` ansetzte,
+nicht an `updateStoredTrip()` selbst.
+
+*Vorschlag:* `updateStoredTrip()` den `boolean`-Rückgabewert von
+`saveStoredChat()` nicht verwerfen, sondern zusammen mit dem
+zusammengeführten Trip zurückgeben (z. B. `{ state: StoredChatState,
+persisted: boolean } | null`, oder einfacher: `null` auch dann liefern,
+wenn das Speichern fehlschlägt — je nachdem, ob die Aufrufer den
+In-Memory-Zwischenstand trotzdem weiterverwenden sollen). Die drei
+Aufrufer könnten das bereits bestehende Warnhinweis-Muster aus
+`Hotelsuche.tsx`/`Flugsuche.tsx` (Zeilen 63-70, "Es gibt noch keine aktive
+Reiseplanung …") um einen dritten, ehrlichen Fall erweitern ("Übernommen,
+aber gerade nicht dauerhaft gespeichert — ein Neuladen würde es verwerfen"),
+und `Buchung.tsx` könnte denselben `role="status"`-Hinweis wie
+`KiChat.tsx:100-104` unter der Aktivitäten-Sektion anzeigen. Sinnvoll wäre,
+das zusammen mit einem erneuten Blick auf den bereits vorhandenen
+`tripStorage.test.ts:117-127`-Test anzugehen, dessen Testname/Kommentar
+dann ebenfalls angepasst werden müsste, falls sich das Rückgabeverhalten
+ändert.
+
+### Nicht geprüft
+Ob und wie genau sich ein einheitlicher `persisted`-artiger Rückgabewert
+am saubersten in die bestehenden Typen von `updateStoredTrip()` einfügt
+(neuer Objekt-Wrapper vs. zusätzlicher Parameter vs. Verhaltensänderung von
+`null`), ist eine Design-/API-Entscheidung für den nächsten IT-Chef-Lauf,
+kein Teil dieser reinen Analyse.
