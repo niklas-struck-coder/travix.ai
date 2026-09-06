@@ -2214,3 +2214,45 @@ der neue Speicher-Warnhinweis in `KiChat.tsx` (dezenter
 `support-chef/auto` heute noch nichts Neues, für den späteren
 6-Uhr-Freigabe-Lauf offen gelassen. Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-06, später Lauf
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Nacht-Check
+  heute geprüft und gemergt, siehe Eintrag oben). Übersprungen.
+- `marketing-chef/auto` — vorhanden, 1 Commit vor `main`.
+- `support-chef/auto` — vorhanden, 1 Commit vor `main`.
+
+**Prüfung `marketing-chef/auto`:** Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`
+(reine Markdown-Ergänzung, kein Produkt-Code). Inhalt: Übersicht auf
+Stand 06.09. gebracht, vier seit dem 05.09. neu hinzugekommene
+Code-Fixes in den bestehenden Tier-4-Kandidatentopf eingeordnet, kein
+neues Content-Stück und keine zweite Mini-Changelog-Ausgabe (Begründung
+im Log: eigene Selbstauflage aus dem 05.09.-Lauf, erst genug Kandidaten
+sammeln bzw. auf Antwort zu Frage 4 warten). Die fünf referenzierten
+Commit-Hashes (`2483ce4`, `404935c`, `0b28d39`, `bf20ae3`, `2daeb05`) per
+`git log` gegen die tatsächliche `main`-Historie geprüft — alle
+vorhanden, Commit-Messages stimmen mit der im Text gegebenen
+Beschreibung überein. Keine erfundenen Kennzahlen, Nutzerzahlen oder
+Kampagnen-Ergebnisse; kein Hinweis auf tatsächliches Posten/Versenden.
+Text ist vollständig und kohärent, keine Stichpunkt-Skizze.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `b94811d..5299c9c`).
+
+**Prüfung `support-chef/auto`:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (reine Analyse, keine Codeänderung). Neuer
+Fund: `updateStoredTrip()` (`tripStorage.ts:50-57`) verwirft den
+`boolean`-Rückgabewert von `saveStoredChat()` und gibt bei vollem
+`localStorage` trotzdem den zusammengeführten Trip zurück; die drei
+Aufrufer (`Hotelsuche.tsx:31-34`, `Flugsuche.tsx:30-33`,
+`Buchung.tsx:141-144`) werten das fälschlich als "gespeichert" und zeigen
+einen Erfolgshinweis, obwohl der Schreibzugriff lautlos fehlgeschlagen
+sein kann. Alle genannten Datei-/Zeilenverweise sowie der zitierte
+Testname in `tripStorage.test.ts:117-127` ("still returns the merged
+trip even when persisting it fails") im aktuellen Code gegengeprüft —
+stimmen exakt. Reibungspunkt ist im Code nachvollziehbar, keine
+Erfindung.
+→ **Alles passt, nach `main` gemergt** (Merge-Commit, `ort`-Strategie).
+
+**Ergebnis:** Beide geprüften Branches bestanden, gemergt und gepusht.
+Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
