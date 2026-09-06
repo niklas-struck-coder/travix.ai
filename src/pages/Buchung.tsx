@@ -136,11 +136,15 @@ function Section({ icon: Icon, title, value, emptyLabel, editHref, editChoice }:
 
 export function Buchung() {
   const [stored, setStored] = useState(() => loadStoredChat())
+  const [storageWarning, setStorageWarning] = useState(false)
   const trip = stored?.trip ?? null
 
   function handleActivitiesChange(activities: TripActivity[]) {
     const updated = updateStoredTrip({ activities })
-    if (updated) setStored(updated)
+    if (updated) {
+      setStored(updated)
+      setStorageWarning(!updated.saved)
+    }
   }
 
   if (!trip || !hasTripData(trip)) {
@@ -201,6 +205,12 @@ export function Buchung() {
         </Badge>
         <Badge variant={complete ? 'default' : 'secondary'}>{complete ? 'Reiseplan vollständig' : 'In Planung'}</Badge>
       </div>
+
+      {storageWarning && (
+        <p role="status" className="rounded-xl border border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+          Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.
+        </p>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Section
