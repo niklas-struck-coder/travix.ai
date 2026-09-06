@@ -519,6 +519,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Fallback für nicht-numerische Beträge eine Zeile darüber. Zwei neue
   Regressionstests in `format.test.ts` (leerer bzw. ungültiger
   Währungscode).
+  Vom autonomen IT-Chef-Lauf am 06.09. einen eigenständig gefundenen
+  Paritäts-Bug in `selectFlight()` (`src/hooks/useChat.ts`) behoben: Die
+  Bestätigungsnachricht nach einer Flugauswahl im KI-Chat interpolierte
+  `offer.totalAmount`/`offer.totalCurrency` roh in den Chattext (z. B.
+  "für 249.00 EUR"), obwohl dieselben Angebotsfelder eine Karte vorher in
+  `FlightCard.tsx`/`HotelCard.tsx` bereits über `formatOfferPrice()`
+  korrekt im deutschen Format angezeigt hatten ("249,00 €") — derselbe
+  Rohformat-Bug, der dort bereits am 04.09. (zweiunddreißigster Lauf)
+  behoben wurde, hier aber unabhängig davon in der Chat-Bestätigung
+  stehen blieb. Fix: `selectFlight()` nutzt jetzt ebenfalls
+  `formatOfferPrice()` statt der rohen Feld-Interpolation. Neuer
+  Regressionstest in `useChat.test.ts` (Bestätigungstext enthält das
+  formatierte "249,00 €", nicht mehr das rohe "249.00 EUR").
 
 ### Sprint 2 — Buchungsseite vervollständigen (KW35-36, 25. Aug - 7. Sep)
 - [ ] 6.2 `TripItem.tsx` mit "Beim Anbieter buchen"-Button — weiterhin offen,

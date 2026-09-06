@@ -7406,3 +7406,63 @@ der das Ein-/Ausblenden des Hinweises verifiziert.
   Produktionsänderung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-06
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` (dort verbleiben nur an Ni-Entscheidungen
+gebundene oder bereits erledigte Punkte), sondern ein eigenständig gefundener
+Bug: Die Flugauswahl-Bestätigung im KI-Chat (`selectFlight()` in
+`src/hooks/useChat.ts`, Zeile 350) zeigte den Preis roh im Duffel-Format
+("249.00 EUR") statt im deutschen Format ("249,00 €") — obwohl dieselben
+Angebotsfelder (`offer.totalAmount`/`offer.totalCurrency`) eine Karte einen
+Schritt vorher in `FlightCard.tsx`/`HotelCard.tsx` bereits korrekt über die
+bestehende `formatOfferPrice()`-Hilfsfunktion (`src/lib/format.ts`) formatiert
+angezeigt hatten.
+
+Zur Auswahl kam der Punkt über eine gezielte, vertiefte Bug-Suche in bisher
+wenig geprüften Bereichen (u. a. `Home.tsx`, `MeineReisen.tsx`,
+`Urlaubsmodus.tsx`, `useConcierge.ts`, die Demo-Listen-Seiten
+Angebote/Favoriten/Preisalarme/Aktivitäten, `Dashboard.tsx`, `Kalender.tsx`,
+`Kartenansicht.tsx`, `duffel/client.ts`, `FlightResults.tsx`/
+`HotelResults.tsx`/`NoResultsMessage.tsx`, `ChatMessage.tsx`,
+`TripSummaryCard.tsx`) — dort keine weiteren neuen, sicheren Kandidaten
+gefunden. Ein erster Kandidat (derselbe Rohformat-Bug in `TrainCard.tsx`)
+wurde bewusst verworfen: `TrainCard` ist laut `ZEITPLAN.md` weiterhin toter,
+nirgends importierter Code, dessen Zukunft (anbinden oder löschen) eine
+offene Produktentscheidung ist — ein Fix dort hätte keinen echten
+Nutzereffekt und war in einem früheren Lauf bereits absichtlich
+zurückgestellt worden.
+
+**Warum sicher genug:** Reine Formatierungs-Parität zu bereits bestehendem,
+etabliertem Code (`formatOfferPrice()` wird im Repo bereits an zwei Stellen
+für exakt dieselben Angebotsfelder genutzt) — keine neue Design- oder
+Produktentscheidung nötig, nur dieselbe Hilfsfunktion an einer dritten,
+bisher übersehenen Stelle anwenden. Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Klar genug beschrieben (exakte Zeile,
+exakter Fix). Ergebnis objektiv prüfbar über einen neuen Regressionstest.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: `selectFlight()` nutzt jetzt `formatOfferPrice()`
+  (neuer Import aus `@/lib/format`) statt der rohen
+  `${offer.totalAmount} ${offer.totalCurrency}`-Interpolation in der
+  Bestätigungsnachricht.
+- Neuer Regressionstest in `src/hooks/useChat.test.ts`: ruft `selectFlight()`
+  mit einem Test-Angebot (`totalAmount: '249.00'`, `totalCurrency: 'EUR'`)
+  auf und prüft, dass die zuletzt angehängte Chat-Nachricht "249,00 €"
+  (mit geschütztem Leerzeichen, analog dem bestehenden `NBSP`-Muster in
+  `format.test.ts`) enthält und nicht mehr das rohe "249.00 EUR".
+- `ZEITPLAN.md` (Ist-Stand-Notiz Phase 5) und dieser Log-Eintrag ergänzt.
+  Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt — reiner
+  Bugfix, kein eigener PRD-Punkt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 197 Tests (196 + 1
+  neuer aus diesem Lauf), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

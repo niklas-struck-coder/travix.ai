@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './useChat'
 import { searchFlights, searchStays } from '@/lib/duffel/client'
+import type { FlightOffer } from '@/types/duffel'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchFlights: vi.fn(),
@@ -436,5 +437,37 @@ describe('useChat persistence resilience', () => {
     })
 
     expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow()
+  })
+})
+
+describe('useChat selectFlight confirmation message', () => {
+  const NBSP = ' '
+
+  it('formats the price in the German-formatted confirmation instead of the raw Duffel value', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '249.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: 'Berlin',
+          destinationIata: 'LIS',
+          destinationName: 'Lissabon',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+
+    const confirmation = result.current.messages.at(-1)?.content ?? ''
+    expect(confirmation).toContain(`249,00${NBSP}€`)
+    expect(confirmation).not.toContain('249.00 EUR')
   })
 })

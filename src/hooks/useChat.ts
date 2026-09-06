@@ -9,6 +9,7 @@ import type { DuffelError, FlightOffer } from '@/types/duffel'
 import { CHAT_STORAGE_KEY, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
+import { formatOfferPrice } from '@/lib/format'
 
 const IATA_CODE_PATTERN = /^[a-zA-Z]{3}$/
 
@@ -347,7 +348,7 @@ export function useChat(speechEnabled: boolean) {
   const selectFlight = (offer: FlightOffer) => {
     const slice = offer.slices[0]
     const route = slice ? `${slice.originIata} → ${slice.destinationIata}` : trip.destination
-    const confirmation = `Alles klar, ich hab den Flug ${route} für ${offer.totalAmount} ${offer.totalCurrency} für dich vorgemerkt. Dein Reiseplan steht weiterhin.`
+    const confirmation = `Alles klar, ich hab den Flug ${route} für ${formatOfferPrice(offer.totalAmount, offer.totalCurrency)} für dich vorgemerkt. Dein Reiseplan steht weiterhin.`
     setFlightOffers(null)
     setMessages((prev) => [...prev, makeMessage('assistant', confirmation)])
     setQuickReplies(['Neue Reise planen'])
