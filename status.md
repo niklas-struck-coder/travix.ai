@@ -13,17 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-04):**
-- Robustheits-Fixes: localStorage-Schreibzugriffe gegen volle Speicher abgesichert,
-  IATA-Feld in Flugsuche korrigiert, identischer Start-/Zielflughafen wird verhindert,
-  Mikrofon-Knopf bleibt bei Fehlern nicht mehr hängen
-- Support-Chef hat einen stillen Reiseplan-Datenverlust bei vollem localStorage
-  gefunden (Fix ist in Arbeit)
-- Marketing-Chef arbeitet an einem neuen Mini-Changelog-Konzept für öffentliche
-  Transparenz statt nur interner Übersicht
-- Freigabe-Chef hat mehrere geprüfte Änderungen (IT-, Marketing-, Support-Chef)
-  unabhängig verifiziert und nach main gemergt
+**Seit letztem Update (2026-09-05):**
+- IT-Chef hat die Normalisierung von Reiseaktivitäten beim Laden korrigiert sowie
+  einen Wortgrenzen-Bug im KI-Concierge behoben; Flugauswahl-Bestätigung im Chat
+  zeigt Preise jetzt im deutschen Format
+- Support-Chef hat einen Fall gefunden, in dem das Speichern von Reiseplänen
+  fehlschlägt, der Nutzerin/dem Nutzer aber trotzdem Erfolg angezeigt wird (Fix
+  in Prüfung)
+- Marketing-Chef hat mehrere Ehrlichkeits-/Zuverlässigkeits-Verbesserungen
+  eingeordnet, ohne neues Content-Stück
+- Freigabe-Chef hat die geprüften Änderungen von IT-, Marketing- und
+  Support-Chef mehrfach unabhängig verifiziert und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-05_
+_Letztes Update: 2026-09-06_
