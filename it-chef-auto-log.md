@@ -7997,4 +7997,53 @@ statt zwei Nachrichten, kein Suchversprechen bei unbekanntem Ziel).
   Tests und den zwei neuen Assertions) — 38 Testdateien, 213 Tests, alle
   grün.
 
+## 2026-09-07 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Checklistenpunkt (Rest von
+Sprint 1/2 weiterhin entweder Produktentscheidung — Backend, 4.1-4.3 —
+oder blockiert durch fehlende `TripDraft`-Preisfelder — 6.2/6.6/6.7/7.12),
+und `reports/it-chef.md` (07.09.) meldet nach gründlicher 30-Dateien-Suche
+keinen neuen Bug. Stattdessen Vorschlag 2 aus genau diesem Bericht
+umgesetzt, der dort bereits das vierte Mal in Folge auftaucht: ein
+schlanker GitHub-Actions-Workflow (`npm ci && npm run lint && npm run
+build && npm test` bei jedem Pull Request bzw. Push nach `main`), weil
+bisher jeder Auto-Fix-PR ungetestet rausgeht.
+
+**Warum sicher genug:** Reine CI-Infrastruktur, kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Recht. Keine offene Produkt-/
+Architekturentscheidung — der Bericht nennt Befehl und Auslöser bereits
+konkret ("npm ci && npm test bei jedem PR"), keine eigene Annahme über
+den Berichtstext hinaus nötig (Lint- und Build-Schritt ergänzt, weil beide
+`package.json`-Scripts bereits existieren und im selben Bericht ebenfalls
+als Qualitätsschranke gelten). Ergebnis objektiv prüfbar: YAML-Syntax
+validiert, alle vier Befehle lokal grün vor dem Commit ausgeführt.
+
+**Umgesetzt:**
+- Neue Datei `.github/workflows/ci.yml`: Job `test` auf `ubuntu-latest`,
+  Trigger `pull_request` und `push` nach `main`. Schritte: Checkout,
+  `actions/setup-node@v4` (Node 22, `cache: npm`), `npm ci`, `npm run
+  lint`, `npm run build` (deckt `tsc -b` Typecheck mit ab), `npm test`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 1, direkt nach dem bestehenden
+  Scaffolding-Punkt) ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — kein eigener
+  PRD-Punkt, reine Infrastruktur-Ergänzung aus einem Berichtsvorschlag.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `python3 -c "import yaml; yaml.safe_load(...)"` — `.github/workflows/ci.yml`
+  ist syntaktisch gültiges YAML.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, unverändert).
+- `npm run build` (tsc -b + vite build) — grün, keine neuen Warnings.
+- `npm test` (vitest) — 38 Testdateien, 213 Tests, alle grün (Log-/Config-
+  Änderung, keine neuen Tests nötig).
+
+**Hinweis:** Der Workflow selbst konnte in dieser Session nicht auf
+GitHub Actions ausgeführt werden (keine Möglichkeit, einen Workflow-Lauf
+aus der Cloud-Sandbox auszulösen) — die Absicherung besteht aus dem
+identischen Befehlssatz lokal grün laufen zu lassen. Ein erster echter
+Lauf entsteht automatisch, sobald dieser Branch von Freigabe-Chef geprüft
+und ein PR/Push die neue Datei erreicht.
+
 **Commit:** siehe Git-Historie auf `it-chef/auto`.

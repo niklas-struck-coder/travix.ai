@@ -29,7 +29,13 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 ## Programmierung (IT-Chef)
 
 ### Ist-Stand (Phase 1, 3, 4 — Details in tasks-prd-travix-platform.md)
-- ✅ Phase 1 Scaffolding (Vite, Tailwind, shadcn/ui, Routing)
+- ✅ Phase 1 Scaffolding (Vite, Tailwind, shadcn/ui, Routing). Vom
+  autonomen IT-Chef-Lauf am 07.09. (weiterer Lauf) den in
+  `reports/it-chef.md` wiederholt vorgeschlagenen CI-Workflow ergänzt:
+  neue `.github/workflows/ci.yml` (Job `test`, Trigger Pull Request und
+  Push nach `main`) führt bei jedem PR `npm ci && npm run lint && npm run
+  build && npm test` aus — bisher lief kein Auto-Fix-PR automatisch
+  gegen Lint/Typecheck/Tests.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
