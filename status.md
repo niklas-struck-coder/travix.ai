@@ -13,18 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-05):**
-- IT-Chef hat die Normalisierung von Reiseaktivitäten beim Laden korrigiert sowie
-  einen Wortgrenzen-Bug im KI-Concierge behoben; Flugauswahl-Bestätigung im Chat
-  zeigt Preise jetzt im deutschen Format
-- Support-Chef hat einen Fall gefunden, in dem das Speichern von Reiseplänen
-  fehlschlägt, der Nutzerin/dem Nutzer aber trotzdem Erfolg angezeigt wird (Fix
-  in Prüfung)
-- Marketing-Chef hat mehrere Ehrlichkeits-/Zuverlässigkeits-Verbesserungen
-  eingeordnet, ohne neues Content-Stück
-- Freigabe-Chef hat die geprüften Änderungen von IT-, Marketing- und
-  Support-Chef mehrfach unabhängig verifiziert und nach main gemergt
+**Seit letztem Update (2026-09-06):**
+- IT-Chef hat mehrere gemeldete Fehler behoben: fehlgeschlagenes Speichern von
+  Reiseplänen zeigt nicht mehr fälschlich Erfolg an, Sprachausgabe im KI-Chat
+  stoppt jetzt zuverlässig beim Ausschalten/Verlassen, "Überrasch mich" wird
+  nicht mehr wörtlich als Reiseziel übernommen, fehlende Chat-Chips nach
+  Nulltreffer-Suche sowie eine widersprüchliche Unterkunfts-Ankündigung bei
+  unbekanntem Ziel wurden korrigiert (Support-Chef sieht hier noch einen
+  Restfall offen)
+- Marketing-Chef hat eine zweite Mini-Changelog-Ausgabe mit acht verifizierten
+  Kandidaten vorbereitet
+- Freigabe-Chef hat die Änderungen mehrfach unabhängig geprüft und gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-06_
+_Letztes Update: 2026-09-07_
