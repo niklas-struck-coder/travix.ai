@@ -1915,3 +1915,74 @@ am saubersten in die bestehenden Typen von `updateStoredTrip()` einfügt
 (neuer Objekt-Wrapper vs. zusätzlicher Parameter vs. Verhaltensänderung von
 `null`), ist eine Design-/API-Entscheidung für den nächsten IT-Chef-Lauf,
 kein Teil dieser reinen Analyse.
+
+---
+
+## 2026-09-07 — Unbekanntes Ziel bei der Unterkunftssuche im Chat (`mockAdvisor.ts`, `useChat.ts`)
+
+**Geprüfter Bereich:** Heute früh (laut `ZEITPLAN.md`) landeten zwei
+IT-Chef-Auto-Fixes auf `main`, die beide genau den Fall "Nutzerin plant im
+Chat eine Reise zu einem nicht-kuratierten Ziel (z. B. Bali)" betreffen:
+
+- `src/lib/ai/mockAdvisor.ts:116-141` (Commit `b0b8d2e`, behebt Vorschlag 2
+  aus dem gestrigen Bericht: die Ankündigung "Ich suche jetzt nach echten
+  Unterkünften …" für ein unbekanntes Ziel entfernt)
+- `src/hooks/useChat.ts:302-347` (Commit `56c8f61`, Chips nach echter
+  Nulltreffer-Suche)
+
+Beide Commits sind für sich genommen saubere, korrekte Fixes (per Test
+verifiziert). Bei der Prüfung des *Zusammenspiels* beider Stellen im
+unbekannten-Ziel-Fall bleibt aber eine Reibung übrig, die der heutige Fix
+nicht abgedeckt hat:
+
+**1. Zwei aufeinanderfolgende, sich widersprechende Chat-Nachrichten im
+Haupt-Ablauf, sobald das Ziel nicht kuratiert ist**
+`mockAdvisor.ts:124-132` liefert für ein unbekanntes Ziel jetzt die ehrliche
+Nachricht "Danke! Für {Ziel} beschreib einfach, was für eine Unterkunft du
+dir vorstellst." — das lädt die Nutzerin explizit ein, direkt im Chat
+weiterzuschreiben. `useChat.ts:302-309` zeigt diese Nachricht als eigene
+Chat-Bubble (`KiChat.tsx:122`, jede `message` ein eigener Eintrag). Direkt
+im selben `setTimeout`-Callback prüft `useChat.ts:311-312` aber unabhängig
+noch einmal `findKnownDestination()` und hängt bei unbekanntem Ziel
+(`useChat.ts:341-345`) sofort eine zweite Bubble an: "Für {Ziel} kenne ich
+noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die
+manuelle Hotelsuche." Für die Nutzerin erscheinen damit in einem Schwung
+zwei Bot-Nachrichten mit gegensätzlicher Handlungsaufforderung — "schreib
+einfach hier weiter" gefolgt sofort von "nutze stattdessen die andere
+Seite". Der bestehende Test dazu (`useChat.test.ts`, Describe-Block
+"useChat accommodation search for an unknown destination") prüft nur die
+letzte Nachricht auf "manuelle Hotelsuche", nicht das Zusammenspiel mit der
+Nachricht direkt davor — der Widerspruch fällt dadurch nicht auf.
+
+*Vorschlag:* Die zweite Nachricht (`useChat.ts:341-345`) nur zeigen, wenn
+die erste sie nicht bereits vorweggenommen hat — z. B. `reply.content`
+selbst schon prüfen lassen (ein neues Flag am `AdvisorReply`, ob bereits auf
+das unbekannte Ziel hingewiesen wurde), statt dass beide Stellen unabhängig
+voneinander denselben Sachverhalt prüfen und dabei zwei verschiedene
+Formulierungen produzieren.
+
+**2. Derselbe Widerspruch unverändert im "Bearbeiten"-Pfad, vom heutigen Fix
+gar nicht berührt**
+Der heutige Fix in `mockAdvisor.ts` betrifft nur den linearen
+Haupt-Chat-Ablauf. Der zweite Auslöser für dieselbe Unterkunftssuche — der
+"Bearbeiten"-Pfad über `startEdit('accommodation')` — nutzt stattdessen das
+feste `editPrompts.accommodation` in `useChat.ts:29-32`: "Klar, ich suche
+eine neue Unterkunft für dich — einen Moment." Diese Nachricht wird
+unbedingt gezeigt, unabhängig davon, ob das Ziel kuratiert ist. Ist es das
+nicht, hängt `startEdit()` (`useChat.ts:192-197`) synchron, ganz ohne
+Verzögerung, dieselbe "kenne ich noch keine Unterkünfte …
+manuelle Hotelsuche"-Nachricht direkt dahinter — exakt derselbe
+Widerspruch wie in Punkt 1 ("ich suche jetzt" bzw. hier "einen Moment"
+gefolgt von "es gibt gar keine Suche"), nur über den anderen Auslöser. Der
+bestehende Test dafür (`useChat.test.ts`, "tells the user on the
+'Bearbeiten' (startEdit) path too") prüft ebenfalls nur die letzte
+Nachricht, nicht die widersprüchliche Ankündigung davor.
+
+*Vorschlag:* `editPrompts.accommodation.content` ist aktuell ein fester
+String ohne Kenntnis des Ziels — sobald der obige Punkt 1 gelöst ist (z. B.
+über ein gemeinsames Flag/eine gemeinsame Hilfsfunktion, die beide Pfade
+nutzen), ließe sich derselbe Mechanismus auch hier anwenden, statt zwei
+getrennte Textbausteine für denselben Fall zu pflegen.
+
+Kein weiterer nennenswerter Reibungspunkt in den beiden heutigen Commits
+gefunden — beide sind andernfalls in sich stimmig und ordentlich getestet.
