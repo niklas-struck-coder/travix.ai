@@ -83,6 +83,30 @@ describe('getNextAdvisorStep', () => {
     const reply = getNextAdvisorStep(trip, 'bis 1.000 €')
     expect(reply.trip.budget).toBe('bis 1.000 €')
     expect(reply.nextField).toBe('accommodation')
+    expect(reply.content).toContain('Ich suche jetzt nach echten Unterkünften')
+    expect(reply.avatarState).toBe('searching')
+    expect(reply.quickReplies.length).toBeGreaterThan(0)
+  })
+
+  it('does not promise a search it cannot start when the destination is not curated', () => {
+    // findKnownDestination() entscheidet in useChat.ts, ob eine echte
+    // Unterkunftssuche ausgelöst wird — für ein nicht-kuratiertes Ziel wie
+    // "Bali" versprach die Nachricht bisher trotzdem "ich suche jetzt",
+    // obwohl useChat.ts direkt danach die gegenteilige Ehrlichkeits-Meldung
+    // zeigt und die hier gesetzten Hotel/Ferienwohnung/Hostel-Chips keine
+    // echte Suche mehr auslösen.
+    const trip = {
+      ...emptyTrip,
+      destination: 'Bali',
+      transportMode: 'train' as const,
+      dates: 'Im Sommer',
+    }
+    const reply = getNextAdvisorStep(trip, 'bis 1.000 €')
+    expect(reply.trip.budget).toBe('bis 1.000 €')
+    expect(reply.nextField).toBe('accommodation')
+    expect(reply.content).not.toContain('Ich suche jetzt')
+    expect(reply.avatarState).toBe('thinking')
+    expect(reply.quickReplies).toEqual([])
   })
 
   it('sets accommodation and signals no further field is being asked for', () => {

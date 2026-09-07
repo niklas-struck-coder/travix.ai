@@ -7859,3 +7859,71 @@ nötig. Ergebnis objektiv prüfbar (Regressionstests).
   3 neue aus diesem Lauf), alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-07 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Checklistenpunkt (Rest von
+Sprint 1/2 ist entweder Produktentscheidung — Backend, 4.1-4.3 — oder
+blockiert durch fehlende `TripDraft`-Preisfelder — 6.2/6.6/6.7/7.12).
+Stattdessen Vorschlag 2 aus `reports/support-chef.md` (06.09.), bisher in
+keinem der beiden vorherigen heutigen Läufe adressiert: Kennt travix.ai
+das im Chat genannte Reiseziel nicht für die automatische Unterkunftssuche
+(`findKnownDestination()` liefert `null`, z. B. bei "Bali"), sagt
+`getNextAdvisorStep()` (`mockAdvisor.ts`, `!next.budget`-Zweig) trotzdem
+unbedingt "Ich suche jetzt nach echten Unterkünften in {Ziel}" und zeigt
+die Chips `Hotel`/`Ferienwohnung`/`Hostel` — `useChat.ts` schickt direkt
+danach die gegenteilige Ehrlichkeits-Meldung ("kenne ich noch keine
+Unterkünfte … nutze die manuelle Hotelsuche"), ohne die zuvor gezeigten
+Chips zurückzunehmen. Für die Nutzerin liest sich das wie "ich suche"
+gefolgt von "ich kann nicht", bei weiterhin scheinbar aktiven Buttons, die
+keine echte Suche mehr auslösen.
+
+**Warum sicher genug:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht.
+Keine offene Produkt-/Architekturentscheidung — der Bericht beschreibt
+Ursache, betroffene Stelle und die gewünschte Korrektur bereits konkret
+("Ankündigung nur dann 'ich suche jetzt' sagen, wenn das Ziel wirklich
+bekannt ist" plus "Quick-Replies leeren, wenn nicht"), keine eigene
+Annahme über den Berichtstext hinaus nötig. Ergebnis objektiv prüfbar
+(Regressionstests für beide Fälle: bekanntes vs. unbekanntes Ziel).
+
+**Umgesetzt (`src/lib/ai/mockAdvisor.ts`):**
+- `getNextAdvisorStep()` prüft im `!next.budget`-Zweig jetzt per neu
+  importierter `findKnownDestination()` (bereits bestehende Funktion aus
+  `@/types/stays`, dieselbe, die `useChat.ts` für denselben Zweck nutzt),
+  ob das Ziel bekannt ist, *bevor* die Antwort formuliert wird.
+- Bekanntes Ziel: unverändertes Verhalten (Ankündigung "ich suche jetzt",
+  `avatarState: 'searching'`, Chips `Hotel`/`Ferienwohnung`/`Hostel`).
+- Unbekanntes Ziel: neue, ehrliche Zwischenantwort ohne Suchversprechen
+  ("Danke! Für {Ziel} beschreib einfach, was für eine Unterkunft du dir
+  vorstellst."), `avatarState: 'thinking'` statt `'searching'`, leere
+  `quickReplies` statt der drei jetzt wirkungslosen Chips — dadurch zeigt
+  die direkt danach von `useChat.ts` gesendete Ehrlichkeits-Meldung keinen
+  Widerspruch mehr, und es bleiben keine toten Chips stehen. Kein neuer
+  Chip zur manuellen Hotelsuche erfunden (dafür gibt es an dieser Stelle
+  keinen bestehenden Klick-Handler) — die Nutzerin kann wie bei anderen
+  freitextbasierten Feldern (Datum, Budget) einfach weiterschreiben,
+  `nextField` bleibt `'accommodation'`.
+- Keine Änderung an `useChat.ts` nötig: die dort schon existierende
+  Ehrlichkeits-Meldung (`else`-Zweig bei fehlendem `findKnownDestination`-
+  Treffer) setzt weder `avatarState` noch `quickReplies` selbst — beide
+  sind durch den Fix in `mockAdvisor.ts` bereits vor dem Aufruf korrekt
+  gesetzt.
+- Zwei neue Regressionstests in `mockAdvisor.test.ts`: bekanntes Ziel
+  ("Lissabon") behält die bisherige Suchankündigung samt Chips; nicht
+  kuratiertes Ziel ("Bali") verspricht keine Suche mehr, hat
+  `avatarState: 'thinking'` und leere `quickReplies`.
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4, direkt nach der letzten
+  bestehenden Notiz) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — reiner Bugfix, kein
+  eigener PRD-Punkt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch, Netzwerkzugriff war in dieser Session verfügbar).
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite, nach Hinzufügen der zwei neuen
+  Tests) — 38 Testdateien, 213 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

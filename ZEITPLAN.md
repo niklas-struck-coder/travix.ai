@@ -92,6 +92,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ursprüngliche Auto-Fix-PR #18 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden, wie in
   `reports/it-chef.md` bereits für andere Altbranches vorgeschlagen).
+  Vom autonomen IT-Chef-Lauf am 07.09. (weiterer Lauf) Vorschlag 2 aus
+  `reports/support-chef.md` (06.09.) behoben: Kennt travix.ai das
+  genannte Reiseziel nicht für die automatische Unterkunftssuche
+  (`findKnownDestination()` liefert `null`, z. B. bei "Bali"), sagte
+  `getNextAdvisorStep()` (`mockAdvisor.ts`) trotzdem unbedingt "Ich suche
+  jetzt nach echten Unterkünften in {Ziel}" samt Chips
+  `Hotel`/`Ferienwohnung`/`Hostel` — direkt gefolgt von der gegenteiligen
+  Ehrlichkeits-Meldung aus `useChat.ts` ("kenne ich noch keine
+  Unterkünfte … nutze die manuelle Hotelsuche"), ohne dass die zuvor
+  gezeigten, inzwischen wirkungslosen Chips zurückgenommen wurden. Fix:
+  `getNextAdvisorStep()` prüft das Ziel jetzt selbst über
+  `findKnownDestination()`, bevor die Antwort formuliert wird — bei
+  unbekanntem Ziel eine ehrliche Zwischenantwort ohne Suchversprechen,
+  `avatarState: 'thinking'` statt `'searching'`, leere `quickReplies`
+  statt der drei wirkungslosen Chips (kein neuer Chip erfunden, die
+  Nutzerin kann wie bei anderen Freitext-Feldern einfach weiterschreiben).
+  `useChat.ts` selbst brauchte keine Änderung, da dessen Ehrlichkeits-
+  Meldung weder `avatarState` noch `quickReplies` überschreibt. Zwei neue
+  Regressionstests in `mockAdvisor.test.ts` (bekanntes vs. nicht
+  kuratiertes Ziel).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

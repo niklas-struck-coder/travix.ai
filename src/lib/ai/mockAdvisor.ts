@@ -1,5 +1,5 @@
 import type { AdvisorReply, TransportMode, TripDraft } from '@/types/chat'
-import { knownDestinations } from '@/types/stays'
+import { findKnownDestination, knownDestinations } from '@/types/stays'
 
 /**
  * Local stand-in for the real AI engine (Base44 InvokeLLM + gemini_3_flash +
@@ -115,6 +115,22 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
 
   if (!next.budget) {
     next.budget = userMessage
+
+    // findKnownDestination() entscheidet weiter unten in useChat.ts, ob die
+    // automatische Unterkunftssuche für dieses Ziel überhaupt ausgelöst wird
+    // — ist das Ziel nicht bekannt, würde "ich suche jetzt" hier eine Suche
+    // versprechen, die nie startet, und die anschließende Ehrlichkeits-
+    // Meldung in useChat.ts widerspricht sich dann mit dieser Nachricht.
+    if (!findKnownDestination(next.destination ?? '')) {
+      return {
+        content: `Danke! Für ${next.destination} beschreib einfach, was für eine Unterkunft du dir vorstellst.`,
+        avatarState: 'thinking',
+        quickReplies: [],
+        trip: next,
+        nextField: 'accommodation',
+      }
+    }
+
     return {
       content: `Danke! Ich suche jetzt nach echten Unterkünften in ${next.destination} — wähle direkt eine aus, oder beschreibe, was du suchst.`,
       avatarState: 'searching',
