@@ -7798,3 +7798,64 @@ liefen erneut — 5 Fehlschläge, danach wieder grün nach Wiederherstellen).
   grün — bestätigt, dass die neuen Tests den Bug tatsächlich abdecken.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-07
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Punkt, sondern ein von
+`reports/support-chef.md` (06.09., Vorschlag 1) konkret gemeldeter und von
+`reports/it-chef.md` (06.09.) bestätigter Bug: Nach einer erfolgreichen
+Unterkunfts- oder Flugsuche mit echten null Treffern bleiben die Chat-Chips
+leer, obwohl `useChat.ts` sie beim Start jeder Nachricht auf `[]`
+zurücksetzt und nur im Fehlerfall wieder befüllt — eine Sackgasse mitten im
+Chat, aus der nur ein kompletter Neustart herausführt.
+
+**Warum sicher genug:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht.
+Zwar hatte `reports/it-chef.md` diesen Punkt am 06.09. noch als "bewusste
+UX-Entscheidung, die Ni treffen sollte" zurückgestellt, weil offen war,
+welcher Text/welche Chips erscheinen sollen — dieser Lauf löst das aber
+ohne neue Annahme: `['Neue Reise planen']` ist im gesamten `useChat.ts`
+bereits das durchgängig einzige Chip-Set für jeden anderen Dead-End-Fall
+(Fehler bei genau denselben drei Suchaufrufen, IATA-Fehler,
+Feld-Bearbeitung fertig usw.) — hier fehlt es nur inkonsistent für den
+Erfolgsfall mit null Treffern. Der von Support-Chef zusätzlich
+vorgeschlagene zweite Chip "Andere Daten versuchen" wurde bewusst NICHT
+übernommen: den gibt es nirgends im Code, es gibt keinen Klick-Handler und
+keine Vorgabe, was er tun soll — das wäre tatsächlich die offene
+Entscheidung gewesen. Damit bleibt der Fix auf das bereits etablierte
+Muster beschränkt, keine Interpretation über die Aufgabenliste hinaus
+nötig. Ergebnis objektiv prüfbar (Regressionstests).
+
+**Umgesetzt (`src/hooks/useChat.ts`):**
+- Haupt-Chat-Ablauf, automatische Unterkunftssuche (`.then()`-Zweig um
+  Zeile 322): im `else`-Zweig (kein Suchfehler) zusätzlich
+  `setQuickReplies(['Neue Reise planen'])`, wenn `result.offers.length ===
+  0`.
+- "Bearbeiten"-Pfad für Unterkunft (`startEdit`, `.then()`-Zweig um Zeile
+  176): dieselbe Ergänzung im `else`-Zweig.
+- Flugsuche (`runFlightSearch`, `.then()`-Zweig um Zeile 96): Bedingung von
+  `result.errors.length > 0` auf `result.errors.length > 0 ||
+  result.offers.length === 0` erweitert.
+- Verhalten bei echten Treffern (Kartenliste erscheint) bleibt in allen
+  drei Fällen unverändert ohne Chips — nur der bisher chip-lose
+  Nulltreffer-Erfolgsfall ist betroffen.
+- Drei neue Regressionstests in `useChat.test.ts` (Haupt-Chat-Unterkunft,
+  "Bearbeiten"-Unterkunft, Flug), die jeweils `{ offers: [], errors: [] }`
+  mocken und `quickReplies` prüfen — vor dem Fix reproduzierbar rot
+  verifiziert (bestehende Tests, die denselben Mock nutzten, prüften bisher
+  nur `stayError`/`flightErrors`, nicht `quickReplies`).
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 5, direkt nach der bestehenden
+  letzten Notiz) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — reiner Bugfix, kein
+  eigener PRD-Punkt.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte; Installation
+  lief diesmal erfolgreich durch, Netzwerkzugriff war in dieser Session
+  verfügbar).
+- `npx tsc -b` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 212 Tests (209 +
+  3 neue aus diesem Lauf), alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

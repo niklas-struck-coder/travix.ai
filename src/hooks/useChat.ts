@@ -96,7 +96,7 @@ export function useChat(speechEnabled: boolean) {
         setFlightOffers(result.offers)
         setFlightErrors(result.errors)
         setFlightLoading(false)
-        if (result.errors.length > 0) {
+        if (result.errors.length > 0 || result.offers.length === 0) {
           setQuickReplies(['Neue Reise planen'])
         }
       })
@@ -178,6 +178,9 @@ export function useChat(speechEnabled: boolean) {
               setQuickReplies(['Neue Reise planen'])
             } else {
               setStayOffers(result.offers)
+              if (result.offers.length === 0) {
+                setQuickReplies(['Neue Reise planen'])
+              }
             }
             setStayLoading(false)
           })
@@ -324,6 +327,9 @@ export function useChat(speechEnabled: boolean) {
                 setQuickReplies(['Neue Reise planen'])
               } else {
                 setStayOffers(result.offers)
+                if (result.offers.length === 0) {
+                  setQuickReplies(['Neue Reise planen'])
+                }
               }
               setStayLoading(false)
             })

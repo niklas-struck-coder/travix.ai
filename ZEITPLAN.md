@@ -497,6 +497,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   der kuratierten `knownDestinations` gewählt — genau die Ziele, für die
   die automatische Unterkunfts- und Flugsuche danach auch wirklich
   funktioniert. Neuer Regressionstest in `mockAdvisor.test.ts`.
+  Vom autonomen IT-Chef-Lauf am 07.09. einen von `reports/support-chef.md`
+  (06.09., Vorschlag 1) gemeldeten Fund behoben: Nach einer erfolgreichen
+  Unterkunfts- oder Flugsuche mit echten null Treffern blieben die Chat-
+  Chips leer (`useChat.ts` setzt `quickReplies` beim Start jeder Nachricht
+  auf `[]` zurück und befüllt sie bisher nur im Fehlerfall neu) — eine
+  Sackgasse mitten im Chat, einziger Ausweg war ein kompletter Neustart.
+  Betrifft alle drei Stellen mit echter Suche: den Haupt-Chat-Ablauf für
+  Unterkunft (Zeile ~322), den "Bearbeiten"-Pfad für Unterkunft (Zeile
+  ~176) und die Flugsuche (Zeile ~99). Fix: In allen drei `.then()`-Zweigen
+  wird bei `result.errors.length === 0 && result.offers.length === 0`
+  jetzt zusätzlich `setQuickReplies(['Neue Reise planen'])` gesetzt — exakt
+  dasselbe, im ganzen Code bereits durchgängig etablierte Muster, das für
+  den Fehlerfall an denselben Stellen schon existiert (keine neue,
+  unbelegte Chip-Beschriftung erfunden, wie es der ebenfalls im Bericht
+  vorgeschlagene zweite Chip "Andere Daten versuchen" gewesen wäre — dafür
+  gibt es noch keinen Klick-Handler und keine Vorgabe, was er tun soll).
+  Verhalten bei echten Treffern (Kartenliste erscheint) bleibt unverändert
+  ohne Chips. Drei neue Regressionstests in `useChat.test.ts` (je einer für
+  Haupt-Chat-Unterkunft, "Bearbeiten"-Unterkunft, Flug), vor dem Fix
+  reproduzierbar rot verifiziert.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

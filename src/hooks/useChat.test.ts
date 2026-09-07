@@ -121,6 +121,17 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayLoading).toBe(false)
   })
 
+  it('offers "Neue Reise planen" as a next step in the main chat flow when the search genuinely returns zero offers, instead of a dead end', async () => {
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
   it('sets the error state when the search resolves with errors instead of rejecting (real Duffel API failure)', async () => {
     vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [{ message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt.' }] })
 
@@ -175,6 +186,25 @@ describe('useChat accommodation search failure vs. real zero results', () => {
 
     expect(result.current.stayError).toBe(true)
     expect(result.current.stayOffers).toBeNull()
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
+  it('offers "Neue Reise planen" as a next step on the "Bearbeiten" (startEdit) path when the retry genuinely returns zero offers', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayError).toBe(false)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
@@ -341,6 +371,18 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightErrors).toEqual([])
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
+  })
+
+  it('offers "Neue Reise planen" as a next step when the search genuinely returns zero offers, instead of a dead end', async () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
   it('clears a stale flight error once the chat moves on with a normal message', async () => {
