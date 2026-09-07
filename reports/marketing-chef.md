@@ -1,50 +1,54 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-06
+**Datum:** 2026-09-07
 
-## Was ist seit dem letzten Eintrag (2026-09-05) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
 
-Ein technisch produktiver Tag, aber wieder ohne neue Entscheidung von dir
-zu den offenen Freigabe-Fragen:
+Ein Tag mit spürbarem Aufräumeffekt, aber weiterhin ohne neue Entscheidung
+von dir zu den offenen Freigabe-Fragen:
 
-- **PR #18 ist gemergt:** Der Absturz der Reiseplan-Seite bei alten/
-  korrupten Trips ohne "Aktivitäten"-Feld, den ich letztes Mal noch als
-  offen gemeldet hatte, ist jetzt behoben.
-- **Neuer Fund, noch offen (PR #19):** Wenn ein Trip nicht gespeichert
-  werden kann (z. B. voller Browser-Speicher), zeigte die App bisher trotz
-  Fehlschlag "gespeichert" an — der Nutzer merkt den Datenverlust also gar
-  nicht. Gleiche Fehlerklasse wie die bereits behobenen Sackgassen-Bugs,
-  nur beim Speichern statt beim Laden.
-- **Kleine, aber charmante Detailkorrektur:** Die Preisbestätigung bei
-  Flugauswahl im Chat zeigt Beträge jetzt im deutschen Zahlenformat
-  (Komma statt Punkt) statt im rohen US-Format.
-- Der PR-Stau wurde aufgeräumt: von 18 offenen Auto-Fix-PRs sind nur noch
-  3 wirklich relevant, der Rest war längst anderweitig gemerged.
+- **Beide zuletzt gemeldeten Bugs sind behoben:** Der stille Speicherfehler
+  (App zeigte "gespeichert" an, obwohl der Trip nicht gesichert wurde,
+  PR #19) ist gefixt, und die Vorlesen-Funktion im Chat stoppt jetzt
+  zuverlässig beim Ausschalten, Neustart oder Verlassen der Seite. Damit
+  sind **beide technischen Gründe ausgeräumt**, die bisher gegen eine
+  Bewerbung der Sprachfunktion sprachen.
+- **Zwei weitere kleine Ehrlichkeits-Fixes:** Fehlende Chat-Chips nach
+  einer echten Nulltreffer-Suche und eine widersprüchliche
+  Unterkunfts-Ankündigung bei unbekanntem Ziel wurden korrigiert.
+- **Zweite Mini-Changelog-Ausgabe liegt fertig:** Ein zweiter Entwurf mit
+  acht weiteren Vorher/Nachher-Punkten für die geplante Changelog-Seite
+  ist bereits geschrieben (`marketing/mini-changelog-konzept.md`,
+  Ausgabe 2) — braucht wie Ausgabe 1 nur noch dein Go, ob IT-Chef die
+  Seite bauen soll.
 - Die vier offenen Fragen an dich (Kanäle anlegen, Warenkorb-Content,
-  Tier-4-Format, und jetzt auch: soll der fertige Mini-Changelog-Entwurf
-  als Footer-Seite gebaut werden) sind weiterhin unbeantwortet — teils
-  seit dem 21.08.
+  Tier-4-Format, Mini-Changelog-Seite bauen) sind weiterhin unbeantwortet
+  — teils seit dem 21.08.
 
 ## Vorschläge
 
-1. **Die deutsche Zahlenformat-Korrektur als kleinen Beleg mitnehmen.**
-   Kein eigenes Kampagnenthema, aber ein gutes zusätzliches Beispiel für
-   "für den deutschen Markt gebaut, nicht nur oberflächlich übersetzt" —
-   gehört in den nächsten Mini-Changelog-Durchgang, sobald der freigegeben
-   ist.
+1. **Mini-Changelog jetzt entscheiden lassen.** Zwei fertige Ausgaben
+   liegen bereit, ohne dass irgendwo sonst etwas verändert werden muss.
+   Von den vier offenen Fragen ist das die mit dem geringsten Aufwand für
+   dich — ein Ja/Nein reicht, und der am längsten liegende Content-Baustein
+   wird endlich nutzbar.
 
-2. **Eine der vier offenen Fragen entblocken, am besten die einfachste.**
-   Der Mini-Changelog-Entwurf liegt fertig da (Text + Design-Brief), braucht
-   keinen neuen Kanal und keine 6.2-Priorisierung — nur ein Ja/Nein von dir,
-   ob IT-Chef die Footer-Seite bauen soll. Das würde den am längsten
-   liegenden Content-Baustein endlich nutzbar machen, ohne dass irgendwo
-   sonst etwas verändert werden muss.
+2. **Vorlesen-Funktion als "wenn, dann zuerst"-Kandidat vormerken.** Jetzt,
+   wo beide technischen Blocker weg sind, ist sie bereit für den Moment,
+   in dem du einen Kanal oder ein Social-Format freigibst — dann direkt als
+   Reisefreiheit-/Unterwegs-Nutzen positionieren ("Reiseplan vorlesen
+   lassen, während du die Hände frei hast"), statt als reine Feature-Liste.
 
-3. **Sprachfunktion weiterhin nicht bewerben.** PR #16 (Stopp-Knopf für die
-   Vorlesen-Funktion) ist immer noch offen. Unveränderte Empfehlung.
+3. **Die Sammlung an Ehrlichkeits-Fixes wird zum eigenen Beweis-Fundament.**
+   Mit jetzt zehn+ einzeln verifizierten Vorher/Nachher-Punkten seit August
+   ist "wir zeigen Fehler ehrlich an, statt sie zu verstecken" kein
+   einzelner Fund mehr, sondern ein durchgehendes Muster. Sobald die
+   Kanal-Frage geklärt ist, wäre das ein starker erster Positionierungs-Post
+   ("Was wir in den letzten Wochen ehrlicher gemacht haben") statt eines
+   einzelnen Bugfix-Hinweises.
 
 4. **Keine erfundenen Kennzahlen.** Mir liegen weiterhin keine Nutzungs-
    oder Erfolgszahlen vor — Content bleibt bei "was wurde ehrlicher und
    zuverlässiger", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-06_
+_Letztes Update: 2026-09-07_
