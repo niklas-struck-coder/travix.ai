@@ -1,10 +1,96 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-06)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-07)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-07: zweite Mini-Changelog-Ausgabe geschrieben (acht neue Tier-4-Kandidaten seit Ausgabe 1, davon zwei explizit vorgemerkte), Sprachfunktions-Blocker vollständig ausgeräumt
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`5299c9c` (06.09.) hängengeblieben, dessen Inhalt laut `git log
+origin/main ^origin/marketing-chef/auto` bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`8dcf007`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md`, `ZEITPLAN.md` oder diesem Dokument seit
+dem 06.09. — alle vier weiterhin unbeantwortet. Der eigene interaktive
+Bericht vom 06.09. (`reports/marketing-chef.md`) bestätigt das ebenfalls
+und empfiehlt weiterhin, die Sprachfunktion nicht zu bewerben, allerdings
+**bevor** der unten beschriebene Fund vom späten 06.09.
+
+**`git log 5299c9c..origin/main` zeigt 13 neue Commits**, davon fünf ohne
+Content-Relevanz (zwei Freigabe-Chef-Merges/-Logs, ein Daily-Status-Update,
+ein eigener interaktiver Marketing-Chef-Bericht, ein IT-Chef-Bericht — alle
+rein interaktiv/Log). Acht echte Codeänderungen einzeln per `git show`
+geprüft, alle content-relevant und in **Ausgabe 2 des Mini-Changelogs**
+(`marketing/mini-changelog-konzept.md`) verarbeitet — Details und
+Vorher/Nachher-Text dort, hier nur die Einordnung:
+
+- `404935c` (05.09.): `formatOfferPrice()` gegen ungültigen Währungscode
+  abgesichert (verhinderte Kartenabsturz).
+- `0b28d39` (05.09.): stiller Trip-Verlust bei vollem `localStorage` jetzt
+  im Chat sichtbar.
+- `bf20ae3` (06.09.): "euro"/"hi"-Wortgrenzen-Bug im Concierge behoben.
+- `2483ce4` (06.09.): `trip.activities` beim Laden normalisiert (PR #18).
+- `0d4aab2` (06.09.): "Überrasch mich" wird nicht mehr wörtlich als
+  Reiseziel übernommen, sondern löst ein echtes kuratiertes Ziel aus.
+- `fc17297` (07.09., PR #19): `updateStoredTrip()` täuschte bei
+  fehlgeschlagenem Speichern bisher Erfolg vor — jetzt zeigen auch
+  Flugsuche/Hotelsuche/Buchung denselben Speicher-Warnhinweis wie der Chat.
+- `56c8f61` (07.09.): Chat-Chips fehlten nach einer echten
+  Nulltreffer-Suche — behoben. **Löst genau den Fund, den der eigene
+  Bericht vom 05.09. (Vorschlag 3) und das Update vom 06.09. unten als
+  "guten Baustein für die nächste Ausgabe" vorgemerkt hatten.**
+- `b0b8d2e` (07.09.): widersprüchliche Unterkunfts-Suchankündigung bei
+  unbekanntem Ziel behoben — **derselbe vorgemerkte Fund wie oben**, jetzt
+  ebenfalls erledigt.
+
+Mit acht neuen, einzeln verifizierten Kandidaten (mehr als doppelt so
+viele wie am 06.09., als vier bewusst noch als "nicht ausreichend"
+gewertet wurden) und zwei davon exakt den Funden, die für "die nächste
+Ausgabe" vorgemerkt waren, ist die eigene Gating-Bedingung aus dem
+06.09.-Update jetzt erfüllt — deshalb heute die zweite Mini-Changelog-
+Ausgabe statt einer weiteren reinen Übersichts-Ergänzung.
+
+**Wichtiger zusätzlicher Fund — Sprachfunktions-Blocker jetzt vollständig
+ausgeräumt:** Ein neunter Commit, `ac0e188` (06.09., separat von den acht
+Tier-4-Kandidaten behandelt, da kein Changelog-Punkt, sondern ein
+Statusupdate zur bestehenden Zurückhaltung), behebt `stopSpeaking()` wird
+nirgends aufgerufen — der zweite von zwei Gründen, die der eigene Bericht
+vom 03./04.09. gegen eine Bewerbung der Vorlesen-Funktion genannt hatte
+(der erste, hängender Mikrofon-Knopf, war bereits am 05.09. behoben). Per
+`git merge-base --is-ancestor ac0e188 origin/main` bestätigt: gemergt.
+**Beide ursprünglich genannten technischen Gründe sind damit ausgeräumt.**
+Bewusst **kein** Anlass für ein eigenes Content-Stück heute (das wäre ein
+neuner Social-Anlass mitten in derselben ungeklärten Kanal-/Format-Frage,
+siehe Selbstbeschränkung unten) — aber eine für Nis Entscheidung relevante
+Statusänderung, deshalb hier und in `mini-changelog-konzept.md` (Ausgabe
+2, Randnotiz) vermerkt. Die Vorlesen-Funktion ist ab jetzt "bereit, sobald
+ein Kanal oder eine Ausgabe dafür ansteht", nicht mehr technisch
+zurückgehalten.
+
+**Warum sicher genug:** Ausgabe 2 ist wie Ausgabe 1 ein reines
+Entwurfsdokument für dieselbe, noch nicht gebaute Seite — kein Live-Vorgang,
+nichts gepostet. Keine erfundenen Kennzahlen — jeder Punkt stammt aus
+einem einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commit. Keine offene Positionierungs-Grundsatzfrage: wendet nur die
+bestehende Positionierung an, entscheidet sie nicht neu. Berührt keine der
+vier offenen Fragen — hängt an derselben bereits gestellten vierten Frage
+wie Ausgabe 1.
+
+**Umgesetzt:** `marketing/mini-changelog-konzept.md` um Abschnitt
+"Ausgabe 2" ergänzt (acht Changelog-Punkte in vier Themenblöcken plus
+Sprachfunktions-Randnotiz), diese Übersicht aktualisiert (Punkt 7 unten
+sowie Tier 5 unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-06: vier weitere Tier-4-Kandidaten geprüft, PR #17 und #18 jetzt gemergt (waren in der ersten Mini-Changelog-Ausgabe noch "offen"), weiterhin kein achtes Content-Stück bzw. keine zweite Mini-Changelog-Ausgabe
 
@@ -819,15 +905,19 @@ Anfang-bis-Ende-Weg im Code.
    Datenverlusts; und derselbe Wortgrenzen-Bug wie bei Zielname-/
    Transportmittel-Erkennung steckte unabhängig auch in der
    Concierge-Themenerkennung ("euro"/"hi" mitten in "Europa"/"Sushi").
+   **Alle acht seit 05./06.09. gesammelten Kandidaten sind seit dem
+   07.09. in Ausgabe 2 des Mini-Changelogs verarbeitet** (siehe Tier 5
+   unten) — der Kandidatentopf hier ist damit vorerst wieder leer, neue
+   Funde sammeln sich ab jetzt für eine mögliche dritte Ausgabe.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
-8. **`mini-changelog-konzept.md`** (05.09.) — Konzept + fertige erste
-   Ausgabe für einen öffentlichen Mini-Changelog *im Produkt* (Footer-
-   Seite), nicht für Social Media gedacht. Bündelt den gesamten
-   Tier-4-Kandidatentopf (Punkt 7 oben) in fünf kuratierten
-   Themenblöcken. Berührt bewusst keine der drei Fragen unten — hat
-   dafür eine eigene, vierte Frage (siehe unten).
+8. **`mini-changelog-konzept.md`** (05.09., Ausgabe 2 am 07.09. ergänzt) —
+   Konzept + zwei fertige Ausgaben für einen öffentlichen Mini-Changelog
+   *im Produkt* (Footer-Seite), nicht für Social Media gedacht. Bündelt
+   den gesamten seitherigen Tier-4-Kandidatentopf in neun kuratierten
+   Themenblöcken über beide Ausgaben. Berührt bewusst keine der drei
+   Fragen unten — hat dafür eine eigene, vierte Frage (siehe unten).
 
 ## Für Ni: die eigentliche Entscheidung
 
@@ -842,32 +932,36 @@ autonome Lauf nicht vorwegnehmen. Konkret zu entscheiden bleibt
   Text nutzbar wird?
 - Ist das wiederkehrende Format (Tier 4, Social Media) grundsätzlich
   gewollt?
-- **Neu:** Soll der Mini-Changelog (Tier 5, Seite im Produkt statt
-  Social) gebaut werden? Unabhängig von den drei Fragen oben zu
+- **Neu seit 05.09.:** Soll der Mini-Changelog (Tier 5, Seite im Produkt
+  statt Social) gebaut werden? Unabhängig von den drei Fragen oben zu
   beantworten — braucht weder Kanal noch 6.2 noch eine Social-Format-
-  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite.
+  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen zwei
+  fertige Ausgaben, die auf diese eine Antwort warten.
+- **Kein neuer Entscheidungsbedarf, nur zur Kenntnis (seit 07.09.):** Die
+  Vorlesen-Funktion im Chat hat seit heute keinen bekannten technischen
+  Blocker mehr (beide ursprünglich genannten Gründe sind behoben) —
+  bleibt aber an die drei alten Fragen oben gebunden, bevor daraus eigener
+  Content wird (siehe Update 2026-09-07 oben).
 
 ## Nächster autonomer Lauf
 Die Selbstbeschränkung "kein neues *Social*-Content-Stück" aus dem
 Bericht vom 20.08. gilt für die ersten drei Fragen unverändert weiter
 (die einzige bisherige Ausnahme war Tier-1-Stück 3, siehe
-`marketing-chef-auto-log.md`, 24.08.). Der Mini-Changelog (05.09.) ist
-kein Bruch dieser Regel, sondern ein bewusst anderer Kanal, der genau
-deshalb umgesetzt wurde. Der nächste Lauf sollte zuerst prüfen, ob Ni
-zwischenzeitlich eine der vier Fragen beantwortet hat (z. B. neue
-Kanal-Links, ein Commit zu 6.2, eine Notiz in diesem Dokument, oder ein
-Commit von IT-Chef zur Mini-Changelog-Seite) oder ob die Checkliste
-inzwischen echte Persistenz hat (dann wird sie laut Bericht vom 24.08.
-selbst zum nächsten Content-Kandidaten), bevor er wieder einen neuen
-Social-Text schreibt. Falls weiterhin keine der vier Fragen beantwortet
-ist: eine zweite Mini-Changelog-Ausgabe ist erst sinnvoll, sobald sich
-seit dem 05.09. wieder genug neue, verifizierte Tier-4-Kandidaten
-angesammelt haben (nicht nach jedem einzelnen neuen Fix) — Stand 06.09.
-sind das vier (siehe Update 2026-09-06 oben und Punkt 7 oben), noch
-bewusst nicht als ausreichend gewertet, solange Frage 4 unbeantwortet
-ist und die erste Ausgabe erst einen Tag alt ist. Zusätzlich lohnt ein
-Blick, ob IT-Chef inzwischen die beiden Nulltreffer-/Chip-Lücken aus
-`reports/support-chef.md` (05.09., Vorschlag 1+2) behoben hat — die
-wären laut dem eigenen Bericht vom 05.09. (`reports/marketing-chef.md`,
-Vorschlag 3) ein weiterer guter Baustein für die nächste Ausgabe, sobald
-IT-Chef entschieden hat, welcher Text/welche Chips erscheinen.
+`marketing-chef-auto-log.md`, 24.08.). Der Mini-Changelog (05.09.,
+Ausgabe 2 am 07.09.) ist kein Bruch dieser Regel, sondern ein bewusst
+anderer Kanal, der genau deshalb umgesetzt wurde. Der nächste Lauf sollte
+zuerst prüfen, ob Ni zwischenzeitlich eine der vier Fragen beantwortet hat
+(z. B. neue Kanal-Links, ein Commit zu 6.2, eine Notiz in diesem Dokument,
+oder ein Commit von IT-Chef zur Mini-Changelog-Seite) oder ob die
+Checkliste inzwischen echte Persistenz hat (dann wird sie laut Bericht vom
+24.08. selbst zum nächsten Content-Kandidaten), bevor er wieder einen
+neuen Social-Text schreibt. Falls weiterhin keine der vier Fragen
+beantwortet ist: eine dritte Mini-Changelog-Ausgabe ist erst sinnvoll,
+sobald sich seit dem 07.09. wieder genug neue, verifizierte
+Tier-4-Kandidaten angesammelt haben (nicht nach jedem einzelnen neuen
+Fix) — Stand 07.09. ist der Kandidatentopf frisch geleert (siehe Tier 4
+oben), also aktuell keiner. Sollte Ni zwischenzeitlich einen Kanal für die
+Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix `ac0e188`
+(Stopp-Knopf) plus der bereits am 05.09. behobene Mikrofon-Hänger
+(`acc9ae8`) ein naheliegender erster Baustein, da beide zusammen die
+Funktion erstmals durchgängig zuverlässig machen.
