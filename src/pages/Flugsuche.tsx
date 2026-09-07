@@ -15,6 +15,7 @@ export function Flugsuche() {
   const [loading, setLoading] = useState(false)
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
   const [selectionHasTrip, setSelectionHasTrip] = useState(true)
+  const [storageWarning, setStorageWarning] = useState(false)
 
   const handleSearch = async (params: FlightSearchParams) => {
     setLoading(true)
@@ -31,6 +32,7 @@ export function Flugsuche() {
     const updated = updateStoredTrip({ transportMode: 'flight' })
     setSelectedOfferId(offer.id)
     setSelectionHasTrip(updated !== null)
+    setStorageWarning(updated !== null && !updated.saved)
   }
 
   return (
@@ -47,6 +49,12 @@ export function Flugsuche() {
             ))}
           </div>
         </div>
+      )}
+
+      {storageWarning && (
+        <p role="status" className="text-xs text-muted-foreground">
+          Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.
+        </p>
       )}
 
       {selectedOfferId && (

@@ -16,6 +16,7 @@ export function Hotelsuche() {
   const [loading, setLoading] = useState(false)
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
   const [selectionHasTrip, setSelectionHasTrip] = useState(true)
+  const [storageWarning, setStorageWarning] = useState(false)
 
   const handleSearch = async (params: StaySearchParams) => {
     setLoading(true)
@@ -32,6 +33,7 @@ export function Hotelsuche() {
     const updated = updateStoredTrip({ accommodation: offer.accommodationName })
     setSelectedOfferId(offer.id)
     setSelectionHasTrip(updated !== null)
+    setStorageWarning(updated !== null && !updated.saved)
   }
 
   return (
@@ -48,6 +50,12 @@ export function Hotelsuche() {
             ))}
           </div>
         </div>
+      )}
+
+      {storageWarning && (
+        <p role="status" className="text-xs text-muted-foreground">
+          Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.
+        </p>
       )}
 
       {selectedOfferId && (

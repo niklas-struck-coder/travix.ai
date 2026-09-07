@@ -7729,3 +7729,72 @@ abgesichert.
 - `npm run build` (`tsc -b && vite build`) — keine Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-07
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Checklistenpunkt (Sprint-1/2-Rest
+ist entweder Produktentscheidung — Backend, 4.1-4.3 — oder blockiert durch
+fehlende `TripDraft`-Preisfelder — 6.2/6.6/6.7/7.12). Stattdessen, wie in
+den letzten Läufen, einen bereits vollständig diagnostizierten, aber noch
+nicht auf `it-chef/auto` gelandeten Fund aus `reports/it-chef.md` (Eintrag
+2026-09-06) behoben: **PR #19**
+(`it-chef-autofix/update-stored-trip-silent-save-failure-2026-09-06`) —
+`updateStoredTrip()` (`tripStorage.ts`) täuscht bei fehlgeschlagenem
+Speichern (voller `localStorage`/privater Modus) trotzdem Erfolg vor.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+Ursache, betroffene Stelle und der bestehende `storageWarning`-Text
+(`KiChat.tsx`/`ChatInput.tsx`) waren durch `reports/it-chef.md` bereits
+exakt benannt, keine eigene Annahme über die Diagnose hinaus nötig. Der
+Report selbst merkte an, in seiner Session ohne `node_modules` nicht
+automatisiert geprüft worden zu sein — hier stand ein normaler Checkout
+zur Verfügung, also vollständig gegen Typecheck/Lint/Tests verifiziert.
+Ergebnis objektiv prüfbar: `saved`-Rückgabewert und die drei neuen
+Warnhinweise sind je durch einen Regressionstest abgesichert, vor dem Fix
+reproduzierbar rot verifiziert (Änderungen zurückgestasht, dieselben Tests
+liefen erneut — 5 Fehlschläge, danach wieder grün nach Wiederherstellen).
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `updateStoredTrip()` verwirft den
+  Rückgabewert von `saveStoredChat()` nicht mehr, sondern liefert ihn als
+  zusätzliches `saved: boolean`-Feld auf dem zurückgegebenen Objekt mit
+  zurück (Rückgabetyp jetzt `(StoredChatState & { saved: boolean }) |
+  null`, bestehende `.trip`/`.messages`/`.quickReplies`-Zugriffe der drei
+  Aufrufer bleiben unverändert kompatibel).
+- `src/pages/Flugsuche.tsx`, `src/pages/Hotelsuche.tsx`: neuer
+  `storageWarning`-Zustand, in `handleSelect` auf `updated !== null &&
+  !updated.saved` gesetzt; neuer Hinweistext direkt unter dem
+  `PageHeader` (`role="status"`, `text-xs text-muted-foreground`, exakt
+  derselbe Text wie in `KiChat.tsx`: "Dein Fortschritt kann gerade nicht
+  dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.").
+- `src/pages/Buchung.tsx`: gleicher `storageWarning`-Zustand und
+  Hinweistext, in `handleActivitiesChange` gesetzt (Aktivitäten-Bearbeiten
+  ist der einzige `updateStoredTrip()`-Aufruf auf dieser Seite).
+- Vier neue Regressionstests: zwei in `tripStorage.test.ts`
+  (`saved: false` bei fehlgeschlagenem, `saved: true` bei erfolgreichem
+  Schreiben), je einer in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
+  (Auswahl bei gemocktem `Storage.prototype.setItem`-Fehler zeigt den
+  Warnhinweis) und `Buchung.test.tsx` (Aktivität hinzufügen unter
+  demselben gemockten Fehler zeigt den Warnhinweis).
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 6, direkt nach der bestehenden
+  6.12-Notiz) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — reiner Bugfix, kein
+  eigener PRD-Punkt. Der ursprüngliche Auto-Fix-PR #19 bleibt als überholt
+  zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden, wie
+  in `reports/it-chef.md` bereits für andere Altbranches vorgeschlagen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- `npx tsc -b --noEmit` — keine Fehler.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite) — 38 Testdateien, 209 Tests (204 +
+  5 neue aus diesem Lauf), alle grün.
+- Rot-Verifikation: mit zurückgestashten Fix-Dateien (nur die vier
+  Test-Dateien behalten) schlugen genau die 5 neuen Tests fehl
+  (`AssertionError`/Timeout beim Warnhinweis), alle anderen 29 blieben
+  grün — bestätigt, dass die neuen Tests den Bug tatsächlich abdecken.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

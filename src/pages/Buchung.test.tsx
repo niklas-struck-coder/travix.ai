@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Buchung } from './Buchung'
 import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
@@ -172,6 +172,34 @@ describe('Buchung – Aktivitäten', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Museum entfernen' }))
 
     expect(screen.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
+  })
+
+  describe('when localStorage is unavailable (e.g. quota exceeded)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('warns that the change cannot be saved instead of silently claiming success', () => {
+      seedStoredChat()
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new DOMException('QuotaExceededError')
+      })
+
+      render(
+        <MemoryRouter>
+          <Buchung />
+        </MemoryRouter>,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'Aktivitäten bearbeiten' }))
+      fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'Stadtführung' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Aktivität hinzufügen' }))
+
+      expect(
+        screen.getByText('Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.'),
+      ).toBeInTheDocument()
+    })
   })
 })
 

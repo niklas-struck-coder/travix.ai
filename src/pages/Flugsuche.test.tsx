@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Flugsuche } from './Flugsuche'
 import { searchFlights } from '@/lib/duffel/client'
 import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
@@ -103,5 +103,35 @@ describe('Flugsuche', () => {
     expect(screen.queryByRole('button', { name: 'Ausgewählt' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(2)
     expect(screen.getAllByRole('button', { name: 'Auswählen' })[0]).not.toBeDisabled()
+  })
+
+  describe('when localStorage is unavailable (e.g. quota exceeded)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('warns that the selection cannot be saved instead of silently claiming success', async () => {
+      seedStoredChat()
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new DOMException('QuotaExceededError')
+      })
+      const searchFlightsMock = vi.mocked(searchFlights)
+      searchFlightsMock.mockResolvedValueOnce({ offers: [makeOffer('1')], errors: [] })
+
+      render(
+        <MemoryRouter>
+          <Flugsuche />
+        </MemoryRouter>,
+      )
+
+      fireEvent.click(screen.getByText('Flüge suchen'))
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Auswählen' })).toBeInTheDocument())
+      fireEvent.click(screen.getByRole('button', { name: 'Auswählen' }))
+
+      expect(
+        await screen.findByText('Dein Fortschritt kann gerade nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen.'),
+      ).toBeInTheDocument()
+    })
   })
 })

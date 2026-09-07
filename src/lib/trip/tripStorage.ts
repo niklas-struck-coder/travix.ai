@@ -46,14 +46,19 @@ export function saveStoredChat(state: StoredChatState): boolean {
  * the standalone Flugsuche page) into the currently stored trip. No-op if no
  * trip has been started yet — there's nothing to integrate the selection
  * into, and this function must not fabricate a new trip on its own.
+ *
+ * `saved` reports whether the merged trip actually made it into
+ * localStorage, so callers can warn the user instead of showing a success
+ * state that a reload would silently undo (same reasoning as
+ * saveStoredChat's own return value above).
  */
-export function updateStoredTrip(patch: Partial<TripDraft>): StoredChatState | null {
+export function updateStoredTrip(patch: Partial<TripDraft>): (StoredChatState & { saved: boolean }) | null {
   const stored = loadStoredChat()
   if (!stored) return null
 
   const updated: StoredChatState = { ...stored, trip: { ...stored.trip, ...patch } }
-  saveStoredChat(updated)
-  return updated
+  const saved = saveStoredChat(updated)
+  return { ...updated, saved }
 }
 
 // activities is a list (not a slot-filling field), so it's excluded from

@@ -237,7 +237,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
-  Checkliste (6.8-6.10) fehlen noch
+  Checkliste (6.8-6.10) fehlen noch.
+  Vom autonomen IT-Chef-Lauf am 07.09. einen bereits über einen offenen,
+  aber noch nicht gemergten Auto-Fix-PR (#19,
+  `it-chef-autofix/update-stored-trip-silent-save-failure-2026-09-06`, von
+  `reports/it-chef.md` am 06.09. diagnostiziert) vollständig verifizierten
+  Bug direkt auf `it-chef/auto` behoben: `updateStoredTrip()`
+  (`tripStorage.ts`) ruft `saveStoredChat()` zwar auf, verwarf deren
+  Rückgabewert (ob das Schreiben nach `localStorage` wirklich geklappt hat)
+  aber und lieferte immer den gemergten Trip zurück — dieselbe Fehlerklasse,
+  die für den Haupt-Chat-Ablauf in `useChat.ts` bereits durch den
+  `storageWarning`-Zustand abgedeckt ist, hier für die drei
+  `updateStoredTrip()`-Aufrufer (`Flugsuche.tsx`, `Hotelsuche.tsx`,
+  `Buchung.tsx`) aber noch offen war. Bei vollem Speicher/privatem Modus
+  zeigten diese drei Seiten weiterhin eine Erfolgsmeldung ("Flug/Unterkunft
+  in deinen Reiseplan übernommen" bzw. die aktualisierte Aktivitätenliste),
+  obwohl ein Neuladen die Änderung verworfen hätte. Fix:
+  `updateStoredTrip()` gibt jetzt zusätzlich `saved: boolean` zurück; alle
+  drei Aufrufer zeigen bei `saved === false` denselben
+  `storageWarning`-Hinweistext, der im Chat schon etabliert ist (exakt
+  gleicher Text, gleiches `role="status"`-Muster wie in `KiChat.tsx`/
+  `ChatInput.tsx`). Vier neue Regressionstests (zwei in
+  `tripStorage.test.ts` für `saved` true/false, je einer in
+  `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`/`Buchung.test.tsx` für die
+  neue Warnung bei fehlgeschlagenem Speichern — vor dem Fix reproduzierbar
+  rot verifiziert). Der ursprüngliche Auto-Fix-PR #19 bleibt als überholt
+  zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden, wie
+  in `reports/it-chef.md` bereits für andere Altbranches vorgeschlagen).
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
