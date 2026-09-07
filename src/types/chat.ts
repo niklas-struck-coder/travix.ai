@@ -34,4 +34,11 @@ export interface AdvisorReply {
   trip: TripDraft
   /** Which trip field this reply is asking the user for next, if any. */
   nextField: keyof TripDraft | null
+  /**
+   * True when `content` already told the user the automatic accommodation
+   * search won't run for this destination — prevents useChat.ts from
+   * appending a second, redundant "kenne ich noch keine Unterkünfte" notice
+   * on top of it.
+   */
+  accommodationNoticeHandled?: boolean
 }

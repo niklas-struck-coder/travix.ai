@@ -86,6 +86,7 @@ describe('getNextAdvisorStep', () => {
     expect(reply.content).toContain('Ich suche jetzt nach echten Unterkünften')
     expect(reply.avatarState).toBe('searching')
     expect(reply.quickReplies.length).toBeGreaterThan(0)
+    expect(reply.accommodationNoticeHandled).toBeFalsy()
   })
 
   it('does not promise a search it cannot start when the destination is not curated', () => {
@@ -107,6 +108,7 @@ describe('getNextAdvisorStep', () => {
     expect(reply.content).not.toContain('Ich suche jetzt')
     expect(reply.avatarState).toBe('thinking')
     expect(reply.quickReplies).toEqual([])
+    expect(reply.accommodationNoticeHandled).toBe(true)
   })
 
   it('sets accommodation and signals no further field is being asked for', () => {

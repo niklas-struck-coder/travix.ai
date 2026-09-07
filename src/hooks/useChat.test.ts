@@ -20,7 +20,7 @@ vi.mock('@/lib/ai/speech', () => ({
 // case, from both places that can trigger an accommodation search.
 const UNKNOWN_DESTINATION = 'Musterstadt'
 
-function completeTripUpToAccommodation() {
+function completeTripUpToAccommodation(includeBudgetStep = true) {
   const { result } = renderHook(() => useChat(false))
 
   act(() => {
@@ -41,12 +41,14 @@ function completeTripUpToAccommodation() {
   act(() => {
     vi.advanceTimersByTime(700)
   })
-  act(() => {
-    result.current.sendMessage('bis 500 €')
-  })
-  act(() => {
-    vi.advanceTimersByTime(700)
-  })
+  if (includeBudgetStep) {
+    act(() => {
+      result.current.sendMessage('bis 500 €')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+  }
 
   return result
 }
@@ -265,18 +267,31 @@ describe('useChat accommodation search for an unknown destination', () => {
     vi.useRealTimers()
   })
 
-  it('tells the user in the main chat flow instead of leaving the search hanging', () => {
-    const result = completeTripUpToAccommodation()
+  it('tells the user in the main chat flow with a single honest message, not a second contradicting one', () => {
+    const result = completeTripUpToAccommodation(false)
+    const messageCountBefore = result.current.messages.length
 
+    act(() => {
+      result.current.sendMessage('bis 500 €')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    // One user message plus exactly one new assistant reply — previously a
+    // second, contradicting "nutze die manuelle Hotelsuche" notice followed
+    // right behind the advisor's own honest "beschreib einfach, was du dir
+    // vorstellst".
+    expect(result.current.messages.length).toBe(messageCountBefore + 2)
     const lastMessage = result.current.messages.at(-1)
     expect(lastMessage?.role).toBe('assistant')
     expect(lastMessage?.content).toContain(UNKNOWN_DESTINATION)
-    expect(lastMessage?.content).toContain('manuelle Hotelsuche')
+    expect(lastMessage?.content).not.toContain('manuelle Hotelsuche')
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })
 
-  it('tells the user on the "Bearbeiten" (startEdit) path too', () => {
+  it('tells the user on the "Bearbeiten" (startEdit) path too, without a second contradicting notice', () => {
     const result = completeTripUpToAccommodation()
     const messageCountBefore = result.current.messages.length
 
@@ -284,11 +299,11 @@ describe('useChat accommodation search for an unknown destination', () => {
       result.current.startEdit('accommodation')
     })
 
-    expect(result.current.messages.length).toBe(messageCountBefore + 2)
+    expect(result.current.messages.length).toBe(messageCountBefore + 1)
     const lastMessage = result.current.messages.at(-1)
     expect(lastMessage?.role).toBe('assistant')
     expect(lastMessage?.content).toContain(UNKNOWN_DESTINATION)
-    expect(lastMessage?.content).toContain('manuelle Hotelsuche')
+    expect(lastMessage?.content).not.toContain('Klar, ich suche eine neue Unterkunft')
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })

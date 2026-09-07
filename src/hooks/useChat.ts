@@ -150,52 +150,67 @@ export function useChat(speechEnabled: boolean) {
    * revisit a field that's already set.
    */
   const startEdit = (field: EditableTripField) => {
-    const prompt = editPrompts[field]
-    setMessages((prev) => [...prev, makeMessage('assistant', prompt.content)])
-    setQuickReplies(prompt.quickReplies)
     setStayOffers(null)
     setStayError(false)
     setEditingField(field)
-    setAvatarState(field === 'accommodation' ? 'searching' : 'thinking')
-    if (speechEnabled) speak(prompt.content)
 
     if (field === 'accommodation') {
       const destination = findKnownDestination(trip.destination ?? '')
-      if (destination) {
-        setStayLoading(true)
-        const { checkInDate, checkOutDate } = defaultStayDates()
-        searchStays({
-          latitude: destination.latitude,
-          longitude: destination.longitude,
-          checkInDate,
-          checkOutDate,
-          rooms: 1,
-          guests: 1,
-        })
-          .then((result) => {
-            if (result.errors.length > 0) {
-              setStayError(true)
-              setQuickReplies(['Neue Reise planen'])
-            } else {
-              setStayOffers(result.offers)
-              if (result.offers.length === 0) {
-                setQuickReplies(['Neue Reise planen'])
-              }
-            }
-            setStayLoading(false)
-          })
-          .catch(() => {
-            setStayError(true)
-            setStayLoading(false)
-            setQuickReplies(['Neue Reise planen'])
-          })
-      } else {
-        const notice = `Für ${trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`
+
+      if (!destination) {
+        // Same honest-instead-of-contradictory fix as the main chat flow in
+        // sendMessage() below: don't announce a search that can't run, and
+        // don't follow it up with a second, contradicting notice — a single
+        // message that invites free text is enough.
+        const notice = `Für ${trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — beschreib einfach, was für eine Unterkunft du dir vorstellst.`
         setMessages((prev) => [...prev, makeMessage('assistant', notice)])
+        setQuickReplies([])
         setAvatarState('thinking')
         if (speechEnabled) speak(notice)
+        return
       }
+
+      const prompt = editPrompts.accommodation
+      setMessages((prev) => [...prev, makeMessage('assistant', prompt.content)])
+      setQuickReplies(prompt.quickReplies)
+      setAvatarState('searching')
+      if (speechEnabled) speak(prompt.content)
+
+      setStayLoading(true)
+      const { checkInDate, checkOutDate } = defaultStayDates()
+      searchStays({
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+        checkInDate,
+        checkOutDate,
+        rooms: 1,
+        guests: 1,
+      })
+        .then((result) => {
+          if (result.errors.length > 0) {
+            setStayError(true)
+            setQuickReplies(['Neue Reise planen'])
+          } else {
+            setStayOffers(result.offers)
+            if (result.offers.length === 0) {
+              setQuickReplies(['Neue Reise planen'])
+            }
+          }
+          setStayLoading(false)
+        })
+        .catch(() => {
+          setStayError(true)
+          setStayLoading(false)
+          setQuickReplies(['Neue Reise planen'])
+        })
+      return
     }
+
+    const prompt = editPrompts[field]
+    setMessages((prev) => [...prev, makeMessage('assistant', prompt.content)])
+    setQuickReplies(prompt.quickReplies)
+    setAvatarState('thinking')
+    if (speechEnabled) speak(prompt.content)
   }
 
   const sendMessage = (content: string) => {
@@ -338,7 +353,7 @@ export function useChat(speechEnabled: boolean) {
               setStayLoading(false)
               setQuickReplies(['Neue Reise planen'])
             })
-        } else {
+        } else if (!reply.accommodationNoticeHandled) {
           const notice = `Für ${reply.trip.destination ?? 'dein Ziel'} kenne ich noch keine Unterkünfte für die automatische Suche — nutze dafür kurz die manuelle Hotelsuche.`
           setMessages((prev) => [...prev, makeMessage('assistant', notice)])
           if (speechEnabled) speak(notice)

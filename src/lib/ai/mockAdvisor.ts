@@ -128,6 +128,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
         quickReplies: [],
         trip: next,
         nextField: 'accommodation',
+        accommodationNoticeHandled: true,
       }
     }
 

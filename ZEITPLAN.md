@@ -537,6 +537,36 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ohne Chips. Drei neue Regressionstests in `useChat.test.ts` (je einer für
   Haupt-Chat-Unterkunft, "Bearbeiten"-Unterkunft, Flug), vor dem Fix
   reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 07.09. (weiterer Lauf) den von
+  `reports/support-chef.md` (07.09.) gemeldeten Anschlussfund behoben: Der
+  heutige Fix der widersprüchlichen Unterkunfts-Ankündigung bei unbekanntem
+  Ziel deckte nur die halbe Lücke ab. Im Hauptchat sagte
+  `getNextAdvisorStep()` (`mockAdvisor.ts`) zwar bereits ehrlich "beschreib
+  einfach, was für eine Unterkunft du dir vorstellst", aber `useChat.ts`
+  prüfte im selben `sendMessage()`-Callback direkt danach unabhängig
+  nochmal `findKnownDestination()` und hängte bei unbekanntem Ziel
+  trotzdem die alte "kenne ich noch keine Unterkünfte … nutze dafür kurz
+  die manuelle Hotelsuche"-Nachricht an — zwei Bot-Bubbles mit
+  gegensätzlicher Handlungsaufforderung direkt hintereinander. Im
+  "Bearbeiten"-Pfad (`startEdit('accommodation')`) bestand derselbe
+  Widerspruch unverändert, vom heutigen Fix gar nicht berührt: die feste
+  Eröffnungsnachricht "Klar, ich suche eine neue Unterkunft für dich"
+  versprach weiterhin eine Suche, obwohl unmittelbar danach dieselbe
+  Ehrlichkeits-Notiz folgte. Fix: neues optionales Feld
+  `accommodationNoticeHandled` auf `AdvisorReply` (`types/chat.ts`), das
+  `getNextAdvisorStep()` bei unbekanntem Ziel auf `true` setzt —
+  `useChat.ts` hängt die zweite Notiz im Hauptchat-Ablauf jetzt nur noch
+  an, wenn dieses Flag fehlt, statt den Sachverhalt ein zweites Mal selbst
+  zu prüfen. `startEdit()` (`useChat.ts`) wurde für `accommodation`
+  umstrukturiert: bei unbekanntem Ziel erscheint jetzt von vornherein nur
+  noch die ehrliche Nachricht (kein Suchversprechen, lädt zum
+  Weiterschreiben ein, exakt im Wortlaut des Hauptchat-Pendants), keine
+  zweite Notiz mehr danach; bei bekanntem Ziel unverändertes Verhalten
+  (Suchankündigung plus echte Suche). Zwei bestehende Tests in
+  `useChat.test.ts` auf das neue Ein-Nachrichten-Verhalten angepasst (statt
+  zwei Nachrichten jetzt eine, Inhalt ohne "manuelle Hotelsuche"), zwei
+  neue Assertions in `mockAdvisor.test.ts` für das neue Flag — vor dem Fix
+  reproduzierbar mit dem alten Verhalten (zwei Nachrichten) verifiziert.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

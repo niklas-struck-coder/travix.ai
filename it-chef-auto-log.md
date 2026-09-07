@@ -7927,3 +7927,74 @@ Annahme über den Berichtstext hinaus nötig. Ergebnis objektiv prüfbar
   Tests) — 38 Testdateien, 213 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-07 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Checklistenpunkt (Rest von
+Sprint 1/2 weiterhin entweder Produktentscheidung — Backend, 4.1-4.3 —
+oder blockiert durch fehlende `TripDraft`-Preisfelder — 6.2/6.6/6.7/7.12).
+Stattdessen der aktuelle `reports/support-chef.md` (07.09.): der
+Anschlussfund zum heutigen Fix der widersprüchlichen Unterkunfts-
+Ankündigung bei unbekanntem Ziel. Support-Chef meldete, dass der Fix nur
+die halbe Lücke schließt — im Hauptchat läuft noch dieselbe zweite,
+gegenteilige Notiz hinterher, und der "Bearbeiten"-Pfad
+(`startEdit('accommodation')`) ist vom heutigen Fix gar nicht berührt und
+hat denselben Widerspruch unverändert.
+
+**Warum sicher genug:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht.
+Keine offene Produkt-/Architekturentscheidung — der Bericht beschreibt
+Ursache (zwei unabhängige Prüfungen derselben Bedingung an zwei bzw. drei
+Stellen), betroffene Stellen (`mockAdvisor.ts`, `useChat.ts` Hauptchat und
+"Bearbeiten"-Pfad) und den gewünschten Mechanismus ("gemeinsames Flag am
+`AdvisorReply`, statt dass beide Stellen unabhängig denselben Sachverhalt
+prüfen") bereits konkret — keine eigene Annahme über den Berichtstext
+hinaus nötig. Ergebnis objektiv prüfbar (Regressionstests: nur noch eine
+statt zwei Nachrichten, kein Suchversprechen bei unbekanntem Ziel).
+
+**Umgesetzt:**
+- `src/types/chat.ts`: neues optionales Feld `accommodationNoticeHandled?:
+  boolean` auf `AdvisorReply` — signalisiert, dass `content` bereits erklärt
+  hat, dass die automatische Suche für dieses Ziel nicht läuft.
+- `src/lib/ai/mockAdvisor.ts`: `getNextAdvisorStep()` setzt dieses Flag im
+  bereits bestehenden "Ziel unbekannt"-Zweig (`!next.budget`) auf `true`.
+- `src/hooks/useChat.ts` (Hauptchat-Ablauf, `sendMessage`): die zweite
+  "kenne ich noch keine Unterkünfte … nutze dafür kurz die manuelle
+  Hotelsuche"-Notiz wird nur noch angehängt, wenn `reply.accommodationNoticeHandled`
+  nicht gesetzt ist — verhindert die bisherige Doppel-Nachricht, ohne den
+  bereits bestehenden Suchpfad für bekannte Ziele anzufassen.
+- `src/hooks/useChat.ts` (`startEdit`): für `field === 'accommodation'`
+  umstrukturiert, sodass zuerst `findKnownDestination()` geprüft wird,
+  *bevor* irgendeine Nachricht gesendet wird — bei unbekanntem Ziel
+  erscheint jetzt von vornherein nur die ehrliche Notiz (kein
+  Suchversprechen mehr, exakt derselbe Wortlaut wie im Hauptchat-Pendant),
+  keine zweite Notiz danach. Bei bekanntem Ziel unverändertes Verhalten
+  (Suchankündigung aus `editPrompts.accommodation` plus echte Suche). Die
+  zuvor für alle Felder gemeinsame `setStayOffers(null)`/`setStayError(false)`/
+  `setEditingField(field)`-Rücksetzung bleibt für alle Felder unverändert
+  erhalten.
+- Zwei bestehende Tests in `useChat.test.ts` (Hauptchat und "Bearbeiten"-Pfad
+  bei unbekanntem Ziel) auf das neue Ein-Nachrichten-Verhalten angepasst
+  (Nachrichtenanzahl-Delta und fehlender "manuelle Hotelsuche"-Text statt
+  vorherigem Doppel-Nachrichten-Check), die Test-Hilfsfunktion
+  `completeTripUpToAccommodation()` um einen optionalen
+  `includeBudgetStep`-Parameter erweitert, um den letzten Schritt separat
+  auslösen und die Nachrichtenanzahl davor/danach vergleichen zu können.
+  Zwei neue Assertions in `mockAdvisor.test.ts` für das neue Flag
+  (`accommodationNoticeHandled` `true`/`falsy` je nach bekanntem/unbekanntem
+  Ziel).
+- `ZEITPLAN.md` (Ist-Stand-Notiz bei Phase 4, direkt nach der letzten
+  bestehenden Notiz) und dieser Log-Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` umgestellt — reiner Bugfix, kein
+  eigener PRD-Punkt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch, Netzwerkzugriff war in dieser Session verfügbar).
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` (vollständige Suite, nach Anpassung der zwei bestehenden
+  Tests und den zwei neuen Assertions) — 38 Testdateien, 213 Tests, alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
