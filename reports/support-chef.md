@@ -1,55 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-06
+**Datum:** 2026-09-07
 
-## Was ist seit dem letzten Eintrag (2026-09-05) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
 
-Der Speicher-Warnhinweis, den ich zuletzt vorgeschlagen hatte, ist jetzt
-live: Läuft der Browser-Speicher voll, zeigt `KiChat.tsx` (Zeile 100-104)
-direkt unter der Chat-Kopfzeile den Hinweis "Dein Fortschritt kann gerade
-nicht dauerhaft gespeichert werden — ein Neuladen würde ihn verwerfen."
-Genau das ehrliche Signal, das vorher gefehlt hat — danke fürs Umsetzen!
+Gute Nachrichten zuerst: Beide Vorschläge aus meinem letzten Bericht sind
+umgesetzt. Die leeren Chat-Chips nach einer echten Nulltreffer-Suche
+(Unterkunft/Flug) sind behoben (`useChat.ts`, Commit `56c8f61`) — es gibt
+jetzt überall den Chip "Neue Reise planen" statt einer Sackgasse. Und die
+widersprüchliche Unterkunfts-Ankündigung bei unbekanntem Ziel ist im
+Hauptchat repariert (`mockAdvisor.ts`, Commit `b0b8d2e`) — danke fürs
+schnelle Umsetzen!
 
-Beim Nachprüfen ist mir aufgefallen, dass derselbe Speicherfehler noch an
-anderer Stelle unentdeckt durchschlägt: Wählst du auf der Flug- oder
-Hotelsuche-Seite ein Angebot aus, oder bearbeitest du in `Buchung.tsx`
-deine Aktivitäten, läuft das über `updateStoredTrip()`
-(`tripStorage.ts:50-57`) — und die zeigt "ausgewählt"/"gespeichert" an,
-auch wenn das eigentliche Schreiben in den Speicher fehlgeschlagen ist.
-Das ist bereits gefunden und eingeordnet (IT-Chef hat dafür PR #19
-eröffnet), hier also keine neue Baustelle von mir, nur zur Einordnung.
-
-Meine zwei Vorschläge von letztem Mal (Nulltreffer-Chips in `useChat.ts`
-und die widersprüchliche Ziel-Ankündigung in `mockAdvisor.ts`) sind nach
-Code-Check unverändert noch offen — deshalb bleiben sie unten stehen,
-diesmal ohne neue Punkte dazu.
+Beim Nachprüfen des Zusammenspiels beider Fixes ist mir aber aufgefallen,
+dass genau dieselbe Art Widerspruch an zwei Stellen weiterlebt, die der
+heutige Fix nicht abgedeckt hat — einmal im Hauptchat selbst (Fix hat nur
+die halbe Lücke geschlossen) und einmal komplett unberührt im
+"Bearbeiten"-Pfad. Deshalb unten ein aktualisierter Vorschlag dazu, kein
+neues, unabhängiges Thema.
 
 ## Meine Vorschläge
 
-1. **Nach einer erfolgreichen Suche mit null Treffern bleiben die
-   Chat-Chips leer.** In `useChat.ts` wird `quickReplies` nur gesetzt,
-   wenn ein echter Suchfehler auftritt (`result.errors.length > 0`,
-   z. B. Zeile 99 und 322). Kommen dagegen einfach null Angebote zurück,
-   bekommt die Nutzerin zwar die richtige "keine Angebote"-Nachricht,
-   aber keinen Chip, um weiterzumachen — eine kleine Sackgasse mitten im
-   sonst so flüssigen Chat. *Vorschlag:* Auch im Nulltreffer-Fall
-   `setQuickReplies(['Neue Reise planen', 'Andere Daten versuchen'])`
-   setzen, konsistent mit jedem anderen Chat-Endzustand.
+1. **Im Hauptchat folgen bei unbekanntem Ziel weiterhin zwei sich
+   widersprechende Bot-Nachrichten direkt hintereinander.**
+   `mockAdvisor.ts:124-132` sagt jetzt ehrlich "Danke! Für {Ziel}
+   beschreib einfach, was für eine Unterkunft du dir vorstellst" — lädt
+   also explizit zum Weiterschreiben im Chat ein. Aber `useChat.ts:311-345`
+   prüft im selben `setTimeout`-Callback direkt danach noch einmal
+   unabhängig `findKnownDestination()` und hängt bei unbekanntem Ziel
+   sofort eine zweite Nachricht an: "kenne ich noch keine Unterkünfte …
+   nutze dafür kurz die manuelle Hotelsuche" (Zeile 342-343). Für die
+   Nutzerin erscheinen damit zwei Bot-Bubbles in einem Schwung mit
+   gegensätzlicher Handlungsaufforderung — "schreib einfach hier weiter"
+   sofort gefolgt von "nutze stattdessen die andere Seite". *Vorschlag:*
+   Die zweite Nachricht nur zeigen, wenn die erste sie nicht schon
+   vorweggenommen hat, z. B. über ein gemeinsames Flag am `AdvisorReply`,
+   statt dass beide Stellen unabhängig denselben Sachverhalt prüfen und
+   zwei verschiedene Formulierungen produzieren.
 
-2. **Kennt travix.ai dein Reiseziel nicht für die automatische
-   Unterkunftssuche, wirkt die Chat-Antwort widersprüchlich.**
-   `mockAdvisor.ts:108` lässt die Bestätigungsnachricht immer "Ich suche
-   jetzt nach echten Unterkünften in [Ziel]" sagen — unabhängig davon,
-   ob `findKnownDestination()` das Ziel überhaupt kennt. Ist das nicht
-   der Fall, folgt in `useChat.ts` (um Zeile 336) sofort eine zweite
-   Nachricht ("kenne ich noch keine Unterkünfte … nutze die manuelle
-   Hotelsuche"), aber die alten Hotel-Chips davor bleiben anklickbar,
-   obwohl ein Klick keine echte Suche mehr auslöst. Für eine
-   Erstnutzerin liest sich das wie "ich suche" gefolgt von "ich kann
-   nicht" — bei scheinbar weiter aktiven Buttons. *Vorschlag:* Bei
-   fehlendem Ziel-Match direkt `setQuickReplies([])` setzen (oder einen
-   Chip zur manuellen Hotelsuche anbieten), und die Ankündigung in
-   `mockAdvisor.ts` nur dann "ich suche jetzt" sagen lassen, wenn das
-   Ziel wirklich bekannt ist.
+2. **Derselbe Widerspruch besteht unverändert im "Bearbeiten"-Pfad — vom
+   heutigen Fix gar nicht berührt.** Wer eine Unterkunft über
+   `startEdit('accommodation')` neu wählt, bekommt aus dem festen
+   `editPrompts.accommodation` (`useChat.ts:29-32`) immer "Klar, ich
+   suche eine neue Unterkunft für dich — einen Moment", unabhängig vom
+   Ziel. Ist das Ziel nicht bekannt, hängt `startEdit()`
+   (`useChat.ts:192-197`) synchron sofort dieselbe
+   "kenne-ich-nicht/manuelle Hotelsuche"-Nachricht dahinter — exakt
+   derselbe Widerspruch wie oben, nur über den anderen Einstiegspunkt.
+   *Vorschlag:* Sobald Punkt 1 gelöst ist (z. B. über eine gemeinsame
+   Hilfsfunktion für beide Pfade), denselben Mechanismus auch hier
+   anwenden, statt zwei getrennte Textbausteine für denselben Fall zu
+   pflegen.
 
-_Letztes Update: 2026-09-06_
+_Letztes Update: 2026-09-07_
