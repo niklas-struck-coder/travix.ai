@@ -2311,3 +2311,59 @@ Buchung) — wortgleich und stilgleich (`role="status"`,
 `support-chef/auto` heute noch nichts Neues, für den späteren
 6-Uhr-Freigabe-Lauf offen gelassen. Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-07, später Lauf (6-Uhr-Slot)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im früheren Lauf heute
+  gemergt, siehe oben). Nichts zu tun.
+- `marketing-chef/auto` — 1 Commit vor `main`.
+- `support-chef/auto` — 1 Commit vor `main`.
+
+Zuerst lokalen `main` per Fast-Forward auf `origin/main` gebracht (war 34
+Commits im Rückstand, u.a. der `it-chef/auto`-Merge von oben).
+
+**Prüfung `marketing-chef/auto`:** Diff betrifft ausschließlich Markdown
+(`marketing-chef-auto-log.md`, `marketing/freigabe-uebersicht.md`,
+`marketing/mini-changelog-konzept.md`) — kein Produkt-Code, daher kein
+Build/Lint/Test nötig, wie im Log selbst vermerkt. Inhalt: zweite Ausgabe
+des Mini-Changelog-Konzepts mit acht Vorher/Nachher-Punkten. Alle neun im
+Log zitierten Commits (`404935c`, `0b28d39`, `bf20ae3`, `2483ce4`,
+`0d4aab2`, `fc17297`, `56c8f61`, `b0b8d2e`, `ac0e188`) unabhängig per
+`git log --oneline main` gegengeprüft — existieren alle in `main` mit
+exakt passenden Commit-Messages, keine erfundenen Fixes. Keine
+Kennzahlen/Nutzerzahlen behauptet, die nicht belegt sind. Reiner Entwurf
+für eine noch nicht gebaute Footer-Seite — kein Hinweis auf tatsächliches
+Posten/Veröffentlichen. Text ist vollständig und kohärent, keine
+Stichpunkt-Skizze.
+→ **Alles passt, nach `main` gemergt** (Merge-Commit, `ort`-Strategie).
+
+**Prüfung `support-chef/auto`:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (reine Analyse, keine Codeänderung — niedrigstes
+Risiko der drei Branch-Typen). Neuer Eintrag beschreibt einen
+Widerspruch im Zusammenspiel zweier heutiger Fixes (`b0b8d2e`,
+`56c8f61`) bei unbekanntem Ziel: zwei sich widersprechende
+Chat-Nachrichten hintereinander, sowohl im Haupt-Ablauf als auch im
+separaten "Bearbeiten"-Pfad. Beide Fundstellen unabhängig im Code
+nachgelesen:
+- `src/lib/ai/mockAdvisor.ts:116-141` — Zeileninhalt und Verhalten
+  stimmen exakt mit der Beschreibung überein (unbekanntes Ziel →
+  `nextField: 'accommodation'` mit einladender Nachricht statt
+  "ich suche jetzt").
+- `src/hooks/useChat.ts:302-347` — bestätigt: der `setTimeout`-Callback
+  prüft unabhängig von `reply.content` erneut `nextField ===
+  'accommodation'` und `findKnownDestination()`, hängt bei unbekanntem
+  Ziel immer eine zweite, widersprüchliche Nachricht an (Zeile 342-345) —
+  unabhängig davon, was die erste Nachricht schon gesagt hat.
+- Zweiter Fund (`editPrompts`/`startEdit`, `useChat.ts:16-19`,
+  `152-156`) ebenfalls nachvollzogen: fester Text ohne Zielkenntnis,
+  gleiche Fehlerklasse über den anderen Auslöser.
+Kein erfundener Reibungspunkt — beide Stellen wie beschrieben im Code
+vorhanden.
+→ **Alles passt, nach `main` gemergt** (Merge-Commit, `ort`-Strategie).
+
+**Ergebnis:** Alle drei Branches geprüft, zwei gemergt
+(`marketing-chef/auto`, `support-chef/auto`), einer war bereits erledigt
+(`it-chef/auto`). Keine Auffälligkeiten, kein Scope-Verstoß, keine Info
+an Ni nötig — beide Merges reine Markdown-Ergänzungen ohne Produkt-Code,
+entsprechend risikoarm.
