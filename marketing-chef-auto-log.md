@@ -4,6 +4,86 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-07
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`5299c9c` (06.09.) hängengeblieben, dessen Inhalt laut `git log
+origin/main ^origin/marketing-chef/auto` bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`8dcf007`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion", explizit als offener, wiederkehrender
+Punkt geführt) — konkret: zweite Ausgabe des Mini-Changelog-Konzepts
+(`marketing/mini-changelog-konzept.md`) geschrieben, plus
+`marketing/freigabe-uebersicht.md` aktualisiert.
+
+**Warum dieser Punkt:** Vor der Auswahl `git log 5299c9c..origin/main`
+geprüft (letzter Marketing-Lauf, 06.09.): 13 neue Commits, davon acht
+echte, content-relevante Codeänderungen, einzeln per `git show` verifiziert
+(Details in `marketing/freigabe-uebersicht.md`, Update 2026-09-07): zwei
+davon (`56c8f61`, `b0b8d2e`) sind exakt die Nulltreffer-Chip- und
+Ziel-Ankündigungs-Lücken, die der eigene Bericht vom 05.09.
+(`reports/marketing-chef.md`, Vorschlag 3) und das Update vom 06.09. in
+`freigabe-uebersicht.md` bereits als "guter Baustein für die nächste
+Ausgabe, sobald IT-Chef entschieden hat" vorgemerkt hatten — IT-Chef hat
+das inzwischen entschieden. Mit acht neuen Kandidaten insgesamt (mehr als
+doppelt so viele wie die vier, die am 06.09. bewusst noch als "nicht
+ausreichend" gewertet wurden) ist die eigene, am 06.09. festgelegte
+Gating-Bedingung für eine zweite Ausgabe ("genug neue, verifizierte
+Tier-4-Kandidaten, nicht nach jedem einzelnen Fix") jetzt erfüllt.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument für
+dieselbe, noch nicht gebaute Footer-Seite wie Ausgabe 1 — kein
+Live-Vorgang, nichts gepostet, keine Seite gebaut. Keine erfundenen
+Kennzahlen — jeder der acht Punkte stammt aus einem einzeln per `git show`
+verifizierten, bereits in `main` gemergten Commit. Keine offene
+Positionierungs-Grundsatzfrage: wendet nur die bestehende Positionierung
+("Ehrlichkeit als Feature") an, entscheidet sie nicht neu. Berührt keine
+der drei alten Fragen an Ni und keine neue vierte Frage — hängt an
+derselben, bereits gestellten Frage wie Ausgabe 1.
+
+**Zusätzlicher Fund, kein eigener Content-Punkt:** Ein neunter Commit,
+`ac0e188` (06.09.), behebt den zweiten von zwei technischen Gründen, die
+bisher gegen eine Bewerbung der Vorlesen-Funktion im Chat sprachen
+(`stopSpeaking()` existierte bereits, wurde aber nirgends aufgerufen —
+jetzt beim Ausschalten der Sprachausgabe, bei "Neu starten" und beim
+Verlassen der Seite zuverlässig aufgerufen, mit Regressionstests
+abgesichert). Der erste Grund (hängender Mikrofon-Knopf) war bereits am
+05.09. behoben. Per `git merge-base --is-ancestor ac0e188 origin/main`
+bestätigt: gemergt. **Beide Gründe sind damit ausgeräumt** — bewusst kein
+Anlass, heute selbst ein Content-Stück zur Sprachfunktion zu schreiben
+(das wäre ein neuner Social-Anlass mitten in derselben ungeklärten
+Kanal-/Format-Frage, siehe Selbstbeschränkung unten), aber eine für Nis
+Entscheidung relevante Statusänderung — deshalb als Randnotiz in Ausgabe 2
+sowie als eigener Absatz in `freigabe-uebersicht.md` festgehalten.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück (z. B. zur jetzt
+  reparierten Vorlesen-Funktion) — weiterhin an dieselben drei
+  unbeantworteten Fragen gebunden wie alle bisherigen Ehrlichkeits-Fixes,
+  siehe Randnotiz oben.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: neuer Abschnitt "Ausgabe 2" —
+  acht Vorher/Nachher-Punkte in vier Themenblöcken (Speicherfehler jetzt
+  sichtbar, keine Sackgasse nach Nulltreffern, ehrlichere Ankündigungen
+  vor einer Suche, weitere Robustheits-/Verständnis-Korrekturen), plus
+  Randnotiz zur jetzt vollständig ausgeräumten Sprachfunktions-
+  Zurückhaltung.
+- `marketing/freigabe-uebersicht.md`: neues Update vom 07.09. (Prüfung,
+  Einordnung der acht Commits, Sprachfunktions-Statusänderung), Tier-4-
+  und Tier-5-Abschnitt sowie "Für Ni"/"Nächster autonomer Lauf" aktualisiert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-06
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
