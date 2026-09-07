@@ -2256,3 +2256,58 @@ Erfindung.
 
 **Ergebnis:** Beide geprüften Branches bestanden, gemergt und gepusht.
 Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-07, früher Nacht-Check (0-4 Uhr)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main`.
+- `marketing-chef/auto` — 0 Commits vor `main`, übersprungen (läuft erst
+  um 6 Uhr, separater späterer Freigabe-Chef-Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, übersprungen (siehe oben).
+
+**Prüfung `it-chef/auto`:** Zuerst lokalen `main` per Fast-Forward auf
+`origin/main` gebracht (war 28 Commits im Rückstand). Danach die 5
+Commits auf `it-chef/auto` einzeln gegen `it-chef-auto-log.md` abgeglichen
+— je ein Eintrag pro Commit, Beschreibung passt zum Diff:
+1. `0d4aab2` "Überrasch mich" wird jetzt zufällig auf ein bekanntes Ziel
+   aufgelöst (`mockAdvisor.ts`, neue `SURPRISE_ME_PATTERN`-Regex +
+   `knownDestinations`-Auswahl).
+2. `ac0e188` Sprachausgabe stoppt jetzt beim Ausschalten, Neu-starten und
+   Seiten-Verlassen (`KiChat.tsx`: `toggleSpeech`, `handleReset`,
+   Unmount-`useEffect`, alle rufen `stopSpeaking()`).
+3. `fc17297` `updateStoredTrip()` gibt jetzt ehrlich zurück, ob das
+   Speichern geklappt hat (`saved`-Feld); `Flugsuche.tsx`/`Hotelsuche.tsx`/
+   `Buchung.tsx` zeigen bei `false` denselben Warnhinweis wie bereits in
+   `KiChat.tsx`.
+4. `56c8f61` Chat-Chips fehlen nicht mehr nach echter Nulltreffer-Suche
+   (Unterkunft/Flug) — `useChat.ts` setzt jetzt auch im Erfolgsfall mit
+   `offers.length === 0` `['Neue Reise planen']`.
+5. `b0b8d2e` Keine widersprüchliche "ich suche jetzt"-Ankündigung mehr bei
+   unbekanntem Ziel (`mockAdvisor.ts` prüft jetzt vorab
+   `findKnownDestination()`).
+
+Unabhängig selbst verifiziert (frischer Checkout, `node_modules` fehlte,
+`npm ci` erfolgreich durchgelaufen):
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  unveränderten `src/components/ui/*`-Dateien.
+- `npx vitest run` — 38 Testdateien, 213 Tests, alle grün.
+- `npm run build` — erfolgreich, keine neuen Fehler/Warnungen gegenüber
+  vorher.
+
+Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+Texten. Kein Scope-Creep — Diff (`ZEITPLAN.md`, `it-chef-auto-log.md`,
+`KiChat.tsx`/`.test.tsx`, `useChat.ts`/`.test.ts`, `mockAdvisor.ts`/
+`.test.ts`, `tripStorage.ts`/`.test.ts`, `Flugsuche.tsx`/`.test.tsx`,
+`Hotelsuche.tsx`/`.test.tsx`, `Buchung.tsx`/`.test.tsx`) passt exakt zu
+den 5 beschriebenen Punkten. Einzige sichtbare neue UI-Änderungen sind
+der Speicher-Warnhinweis auf drei weiteren Seiten (Flugsuche, Hotelsuche,
+Buchung) — wortgleich und stilgleich (`role="status"`,
+`text-xs text-muted-foreground`) zum bereits bestehenden Hinweis in
+`KiChat.tsx` übernommen, kein Rot-Schock, passt zu `MARKENDESIGN.md`.
+
+**Ergebnis:** Alles grün und stimmig → nach `main` gemerged
+(Fast-Forward `fc9f06c..b0b8d2e`, gepusht). `marketing-chef/auto` und
+`support-chef/auto` heute noch nichts Neues, für den späteren
+6-Uhr-Freigabe-Lauf offen gelassen. Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
