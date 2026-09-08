@@ -1,55 +1,53 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-07
+**Datum:** 2026-09-08
 
-## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-07) passiert?
 
-Gute Nachrichten zuerst: Beide Vorschläge aus meinem letzten Bericht sind
-umgesetzt. Die leeren Chat-Chips nach einer echten Nulltreffer-Suche
-(Unterkunft/Flug) sind behoben (`useChat.ts`, Commit `56c8f61`) — es gibt
-jetzt überall den Chip "Neue Reise planen" statt einer Sackgasse. Und die
-widersprüchliche Unterkunfts-Ankündigung bei unbekanntem Ziel ist im
-Hauptchat repariert (`mockAdvisor.ts`, Commit `b0b8d2e`) — danke fürs
-schnelle Umsetzen!
+Gute Nachrichten: Beide offenen Punkte aus meinem letzten Bericht sind
+jetzt wirklich vollständig behoben, nicht nur zur Hälfte. Der Fix
+`d7682d2` schließt die Lücke sauber an beiden Stellen — `mockAdvisor.ts`
+teilt `useChat.ts` jetzt über ein neues Feld (`accommodationNoticeHandled`)
+mit, wenn die Ehrlich-Notiz zum unbekannten Ziel schon in der Advisor-
+Antwort steckt, statt dass beide Stellen unabhängig prüfen und eine
+doppelte, widersprüchliche Nachricht senden. Und der "Bearbeiten"-Pfad
+(`startEdit()`) prüft das Ziel jetzt vorher, statt hinterherzuschieben.
+Ich habe den Code selbst nachgelesen — beide Varianten sind wirklich zu.
+Danke fürs gründliche Nacharbeiten!
 
-Beim Nachprüfen des Zusammenspiels beider Fixes ist mir aber aufgefallen,
-dass genau dieselbe Art Widerspruch an zwei Stellen weiterlebt, die der
-heutige Fix nicht abgedeckt hat — einmal im Hauptchat selbst (Fix hat nur
-die halbe Lücke geschlossen) und einmal komplett unberührt im
-"Bearbeiten"-Pfad. Deshalb unten ein aktualisierter Vorschlag dazu, kein
-neues, unabhängiges Thema.
+Beim Durchsehen der neueren Änderungen (Zugpreis-Format, Umbau der
+Unterkunfts-Notiz) sind mir zwei weitere Punkte aufgefallen.
 
 ## Meine Vorschläge
 
-1. **Im Hauptchat folgen bei unbekanntem Ziel weiterhin zwei sich
-   widersprechende Bot-Nachrichten direkt hintereinander.**
-   `mockAdvisor.ts:124-132` sagt jetzt ehrlich "Danke! Für {Ziel}
-   beschreib einfach, was für eine Unterkunft du dir vorstellst" — lädt
-   also explizit zum Weiterschreiben im Chat ein. Aber `useChat.ts:311-345`
-   prüft im selben `setTimeout`-Callback direkt danach noch einmal
-   unabhängig `findKnownDestination()` und hängt bei unbekanntem Ziel
-   sofort eine zweite Nachricht an: "kenne ich noch keine Unterkünfte …
-   nutze dafür kurz die manuelle Hotelsuche" (Zeile 342-343). Für die
-   Nutzerin erscheinen damit zwei Bot-Bubbles in einem Schwung mit
-   gegensätzlicher Handlungsaufforderung — "schreib einfach hier weiter"
-   sofort gefolgt von "nutze stattdessen die andere Seite". *Vorschlag:*
-   Die zweite Nachricht nur zeigen, wenn die erste sie nicht schon
-   vorweggenommen hat, z. B. über ein gemeinsames Flag am `AdvisorReply`,
-   statt dass beide Stellen unabhängig denselben Sachverhalt prüfen und
-   zwei verschiedene Formulierungen produzieren.
+1. **Fehlermeldung bei fehlgeschlagener Unterkunftssuche im KI-Chat ist
+   immer gleich, egal was wirklich schiefging.** `src/hooks/useChat.ts:78`
+   speichert einen fehlgeschlagenen `searchStays()`-Aufruf nur als
+   `stayError: boolean`, und `HotelResults.tsx:29` zeigt dafür immer denselben
+   festen Satz ("Die Unterkunftssuche hat gerade nicht geklappt — versuch's
+   gleich nochmal."). Die eigenständige Hotelsuche-Seite (`Hotelsuche.tsx:15`)
+   macht es dagegen richtig und zeigt die konkrete Duffel-Fehlermeldung an
+   — genau wie die Flugsuche im Chat (`flightErrors: DuffelError[]`). Für
+   Nutzer:innen im Chat heißt das: Ob z. B. die Daten ungültig sind oder der
+   Dienst gerade nicht erreichbar ist, sieht immer gleich aus — "nochmal
+   versuchen" hilft dann nicht immer weiter. *Vorschlag:* `stayError`
+   analog zu `flightErrors` auf ein Array konkreter Fehlermeldungen
+   umstellen, exakt nach dem bewährten Flug-Muster. (Deckt sich mit einem
+   Fund aus dem heutigen IT-Chef-Bericht — aus Nutzersicht bestätige ich
+   das gerne als echten Reibungspunkt.)
 
-2. **Derselbe Widerspruch besteht unverändert im "Bearbeiten"-Pfad — vom
-   heutigen Fix gar nicht berührt.** Wer eine Unterkunft über
-   `startEdit('accommodation')` neu wählt, bekommt aus dem festen
-   `editPrompts.accommodation` (`useChat.ts:29-32`) immer "Klar, ich
-   suche eine neue Unterkunft für dich — einen Moment", unabhängig vom
-   Ziel. Ist das Ziel nicht bekannt, hängt `startEdit()`
-   (`useChat.ts:192-197`) synchron sofort dieselbe
-   "kenne-ich-nicht/manuelle Hotelsuche"-Nachricht dahinter — exakt
-   derselbe Widerspruch wie oben, nur über den anderen Einstiegspunkt.
-   *Vorschlag:* Sobald Punkt 1 gelöst ist (z. B. über eine gemeinsame
-   Hilfsfunktion für beide Pfade), denselben Mechanismus auch hier
-   anwenden, statt zwei getrennte Textbausteine für denselben Fall zu
-   pflegen.
+2. **Ladetext bei Zug/Bus/Fähre verspricht "echte" Verbindungen, obwohl
+   noch keine Datenquelle angebunden ist.** `TrainResults.tsx:18` zeigt
+   während der Suche "Travix sucht echte Zug-, Bus- und Fährverbindungen …"
+   — genau der ehrliche Ton, den ich mir auch bei der Unterkunft wünsche,
+   nur leider (noch) nicht wahr: Es gibt aktuell keine angebundene
+   Zug-/Bus-/Fähr-Datenquelle. Die gute Nachricht: `TrainResults.tsx` und
+   `TrainCard.tsx` sind noch in keine Seite eingebunden, aktuell sieht also
+   noch keine echte Nutzerin diesen Text. *Vorschlag:* Den Text jetzt schon
+   korrigieren (z. B. "Travix sucht Zug-, Bus- und Fährverbindungen …" ohne
+   "echte", oder gleich ehrlich als Demo/Vorschau kennzeichnen), bevor die
+   Komponente an eine Seite angebunden wird — dann ist das Risiko einer
+   falschen Erwartung von Anfang an ausgeschlossen statt erst hinterher
+   korrigiert zu werden.
 
-_Letztes Update: 2026-09-07_
+_Letztes Update: 2026-09-08_
