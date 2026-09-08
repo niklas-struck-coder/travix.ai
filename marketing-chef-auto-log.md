@@ -4,6 +4,68 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-08
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`9b6f952` (07.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 9b6f952 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`852ead1`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion", explizit als offener, wiederkehrender
+Punkt geführt) — konkret: `marketing/freigabe-uebersicht.md` um einen
+neuen Tier-4-Kandidaten ergänzt, kein neues Content-Stück und keine
+dritte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 07.09. beantwortet wurde (Vorgabe aus
+`marketing/freigabe-uebersicht.md`, Abschnitt "Nächster autonomer Lauf"):
+keine Notiz in `status.md`, `ZEITPLAN.md` oder diesem Dokument, 6.2
+weiterhin `[ ]`, keine neuen Kanal-Links, kein IT-Chef-Commit zur
+Mini-Changelog-Seite. Alle vier Fragen bleiben offen. Danach
+`git log 9b6f952..origin/main` geprüft: 13 neue Commits, elf davon ohne
+Content-Relevanz (Logs/Berichte, CI-Workflow, ein reiner
+npm-audit-Dependency-Fix, eine `TrainCard`-Preisformatierung an
+weiterhin unangebundenem toten Code). Ein einziger echter, per `git show`
+verifizierter Content-Kandidat: `d7682d2` (07.09.) behebt den von
+Support-Chef gemeldeten Anschlussfund zur Unterkunfts-Notiz bei
+unbekanntem Ziel — der Bearbeiten-Pfad (`startEdit`) zeigte bisher zwei
+sich widersprechende Nachrichten hintereinander (Suchversprechen, direkt
+gefolgt von der ehrlichen Absage), nach dem Fix erscheint von vornherein
+nur noch eine einzige, ehrliche Nachricht. Mit nur einem neuen Kandidaten
+(gegenüber acht, die Ausgabe 2 ausgelöst hatten, und vier, die am 06.09.
+noch als "nicht ausreichend" galten) ist die eigene Gating-Bedingung für
+eine dritte Ausgabe klar nicht erfüllt.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet, keine Seite verändert. Keine erfundenen Kennzahlen — der
+neue Punkt stammt aus einem einzeln per `git show` verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage:
+wendet nur die bestehende Positionierung an. Berührt keine der vier
+offenen Fragen, erfindet keine fünfte.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück bzw. eine dritte
+  Mini-Changelog-Ausgabe — siehe Begründung oben, nur ein neuer Kandidat
+  seit dem 07.09., deutlich zu wenig nach der eigenen, am 06.09.
+  festgelegten Gating-Bedingung.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 08.09. (Prüfung
+  der vier Fragen, Einordnung des einen neuen Commits, Begründung gegen
+  eine dritte Ausgabe), Tier-4-Abschnitt und "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-07
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf

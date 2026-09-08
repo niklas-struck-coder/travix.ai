@@ -1,10 +1,82 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-07)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-08)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-08: ein weiterer Tier-4-Kandidat geprüft (Anschlussfix zur Unterkunfts-Notiz), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`9b6f952` (07.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 9b6f952 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`852ead1`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md`, `ZEITPLAN.md` oder diesem Dokument seit
+dem 07.09. Der eigene interaktive Bericht vom 07.09.
+(`reports/marketing-chef.md`, Commit `e99289c`) bestätigt im Titel selbst
+"vier Fragen weiterhin offen". 6.2 (`TripItem.tsx`-Buchen-Button) laut
+`ZEITPLAN.md` weiterhin `[ ]`, keine neuen Kanal-Links, kein Commit zu
+einer IT-Chef-Umsetzung der Mini-Changelog-Seite. Alle vier Fragen bleiben
+offen.
+
+**`git log 9b6f952..origin/main` zeigt 13 neue Commits**, davon neun ohne
+Content-Relevanz (Freigabe-Chef-Merges/-Logs, IT-Chef-Auto-Log, ein
+Support-Chef- und ein eigener Marketing-Chef-Bericht, ein Daily-Status-
+Update, eine CI-Workflow-Ergänzung, ein reiner npm-audit-Dependency-Fix —
+alle rein interaktiv/Log/Infrastruktur). Zwei Codeänderungen einzeln per
+`git show` geprüft:
+
+- `d7682d2` (07.09.): löst den Anschlussfund, den Support-Chef zum
+  06./07.09.-Fix meldete — `useChat.ts` prüfte im Hauptchat unabhängig von
+  `mockAdvisor.ts` noch einmal `findKnownDestination()` und hängte trotz
+  bereits ehrlicher Advisor-Antwort eine zweite, widersprüchliche
+  "nutze die manuelle Hotelsuche"-Notiz an; im "Bearbeiten"-Pfad
+  (`startEdit`) bestand derselbe Widerspruch unverändert, vom
+  07.09.-Vormittagsfix noch gar nicht berührt. Neues optionales
+  `AdvisorReply`-Feld `accommodationNoticeHandled` lässt `mockAdvisor.ts`
+  der aufrufenden Seite mitteilen, dass die Notiz bereits enthalten ist,
+  statt dass beide Stellen den Sachverhalt unabhängig prüfen — im
+  Bearbeiten-Pfad erscheint bei unbekanntem Ziel jetzt von vornherein nur
+  noch eine einzige, ehrliche Nachricht statt zwei sich widersprechenden.
+  **Content-relevant** — gehört inhaltlich zur selben "Ehrlichkeit als
+  Feature"-Fundgruppe wie die bereits verarbeiteten Nulltreffer-/
+  Ankündigungs-Fixes vom 07.09. (Ausgabe 2), ist aber ein eigener, erst
+  danach gemergter Commit und damit noch kein Teil von Ausgabe 2.
+- `cafb37c` (08.09.): `TrainCard.tsx` zeigt den Preis jetzt ebenfalls über
+  `formatOfferPrice()` statt roh. **Nicht** aufgenommen — laut
+  `ZEITPLAN.md` weiterhin toter Code, der in keiner Seite eingebunden ist
+  (5.7 offen); ohne sichtbaren Nutzerpfad kein "falsche Information ohne
+  Erkennbarkeit"-Fund wie bei den übrigen Tier-4-Kandidaten, gleiche
+  Begründung wie beim bereits am 06.09. ausgeschlossenen `2daeb05`.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Nur ein einziger neuer, verifizierter
+Tier-4-Kandidat seit dem 07.09. (Kandidatentopf war laut Update 2026-09-07
+frisch geleert) — deutlich unter der Menge, die am 06.09. mit vier
+Kandidaten noch ausdrücklich als "nicht ausreichend" bewertet wurde, erst
+recht unter den acht, die Ausgabe 2 ausgelöst haben. Ein eigenständiges
+neuntes Social-Content-Stück bleibt weiterhin an dieselben drei
+unbeantworteten Fragen gebunden. Stattdessen heute nur diese Übersicht
+aktualisiert (reiner, sicherer Übersichts-Lauf, wie z. B. am 01.-04.09.
+und 06.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang,
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der einzige
+neue Punkt stammt aus einem per `git show` einzeln verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Tier-4-Absatz
+unten, Datum im Titel).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-07: zweite Mini-Changelog-Ausgabe geschrieben (acht neue Tier-4-Kandidaten seit Ausgabe 1, davon zwei explizit vorgemerkte), Sprachfunktions-Blocker vollständig ausgeräumt
 
@@ -908,7 +980,13 @@ Anfang-bis-Ende-Weg im Code.
    **Alle acht seit 05./06.09. gesammelten Kandidaten sind seit dem
    07.09. in Ausgabe 2 des Mini-Changelogs verarbeitet** (siehe Tier 5
    unten) — der Kandidatentopf hier ist damit vorerst wieder leer, neue
-   Funde sammeln sich ab jetzt für eine mögliche dritte Ausgabe.
+   Funde sammeln sich ab jetzt für eine mögliche dritte Ausgabe. Seit dem
+   07.09. (später Commit, noch nicht Teil von Ausgabe 2) ein erster neuer
+   Kandidat (siehe Update 2026-09-08 oben): der Bearbeiten-Pfad für
+   Unterkunft zeigte bei unbekanntem Ziel bisher zwei sich
+   widersprechende Nachrichten hintereinander (Suchversprechen, direkt
+   gefolgt von der ehrlichen Absage) — jetzt erscheint von vornherein nur
+   noch die ehrliche Nachricht.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -959,9 +1037,9 @@ neuen Social-Text schreibt. Falls weiterhin keine der vier Fragen
 beantwortet ist: eine dritte Mini-Changelog-Ausgabe ist erst sinnvoll,
 sobald sich seit dem 07.09. wieder genug neue, verifizierte
 Tier-4-Kandidaten angesammelt haben (nicht nach jedem einzelnen neuen
-Fix) — Stand 07.09. ist der Kandidatentopf frisch geleert (siehe Tier 4
-oben), also aktuell keiner. Sollte Ni zwischenzeitlich einen Kanal für die
-Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix `ac0e188`
-(Stopp-Knopf) plus der bereits am 05.09. behobene Mikrofon-Hänger
-(`acc9ae8`) ein naheliegender erster Baustein, da beide zusammen die
-Funktion erstmals durchgängig zuverlässig machen.
+Fix) — Stand 08.09. ist erst einer im Topf (siehe Update 2026-09-08
+oben), also weiterhin zu wenig. Sollte Ni zwischenzeitlich einen Kanal für
+die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
+`ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene
+Mikrofon-Hänger (`acc9ae8`) ein naheliegender erster Baustein, da beide
+zusammen die Funktion erstmals durchgängig zuverlässig machen.
