@@ -1,5 +1,58 @@
 # Freigabe-Chef-Log
 
+## 2026-09-08, Nachmittags-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, 0 Commits vor `main` (bereits im
+  früheren Lauf heute geprüft und gemergt, siehe Eintrag "früher
+  Nacht-Check" oben in der Historie). Planmäßig übersprungen, da keine
+  neuen Commits gegenüber `main`.
+- `marketing-chef/auto` — 1 neuer Commit (`50cd675`).
+- `support-chef/auto` — 1 neuer Commit (`9977035`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-Ergänzung,
+  kein neues Content-Stück, keine dritte Mini-Changelog-Ausgabe, nichts
+  gepostet oder live verändert.
+- Der im Eintrag genannte Content-Kandidat verweist auf Commit `d7682d2`
+  ("Fix: Widersprüchliche Unterkunfts-Notiz bei unbekanntem Ziel …") —
+  per `git merge-base --is-ancestor d7682d2 origin/main` selbst bestätigt:
+  dieser Commit ist bereits Teil von `main`, keine erfundene Referenz.
+  Der zweite erwähnte, bewusst ausgeschlossene Commit `cafb37c`
+  (`TrainCard.tsx`-Preisformatierung) ist ebenfalls bereits in `main`
+  vorhanden — Einordnung als "kein Content-relevanter Fund, da toter
+  Code" nachvollziehbar (Komponente laut `ZEITPLAN.md` 5.7 nirgends
+  eingebunden).
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine Positionierungs-
+  Grundsatzfrage berührt.
+→ **Passt, nach `main` gemergt** (Fast-Forward `852ead1..50cd675`).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen):
+- Ändert ausschließlich `support-chef-auto-log.md` (54 neue Zeilen),
+  reine Analyse, kein Code geändert.
+- Stichprobe verifiziert: `TrainResults.tsx:18` zeigt tatsächlich exakt
+  den zitierten Text ("Travix sucht echte Zug-, Bus- und
+  Fährverbindungen …") — per `git show` auf `origin/main` selbst
+  nachgelesen, Zeilennummer stimmt.
+- Behauptung "nirgends im Projekt eingebunden außer im eigenen Test"
+  selbst per `git grep -l "TrainResults\|TrainCard"` auf `origin/main`
+  nachvollzogen: einzige Treffer außerhalb der Komponente/des Tests sind
+  `ZEITPLAN.md`, `freigabe-chef-log.md`, `it-chef-auto-log.md`,
+  `support-chef-auto-log.md`, `tasks/tasks-prd-travix-platform.md` — also
+  nur Doku/Logs, kein echter Nutzerpfad. Fund ist nachvollziehbar, nicht
+  erfunden.
+→ **Passt, nach `main` gemergt** (Merge-Commit `a65c727`, da Branch von
+  einem älteren `main`-Stand abzweigte und kein Fast-Forward möglich war;
+  einziger Inhalt beider Seiten sind nicht überlappende Log-Dateien, kein
+  Konfliktrisiko).
+
+**Ergebnis:** Zwei Branches geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), `it-chef/auto` planmäßig
+übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
+
 ## 2026-08-10, früher Nacht-Check (0-4 Uhr)
 
 **Geprüfte Branches:**
