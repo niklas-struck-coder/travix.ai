@@ -27,7 +27,7 @@ const baseChatState = {
   isThinking: false,
   stayOffers: null,
   stayLoading: false,
-  stayError: false,
+  stayErrors: [],
   flightOffers: null,
   flightErrors: [],
   flightLoading: false,

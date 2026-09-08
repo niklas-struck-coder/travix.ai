@@ -582,6 +582,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   der weiterhin fehlenden Einbindung von `TrainCard`/`TrainResults` in
   eine Seite (5.7 bleibt offen). Neue `TrainCard.test.tsx` (bisher gab es
   dort keinen Test), vor dem Fix reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 08.09. (weiterer Lauf) den von
+  `reports/it-chef.md` (08.09.) gemeldeten Fund behoben: Ein
+  fehlgeschlagener `searchStays()`-Aufruf im KI-Chat (`useChat.ts`, State
+  `stayError: boolean`) verlor die konkrete Fehlermeldung —
+  `HotelResults.tsx` zeigte dafür immer denselben festen Text, egal ob
+  Duffel offline, überlastet oder mit einem HTTP-Fehler geantwortet
+  hatte. Die Flugsuche macht es bereits richtig: `flightErrors:
+  DuffelError[]` reicht die von `callDuffelProxy()` gebaute, konkrete
+  deutsche Fehlermeldung durch (`FlightResults.tsx`). Fix: exakt dasselbe
+  Muster auf die Unterkunftssuche übertragen — `stayError: boolean` durch
+  `stayErrors: DuffelError[]` ersetzt (State, beide `searchStays`-Aufrufstellen
+  in `useChat.ts` inkl. `resetChat`/`startEdit`/`sendMessage`), `KiChat.tsx`
+  reicht `stayErrors` statt `stayError` durch, `HotelResults.tsx` rendert
+  jetzt wie `FlightResults.tsx` alle `errors`-Meldungen statt eines festen
+  Texts. Reines Fehlermeldungs-Detail, keine Verhaltensänderung bei
+  Erfolg oder echter Null-Treffer-Suche. Zehn bestehende Assertions in
+  `useChat.test.ts` auf das neue Array-Format angepasst (exakt analog zu
+  den bestehenden `flightErrors`-Tests: `.length` bei erwartetem Fehler,
+  `toEqual([])` sonst), `KiChat.test.tsx`s Mock-Rückgabewert ebenfalls
+  angepasst.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

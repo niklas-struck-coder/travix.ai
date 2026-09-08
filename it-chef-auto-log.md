@@ -8207,3 +8207,69 @@ Regressionsschutz.
 - `npm test` (vitest) — 39 Testdateien, 214 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-08 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig nach `main`
+gemergt (keine Divergenz), Branch daher frisch von `origin/main` neu
+angelegt (`git checkout -B it-chef/auto origin/main`), wie in der
+SKILL.md für diesen Fall vorgesehen.
+
+**Ausgewählter Punkt:** Der in `reports/it-chef.md` (08.09., Abschnitt
+"Gefundene Bugs") explizit als "guter, klar abgegrenzter nächster Punkt
+für it-chef-eigen" markierte Fund: Ein fehlgeschlagener
+`searchStays()`-Aufruf im KI-Chat (`useChat.ts`) speicherte den Fehler
+nur als `stayError: boolean`, wodurch `HotelResults.tsx` immer denselben
+festen Text zeigte, egal was Duffel konkret gemeldet hat. Die
+strukturell identische Flugsuche macht es bereits richtig:
+`flightErrors: DuffelError[]` reicht die von `callDuffelProxy()` gebaute,
+konkrete deutsche Fehlermeldung durch (`FlightResults.tsx`).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (reine Chat-Fehlermeldung). Keine
+offene Produkt-/Architekturentscheidung — der Bericht selbst beschreibt
+den Fix als mechanische Übertragung eines bereits im Code etablierten
+Musters ("exakt nach dem Vorbild von `flightErrors`"). Klar genug
+beschrieben, um ohne zusätzliche Annahmen umsetzbar zu sein. Ergebnis
+objektiv prüfbar über Typecheck/Lint/Tests plus die bestehenden
+Regressionstests für die betroffenen Fälle.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: State `stayError: boolean` → `stayErrors:
+  DuffelError[]`. Beide `searchStays()`-Aufrufstellen (Hauptchat-Ablauf
+  und `startEdit('accommodation')`) setzen im Fehlerfall jetzt
+  `setStayErrors(result.errors)` (aufgelöste Duffel-Fehler) bzw. im
+  `.catch()`-Zweig eine eigene Fallback-Meldung (identisch zum bisherigen
+  festen `HotelResults`-Text), analog zum bestehenden `flightErrors`-Muster
+  in `runFlightSearch()`. `resetChat()`, `startEdit()` und `sendMessage()`
+  setzen `stayErrors` beim Zurücksetzen jetzt auf `[]` statt `false`.
+- `src/components/search/HotelResults.tsx`: Prop `error: boolean` →
+  `errors: DuffelError[]`, Anzeige jetzt wie in `FlightResults.tsx` eine
+  Liste aller `errors`-Meldungen statt eines festen Texts.
+- `src/components/chat/KiChat.tsx`: reicht `stayErrors` statt `stayError`
+  durch, Anzeige-Bedingung entsprechend angepasst
+  (`stayErrors.length > 0`).
+- Zehn bestehende Assertions in `src/hooks/useChat.test.ts` auf das neue
+  Array-Format angepasst (exakt analog zu den bereits bestehenden
+  `flightErrors`-Tests: `.length` prüfen bei erwartetem Fehler,
+  `toEqual([])` sonst) — keine neuen Testfälle nötig, das bereits
+  bestehende Testverhalten (Fehler vs. echte Null-Treffer-Suche vs.
+  Reset) bleibt inhaltlich unverändert, nur die Prüfung auf das neue
+  Datenformat umgestellt.
+- `src/components/chat/KiChat.test.tsx`: Mock-Rückgabewert von `useChat`
+  auf `stayErrors: []` statt `stayError: false` umgestellt.
+- `ZEITPLAN.md` (Phase 5 Suche) um diesen Fund/Fix ergänzt.
+- Kein Eintrag in `tasks/tasks-prd-travix-platform.md` — der Fix behebt
+  keinen eigenständig nummerierten PRD-Punkt, sondern eine
+  Fehlermeldungs-Inkonsistenz innerhalb der bereits als fertig markierten
+  Unterkunftssuche (5.1-5.3, 5.6).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 39 Testdateien, 214 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
