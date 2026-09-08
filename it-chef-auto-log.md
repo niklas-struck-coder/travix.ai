@@ -8156,3 +8156,54 @@ bereits gefundenen und behobenen Punkt zu wiederholen.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (nur dieser
 Log-Eintrag).
+
+## 2026-09-08 (dritter Lauf)
+
+**Ausgangslage:** `it-chef/auto` unverändert seit den beiden vorherigen
+Läufen heute (TrainCard-Preisformat-Fix, CI-Workflow, kein neuer Fund),
+`main` weiterhin dahinter. Dritter autonomer Lauf am selben Tag.
+
+**Vorgehen:** Erneute, auf bisher weniger im Detail geprüfte Bereiche
+fokussierte Suche, um eine reine Wiederholung der vorherigen zwei Läufe
+zu vermeiden: `TrainResults.tsx`, `NoResultsMessage.tsx`, `AppShell.tsx`,
+`PageTransition.tsx`, `select.tsx`/`sheet.tsx`/`dialog.tsx` (shadcn-Basis-
+komponenten), `design-tokens.ts`, `types/duffel.ts`, `utils.ts`,
+`routes.tsx`, `Kartenansicht.tsx` gezielt gelesen — keine Auffälligkeiten.
+Zusätzlich alle `.includes()`/`.indexOf()`-Aufrufe im gesamten `src`-Baum
+erneut nach dem wiederkehrenden Wortgrenzen-Fehlermuster durchsucht: die
+einzigen verbleibenden Treffer sind reine Array-`includes()`-Prüfungen in
+`Profil.tsx`/`KiChat.tsx` (kein String-Teilstring-Problem, da über
+endliche Werte-Arrays, nicht Freitext).
+
+**Ausgewählter Punkt:** Kein neuer Code-Bug gefunden, aber `npm audit`
+zeigte 3 Schwachstellen (2 hoch: `fast-uri`, `nanoid`; 1 mittel: `qs`) in
+transitiven Abhängigkeiten. Alle drei kommen ausschließlich über die in
+`dependencies` gelistete `shadcn`-CLI (Scaffolding-Tool für UI-Komponenten,
+nirgends im `src`-Baum importiert, läuft nie im ausgelieferten Bundle mit,
+per `npm ls`/`grep` verifiziert) — kein Laufzeit-Code-Pfad betroffen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine Produkt-/Architekturentscheidung — reines
+Anheben transitiver Versionsnummern innerhalb bestehender Semver-Ranges
+über `npm audit fix` (ohne `--force`, keine Major-Sprünge, keine
+Breaking-Changes laut npm). Klar abgegrenzt: nur `package-lock.json`
+betroffen, kein Quellcode geändert. Objektiv prüfbar: `npm audit` vorher/
+nachher, plus bestehende Lint/Typecheck/Build/Test-Suite als
+Regressionsschutz.
+
+**Umgesetzt:**
+- `npm audit fix` ausgeführt: `qs` 6.15.3 → 6.16.0, `nanoid` 3.3.17 →
+  3.3.18, `fast-uri` 3.1.5 → 3.1.7. Nur `package-lock.json` geändert,
+  `package.json` unverändert (keine Versionsbereich-Änderung nötig).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm audit` vorher: 3 Schwachstellen (2 hoch, 1 mittel); danach: 0
+  Schwachstellen.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npx tsc --noEmit` — keine Fehler.
+- `npm run build` (tsc -b + vite build) — grün, keine neuen Warnings.
+- `npm test` (vitest) — 39 Testdateien, 214 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
