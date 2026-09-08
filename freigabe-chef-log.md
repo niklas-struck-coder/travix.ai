@@ -2367,3 +2367,64 @@ vorhanden.
 (`it-chef/auto`). Keine Auffälligkeiten, kein Scope-Verstoß, keine Info
 an Ni nötig — beide Merges reine Markdown-Ergänzungen ohne Produkt-Code,
 entsprechend risikoarm.
+
+## 2026-09-08, früher Nacht-Check (0-4-Uhr-Slot)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `main` (lokalen `main` zuerst per
+  Fast-Forward auf `origin/main` gebracht, 43 Commits Rückstand seit dem
+  6-Uhr-Lauf vom 07.09.).
+- `marketing-chef/auto` — 0 Commits vor `main`. Wie in der Aufgabe für
+  diesen frühen Lauf vorgesehen ignoriert (läuft erst um 6 Uhr, eigener
+  späterer Freigabe-Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`. Ebenfalls ignoriert, aus
+  demselben Grund.
+
+**Prüfung `it-chef/auto`:** Vier inhaltliche Commits seit dem letzten
+Merge (plus ein reiner "kein Fund"-Log-Eintrag ohne Codeänderung):
+
+1. `d7682d2` — Fix für den vom Support-Chef gemeldeten Anschlussfund zum
+   07.09.-Fix: die Unterkunfts-Notiz bei unbekanntem Ziel widersprach sich
+   noch doppelt (Hauptchat) bzw. war im "Bearbeiten"-Pfad vom früheren Fix
+   unberührt. Neues optionales Flag `accommodationNoticeHandled` auf
+   `AdvisorReply` (`src/types/chat.ts`), gesetzt in `mockAdvisor.ts`,
+   ausgewertet in `useChat.ts` (Hauptchat + `startEdit`). Diff gelesen:
+   sauber auf genau diesen einen Punkt begrenzt, kein Auth-/Zahlungs-/
+   Rechtsbezug, `startEdit('accommodation')` jetzt strukturell identisch
+   zum Hauptchat-Pfad (Zielprüfung vor jeder Nachricht statt danach).
+2. `76fed4d` — neue `.github/workflows/ci.yml` (Lint/Build/Test bei jedem
+   PR und Push nach `main`), exakt der seit vier IT-Chef-Berichten in
+   Folge vorgeschlagene Punkt. Reine CI-Infrastruktur, YAML syntaktisch
+   geprüft.
+3. `cafb37c` — `TrainCard.tsx` nutzt jetzt `formatOfferPrice()` statt
+   roher String-Konkatenation, identisch zum bereits etablierten Muster in
+   `FlightCard`/`HotelCard`. Neuer Test `TrainCard.test.tsx`. Reine
+   Anzeige-Formatierung, keine Scope-Ausweitung.
+4. `fb7b2f0` — `npm audit fix` gegen 3 Schwachstellen in transitiven
+   `shadcn`-CLI-Abhängigkeiten (`qs`, `nanoid`, `fast-uri`); nur
+   `package-lock.json` geändert, keine Major-Sprünge.
+
+Alle vier Diffs einzeln gelesen (nicht nur den Log-Eintrag geglaubt):
+betreffen ausschließlich die beschriebenen Punkte, kein Scope-Creep, kein
+Auth-/Zahlungs-/Rechtsbezug, kein UI/Design-Punkt, der gegen
+`MARKENDESIGN.md` verstoßen könnte (TrainCard-Fix übernimmt nur ein
+bereits etabliertes Formatierungsmuster 1:1).
+
+**Unabhängige Verifikation** (Branch ausgecheckt, nicht nur Log-Eintrag
+geglaubt):
+- `npm install` — sauber, **0 Schwachstellen** (bestätigt den
+  `npm audit fix` unabhängig).
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, unverändert
+  — exakt wie im Log behauptet).
+- `npx vitest run` — 39 Testdateien, 214 Tests, alle grün (exakt wie im
+  Log behauptet).
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`dcb620a..fb7b2f0`, gepusht).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
+übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
