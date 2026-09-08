@@ -425,7 +425,8 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   hat denselben Bug, bleibt aber bewusst unangetastet — sie ist laut
   `reports/it-chef.md` (Vorschlag 4) toter Code, der nirgends importiert
   wird, und ihre Zukunft (anbinden oder löschen) war nicht Teil dieses
-  einen, klar abgegrenzten Punkts. Neue `src/lib/format.test.ts`
+  einen, klar abgegrenzten Punkts (vom autonomen IT-Chef-Lauf am 08.09.
+  nachgeholt, siehe unten). Neue `src/lib/format.test.ts`
   (bisher gab es dort keine Tests) mit vier Fällen (EUR, Beträge mit
   Cent-Anteil, andere Währung, nicht-numerischer Fallback).
   Vom autonomen IT-Chef-Lauf am 04.09. (vierunddreißigster Lauf) einen von
@@ -573,6 +574,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zwei Nachrichten jetzt eine, Inhalt ohne "manuelle Hotelsuche"), zwei
   neue Assertions in `mockAdvisor.test.ts` für das neue Flag — vor dem Fix
   reproduzierbar mit dem alten Verhalten (zwei Nachrichten) verifiziert.
+  Vom autonomen IT-Chef-Lauf am 08.09. den beim Preisformat-Fix vom 04.09.
+  bewusst zurückgestellten Teil für `TrainCard.tsx` nachgeholt: Der Preis
+  wird jetzt ebenfalls über `formatOfferPrice()` angezeigt statt roh
+  konkateniert ("129.00 EUR" → "129,00 €"), identisch zum bereits
+  bestehenden Muster in `FlightCard.tsx`/`HotelCard.tsx`. Ändert nichts an
+  der weiterhin fehlenden Einbindung von `TrainCard`/`TrainResults` in
+  eine Seite (5.7 bleibt offen). Neue `TrainCard.test.tsx` (bisher gab es
+  dort keinen Test), vor dem Fix reproduzierbar rot verifiziert.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

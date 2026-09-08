@@ -8046,4 +8046,65 @@ identischen Befehlssatz lokal grün laufen zu lassen. Ein erster echter
 Lauf entsteht automatisch, sobald dieser Branch von Freigabe-Chef geprüft
 und ein PR/Push die neue Datei erreicht.
 
+## 2026-09-08
+
+**Ausgewählter Punkt:** Kein neuer ZEITPLAN-Checklistenpunkt — der
+verbleibende Sprint-1/2-Rest ist weiterhin entweder Produktentscheidung
+(Backend 4.1-4.3, Premium/Loyalty wegen offener PRD-Fragen OQ-03/OQ-04)
+oder durch fehlende `TripDraft`-Preis-/Item-Felder blockiert (6.2, 6.6,
+6.7, 7.12), 7.4 ("Planung fortsetzen") bräuchte eine eigene
+Design-Entscheidung zur Speicherung der Chat-Historie pro Entwurf, und
+8.11 Hilfe hängt weiterhin an fehlendem FAQ-Content vom Support-Chef.
+Eine gezielte Bug-Suche über rund 45 bisher nicht im Detail geprüfte
+Dateien (u. a. `Urlaubsmodus.tsx`, `useConcierge.ts`, alle
+Demo-Daten-Seiten, `cartTotals.ts`, `calendarUtils.ts`,
+`nav-config.ts`, `duffel/client.ts`) fand keinen neuen Bug in erreichbarem
+Code — die zuvor wiederholt gefundene Wortgrenzen-Lücke
+(`String.includes()` ohne `\b`) ist inzwischen überall behoben, wo sie
+vorkam. Einziger Fund: `TrainCard.tsx` zeigt den Preis weiterhin roh
+(`{offer.totalAmount} {offer.totalCurrency}`, z. B. "129.00 EUR") statt
+über `formatOfferPrice()` wie `FlightCard.tsx`/`HotelCard.tsx` — genau der
+Preisformat-Bug, der am 04.09. (zweiunddreißigster Lauf) für Flug/Hotel
+behoben, für `TrainCard` damals aber bewusst zurückgestellt wurde ("ihre
+Zukunft (anbinden oder löschen) war nicht Teil dieses einen, klar
+abgegrenzten Punkts", siehe `ZEITPLAN.md`). Dieser Lauf holt genau den
+damals vertagten, klar abgegrenzten Formatierungs-Teil nach.
+
+**Warum sicher genug:** Reine Anzeige-Formatierung, kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Recht. Keine offene Produkt-/
+Architekturentscheidung — exakt dasselbe, bereits zweimal etablierte
+Muster (`formatOfferPrice()`) wird ein drittes Mal angewendet, keine neue
+Design-Entscheidung nötig. `TrainCard`/`TrainResults` sind zwar weiterhin
+in keiner Seite eingebunden (5.7 offen, siehe `ZEITPLAN.md`), das ändert
+aber nichts an der Korrektheit des Fixes selbst und war für den früheren
+Fix ebenfalls keine Voraussetzung. Ergebnis objektiv prüfbar: neuer Test
+vor dem Fix reproduzierbar rot, danach grün.
+
+**Umgesetzt:**
+- `src/components/search/TrainCard.tsx`: Preis-Anzeige nutzt jetzt
+  `formatOfferPrice(offer.totalAmount, offer.totalCurrency)` aus
+  `src/lib/format.ts` statt der rohen String-Konkatenation, identisch zum
+  bestehenden Muster in `FlightCard.tsx`/`HotelCard.tsx`.
+- Neue `src/components/search/TrainCard.test.tsx` (bisher gab es dort
+  keinen Test): rendert eine Beispiel-Zugverbindung und prüft, dass der
+  Preis als "129,00 €" statt "129.00 EUR" erscheint.
+- Keine Checkbox in `tasks/tasks-prd-travix-platform.md` umgestellt —
+  kein eigener PRD-Punkt (5.4/5.5 sind bereits als erledigt markiert),
+  reiner Anschlussfix zu einem bereits abgeschlossenen Punkt.
+  `ZEITPLAN.md` mit einer kurzen Notiz bei Phase 5 ergänzt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte; Installation lief
+  erfolgreich durch).
+- Neuer Test vor dem Fix reproduzierbar rot verifiziert (per
+  `git stash` auf die alte `TrainCard.tsx` zurückgesetzt, Test schlug mit
+  dem erwarteten rohen "129.00 EUR" fehl), danach grün.
+- `npm run lint` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, unverändert).
+- `npx tsc --noEmit` — keine Fehler.
+- `npm run build` (tsc -b + vite build) — grün, keine neuen Warnings.
+- `npm test` (vitest) — 39 Testdateien, 214 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
