@@ -1,54 +1,53 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-07
+**Datum:** 2026-09-08
 
-## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-07) passiert?
 
-Ein Tag mit spürbarem Aufräumeffekt, aber weiterhin ohne neue Entscheidung
-von dir zu den offenen Freigabe-Fragen:
+Ein ruhiger Tag ohne große Content-Bewegung — passt zur Einschätzung des
+autonomen Marketing-Laufs von heute, der ebenfalls nur einen einzigen neuen
+Kandidaten fand:
 
-- **Beide zuletzt gemeldeten Bugs sind behoben:** Der stille Speicherfehler
-  (App zeigte "gespeichert" an, obwohl der Trip nicht gesichert wurde,
-  PR #19) ist gefixt, und die Vorlesen-Funktion im Chat stoppt jetzt
-  zuverlässig beim Ausschalten, Neustart oder Verlassen der Seite. Damit
-  sind **beide technischen Gründe ausgeräumt**, die bisher gegen eine
-  Bewerbung der Sprachfunktion sprachen.
-- **Zwei weitere kleine Ehrlichkeits-Fixes:** Fehlende Chat-Chips nach
-  einer echten Nulltreffer-Suche und eine widersprüchliche
-  Unterkunfts-Ankündigung bei unbekanntem Ziel wurden korrigiert.
-- **Zweite Mini-Changelog-Ausgabe liegt fertig:** Ein zweiter Entwurf mit
-  acht weiteren Vorher/Nachher-Punkten für die geplante Changelog-Seite
-  ist bereits geschrieben (`marketing/mini-changelog-konzept.md`,
-  Ausgabe 2) — braucht wie Ausgabe 1 nur noch dein Go, ob IT-Chef die
-  Seite bauen soll.
-- Die vier offenen Fragen an dich (Kanäle anlegen, Warenkorb-Content,
-  Tier-4-Format, Mini-Changelog-Seite bauen) sind weiterhin unbeantwortet
-  — teils seit dem 21.08.
+- **Ein Ehrlichkeits-Fix nachgezogen:** Die widersprüchliche
+  Unterkunfts-Notiz bei unbekanntem Ziel ist jetzt auch im
+  "Bearbeiten"-Pfad behoben (vorher nur im Hauptchat). Reiht sich ins
+  bestehende Muster ein, ist aber allein zu wenig für eine dritte
+  Mini-Changelog-Ausgabe.
+- **Dritter Preisformat-Fix:** Nach Flug- und Hotelkarte zeigt jetzt auch
+  die Zugkarte den Preis im deutschen Format ("129,00 €" statt "129.00
+  EUR"). Kein eigenständiger Content-Anlass, aber ein weiterer Beleg für
+  "wir achten auf Details, die Nutzern aber sofort auffallen".
+- **Neuer Fund von Support-Chef (noch offen, kein Fix):** Der Ladetext bei
+  der Zug-/Bus-/Fähre-Suche verspricht eine "echte" Suche, obwohl noch
+  keine Datenquelle angebunden ist. Sobald das behoben ist, ist das ein
+  weiterer klarer Kandidat fürs Ehrlichkeits-Narrativ.
+- **Rest war IT-Hygiene:** CI-Workflow für Pull Requests, drei behobene
+  npm-audit-Schwachstellen — technisch wichtig, aber ohne Nutzer-Sicht und
+  damit ohne Content-Wert.
+- Die vier offenen Fragen an dich (Kanäle anlegen, Warenkorb-Content vs.
+  6.2, Tier-4-Format grundsätzlich, Mini-Changelog-Seite bauen) sind
+  weiterhin unbeantwortet.
 
 ## Vorschläge
 
-1. **Mini-Changelog jetzt entscheiden lassen.** Zwei fertige Ausgaben
-   liegen bereit, ohne dass irgendwo sonst etwas verändert werden muss.
-   Von den vier offenen Fragen ist das die mit dem geringsten Aufwand für
-   dich — ein Ja/Nein reicht, und der am längsten liegende Content-Baustein
-   wird endlich nutzbar.
+1. **Mini-Changelog-Entscheidung bleibt der schnellste Hebel.** Zwei
+   fertige Ausgaben liegen seit über einer Woche bereit, ohne dass sonst
+   etwas verändert werden muss. Von allen vier offenen Fragen ist das die
+   mit dem geringsten Aufwand für dich — ein Ja/Nein reicht.
 
-2. **Vorlesen-Funktion als "wenn, dann zuerst"-Kandidat vormerken.** Jetzt,
-   wo beide technischen Blocker weg sind, ist sie bereit für den Moment,
-   in dem du einen Kanal oder ein Social-Format freigibst — dann direkt als
-   Reisefreiheit-/Unterwegs-Nutzen positionieren ("Reiseplan vorlesen
-   lassen, während du die Hände frei hast"), statt als reine Feature-Liste.
+2. **Die drei Kanal-/Format-Fragen an einem Termin bündeln statt
+   einzeln.** Sie hängen ohnehin zusammen (Kanal → Format → Warenkorb-Timing)
+   und werden seit dem 21.08. täglich neu als "weiterhin offen" mitgeschleppt.
+   Ein einziges kurzes Gespräch mit dir würde reichen, um den ganzen
+   Content-Stau auf einmal aufzulösen, statt dass jeder Tagesbericht dieselbe
+   Liste wiederholt.
 
-3. **Die Sammlung an Ehrlichkeits-Fixes wird zum eigenen Beweis-Fundament.**
-   Mit jetzt zehn+ einzeln verifizierten Vorher/Nachher-Punkten seit August
-   ist "wir zeigen Fehler ehrlich an, statt sie zu verstecken" kein
-   einzelner Fund mehr, sondern ein durchgehendes Muster. Sobald die
-   Kanal-Frage geklärt ist, wäre das ein starker erster Positionierungs-Post
-   ("Was wir in den letzten Wochen ehrlicher gemacht haben") statt eines
-   einzelnen Bugfix-Hinweises.
+3. **Sobald der Zug/Bus/Fähre-Ladetext korrigiert ist, direkt als weiteren
+   Beleg vormerken** — nicht als eigenes Content-Stück, sondern für die
+   dritte Mini-Changelog-Ausgabe, sobald genug neue Punkte zusammenkommen.
 
 4. **Keine erfundenen Kennzahlen.** Mir liegen weiterhin keine Nutzungs-
    oder Erfolgszahlen vor — Content bleibt bei "was wurde ehrlicher und
    zuverlässiger", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-07_
+_Letztes Update: 2026-09-08_
