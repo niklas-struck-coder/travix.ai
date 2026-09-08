@@ -13,18 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-06):**
-- IT-Chef hat mehrere gemeldete Fehler behoben: fehlgeschlagenes Speichern von
-  Reiseplänen zeigt nicht mehr fälschlich Erfolg an, Sprachausgabe im KI-Chat
-  stoppt jetzt zuverlässig beim Ausschalten/Verlassen, "Überrasch mich" wird
-  nicht mehr wörtlich als Reiseziel übernommen, fehlende Chat-Chips nach
-  Nulltreffer-Suche sowie eine widersprüchliche Unterkunfts-Ankündigung bei
-  unbekanntem Ziel wurden korrigiert (Support-Chef sieht hier noch einen
-  Restfall offen)
-- Marketing-Chef hat eine zweite Mini-Changelog-Ausgabe mit acht verifizierten
-  Kandidaten vorbereitet
+**Seit letztem Update (2026-09-07):**
+- IT-Chef hat einen neuen GitHub-Actions-Workflow eingerichtet (Lint/Typecheck/
+  Build/Tests bei jedem Pull Request), drei bekannte npm-audit-Schwachstellen
+  in transitiven Abhängigkeiten behoben und den Preis in der Zugkarte auf
+  deutsches Zahlenformat umgestellt
+- Support-Chef hat einen neuen Punkt gemeldet: Der Ladetext bei der Zug-/Bus-/
+  Fähre-Suche verspricht eine "echte" Suche, obwohl noch keine Datenquelle
+  angebunden ist
+- Marketing-Chef hat einen weiteren Tier-4-Kandidaten eingeordnet, kein neues
+  Content-Stück
 - Freigabe-Chef hat die Änderungen mehrfach unabhängig geprüft und gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-07_
+_Letztes Update: 2026-09-08_
