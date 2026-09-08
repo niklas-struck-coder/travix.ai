@@ -1986,3 +1986,57 @@ getrennte Textbausteine für denselben Fall zu pflegen.
 
 Kein weiterer nennenswerter Reibungspunkt in den beiden heutigen Commits
 gefunden — beide sind andernfalls in sich stimmig und ordentlich getestet.
+
+## 2026-09-08 — Zug-/Bus-/Fähr-Suchergebnisse (`TrainResults.tsx`, `TrainCard.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+Das gestrige (07.09.) und heutige (08.09.) IT-Chef-Auto-Log nennt als
+zuletzt gebauten Bereich `TrainCard.tsx`/`TrainResults.tsx` (5.4/5.5) —
+Kartenkomponente und Listenansicht für Zug-/Bus-/Fährverbindungen, zuletzt
+am 08.09. um die deutsche Preisformatierung ergänzt. Beide Dateien waren
+bisher weder im normalen Gespräch mit Ni noch in einem früheren Auto-Log
+Thema, deshalb heute geprüft.
+
+**Wichtiger Kontext vorweg:** Laut `ZEITPLAN.md` (Punkt 5.7) ist
+`TrainResults` aktuell **in keine einzige Seite eingebunden** — es gibt
+noch keine angebundene Zug-/Bus-/Fähr-Datenquelle, Duffel bietet dafür
+nichts an. Ich habe das per Grep bestätigt: Außer dem eigenen Test importiert
+aktuell keine andere Datei im Projekt `TrainResults` oder `TrainCard`. Der
+folgende Punkt ist also (noch) kein Reibungspunkt, dem eine echte Nutzerin
+heute begegnen kann — sondern ein Fund, der jetzt schon feststeht, bevor die
+Komponente überhaupt live geht.
+
+**Der Ladetext verspricht bereits jetzt eine "echte" Suche, die es noch gar
+nicht geben kann**
+
+`TrainResults.tsx:18` zeigt während `loading` den Text "Travix sucht echte
+Zug-, Bus- und Fährverbindungen …". Das ist exakt das gleiche
+Ehrlichkeits-Problem, das der autonome IT-Chef-Lauf am 28.08. in
+`mockAdvisor.ts` schon einmal beheben musste: Dort versprach der letzte
+Chat-Schritt für jeden Transportmodus "Ich suche jetzt nach echten
+X-Verbindungen", obwohl außer für Flug gar keine echte Suche existiert — der
+Fix hat Zug/Bus/Fähre/Mietwagen seitdem bewusst eine ehrliche
+Abschlussmeldung ohne Suchversprechen ("noch keine automatische Suche")
+gegeben, exakt weil es dafür (bis heute, siehe 5.7) keine echte Datenquelle
+gibt. `TrainResults.tsx` wurde offenbar unabhängig davon gebaut (analog zu
+`HotelResults.tsx`, das für eine tatsächlich angebundene, echte Suche
+korrekt "Travix sucht echte Unterkünfte …" zeigen darf) und übernimmt
+denselben Wortlaut, obwohl die Grundvoraussetzung dafür bei Zug/Bus/Fähre
+weiterhin fehlt.
+
+*Vorschlag:* Sobald 5.7 (echte Anbindung) ansteht, den Ladetext in
+`TrainResults.tsx:18` erst dann auf "echte" Verbindungen umstellen, wenn
+tatsächlich eine echte Datenquelle dahintersteht — bis dahin (falls die
+Komponente vorher schon irgendwo eingebunden wird) denselben ehrlichen
+Wortlaut wie in `mockAdvisor.ts` verwenden ("noch keine automatische Suche")
+statt eines Suchversprechens, das die Seite nicht einlösen kann. Kein
+Blocker für jetzt, da die Komponente noch nirgends eingebunden ist — aber
+ein guter Punkt, um ihn nicht erst beim Einbinden selbst zu vergessen.
+
+Restliche Komponente (`TrainCard.tsx`, `NoResultsMessage`-Nutzung in
+`TrainResults.tsx:24`) unauffällig: Zeit-/Dauer-Formatierung fängt leere
+Werte ab (`formatTime`/`formatDuration` liefern `—` statt kaputter
+Ausgabe), Umstiege werden korrekt nur ab 1 angezeigt und pluralisiert, der
+Nulltreffer-Fall nutzt bereits die etablierte, ehrliche
+`NoResultsMessage`-Komponente statt eigenem Text.
