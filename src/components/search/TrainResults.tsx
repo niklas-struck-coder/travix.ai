@@ -15,7 +15,7 @@ export function TrainResults({ offers, loading, onSelect }: TrainResultsProps) {
     return (
       <div className="flex items-center gap-2 pl-1">
         <TravixAvatar state="searching" size="sm" />
-        <span className="text-sm text-muted-foreground">Travix sucht echte Zug-, Bus- und Fährverbindungen …</span>
+        <span className="text-sm text-muted-foreground">Travix sucht nach Zug-, Bus- und Fährverbindungen …</span>
       </div>
     )
   }

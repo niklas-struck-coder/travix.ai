@@ -602,6 +602,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   den bestehenden `flightErrors`-Tests: `.length` bei erwartetem Fehler,
   `toEqual([])` sonst), `KiChat.test.tsx`s Mock-Rückgabewert ebenfalls
   angepasst.
+  Vom autonomen IT-Chef-Lauf am 08.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (08.09.) gemeldeten Ehrlichkeits-Fund behoben:
+  `TrainResults.tsx:18` zeigte während `loading` den Text "Travix sucht
+  echte Zug-, Bus- und Fährverbindungen …" — dieselbe Fehlerklasse, die der
+  autonome IT-Chef-Lauf am 28.08. bereits in `mockAdvisor.ts` beheben
+  musste: Für Zug/Bus/Fähre existiert (5.7 weiterhin offen) keine
+  angebundene Datenquelle, das Wort "echte" versprach also eine Suche, die
+  es noch gar nicht geben kann (anders als bei `FlightResults.tsx`/
+  `HotelResults.tsx`, wo eine echte Duffel-Suche dahintersteht). Der Fund
+  betrifft aktuell noch keine echte Nutzerin, da `TrainResults`/`TrainCard`
+  laut Support-Chef-Bericht (per Grep bestätigt) in keine Seite eingebunden
+  sind — reine Vorab-Korrektur, damit der Text beim künftigen Einbinden
+  (5.7) nicht vergessen wird. Fix: "echte" aus dem Ladetext entfernt
+  ("Travix sucht nach Zug-, Bus- und Fährverbindungen …"), minimale,
+  mechanische Änderung ohne neue Wortwahl-Entscheidung. Neue
+  `TrainResults.test.tsx` (bisher gab es dort keinen Test): prüft
+  Ladetext ohne "echte", Leerzustand, Nulltreffer-Anzeige und
+  Kartenrendering.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

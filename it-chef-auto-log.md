@@ -8273,3 +8273,59 @@ Regressionstests für die betroffenen Fälle.
 - `npm test` (vitest) → 39 Testdateien, 214 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-08 (fünfter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` plus dem eigenen, noch nicht gemergten Commit aus dem
+vierten Lauf (Unterkunfts-Fehlermeldung) — keine Divergenz, direkt darauf
+weitergearbeitet.
+
+**Ausgewählter Punkt:** Der in `reports/support-chef.md` (08.09.)
+gemeldete Ehrlichkeits-Fund: `TrainResults.tsx:18` zeigt während `loading`
+den Text "Travix sucht echte Zug-, Bus- und Fährverbindungen …", obwohl es
+für Zug/Bus/Fähre (Punkt 5.7 in `ZEITPLAN.md`) weiterhin keine angebundene
+Datenquelle gibt — dieselbe Fehlerklasse, die der autonome IT-Chef-Lauf am
+28.08. bereits in `mockAdvisor.ts` beheben musste (dort: unbelegtes
+Suchversprechen für Zug/Bus/Fähre/Mietwagen).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten (reiner UI-Ladetext einer noch nicht eingebundenen
+Komponente). Keine offene Produkt-/Architekturentscheidung — es geht nur
+darum, ein nicht eingelöstes Wort ("echte") aus einem Text zu entfernen,
+nicht um eine neue Formulierung zu erfinden. Klar genug beschrieben: der
+Bericht benennt Datei, Zeile und die exakte Ursache (kein echter
+Datenanschluss). Ergebnis objektiv prüfbar über einen neuen
+Component-Test plus Typecheck/Lint/Tests.
+
+**Umgesetzt:**
+- `src/components/search/TrainResults.tsx`: Ladetext von "Travix sucht
+  echte Zug-, Bus- und Fährverbindungen …" zu "Travix sucht nach Zug-,
+  Bus- und Fährverbindungen …" geändert — minimale, mechanische Änderung
+  (nur das Wort "echte" entfernt), da der Bericht keine eigene Ersatz-
+  Formulierung für den Ladetext-Fall vorgibt (nur den allgemeinen
+  Ehrlichkeitsgrundsatz und die bereits bestehende Abschlussmeldung in
+  `mockAdvisor.ts`, die aber ein anderer Textbaustein ist, kein
+  Ladetext).
+- Neue `src/components/search/TrainResults.test.tsx` (bisher gab es dort
+  keinen Test): prüft, dass der Ladetext kein "echte" mehr enthält, sowie
+  Leerzustand (keine Angebote, nicht ladend), Nulltreffer-Anzeige und
+  Kartenrendering.
+- `ZEITPLAN.md` (Phase 5 Suche) um diesen Fund/Fix ergänzt.
+- Kein Eintrag in `tasks/tasks-prd-travix-platform.md` nötig — reine
+  Textkorrektur, kein eigenständig nummerierter PRD-Punkt.
+
+**Hinweis:** Betrifft aktuell keine echte Nutzerin, da `TrainResults`/
+`TrainCard` laut Support-Chef-Bericht (per Grep bestätigt) noch in keine
+Seite eingebunden sind — reine Vorab-Korrektur für den künftigen
+Einbinde-Zeitpunkt (5.7).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm test` (vitest) → 40 Testdateien, 218 Tests, alle grün (neue
+  `TrainResults.test.tsx` mit vier Tests).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
