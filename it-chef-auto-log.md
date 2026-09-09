@@ -8329,3 +8329,77 @@ Einbinde-Zeitpunkt (5.7).
   `TrainResults.test.tsx` mit vier Tests).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-09
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` plus den beiden eigenen, noch nicht gemergten Commits aus
+dem vierten und fünften Lauf vom 08.09. (Unterkunfts-Fehlermeldung,
+TrainResults-Ladetext) — keine Divergenz, direkt darauf weitergearbeitet.
+
+**Vorgehen:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+durchgesehen — alle offenen Checkbox-Punkte hängen entweder an einer
+noch offenen Produkt-/Backend-Entscheidung (4.1-4.3, 2.x, Sprint 5) oder
+an fehlenden Datenmodell-Feldern, die selbst eine Design-Entscheidung
+bräuchten (6.2/6.6/6.7/7.12: `TripDraft` hat weiterhin keine echten
+Preis-/Provider-URL-Felder), oder sind größere, noch nicht im Detail
+spezifizierte Features (7.4, 8.2-8.7). `reports/it-chef.md` und
+`reports/support-chef.md` (beide 08.09.) erneut geprüft: alle darin
+gemeldeten Punkte sind laut `ZEITPLAN.md`/Log bereits im vierten und
+fünften Lauf vom 08.09. behoben — nichts Neues dort offen. Eigene
+gezielte Suche nach neuen Bugs (u. a. `.includes()`/Wortgrenzen-Muster
+erneut komplett durchsucht, `tripStorage.ts`, `EditMode.tsx`,
+`ChatInput.tsx`/`speech.ts`-Zusammenspiel, `routes.tsx`/`nav-config.ts`
+auf kaputte Links) ohne neuen Fund.
+
+**Ausgewählter Punkt:** Kein neuer Code-Bug gefunden, aber `npm audit`
+zeigte 4 Schwachstellen (1 hoch: `js-yaml`; 3 mittel: `hono`,
+`@vitest/mocker`) in transitiven Abhängigkeiten. Alle drei betroffenen
+Pakete kommen ausschließlich über Entwicklungs-Tooling (`js-yaml` über
+`@eslint/eslintrc`/`cosmiconfig`, `hono` über
+`@modelcontextprotocol/sdk`, `@vitest/mocker` über `vitest` selbst) —
+kein Laufzeit-Code-Pfad betroffen, per `package-lock.json`-Abhängigkeits-
+kette verifiziert.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine Produkt-/Architekturentscheidung — reines
+Anheben transitiver Versionsnummern innerhalb bestehender Semver-Ranges,
+kein `--force`, keine Major-Sprünge laut npm. Klar abgegrenzt: nur
+`package-lock.json` betroffen, `package.json` unverändert. Objektiv
+prüfbar: `npm audit` vorher/nachher, plus bestehende
+Lint/Typecheck/Build/Test-Suite als Regressionsschutz.
+
+**Umgesetzt:**
+- `npm audit fix --package-lock-only` ausgeführt: `@vitest/mocker`
+  (und der Rest der `vitest`-Paketfamilie) 4.1.10 → 4.1.11, `hono` 4.13.0
+  → 4.13.7, `js-yaml` 4.3.1 → 4.3.2. Nur `package-lock.json` geändert,
+  `package.json` unverändert (keine Versionsbereich-Änderung nötig).
+- **Technische Anmerkung:** Der reguläre `npm audit fix` (System-npm
+  10.9.7) brach dabei zunächst wiederholt mit einem internen npm-Fehler
+  ab (`Cannot read properties of null (reading 'edgesOut')`, in
+  `@npmcli/arborist`, offenbar ein Bug beim Aufbau des Peer-Dependency-
+  Baums für `vitest`s optionale Peer-Pakete wie
+  `@vitest/browser-playwright`). `--legacy-peer-deps` umging den Absturz,
+  erzeugte aber ein Lockfile, das `npm ci` als inkonsistent ablehnte
+  (fehlende `@testing-library/dom` & Co.) — dieser Versuch wurde
+  verworfen (`git checkout -- package-lock.json`), bevor irgendetwas
+  committet wurde. Ein direktes `npm install js-yaml@latest` hätte
+  versehentlich `js-yaml` als neue direkte Abhängigkeit in `package.json`
+  eingetragen — ebenfalls verworfen. Erfolgreich war stattdessen ein
+  transienter `npx -y npm@11 audit fix --package-lock-only` (neuere
+  npm-Version nur für diesen einen Befehl, ohne die Projekt- oder
+  Umgebungs-npm-Version zu ändern) — lieferte exakt den erwarteten,
+  minimalen Diff ohne den Absturz.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout mit dem neuen Lockfile, System-npm 10.9.7)
+  → sauber.
+- `npm audit` vorher: 4 Schwachstellen (1 hoch, 3 mittel); danach: 0
+  Schwachstellen.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` (vitest, jetzt 4.1.11) → 40 Testdateien, 218 Tests, alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
