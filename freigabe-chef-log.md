@@ -2542,3 +2542,67 @@ Commit wie `main` — keine weitere Anpassung nötig.
 `marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
 übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-09, Tages-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im früheren
+  Lauf heute geprüft und gemergt, siehe Eintrag "früher Nacht-Check"
+  oben). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`50b6fb1`).
+- `support-chef/auto` — 1 neuer Commit (`585efea`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-
+  Ergänzung, kein neues Content-Stück, keine dritte Mini-Changelog-
+  Ausgabe, nichts gepostet oder live verändert.
+- Der als neuer Tier-4-Kandidat aufgenommene Commit `7068653`
+  ("Unterkunftssuche im Chat zeigt jetzt die konkrete
+  Duffel-Fehlermeldung") per `git show` selbst nachgelesen: existiert
+  genau wie beschrieben, bereits Teil von `main`.
+- Der bewusst ausgeschlossene Commit `b5fac18`
+  (`TrainResults.tsx`-Ladetext) ebenfalls per `git show` verifiziert —
+  existiert wie beschrieben, Ausschluss-Begründung (Komponente laut
+  `ZEITPLAN.md` 5.7 nirgends eingebunden) nachvollziehbar und konsistent
+  zur bisherigen Linie bei totem Code.
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine Positionierungs-
+  Grundsatzfrage berührt.
+→ **Passt, nach `main` gemergt** (Fast-Forward `db61751..50b6fb1`,
+gepusht). `marketing-chef/auto` zeigt danach auf denselben Commit wie
+`main` — keine weitere Anpassung nötig.
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Branch war von einem veralteten `main`-Stand (`9977035`, vor den
+  IT-Chef-Nacht-Läufen) abgezweigt und enthält nur einen einzigen neuen
+  Commit (`585efea`) obendrauf — dadurch täuscht ein direkter
+  Tip-zu-Tip-Diff massive Löschungen vor, die tatsächlich nur fehlende
+  neuere `main`-Commits sind (`git merge-base` bestätigt: `main` ist
+  kein Vorfahre des Branches).
+- Der einzige neue Log-Eintrag (`support-chef-auto-log.md`, "2026-09-09
+  — Fehlgeschlagene Unterkunftssuche im Chat") bestätigt als Reibungspunkt
+  genau das, was die `stayError: boolean` vs. `flightErrors`-Diskrepanz in
+  `HotelResults.tsx`/`useChat.ts` beschreibt — **aber dieser Fund ist
+  bereits durch Commit `7068653` in `main` behoben** (selbst per
+  `git show origin/main:src/components/search/HotelResults.tsx`
+  nachgelesen: `errors: DuffelError[]`-Prop, zeigt bereits
+  `error.message` pro Fehler, exakt das im Bericht als fehlend
+  beschriebene Verhalten). Der Support-Chef-Lauf hatte diesen Fix
+  offenbar noch nicht in seinem Repo-Stand und hat einen inzwischen
+  gelösten Punkt als offen bestätigt.
+→ **Nicht gemergt.** Ein bereits behobener Punkt würde als "bestätigter,
+offener Reibungspunkt" in `main` landen — sachlich falsch gegenüber dem
+aktuellen Code-Stand. Kein Scope-Verstoß oder erfundener Fund, sondern
+ein durch die veraltete Branch-Basis überholter Stand. Branch bleibt für
+den nächsten Support-Chef-Lauf liegen, damit er selbst gegen den
+aktuellen `main`-Stand neu ansetzen kann (analog zum Muster, das
+Marketing-Chef bei veralteten Branches selbst schon anwendet).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`),
+ein Branch bewusst nicht gemergt (`support-chef/auto`, überholter Fund),
+`it-chef/auto` planmäßig übersprungen (keine neuen Commits). Kein
+wiederholtes Muster bei `support-chef/auto` (erstmaliger Fall dieser
+Art) und keine eigenen Regelverstöße erkennbar — daher keine gesonderte
+Info an Ni nötig, reicht als Log-Eintrag.
