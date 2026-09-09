@@ -2481,3 +2481,64 @@ geglaubt):
 `marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
 übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-09, früher Nacht-Check (0-4-Uhr-Slot)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `origin/main` (3 inhaltliche Fix-Commits
+  plus 2 reine "kein Fund"-Log-Einträge aus den beiden stündlichen Läufen
+  von heute Nacht ohne Codeänderung).
+- `marketing-chef/auto` — 0 Commits vor `origin/main`. Wie in der Aufgabe
+  für diesen frühen Lauf vorgesehen ignoriert (läuft erst um 6 Uhr,
+  eigener späterer Freigabe-Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `origin/main`. Ebenfalls ignoriert,
+  aus demselben Grund.
+
+**Prüfung `it-chef/auto`:** Drei inhaltliche Commits seit dem letzten
+Merge:
+
+1. `7068653` — Unterkunftssuche im Chat zeigt jetzt die konkrete
+   Duffel-Fehlermeldung statt eines festen Textes. `useChat.ts`:
+   `stayError: boolean` → `stayErrors: DuffelError[]`, exakt nach dem
+   bereits etablierten `flightErrors`-Muster. `HotelResults.tsx` zeigt
+   jetzt wie `FlightResults.tsx` eine Liste der Fehlermeldungen.
+   `KiChat.tsx` reicht das neue Prop nur durch. Diff gelesen: sauber auf
+   genau diesen einen, im `it-chef-auto-log.md` beschriebenen Punkt
+   begrenzt, kein Auth-/Zahlungs-/Rechtsbezug, UI-Änderung übernimmt nur
+   ein bereits bestehendes Anzeigemuster 1:1 (kein neuer
+   MARKENDESIGN.md-Verstoß).
+2. `b5fac18` — `TrainResults.tsx`-Ladetext verspricht keine "echte" Suche
+   mehr ("Travix sucht echte Zug-, Bus- und Fährverbindungen …" → "…sucht
+   nach Zug-, Bus- und Fährverbindungen …"), minimale Textkorrektur, neuer
+   `TrainResults.test.tsx`. Betrifft laut Log noch keine echte Nutzerin
+   (Komponente noch nicht eingebunden). Kein Auth-/Zahlungs-/Rechtsbezug.
+3. `e704e42` — `npm audit fix --package-lock-only` gegen 4 Schwachstellen
+   (1 hoch: `js-yaml`; 3 mittel: `hono`, `@vitest/mocker`) in transitiven
+   Dev-Tooling-Abhängigkeiten; nur `package-lock.json` geändert,
+   `package.json` unverändert bestätigt (`git diff` explizit geprüft),
+   keine Major-Sprünge.
+
+Alle drei Diffs einzeln gelesen (nicht nur den Log-Eintrag geglaubt):
+betreffen ausschließlich die beschriebenen Punkte, kein Scope-Creep, kein
+Auth-/Zahlungs-/Rechtsbezug, kein UI/Design-Punkt, der gegen
+`MARKENDESIGN.md` verstoßen könnte.
+
+**Unabhängige Verifikation** (Branch ausgecheckt, nicht nur Log-Eintrag
+geglaubt):
+- `npm ci` — sauber, **0 Schwachstellen** (bestätigt den `npm audit fix`
+  unabhängig).
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, unverändert
+  — exakt wie im Log behauptet).
+- `npx vitest run` — 40 Testdateien, 218 Tests, alle grün (exakt wie im
+  Log behauptet).
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`98d6d8a..96d508a`, gepusht). `it-chef/auto` zeigt danach auf denselben
+Commit wie `main` — keine weitere Anpassung nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
+übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
