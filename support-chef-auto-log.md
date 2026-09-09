@@ -2040,3 +2040,69 @@ Werte ab (`formatTime`/`formatDuration` liefern `—` statt kaputter
 Ausgabe), Umstiege werden korrekt nur ab 1 angezeigt und pluralisiert, der
 Nulltreffer-Fall nutzt bereits die etablierte, ehrliche
 `NoResultsMessage`-Komponente statt eigenem Text.
+
+## 2026-09-09 — Fehlgeschlagene Unterkunftssuche im Chat (`HotelResults.tsx`, `useChat.ts`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** `reports/it-chef.md` (Stand 08.09.) nennt als
+heute gefundenen, aber noch nicht behobenen Punkt die fehlende
+`stayErrors`-Angleichung an das Flug-Vorbild — dieselbe Stelle war schon
+im eigenen Bericht vom 01.09. ausdrücklich als "nicht geprüft"
+vermerkt (siehe dort). Heute aus reiner Nutzersicht nachvollzogen, ob
+das tatsächlich als Reibungspunkt spürbar wird:
+
+- `src/components/search/HotelResults.tsx`
+- `src/components/search/FlightResults.tsx` (zum Vergleich)
+- `src/hooks/useChat.ts:179-206` und `:326-355` (beide `searchStays()`-
+  Aufrufstellen: Haupt-Chat-Ablauf und der "Bearbeiten"-Pfad)
+- `src/lib/duffel/client.ts:15-53` (`callDuffelProxy`)
+
+### Reibungspunkt
+
+**Eine fehlgeschlagene Unterkunftssuche zeigt immer denselben Satz, egal
+was wirklich schiefging — während dieselbe Infrastruktur bei Flügen den
+konkreten Grund anzeigt**
+
+`callDuffelProxy()` (`client.ts:15-53`) unterscheidet beim Fehlschlag
+bereits sauber zwischen drei Fällen und liefert für jeden eine eigene,
+für Nutzer:innen verständliche deutsche Meldung: ein Netzwerk-/Parse-
+Fehler ("bitte prüfe deine Internetverbindung …", Zeile 50), ein Duffel-
+API-Fehler mit Eingaben-Bezug ("bitte prüfe deine Eingaben …", Zeile 34)
+oder ein reiner Status-Code-Fallback (Zeile 37). `searchStays()` reicht
+diese `DuffelError[]` unverändert durch (`client.ts:200`) — die
+Information ist also an der Quelle für Flüge und Unterkünfte
+gleichermaßen vorhanden.
+
+`FlightResults.tsx:25-36` gibt genau diese `errors`-Liste 1:1 an die
+Nutzerin weiter (`error.message`). `HotelResults.tsx:8-32` hat dagegen
+gar keine Möglichkeit dazu: Die `error`-Prop ist ein reines `boolean`
+(Zeile 10), und Zeile 29 zeigt immer denselben festen Text ("Die
+Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal."),
+egal ob eigentlich ein Netzwerkproblem, eine falsche Eingabe oder ein
+Server-Fehler vorlag. `useChat.ts` verwirft die konkrete Meldung an
+beiden Aufrufstellen aktiv, statt sie nur nicht zu nutzen:
+`result.errors.length > 0` löst jeweils nur `setStayError(true)` aus
+(Zeile 191 und 341), der eigentliche Inhalt von `result.errors` wird nie
+gelesen. Aus Nutzersicht bedeutet das: Bei einem einfachen
+Internet-Aussetzer bekommt man exakt dieselbe Meldung wie bei einem
+tieferliegenden Problem, das ein "versuch's gleich nochmal" gar nicht
+lösen würde — während dieselbe Situation bei der Flugsuche im selben
+Chat unmittelbar daneben schon differenziert erklärt wird. Das fällt
+besonders auf, weil beide Ergebnisblöcke (`KiChat.tsx:133-139`) im
+selben Chatverlauf direkt untereinander erscheinen können.
+
+*Vorschlag:* Deckt sich mit dem bereits im IT-Chef-Bericht vom 08.09.
+vorgeschlagenen Fix — aus Nutzersicht bestätigt: `stayError: boolean`
+(useChat.ts, `KiChat.tsx`, `HotelResults.tsx`) durch `stayErrors:
+DuffelError[]` ersetzen, exakt nach dem Vorbild von `flightErrors`/
+`FlightResults.tsx`. Kein neues Konzept nötig, nur dasselbe bereits
+etablierte und bewährte Muster von Flug auf Unterkunft übertragen.
+
+### Nicht geprüft
+Der Nulltreffer-Fall (`offers.length === 0`) ist davon nicht betroffen —
+der nutzt bereits korrekt die ehrliche `NoResultsMessage`-Komponente statt
+einer Fehlermeldung. Ebenfalls nicht vertieft: ob nach einem Fehler ein
+erneuter Versuch innerhalb desselben Chats möglich sein sollte (aktuell
+bei Flug und Unterkunft identisch nur "Neue Reise planen") — das ist ein
+eigenständiges, größeres Verhaltensthema und kein Teil dieses Fundes.
