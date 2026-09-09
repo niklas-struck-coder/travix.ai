@@ -8494,3 +8494,73 @@ und nicht bereits durch einen der beiden Läufe von heute früher erledigt
 ist. Statt etwas zu erfinden: ehrlich nichts umgesetzt in diesem Lauf.
 
 **Commit:** nur dieser Log-Eintrag, keine Code-Änderung.
+
+## 2026-09-09 (weiterer Lauf, ca. 5h später)
+
+**Ausgangslage:** `it-chef/auto` war laut `git merge-base --is-ancestor`
+bereits vollständig in `origin/main` gemergt (Freigabe-Chef hat den
+Branch inzwischen übernommen) — Branch frisch von `origin/main` neu
+aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf der
+alten, bereits gemergten Historie weiterzuarbeiten, wie es
+`.claude/skills/it-chef-eigen/SKILL.md` für diesen Fall vorschreibt.
+
+**Vorgehen:** `main` enthielt seit den letzten beiden "nichts gefunden"-
+Läufen von heute einen neuen `reports/support-chef.md`-Eintrag (09.09.)
+mit vier neuen UX-Punkten. Gegen die vier Sicherheitskriterien geprüft:
+- **Vorschlag 4 ("Planung fortsetzen" generisch):** hängt an echter
+  Mehrfach-Trip-Speicherung — dieselbe offene Backend-Entscheidung, die
+  bereits 7.4 blockiert (siehe Lauf von heute Mittag). Nicht autonom
+  umsetzbar.
+- **Vorschlag 3 (Warenkorb-Sackgasse):** ein echter "Jetzt
+  buchen"-Button ist 6.2, explizit blockiert (fehlende Provider-URL-/
+  Kostenfelder in `TripDraft`, hängt an der Zahlungsprozess-
+  Produktentscheidung laut `ZEITPLAN.md` Sprint 5). Die im Bericht
+  genannte Alternative (nur erklärender Text) wäre autonom machbar, aber
+  der Bericht selbst lässt offen, welche der beiden Varianten gewünscht
+  ist ("entweder … oder … falls das bewusst (noch) nicht vorgesehen
+  ist") — genau die Art Interpretationsspielraum, die laut Kriterium 3
+  ausschließt.
+- **Vorschlag 2 (Löschen ohne Bestätigung):** betrifft fünf Seiten
+  (Preisalarme, Favoriten, Angebote, Aktivitaeten, Warenkorb) und der
+  Bericht lässt bewusst offen, ob Bestätigungsdialog oder
+  Rückgängig-Toast der richtige Ansatz ist ("an einer Stelle lösen, dann
+  überall gleich anwenden") — eine Design-Entscheidung, die laut
+  `MARKENDESIGN.md`-Abschnitt in `.claude/skills/it-chef-eigen/SKILL.md`
+  im Bericht vermerkt statt geraten werden soll. Für einen künftigen Lauf
+  vorgemerkt, sobald entweder Ni oder Marketing-Chef sich für ein Muster
+  entscheidet.
+- **Vorschlag 1 ("Neu starten" ohne Rückfrage):** einziges Fundament,
+  einzelnes File (`KiChat.tsx`), exakter vorgeschlagener Hinweistext
+  bereits im Bericht ("Wirklich neu starten? Deine aktuelle Planung geht
+  verloren."), keine Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Berührung,
+  keine offene Architekturfrage, objektiv prüfbar über Tests. Erfüllt
+  alle vier Kriterien.
+
+**Ausgewählter Punkt:** Vorschlag 1 aus `reports/support-chef.md`
+(09.09.) — Bestätigungsdialog vor `resetChat()`.
+
+**Umgesetzt:** `KiChat.tsx`s "Neu starten"-Icon-Button (Chat-Header)
+löst nicht mehr direkt `resetChat()` aus, sondern öffnet zunächst einen
+Bestätigungsdialog (bestehende `Dialog`-Komponente aus
+`components/ui/dialog.tsx`, gleiches Muster wie in `EditMode.tsx`/
+`Buchung.tsx` — keine neue Komponente/Abhängigkeit eingeführt). Titel
+"Neu starten?", Beschreibung "Deine aktuelle Planung geht verloren."
+(inhaltlich der vom Bericht vorgeschlagene Text, auf Titel/Beschreibung
+aufgeteilt), "Abbrechen" (outline) schließt ohne Änderung, "Ja, neu
+starten" (destructive) löst den bisherigen `handleReset()` aus. Der
+separate "Neue Reise planen"-Quick-Reply-Chip bleibt bewusst unverändert
+ohne Bestätigung — der Bericht bezog sich ausdrücklich nur auf den
+Icon-Knopf, ein Textbutton als bewusste Aktion hat nicht dasselbe
+Fehlklick-Risiko. Details siehe `ZEITPLAN.md` (Phase 4 KI-Chat).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` → 40 Testdateien, 220 Tests (vorher 218), alle grün. Ein
+  bestehender Test in `KiChat.test.tsx` auf den zusätzlichen
+  Bestätigungsklick angepasst, zwei neue Tests ergänzt (Dialog erscheint
+  vor dem Reset ohne ihn auszulösen; Abbrechen verwirft den Reset).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

@@ -118,6 +118,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Meldung weder `avatarState` noch `quickReplies` überschreibt. Zwei neue
   Regressionstests in `mockAdvisor.test.ts` (bekanntes vs. nicht
   kuratiertes Ziel).
+  Vom autonomen IT-Chef-Lauf am 09.09. Vorschlag 1 aus
+  `reports/support-chef.md` (09.09.) behoben: Der "Neu starten"-Knopf im
+  Chat-Header (`KiChat.tsx`) war ein reines Icon ohne sichtbaren Text und
+  löste `resetChat()` (kompletter Chatverlauf, Reiseplan und der
+  `localStorage`-Eintrag weg) mit einem einzigen Klick sofort aus — ohne
+  Rückfrage, ohne Rückgängig. Ein Fehlklick (z. B. auf dem Handy neben dem
+  Lautsprecher-Icon) verliert damit unwiderruflich eine möglicherweise
+  lange Planung. Fix: Der Knopf öffnet jetzt einen Bestätigungsdialog
+  (bestehende `Dialog`-Komponente, gleiches Muster wie in `EditMode.tsx`/
+  `Buchung.tsx`) mit exakt dem im Bericht vorgeschlagenen Hinweistext
+  ("Neu starten?" / "Deine aktuelle Planung geht verloren."), erst ein
+  zweiter Klick auf "Ja, neu starten" (destructive-Button) löst den
+  eigentlichen Reset aus; "Abbrechen" schließt den Dialog ohne Änderung.
+  Der separate "Neue Reise planen"-Quick-Reply-Chip (Textbutton, bewusste
+  Aktion statt Fehlklick-Risiko) bleibt unverändert ohne Bestätigung, da
+  der Bericht sich ausdrücklich nur auf den Icon-Knopf bezog. Bestehender
+  Test in `KiChat.test.tsx` auf den zusätzlichen Bestätigungsklick
+  angepasst, zwei neue Tests dort (Dialog erscheint vor dem Reset ohne
+  ihn auszulösen; Abbrechen verwirft den Reset).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
