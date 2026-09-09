@@ -639,6 +639,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `TrainResults.test.tsx` (bisher gab es dort keinen Test): prüft
   Ladetext ohne "echte", Leerzustand, Nulltreffer-Anzeige und
   Kartenrendering.
+  Vom autonomen IT-Chef-Lauf am 09.09. (weiterer Lauf) eine Testlücke im
+  bestehenden Urlaubsmodus-Grundgerüst (Teil von 8.1/8.3) geschlossen:
+  `src/pages/Urlaubsmodus.tsx` selbst hatte bisher keine eigene Testdatei
+  — die bestehenden Tests decken nur `useConcierge.ts`/`mockConcierge.ts`
+  einzeln ab, nicht die Seite, die beides zusammen mit `loadStoredChat()`
+  verdrahtet (Begrüßungstext, Zielbanner mit Datum, Quick-Replies je nach
+  bekanntem/unbekanntem/fehlendem Ziel, Chat-Eingabe). Reine Testabdeckung
+  für bestehendes, unverändertes Verhalten, kein Fund/keine Verhaltens-
+  änderung. Neue `src/pages/Urlaubsmodus.test.tsx` (sieben Tests, Muster
+  analog `Buchung.test.tsx`s `localStorage`-Seeding und `KiChat.test.tsx`s
+  `Element.scrollTo`-Stub): Begrüßung ohne/mit Reise, Zielbanner mit/ohne
+  Datum, Quick-Replies für bekanntes/unbekanntes/fehlendes Ziel, sofortige
+  Anzeige der Nutzer-Nachricht plus Denk-Indikator, faktenbasierte Antwort
+  nach Ablauf der simulierten Verzögerung (`vi.useFakeTimers`).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

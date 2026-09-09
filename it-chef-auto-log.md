@@ -8564,3 +8564,78 @@ Fehlklick-Risiko. Details siehe `ZEITPLAN.md` (Phase 4 KI-Chat).
   vor dem Reset ohne ihn auszulösen; Abbrechen verwirft den Reset).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-09 (weiterer Lauf)
+
+**Ausgangslage:** `it-chef/auto` (`6d7c61e`) lag bereits genau auf
+`origin/main` auf (kein Merge-Konflikt, keine Divergenz) — der vorherige
+Lauf von heute (Reset-Bestätigungsdialog) war noch nicht von
+Freigabe-Chef übernommen, also direkt auf demselben Branch
+weitergearbeitet statt neu von `main` aufzusetzen.
+
+**Vorgehen:** Frischer `npm ci`, danach `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md`, `reports/it-chef.md` und
+`reports/support-chef.md` (beide zuletzt 09.09.) erneut geprüft. Die vier
+Support-Chef-Vorschläge vom heutigen Datum sind bereits im vorherigen
+Lauf von heute einzeln gegen die vier Sicherheitskriterien geprüft:
+Vorschlag 1 (Reset-Bestätigung) wurde umgesetzt, Vorschläge 2 (Löschen
+ohne Bestätigung, offene Design-Frage Dialog vs. Toast), 3
+(Warenkorb-Sackgasse, Bericht selbst lässt zwei Varianten offen) und 4
+("Planung fortsetzen" generisch, hängt an der offenen
+Mehrfach-Trip-Speicherung) bleiben aus denselben, dort bereits
+dokumentierten Gründen nicht autonom umsetzbar — nichts daran hat sich
+seither geändert. `reports/it-chef.md` (09.09.) meldet explizit keinen
+neuen Bugfund. Alle übrigen offenen Punkte in `ZEITPLAN.md`/Tasks-Datei
+hängen unverändert an der Backend-/Produktentscheidung (2.x, 4.1-4.3,
+5.7), an fehlenden Preis-/Provider-URL-Feldern in `TripDraft` (6.2,
+6.6/6.7, 7.12) oder sind größere, nicht im Detail spezifizierte Features
+(7.4, 8.2, 8.4-8.7, 8.9, 8.11, 8.12).
+
+Da eine reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts
+Neues findet, diesmal gezielt nach Testabdeckungslücken bei bereits
+fertigen Seiten gesucht (analog 8.13 "Unit-Tests für bestehende Module"
+und dem Muster mehrerer früherer Läufe, die fehlende Testdateien für
+fertige Komponenten nachgezogen haben, z. B. `KiChat.test.tsx`,
+`Flugsuche.test.tsx`, `TrainCard.test.tsx`). Alle Testdateien unter
+`src/` mit den zugehörigen Quelldateien abgeglichen: `src/pages/
+Urlaubsmodus.tsx` (Urlaubsmodus-Grundgerüst, Teil von 8.1/8.3) hatte als
+einzige fertige Seite keine eigene Testdatei — die bestehenden Tests
+(`useConcierge.test.ts`, `mockConcierge.test.ts`) decken nur die
+Hook-/Logik-Ebene ab, nicht die Seite selbst, die `loadStoredChat()` und
+`useConcierge()` verdrahtet (Zielbanner mit Datum, Begrüßungstext je nach
+Ziel, Quick-Replies je nach bekanntem/unbekanntem/fehlendem Ziel,
+Chat-Eingabe). Erfüllt alle vier Sicherheitskriterien: kein Auth-/
+Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/
+Architekturentscheidung, klar abgegrenzt (reine Testabdeckung für
+bestehendes, unverändertes Verhalten, keine Interpretation nötig), und
+objektiv über die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `Urlaubsmodus.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/pages/Urlaubsmodus.test.tsx` (sieben Tests,
+Muster analog `Buchung.test.tsx`s `localStorage`-Seeding von
+`StoredChatState` und `KiChat.test.tsx`s `Element.prototype.scrollTo`-
+Stub für jsdom): Begrüßungstext ohne geplante Reise und ohne
+Quick-Replies; Zielbanner mit Ziel und Datum bzw. ohne Datum, wenn keins
+gesetzt ist; ziel-spezifische Begrüßung und Quick-Replies für ein
+kuratiertes Ziel (Lissabon); keine Quick-Replies für ein echtes, aber
+nicht kuratiertes Ziel (Bali); Nutzer-Nachricht erscheint sofort samt
+Denk-Indikator; faktenbasierte Antwort erscheint nach Ablauf der
+simulierten Verzögerung (`vi.useFakeTimers`/`vi.advanceTimersByTime`,
+gleiches Muster wie `useConcierge.test.ts`). Keine Verhaltensänderung an
+`Urlaubsmodus.tsx` selbst, kein neuer Bug gefunden. `ZEITPLAN.md`
+(Phase 8) entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert, da 8.1 wegen des
+weiterhin fehlenden Tagesitinerars nicht abgeschlossen ist.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` → 41 Testdateien, 227 Tests (vorher 220), alle grün — sieben
+  neue Tests in `Urlaubsmodus.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
