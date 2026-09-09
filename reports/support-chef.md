@@ -1,53 +1,72 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-08
+**Datum:** 2026-09-09
 
-## Was ist seit dem letzten Eintrag (2026-09-07) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-08) passiert?
 
-Gute Nachrichten: Beide offenen Punkte aus meinem letzten Bericht sind
-jetzt wirklich vollständig behoben, nicht nur zur Hälfte. Der Fix
-`d7682d2` schließt die Lücke sauber an beiden Stellen — `mockAdvisor.ts`
-teilt `useChat.ts` jetzt über ein neues Feld (`accommodationNoticeHandled`)
-mit, wenn die Ehrlich-Notiz zum unbekannten Ziel schon in der Advisor-
-Antwort steckt, statt dass beide Stellen unabhängig prüfen und eine
-doppelte, widersprüchliche Nachricht senden. Und der "Bearbeiten"-Pfad
-(`startEdit()`) prüft das Ziel jetzt vorher, statt hinterherzuschieben.
-Ich habe den Code selbst nachgelesen — beide Varianten sind wirklich zu.
-Danke fürs gründliche Nacharbeiten!
+Gute Nachrichten zuerst: Beide Vorschläge aus meinem letzten Bericht sind
+jetzt wirklich behoben. Die Unterkunftssuche im Chat zeigt jetzt die
+konkrete Duffel-Fehlermeldung statt immer desselben Satzes
+(`useChat.ts` nutzt jetzt `stayErrors: DuffelError[]` statt eines reinen
+Booleans, `HotelResults.tsx` zeigt sie an — genau nach dem Flug-Vorbild).
+Und der Ladetext bei Zug/Bus/Fähre verspricht keine "echte" Suche mehr,
+solange keine Datenquelle angebunden ist. Ich habe beides im Code
+nachgelesen — beide Fälle sind sauber zu.
 
-Beim Durchsehen der neueren Änderungen (Zugpreis-Format, Umbau der
-Unterkunfts-Notiz) sind mir zwei weitere Punkte aufgefallen.
+Für diesen Bericht habe ich bewusst nicht nochmal nach technischen Bugs
+gesucht (das hat IT-Chef gerade erst sehr gründlich für viele Seiten
+gemacht, ohne Fund) — sondern gezielt aus reiner Nutzersicht auf
+Bestätigungen, Sackgassen und Rückmeldungen geschaut. Dabei sind mir vier
+neue Reibungspunkte aufgefallen.
 
 ## Meine Vorschläge
 
-1. **Fehlermeldung bei fehlgeschlagener Unterkunftssuche im KI-Chat ist
-   immer gleich, egal was wirklich schiefging.** `src/hooks/useChat.ts:78`
-   speichert einen fehlgeschlagenen `searchStays()`-Aufruf nur als
-   `stayError: boolean`, und `HotelResults.tsx:29` zeigt dafür immer denselben
-   festen Satz ("Die Unterkunftssuche hat gerade nicht geklappt — versuch's
-   gleich nochmal."). Die eigenständige Hotelsuche-Seite (`Hotelsuche.tsx:15`)
-   macht es dagegen richtig und zeigt die konkrete Duffel-Fehlermeldung an
-   — genau wie die Flugsuche im Chat (`flightErrors: DuffelError[]`). Für
-   Nutzer:innen im Chat heißt das: Ob z. B. die Daten ungültig sind oder der
-   Dienst gerade nicht erreichbar ist, sieht immer gleich aus — "nochmal
-   versuchen" hilft dann nicht immer weiter. *Vorschlag:* `stayError`
-   analog zu `flightErrors` auf ein Array konkreter Fehlermeldungen
-   umstellen, exakt nach dem bewährten Flug-Muster. (Deckt sich mit einem
-   Fund aus dem heutigen IT-Chef-Bericht — aus Nutzersicht bestätige ich
-   das gerne als echten Reibungspunkt.)
+1. **"Neu starten" im KI-Chat löscht die ganze Reiseplanung sofort, ohne
+   Rückfrage.** `src/components/chat/KiChat.tsx:74–77, 109` löst mit
+   einem einzigen Klick auf ein reines Icon (kein Text, kein
+   Bestätigungsdialog) `resetChat()` aus — das räumt Chatverlauf, Reiseplan
+   und den localStorage-Eintrag komplett weg. Wer aus Versehen daneben
+   tippt (z. B. auf dem Handy neben dem Lautsprecher-Icon), verliert eine
+   möglicherweise lange Planung unwiderruflich, ohne Chance auf Rückgängig.
+   *Vorschlag:* Kurze Bestätigung ("Wirklich neu starten? Deine aktuelle
+   Planung geht verloren.") vor dem eigentlichen Reset.
 
-2. **Ladetext bei Zug/Bus/Fähre verspricht "echte" Verbindungen, obwohl
-   noch keine Datenquelle angebunden ist.** `TrainResults.tsx:18` zeigt
-   während der Suche "Travix sucht echte Zug-, Bus- und Fährverbindungen …"
-   — genau der ehrliche Ton, den ich mir auch bei der Unterkunft wünsche,
-   nur leider (noch) nicht wahr: Es gibt aktuell keine angebundene
-   Zug-/Bus-/Fähr-Datenquelle. Die gute Nachricht: `TrainResults.tsx` und
-   `TrainCard.tsx` sind noch in keine Seite eingebunden, aktuell sieht also
-   noch keine echte Nutzerin diesen Text. *Vorschlag:* Den Text jetzt schon
-   korrigieren (z. B. "Travix sucht Zug-, Bus- und Fährverbindungen …" ohne
-   "echte", oder gleich ehrlich als Demo/Vorschau kennzeichnen), bevor die
-   Komponente an eine Seite angebunden wird — dann ist das Risiko einer
-   falschen Erwartung von Anfang an ausgeschlossen statt erst hinterher
-   korrigiert zu werden.
+2. **Löschen ist an mehreren Stellen sofort und endgültig, ohne
+   Bestätigung oder Rückgängig.** Gleiches Muster in
+   `src/pages/Preisalarme.tsx:45,94` (`removeAlert`) und
+   `src/pages/Favoriten.tsx:40,88` (`removeFavorite`), ebenso in
+   `Angebote.tsx`, `Aktivitaeten.tsx` und `Warenkorb.tsx`: Ein Klick auf
+   das Papierkorb-/X-Icon entfernt den Eintrag direkt aus dem State, ohne
+   Nachfrage und ohne "Rückgängig"-Toast. Bei einem Preisalarm oder einem
+   Warenkorb-Eintrag, an dem man länger gesucht hat, ist ein Fehlklick
+   besonders ärgerlich. *Vorschlag:* Einheitlich einen kurzen
+   Bestätigungsdialog oder zumindest einen "Rückgängig"-Toast nach dem
+   Entfernen einführen — an einer Stelle lösen, dann überall gleich
+   anwenden.
 
-_Letztes Update: 2026-09-08_
+3. **Der Warenkorb ist eine Sackgasse — es gibt keinen "Jetzt
+   buchen"-Button.** `src/pages/Warenkorb.tsx` endet nach der
+   Summen-Karte (Zeile 109–117) einfach so; es gibt keine Aktion, um von
+   "ausgewählte Leistungen" tatsächlich zur Buchung zu kommen. Wer seinen
+   Warenkorb ansieht, erwartet als nächsten Schritt logischerweise einen
+   Buchen-Button — der fehlt komplett. *Vorschlag:* Entweder einen
+   "Jetzt buchen"/"Zur Kasse"-Button ergänzen, oder — falls das bewusst
+   (noch) nicht vorgesehen ist, weil Direktbuchung laut IT-Chef-Bericht
+   ohnehin nur ein Redirect zum Anbieter ist — der Nutzerin das im Text
+   auf der Seite kurz erklären, statt sie ratlos zurückzulassen.
+
+4. **"Planung fortsetzen" bei Reiseentwürfen führt immer zum selben,
+   generischen Chat statt zum jeweiligen Entwurf.** In
+   `src/pages/Reiseentwuerfe.tsx:155` verlinkt der Button bei jeder
+   Entwurfskarte identisch auf `/ki-chat`, ohne die jeweilige Entwurfs-ID
+   mitzugeben. Wer zwei Entwürfe sieht (z. B. Lissabon und Kyoto) und bei
+   Kyoto auf "Planung fortsetzen" klickt, landet trotzdem im einen,
+   global gespeicherten Chat — nicht zwingend beim richtigen Entwurf. Das
+   kann zu Verwirrung führen ("wo ist meine Kyoto-Planung hin?").
+   *Vorschlag:* Die Entwurfs-ID als Parameter mitgeben und den Chat beim
+   Fortsetzen den passenden Entwurf laden lassen, sobald mehrere Entwürfe
+   gleichzeitig unterstützt werden sollen — oder, als Kurzfristlösung,
+   den Nutzerinnen im Text klarmachen, dass aktuell nur eine aktive
+   Planung gleichzeitig möglich ist.
+
+_Letztes Update: 2026-09-09_
