@@ -13,18 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-07):**
-- IT-Chef hat einen neuen GitHub-Actions-Workflow eingerichtet (Lint/Typecheck/
-  Build/Tests bei jedem Pull Request), drei bekannte npm-audit-Schwachstellen
-  in transitiven Abhängigkeiten behoben und den Preis in der Zugkarte auf
-  deutsches Zahlenformat umgestellt
-- Support-Chef hat einen neuen Punkt gemeldet: Der Ladetext bei der Zug-/Bus-/
-  Fähre-Suche verspricht eine "echte" Suche, obwohl noch keine Datenquelle
-  angebunden ist
-- Marketing-Chef hat einen weiteren Tier-4-Kandidaten eingeordnet, kein neues
-  Content-Stück
-- Freigabe-Chef hat die Änderungen mehrfach unabhängig geprüft und gemergt
+**Seit letztem Update (2026-09-08):**
+- Beide zuletzt offenen Support-Chef-Punkte behoben: Unterkunftssuche im Chat zeigt
+  jetzt die konkrete Fehlermeldung statt einer generischen, und der Zug/Bus/Fähre-
+  Ladetext verspricht keine "echte" Suche mehr ohne angebundene Datenquelle
+- Weitere 4 npm-audit-Schwachstellen in transitiven Dev-Tooling-Abhängigkeiten behoben
+- Marketing-Chef hat einen weiteren Tier-4-Kandidaten eingeordnet und bewusst einen
+  toten-Code-Fund ausgeschlossen, kein neues Content-Stück
+- IT-Chef fand bei mehreren Auto-Läufen keinen neuen sicheren Punkt zum Umsetzen
+- Freigabe-Chef hat die Änderungen mehrfach geprüft und gemergt; ein Support-Chef-
+  Vorschlag wurde als überholt eingestuft und nicht gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-08_
+_Letztes Update: 2026-09-09_
