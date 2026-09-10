@@ -290,6 +290,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstests in `FlightWizard.test.tsx` (NaN-Fallback auf 1,
   Begrenzung auf 1-9), analog den bereits bestehenden Tests in
   `HotelWizard.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `FlightCard.tsx` — trotz mehrfacher
+  eigenständiger Bugfixes in der Vergangenheit (Preisformat über
+  `formatOfferPrice`, `selected`-Prop, IATA-Anzeige) — hatte bisher keine
+  eigene Testdatei, nur indirekte Abdeckung über `Flugsuche.test.tsx`.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+  neuer Bug gefunden. Neue `FlightCard.test.tsx` (8 Tests, Muster analog
+  `TrainCard.test.tsx`): Preisformatierung (deutsches Format statt
+  Rohwert), Anzeige von Fluggesellschaft/IATA-Codes/Flugdauer für einen
+  Direktflug, kein Zwischenstopp-Badge bei Direktflug, Singular-/
+  Plural-Form des Zwischenstopp-Badges (1 vs. mehrere), kein
+  "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft `onSelect` mit
+  dem Angebot auf, sowie der deaktivierte "Ausgewählt"-Zustand bei
+  `selected` (kein erneuter `onSelect`-Aufruf).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

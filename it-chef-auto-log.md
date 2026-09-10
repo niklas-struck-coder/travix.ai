@@ -8711,3 +8711,61 @@ gleiches Muster wie beim `Urlaubsmodus.test.tsx`-Lauf).
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` (`b068c7e`) lag 3 Commits vor
+`origin/main`, `main` hatte seither keine neuen Commits — direkt auf
+`it-chef/auto` weitergearbeitet, kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten
+Lauf (09.09.) aktualisiert, keine neuen Funde von anderer Stelle. Da eine
+reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts Neues
+findet, erneut gezielt nach Testabdeckungslücken gesucht (gleiches
+Muster wie bei den beiden vorherigen Läufen): alle `.tsx`/`.ts`-Dateien
+unter `src/` (außer `components/ui/`, reinen Typdeklarationen und
+Einstiegspunkten) gegen vorhandene Testdateien abgeglichen.
+`src/components/search/FlightCard.tsx` fiel dabei besonders auf: die
+Komponente wurde im Laufe der letzten Wochen mehrfach eigenständig
+gefixt (Preisformat über `formatOfferPrice`, `selected`-Prop für den
+Auswahlzustand, IATA-Anzeige), hatte aber nie eine eigene Testdatei —
+nur indirekte Abdeckung über `Flugsuche.test.tsx` (dort nur ein bis zwei
+Assertions je Test, nicht die volle Komponentenlogik wie Zwischenstopp-
+Pluralisierung oder Dauer-Formatierung). Erfüllt alle vier
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine offene Produkt-/Architekturentscheidung, klar abgegrenzt (reine
+Testabdeckung für bestehendes, unverändertes Verhalten), objektiv über
+die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `FlightCard.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/FlightCard.test.tsx` (8
+Tests, Muster analog `TrainCard.test.tsx`): Preisformatierung im
+deutschen Format statt Rohwert; Anzeige von Fluggesellschaft, Origin-/
+Destination-IATA-Code und formatierter Flugdauer (`PT3H15M` → "3h
+15min") für einen Direktflug; kein Zwischenstopp-Badge bei einem
+Direktflug; Singular-Badge "1 Zwischenstopp" bei genau einem Zwischenstopp;
+Plural-Badge "2 Zwischenstopps" bei mehreren; kein "Auswählen"-Button,
+wenn `onSelect` nicht übergeben wird; Klick auf "Auswählen" ruft
+`onSelect` mit dem Angebot auf; bei `selected` erscheint stattdessen ein
+deaktivierter "Ausgewählt"-Button, ein Klick darauf löst `onSelect` nicht
+aus. Keine Verhaltensänderung an `FlightCard.tsx` selbst, kein neuer Bug
+gefunden. `ZEITPLAN.md` (Phase 5 Suche) entsprechend ergänzt; keine
+Checkbox in `tasks/tasks-prd-travix-platform.md` geändert, da es dort
+keinen eigenen Testabdeckungs-Checkbox-Punkt für `FlightCard.tsx` gibt
+(gleiches Muster wie bei den beiden vorherigen Test-Nachzieh-Läufen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 43 Testdateien, 245 Tests (vorher 42/237), alle grün —
+  acht neue Tests in `FlightCard.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
