@@ -304,6 +304,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft `onSelect` mit
   dem Angebot auf, sowie der deaktivierte "Ausgewählt"-Zustand bei
   `selected` (kein erneuter `onSelect`-Aufruf).
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) das
+  Schwesterstück behoben: `HotelCard.tsx` hatte aus demselben Grund wie
+  `FlightCard.tsx` bisher keine eigene Testdatei — nur indirekte
+  Abdeckung über `Hotelsuche.test.tsx`, dort durchgängig mit
+  `rating: null`, `address: ''` und `photoUrl: null`, sodass die
+  bedingten Zweige (Sternebewertung, Adresse, Bild) nie geprüft wurden.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+  neuer Bug gefunden. Neue `HotelCard.test.tsx` (11 Tests, Muster analog
+  `FlightCard.test.tsx`): Preisformatierung (deutsches Format statt
+  Rohwert), Anzeige des Hotelnamens, kein Sternebewertungs-Badge bei
+  `rating: null` vs. gerundete Anzeige bei gesetztem Wert, keine Adresse
+  bei leerem String vs. Anzeige bei gesetzter Adresse, kein `<img>` bei
+  `photoUrl: null` vs. Bild mit Hotelnamen als Alt-Text bei gesetzter
+  URL, kein "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft
+  `onSelect` mit dem Angebot auf, sowie der deaktivierte
+  "Ausgewählt"-Zustand bei `selected` (kein erneuter `onSelect`-Aufruf).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

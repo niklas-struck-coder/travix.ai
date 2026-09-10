@@ -8769,3 +8769,70 @@ keinen eigenen Testabdeckungs-Checkbox-Punkt für `FlightCard.tsx` gibt
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf, ca. 1h später)
+
+**Ausgangslage:** `origin/it-chef/auto` (`f7b93fb`) lag 4 Commits vor
+`origin/main`, `main` hatte seither keine neuen Commits — direkt auf
+`it-chef/auto` weitergearbeitet, kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten Lauf
+(09.09.) aktualisiert, keine neuen Funde. Die vier Support-Chef-Vorschläge
+vom 09.09. bleiben aus den bereits mehrfach dokumentierten Gründen
+weiterhin nicht autonom umsetzbar (Vorschlag 1 bereits umgesetzt;
+Vorschläge 2-4 hängen an offenen Design-/Architekturfragen). Alle
+übrigen offenen Task-Punkte hängen unverändert an der Backend-/
+Produktentscheidung (2.x, 4.1-4.3, 5.7), an fehlenden Preis-/
+Provider-URL-Feldern in `TripDraft` (6.2, 6.6/6.7, 7.12) oder sind
+größere, nicht im Detail spezifizierte Features (7.4, 8.2, 8.4-8.7, 8.9,
+8.11).
+
+Erneut gezielt nach Testabdeckungslücken gesucht (gleiches Muster wie
+bei den drei vorherigen Läufen dieser Woche, zuletzt `FlightCard.tsx`
+vor rund einer Stunde). `src/components/search/HotelCard.tsx` fiel dabei
+als direktes Schwesterstück zu `FlightCard.tsx` auf: strukturell
+identisch (Preisformatierung über `formatOfferPrice`, optionaler
+Auswahl-Button mit `selected`-Zustand), ebenfalls bisher ohne eigene
+Testdatei. Die einzige indirekte Abdeckung über `Hotelsuche.test.tsx`
+verwendet durchgängig `rating: null`, `address: ''` und `photoUrl: null`
+(per Grep verifiziert) — die drei bedingten Anzeige-Zweige (Sternebewertung,
+Adresse, Bild) waren dadurch komplett ungetestet. Erfüllt alle vier
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine offene Produkt-/Architekturentscheidung, klar abgegrenzt (reine
+Testabdeckung für bestehendes, unverändertes Verhalten), objektiv über
+die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `HotelCard.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/HotelCard.test.tsx` (11
+Tests, Muster analog `FlightCard.test.tsx`): Preisformatierung im
+deutschen Format statt Rohwert; Anzeige des Hotelnamens; kein
+Sternebewertungs-Badge bei `rating: null`; gerundete Anzeige (eine
+Nachkommastelle) bei gesetztem Wert; keine Adresse bei leerem String
+(über das Ausbleiben des `MapPin`-Icons geprüft); Anzeige der Adresse,
+wenn gesetzt; kein `<img>`-Element bei `photoUrl: null`; Bild mit dem
+Hotelnamen als Alt-Text und korrekter `src`, wenn `photoUrl` gesetzt
+ist; kein "Auswählen"-Button, wenn `onSelect` nicht übergeben wird;
+Klick auf "Auswählen" ruft `onSelect` mit dem Angebot auf; bei
+`selected` erscheint ein deaktivierter "Ausgewählt"-Button, ein Klick
+darauf löst `onSelect` nicht aus. Keine Verhaltensänderung an
+`HotelCard.tsx` selbst, kein neuer Bug gefunden. `ZEITPLAN.md` (Phase 5
+Suche) entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert (5.1 war bereits
+abgehakt, es gibt keinen eigenen Testabdeckungs-Checkbox-Punkt dafür,
+gleiches Muster wie bei den vorherigen Test-Nachzieh-Läufen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 44 Testdateien, 256 Tests (vorher 43/245), alle grün —
+  elf neue Tests in `HotelCard.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
