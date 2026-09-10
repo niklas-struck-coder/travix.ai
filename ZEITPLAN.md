@@ -137,6 +137,17 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Test in `KiChat.test.tsx` auf den zusätzlichen Bestätigungsklick
   angepasst, zwei neue Tests dort (Dialog erscheint vor dem Reset ohne
   ihn auszulösen; Abbrechen verwirft den Reset).
+  Vom autonomen IT-Chef-Lauf am 10.09. eine fehlende Testdatei nachgezogen:
+  `TravixAvatar.tsx` (4.4, 6 animierte Zustände) hatte trotz expliziter
+  Erwähnung im Tests-Abschnitt von `tasks/tasks-prd-travix-platform.md`
+  ("Avatar state rendering tests") bisher keine eigene Testdatei — reine
+  Testabdeckungslücke, keine Verhaltensänderung nötig. Neue
+  `TravixAvatar.test.tsx`: pro Zustand (idle/greeting/thinking/writing/
+  searching/happy/error) wird über die von lucide-react vergebene
+  CSS-Klasse (`svg.lucide-<name>`) geprüft, dass genau das richtige Icon
+  gerendert wird; zusätzlich ein Test für den Puls-Ring, der nur im
+  Zustand "thinking" erscheint, sowie zwei Tests für Standard- und
+  explizit übergebene Größe (`sm`/`md`/`lg`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

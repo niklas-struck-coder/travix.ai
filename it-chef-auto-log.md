@@ -8639,3 +8639,75 @@ weiterhin fehlenden Tagesitinerars nicht abgeschlossen ist.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10
+
+**Ausgangslage:** `origin/it-chef/auto` (`dbab26a`) lag 2 Commits vor
+`origin/main` (noch nicht von Freigabe-Chef übernommen), `main` hatte
+seither keine neuen Commits — direkt auf `it-chef/auto` weitergearbeitet,
+kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten Lauf
+(09.09.) aktualisiert, keine neuen Funde. `reports/it-chef.md` (09.09.)
+meldet explizit "keine neuen Bugs" nach einer eigenen 20-Datei-Recherche.
+Die vier Support-Chef-Vorschläge vom 09.09. sind laut vorherigen
+Log-Einträgen bereits einzeln geprüft: Vorschlag 1 (Reset-Bestätigung)
+umgesetzt, Vorschläge 2 (Löschen ohne Bestätigung, offene Design-Frage
+Dialog vs. Toast), 3 (Warenkorb-Sackgasse, Bericht lässt zwei Varianten
+offen) und 4 ("Planung fortsetzen" generisch, hängt an fehlender
+Mehrfach-Trip-Speicherung/Backend-Entscheidung) weiterhin nicht autonom
+umsetzbar — nichts daran hat sich geändert. Alle übrigen offenen
+Task-Punkte hängen unverändert an der Backend-/Produktentscheidung (2.x,
+4.1-4.3, 5.7), an fehlenden Preis-/Provider-URL-Feldern in `TripDraft`
+(6.2, 6.6/6.7, 7.12) oder sind größere, nicht im Detail spezifizierte
+Features (7.4, 8.2, 8.4-8.7, 8.9, 8.11 — 8.11 zusätzlich blockiert auf
+noch fehlende FAQ-Inhalte vom Support-Chef, siehe `ZEITPLAN.md`).
+
+Da eine reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts
+Neues findet, wieder gezielt nach Testabdeckungslücken bei bestehenden,
+unveränderten Komponenten gesucht (gleiches Muster wie beim
+`Urlaubsmodus.test.tsx`-Lauf vom 09.09.). Alle `.tsx`/`.ts`-Dateien unter
+`src/` (außer `components/ui/`, reinen Typdeklarationen und
+Einstiegspunkten wie `main.tsx`/`App.tsx`/`routes.tsx`) gegen vorhandene
+Testdateien abgeglichen: `src/components/chat/TravixAvatar.tsx` hatte als
+einzige Komponente, die im Tests-Abschnitt von
+`tasks/tasks-prd-travix-platform.md` namentlich mit eigener Testdatei
+aufgeführt ist ("Avatar state rendering tests"), tatsächlich keine.
+Erfüllt alle vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/Architekturentscheidung,
+klar abgegrenzt (reine Testabdeckung für bestehendes, unverändertes
+Verhalten laut ausdrücklicher Vorgabe in der Tasks-Datei, keine
+Interpretation nötig), objektiv über die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `TravixAvatar.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/chat/TravixAvatar.test.tsx` (10
+Tests): für jeden der 7 `AvatarState`-Werte (idle/greeting/thinking/
+writing/searching/happy/error) wird geprüft, dass genau das laut
+`stateConfig` zugeordnete lucide-react-Icon gerendert wird (über die von
+lucide-react vergebene CSS-Klasse `svg.lucide-<name>`, z. B.
+`svg.lucide-hand` für `greeting`) und dass jeweils nur ein SVG im
+Baum steht; ein Test prüft, dass der zusätzliche Puls-Ring
+(`border-teal/40`) ausschließlich im Zustand `thinking` erscheint, zwei
+weitere Tests decken Standardgröße (`md`) und explizit übergebene
+Größen (`sm`/`lg`) ab. Keine Verhaltensänderung an `TravixAvatar.tsx`
+selbst, kein neuer Bug gefunden. `ZEITPLAN.md` (Phase 4 KI-Chat)
+entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert (4.4 war bereits
+abgehakt, es gibt keinen eigenen Testabdeckungs-Checkbox-Punkt dafür,
+gleiches Muster wie beim `Urlaubsmodus.test.tsx`-Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 42 Testdateien, 237 Tests (vorher 41/227), alle grün —
+  zehn neue Tests in `TravixAvatar.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
