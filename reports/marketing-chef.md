@@ -1,54 +1,42 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-07
+**Datum:** 2026-09-09
 
-## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-08) passiert?
 
-Ein Tag mit spürbarem Aufräumeffekt, aber weiterhin ohne neue Entscheidung
-von dir zu den offenen Freigabe-Fragen:
+Ruhiger Tag, aber ein sauberer inhaltlicher Baustein ist fertig geworden:
 
-- **Beide zuletzt gemeldeten Bugs sind behoben:** Der stille Speicherfehler
-  (App zeigte "gespeichert" an, obwohl der Trip nicht gesichert wurde,
-  PR #19) ist gefixt, und die Vorlesen-Funktion im Chat stoppt jetzt
-  zuverlässig beim Ausschalten, Neustart oder Verlassen der Seite. Damit
-  sind **beide technischen Gründe ausgeräumt**, die bisher gegen eine
-  Bewerbung der Sprachfunktion sprachen.
-- **Zwei weitere kleine Ehrlichkeits-Fixes:** Fehlende Chat-Chips nach
-  einer echten Nulltreffer-Suche und eine widersprüchliche
-  Unterkunfts-Ankündigung bei unbekanntem Ziel wurden korrigiert.
-- **Zweite Mini-Changelog-Ausgabe liegt fertig:** Ein zweiter Entwurf mit
-  acht weiteren Vorher/Nachher-Punkten für die geplante Changelog-Seite
-  ist bereits geschrieben (`marketing/mini-changelog-konzept.md`,
-  Ausgabe 2) — braucht wie Ausgabe 1 nur noch dein Go, ob IT-Chef die
-  Seite bauen soll.
+- **Chat-Fehlermeldungen sind jetzt komplett ehrlich, nicht nur bei Flügen.**
+  Schlägt die Unterkunftssuche im Chat fehl, zeigt Travix jetzt die
+  konkrete Duffel-Fehlermeldung statt eines immer gleichen Pauschalsatzes
+  — exakt nach dem Vorbild der Flugsuche. Damit ist das Ehrlichkeits-Muster
+  im Chat jetzt für beide Suchen durchgängig, nicht nur für eine.
+- **Zug/Bus/Fähre-Ladetext vorab korrigiert:** Der Text versprach fälschlich
+  eine "echte" Suche. Kein Nutzer-Impact, weil die Komponente noch in keine
+  Seite eingebunden ist — aber ein gutes Beispiel für "von Anfang an ehrlich
+  geplant" statt nachträglich korrigiert, sobald sie live geht.
+- Rest war reine IT-Hygiene (npm-audit-Fixes, ausführliche Bug-Suche ohne
+  neuen Fund) — technisch solide, aber ohne eigenen Content-Wert.
 - Die vier offenen Fragen an dich (Kanäle anlegen, Warenkorb-Content,
   Tier-4-Format, Mini-Changelog-Seite bauen) sind weiterhin unbeantwortet
-  — teils seit dem 21.08.
+  — jetzt seit über zwei Wochen.
 
 ## Vorschläge
 
-1. **Mini-Changelog jetzt entscheiden lassen.** Zwei fertige Ausgaben
-   liegen bereit, ohne dass irgendwo sonst etwas verändert werden muss.
-   Von den vier offenen Fragen ist das die mit dem geringsten Aufwand für
-   dich — ein Ja/Nein reicht, und der am längsten liegende Content-Baustein
-   wird endlich nutzbar.
-
-2. **Vorlesen-Funktion als "wenn, dann zuerst"-Kandidat vormerken.** Jetzt,
-   wo beide technischen Blocker weg sind, ist sie bereit für den Moment,
-   in dem du einen Kanal oder ein Social-Format freigibst — dann direkt als
-   Reisefreiheit-/Unterwegs-Nutzen positionieren ("Reiseplan vorlesen
-   lassen, während du die Hände frei hast"), statt als reine Feature-Liste.
-
-3. **Die Sammlung an Ehrlichkeits-Fixes wird zum eigenen Beweis-Fundament.**
-   Mit jetzt zehn+ einzeln verifizierten Vorher/Nachher-Punkten seit August
-   ist "wir zeigen Fehler ehrlich an, statt sie zu verstecken" kein
-   einzelner Fund mehr, sondern ein durchgehendes Muster. Sobald die
-   Kanal-Frage geklärt ist, wäre das ein starker erster Positionierungs-Post
-   ("Was wir in den letzten Wochen ehrlicher gemacht haben") statt eines
-   einzelnen Bugfix-Hinweises.
-
-4. **Keine erfundenen Kennzahlen.** Mir liegen weiterhin keine Nutzungs-
+1. **Die Fehlermeldungs-Konsistenz ist ein starker, abgeschlossener
+   Baustein — nicht einzeln vermarkten, sondern fürs große Ehrlichkeits-
+   Narrativ vormerken.** "Wir zeigen dir immer, was wirklich schiefging,
+   egal ob Flug oder Unterkunft" ist jetzt technisch durchgehend wahr —
+   genau der Stoff für den ersten Positionierungs-Post, sobald ein Kanal
+   steht.
+2. **Die Kanal-Frage ist mittlerweile der eigentliche Engpass, nicht
+   fehlender Content.** Es liegen inzwischen mehrere fertige Bausteine
+   (Mini-Changelog-Ausgaben, Ehrlichkeits-Fixes, Fehlermeldungs-Story)
+   bereit, ohne dass etwas raus kann. Ein kurzes Ja/Nein von dir zu Kanal
+   und Mini-Changelog-Seite würde mehr freischalten als jede weitere
+   Content-Idee.
+3. **Keine erfundenen Kennzahlen.** Mir liegen weiterhin keine Nutzungs-
    oder Erfolgszahlen vor — Content bleibt bei "was wurde ehrlicher und
    zuverlässiger", nicht bei Reichweite oder Nutzerzahlen.
 
-_Letztes Update: 2026-09-07_
+_Letztes Update: 2026-09-09_

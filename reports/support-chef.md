@@ -1,55 +1,72 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-07
+**Datum:** 2026-09-09
 
-## Was ist seit dem letzten Eintrag (2026-09-06) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-08) passiert?
 
 Gute Nachrichten zuerst: Beide Vorschläge aus meinem letzten Bericht sind
-umgesetzt. Die leeren Chat-Chips nach einer echten Nulltreffer-Suche
-(Unterkunft/Flug) sind behoben (`useChat.ts`, Commit `56c8f61`) — es gibt
-jetzt überall den Chip "Neue Reise planen" statt einer Sackgasse. Und die
-widersprüchliche Unterkunfts-Ankündigung bei unbekanntem Ziel ist im
-Hauptchat repariert (`mockAdvisor.ts`, Commit `b0b8d2e`) — danke fürs
-schnelle Umsetzen!
+jetzt wirklich behoben. Die Unterkunftssuche im Chat zeigt jetzt die
+konkrete Duffel-Fehlermeldung statt immer desselben Satzes
+(`useChat.ts` nutzt jetzt `stayErrors: DuffelError[]` statt eines reinen
+Booleans, `HotelResults.tsx` zeigt sie an — genau nach dem Flug-Vorbild).
+Und der Ladetext bei Zug/Bus/Fähre verspricht keine "echte" Suche mehr,
+solange keine Datenquelle angebunden ist. Ich habe beides im Code
+nachgelesen — beide Fälle sind sauber zu.
 
-Beim Nachprüfen des Zusammenspiels beider Fixes ist mir aber aufgefallen,
-dass genau dieselbe Art Widerspruch an zwei Stellen weiterlebt, die der
-heutige Fix nicht abgedeckt hat — einmal im Hauptchat selbst (Fix hat nur
-die halbe Lücke geschlossen) und einmal komplett unberührt im
-"Bearbeiten"-Pfad. Deshalb unten ein aktualisierter Vorschlag dazu, kein
-neues, unabhängiges Thema.
+Für diesen Bericht habe ich bewusst nicht nochmal nach technischen Bugs
+gesucht (das hat IT-Chef gerade erst sehr gründlich für viele Seiten
+gemacht, ohne Fund) — sondern gezielt aus reiner Nutzersicht auf
+Bestätigungen, Sackgassen und Rückmeldungen geschaut. Dabei sind mir vier
+neue Reibungspunkte aufgefallen.
 
 ## Meine Vorschläge
 
-1. **Im Hauptchat folgen bei unbekanntem Ziel weiterhin zwei sich
-   widersprechende Bot-Nachrichten direkt hintereinander.**
-   `mockAdvisor.ts:124-132` sagt jetzt ehrlich "Danke! Für {Ziel}
-   beschreib einfach, was für eine Unterkunft du dir vorstellst" — lädt
-   also explizit zum Weiterschreiben im Chat ein. Aber `useChat.ts:311-345`
-   prüft im selben `setTimeout`-Callback direkt danach noch einmal
-   unabhängig `findKnownDestination()` und hängt bei unbekanntem Ziel
-   sofort eine zweite Nachricht an: "kenne ich noch keine Unterkünfte …
-   nutze dafür kurz die manuelle Hotelsuche" (Zeile 342-343). Für die
-   Nutzerin erscheinen damit zwei Bot-Bubbles in einem Schwung mit
-   gegensätzlicher Handlungsaufforderung — "schreib einfach hier weiter"
-   sofort gefolgt von "nutze stattdessen die andere Seite". *Vorschlag:*
-   Die zweite Nachricht nur zeigen, wenn die erste sie nicht schon
-   vorweggenommen hat, z. B. über ein gemeinsames Flag am `AdvisorReply`,
-   statt dass beide Stellen unabhängig denselben Sachverhalt prüfen und
-   zwei verschiedene Formulierungen produzieren.
+1. **"Neu starten" im KI-Chat löscht die ganze Reiseplanung sofort, ohne
+   Rückfrage.** `src/components/chat/KiChat.tsx:74–77, 109` löst mit
+   einem einzigen Klick auf ein reines Icon (kein Text, kein
+   Bestätigungsdialog) `resetChat()` aus — das räumt Chatverlauf, Reiseplan
+   und den localStorage-Eintrag komplett weg. Wer aus Versehen daneben
+   tippt (z. B. auf dem Handy neben dem Lautsprecher-Icon), verliert eine
+   möglicherweise lange Planung unwiderruflich, ohne Chance auf Rückgängig.
+   *Vorschlag:* Kurze Bestätigung ("Wirklich neu starten? Deine aktuelle
+   Planung geht verloren.") vor dem eigentlichen Reset.
 
-2. **Derselbe Widerspruch besteht unverändert im "Bearbeiten"-Pfad — vom
-   heutigen Fix gar nicht berührt.** Wer eine Unterkunft über
-   `startEdit('accommodation')` neu wählt, bekommt aus dem festen
-   `editPrompts.accommodation` (`useChat.ts:29-32`) immer "Klar, ich
-   suche eine neue Unterkunft für dich — einen Moment", unabhängig vom
-   Ziel. Ist das Ziel nicht bekannt, hängt `startEdit()`
-   (`useChat.ts:192-197`) synchron sofort dieselbe
-   "kenne-ich-nicht/manuelle Hotelsuche"-Nachricht dahinter — exakt
-   derselbe Widerspruch wie oben, nur über den anderen Einstiegspunkt.
-   *Vorschlag:* Sobald Punkt 1 gelöst ist (z. B. über eine gemeinsame
-   Hilfsfunktion für beide Pfade), denselben Mechanismus auch hier
-   anwenden, statt zwei getrennte Textbausteine für denselben Fall zu
-   pflegen.
+2. **Löschen ist an mehreren Stellen sofort und endgültig, ohne
+   Bestätigung oder Rückgängig.** Gleiches Muster in
+   `src/pages/Preisalarme.tsx:45,94` (`removeAlert`) und
+   `src/pages/Favoriten.tsx:40,88` (`removeFavorite`), ebenso in
+   `Angebote.tsx`, `Aktivitaeten.tsx` und `Warenkorb.tsx`: Ein Klick auf
+   das Papierkorb-/X-Icon entfernt den Eintrag direkt aus dem State, ohne
+   Nachfrage und ohne "Rückgängig"-Toast. Bei einem Preisalarm oder einem
+   Warenkorb-Eintrag, an dem man länger gesucht hat, ist ein Fehlklick
+   besonders ärgerlich. *Vorschlag:* Einheitlich einen kurzen
+   Bestätigungsdialog oder zumindest einen "Rückgängig"-Toast nach dem
+   Entfernen einführen — an einer Stelle lösen, dann überall gleich
+   anwenden.
 
-_Letztes Update: 2026-09-07_
+3. **Der Warenkorb ist eine Sackgasse — es gibt keinen "Jetzt
+   buchen"-Button.** `src/pages/Warenkorb.tsx` endet nach der
+   Summen-Karte (Zeile 109–117) einfach so; es gibt keine Aktion, um von
+   "ausgewählte Leistungen" tatsächlich zur Buchung zu kommen. Wer seinen
+   Warenkorb ansieht, erwartet als nächsten Schritt logischerweise einen
+   Buchen-Button — der fehlt komplett. *Vorschlag:* Entweder einen
+   "Jetzt buchen"/"Zur Kasse"-Button ergänzen, oder — falls das bewusst
+   (noch) nicht vorgesehen ist, weil Direktbuchung laut IT-Chef-Bericht
+   ohnehin nur ein Redirect zum Anbieter ist — der Nutzerin das im Text
+   auf der Seite kurz erklären, statt sie ratlos zurückzulassen.
+
+4. **"Planung fortsetzen" bei Reiseentwürfen führt immer zum selben,
+   generischen Chat statt zum jeweiligen Entwurf.** In
+   `src/pages/Reiseentwuerfe.tsx:155` verlinkt der Button bei jeder
+   Entwurfskarte identisch auf `/ki-chat`, ohne die jeweilige Entwurfs-ID
+   mitzugeben. Wer zwei Entwürfe sieht (z. B. Lissabon und Kyoto) und bei
+   Kyoto auf "Planung fortsetzen" klickt, landet trotzdem im einen,
+   global gespeicherten Chat — nicht zwingend beim richtigen Entwurf. Das
+   kann zu Verwirrung führen ("wo ist meine Kyoto-Planung hin?").
+   *Vorschlag:* Die Entwurfs-ID als Parameter mitgeben und den Chat beim
+   Fortsetzen den passenden Entwurf laden lassen, sobald mehrere Entwürfe
+   gleichzeitig unterstützt werden sollen — oder, als Kurzfristlösung,
+   den Nutzerinnen im Text klarmachen, dass aktuell nur eine aktive
+   Planung gleichzeitig möglich ist.
+
+_Letztes Update: 2026-09-09_

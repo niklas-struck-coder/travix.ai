@@ -4,15 +4,16 @@ import { HotelCard } from '@/components/search/HotelCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
 import type { StayOffer } from '@/types/stays'
+import type { DuffelError } from '@/types/duffel'
 
 interface HotelResultsProps {
   offers: StayOffer[] | null
-  error: boolean
+  errors: DuffelError[]
   loading: boolean
   onSelect: (offer: StayOffer) => void
 }
 
-export function HotelResults({ offers, error, loading, onSelect }: HotelResultsProps) {
+export function HotelResults({ offers, errors, loading, onSelect }: HotelResultsProps) {
   if (loading) {
     return (
       <div className="flex items-center gap-2 pl-1">
@@ -22,11 +23,15 @@ export function HotelResults({ offers, error, loading, onSelect }: HotelResultsP
     )
   }
 
-  if (error) {
+  if (errors.length > 0) {
     return (
       <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
         <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-        <span>Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal.</span>
+        <div className="flex flex-col gap-1">
+          {errors.map((error, index) => (
+            <span key={index}>{error.message}</span>
+          ))}
+        </div>
       </div>
     )
   }

@@ -27,7 +27,7 @@ const baseChatState = {
   isThinking: false,
   stayOffers: null,
   stayLoading: false,
-  stayError: false,
+  stayErrors: [],
   flightOffers: null,
   flightErrors: [],
   flightLoading: false,
@@ -88,6 +88,7 @@ describe('KiChat speech synthesis stop', () => {
     renderKiChat({ resetChat })
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, neu starten' }))
 
     expect(stopSpeaking).toHaveBeenCalled()
     expect(resetChat).toHaveBeenCalled()
@@ -101,5 +102,27 @@ describe('KiChat speech synthesis stop', () => {
     unmount()
 
     expect(stopSpeaking).toHaveBeenCalled()
+  })
+})
+
+describe('KiChat reset confirmation', () => {
+  it('does not reset immediately, but asks for confirmation first', () => {
+    const resetChat = vi.fn()
+    renderKiChat({ resetChat })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
+
+    expect(screen.getByText('Deine aktuelle Planung geht verloren.')).toBeInTheDocument()
+    expect(resetChat).not.toHaveBeenCalled()
+  })
+
+  it('keeps the chat when the confirmation is cancelled', () => {
+    const resetChat = vi.fn()
+    renderKiChat({ resetChat })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+
+    expect(resetChat).not.toHaveBeenCalled()
   })
 })

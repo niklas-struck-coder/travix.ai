@@ -9,6 +9,16 @@ import { TripSummaryCard } from '@/components/chat/TripSummaryCard'
 import { HotelResults } from '@/components/search/HotelResults'
 import { FlightResults } from '@/components/search/FlightResults'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { useChat } from '@/hooks/useChat'
 import { isSpeechSynthesisSupported, stopSpeaking } from '@/lib/ai/speech'
 import { hasTripData } from '@/lib/trip/tripStorage'
@@ -18,6 +28,7 @@ const editableFields: EditableTripField[] = ['transportMode', 'dates', 'budget',
 
 export function KiChat() {
   const [speechEnabled, setSpeechEnabled] = useState(false)
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const {
     messages,
     trip,
@@ -26,7 +37,7 @@ export function KiChat() {
     isThinking,
     stayOffers,
     stayLoading,
-    stayError,
+    stayErrors,
     flightOffers,
     flightErrors,
     flightLoading,
@@ -76,6 +87,11 @@ export function KiChat() {
     resetChat()
   }
 
+  const confirmReset = () => {
+    setResetDialogOpen(false)
+    handleReset()
+  }
+
   const handleQuickReply = (option: string) => {
     if (option === 'Neue Reise planen') {
       handleReset()
@@ -106,9 +122,27 @@ export function KiChat() {
               {speechEnabled ? <Volume2 className="text-teal" /> : <VolumeX />}
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={handleReset} aria-label="Neu starten" title="Neu starten">
-            <RotateCcw />
-          </Button>
+          <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Neu starten" title="Neu starten">
+                <RotateCcw />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Neu starten?</DialogTitle>
+                <DialogDescription>Deine aktuelle Planung geht verloren.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Abbrechen</Button>
+                </DialogClose>
+                <Button variant="destructive" onClick={confirmReset}>
+                  Ja, neu starten
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -130,8 +164,8 @@ export function KiChat() {
           </div>
         )}
 
-        {(stayLoading || stayOffers || stayError) && (
-          <HotelResults offers={stayOffers} error={stayError} loading={stayLoading} onSelect={selectHotel} />
+        {(stayLoading || stayOffers || stayErrors.length > 0) && (
+          <HotelResults offers={stayOffers} errors={stayErrors} loading={stayLoading} onSelect={selectHotel} />
         )}
 
         {(flightLoading || flightOffers || flightErrors.length > 0) && (

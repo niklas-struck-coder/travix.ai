@@ -1,5 +1,115 @@
 # Freigabe-Chef-Log
 
+## 2026-09-10, früher Nacht-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (`6d7c61e` bis
+  `c7fe75d`, letzter Commit 10.09. 02:07 UTC).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, dafür gibt es den späteren Freigabe-Chef-Lauf).
+- `support-chef/auto` — einziger Commit oben drauf ist weiterhin
+  `585efea` vom 09.09. (04:05 UTC), kein neuer Commit von heute. Das ist
+  derselbe Commit, der bereits im Eintrag "2026-09-09, Tages-Check"
+  geprüft und bewusst **nicht** gemergt wurde (überholter Fund, durch
+  `7068653` bereits behoben). Nichts hat sich seither geändert, also
+  planmäßig übersprungen statt erneut komplett durchgeprüft.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Inhalt: ein Bugfix (`KiChat.tsx` — "Neu starten"-Icon-Button löst jetzt
+  erst nach Bestätigungsdialog `resetChat()` aus, Vorschlag 1 aus
+  `reports/support-chef.md` 09.09.) plus vier nachgezogene Testdateien
+  (`TravixAvatar.test.tsx`, `FlightCard.test.tsx`, `HotelCard.test.tsx`,
+  `Urlaubsmodus.test.tsx`) ohne Verhaltensänderung an den jeweiligen
+  Quelldateien, dazu passende `ZEITPLAN.md`-Ergänzungen. Deckt sich mit
+  dem, was `it-chef-auto-log.md` für die vier Läufe vom 09./10.09.
+  beschreibt.
+- Scope: jeder der fünf Commits betrifft genau den einen im jeweiligen
+  Log-Abschnitt beschriebenen Punkt, kein Scope-Creep über mehrere
+  Themen in einem Commit.
+- Auth/Zahlungen/Rechtstexte: nicht berührt — der einzige
+  Verhaltens-Eingriff ist ein reiner UI-Bestätigungsdialog im Chat-Reset,
+  alle anderen Änderungen sind neue Tests ohne Quelldatei-Änderung.
+- UI/Design (`KiChat.tsx`-Dialog): wiederverwendet die bestehende
+  `Dialog`-Komponente im selben Muster wie `EditMode.tsx`/`Buchung.tsx`,
+  keine neue Komponente/Abhängigkeit, deckt sich mit `MARKENDESIGN.md`.
+- **Unabhängig selbst verifiziert** (eigener `git worktree` auf
+  `origin/it-chef/auto`, frisches `npm install`, nicht nur den
+  Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 packages, 0 vulnerabilities.
+  - `npx tsc -b` → keine Fehler.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `src/components/ui/{badge,button,tabs}.tsx` (react-refresh,
+    unverändert — exakt wie im Log behauptet).
+  - `npx vitest run` → 44 Testdateien, 256 Tests, alle grün (Log
+    behauptet zuletzt 41 Testdateien/227 Tests vor dem letzten Commit,
+    passt zur zusätzlichen `HotelCard.test.tsx` aus dem allerletzten
+    Commit).
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`f40b897..c7fe75d`, gepusht). `it-chef/auto` zeigt danach auf denselben
+Commit wie `main` — keine weitere Anpassung nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto` planmäßig für den 6-Uhr-Lauf übersprungen (keine
+neuen Commits), `support-chef/auto` planmäßig übersprungen (kein neuer
+Commit seit der bereits dokumentierten Nicht-Merge-Entscheidung vom
+09.09.). Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni
+nötig.
+
+## 2026-09-08, Nachmittags-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — vorhanden, 0 Commits vor `main` (bereits im
+  früheren Lauf heute geprüft und gemergt, siehe Eintrag "früher
+  Nacht-Check" oben in der Historie). Planmäßig übersprungen, da keine
+  neuen Commits gegenüber `main`.
+- `marketing-chef/auto` — 1 neuer Commit (`50cd675`).
+- `support-chef/auto` — 1 neuer Commit (`9977035`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-Ergänzung,
+  kein neues Content-Stück, keine dritte Mini-Changelog-Ausgabe, nichts
+  gepostet oder live verändert.
+- Der im Eintrag genannte Content-Kandidat verweist auf Commit `d7682d2`
+  ("Fix: Widersprüchliche Unterkunfts-Notiz bei unbekanntem Ziel …") —
+  per `git merge-base --is-ancestor d7682d2 origin/main` selbst bestätigt:
+  dieser Commit ist bereits Teil von `main`, keine erfundene Referenz.
+  Der zweite erwähnte, bewusst ausgeschlossene Commit `cafb37c`
+  (`TrainCard.tsx`-Preisformatierung) ist ebenfalls bereits in `main`
+  vorhanden — Einordnung als "kein Content-relevanter Fund, da toter
+  Code" nachvollziehbar (Komponente laut `ZEITPLAN.md` 5.7 nirgends
+  eingebunden).
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine Positionierungs-
+  Grundsatzfrage berührt.
+→ **Passt, nach `main` gemergt** (Fast-Forward `852ead1..50cd675`).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen):
+- Ändert ausschließlich `support-chef-auto-log.md` (54 neue Zeilen),
+  reine Analyse, kein Code geändert.
+- Stichprobe verifiziert: `TrainResults.tsx:18` zeigt tatsächlich exakt
+  den zitierten Text ("Travix sucht echte Zug-, Bus- und
+  Fährverbindungen …") — per `git show` auf `origin/main` selbst
+  nachgelesen, Zeilennummer stimmt.
+- Behauptung "nirgends im Projekt eingebunden außer im eigenen Test"
+  selbst per `git grep -l "TrainResults\|TrainCard"` auf `origin/main`
+  nachvollzogen: einzige Treffer außerhalb der Komponente/des Tests sind
+  `ZEITPLAN.md`, `freigabe-chef-log.md`, `it-chef-auto-log.md`,
+  `support-chef-auto-log.md`, `tasks/tasks-prd-travix-platform.md` — also
+  nur Doku/Logs, kein echter Nutzerpfad. Fund ist nachvollziehbar, nicht
+  erfunden.
+→ **Passt, nach `main` gemergt** (Merge-Commit `a65c727`, da Branch von
+  einem älteren `main`-Stand abzweigte und kein Fast-Forward möglich war;
+  einziger Inhalt beider Seiten sind nicht überlappende Log-Dateien, kein
+  Konfliktrisiko).
+
+**Ergebnis:** Zwei Branches geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), `it-chef/auto` planmäßig
+übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
+
 ## 2026-08-10, früher Nacht-Check (0-4 Uhr)
 
 **Geprüfte Branches:**
@@ -2428,3 +2538,128 @@ geglaubt):
 `marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
 übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
 Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-09, früher Nacht-Check (0-4-Uhr-Slot)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 Commits vor `origin/main` (3 inhaltliche Fix-Commits
+  plus 2 reine "kein Fund"-Log-Einträge aus den beiden stündlichen Läufen
+  von heute Nacht ohne Codeänderung).
+- `marketing-chef/auto` — 0 Commits vor `origin/main`. Wie in der Aufgabe
+  für diesen frühen Lauf vorgesehen ignoriert (läuft erst um 6 Uhr,
+  eigener späterer Freigabe-Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `origin/main`. Ebenfalls ignoriert,
+  aus demselben Grund.
+
+**Prüfung `it-chef/auto`:** Drei inhaltliche Commits seit dem letzten
+Merge:
+
+1. `7068653` — Unterkunftssuche im Chat zeigt jetzt die konkrete
+   Duffel-Fehlermeldung statt eines festen Textes. `useChat.ts`:
+   `stayError: boolean` → `stayErrors: DuffelError[]`, exakt nach dem
+   bereits etablierten `flightErrors`-Muster. `HotelResults.tsx` zeigt
+   jetzt wie `FlightResults.tsx` eine Liste der Fehlermeldungen.
+   `KiChat.tsx` reicht das neue Prop nur durch. Diff gelesen: sauber auf
+   genau diesen einen, im `it-chef-auto-log.md` beschriebenen Punkt
+   begrenzt, kein Auth-/Zahlungs-/Rechtsbezug, UI-Änderung übernimmt nur
+   ein bereits bestehendes Anzeigemuster 1:1 (kein neuer
+   MARKENDESIGN.md-Verstoß).
+2. `b5fac18` — `TrainResults.tsx`-Ladetext verspricht keine "echte" Suche
+   mehr ("Travix sucht echte Zug-, Bus- und Fährverbindungen …" → "…sucht
+   nach Zug-, Bus- und Fährverbindungen …"), minimale Textkorrektur, neuer
+   `TrainResults.test.tsx`. Betrifft laut Log noch keine echte Nutzerin
+   (Komponente noch nicht eingebunden). Kein Auth-/Zahlungs-/Rechtsbezug.
+3. `e704e42` — `npm audit fix --package-lock-only` gegen 4 Schwachstellen
+   (1 hoch: `js-yaml`; 3 mittel: `hono`, `@vitest/mocker`) in transitiven
+   Dev-Tooling-Abhängigkeiten; nur `package-lock.json` geändert,
+   `package.json` unverändert bestätigt (`git diff` explizit geprüft),
+   keine Major-Sprünge.
+
+Alle drei Diffs einzeln gelesen (nicht nur den Log-Eintrag geglaubt):
+betreffen ausschließlich die beschriebenen Punkte, kein Scope-Creep, kein
+Auth-/Zahlungs-/Rechtsbezug, kein UI/Design-Punkt, der gegen
+`MARKENDESIGN.md` verstoßen könnte.
+
+**Unabhängige Verifikation** (Branch ausgecheckt, nicht nur Log-Eintrag
+geglaubt):
+- `npm ci` — sauber, **0 Schwachstellen** (bestätigt den `npm audit fix`
+  unabhängig).
+- `npx tsc -b` — keine Fehler.
+- `npx eslint .` — 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (react-refresh, unverändert
+  — exakt wie im Log behauptet).
+- `npx vitest run` — 40 Testdateien, 218 Tests, alle grün (exakt wie im
+  Log behauptet).
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`98d6d8a..96d508a`, gepusht). `it-chef/auto` zeigt danach auf denselben
+Commit wie `main` — keine weitere Anpassung nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto`/`support-chef/auto` planmäßig für den 6-Uhr-Lauf
+übersprungen (keine neuen Commits). Keine Auffälligkeiten, kein
+Scope-Verstoß, keine Info an Ni nötig.
+
+## 2026-09-09, Tages-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im früheren
+  Lauf heute geprüft und gemergt, siehe Eintrag "früher Nacht-Check"
+  oben). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`50b6fb1`).
+- `support-chef/auto` — 1 neuer Commit (`585efea`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-
+  Ergänzung, kein neues Content-Stück, keine dritte Mini-Changelog-
+  Ausgabe, nichts gepostet oder live verändert.
+- Der als neuer Tier-4-Kandidat aufgenommene Commit `7068653`
+  ("Unterkunftssuche im Chat zeigt jetzt die konkrete
+  Duffel-Fehlermeldung") per `git show` selbst nachgelesen: existiert
+  genau wie beschrieben, bereits Teil von `main`.
+- Der bewusst ausgeschlossene Commit `b5fac18`
+  (`TrainResults.tsx`-Ladetext) ebenfalls per `git show` verifiziert —
+  existiert wie beschrieben, Ausschluss-Begründung (Komponente laut
+  `ZEITPLAN.md` 5.7 nirgends eingebunden) nachvollziehbar und konsistent
+  zur bisherigen Linie bei totem Code.
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine Positionierungs-
+  Grundsatzfrage berührt.
+→ **Passt, nach `main` gemergt** (Fast-Forward `db61751..50b6fb1`,
+gepusht). `marketing-chef/auto` zeigt danach auf denselben Commit wie
+`main` — keine weitere Anpassung nötig.
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Branch war von einem veralteten `main`-Stand (`9977035`, vor den
+  IT-Chef-Nacht-Läufen) abgezweigt und enthält nur einen einzigen neuen
+  Commit (`585efea`) obendrauf — dadurch täuscht ein direkter
+  Tip-zu-Tip-Diff massive Löschungen vor, die tatsächlich nur fehlende
+  neuere `main`-Commits sind (`git merge-base` bestätigt: `main` ist
+  kein Vorfahre des Branches).
+- Der einzige neue Log-Eintrag (`support-chef-auto-log.md`, "2026-09-09
+  — Fehlgeschlagene Unterkunftssuche im Chat") bestätigt als Reibungspunkt
+  genau das, was die `stayError: boolean` vs. `flightErrors`-Diskrepanz in
+  `HotelResults.tsx`/`useChat.ts` beschreibt — **aber dieser Fund ist
+  bereits durch Commit `7068653` in `main` behoben** (selbst per
+  `git show origin/main:src/components/search/HotelResults.tsx`
+  nachgelesen: `errors: DuffelError[]`-Prop, zeigt bereits
+  `error.message` pro Fehler, exakt das im Bericht als fehlend
+  beschriebene Verhalten). Der Support-Chef-Lauf hatte diesen Fix
+  offenbar noch nicht in seinem Repo-Stand und hat einen inzwischen
+  gelösten Punkt als offen bestätigt.
+→ **Nicht gemergt.** Ein bereits behobener Punkt würde als "bestätigter,
+offener Reibungspunkt" in `main` landen — sachlich falsch gegenüber dem
+aktuellen Code-Stand. Kein Scope-Verstoß oder erfundener Fund, sondern
+ein durch die veraltete Branch-Basis überholter Stand. Branch bleibt für
+den nächsten Support-Chef-Lauf liegen, damit er selbst gegen den
+aktuellen `main`-Stand neu ansetzen kann (analog zum Muster, das
+Marketing-Chef bei veralteten Branches selbst schon anwendet).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`),
+ein Branch bewusst nicht gemergt (`support-chef/auto`, überholter Fund),
+`it-chef/auto` planmäßig übersprungen (keine neuen Commits). Kein
+wiederholtes Muster bei `support-chef/auto` (erstmaliger Fall dieser
+Art) und keine eigenen Regelverstöße erkennbar — daher keine gesonderte
+Info an Ni nötig, reicht als Log-Eintrag.

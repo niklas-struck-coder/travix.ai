@@ -75,7 +75,7 @@ export function useChat(speechEnabled: boolean) {
   const [isThinking, setIsThinking] = useState(false)
   const [stayOffers, setStayOffers] = useState<StayOffer[] | null>(null)
   const [stayLoading, setStayLoading] = useState(false)
-  const [stayError, setStayError] = useState(false)
+  const [stayErrors, setStayErrors] = useState<DuffelError[]>([])
   const [editingField, setEditingField] = useState<EditableTripField | null>(null)
   const [flightOffers, setFlightOffers] = useState<FlightOffer[] | null>(null)
   const [flightErrors, setFlightErrors] = useState<DuffelError[]>([])
@@ -151,7 +151,7 @@ export function useChat(speechEnabled: boolean) {
    */
   const startEdit = (field: EditableTripField) => {
     setStayOffers(null)
-    setStayError(false)
+    setStayErrors([])
     setEditingField(field)
 
     if (field === 'accommodation') {
@@ -188,7 +188,7 @@ export function useChat(speechEnabled: boolean) {
       })
         .then((result) => {
           if (result.errors.length > 0) {
-            setStayError(true)
+            setStayErrors(result.errors)
             setQuickReplies(['Neue Reise planen'])
           } else {
             setStayOffers(result.offers)
@@ -199,7 +199,7 @@ export function useChat(speechEnabled: boolean) {
           setStayLoading(false)
         })
         .catch(() => {
-          setStayError(true)
+          setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
           setStayLoading(false)
           setQuickReplies(['Neue Reise planen'])
         })
@@ -217,7 +217,7 @@ export function useChat(speechEnabled: boolean) {
     setMessages((prev) => [...prev, makeMessage('user', content)])
     setQuickReplies([])
     setStayOffers(null)
-    setStayError(false)
+    setStayErrors([])
     if (!awaitingFlightOrigin) {
       setFlightOffers(null)
       setFlightErrors([])
@@ -338,7 +338,7 @@ export function useChat(speechEnabled: boolean) {
           })
             .then((result) => {
               if (result.errors.length > 0) {
-                setStayError(true)
+                setStayErrors(result.errors)
                 setQuickReplies(['Neue Reise planen'])
               } else {
                 setStayOffers(result.offers)
@@ -349,7 +349,7 @@ export function useChat(speechEnabled: boolean) {
               setStayLoading(false)
             })
             .catch(() => {
-              setStayError(true)
+              setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
               setStayLoading(false)
               setQuickReplies(['Neue Reise planen'])
             })
@@ -386,7 +386,7 @@ export function useChat(speechEnabled: boolean) {
     setAvatarState(greeting.avatarState)
     setStayOffers(null)
     setStayLoading(false)
-    setStayError(false)
+    setStayErrors([])
     setEditingField(null)
     setFlightOffers(null)
     setFlightErrors([])
@@ -402,7 +402,7 @@ export function useChat(speechEnabled: boolean) {
     isThinking,
     stayOffers,
     stayLoading,
-    stayError,
+    stayErrors,
     flightOffers,
     flightErrors,
     flightLoading,

@@ -105,7 +105,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })
@@ -118,7 +118,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(false)
+    expect(result.current.stayErrors).toEqual([])
     expect(result.current.stayOffers).toEqual([])
     expect(result.current.stayLoading).toBe(false)
   })
@@ -142,7 +142,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })
@@ -155,7 +155,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
@@ -167,7 +167,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
@@ -186,7 +186,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
@@ -206,7 +206,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(false)
+    expect(result.current.stayErrors).toEqual([])
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
@@ -225,7 +225,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       await Promise.resolve()
     })
 
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
@@ -235,13 +235,13 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     await act(async () => {
       await Promise.resolve()
     })
-    expect(result.current.stayError).toBe(true)
+    expect(result.current.stayErrors.length).toBeGreaterThan(0)
 
     act(() => {
       result.current.resetChat()
     })
 
-    expect(result.current.stayError).toBe(false)
+    expect(result.current.stayErrors).toEqual([])
   })
 
   it('clears a still-pending stayLoading when the chat is reset mid-search', () => {

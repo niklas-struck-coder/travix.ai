@@ -118,6 +118,36 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Meldung weder `avatarState` noch `quickReplies` überschreibt. Zwei neue
   Regressionstests in `mockAdvisor.test.ts` (bekanntes vs. nicht
   kuratiertes Ziel).
+  Vom autonomen IT-Chef-Lauf am 09.09. Vorschlag 1 aus
+  `reports/support-chef.md` (09.09.) behoben: Der "Neu starten"-Knopf im
+  Chat-Header (`KiChat.tsx`) war ein reines Icon ohne sichtbaren Text und
+  löste `resetChat()` (kompletter Chatverlauf, Reiseplan und der
+  `localStorage`-Eintrag weg) mit einem einzigen Klick sofort aus — ohne
+  Rückfrage, ohne Rückgängig. Ein Fehlklick (z. B. auf dem Handy neben dem
+  Lautsprecher-Icon) verliert damit unwiderruflich eine möglicherweise
+  lange Planung. Fix: Der Knopf öffnet jetzt einen Bestätigungsdialog
+  (bestehende `Dialog`-Komponente, gleiches Muster wie in `EditMode.tsx`/
+  `Buchung.tsx`) mit exakt dem im Bericht vorgeschlagenen Hinweistext
+  ("Neu starten?" / "Deine aktuelle Planung geht verloren."), erst ein
+  zweiter Klick auf "Ja, neu starten" (destructive-Button) löst den
+  eigentlichen Reset aus; "Abbrechen" schließt den Dialog ohne Änderung.
+  Der separate "Neue Reise planen"-Quick-Reply-Chip (Textbutton, bewusste
+  Aktion statt Fehlklick-Risiko) bleibt unverändert ohne Bestätigung, da
+  der Bericht sich ausdrücklich nur auf den Icon-Knopf bezog. Bestehender
+  Test in `KiChat.test.tsx` auf den zusätzlichen Bestätigungsklick
+  angepasst, zwei neue Tests dort (Dialog erscheint vor dem Reset ohne
+  ihn auszulösen; Abbrechen verwirft den Reset).
+  Vom autonomen IT-Chef-Lauf am 10.09. eine fehlende Testdatei nachgezogen:
+  `TravixAvatar.tsx` (4.4, 6 animierte Zustände) hatte trotz expliziter
+  Erwähnung im Tests-Abschnitt von `tasks/tasks-prd-travix-platform.md`
+  ("Avatar state rendering tests") bisher keine eigene Testdatei — reine
+  Testabdeckungslücke, keine Verhaltensänderung nötig. Neue
+  `TravixAvatar.test.tsx`: pro Zustand (idle/greeting/thinking/writing/
+  searching/happy/error) wird über die von lucide-react vergebene
+  CSS-Klasse (`svg.lucide-<name>`) geprüft, dass genau das richtige Icon
+  gerendert wird; zusätzlich ein Test für den Puls-Ring, der nur im
+  Zustand "thinking" erscheint, sowie zwei Tests für Standard- und
+  explizit übergebene Größe (`sm`/`md`/`lg`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -260,6 +290,36 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstests in `FlightWizard.test.tsx` (NaN-Fallback auf 1,
   Begrenzung auf 1-9), analog den bereits bestehenden Tests in
   `HotelWizard.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `FlightCard.tsx` — trotz mehrfacher
+  eigenständiger Bugfixes in der Vergangenheit (Preisformat über
+  `formatOfferPrice`, `selected`-Prop, IATA-Anzeige) — hatte bisher keine
+  eigene Testdatei, nur indirekte Abdeckung über `Flugsuche.test.tsx`.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+  neuer Bug gefunden. Neue `FlightCard.test.tsx` (8 Tests, Muster analog
+  `TrainCard.test.tsx`): Preisformatierung (deutsches Format statt
+  Rohwert), Anzeige von Fluggesellschaft/IATA-Codes/Flugdauer für einen
+  Direktflug, kein Zwischenstopp-Badge bei Direktflug, Singular-/
+  Plural-Form des Zwischenstopp-Badges (1 vs. mehrere), kein
+  "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft `onSelect` mit
+  dem Angebot auf, sowie der deaktivierte "Ausgewählt"-Zustand bei
+  `selected` (kein erneuter `onSelect`-Aufruf).
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) das
+  Schwesterstück behoben: `HotelCard.tsx` hatte aus demselben Grund wie
+  `FlightCard.tsx` bisher keine eigene Testdatei — nur indirekte
+  Abdeckung über `Hotelsuche.test.tsx`, dort durchgängig mit
+  `rating: null`, `address: ''` und `photoUrl: null`, sodass die
+  bedingten Zweige (Sternebewertung, Adresse, Bild) nie geprüft wurden.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+  neuer Bug gefunden. Neue `HotelCard.test.tsx` (11 Tests, Muster analog
+  `FlightCard.test.tsx`): Preisformatierung (deutsches Format statt
+  Rohwert), Anzeige des Hotelnamens, kein Sternebewertungs-Badge bei
+  `rating: null` vs. gerundete Anzeige bei gesetztem Wert, keine Adresse
+  bei leerem String vs. Anzeige bei gesetzter Adresse, kein `<img>` bei
+  `photoUrl: null` vs. Bild mit Hotelnamen als Alt-Text bei gesetzter
+  URL, kein "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft
+  `onSelect` mit dem Angebot auf, sowie der deaktivierte
+  "Ausgewählt"-Zustand bei `selected` (kein erneuter `onSelect`-Aufruf).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -582,6 +642,58 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   der weiterhin fehlenden Einbindung von `TrainCard`/`TrainResults` in
   eine Seite (5.7 bleibt offen). Neue `TrainCard.test.tsx` (bisher gab es
   dort keinen Test), vor dem Fix reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 08.09. (weiterer Lauf) den von
+  `reports/it-chef.md` (08.09.) gemeldeten Fund behoben: Ein
+  fehlgeschlagener `searchStays()`-Aufruf im KI-Chat (`useChat.ts`, State
+  `stayError: boolean`) verlor die konkrete Fehlermeldung —
+  `HotelResults.tsx` zeigte dafür immer denselben festen Text, egal ob
+  Duffel offline, überlastet oder mit einem HTTP-Fehler geantwortet
+  hatte. Die Flugsuche macht es bereits richtig: `flightErrors:
+  DuffelError[]` reicht die von `callDuffelProxy()` gebaute, konkrete
+  deutsche Fehlermeldung durch (`FlightResults.tsx`). Fix: exakt dasselbe
+  Muster auf die Unterkunftssuche übertragen — `stayError: boolean` durch
+  `stayErrors: DuffelError[]` ersetzt (State, beide `searchStays`-Aufrufstellen
+  in `useChat.ts` inkl. `resetChat`/`startEdit`/`sendMessage`), `KiChat.tsx`
+  reicht `stayErrors` statt `stayError` durch, `HotelResults.tsx` rendert
+  jetzt wie `FlightResults.tsx` alle `errors`-Meldungen statt eines festen
+  Texts. Reines Fehlermeldungs-Detail, keine Verhaltensänderung bei
+  Erfolg oder echter Null-Treffer-Suche. Zehn bestehende Assertions in
+  `useChat.test.ts` auf das neue Array-Format angepasst (exakt analog zu
+  den bestehenden `flightErrors`-Tests: `.length` bei erwartetem Fehler,
+  `toEqual([])` sonst), `KiChat.test.tsx`s Mock-Rückgabewert ebenfalls
+  angepasst.
+  Vom autonomen IT-Chef-Lauf am 08.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (08.09.) gemeldeten Ehrlichkeits-Fund behoben:
+  `TrainResults.tsx:18` zeigte während `loading` den Text "Travix sucht
+  echte Zug-, Bus- und Fährverbindungen …" — dieselbe Fehlerklasse, die der
+  autonome IT-Chef-Lauf am 28.08. bereits in `mockAdvisor.ts` beheben
+  musste: Für Zug/Bus/Fähre existiert (5.7 weiterhin offen) keine
+  angebundene Datenquelle, das Wort "echte" versprach also eine Suche, die
+  es noch gar nicht geben kann (anders als bei `FlightResults.tsx`/
+  `HotelResults.tsx`, wo eine echte Duffel-Suche dahintersteht). Der Fund
+  betrifft aktuell noch keine echte Nutzerin, da `TrainResults`/`TrainCard`
+  laut Support-Chef-Bericht (per Grep bestätigt) in keine Seite eingebunden
+  sind — reine Vorab-Korrektur, damit der Text beim künftigen Einbinden
+  (5.7) nicht vergessen wird. Fix: "echte" aus dem Ladetext entfernt
+  ("Travix sucht nach Zug-, Bus- und Fährverbindungen …"), minimale,
+  mechanische Änderung ohne neue Wortwahl-Entscheidung. Neue
+  `TrainResults.test.tsx` (bisher gab es dort keinen Test): prüft
+  Ladetext ohne "echte", Leerzustand, Nulltreffer-Anzeige und
+  Kartenrendering.
+  Vom autonomen IT-Chef-Lauf am 09.09. (weiterer Lauf) eine Testlücke im
+  bestehenden Urlaubsmodus-Grundgerüst (Teil von 8.1/8.3) geschlossen:
+  `src/pages/Urlaubsmodus.tsx` selbst hatte bisher keine eigene Testdatei
+  — die bestehenden Tests decken nur `useConcierge.ts`/`mockConcierge.ts`
+  einzeln ab, nicht die Seite, die beides zusammen mit `loadStoredChat()`
+  verdrahtet (Begrüßungstext, Zielbanner mit Datum, Quick-Replies je nach
+  bekanntem/unbekanntem/fehlendem Ziel, Chat-Eingabe). Reine Testabdeckung
+  für bestehendes, unverändertes Verhalten, kein Fund/keine Verhaltens-
+  änderung. Neue `src/pages/Urlaubsmodus.test.tsx` (sieben Tests, Muster
+  analog `Buchung.test.tsx`s `localStorage`-Seeding und `KiChat.test.tsx`s
+  `Element.scrollTo`-Stub): Begrüßung ohne/mit Reise, Zielbanner mit/ohne
+  Datum, Quick-Replies für bekanntes/unbekanntes/fehlendes Ziel, sofortige
+  Anzeige der Nutzer-Nachricht plus Denk-Indikator, faktenbasierte Antwort
+  nach Ablauf der simulierten Verzögerung (`vi.useFakeTimers`).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

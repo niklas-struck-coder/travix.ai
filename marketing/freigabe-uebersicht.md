@@ -1,10 +1,158 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-07)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-09)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-09: ein weiterer Tier-4-Kandidat geprüft (konkrete Fehlermeldung bei Unterkunftssuche), ein toter-Code-Fund bewusst ausgeschlossen, weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`50cd675` (08.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 50cd675 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`db61751`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand 08.09.), `ZEITPLAN.md` oder
+diesem Dokument seit dem 08.09. 6.2 (`TripItem.tsx`-Buchen-Button) laut
+`ZEITPLAN.md` (Zeile 767) weiterhin `[ ]`, keine neuen Kanal-Links, kein
+Commit zu einer IT-Chef-Umsetzung der Mini-Changelog-Seite. Alle vier
+Fragen bleiben offen.
+
+**`git log 50cd675..origin/main` zeigt 13 neue Commits**, davon elf ohne
+Content-Relevanz (Freigabe-Chef-Logs, zwei IT-Chef-Auto-Läufe ohne
+sicheren Punkt, ein Support-Chef-Bericht, der eigene interaktive
+Marketing-Chef-Bericht vom 08.09., ein IT-Chef-Bericht, ein
+Daily-Status-Update, ein Merge-Commit, ein Support-Chef-Auto-Log, zwei
+reine npm-audit-Dependency-Fixes — alle rein interaktiv/Log/
+Infrastruktur). Zwei Codeänderungen einzeln per `git show` geprüft:
+
+- `7068653` (08.09., später Commit): löst den von `reports/it-chef.md`
+  (08.09.) gemeldeten Fund — ein fehlgeschlagener `searchStays()`-Aufruf
+  im KI-Chat verlor bisher die konkrete Fehlermeldung, `HotelResults.tsx`
+  zeigte immer denselben festen Text, egal was Duffel konkret gemeldet
+  hat. `stayError: boolean` wird durch `stayErrors: DuffelError[]`
+  ersetzt, exakt nach dem bereits etablierten `flightErrors`-Vorbild.
+  **Content-relevant** — gehört inhaltlich zur selben "Ehrlichkeit als
+  Feature"-Fundgruppe wie die bereits verarbeiteten Fehlermeldungs-Fixes
+  (echte Nutzerin sieht jetzt die tatsächliche Fehlerursache statt eines
+  pauschalen Satzes, betrifft den echten, bereits angebundenen
+  Unterkunfts-Suchpfad).
+- `b5fac18` (08.09., später Commit): `TrainResults.tsx` versprach im
+  Ladetext "echte" Zug-/Bus-/Fährverbindungen zu suchen, obwohl dafür
+  weiterhin keine angebundene Datenquelle existiert (5.7 offen) —
+  inhaltlich exakt dieselbe Ehrlichkeits-Fehlerklasse wie die bereits am
+  28.08. in `mockAdvisor.ts` behobene. **Nicht** in den Tier-4-
+  Kandidatentopf aufgenommen: laut Commit-Beschreibung selbst und
+  `ZEITPLAN.md` ist `TrainResults`/`TrainCard` weiterhin in keine Seite
+  eingebunden (5.7 offen) — dieselbe Begründung, mit der bereits der
+  `TrainCard`-Preisformat-Fix `cafb37c` (08.09., Update 2026-09-08 oben)
+  ausgeschlossen wurde: ohne sichtbaren Nutzerpfad hat aktuell keine
+  echte Nutzerin die falsche Aussage je gesehen, also kein "falsche
+  Information ohne Erkennbarkeit"-Fund im Sinne der bisherigen
+  Aufnahmekriterien. Wandert erst in den Kandidatentopf, sobald 5.7 die
+  Komponente tatsächlich in eine Seite einbindet.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Nur ein einziger neuer Tier-4-Kandidat seit dem
+08.09. (Topf wächst damit von einem auf zwei seit Ausgabe 2) — weiterhin
+deutlich unter der Menge, die selbst am 06.09. mit vier Kandidaten noch
+ausdrücklich als "nicht ausreichend" bewertet wurde, erst recht unter den
+acht, die Ausgabe 2 ausgelöst haben. Ein eigenständiges neuntes
+Social-Content-Stück bleibt weiterhin an dieselben drei unbeantworteten
+Fragen gebunden. Stattdessen heute nur diese Übersicht aktualisiert
+(reiner, sicherer Übersichts-Lauf, wie z. B. am 01.-04.09., 06.09. und
+08.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang,
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der einzige
+neue Punkt stammt aus einem per `git show` einzeln verifizierten, bereits
+in `main` gemergten Commit; der ausgeschlossene zweite Fund wird
+transparent begründet, nicht stillschweigend fallengelassen. Keine offene
+Positionierungs-Grundsatzfrage.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Tier-4-Absatz
+unten, Datum im Titel, "Nächster autonomer Lauf" unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
+## Update 2026-09-08: ein weiterer Tier-4-Kandidat geprüft (Anschlussfix zur Unterkunfts-Notiz), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`9b6f952` (07.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 9b6f952 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`852ead1`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md`, `ZEITPLAN.md` oder diesem Dokument seit
+dem 07.09. Der eigene interaktive Bericht vom 07.09.
+(`reports/marketing-chef.md`, Commit `e99289c`) bestätigt im Titel selbst
+"vier Fragen weiterhin offen". 6.2 (`TripItem.tsx`-Buchen-Button) laut
+`ZEITPLAN.md` weiterhin `[ ]`, keine neuen Kanal-Links, kein Commit zu
+einer IT-Chef-Umsetzung der Mini-Changelog-Seite. Alle vier Fragen bleiben
+offen.
+
+**`git log 9b6f952..origin/main` zeigt 13 neue Commits**, davon neun ohne
+Content-Relevanz (Freigabe-Chef-Merges/-Logs, IT-Chef-Auto-Log, ein
+Support-Chef- und ein eigener Marketing-Chef-Bericht, ein Daily-Status-
+Update, eine CI-Workflow-Ergänzung, ein reiner npm-audit-Dependency-Fix —
+alle rein interaktiv/Log/Infrastruktur). Zwei Codeänderungen einzeln per
+`git show` geprüft:
+
+- `d7682d2` (07.09.): löst den Anschlussfund, den Support-Chef zum
+  06./07.09.-Fix meldete — `useChat.ts` prüfte im Hauptchat unabhängig von
+  `mockAdvisor.ts` noch einmal `findKnownDestination()` und hängte trotz
+  bereits ehrlicher Advisor-Antwort eine zweite, widersprüchliche
+  "nutze die manuelle Hotelsuche"-Notiz an; im "Bearbeiten"-Pfad
+  (`startEdit`) bestand derselbe Widerspruch unverändert, vom
+  07.09.-Vormittagsfix noch gar nicht berührt. Neues optionales
+  `AdvisorReply`-Feld `accommodationNoticeHandled` lässt `mockAdvisor.ts`
+  der aufrufenden Seite mitteilen, dass die Notiz bereits enthalten ist,
+  statt dass beide Stellen den Sachverhalt unabhängig prüfen — im
+  Bearbeiten-Pfad erscheint bei unbekanntem Ziel jetzt von vornherein nur
+  noch eine einzige, ehrliche Nachricht statt zwei sich widersprechenden.
+  **Content-relevant** — gehört inhaltlich zur selben "Ehrlichkeit als
+  Feature"-Fundgruppe wie die bereits verarbeiteten Nulltreffer-/
+  Ankündigungs-Fixes vom 07.09. (Ausgabe 2), ist aber ein eigener, erst
+  danach gemergter Commit und damit noch kein Teil von Ausgabe 2.
+- `cafb37c` (08.09.): `TrainCard.tsx` zeigt den Preis jetzt ebenfalls über
+  `formatOfferPrice()` statt roh. **Nicht** aufgenommen — laut
+  `ZEITPLAN.md` weiterhin toter Code, der in keiner Seite eingebunden ist
+  (5.7 offen); ohne sichtbaren Nutzerpfad kein "falsche Information ohne
+  Erkennbarkeit"-Fund wie bei den übrigen Tier-4-Kandidaten, gleiche
+  Begründung wie beim bereits am 06.09. ausgeschlossenen `2daeb05`.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Nur ein einziger neuer, verifizierter
+Tier-4-Kandidat seit dem 07.09. (Kandidatentopf war laut Update 2026-09-07
+frisch geleert) — deutlich unter der Menge, die am 06.09. mit vier
+Kandidaten noch ausdrücklich als "nicht ausreichend" bewertet wurde, erst
+recht unter den acht, die Ausgabe 2 ausgelöst haben. Ein eigenständiges
+neuntes Social-Content-Stück bleibt weiterhin an dieselben drei
+unbeantworteten Fragen gebunden. Stattdessen heute nur diese Übersicht
+aktualisiert (reiner, sicherer Übersichts-Lauf, wie z. B. am 01.-04.09.
+und 06.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang,
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der einzige
+neue Punkt stammt aus einem per `git show` einzeln verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Tier-4-Absatz
+unten, Datum im Titel).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-07: zweite Mini-Changelog-Ausgabe geschrieben (acht neue Tier-4-Kandidaten seit Ausgabe 1, davon zwei explizit vorgemerkte), Sprachfunktions-Blocker vollständig ausgeräumt
 
@@ -908,7 +1056,17 @@ Anfang-bis-Ende-Weg im Code.
    **Alle acht seit 05./06.09. gesammelten Kandidaten sind seit dem
    07.09. in Ausgabe 2 des Mini-Changelogs verarbeitet** (siehe Tier 5
    unten) — der Kandidatentopf hier ist damit vorerst wieder leer, neue
-   Funde sammeln sich ab jetzt für eine mögliche dritte Ausgabe.
+   Funde sammeln sich ab jetzt für eine mögliche dritte Ausgabe. Seit dem
+   07.09. (später Commit, noch nicht Teil von Ausgabe 2) ein erster neuer
+   Kandidat (siehe Update 2026-09-08 oben): der Bearbeiten-Pfad für
+   Unterkunft zeigte bei unbekanntem Ziel bisher zwei sich
+   widersprechende Nachrichten hintereinander (Suchversprechen, direkt
+   gefolgt von der ehrlichen Absage) — jetzt erscheint von vornherein nur
+   noch die ehrliche Nachricht. Seit dem 08.09. (später Commit) ein
+   zweiter Kandidat (siehe Update 2026-09-09 oben): die Unterkunftssuche
+   im Chat zeigt bei einem echten Suchfehler jetzt die konkrete
+   Duffel-Fehlermeldung statt immer desselben festen Textes, exakt nach
+   dem bei der Flugsuche bereits etablierten Muster.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -959,9 +1117,13 @@ neuen Social-Text schreibt. Falls weiterhin keine der vier Fragen
 beantwortet ist: eine dritte Mini-Changelog-Ausgabe ist erst sinnvoll,
 sobald sich seit dem 07.09. wieder genug neue, verifizierte
 Tier-4-Kandidaten angesammelt haben (nicht nach jedem einzelnen neuen
-Fix) — Stand 07.09. ist der Kandidatentopf frisch geleert (siehe Tier 4
-oben), also aktuell keiner. Sollte Ni zwischenzeitlich einen Kanal für die
-Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix `ac0e188`
-(Stopp-Knopf) plus der bereits am 05.09. behobene Mikrofon-Hänger
-(`acc9ae8`) ein naheliegender erster Baustein, da beide zusammen die
-Funktion erstmals durchgängig zuverlässig machen.
+Fix) — Stand 09.09. sind erst zwei im Topf (siehe Update 2026-09-09
+oben), also weiterhin zu wenig. Sollte Ni zwischenzeitlich einen Kanal für
+die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
+`ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene
+Mikrofon-Hänger (`acc9ae8`) ein naheliegender erster Baustein, da beide
+zusammen die Funktion erstmals durchgängig zuverlässig machen. Sobald 5.7
+(Zug/Bus/Fähre-Anbindung) umgesetzt wird, wird zusätzlich der bereits
+vorab korrigierte `TrainResults`-Ladetext (`b5fac18`, 08.09., siehe
+Update 2026-09-09 oben) rückwirkend zum Tier-4-Kandidaten, da die
+Komponente dann erstmals einen echten Nutzerpfad hat.

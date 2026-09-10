@@ -8207,3 +8207,632 @@ Regressionsschutz.
 - `npm test` (vitest) — 39 Testdateien, 214 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-08 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig nach `main`
+gemergt (keine Divergenz), Branch daher frisch von `origin/main` neu
+angelegt (`git checkout -B it-chef/auto origin/main`), wie in der
+SKILL.md für diesen Fall vorgesehen.
+
+**Ausgewählter Punkt:** Der in `reports/it-chef.md` (08.09., Abschnitt
+"Gefundene Bugs") explizit als "guter, klar abgegrenzter nächster Punkt
+für it-chef-eigen" markierte Fund: Ein fehlgeschlagener
+`searchStays()`-Aufruf im KI-Chat (`useChat.ts`) speicherte den Fehler
+nur als `stayError: boolean`, wodurch `HotelResults.tsx` immer denselben
+festen Text zeigte, egal was Duffel konkret gemeldet hat. Die
+strukturell identische Flugsuche macht es bereits richtig:
+`flightErrors: DuffelError[]` reicht die von `callDuffelProxy()` gebaute,
+konkrete deutsche Fehlermeldung durch (`FlightResults.tsx`).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (reine Chat-Fehlermeldung). Keine
+offene Produkt-/Architekturentscheidung — der Bericht selbst beschreibt
+den Fix als mechanische Übertragung eines bereits im Code etablierten
+Musters ("exakt nach dem Vorbild von `flightErrors`"). Klar genug
+beschrieben, um ohne zusätzliche Annahmen umsetzbar zu sein. Ergebnis
+objektiv prüfbar über Typecheck/Lint/Tests plus die bestehenden
+Regressionstests für die betroffenen Fälle.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: State `stayError: boolean` → `stayErrors:
+  DuffelError[]`. Beide `searchStays()`-Aufrufstellen (Hauptchat-Ablauf
+  und `startEdit('accommodation')`) setzen im Fehlerfall jetzt
+  `setStayErrors(result.errors)` (aufgelöste Duffel-Fehler) bzw. im
+  `.catch()`-Zweig eine eigene Fallback-Meldung (identisch zum bisherigen
+  festen `HotelResults`-Text), analog zum bestehenden `flightErrors`-Muster
+  in `runFlightSearch()`. `resetChat()`, `startEdit()` und `sendMessage()`
+  setzen `stayErrors` beim Zurücksetzen jetzt auf `[]` statt `false`.
+- `src/components/search/HotelResults.tsx`: Prop `error: boolean` →
+  `errors: DuffelError[]`, Anzeige jetzt wie in `FlightResults.tsx` eine
+  Liste aller `errors`-Meldungen statt eines festen Texts.
+- `src/components/chat/KiChat.tsx`: reicht `stayErrors` statt `stayError`
+  durch, Anzeige-Bedingung entsprechend angepasst
+  (`stayErrors.length > 0`).
+- Zehn bestehende Assertions in `src/hooks/useChat.test.ts` auf das neue
+  Array-Format angepasst (exakt analog zu den bereits bestehenden
+  `flightErrors`-Tests: `.length` prüfen bei erwartetem Fehler,
+  `toEqual([])` sonst) — keine neuen Testfälle nötig, das bereits
+  bestehende Testverhalten (Fehler vs. echte Null-Treffer-Suche vs.
+  Reset) bleibt inhaltlich unverändert, nur die Prüfung auf das neue
+  Datenformat umgestellt.
+- `src/components/chat/KiChat.test.tsx`: Mock-Rückgabewert von `useChat`
+  auf `stayErrors: []` statt `stayError: false` umgestellt.
+- `ZEITPLAN.md` (Phase 5 Suche) um diesen Fund/Fix ergänzt.
+- Kein Eintrag in `tasks/tasks-prd-travix-platform.md` — der Fix behebt
+  keinen eigenständig nummerierten PRD-Punkt, sondern eine
+  Fehlermeldungs-Inkonsistenz innerhalb der bereits als fertig markierten
+  Unterkunftssuche (5.1-5.3, 5.6).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 39 Testdateien, 214 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-08 (fünfter Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` plus dem eigenen, noch nicht gemergten Commit aus dem
+vierten Lauf (Unterkunfts-Fehlermeldung) — keine Divergenz, direkt darauf
+weitergearbeitet.
+
+**Ausgewählter Punkt:** Der in `reports/support-chef.md` (08.09.)
+gemeldete Ehrlichkeits-Fund: `TrainResults.tsx:18` zeigt während `loading`
+den Text "Travix sucht echte Zug-, Bus- und Fährverbindungen …", obwohl es
+für Zug/Bus/Fähre (Punkt 5.7 in `ZEITPLAN.md`) weiterhin keine angebundene
+Datenquelle gibt — dieselbe Fehlerklasse, die der autonome IT-Chef-Lauf am
+28.08. bereits in `mockAdvisor.ts` beheben musste (dort: unbelegtes
+Suchversprechen für Zug/Bus/Fähre/Mietwagen).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten (reiner UI-Ladetext einer noch nicht eingebundenen
+Komponente). Keine offene Produkt-/Architekturentscheidung — es geht nur
+darum, ein nicht eingelöstes Wort ("echte") aus einem Text zu entfernen,
+nicht um eine neue Formulierung zu erfinden. Klar genug beschrieben: der
+Bericht benennt Datei, Zeile und die exakte Ursache (kein echter
+Datenanschluss). Ergebnis objektiv prüfbar über einen neuen
+Component-Test plus Typecheck/Lint/Tests.
+
+**Umgesetzt:**
+- `src/components/search/TrainResults.tsx`: Ladetext von "Travix sucht
+  echte Zug-, Bus- und Fährverbindungen …" zu "Travix sucht nach Zug-,
+  Bus- und Fährverbindungen …" geändert — minimale, mechanische Änderung
+  (nur das Wort "echte" entfernt), da der Bericht keine eigene Ersatz-
+  Formulierung für den Ladetext-Fall vorgibt (nur den allgemeinen
+  Ehrlichkeitsgrundsatz und die bereits bestehende Abschlussmeldung in
+  `mockAdvisor.ts`, die aber ein anderer Textbaustein ist, kein
+  Ladetext).
+- Neue `src/components/search/TrainResults.test.tsx` (bisher gab es dort
+  keinen Test): prüft, dass der Ladetext kein "echte" mehr enthält, sowie
+  Leerzustand (keine Angebote, nicht ladend), Nulltreffer-Anzeige und
+  Kartenrendering.
+- `ZEITPLAN.md` (Phase 5 Suche) um diesen Fund/Fix ergänzt.
+- Kein Eintrag in `tasks/tasks-prd-travix-platform.md` nötig — reine
+  Textkorrektur, kein eigenständig nummerierter PRD-Punkt.
+
+**Hinweis:** Betrifft aktuell keine echte Nutzerin, da `TrainResults`/
+`TrainCard` laut Support-Chef-Bericht (per Grep bestätigt) noch in keine
+Seite eingebunden sind — reine Vorab-Korrektur für den künftigen
+Einbinde-Zeitpunkt (5.7).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm test` (vitest) → 40 Testdateien, 218 Tests, alle grün (neue
+  `TrainResults.test.tsx` mit vier Tests).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-09
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` plus den beiden eigenen, noch nicht gemergten Commits aus
+dem vierten und fünften Lauf vom 08.09. (Unterkunfts-Fehlermeldung,
+TrainResults-Ladetext) — keine Divergenz, direkt darauf weitergearbeitet.
+
+**Vorgehen:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+durchgesehen — alle offenen Checkbox-Punkte hängen entweder an einer
+noch offenen Produkt-/Backend-Entscheidung (4.1-4.3, 2.x, Sprint 5) oder
+an fehlenden Datenmodell-Feldern, die selbst eine Design-Entscheidung
+bräuchten (6.2/6.6/6.7/7.12: `TripDraft` hat weiterhin keine echten
+Preis-/Provider-URL-Felder), oder sind größere, noch nicht im Detail
+spezifizierte Features (7.4, 8.2-8.7). `reports/it-chef.md` und
+`reports/support-chef.md` (beide 08.09.) erneut geprüft: alle darin
+gemeldeten Punkte sind laut `ZEITPLAN.md`/Log bereits im vierten und
+fünften Lauf vom 08.09. behoben — nichts Neues dort offen. Eigene
+gezielte Suche nach neuen Bugs (u. a. `.includes()`/Wortgrenzen-Muster
+erneut komplett durchsucht, `tripStorage.ts`, `EditMode.tsx`,
+`ChatInput.tsx`/`speech.ts`-Zusammenspiel, `routes.tsx`/`nav-config.ts`
+auf kaputte Links) ohne neuen Fund.
+
+**Ausgewählter Punkt:** Kein neuer Code-Bug gefunden, aber `npm audit`
+zeigte 4 Schwachstellen (1 hoch: `js-yaml`; 3 mittel: `hono`,
+`@vitest/mocker`) in transitiven Abhängigkeiten. Alle drei betroffenen
+Pakete kommen ausschließlich über Entwicklungs-Tooling (`js-yaml` über
+`@eslint/eslintrc`/`cosmiconfig`, `hono` über
+`@modelcontextprotocol/sdk`, `@vitest/mocker` über `vitest` selbst) —
+kein Laufzeit-Code-Pfad betroffen, per `package-lock.json`-Abhängigkeits-
+kette verifiziert.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine Produkt-/Architekturentscheidung — reines
+Anheben transitiver Versionsnummern innerhalb bestehender Semver-Ranges,
+kein `--force`, keine Major-Sprünge laut npm. Klar abgegrenzt: nur
+`package-lock.json` betroffen, `package.json` unverändert. Objektiv
+prüfbar: `npm audit` vorher/nachher, plus bestehende
+Lint/Typecheck/Build/Test-Suite als Regressionsschutz.
+
+**Umgesetzt:**
+- `npm audit fix --package-lock-only` ausgeführt: `@vitest/mocker`
+  (und der Rest der `vitest`-Paketfamilie) 4.1.10 → 4.1.11, `hono` 4.13.0
+  → 4.13.7, `js-yaml` 4.3.1 → 4.3.2. Nur `package-lock.json` geändert,
+  `package.json` unverändert (keine Versionsbereich-Änderung nötig).
+- **Technische Anmerkung:** Der reguläre `npm audit fix` (System-npm
+  10.9.7) brach dabei zunächst wiederholt mit einem internen npm-Fehler
+  ab (`Cannot read properties of null (reading 'edgesOut')`, in
+  `@npmcli/arborist`, offenbar ein Bug beim Aufbau des Peer-Dependency-
+  Baums für `vitest`s optionale Peer-Pakete wie
+  `@vitest/browser-playwright`). `--legacy-peer-deps` umging den Absturz,
+  erzeugte aber ein Lockfile, das `npm ci` als inkonsistent ablehnte
+  (fehlende `@testing-library/dom` & Co.) — dieser Versuch wurde
+  verworfen (`git checkout -- package-lock.json`), bevor irgendetwas
+  committet wurde. Ein direktes `npm install js-yaml@latest` hätte
+  versehentlich `js-yaml` als neue direkte Abhängigkeit in `package.json`
+  eingetragen — ebenfalls verworfen. Erfolgreich war stattdessen ein
+  transienter `npx -y npm@11 audit fix --package-lock-only` (neuere
+  npm-Version nur für diesen einen Befehl, ohne die Projekt- oder
+  Umgebungs-npm-Version zu ändern) — lieferte exakt den erwarteten,
+  minimalen Diff ohne den Absturz.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout mit dem neuen Lockfile, System-npm 10.9.7)
+  → sauber.
+- `npm audit` vorher: 4 Schwachstellen (1 hoch, 3 mittel); danach: 0
+  Schwachstellen.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` (vitest, jetzt 4.1.11) → 40 Testdateien, 218 Tests, alle
+  grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-09 (weiterer Lauf, ca. 1h später)
+
+**Ausgangslage:** `it-chef/auto` unverändert gegenüber dem Lauf von vor
+etwa einer Stunde (`e704e42`, npm-audit-Fix) — 3 Commits vor `origin/main`,
+keine Divergenz (`origin/main..origin/it-chef/auto` leer in beide
+Richtungen außer den eigenen 3 Commits).
+
+**Vorgehen:** `ZEITPLAN.md` (alle "- [ ]"-Punkte im Programmierungs-
+Bereich per Grep durchgesehen) und `tasks/tasks-prd-travix-platform.md`
+(Unterpunkte von 5.0-8.0 einzeln gelesen, nicht nur die Elternpunkte)
+erneut komplett geprüft, plus `reports/it-chef.md` und
+`reports/support-chef.md` (beide 08.09.) gegen den aktuellen Stand
+verglichen. Ergebnis identisch zum letzten Lauf: alle offenen Punkte
+hängen entweder an der offenen Backend-/Produktentscheidung (2.x, 4.1-4.3,
+5.7 Transportanbieter, Sprint 5), an fehlenden Preis-/Provider-URL-Feldern
+in `TripDraft` (6.2, 6.6/6.7, 7.12), sind noch nicht im Detail spezifizierte
+Größer-Features (7.4, 8.2-8.7, 8.9/8.11/8.12) oder pauschale
+Sammelpunkte ohne prüfbares Einzelergebnis (End-to-End-Testing,
+Mobile-Politur, Bugfixing-Durchgang, Performance-Check). Beide Berichte
+sind bereits vollständig im vierten/fünften Lauf vom 08.09. abgearbeitet
+— nichts Neues darin offen.
+
+Zusätzlich eigene gezielte Suche nach neuen Bugs/Lücken, die über die
+beiden Berichte hinausgeht: alle `size="icon"`-Buttons im gesamten `src`-
+Ordner per Grep aufgelistet und einzeln geprüft — jeder hat bereits ein
+`aria-label`. `JSON.parse`/`localStorage`-Aufrufe erneut durchsucht —
+außerhalb des bereits abgesicherten `tripStorage.ts` keine neuen
+ungeschützten Stellen. `nav-config.ts`s `extraRoutes` geprüft — die dort
+verbleibenden Einträge (Deal Finder, Reisebudget, Premium) sind laut
+Kommentar im Code selbst bewusst noch nicht gebaute Platzhalter, kein
+Navigationsfehler. `npm audit` erneut laufen lassen: weiterhin 0
+Schwachstellen (bestätigt den Fix von vor einer Stunde unabhängig).
+
+**Ausgewählter Punkt:** Keiner. Kein neuer Punkt gefunden, der alle vier
+Sicherheitskriterien aus `.claude/skills/it-chef-eigen/SKILL.md` erfüllt
+und nicht bereits durch den Lauf von vor einer Stunde erledigt ist. Statt
+etwas zu erfinden: ehrlich nichts umgesetzt in diesem Lauf.
+
+**Commit:** nur dieser Log-Eintrag, keine Code-Änderung.
+
+## 2026-09-09 (weiterer Lauf, ca. 5h später)
+
+**Ausgangslage:** `it-chef/auto` unverändert gegenüber den beiden Läufen
+von heute früher (`d90252d`), deckungsgleich mit `origin/main` (keine
+Divergenz in beide Richtungen).
+
+**Vorgehen:** Frischer `npm ci`, danach `ZEITPLAN.md` (alle offenen
+"- [ ]"-Punkte im Programmierungs-Bereich per Grep durchgesehen) sowie
+`tasks/tasks-prd-travix-platform.md` erneut geprüft. Ergebnis identisch zu
+den beiden vorherigen Läufen von heute: alle offenen Punkte hängen entweder
+an der Backend-/Produktentscheidung (2.x, 4.1-4.3, 5.7), an fehlenden
+Preis-/Provider-URL-Feldern in `TripDraft` (6.2, 6.6/6.7, 7.12), sind
+größere, nicht im Detail spezifizierte Features (8.2-8.7, 8.9/8.11/8.12)
+oder pauschale Sammelpunkte ohne einzeln prüfbares Ergebnis (End-to-End-
+Testing, Mobile-Politur, Bugfixing-Durchgang, Performance-Check). Neu
+geprüft: 7.4 ("Planung fortsetzen" mit voller Chat-Historie) — zwar nicht
+explizit als blockiert markiert, aber `Reiseentwuerfe.tsx` verlinkt beide
+Demo-Entwürfe unterschiedslos auf `/ki-chat`, das nur den einen in
+`localStorage` abgelegten Chat kennt; eine echte Umsetzung bräuchte pro
+Entwurf eine eigene gespeicherte Historie — mangels echter, mehrfacher
+Trip-Speicherung (hängt an derselben offenen Backend-Entscheidung) keine
+klar abgegrenzte, interpretationsfreie Aufgabe für einen autonomen Lauf.
+
+`reports/it-chef.md`, `reports/support-chef.md` und `reports/marketing-chef.md`
+(alle zuletzt 08.09.) gegen den aktuellen Stand verglichen: beide dort
+gemeldeten Funde (Unterkunfts-Fehlermeldung, Zug/Bus/Fähre-Ladetext) sind
+laut Log bereits am 08.09. behoben — nichts Neues offen.
+
+Eigene gezielte Suche nach neuen Bugs, mit Fokus auf bisher seltener
+geprüfte Dateien: `src/lib/trip/calendarUtils.ts`, `checklistRules.ts`,
+`cartTotals.ts` einzeln gelesen (keine Logikfehler, `getTripsForDay`s
+Datumsvergleich korrekt über ISO-Strings, `AUTO_CHECKLIST_ITEMS` deckt
+sich weiterhin mit `calculateProgress.ts`). Zusätzlich nach
+`dangerouslySetInnerHTML` (keine Treffer), `parseInt` ohne Radix (keine
+Treffer) und TODO/FIXME (keine Treffer) im gesamten `src`-Ordner gesucht.
+`npm audit` erneut geprüft: weiterhin 0 Schwachstellen (bestätigt den Fix
+von heute Morgen). Die drei vorbestehenden `react-refresh/only-export-
+components`-Lint-Warnings in `badge.tsx`/`button.tsx`/`tabs.tsx` erneut
+angesehen: Standard-shadcn/ui-Generierungsmuster (Varianten-Helper im
+selben File wie die Komponente), keine externen Importe der Varianten
+außerhalb dieser drei Dateien selbst — ein Auftrennen wäre zwar mechanisch
+möglich, weicht aber vom shadcn-CLI-Standardmuster ab und wurde deshalb
+auch in allen bisherigen Läufen bewusst nicht angefasst; dabei belassen.
+
+**Ausgewählter Punkt:** Keiner. Kein neuer Punkt gefunden, der alle vier
+Sicherheitskriterien aus `.claude/skills/it-chef-eigen/SKILL.md` erfüllt
+und nicht bereits durch einen der beiden Läufe von heute früher erledigt
+ist. Statt etwas zu erfinden: ehrlich nichts umgesetzt in diesem Lauf.
+
+**Commit:** nur dieser Log-Eintrag, keine Code-Änderung.
+
+## 2026-09-09 (weiterer Lauf, ca. 5h später)
+
+**Ausgangslage:** `it-chef/auto` war laut `git merge-base --is-ancestor`
+bereits vollständig in `origin/main` gemergt (Freigabe-Chef hat den
+Branch inzwischen übernommen) — Branch frisch von `origin/main` neu
+aufgesetzt (`git checkout -B it-chef/auto origin/main`), statt auf der
+alten, bereits gemergten Historie weiterzuarbeiten, wie es
+`.claude/skills/it-chef-eigen/SKILL.md` für diesen Fall vorschreibt.
+
+**Vorgehen:** `main` enthielt seit den letzten beiden "nichts gefunden"-
+Läufen von heute einen neuen `reports/support-chef.md`-Eintrag (09.09.)
+mit vier neuen UX-Punkten. Gegen die vier Sicherheitskriterien geprüft:
+- **Vorschlag 4 ("Planung fortsetzen" generisch):** hängt an echter
+  Mehrfach-Trip-Speicherung — dieselbe offene Backend-Entscheidung, die
+  bereits 7.4 blockiert (siehe Lauf von heute Mittag). Nicht autonom
+  umsetzbar.
+- **Vorschlag 3 (Warenkorb-Sackgasse):** ein echter "Jetzt
+  buchen"-Button ist 6.2, explizit blockiert (fehlende Provider-URL-/
+  Kostenfelder in `TripDraft`, hängt an der Zahlungsprozess-
+  Produktentscheidung laut `ZEITPLAN.md` Sprint 5). Die im Bericht
+  genannte Alternative (nur erklärender Text) wäre autonom machbar, aber
+  der Bericht selbst lässt offen, welche der beiden Varianten gewünscht
+  ist ("entweder … oder … falls das bewusst (noch) nicht vorgesehen
+  ist") — genau die Art Interpretationsspielraum, die laut Kriterium 3
+  ausschließt.
+- **Vorschlag 2 (Löschen ohne Bestätigung):** betrifft fünf Seiten
+  (Preisalarme, Favoriten, Angebote, Aktivitaeten, Warenkorb) und der
+  Bericht lässt bewusst offen, ob Bestätigungsdialog oder
+  Rückgängig-Toast der richtige Ansatz ist ("an einer Stelle lösen, dann
+  überall gleich anwenden") — eine Design-Entscheidung, die laut
+  `MARKENDESIGN.md`-Abschnitt in `.claude/skills/it-chef-eigen/SKILL.md`
+  im Bericht vermerkt statt geraten werden soll. Für einen künftigen Lauf
+  vorgemerkt, sobald entweder Ni oder Marketing-Chef sich für ein Muster
+  entscheidet.
+- **Vorschlag 1 ("Neu starten" ohne Rückfrage):** einziges Fundament,
+  einzelnes File (`KiChat.tsx`), exakter vorgeschlagener Hinweistext
+  bereits im Bericht ("Wirklich neu starten? Deine aktuelle Planung geht
+  verloren."), keine Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Berührung,
+  keine offene Architekturfrage, objektiv prüfbar über Tests. Erfüllt
+  alle vier Kriterien.
+
+**Ausgewählter Punkt:** Vorschlag 1 aus `reports/support-chef.md`
+(09.09.) — Bestätigungsdialog vor `resetChat()`.
+
+**Umgesetzt:** `KiChat.tsx`s "Neu starten"-Icon-Button (Chat-Header)
+löst nicht mehr direkt `resetChat()` aus, sondern öffnet zunächst einen
+Bestätigungsdialog (bestehende `Dialog`-Komponente aus
+`components/ui/dialog.tsx`, gleiches Muster wie in `EditMode.tsx`/
+`Buchung.tsx` — keine neue Komponente/Abhängigkeit eingeführt). Titel
+"Neu starten?", Beschreibung "Deine aktuelle Planung geht verloren."
+(inhaltlich der vom Bericht vorgeschlagene Text, auf Titel/Beschreibung
+aufgeteilt), "Abbrechen" (outline) schließt ohne Änderung, "Ja, neu
+starten" (destructive) löst den bisherigen `handleReset()` aus. Der
+separate "Neue Reise planen"-Quick-Reply-Chip bleibt bewusst unverändert
+ohne Bestätigung — der Bericht bezog sich ausdrücklich nur auf den
+Icon-Knopf, ein Textbutton als bewusste Aktion hat nicht dasselbe
+Fehlklick-Risiko. Details siehe `ZEITPLAN.md` (Phase 4 KI-Chat).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` → 40 Testdateien, 220 Tests (vorher 218), alle grün. Ein
+  bestehender Test in `KiChat.test.tsx` auf den zusätzlichen
+  Bestätigungsklick angepasst, zwei neue Tests ergänzt (Dialog erscheint
+  vor dem Reset ohne ihn auszulösen; Abbrechen verwirft den Reset).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-09 (weiterer Lauf)
+
+**Ausgangslage:** `it-chef/auto` (`6d7c61e`) lag bereits genau auf
+`origin/main` auf (kein Merge-Konflikt, keine Divergenz) — der vorherige
+Lauf von heute (Reset-Bestätigungsdialog) war noch nicht von
+Freigabe-Chef übernommen, also direkt auf demselben Branch
+weitergearbeitet statt neu von `main` aufzusetzen.
+
+**Vorgehen:** Frischer `npm ci`, danach `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md`, `reports/it-chef.md` und
+`reports/support-chef.md` (beide zuletzt 09.09.) erneut geprüft. Die vier
+Support-Chef-Vorschläge vom heutigen Datum sind bereits im vorherigen
+Lauf von heute einzeln gegen die vier Sicherheitskriterien geprüft:
+Vorschlag 1 (Reset-Bestätigung) wurde umgesetzt, Vorschläge 2 (Löschen
+ohne Bestätigung, offene Design-Frage Dialog vs. Toast), 3
+(Warenkorb-Sackgasse, Bericht selbst lässt zwei Varianten offen) und 4
+("Planung fortsetzen" generisch, hängt an der offenen
+Mehrfach-Trip-Speicherung) bleiben aus denselben, dort bereits
+dokumentierten Gründen nicht autonom umsetzbar — nichts daran hat sich
+seither geändert. `reports/it-chef.md` (09.09.) meldet explizit keinen
+neuen Bugfund. Alle übrigen offenen Punkte in `ZEITPLAN.md`/Tasks-Datei
+hängen unverändert an der Backend-/Produktentscheidung (2.x, 4.1-4.3,
+5.7), an fehlenden Preis-/Provider-URL-Feldern in `TripDraft` (6.2,
+6.6/6.7, 7.12) oder sind größere, nicht im Detail spezifizierte Features
+(7.4, 8.2, 8.4-8.7, 8.9, 8.11, 8.12).
+
+Da eine reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts
+Neues findet, diesmal gezielt nach Testabdeckungslücken bei bereits
+fertigen Seiten gesucht (analog 8.13 "Unit-Tests für bestehende Module"
+und dem Muster mehrerer früherer Läufe, die fehlende Testdateien für
+fertige Komponenten nachgezogen haben, z. B. `KiChat.test.tsx`,
+`Flugsuche.test.tsx`, `TrainCard.test.tsx`). Alle Testdateien unter
+`src/` mit den zugehörigen Quelldateien abgeglichen: `src/pages/
+Urlaubsmodus.tsx` (Urlaubsmodus-Grundgerüst, Teil von 8.1/8.3) hatte als
+einzige fertige Seite keine eigene Testdatei — die bestehenden Tests
+(`useConcierge.test.ts`, `mockConcierge.test.ts`) decken nur die
+Hook-/Logik-Ebene ab, nicht die Seite selbst, die `loadStoredChat()` und
+`useConcierge()` verdrahtet (Zielbanner mit Datum, Begrüßungstext je nach
+Ziel, Quick-Replies je nach bekanntem/unbekanntem/fehlendem Ziel,
+Chat-Eingabe). Erfüllt alle vier Sicherheitskriterien: kein Auth-/
+Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/
+Architekturentscheidung, klar abgegrenzt (reine Testabdeckung für
+bestehendes, unverändertes Verhalten, keine Interpretation nötig), und
+objektiv über die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `Urlaubsmodus.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/pages/Urlaubsmodus.test.tsx` (sieben Tests,
+Muster analog `Buchung.test.tsx`s `localStorage`-Seeding von
+`StoredChatState` und `KiChat.test.tsx`s `Element.prototype.scrollTo`-
+Stub für jsdom): Begrüßungstext ohne geplante Reise und ohne
+Quick-Replies; Zielbanner mit Ziel und Datum bzw. ohne Datum, wenn keins
+gesetzt ist; ziel-spezifische Begrüßung und Quick-Replies für ein
+kuratiertes Ziel (Lissabon); keine Quick-Replies für ein echtes, aber
+nicht kuratiertes Ziel (Bali); Nutzer-Nachricht erscheint sofort samt
+Denk-Indikator; faktenbasierte Antwort erscheint nach Ablauf der
+simulierten Verzögerung (`vi.useFakeTimers`/`vi.advanceTimersByTime`,
+gleiches Muster wie `useConcierge.test.ts`). Keine Verhaltensänderung an
+`Urlaubsmodus.tsx` selbst, kein neuer Bug gefunden. `ZEITPLAN.md`
+(Phase 8) entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert, da 8.1 wegen des
+weiterhin fehlenden Tagesitinerars nicht abgeschlossen ist.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` → 41 Testdateien, 227 Tests (vorher 220), alle grün — sieben
+  neue Tests in `Urlaubsmodus.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10
+
+**Ausgangslage:** `origin/it-chef/auto` (`dbab26a`) lag 2 Commits vor
+`origin/main` (noch nicht von Freigabe-Chef übernommen), `main` hatte
+seither keine neuen Commits — direkt auf `it-chef/auto` weitergearbeitet,
+kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten Lauf
+(09.09.) aktualisiert, keine neuen Funde. `reports/it-chef.md` (09.09.)
+meldet explizit "keine neuen Bugs" nach einer eigenen 20-Datei-Recherche.
+Die vier Support-Chef-Vorschläge vom 09.09. sind laut vorherigen
+Log-Einträgen bereits einzeln geprüft: Vorschlag 1 (Reset-Bestätigung)
+umgesetzt, Vorschläge 2 (Löschen ohne Bestätigung, offene Design-Frage
+Dialog vs. Toast), 3 (Warenkorb-Sackgasse, Bericht lässt zwei Varianten
+offen) und 4 ("Planung fortsetzen" generisch, hängt an fehlender
+Mehrfach-Trip-Speicherung/Backend-Entscheidung) weiterhin nicht autonom
+umsetzbar — nichts daran hat sich geändert. Alle übrigen offenen
+Task-Punkte hängen unverändert an der Backend-/Produktentscheidung (2.x,
+4.1-4.3, 5.7), an fehlenden Preis-/Provider-URL-Feldern in `TripDraft`
+(6.2, 6.6/6.7, 7.12) oder sind größere, nicht im Detail spezifizierte
+Features (7.4, 8.2, 8.4-8.7, 8.9, 8.11 — 8.11 zusätzlich blockiert auf
+noch fehlende FAQ-Inhalte vom Support-Chef, siehe `ZEITPLAN.md`).
+
+Da eine reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts
+Neues findet, wieder gezielt nach Testabdeckungslücken bei bestehenden,
+unveränderten Komponenten gesucht (gleiches Muster wie beim
+`Urlaubsmodus.test.tsx`-Lauf vom 09.09.). Alle `.tsx`/`.ts`-Dateien unter
+`src/` (außer `components/ui/`, reinen Typdeklarationen und
+Einstiegspunkten wie `main.tsx`/`App.tsx`/`routes.tsx`) gegen vorhandene
+Testdateien abgeglichen: `src/components/chat/TravixAvatar.tsx` hatte als
+einzige Komponente, die im Tests-Abschnitt von
+`tasks/tasks-prd-travix-platform.md` namentlich mit eigener Testdatei
+aufgeführt ist ("Avatar state rendering tests"), tatsächlich keine.
+Erfüllt alle vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/Architekturentscheidung,
+klar abgegrenzt (reine Testabdeckung für bestehendes, unverändertes
+Verhalten laut ausdrücklicher Vorgabe in der Tasks-Datei, keine
+Interpretation nötig), objektiv über die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `TravixAvatar.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/chat/TravixAvatar.test.tsx` (10
+Tests): für jeden der 7 `AvatarState`-Werte (idle/greeting/thinking/
+writing/searching/happy/error) wird geprüft, dass genau das laut
+`stateConfig` zugeordnete lucide-react-Icon gerendert wird (über die von
+lucide-react vergebene CSS-Klasse `svg.lucide-<name>`, z. B.
+`svg.lucide-hand` für `greeting`) und dass jeweils nur ein SVG im
+Baum steht; ein Test prüft, dass der zusätzliche Puls-Ring
+(`border-teal/40`) ausschließlich im Zustand `thinking` erscheint, zwei
+weitere Tests decken Standardgröße (`md`) und explizit übergebene
+Größen (`sm`/`lg`) ab. Keine Verhaltensänderung an `TravixAvatar.tsx`
+selbst, kein neuer Bug gefunden. `ZEITPLAN.md` (Phase 4 KI-Chat)
+entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert (4.4 war bereits
+abgehakt, es gibt keinen eigenen Testabdeckungs-Checkbox-Punkt dafür,
+gleiches Muster wie beim `Urlaubsmodus.test.tsx`-Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 42 Testdateien, 237 Tests (vorher 41/227), alle grün —
+  zehn neue Tests in `TravixAvatar.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf)
+
+**Ausgangslage:** `origin/it-chef/auto` (`b068c7e`) lag 3 Commits vor
+`origin/main`, `main` hatte seither keine neuen Commits — direkt auf
+`it-chef/auto` weitergearbeitet, kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten
+Lauf (09.09.) aktualisiert, keine neuen Funde von anderer Stelle. Da eine
+reine Bug-/Feature-Suche seit mehreren Läufen in Folge nichts Neues
+findet, erneut gezielt nach Testabdeckungslücken gesucht (gleiches
+Muster wie bei den beiden vorherigen Läufen): alle `.tsx`/`.ts`-Dateien
+unter `src/` (außer `components/ui/`, reinen Typdeklarationen und
+Einstiegspunkten) gegen vorhandene Testdateien abgeglichen.
+`src/components/search/FlightCard.tsx` fiel dabei besonders auf: die
+Komponente wurde im Laufe der letzten Wochen mehrfach eigenständig
+gefixt (Preisformat über `formatOfferPrice`, `selected`-Prop für den
+Auswahlzustand, IATA-Anzeige), hatte aber nie eine eigene Testdatei —
+nur indirekte Abdeckung über `Flugsuche.test.tsx` (dort nur ein bis zwei
+Assertions je Test, nicht die volle Komponentenlogik wie Zwischenstopp-
+Pluralisierung oder Dauer-Formatierung). Erfüllt alle vier
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine offene Produkt-/Architekturentscheidung, klar abgegrenzt (reine
+Testabdeckung für bestehendes, unverändertes Verhalten), objektiv über
+die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `FlightCard.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/FlightCard.test.tsx` (8
+Tests, Muster analog `TrainCard.test.tsx`): Preisformatierung im
+deutschen Format statt Rohwert; Anzeige von Fluggesellschaft, Origin-/
+Destination-IATA-Code und formatierter Flugdauer (`PT3H15M` → "3h
+15min") für einen Direktflug; kein Zwischenstopp-Badge bei einem
+Direktflug; Singular-Badge "1 Zwischenstopp" bei genau einem Zwischenstopp;
+Plural-Badge "2 Zwischenstopps" bei mehreren; kein "Auswählen"-Button,
+wenn `onSelect` nicht übergeben wird; Klick auf "Auswählen" ruft
+`onSelect` mit dem Angebot auf; bei `selected` erscheint stattdessen ein
+deaktivierter "Ausgewählt"-Button, ein Klick darauf löst `onSelect` nicht
+aus. Keine Verhaltensänderung an `FlightCard.tsx` selbst, kein neuer Bug
+gefunden. `ZEITPLAN.md` (Phase 5 Suche) entsprechend ergänzt; keine
+Checkbox in `tasks/tasks-prd-travix-platform.md` geändert, da es dort
+keinen eigenen Testabdeckungs-Checkbox-Punkt für `FlightCard.tsx` gibt
+(gleiches Muster wie bei den beiden vorherigen Test-Nachzieh-Läufen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 43 Testdateien, 245 Tests (vorher 42/237), alle grün —
+  acht neue Tests in `FlightCard.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf, ca. 1h später)
+
+**Ausgangslage:** `origin/it-chef/auto` (`f7b93fb`) lag 4 Commits vor
+`origin/main`, `main` hatte seither keine neuen Commits — direkt auf
+`it-chef/auto` weitergearbeitet, kein Merge nötig.
+
+**Vorgehen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` sowie
+alle drei Berichte (`reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md`) geprüft — keiner wurde seit dem letzten Lauf
+(09.09.) aktualisiert, keine neuen Funde. Die vier Support-Chef-Vorschläge
+vom 09.09. bleiben aus den bereits mehrfach dokumentierten Gründen
+weiterhin nicht autonom umsetzbar (Vorschlag 1 bereits umgesetzt;
+Vorschläge 2-4 hängen an offenen Design-/Architekturfragen). Alle
+übrigen offenen Task-Punkte hängen unverändert an der Backend-/
+Produktentscheidung (2.x, 4.1-4.3, 5.7), an fehlenden Preis-/
+Provider-URL-Feldern in `TripDraft` (6.2, 6.6/6.7, 7.12) oder sind
+größere, nicht im Detail spezifizierte Features (7.4, 8.2, 8.4-8.7, 8.9,
+8.11).
+
+Erneut gezielt nach Testabdeckungslücken gesucht (gleiches Muster wie
+bei den drei vorherigen Läufen dieser Woche, zuletzt `FlightCard.tsx`
+vor rund einer Stunde). `src/components/search/HotelCard.tsx` fiel dabei
+als direktes Schwesterstück zu `FlightCard.tsx` auf: strukturell
+identisch (Preisformatierung über `formatOfferPrice`, optionaler
+Auswahl-Button mit `selected`-Zustand), ebenfalls bisher ohne eigene
+Testdatei. Die einzige indirekte Abdeckung über `Hotelsuche.test.tsx`
+verwendet durchgängig `rating: null`, `address: ''` und `photoUrl: null`
+(per Grep verifiziert) — die drei bedingten Anzeige-Zweige (Sternebewertung,
+Adresse, Bild) waren dadurch komplett ungetestet. Erfüllt alle vier
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine offene Produkt-/Architekturentscheidung, klar abgegrenzt (reine
+Testabdeckung für bestehendes, unverändertes Verhalten), objektiv über
+die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `HotelCard.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/HotelCard.test.tsx` (11
+Tests, Muster analog `FlightCard.test.tsx`): Preisformatierung im
+deutschen Format statt Rohwert; Anzeige des Hotelnamens; kein
+Sternebewertungs-Badge bei `rating: null`; gerundete Anzeige (eine
+Nachkommastelle) bei gesetztem Wert; keine Adresse bei leerem String
+(über das Ausbleiben des `MapPin`-Icons geprüft); Anzeige der Adresse,
+wenn gesetzt; kein `<img>`-Element bei `photoUrl: null`; Bild mit dem
+Hotelnamen als Alt-Text und korrekter `src`, wenn `photoUrl` gesetzt
+ist; kein "Auswählen"-Button, wenn `onSelect` nicht übergeben wird;
+Klick auf "Auswählen" ruft `onSelect` mit dem Angebot auf; bei
+`selected` erscheint ein deaktivierter "Ausgewählt"-Button, ein Klick
+darauf löst `onSelect` nicht aus. Keine Verhaltensänderung an
+`HotelCard.tsx` selbst, kein neuer Bug gefunden. `ZEITPLAN.md` (Phase 5
+Suche) entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` geändert (5.1 war bereits
+abgehakt, es gibt keinen eigenen Testabdeckungs-Checkbox-Punkt dafür,
+gleiches Muster wie bei den vorherigen Test-Nachzieh-Läufen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 44 Testdateien, 256 Tests (vorher 43/245), alle grün —
+  elf neue Tests in `HotelCard.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
