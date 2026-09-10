@@ -1,5 +1,62 @@
 # Freigabe-Chef-Log
 
+## 2026-09-10, früher Nacht-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (`6d7c61e` bis
+  `c7fe75d`, letzter Commit 10.09. 02:07 UTC).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, dafür gibt es den späteren Freigabe-Chef-Lauf).
+- `support-chef/auto` — einziger Commit oben drauf ist weiterhin
+  `585efea` vom 09.09. (04:05 UTC), kein neuer Commit von heute. Das ist
+  derselbe Commit, der bereits im Eintrag "2026-09-09, Tages-Check"
+  geprüft und bewusst **nicht** gemergt wurde (überholter Fund, durch
+  `7068653` bereits behoben). Nichts hat sich seither geändert, also
+  planmäßig übersprungen statt erneut komplett durchgeprüft.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Inhalt: ein Bugfix (`KiChat.tsx` — "Neu starten"-Icon-Button löst jetzt
+  erst nach Bestätigungsdialog `resetChat()` aus, Vorschlag 1 aus
+  `reports/support-chef.md` 09.09.) plus vier nachgezogene Testdateien
+  (`TravixAvatar.test.tsx`, `FlightCard.test.tsx`, `HotelCard.test.tsx`,
+  `Urlaubsmodus.test.tsx`) ohne Verhaltensänderung an den jeweiligen
+  Quelldateien, dazu passende `ZEITPLAN.md`-Ergänzungen. Deckt sich mit
+  dem, was `it-chef-auto-log.md` für die vier Läufe vom 09./10.09.
+  beschreibt.
+- Scope: jeder der fünf Commits betrifft genau den einen im jeweiligen
+  Log-Abschnitt beschriebenen Punkt, kein Scope-Creep über mehrere
+  Themen in einem Commit.
+- Auth/Zahlungen/Rechtstexte: nicht berührt — der einzige
+  Verhaltens-Eingriff ist ein reiner UI-Bestätigungsdialog im Chat-Reset,
+  alle anderen Änderungen sind neue Tests ohne Quelldatei-Änderung.
+- UI/Design (`KiChat.tsx`-Dialog): wiederverwendet die bestehende
+  `Dialog`-Komponente im selben Muster wie `EditMode.tsx`/`Buchung.tsx`,
+  keine neue Komponente/Abhängigkeit, deckt sich mit `MARKENDESIGN.md`.
+- **Unabhängig selbst verifiziert** (eigener `git worktree` auf
+  `origin/it-chef/auto`, frisches `npm install`, nicht nur den
+  Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 packages, 0 vulnerabilities.
+  - `npx tsc -b` → keine Fehler.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `src/components/ui/{badge,button,tabs}.tsx` (react-refresh,
+    unverändert — exakt wie im Log behauptet).
+  - `npx vitest run` → 44 Testdateien, 256 Tests, alle grün (Log
+    behauptet zuletzt 41 Testdateien/227 Tests vor dem letzten Commit,
+    passt zur zusätzlichen `HotelCard.test.tsx` aus dem allerletzten
+    Commit).
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`f40b897..c7fe75d`, gepusht). `it-chef/auto` zeigt danach auf denselben
+Commit wie `main` — keine weitere Anpassung nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto` planmäßig für den 6-Uhr-Lauf übersprungen (keine
+neuen Commits), `support-chef/auto` planmäßig übersprungen (kein neuer
+Commit seit der bereits dokumentierten Nicht-Merge-Entscheidung vom
+09.09.). Keine Auffälligkeiten, kein Scope-Verstoß, keine Info an Ni
+nötig.
+
 ## 2026-09-08, Nachmittags-Check
 
 **Geprüfte Branches:**
