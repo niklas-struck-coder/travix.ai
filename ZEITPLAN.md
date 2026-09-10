@@ -333,9 +333,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Null-Treffer-Text bei einem echten Suchfehler, kein Rendering ohne
   Laden/Fehler/Angebote, Null-Treffer-Meldung bei leerer Angebotsliste,
   sowie eine gerenderte Karte pro Angebot. Das strukturell identische
-  `HotelResults.tsx` hat dieselbe Lücke und bleibt bewusst als eigener,
-  künftiger Ein-Punkt-Lauf offen (siehe "Einen einzigen Punkt
-  aussuchen" in `.claude/skills/it-chef-eigen/SKILL.md`).
+  `HotelResults.tsx` hatte dieselbe Lücke — vom autonomen IT-Chef-Lauf am
+  10.09. (weiterer Lauf) nachgeholt: neue `HotelResults.test.tsx` (5
+  Tests, Muster analog `FlightResults.test.tsx`) prüft Lade-Anzeige,
+  Fehlermeldung statt Null-Treffer-Text bei einem echten Suchfehler,
+  kein Rendering ohne Laden/Fehler/Angebote, Null-Treffer-Meldung bei
+  leerer Angebotsliste, sowie eine gerenderte Karte pro Angebot. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

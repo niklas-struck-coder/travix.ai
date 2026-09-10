@@ -8901,3 +8901,50 @@ Muster wie bei den vorherigen Test-Nachzieh-Läufen).
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf)
+
+**Branch-Stand:** `it-chef/auto` lag bereits einen Commit vor `main`
+(`FlightResults.test.tsx`-Nachzieher aus dem vorherigen Lauf), `main`
+selbst unverändert als Merge-Base — kein Merge nötig, direkt
+weitergearbeitet.
+
+**ZEITPLAN.md geprüft:** Fast alle offenen Sprint-Punkte hängen entweder
+an Nis Backend-/Auth-/Zahlungsentscheidung (Sprint 1 Rest, 2.x, Sprint 5)
+oder brauchen neue Preisfelder in `TripDraft`, die eine eigene
+Design-Entscheidung wären (6.2, 6.6, 6.7, 7.12). Der eine im vorherigen
+Lauf selbst explizit vorgemerkte, klar abgegrenzte Punkt: die fehlende
+Testdatei für `HotelResults.tsx` (analoges Schwesterstück zu
+`FlightResults.test.tsx`, das strukturell identisch dieselbe Lücke
+hatte). Erfüllt alle vier Sicherheitskriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/Architektur-
+entscheidung, klar abgegrenzt (reine Testabdeckung für bestehendes,
+unverändertes Verhalten nach exakt demselben Muster wie
+`FlightResults.test.tsx`), objektiv über die Tests selbst prüfbar.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `HotelResults.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/HotelResults.test.tsx` (5
+Tests, Muster analog `FlightResults.test.tsx`): Lade-Anzeige ("Travix
+sucht echte Unterkünfte …") während `loading`; Fehlermeldung aus
+`errors` statt Null-Treffer-Text bei einem echten Suchfehler; kein
+Rendering (leeres DOM), wenn weder geladen noch ein Fehler noch
+Angebote vorliegen; Null-Treffer-Meldung ("Keine Unterkünfte gefunden")
+bei leerer Angebotsliste; eine gerenderte `HotelCard` pro Angebot in
+der Liste. Keine Verhaltensänderung an `HotelResults.tsx` selbst, kein
+neuer Bug gefunden. `ZEITPLAN.md` (Phase 5 Suche) entsprechend ergänzt.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber.
+- `npx tsc -b` (über `npm run build`, Typecheck) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings.
+- `npm test` → 46 Testdateien, 266 Tests (vorher 45/261), alle grün —
+  fünf neue Tests in `HotelResults.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
