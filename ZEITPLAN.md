@@ -320,6 +320,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   URL, kein "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft
   `onSelect` mit dem Angebot auf, sowie der deaktivierte
   "Ausgewählt"-Zustand bei `selected` (kein erneuter `onSelect`-Aufruf).
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `FlightResults.tsx` (Lade-/Fehler-/
+  Leer-/Treffer-Zustände beim Rendern der Flugkarten-Liste im KI-Chat)
+  hatte bisher keine eigene Testdatei und war — anders als angenommen —
+  auch nicht indirekt über `KiChat.test.tsx` abgedeckt, da dort
+  `useChat` komplett gemockt wird und `FlightResults` folglich nie
+  wirklich gerendert wird. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `FlightResults.test.tsx` (5 Tests, Muster analog
+  `TrainResults.test.tsx`): Lade-Anzeige, Fehlermeldung statt
+  Null-Treffer-Text bei einem echten Suchfehler, kein Rendering ohne
+  Laden/Fehler/Angebote, Null-Treffer-Meldung bei leerer Angebotsliste,
+  sowie eine gerenderte Karte pro Angebot. Das strukturell identische
+  `HotelResults.tsx` hat dieselbe Lücke und bleibt bewusst als eigener,
+  künftiger Ein-Punkt-Lauf offen (siehe "Einen einzigen Punkt
+  aussuchen" in `.claude/skills/it-chef-eigen/SKILL.md`).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

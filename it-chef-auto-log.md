@@ -8836,3 +8836,68 @@ gleiches Muster wie bei den vorherigen Test-Nachzieh-Läufen).
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-10 (weiterer Lauf)
+
+`it-chef/auto` war zu Beginn dieses Laufs bereits vollständig in `main`
+gemerged (letzter Merge laut `freigabe-chef-log.md`) und hatte keine
+offenen Änderungen — Branch frisch von `main` neu angelegt, `main`
+selbst unberührt.
+
+`reports/it-chef.md` (10.09.) meldet, dass praktisch der gesamte
+`src`-Ordner inzwischen gezielt auf Bugs geprüft wurde, ohne neuen Fund,
+und empfiehlt ausdrücklich, sich auf echte Feature-Lücken oder gezielte
+Tests für Randfälle zu konzentrieren statt weiterer Vollständig-Lese-
+Durchgänge. Offene Punkte aus `tasks/tasks-prd-travix-platform.md`
+(6.2, 6.6, 6.7, 7.12) hängen laut eigener Notiz an fehlenden
+`TripDraft`-Preisfeldern bzw. Datenmodell-Entscheidungen — kein
+autonom umsetzbarer, eindeutig abgegrenzter Punkt. Stattdessen erneut
+gezielt nach Testabdeckungslücken gesucht (gleiches, bereits etablierte
+Muster wie bei den vorherigen `FlightCard.tsx`/`HotelCard.tsx`/
+`TravixAvatar.tsx`-Läufen): Abgleich aller `.tsx`/`.ts`-Quelldateien
+gegen vorhandene Testdateien ergab, dass `FlightResults.tsx` und ihr
+Schwesterstück `HotelResults.tsx` — beide mit klar verzweigter,
+nutzersichtbarer Logik (Lade-/Fehler-/Null-Treffer-/Treffer-Zustand
+beim Rendern der Suchergebnisse im KI-Chat) — bisher keine eigene
+Testdatei hatten. Per Grep verifiziert, dass auch keine indirekte
+Abdeckung existiert: `KiChat.test.tsx` mockt `useChat` komplett
+(`vi.mock('@/hooks/useChat')`), `FlightResults`/`HotelResults` werden
+dort nie tatsächlich gerendert. Erfüllt alle vier Sicherheitskriterien:
+kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine offene
+Produkt-/Architekturentscheidung, klar abgegrenzt (reine Testabdeckung
+für bestehendes, unverändertes Verhalten), objektiv über die Tests
+selbst prüfbar. Von den beiden nur einen genommen (ein einzelner
+Punkt pro Lauf) — `HotelResults.tsx` bleibt bewusst für einen künftigen
+Lauf offen.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `FlightResults.tsx`
+nachgezogen.
+
+**Umgesetzt:** Neue `src/components/search/FlightResults.test.tsx` (5
+Tests, Muster analog `TrainResults.test.tsx`): Lade-Anzeige ("Travix
+sucht echte Flüge …") während `loading`; Fehlermeldung aus `errors`
+statt Null-Treffer-Text bei einem echten Suchfehler; kein Rendering
+(leeres DOM), wenn weder geladen noch ein Fehler noch Angebote
+vorliegen; Null-Treffer-Meldung ("Keine Flüge gefunden") bei leerer
+Angebotsliste; eine gerenderte `FlightCard` pro Angebot in der Liste.
+Keine Verhaltensänderung an `FlightResults.tsx` selbst, kein neuer Bug
+gefunden. `ZEITPLAN.md` (Phase 5 Suche) entsprechend ergänzt; keine
+Checkbox in `tasks/tasks-prd-travix-platform.md` geändert (5.7 bezieht
+sich auf die noch fehlende Zug/Bus/Fähre-Anbindung, nicht auf
+Testabdeckung für den bereits fertigen Flug-/Unterkunfts-Teil; gleiches
+Muster wie bei den vorherigen Test-Nachzieh-Läufen).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber.
+- `npx tsc -b` (Typecheck) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 45 Testdateien, 261 Tests (vorher 44/256), alle grün —
+  fünf neue Tests in `FlightResults.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
