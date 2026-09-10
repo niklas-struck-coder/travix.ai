@@ -2106,3 +2106,60 @@ einer Fehlermeldung. Ebenfalls nicht vertieft: ob nach einem Fehler ein
 erneuter Versuch innerhalb desselben Chats möglich sein sollte (aktuell
 bei Flug und Unterkunft identisch nur "Neue Reise planen") — das ist ein
 eigenständiges, größeres Verhaltensthema und kein Teil dieses Fundes.
+
+---
+
+## 2026-09-10 — Bestätigungsdialog beim Chat-Neustart (`KiChat.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` hat der autonome IT-Chef-Lauf am
+09.09. genau den eigenen Vorschlag vom selben Tag (`reports/support-chef.md`)
+umgesetzt: Der bis dahin ungeschützte "Neu starten"-Icon-Knopf im
+Chat-Header (`KiChat.tsx`) löst `resetChat()` jetzt nicht mehr sofort aus,
+sondern öffnet erst einen Bestätigungsdialog. Diese Änderung kam erst nach
+dem letzten eigenen Bericht (09.09., anderer Fund oben) in `main` an und
+wurde bisher noch nicht aus Nutzersicht nachvollzogen — heute geprüft:
+
+- `src/components/chat/KiChat.tsx:29-101` (Dialog-State, `handleReset`,
+  `confirmReset`, `handleQuickReply`)
+- `src/components/chat/KiChat.tsx:125-145` (Dialog-Markup)
+- `src/lib/trip/tripStorage.ts:74-77` (`hasTripData()`, zum Vergleich)
+- `src/components/chat/KiChat.test.tsx` (bestehende Tests zum Dialog)
+
+### Reibungspunkt
+
+**Der Bestätigungsdialog erscheint auch dann, wenn es noch gar nichts zu
+verlieren gibt — und behauptet dann fälschlich das Gegenteil**
+
+Der Dialog in `KiChat.tsx:125-145` wird unbedingt gerendert, sobald der
+Knopf geklickt wird — unabhängig vom aktuellen `trip`-Zustand. Genau
+dieselbe Datei hat aber bereits an zwei anderen Stellen (Zeile 68 und 175)
+das etablierte Muster, per `hasTripData(trip)` zu prüfen, ob überhaupt eine
+nennenswerte Planung existiert. Direkt nach dem Laden der Seite (frischer
+Besuch ohne gespeicherten Chat, `trip` ist `emptyTrip`, siehe
+`useChat.ts:110-127`) oder direkt nach einem gerade erst durchgeführten
+Reset ist `hasTripData(trip)` `false` — es gibt nichts, was ein erneuter
+Klick auf "Neu starten" tatsächlich zerstören würde. Der Dialog zeigt in
+genau diesem Fall trotzdem denselben Text an: "Neu starten?" /
+"Deine aktuelle Planung geht verloren." (Zeile 133-134) — eine Aussage, die
+in diesem Zustand schlicht nicht stimmt. Für die Nutzerin bedeutet das
+einen unnötigen zusätzlichen Klick ("Ja, neu starten" bestätigen für eine
+Aktion, die ohnehin folgenlos wäre) und eine leicht verunsichernde,
+falsche Warnung ("was geht denn verloren, ich hab doch noch gar nichts
+gemacht?").
+
+*Vorschlag:* Den Dialog nur öffnen, wenn `hasTripData(trip)` `true` ist —
+z. B. `DialogTrigger` durch einen einfachen `onClick`-Handler ersetzen, der
+bei fehlender Planung direkt `handleReset()` aufruft und sonst
+`setResetDialogOpen(true)` setzt. Kein neues Konzept, nur dieselbe Prüfung
+übertragen, die in derselben Datei (Zeile 68, 175) schon etabliert ist.
+
+### Nicht geprüft
+Ob der separate "Neue Reise planen"-Quick-Reply-Chip (`handleQuickReply`,
+Zeile 95-101) weiterhin bewusst ohne Bestätigung bleiben soll, ist bereits
+in `ZEITPLAN.md` (09.09.-Eintrag) als Absicht dokumentiert und war nicht
+Teil dieser Prüfung. Die Dialog-Bedienung selbst (Fokus, Tastatur,
+Screenreader) wirkt über die verwendete `Dialog`-Komponente konsistent zu
+den bereits an anderer Stelle genutzten Mustern (`EditMode.tsx`,
+`Buchung.tsx`) und wurde nicht erneut im Detail geprüft.
