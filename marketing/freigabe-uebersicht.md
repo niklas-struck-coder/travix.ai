@@ -1,10 +1,76 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-09)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-10)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-10: ein weiterer Tier-4-Kandidat geprüft (Bestätigungsdialog vor Chat-Reset), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`50b6fb1` (09.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 50b6fb1 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`9fe370e`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand 08.09., seither nicht
+aktualisiert), `ZEITPLAN.md` oder diesem Dokument seit dem 09.09. 6.2
+(`TripItem.tsx`-Buchen-Button) laut `ZEITPLAN.md` (Zeile 767) weiterhin
+`[ ]`, keine neuen Kanal-Links, kein Commit zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite. Alle vier Fragen bleiben offen.
+
+**`git log 50b6fb1..origin/main` zeigt 8 neue Commits**, davon sieben ohne
+Content-Relevanz (ein Freigabe-Chef-Log, ein Daily-Status-Update, der
+eigene interaktive Marketing-Chef-Bericht vom 09.09., ein IT-Chef-Bericht
+ohne neue Bugs, ein Support-Chef-Bericht mit vier neuen, noch unbehobenen
+UX-Punkten, sowie vier reine Testdatei-Nachzüge ohne Verhaltensänderung
+für `HotelCard`, `FlightCard`, `TravixAvatar` und die Urlaubsmodus-Seite).
+Eine echte Codeänderung per `git show` verifiziert:
+
+- `6d7c61e` (09.09., später Commit): löst Vorschlag 1 aus
+  `reports/support-chef.md` (09.09.) — der "Neu starten"-Icon-Knopf im
+  Chat-Header (`KiChat.tsx`) löschte Chatverlauf, Reiseplan und
+  `localStorage` bisher mit einem einzigen Klick, ohne Rückfrage und ohne
+  Rückgängig. Jetzt öffnet er einen Bestätigungsdialog ("Neu starten?" /
+  "Deine aktuelle Planung geht verloren.", bestehende `Dialog`-Komponente,
+  gleiches Muster wie `EditMode.tsx`/`Buchung.tsx`), erst ein zweiter
+  Klick auf "Ja, neu starten" löst den Reset aus; der separate "Neue Reise
+  planen"-Quick-Reply-Chip bleibt bewusst unverändert. **Content-relevant**
+  — echter, angebundener Nutzerpfad (jeder, der den Chat nutzt, sieht den
+  Knopf), passt inhaltlich zur selben Vertrauens-/Sorgfalts-Fundgruppe wie
+  die bisherigen Ehrlichkeits-Fixes: ein Fehlklick verliert nicht mehr
+  unwiderruflich eine laufende Planung.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Nur ein einziger neuer Tier-4-Kandidat seit dem
+09.09. (Topf wächst damit von zwei auf drei seit Ausgabe 2) — weiterhin
+deutlich unter der Menge, die selbst am 06.09. mit vier Kandidaten noch
+ausdrücklich als "nicht ausreichend" bewertet wurde, erst recht unter den
+acht, die Ausgabe 2 ausgelöst haben. Ein eigenständiges neuntes
+Social-Content-Stück bleibt weiterhin an dieselben drei unbeantworteten
+Fragen gebunden. Die drei neuen Support-Chef-Punkte vom 09.09. (Löschen
+ohne Bestätigung, Warenkorb-Sackgasse, Entwurf-Fortsetzen generisch) sind
+laut `it-chef-auto-log.md` (09.09., weiterer Lauf) bewusst noch nicht
+umgesetzt — kein verifizierter Commit, also auch kein Tier-4-Kandidat
+daraus. Stattdessen heute nur diese Übersicht aktualisiert (reiner,
+sicherer Übersichts-Lauf, wie z. B. am 01.-04.09., 06.09., 08.09. und
+09.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang,
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der einzige
+neue Punkt stammt aus einem per `git show` einzeln verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Tier-4-Absatz
+unten, Datum im Titel, "Nächster autonomer Lauf" unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-09: ein weiterer Tier-4-Kandidat geprüft (konkrete Fehlermeldung bei Unterkunftssuche), ein toter-Code-Fund bewusst ausgeschlossen, weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
 
@@ -1066,7 +1132,11 @@ Anfang-bis-Ende-Weg im Code.
    zweiter Kandidat (siehe Update 2026-09-09 oben): die Unterkunftssuche
    im Chat zeigt bei einem echten Suchfehler jetzt die konkrete
    Duffel-Fehlermeldung statt immer desselben festen Textes, exakt nach
-   dem bei der Flugsuche bereits etablierten Muster.
+   dem bei der Flugsuche bereits etablierten Muster. Seit dem 09.09.
+   (später Commit) ein dritter Kandidat (siehe Update 2026-09-10 oben):
+   der "Neu starten"-Knopf im Chat-Header löscht Chatverlauf, Reiseplan
+   und `localStorage` nicht mehr mit einem einzigen, ungeschützten Klick,
+   sondern erst nach einer Bestätigung im Dialog.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -1118,7 +1188,14 @@ beantwortet ist: eine dritte Mini-Changelog-Ausgabe ist erst sinnvoll,
 sobald sich seit dem 07.09. wieder genug neue, verifizierte
 Tier-4-Kandidaten angesammelt haben (nicht nach jedem einzelnen neuen
 Fix) — Stand 09.09. sind erst zwei im Topf (siehe Update 2026-09-09
-oben), also weiterhin zu wenig. Sollte Ni zwischenzeitlich einen Kanal für
+oben), also weiterhin zu wenig. Stand 09.10. ist ein dritter Kandidat
+dazugekommen (siehe Update 2026-09-10 oben), damit weiterhin klar unter
+der Menge, die selbst am 06.09. mit vier Kandidaten noch als "nicht
+ausreichend" galt. Die drei am 09.09. gemeldeten, noch offenen
+Support-Chef-Punkte (Löschen ohne Bestätigung, Warenkorb-Sackgasse,
+Entwurf-Fortsetzen generisch) werden erst zu Kandidaten, sobald IT-Chef
+sie tatsächlich behebt — nicht schon durch die Meldung selbst. Sollte Ni
+zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene
 Mikrofon-Hänger (`acc9ae8`) ein naheliegender erster Baustein, da beide

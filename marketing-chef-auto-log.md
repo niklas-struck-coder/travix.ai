@@ -4,6 +4,75 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-10
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`50b6fb1` (09.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemergt war — der Branch war
+also nur noch veraltet, nicht mehr in Arbeit. Neu von aktuellem
+`origin/main` (`9fe370e`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion", explizit als offener, wiederkehrender
+Punkt geführt) — konkret: `marketing/freigabe-uebersicht.md` um einen
+neuen Tier-4-Kandidaten ergänzt, kein neues Content-Stück und keine
+dritte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 09.09. beantwortet wurde (Vorgabe aus
+`marketing/freigabe-uebersicht.md`, Abschnitt "Nächster autonomer Lauf"):
+keine Notiz in `status.md`, `ZEITPLAN.md` oder diesem Dokument, 6.2
+weiterhin `[ ]`, keine neuen Kanal-Links, kein IT-Chef-Commit zur
+Mini-Changelog-Seite. Alle vier Fragen bleiben offen. Danach `git log
+50b6fb1..origin/main` geprüft: 8 neue Commits, sieben davon ohne
+Content-Relevanz (ein Freigabe-Chef-Log, ein Daily-Status-Update, der
+eigene interaktive Marketing-Chef-Bericht vom 09.09., ein IT-Chef-Bericht
+ohne neue Bugs, ein Support-Chef-Bericht mit vier neuen, noch unbehobenen
+UX-Punkten, sowie vier reine Testdatei-Nachzüge ohne
+Verhaltensänderung). Eine echte, per `git show` verifizierte
+Codeänderung geprüft: `6d7c61e` (09.09., später Commit) behebt Vorschlag
+1 aus `reports/support-chef.md` (09.09.) — der "Neu starten"-Icon-Knopf
+im Chat-Header löschte Chatverlauf, Reiseplan und `localStorage` bisher
+mit einem einzigen, ungeschützten Klick; jetzt fragt ein
+Bestätigungsdialog erst nach, bevor der Reset ausgelöst wird. Echter,
+angebundener Nutzerpfad, daher als neuer Tier-4-Kandidat aufgenommen. Mit
+nur einem neuen Kandidaten (Topf wächst damit von zwei auf drei seit
+Ausgabe 2) ist die eigene Gating-Bedingung für eine dritte Ausgabe
+weiterhin klar nicht erfüllt.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet, keine Seite verändert. Keine erfundenen Kennzahlen — der
+neue Punkt stammt aus einem einzeln per `git show` verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage:
+wendet nur die bestehende Positionierung an. Berührt keine der vier
+offenen Fragen, erfindet keine fünfte.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück bzw. eine dritte
+  Mini-Changelog-Ausgabe — siehe Begründung oben, nur ein neuer
+  Tier-4-Kandidat seit dem 09.09., deutlich zu wenig nach der eigenen, am
+  06.09. festgelegten Gating-Bedingung.
+- Die drei neuen Support-Chef-Punkte vom 09.09. (Löschen ohne
+  Bestätigung, Warenkorb-Sackgasse, Entwurf-Fortsetzen generisch) als
+  eigene Tier-4-Kandidaten — laut `it-chef-auto-log.md` (09.09., weiterer
+  Lauf) bewusst noch nicht umgesetzt, also kein verifizierter Commit und
+  damit kein Kandidat.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 10.09. (Prüfung
+  der vier Fragen, Einordnung des neuen Commits, Begründung gegen eine
+  dritte Ausgabe), Tier-4-Abschnitt und "Nächster autonomer Lauf"-
+  Abschnitt aktualisiert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-09
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
