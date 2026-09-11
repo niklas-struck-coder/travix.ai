@@ -9077,3 +9077,59 @@ gesetzt, keine Änderung nötig.
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Branch-Stand:** `it-chef/auto` (origin) war bereits auf aktuellem
+`main`-Stand (letzter Lauf von heute, Commit d642c0e) plus vier eigene,
+noch nicht vom Freigabe-Chef gemergte Commits — kein Merge nötig, direkt
+weitergearbeitet.
+
+**ZEITPLAN.md/reports/ geprüft:** Alle offenen Checklistenpunkte in
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` (2.x, 4.1-4.3, 5.7, 6.2,
+6.6/6.7, 7.4, 7.12, 8.1-8.7, 8.9, 8.11-8.13) bleiben aus denselben, in
+früheren Log-Einträgen bereits mehrfach dokumentierten Gründen blockiert
+(Backend-/Auth-/Zahlungsentscheidung, fehlende `TripDraft`-Felder, offene
+PRD-Fragen OQ-03/OQ-04, fehlende FAQ-Inhalte vom Support-Chef) —
+keiner davon erfüllt alle vier Sicherheitskriterien für den autonomen
+Modus. Die vom Lauf von vor knapp einer Stunde aufgelistete
+Testabdeckungslücken-Liste (`ChatMessage.tsx`, `QuickReplies.tsx`,
+`TripSummaryCard.tsx`, `PageHeader.tsx`, `PageTransition.tsx`,
+`MobileNav.tsx`, `AppShell.tsx`, `App.tsx`, `main.tsx`, `routes.tsx`,
+`pages/KiChat.tsx`, `PlaceholderPage.tsx`) noch aktuell (per Grep erneut
+bestätigt).
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `ChatMessage.tsx`
+nachziehen (4.5, bereits fertige, unveränderte Komponente).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine offene Produkt-/Architekturentscheidung, klar auf eine Datei
+abgegrenzt, objektiv über neue Tests prüfbar (rein additive Testdatei,
+keine Verhaltensänderung an `ChatMessage.tsx` selbst).
+
+**Umgesetzt:** Neue `src/components/chat/ChatMessage.test.tsx` (2 Tests,
+Muster analog `NoResultsMessage.test.tsx`/`TravixAvatar.test.tsx`):
+Assistenten-Nachricht zeigt den Nachrichtentext, die über
+`toLocaleTimeString('de-DE', …)` formatierte Uhrzeit sowie den
+`happy`-Zustand des `TravixAvatar` (`svg.lucide-smile`, gleiches
+Klassen-Muster wie in `TravixAvatar.test.tsx`); Nutzer-Nachricht zeigt den
+Text ohne Avatar. Reine Testabdeckung für bestehendes, unverändertes
+Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`ChatMessage.tsx` selbst. `ZEITPLAN.md` (Phase 4) entsprechend ergänzt;
+Checkbox 4.5 in `tasks/tasks-prd-travix-platform.md` war bereits gesetzt,
+keine Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber.
+- `npx tsc --noEmit` (Typecheck) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 48 Testdateien, 272 Tests (vorher 47/270), alle grün —
+  zwei neue Tests in `ChatMessage.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

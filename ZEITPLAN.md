@@ -723,6 +723,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Datum, Quick-Replies für bekanntes/unbekanntes/fehlendes Ziel, sofortige
   Anzeige der Nutzer-Nachricht plus Denk-Indikator, faktenbasierte Antwort
   nach Ablauf der simulierten Verzögerung (`vi.useFakeTimers`).
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere von
+  `reports/it-chef.md` (10.09.) aufgelistete Testabdeckungslücke
+  geschlossen: `ChatMessage.tsx` (4.5, einzelne Chat-Blase im KI-Chat,
+  rendert je nach `role` mit/ohne `TravixAvatar` und formatierter Uhrzeit)
+  hatte bisher keine eigene Testdatei. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `ChatMessage.test.tsx` (2 Tests, Muster analog `NoResultsMessage.test.tsx`/
+  `TravixAvatar.test.tsx`): Assistenten-Nachricht zeigt Text, formatierte
+  Uhrzeit (`toLocaleTimeString('de-DE', …)`) und den `happy`-Avatar
+  (`svg.lucide-smile`); Nutzer-Nachricht zeigt Text ohne Avatar.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
