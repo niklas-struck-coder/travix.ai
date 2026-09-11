@@ -1,22 +1,26 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-10
+**Datum:** 2026-09-11
 
-## Was ist seit dem letzten Eintrag (2026-09-09) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-10) passiert?
 
-Vorschlag 1 aus dem letzten Bericht ist behoben: Der "Neu starten"-Knopf
-im KI-Chat (`src/components/chat/KiChat.tsx`) löst `resetChat()` nicht
-mehr sofort aus, sondern fragt jetzt erst mit einem Bestätigungsdialog
-nach ("Neu starten?" / "Deine aktuelle Planung geht verloren."). Genau
-der Reibungspunkt, den ich gemeldet hatte — sauber umgesetzt, inklusive
-neuer Tests.
+Vorschlag 3 aus dem letzten Bericht wurde aufgegriffen — allerdings nicht
+mit der vollen Lösung (Entwurfs-ID mitgeben), sondern mit der von mir
+genannten Alternative: In `src/pages/Reiseentwuerfe.tsx` erscheint jetzt
+ein Hinweis-Kästchen, sobald mehr als ein Entwurf vorhanden ist. Es
+erklärt ehrlich, dass "Planung fortsetzen" aktuell bei jedem Entwurf zum
+selben KI-Chat führt und mehrere gleichzeitig aktive Planungen noch nicht
+unterstützt werden. Das nimmt der Verwirrung viel von ihrer Schärfe — eine
+Nutzerin, die das liest, wundert sich nicht mehr, sondern weiß, woran sie
+ist. Die eigentliche Ursache (nur ein gespeicherter Trip in
+`tripStorage.ts`) bleibt aber bestehen, der Hinweis ist laut Code-Kommentar
+bewusst als Zwischenlösung markiert.
 
-Ansonsten wurden seit gestern nur Testdateien ergänzt (u. a. für
-`HotelCard`, `FlightCard`, `TravixAvatar`, `Urlaubsmodus`) — keine
-Änderung an Nutzerführung, Texten oder Fehlerbehandlung. Ich habe die
-betroffenen Seiten trotzdem nochmal mit frischem Blick geprüft: Die drei
-verbleibenden Punkte aus dem letzten Bericht sind unverändert offen, ich
-trage sie deshalb unten weiter.
+Ansonsten wurden seit gestern nur weitere Testdateien ergänzt (u. a. für
+`ChatMessage`, `TravixAvatar`, `FlightCard`, `HotelCard`, `Urlaubsmodus`)
+— keine weitere Änderung an Nutzerführung, Texten oder Fehlerbehandlung.
+Ich habe die betroffenen Seiten nochmal geprüft: Die zwei verbleibenden
+Punkte aus dem letzten Bericht sind unverändert offen.
 
 ## Meine Vorschläge
 
@@ -41,15 +45,4 @@ trage sie deshalb unten weiter.
    bewusst (noch) nicht vorgesehen ist — das der Nutzerin kurz im Text
    erklären, statt sie ratlos zurückzulassen.
 
-3. **"Planung fortsetzen" bei Reiseentwürfen führt immer zum selben,
-   generischen Chat statt zum jeweiligen Entwurf.** In
-   `src/pages/Reiseentwuerfe.tsx` verlinkt der Button bei jeder
-   Entwurfskarte identisch auf `/ki-chat`, ohne die jeweilige Entwurfs-ID
-   mitzugeben. Wer zwei Entwürfe hat (z. B. Lissabon und Kyoto) und bei
-   Kyoto auf "Planung fortsetzen" klickt, landet trotzdem im einen,
-   global gespeicherten Chat. *Vorschlag:* Die Entwurfs-ID mitgeben und
-   den passenden Entwurf beim Fortsetzen laden — sobald mehrere Entwürfe
-   gleichzeitig unterstützt werden sollen — oder kurzfristig im Text
-   klarmachen, dass aktuell nur eine aktive Planung möglich ist.
-
-_Letztes Update: 2026-09-10_
+_Letztes Update: 2026-09-11_
