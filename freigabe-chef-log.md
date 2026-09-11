@@ -1,5 +1,81 @@
 # Freigabe-Chef-Log
 
+## 2026-09-10, Tages-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" geprüft und gemergt). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`5d056c2`).
+- `support-chef/auto` — 3 Commits vor `main`: `585efea` (09.09., der
+  bereits zweimal nicht gemergte, überholte Fund), `a3da2d5` (Merge von
+  `main` in den Branch) und `a318d38` (10.09., neuer Log-Eintrag).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-
+  Ergänzung (neuer Tier-4-Kandidat "Bestätigungsdialog vor Chat-Reset"),
+  kein neues Content-Stück, keine dritte Mini-Changelog-Ausgabe, nichts
+  gepostet oder live verändert.
+- Der als neuer Tier-4-Kandidat aufgenommene Commit `6d7c61e`
+  ("Neu starten" fragt jetzt vor dem Zurücksetzen nach) per `git show`
+  selbst nachgelesen: existiert genau wie beschrieben, bereits Teil von
+  `main` (aus dem heutigen "früher Nacht-Check" gemergt).
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine offene
+  Positionierungs-Grundsatzfrage berührt, Gating-Logik für eine dritte
+  Mini-Changelog-Ausgabe konsistent zur bisherigen Linie.
+→ **Passt, nach `main` gemergt** (Fast-Forward `9fe370e..5d056c2`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Enthält weiterhin unverändert den Commit `585efea` (09.09.) mit dem
+  Fund "`stayError: boolean` vs. `flightErrors`-Diskrepanz in
+  `HotelResults.tsx`". Erneut selbst per `git show
+  origin/main:src/components/search/HotelResults.tsx` nachgelesen: `main`
+  hat schon seit Commit `7068653` (08.09., vor dem 09.09.-Fund
+  entstanden) eine `errors: DuffelError[]`-Prop mit `error.message` pro
+  Fehler — der im Bericht beschriebene Zustand existiert in `main` nicht
+  mehr. Dieser Fund wurde bereits zweimal zuvor (Einträge "2026-09-09,
+  Tages-Check" und "2026-09-10, früher Nacht-Check") aus genau diesem
+  Grund nicht gemergt. Support-Chef hat den Branch inzwischen zwar mit
+  `main` gemergt (`a3da2d5`) und einen neuen, eigenständigen Lauf
+  aufgesetzt, den veralteten Commit `585efea` aber nicht entfernt oder
+  korrigiert — er bleibt Teil der Branch-Historie.
+- Der neue Log-Eintrag `a318d38` ("fehlende `hasTripData`-Prüfung im
+  Neu-starten-Bestätigungsdialog", `KiChat.tsx`) dagegen selbst
+  nachvollzogen und für zutreffend befunden: `origin/main:src/components/
+  chat/KiChat.tsx` zeigt tatsächlich einen unbedingten `DialogTrigger`
+  ohne vorherige `hasTripData(trip)`-Prüfung, obwohl genau dieses Muster
+  im selben File an zwei anderen Stellen (Zeile 68, 175) schon etabliert
+  ist. Datei-/Zeilenangaben stimmen, Fund ist real und nicht erfunden.
+- Da beide Commits (der veraltete und der neue) auf demselben Branch
+  liegen und ein Merge beide gleichzeitig nach `main` bringen würde,
+  kann ich den validen neuen Fund nicht isoliert übernehmen, ohne den
+  überholten, sachlich falschen Fund mit hineinzuziehen. Fremde Commits
+  selbst umzuschreiben oder den alten Eintrag zu entfernen ist nicht
+  meine Aufgabe.
+→ **Nicht gemergt.** Gleicher Grund wie in den letzten zwei Läufen:
+`585efea` würde einen bereits behobenen Punkt als aktuell offenen,
+bestätigten Reibungspunkt in `main` festschreiben — sachlich falsch
+gegenüber dem heutigen Code-Stand. Der neue, valide Fund (`a318d38`)
+hängt an derselben Kette und bleibt dadurch mitblockiert.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`),
+ein Branch bewusst nicht gemergt (`support-chef/auto`), `it-chef/auto`
+planmäßig übersprungen (keine neuen Commits seit dem früheren Lauf
+heute).
+
+**Info an Ni nötig:** Ja — `support-chef/auto` hängt jetzt zum dritten
+Mal in Folge am selben überholten Commit (`585efea`) fest, und
+Support-Chef repariert das strukturell nicht selbst (er baut nur oben
+drauf, statt die Branch-Historie zu bereinigen). Ohne manuelles
+Eingreifen (z. B. `585efea` per Rebase/Squash aus der Branch-Historie
+entfernen, oder den betroffenen Log-Absatz direkt auf `main`
+nachträglich korrigieren) wird dieser Branch vermutlich nie merge-fähig,
+und der ansonsten gute neue Fund von heute (`a318d38`,
+`hasTripData`-Lücke im Reset-Dialog) bleibt so lange mitblockiert.
+
 ## 2026-09-10, früher Nacht-Check
 
 **Geprüfte Branches:**
@@ -2663,3 +2739,54 @@ ein Branch bewusst nicht gemergt (`support-chef/auto`, überholter Fund),
 wiederholtes Muster bei `support-chef/auto` (erstmaliger Fall dieser
 Art) und keine eigenen Regelverstöße erkennbar — daher keine gesonderte
 Info an Ni nötig, reicht als Log-Eintrag.
+
+## 2026-09-11, früher Nacht-Check
+
+**Geprüfte Branches:** Auftrag für diesen Lauf war explizit, `it-chef/auto`
+gründlich zu prüfen; `marketing-chef/auto`/`support-chef/auto` nur kurz
+gegenzuchecken und zu überspringen, falls keine neuen Commits von heute
+vorliegen (die laufen separat erst um 6 Uhr).
+- `marketing-chef/auto` — 0 Commits vor `main` (letzter Commit `5d056c2`,
+  09.09., bereits gemergt). Planmäßig übersprungen.
+- `support-chef/auto` — 3 Commits vor `main` (`585efea` 09.09., `a3da2d5`
+  Merge, `a318d38` 10.09.) — keiner davon von heute. Planmäßig
+  übersprungen für diesen frühen Lauf, bleibt für den späteren
+  Freigabe-Chef-Lauf.
+- `it-chef/auto` — 5 neue Commits vor `main` (`58015ec`, `f18d393`,
+  `78c764f`, `d642c0e`, `2ce856b`), alle von heute (10./11.09. laut
+  Zeitstempel der letzten Läufe).
+
+**Prüfung `it-chef/auto`** (unabhängig selbst verifiziert, nicht nur den
+Log-Eintrag geglaubt):
+- Diff gelesen: vier reine Test-Nachzieh-Commits (`ChatMessage.test.tsx`,
+  `NoResultsMessage.test.tsx`, `HotelResults.test.tsx`,
+  `FlightResults.test.tsx` — jeweils neue Testdatei, keine Änderung an
+  der getesteten Komponente selbst) sowie ein Commit mit echter
+  Code-Änderung: `Reiseentwuerfe.tsx` zeigt jetzt bei mehr als einem
+  Entwurf einen Hinweis, dass "Planung fortsetzen" bei jedem Entwurf
+  denselben KI-Chat öffnet (Vorschlag 3 aus `reports/support-chef.md`,
+  10.09.), plus zwei neue Regressionstests dafür.
+- Branch selbst ausgecheckt, frisches `npm install`, dann selbst
+  ausgeführt (nicht nur den Log-Eintrag übernommen):
+  - `npx tsc -b` → grün, keine Fehler.
+  - `npx eslint .` → 0 Fehler, nur dieselben 3 vorbestehenden Warnings
+    in `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+  - `npx vitest run` → 48 Testdateien, 272 Tests, alle grün — deckt sich
+    mit der im `it-chef-auto-log.md` behaupteten Zahl.
+- Scope-Check: keine Berührung von Auth/Zahlungen/Rechtstexten. Der eine
+  Code-Change ist klar auf `Reiseentwuerfe.tsx` begrenzt (kein
+  Scope-Creep), Test-Commits ändern nur neue Testdateien plus
+  `ZEITPLAN.md`/Log.
+- Design-Check: Der neue Hinweis in `Reiseentwuerfe.tsx` (gestrichelte
+  Card, `Info`-Icon in `text-teal`, gedämpfter Text) selbst mit der
+  bestehenden Prämienprogramm-Card in `Dashboard.tsx` verglichen (per
+  `grep` auf `border-dashed`/`text-teal`) — exakt dasselbe Stil-Muster,
+  passt zu `MARKENDESIGN.md`.
+→ **Passt, nach `main` gemergt** (Fast-Forward `ade61af..2ce856b`,
+gepusht).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`, alle
+Checks selbst grün, kein Scope-Verstoß). `marketing-chef/auto` und
+`support-chef/auto` planmäßig übersprungen (keine neuen Commits von
+heute, separater 6-Uhr-Lauf zuständig). Keine Auffälligkeiten, keine
+gesonderte Info an Ni nötig.

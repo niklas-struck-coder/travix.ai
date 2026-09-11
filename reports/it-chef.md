@@ -1,43 +1,40 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-09-09
+**Datum:** 2026-09-10
 
-## Was ist seit dem letzten Eintrag (2026-09-08) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-09) passiert?
 
-Der separate `it-chef-eigen`-Kanal (direkte Commits auf `it-chef/auto`,
-von Freigabe-Chef geprüft und nach `main` gemergt) hatte seither mehrere
-Läufe: Die im letzten Bericht als nächster Schritt genannte
-Unterkunfts-Fehlermeldung im Chat wurde behoben — `useChat.ts` reicht
-jetzt `stayErrors: DuffelError[]` statt eines reinen Booleans durch,
-`HotelResults.tsx` zeigt dieselbe konkrete Duffel-Fehlermeldung wie
-die Flugsuche. Außerdem wurde der zuvor gemeldete Ladetext bei
-Zug/Bus/Fähre-Suche korrigiert, der fälschlich eine "echte" Suche
-versprach, obwohl dafür keine Datenquelle angebunden ist. Zusätzlich
-wurden 4 `npm audit`-Schwachstellen (1 hoch, 3 mittel) in transitiven
-Dev-Tooling-Abhängigkeiten (`js-yaml`, `hono`, `@vitest/mocker`)
-behoben — reine Lockfile-Änderung, kein Laufzeit-Code-Pfad. Danach
-liefen mehrere weitere Läufe des `it-chef-eigen`-Kanals ohne neuen
-sicheren Fund (siehe `it-chef-auto-log.md`).
+Der `it-chef-eigen`-Kanal (direkte Commits auf `it-chef/auto`, von
+Freigabe-Chef geprüft und nach `main` gemergt) hatte seither einen
+Lauf: "Neu starten" im KI-Chat fragt jetzt vor dem Zurücksetzen nach,
+statt den Chat sofort zu löschen. Außerdem wurden vier fehlende
+Testdateien nachgezogen (`HotelCard`, `FlightCard`, `TravixAvatar`,
+Urlaubsmodus-Seite) — reine Testabdeckung, keine Verhaltensänderung.
+Freigabe-Chef hat beides geprüft und gemergt.
 
-Eigene gezielte Bug-Suche in dieser Session (PR-Kanal): Ein
-Rechercheagent hat 20 bisher seltener geprüfte Dateien vollständig
-gelesen — u. a. `Buchung.tsx`, `Warenkorb.tsx`, `Preisalarme.tsx`,
-`Kalender.tsx`, `Kartenansicht.tsx`, `Urlaubsmodus.tsx`,
-`Einstellungen.tsx`, `Profil.tsx`, `Aktivitaeten.tsx`, `Angebote.tsx`,
-`ReiseSuche.tsx`, `Favoriten.tsx`, `MeineReisen.tsx`, `Dashboard.tsx`,
-`FlightWizard.tsx`, `HotelWizard.tsx`, `EditMode.tsx`,
-`ChecklistPanel.tsx`, `Sidebar.tsx`, `MobileNav.tsx`, `AppShell.tsx`.
-Geprüft wurden u. a. Fehlerbehandlung, Edge Cases (leere Arrays,
-Divisionen, Datumsvergleiche), interne Links/Routen und deutsche
-Texte auf Tippfehler. Ergebnis: keine echten Bugs. Ein anfänglicher
-Verdacht bei `Kalender.tsx`s Monatswechsel-Logik (gemischter
-Zugriff auf alten und aktualisierten State) erwies sich bei genauerer
-Prüfung als nicht ausnutzbar, da React zwischen einzelnen Klicks
-zuverlässig neu rendert. Zusätzlich eigene TODO/FIXME-Suche über
-den ganzen `src`-Ordner (kein echter Treffer) und Lesen von
-`useChat.ts` im Detail (Fehlerbehandlung bei Flug-/Unterkunftssuche
-durchgängig vorhanden, `.catch()` an allen `searchFlights`-/
-`searchStays`-Aufrufen).
+Eigene gezielte Bug-Suche in dieser Session (PR-Kanal): Ich habe
+`useChat.ts` selbst im Detail gelesen (Fehlerbehandlung bei Flug-/
+Unterkunftssuche weiterhin durchgängig vorhanden) und zusätzlich einen
+Rechercheagenten alle bisher nicht namentlich geprüften Dateien
+vollständig lesen lassen: den kompletten `src/lib`-Ordner
+(`calculateProgress.ts`, `calendarUtils.ts`, `cartTotals.ts`,
+`checklistRules.ts`, `tripStorage.ts`, `format.ts`, `utils.ts`,
+`duffel/client.ts`, `ai/mockAdvisor.ts`, `ai/mockConcierge.ts`,
+`ai/speech.ts`, `design-tokens.ts`, `nav-config.ts`), `useConcierge.ts`,
+die restlichen Suchkomponenten (`TrainCard`, `NoResultsMessage`,
+`FlightResults`, `FlightWizard`, `HotelWizard`), die Chat-Komponenten
+(`ChatInput`, `ChatMessage`, `KiChat`, `QuickReplies`,
+`TripSummaryCard`), die Layout-Komponenten (`AppShell`, `MobileNav`,
+`Sidebar`, `PageHeader`, `PageTransition`) sowie `App.tsx`,
+`routes.tsx` und `main.tsx`. Geprüft wurden Fehlerbehandlung, Edge
+Cases, tote Routen/Importe und deutsche Texte auf Tippfehler. Zwei
+anfängliche Verdachtsmomente (Cleanup-Funktion in `KiChat.tsx`,
+fehlendes Unmount-Cleanup bei einem `setTimeout` in `useConcierge.ts`)
+erwiesen sich bei genauerer Prüfung als unbedenklich. TODO/FIXME-Suche
+über den ganzen `src`-Ordner: kein echter Treffer.
+
+Damit sind inzwischen praktisch alle Quelldateien der App mindestens
+einmal gezielt gelesen worden, ohne einen echten Bug zu finden.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -46,8 +43,7 @@ für einen automatischen Fix erfüllt.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine neuen. Die im letzten Bericht gemeldete Unterkunfts-Fehlermeldung
-ist inzwischen behoben (siehe oben).
+Keine.
 
 ## Weitere Vorschläge
 
@@ -57,15 +53,17 @@ ist inzwischen behoben (siehe oben).
    sind laut Log inhaltlich längst über `it-chef/auto` auf `main`
    gelandet und können geschlossen werden. Reine Aufräumarbeit ohne
    Coderisiko, aber nur Ni kann PRs schließen.
-2. **Codebasis im Bug-Bereich weiterhin sehr sauber.** Mehrere
-   unabhängige Läufe in Folge (heute drei vom `it-chef-eigen`-Kanal,
-   dazu diese Session) ohne neuen Fund. Für weiteren Fortschritt lohnt
-   sich der Fokus eher auf echte Feature-Lücken als auf reine
-   Fehlersuche.
+2. **Codebasis im Bug-Bereich durchgehend sauber.** Mehrere
+   unabhängige Läufe in Folge (der komplette Seiten-Ordner am
+   2026-09-09, jetzt zusätzlich der komplette `lib`-/Komponenten-Rest
+   heute) ohne neuen Fund. Weitere reine Fehlersuche dürfte kaum noch
+   etwas bringen — für Fortschritt lohnt sich eher der Fokus auf echte
+   Feature-Lücken oder gezielte Tests für Randfälle statt weiterer
+   Vollständig-Lese-Durchgänge.
 3. **Größte offene Architektur-Baustellen bleiben unverändert:**
    Direktbuchung (aktuell nur Redirect zum Anbieter) und das
    Duffel-Flug-Backend (entworfen, aber ohne Base44-Builder+-Abo
    nicht deploybar) — beides hängt an offenen Produktentscheidungen,
    keine autonome Umsetzung möglich.
 
-_Letztes Update: 2026-09-09_
+_Letztes Update: 2026-09-10_

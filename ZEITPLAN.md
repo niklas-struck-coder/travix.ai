@@ -320,6 +320,35 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   URL, kein "Auswählen"-Button ohne `onSelect`-Prop, `onClick` ruft
   `onSelect` mit dem Angebot auf, sowie der deaktivierte
   "Ausgewählt"-Zustand bei `selected` (kein erneuter `onSelect`-Aufruf).
+  Vom autonomen IT-Chef-Lauf am 10.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `FlightResults.tsx` (Lade-/Fehler-/
+  Leer-/Treffer-Zustände beim Rendern der Flugkarten-Liste im KI-Chat)
+  hatte bisher keine eigene Testdatei und war — anders als angenommen —
+  auch nicht indirekt über `KiChat.test.tsx` abgedeckt, da dort
+  `useChat` komplett gemockt wird und `FlightResults` folglich nie
+  wirklich gerendert wird. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `FlightResults.test.tsx` (5 Tests, Muster analog
+  `TrainResults.test.tsx`): Lade-Anzeige, Fehlermeldung statt
+  Null-Treffer-Text bei einem echten Suchfehler, kein Rendering ohne
+  Laden/Fehler/Angebote, Null-Treffer-Meldung bei leerer Angebotsliste,
+  sowie eine gerenderte Karte pro Angebot. Das strukturell identische
+  `HotelResults.tsx` hatte dieselbe Lücke — vom autonomen IT-Chef-Lauf am
+  10.09. (weiterer Lauf) nachgeholt: neue `HotelResults.test.tsx` (5
+  Tests, Muster analog `FlightResults.test.tsx`) prüft Lade-Anzeige,
+  Fehlermeldung statt Null-Treffer-Text bei einem echten Suchfehler,
+  kein Rendering ohne Laden/Fehler/Angebote, Null-Treffer-Meldung bei
+  leerer Angebotsliste, sowie eine gerenderte Karte pro Angebot. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `NoResultsMessage.tsx` (5.6, ehrliche
+  Null-Treffer-Meldung, u. a. in `HotelResults`/`FlightResults`/
+  `TrainResults`/`Flugsuche`/`Hotelsuche` verwendet) hatte bisher keine
+  eigene Testdatei. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `NoResultsMessage.test.tsx` (2
+  Tests): Standardtitel/-text ohne Props, sowie übergebener eigener
+  Titel/Text statt der Standardwerte.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -694,6 +723,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Datum, Quick-Replies für bekanntes/unbekanntes/fehlendes Ziel, sofortige
   Anzeige der Nutzer-Nachricht plus Denk-Indikator, faktenbasierte Antwort
   nach Ablauf der simulierten Verzögerung (`vi.useFakeTimers`).
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere von
+  `reports/it-chef.md` (10.09.) aufgelistete Testabdeckungslücke
+  geschlossen: `ChatMessage.tsx` (4.5, einzelne Chat-Blase im KI-Chat,
+  rendert je nach `role` mit/ohne `TravixAvatar` und formatierter Uhrzeit)
+  hatte bisher keine eigene Testdatei. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `ChatMessage.test.tsx` (2 Tests, Muster analog `NoResultsMessage.test.tsx`/
+  `TravixAvatar.test.tsx`): Assistenten-Nachricht zeigt Text, formatierte
+  Uhrzeit (`toLocaleTimeString('de-DE', …)`) und den `happy`-Avatar
+  (`svg.lucide-smile`); Nutzer-Nachricht zeigt Text ohne Avatar.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
@@ -938,7 +977,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `MeineReisen.tsx` — dafür fehlt noch echte, geteilte Trip-Speicherung
   (hängt an der offenen Backend-Entscheidung)
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
-  Unterbrechungspunkt fortsetzen
+  Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
+  je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,
+  `tripStorage.ts` verwaltet aber nur einen aktiven Trip; das ist eine
+  eigene Datenmodell-Entscheidung, kein autonom fällbarer Punkt. Vom
+  autonomen IT-Chef-Lauf am 11.09. der kurzfristige Teil aus
+  `reports/support-chef.md` (10.09., Vorschlag 3) umgesetzt: Der Button
+  "Planung fortsetzen" verlinkte bei jedem Entwurf identisch auf
+  `/ki-chat`, ohne dass ersichtlich war, dass das immer denselben einen
+  Chat öffnet statt der Details des jeweiligen Entwurfs — bei zwei
+  Entwürfen (z. B. Lissabon und Kyoto) landete ein Klick bei Kyoto
+  trotzdem im global gespeicherten Chat. Statt der eigentlichen Umsetzung
+  (eigene Architektur-Entscheidung, s.o.) jetzt ein ehrlicher Hinweis in
+  `Reiseentwuerfe.tsx`, sichtbar nur wenn mehr als ein Entwurf existiert,
+  im selben Karten-Stil wie der bereits bestehende Prämienprogramm-Hinweis
+  in `Dashboard.tsx` (gestrichelte Card, `Info`-Icon, gedämpfter Text).
+  Zwei neue Regressionstests in `Reiseentwuerfe.test.tsx` (Hinweis
+  erscheint bei mehreren Entwürfen, verschwindet, sobald nur noch einer
+  übrig ist).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

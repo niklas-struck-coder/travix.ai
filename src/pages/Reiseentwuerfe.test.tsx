@@ -21,6 +21,27 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getByText('20%')).toBeInTheDocument()
   })
 
+  it('shows a hint that "Planung fortsetzen" opens the same chat for every draft while there are multiple', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).toBeInTheDocument()
+  })
+
+  it('hides the multi-draft hint once only one draft is left', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon löschen' }))
+    expect(screen.queryByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).not.toBeInTheDocument()
+  })
+
   it('pauses and resumes a draft via the pause/play toggle', () => {
     render(
       <MemoryRouter>
