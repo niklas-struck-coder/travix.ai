@@ -2790,3 +2790,86 @@ Checks selbst grün, kein Scope-Verstoß). `marketing-chef/auto` und
 `support-chef/auto` planmäßig übersprungen (keine neuen Commits von
 heute, separater 6-Uhr-Lauf zuständig). Keine Auffälligkeiten, keine
 gesonderte Info an Ni nötig.
+
+## 2026-09-11, Tages-Check
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" geprüft und gemergt). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`4fb18e8`, 11.09.).
+- `support-chef/auto` — 5 Commits vor `main`, davon 3 neue Log-Einträge
+  (`585efea` 09.09., `a318d38` 10.09., `c88f1ac` 11.09.) plus 2
+  Merge-main-Commits.
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Branch war auf veraltetem `main`-Stand (`5d056c2`, 10.09.) aufgesetzt —
+  `git merge-base --is-ancestor origin/main origin/marketing-chef/auto`
+  bestätigt: nicht der Fall, 11 neuere `main`-Commits fehlten. Ein
+  Tip-zu-Tip-Diff hätte daher massive Löschungen vorgetäuscht; stattdessen
+  gezielt nur den einzelnen neuen Commit (`4fb18e8`) per `git show`
+  geprüft.
+- Der Commit ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` (reine Markdown-Aktualisierung), kein
+  Produkt-Code. Nimmt einen bereits in `main` vorhandenen Commit
+  (`78c764f`, Hinweis-Karte in `Reiseentwuerfe.tsx`) als vierten
+  Tier-4-Kandidaten auf — selbst per `git show` gegen `main` nachgelesen:
+  existiert wie beschrieben.
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine
+  Positionierungs-Grundsatzfrage berührt, nichts gepostet oder live
+  verändert (reiner Übersichts-Lauf).
+- Kein Dateiüberschneidung mit den 11 dazwischenliegenden `main`-Commits
+  (`git log origin/marketing-chef/auto..origin/main --name-only` geprüft),
+  daher regulärer Merge statt Fast-Forward risikofrei möglich.
+→ **Passt, nach `main` gemergt** (regulärer Merge-Commit, da Branch auf
+veraltetem `main`-Stand basierte; kein Konflikt).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- `585efea` (09.09., "stayError vs. flightErrors Diskrepanz"): **erneut
+  unabhängig am aktuellen Code-Stand nachgeprüft** (`git show
+  origin/main:src/components/search/HotelResults.tsx` und
+  `src/hooks/useChat.ts`) — der Fund ist weiterhin überholt:
+  `HotelResults.tsx` nimmt bereits `errors: DuffelError[]` als Prop und
+  zeigt `error.message` pro Fehler, `useChat.ts` nutzt bereits
+  `stayErrors: DuffelError[]` an beiden `searchStays()`-Aufrufstellen
+  (Zeilen 78, 190f., 340f.) — exakt der im Fund vorgeschlagene Fix ist
+  längst umgesetzt. Das ist jetzt das **vierte Mal in Folge**, dass dieser
+  einzelne, überholte Log-Eintrag den Merge des gesamten Branches
+  blockiert (zuvor: 09.09., 10.09., früherer Lauf vom 11.09. laut
+  vorherigen Log-Einträgen).
+- `a318d38` (10.09., "fehlende hasTripData-Prüfung im
+  Neu-starten-Bestätigungsdialog") — selbst gegen `src/components/chat/
+  KiChat.tsx` nachgelesen: Zeile 126 (`DialogTrigger`) ist tatsächlich
+  unbedingt gerendert, ohne die in derselben Datei an zwei anderen Stellen
+  (Zeile 68, 175) etablierte `hasTripData(trip)`-Prüfung. Fund verifiziert,
+  wirkt nicht erfunden.
+- `c88f1ac` (11.09., "ungenaue Hinweis-Karte bei abgeschlossenen
+  Entwürfen") — selbst gegen `src/pages/Reiseentwuerfe.tsx` nachgelesen:
+  `finalizeDraft` (Zeile 84-88) entfernt einen Entwurf tatsächlich nicht
+  aus `drafts`, die Hinweis-Karte prüft weiterhin nur `drafts.length > 1`
+  (Zeile 134) statt nur nicht-finalisierte Entwürfe zu zählen. Fund
+  verifiziert, wirkt nicht erfunden.
+- Beide neuen Funde (`a318d38`, `c88f1ac`) sind für sich genommen
+  legitime, verifizierte Analyse ohne Code-Änderung — würden also einzeln
+  bestehen. Da git-Branches aber nur als Ganzes gemergt werden und ich
+  fremde Branches nicht selbst bereinige (Grundsatz dieses Skills), bleibt
+  der gesamte Branch wegen des weiterhin unkorrigierten `585efea`
+  blockiert.
+→ **Nicht gemergt.** Gleicher Grund wie zuvor: der überholte Fund vom
+09.09. würde als "bestätigter, offener Reibungspunkt" in `main` landen,
+obwohl er längst behoben ist. Branch bleibt liegen.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`), ein
+Branch bewusst nicht gemergt (`support-chef/auto`), `it-chef/auto`
+planmäßig übersprungen (keine neuen Commits). **Info an Ni nötig:**
+`support-chef/auto` wird jetzt zum vierten Mal in Folge durch denselben
+unkorrigierten, überholten Log-Eintrag (`585efea`) blockiert — die zwei
+neuen, dahinter gestapelten Funde sind gut, kommen aber nicht durch, weil
+niemand den alten Eintrag korrigiert oder entfernt. Das ist kein
+Regelverstoß von Support-Chef, aber ein strukturelles Problem, das sich
+ohne Eingriff nicht von selbst löst (der Branch merged inzwischen zwar
+`main`, lässt den falschen Eintrag aber unangetastet stehen). Ni müsste
+entweder den 585efea-Eintrag im laufenden `support-chef-auto-log.md`
+selbst korrigieren/entfernen lassen, oder Support-Chef anweisen, vor jedem
+Lauf zu prüfen, ob eigene ältere offene Funde inzwischen behoben wurden.
