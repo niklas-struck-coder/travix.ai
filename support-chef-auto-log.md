@@ -2163,3 +2163,67 @@ Teil dieser Prüfung. Die Dialog-Bedienung selbst (Fokus, Tastatur,
 Screenreader) wirkt über die verwendete `Dialog`-Komponente konsistent zu
 den bereits an anderer Stelle genutzten Mustern (`EditMode.tsx`,
 `Buchung.tsx`) und wurde nicht erneut im Detail geprüft.
+
+---
+
+## 2026-09-11 — Hinweis-Karte zu geteiltem Chat (`Reiseentwuerfe.tsx`)
+
+**Geprüfter Bereich:** `src/pages/Reiseentwuerfe.tsx` (`/entwuerfe`),
+die neue Hinweis-Karte (Zeile 134-146), die der autonome IT-Chef-Lauf
+heute Nacht (Commit `78c764f`, "Vorschlag 3 aus reports/support-chef.md,
+10.09.") ergänzt hat: Sie soll ehrlich darauf hinweisen, dass "Planung
+fortsetzen" bei mehreren Entwürfen immer denselben KI-Chat öffnet statt
+den jeweiligen Entwurf.
+
+### Reibungspunkte
+
+**1. Die Bedingung zählt alle Entwürfe, nicht nur wirklich aktive —
+der Hinweis wird dadurch selbst ungenau**
+
+Die Karte wird über `drafts.length > 1` (Zeile 134) eingeblendet, und der
+Text behauptet dann unbedingt: „mehrere gleichzeitig aktive Planungen
+unterstützt Travix noch nicht" (Zeile 141-142). `finalizeDraft` (Zeile
+84-88) entfernt einen abgeschlossenen Entwurf aber nicht aus `drafts` —
+er bleibt mit Status `finalized` im Array. Schließt man im Demo-Zustand
+einen der beiden Entwürfe ab (z. B. Kyoto über den "Abschließen"-Button),
+bleibt `drafts.length` weiterhin 2, die Karte bleibt sichtbar — obwohl
+es jetzt nur noch eine einzige tatsächlich aktive Planung gibt (Lissabon).
+Schließt man beide ab, zeigt die Karte immer noch "mehrere gleichzeitig
+aktive Planungen", obwohl es null aktive gibt. Ausgerechnet die Karte,
+die laut Code-Kommentar (Zeile 127-133) für "ehrlich statt irreführend"
+steht, wird damit in genau dem Fall selbst irreführend, für den
+`finalizeDraft` sichtbar gemacht wurde.
+
+*Vorschlag:* Für die Bedingung und den Text nur nicht-finalisierte
+Entwürfe zählen, z. B. `drafts.filter((d) => d.status !== 'finalized').length > 1`
+statt `drafts.length > 1`.
+
+**2. Kein Weg, den Hinweis dauerhaft auszublenden**
+
+Die Karte (Zeile 134-146) hat keinerlei Dismiss-Mechanik — sie wird bei
+jedem Seitenaufruf erneut angezeigt, solange mehr als ein Entwurf
+existiert, ohne "Verstanden"-Button oder Speicherung einer
+Ausgeblendet-Präferenz. Für eine Nutzerin mit dauerhaft mehreren echten
+Reiseplanungen (der Normalfall, sobald es keine Demo-Daten mehr sind)
+liest sie denselben Hinweistext bei jedem einzelnen Besuch der Seite,
+ohne dass sich je etwas ändert. Das folgt zwar demselben bereits
+etablierten Muster wie die Prämienprogramm-Karte in `Dashboard.tsx`
+(auf die der Code-Kommentar in Zeile 128 selbst verweist) — ist an
+dieser zweiten Stelle im Produkt aber kein neues Problem, sondern eine
+Wiederholung desselben grundsätzlichen Reibungspunkts.
+
+*Vorschlag:* Wie bei `Dashboard.tsx` würde sich auch hier ein einmaliges
+"Verstanden, nicht mehr zeigen" lohnen (z. B. per `localStorage`-Flag),
+statt beide Stellen dauerhaft unbedingt einzublenden.
+
+### Nicht geprüft
+Die drei bereits am 19.08. gemeldeten Reibungspunkte zu dieser Datei
+(sofortiges Löschen ohne Rückgängig, "Planung fortsetzen" bei
+abgeschlossenen Entwürfen, nicht unterscheidbare duplizierte Karte)
+bestehen laut heutigem Code-Stand unverändert fort, wurden hier aber
+nicht erneut im Detail wiederholt, da sie bereits dokumentiert sind. Die
+übrigen, heute vom IT-Chef-Auto-Lauf gemergten Änderungen (`ChatMessage.
+test.tsx`, `FlightResults.test.tsx`, `HotelResults.test.tsx`,
+`NoResultsMessage.test.tsx`) sind laut deren eigenen Commit-Beschreibungen
+reine Testabdeckung für bestehendes, unverändertes Verhalten ohne neuen
+Code-Pfad — dafür gibt es aus Nutzersicht nichts Neues zu prüfen.
