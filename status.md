@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-09):**
-- Fehlende Testdateien für HotelCard, FlightCard, TravixAvatar und die
-  Urlaubsmodus-Seite nachgezogen (Testabdeckung verbessert)
-- Fix: "Neu starten" im KI-Chat fragt jetzt vor dem Zurücksetzen nach, statt
-  sofort zu löschen
-- Marketing-Chef hat einen weiteren Tier-4-Kandidaten eingeordnet, kein neues
-  Content-Stück
-- Freigabe-Chef hat die Änderungen geprüft und gemergt; ein Support-Chef-
-  Vorschlag wurde zum dritten Mal als überholt eingestuft und nicht gemergt
+**Seit letztem Update (2026-09-10):**
+- Fehlende Testdateien für HotelResults, FlightResults, ChatMessage und
+  NoResultsMessage nachgezogen (Testabdeckung weiter verbessert)
+- IT-Chef hat einen Hinweis auf einen geteilten Chat bei "Planung fortsetzen"
+  (Reiseentwürfe) notiert; Marketing-Chef hat denselben Punkt als weiteren
+  Tier-4-Kandidaten eingeordnet, kein neues Content-Stück
+- Freigabe-Chef hat IT-Chef- und Marketing-Chef-Änderungen geprüft und gemergt;
+  ein Support-Chef-Vorschlag wurde zum vierten Mal als überholt eingestuft
+  und nicht gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-10_
+_Letztes Update: 2026-09-11_
