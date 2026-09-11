@@ -341,6 +341,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   leerer Angebotsliste, sowie eine gerenderte Karte pro Angebot. Reine
   Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
   gefunden.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `NoResultsMessage.tsx` (5.6, ehrliche
+  Null-Treffer-Meldung, u. a. in `HotelResults`/`FlightResults`/
+  `TrainResults`/`Flugsuche`/`Hotelsuche` verwendet) hatte bisher keine
+  eigene Testdatei. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `NoResultsMessage.test.tsx` (2
+  Tests): Standardtitel/-text ohne Props, sowie übergebener eigener
+  Titel/Text statt der Standardwerte.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
