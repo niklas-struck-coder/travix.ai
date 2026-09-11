@@ -2739,3 +2739,54 @@ ein Branch bewusst nicht gemergt (`support-chef/auto`, überholter Fund),
 wiederholtes Muster bei `support-chef/auto` (erstmaliger Fall dieser
 Art) und keine eigenen Regelverstöße erkennbar — daher keine gesonderte
 Info an Ni nötig, reicht als Log-Eintrag.
+
+## 2026-09-11, früher Nacht-Check
+
+**Geprüfte Branches:** Auftrag für diesen Lauf war explizit, `it-chef/auto`
+gründlich zu prüfen; `marketing-chef/auto`/`support-chef/auto` nur kurz
+gegenzuchecken und zu überspringen, falls keine neuen Commits von heute
+vorliegen (die laufen separat erst um 6 Uhr).
+- `marketing-chef/auto` — 0 Commits vor `main` (letzter Commit `5d056c2`,
+  09.09., bereits gemergt). Planmäßig übersprungen.
+- `support-chef/auto` — 3 Commits vor `main` (`585efea` 09.09., `a3da2d5`
+  Merge, `a318d38` 10.09.) — keiner davon von heute. Planmäßig
+  übersprungen für diesen frühen Lauf, bleibt für den späteren
+  Freigabe-Chef-Lauf.
+- `it-chef/auto` — 5 neue Commits vor `main` (`58015ec`, `f18d393`,
+  `78c764f`, `d642c0e`, `2ce856b`), alle von heute (10./11.09. laut
+  Zeitstempel der letzten Läufe).
+
+**Prüfung `it-chef/auto`** (unabhängig selbst verifiziert, nicht nur den
+Log-Eintrag geglaubt):
+- Diff gelesen: vier reine Test-Nachzieh-Commits (`ChatMessage.test.tsx`,
+  `NoResultsMessage.test.tsx`, `HotelResults.test.tsx`,
+  `FlightResults.test.tsx` — jeweils neue Testdatei, keine Änderung an
+  der getesteten Komponente selbst) sowie ein Commit mit echter
+  Code-Änderung: `Reiseentwuerfe.tsx` zeigt jetzt bei mehr als einem
+  Entwurf einen Hinweis, dass "Planung fortsetzen" bei jedem Entwurf
+  denselben KI-Chat öffnet (Vorschlag 3 aus `reports/support-chef.md`,
+  10.09.), plus zwei neue Regressionstests dafür.
+- Branch selbst ausgecheckt, frisches `npm install`, dann selbst
+  ausgeführt (nicht nur den Log-Eintrag übernommen):
+  - `npx tsc -b` → grün, keine Fehler.
+  - `npx eslint .` → 0 Fehler, nur dieselben 3 vorbestehenden Warnings
+    in `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+  - `npx vitest run` → 48 Testdateien, 272 Tests, alle grün — deckt sich
+    mit der im `it-chef-auto-log.md` behaupteten Zahl.
+- Scope-Check: keine Berührung von Auth/Zahlungen/Rechtstexten. Der eine
+  Code-Change ist klar auf `Reiseentwuerfe.tsx` begrenzt (kein
+  Scope-Creep), Test-Commits ändern nur neue Testdateien plus
+  `ZEITPLAN.md`/Log.
+- Design-Check: Der neue Hinweis in `Reiseentwuerfe.tsx` (gestrichelte
+  Card, `Info`-Icon in `text-teal`, gedämpfter Text) selbst mit der
+  bestehenden Prämienprogramm-Card in `Dashboard.tsx` verglichen (per
+  `grep` auf `border-dashed`/`text-teal`) — exakt dasselbe Stil-Muster,
+  passt zu `MARKENDESIGN.md`.
+→ **Passt, nach `main` gemergt** (Fast-Forward `ade61af..2ce856b`,
+gepusht).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`, alle
+Checks selbst grün, kein Scope-Verstoß). `marketing-chef/auto` und
+`support-chef/auto` planmäßig übersprungen (keine neuen Commits von
+heute, separater 6-Uhr-Lauf zuständig). Keine Auffälligkeiten, keine
+gesonderte Info an Ni nötig.
