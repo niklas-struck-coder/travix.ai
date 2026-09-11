@@ -9197,3 +9197,52 @@ Lauf).
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+Frischer, isolierter Cloud-Checkout, niemand live dabei. `main` und
+`it-chef/auto` per `git fetch` geholt: `it-chef/auto` lag exakt auf
+`main` plus dem eigenen Commit aus dem letzten Lauf oben (kein Merge
+nötig, keine offenen unveröffentlichten Änderungen). `node_modules`
+fehlte zu Beginn (`npm ci` nachgeholt, 650 Pakete, 0 Vulnerabilities).
+
+**Ausgewählter Punkt:** Der letzte Log-Eintrag oben ließ
+`TripSummaryCard.tsx` selbst ausdrücklich als nächsten ähnlichen
+Kandidaten offen — fehlende Testdatei für die bereits fertige,
+unveränderte `TripSummaryCard.tsx` (4.8, kompakte Reise-Zusammenfassung
+im KI-Chat, zeigt Ziel/Transportmittel/Reisedaten/Budget/Unterkunft plus
+Link zur Buchungsseite).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Trip-Objekt rein, gefilterte Zeilen plus
+ein Link raus). Keine offene Produkt-/Architekturentscheidung nötig.
+Klar auf eine Datei abgegrenzt, Verhalten vollständig durch bestehenden
+Code festgelegt. Objektiv über neue Tests prüfbar, rein additiv — keine
+Verhaltensänderung an `TripSummaryCard.tsx` selbst.
+
+**Umgesetzt:** Neue `src/components/chat/TripSummaryCard.test.tsx` (4
+Tests, Muster analog `ChecklistPanel.test.tsx`s `MemoryRouter`-Wrapper,
+da die Komponente einen `react-router-dom`-`Link` rendert): kein
+Rendering, wenn kein Trip-Feld gesetzt ist (früher `rows.length ===
+0`-Return); Anzeige nur der tatsächlich gesetzten Felder (Ziel und
+Budget gesetzt, aber kein Transportmittel-Label sichtbar); korrektes
+Transportmittel-Label für den gewählten Modus (hier: Zug); alle Felder
+zusammen inkl. sichtbarem Link "Speichern & ansehen" zu `/buchung`.
+Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer
+Bug gefunden, keine Codeänderung an `TripSummaryCard.tsx` selbst.
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag unter Phase 4).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc --noEmit -p tsconfig.app.json` (Typecheck) → grün, keine
+  Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 50 Testdateien, 279 Tests (vorher 49/275), alle
+  grün — vier neue Tests in `TripSummaryCard.test.tsx`, keine
+  bestehenden Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

@@ -741,8 +741,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gefunden. Neue `QuickReplies.test.tsx` (3 Tests, Muster analog
   `NoResultsMessage.test.tsx`): kein Rendering bei leerer Options-Liste,
   ein Button pro Option, Klick löst `onSelect` mit dem Options-Text aus.
-  `TripSummaryCard.tsx` (4.8) hat dieselbe Lücke und bleibt bewusst offen
-  für einen künftigen Lauf.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) die dort selbst
+  vorgemerkte Schwesterlücke geschlossen: `TripSummaryCard.tsx` (4.8,
+  kompakte Reise-Zusammenfassung im KI-Chat) hatte ebenfalls noch keine
+  eigene Testdatei. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `TripSummaryCard.test.tsx` (4
+  Tests, Muster analog `ChecklistPanel.test.tsx`s `MemoryRouter`-Wrapper
+  für den enthaltenen `Link`): kein Rendering ohne gesetzte Trip-Felder,
+  Anzeige nur der tatsächlich gesetzten Felder, Transportmittel-Label für
+  den gewählten Modus, sowie alle Felder zusammen inkl. Link zu
+  `/buchung`.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
