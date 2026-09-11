@@ -9133,3 +9133,67 @@ keine Änderung nötig.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout, `main` per `git fetch`
+neu geholt und per Fast-Forward-Merge in `it-chef/auto` übernommen (Branch
+lag hinter `main`, keine eigenen unveröffentlichten Änderungen von einem
+vorherigen Lauf vorhanden). `node_modules` fehlte zu Beginn (`npm ci`
+nachgeholt). Baseline vor jeder eigenen Änderung geprüft: Lint (0 Fehler,
+nur die 3 bekannten Warnings in `ui/{badge,button,tabs}.tsx`), Typecheck
+(`tsc -b`, grün), Tests (`vitest run`: 48 Dateien, 272 Tests, alle grün) —
+alles bereits grün vor dieser Sitzung.
+
+Suche nach einem sicheren Punkt: `reports/it-chef.md` (heutiger Stand)
+meldet für den PR-Kanal keinen neuen Bug und schlägt als einzig
+verbleibende risikoarme Arbeit weitere gezielte Tests vor. Der letzte
+Log-Eintrag oben listete bereits eine Reihe noch ungetesteter,
+bestehender Dateien; eigener erneuter Scan (alle `.ts`/`.tsx` unter `src`
+ohne `ui/`-Basiskomponenten mit passender `*.test.ts(x)`-Datei) bestätigt
+davon u. a. weiterhin offen: `QuickReplies.tsx`, `TripSummaryCard.tsx`,
+`PageHeader.tsx`, `PageTransition.tsx`, `MobileNav.tsx`, `AppShell.tsx`,
+`pages/KiChat.tsx` (reiner Wrapper um die bereits getestete
+`components/chat/KiChat.tsx`), `PlaceholderPage.tsx`, sowie reine
+Typdefinitionsdateien (`types/*.ts`, keine eigene Logik).
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `QuickReplies.tsx`
+nachziehen (4.7 in `tasks/tasks-prd-travix-platform.md`, bereits fertige,
+unveränderte Komponente — Chip-Leiste für Chat-Schnellantworten, genutzt
+in `KiChat.tsx` und `Urlaubsmodus.tsx`).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Liste von Optionen rein, Klick-Callback
+raus). Keine offene Produkt-/Architekturentscheidung nötig. Klar auf eine
+Datei abgegrenzt, Verhalten vollständig durch bestehenden Code
+festgelegt (kein Interpretationsspielraum). Objektiv über neue Tests
+prüfbar, rein additiv — keine Verhaltensänderung an `QuickReplies.tsx`
+selbst.
+
+**Umgesetzt:** Neue `src/components/chat/QuickReplies.test.tsx` (3 Tests,
+Muster analog `NoResultsMessage.test.tsx`): kein Rendering bei leerer
+Options-Liste (`container` bleibt leer, deckt den frühen
+`options.length === 0`-Return ab), ein Button pro übergebener Option,
+Klick auf einen Button ruft `onSelect` genau einmal mit dem Options-Text
+auf. Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+neuer Bug gefunden, keine Codeänderung an `QuickReplies.tsx` selbst.
+`TripSummaryCard.tsx` bleibt als nächster ähnlicher Kandidat bewusst
+offen für einen künftigen, eigenständigen Lauf (ein einziger Punkt pro
+Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 49 Testdateien, 275 Tests (vorher 48/272), alle
+  grün — drei neue Tests in `QuickReplies.test.tsx`, keine bestehenden
+  Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

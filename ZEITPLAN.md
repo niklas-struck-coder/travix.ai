@@ -733,6 +733,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `TravixAvatar.test.tsx`): Assistenten-Nachricht zeigt Text, formatierte
   Uhrzeit (`toLocaleTimeString('de-DE', …)`) und den `happy`-Avatar
   (`svg.lucide-smile`); Nutzer-Nachricht zeigt Text ohne Avatar.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `QuickReplies.tsx` (4.7,
+  Chip-Leiste für Chat-Schnellantworten, genutzt in `KiChat.tsx` und
+  `Urlaubsmodus.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `QuickReplies.test.tsx` (3 Tests, Muster analog
+  `NoResultsMessage.test.tsx`): kein Rendering bei leerer Options-Liste,
+  ein Button pro Option, Klick löst `onSelect` mit dem Options-Text aus.
+  `TripSummaryCard.tsx` (4.8) hat dieselbe Lücke und bleibt bewusst offen
+  für einen künftigen Lauf.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
