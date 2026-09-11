@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarDays, Copy, PauseCircle, PiggyBank, PlayCircle, Sparkles, Trash2, CheckCircle2 } from 'lucide-react'
+import {
+  CalendarDays,
+  Copy,
+  Info,
+  PauseCircle,
+  PiggyBank,
+  PlayCircle,
+  Sparkles,
+  Trash2,
+  CheckCircle2,
+} from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -113,6 +123,27 @@ export function Reiseentwuerfe() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Reiseentwürfe" description="Gespeicherte Planungen fortsetzen" />
+
+      {/* Ehrlich statt irreführend (MARKENDESIGN.md, siehe auch die
+          Prämienprogramm-Karte in Dashboard.tsx): "Planung fortsetzen" führt
+          bei jedem Entwurf zum selben, einen aktiven KI-Chat, da
+          `tripStorage.ts` aktuell nur einen Trip gleichzeitig speichert —
+          echte Wiederaufnahme je Entwurf ist Aufgabe 7.4 und weiterhin offen
+          (siehe reports/support-chef.md, 10.09.). Nur relevant, sobald es
+          mehr als einen Entwurf gibt. */}
+      {drafts.length > 1 && (
+        <Card className="border-dashed">
+          <CardContent className="flex items-start gap-3 px-4 py-4 text-sm text-muted-foreground">
+            <Info className="mt-0.5 size-5 shrink-0 text-teal" />
+            <p>
+              <span className="font-medium text-foreground">Hinweis: </span>
+              „Planung fortsetzen" öffnet aktuell bei jedem Entwurf denselben KI-Chat, nicht die Details
+              dieses einzelnen Entwurfs — mehrere gleichzeitig aktive Planungen unterstützt Travix noch
+              nicht.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {drafts.map((draft) => {

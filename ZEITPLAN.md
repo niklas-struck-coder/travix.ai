@@ -959,7 +959,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `MeineReisen.tsx` — dafür fehlt noch echte, geteilte Trip-Speicherung
   (hängt an der offenen Backend-Entscheidung)
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
-  Unterbrechungspunkt fortsetzen
+  Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
+  je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,
+  `tripStorage.ts` verwaltet aber nur einen aktiven Trip; das ist eine
+  eigene Datenmodell-Entscheidung, kein autonom fällbarer Punkt. Vom
+  autonomen IT-Chef-Lauf am 11.09. der kurzfristige Teil aus
+  `reports/support-chef.md` (10.09., Vorschlag 3) umgesetzt: Der Button
+  "Planung fortsetzen" verlinkte bei jedem Entwurf identisch auf
+  `/ki-chat`, ohne dass ersichtlich war, dass das immer denselben einen
+  Chat öffnet statt der Details des jeweiligen Entwurfs — bei zwei
+  Entwürfen (z. B. Lissabon und Kyoto) landete ein Klick bei Kyoto
+  trotzdem im global gespeicherten Chat. Statt der eigentlichen Umsetzung
+  (eigene Architektur-Entscheidung, s.o.) jetzt ein ehrlicher Hinweis in
+  `Reiseentwuerfe.tsx`, sichtbar nur wenn mehr als ein Entwurf existiert,
+  im selben Karten-Stil wie der bereits bestehende Prämienprogramm-Hinweis
+  in `Dashboard.tsx` (gestrichelte Card, `Info`-Icon, gedämpfter Text).
+  Zwei neue Regressionstests in `Reiseentwuerfe.test.tsx` (Hinweis
+  erscheint bei mehreren Entwürfen, verschwindet, sobald nur noch einer
+  übrig ist).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

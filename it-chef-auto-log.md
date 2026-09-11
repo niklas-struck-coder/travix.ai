@@ -8948,3 +8948,67 @@ neuer Bug gefunden. `ZEITPLAN.md` (Phase 5 Suche) entsprechend ergänzt.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11
+
+**Branch-Stand:** `it-chef/auto` lag bereits zwei Commits vor `main`
+(`HotelResults.test.tsx`/`FlightResults.test.tsx`-Nachzieher aus den
+vorherigen Läufen), `main` selbst unverändert als Merge-Base — kein
+Merge nötig, direkt weitergearbeitet.
+
+**ZEITPLAN.md/reports/ geprüft:** `reports/it-chef.md` (10.09.) meldet
+selbst, dass praktisch der ganze Code mittlerweile gezielt gelesen
+wurde, ohne neuen Bug zu finden, und empfiehlt echte Feature-Lücken statt
+weiterer Lese-Durchgänge. Fast alle offenen Sprint-Punkte in `ZEITPLAN.md`
+hängen an Nis Backend-/Auth-/Zahlungsentscheidung (Sprint 1 Rest, 2.x,
+Sprint 5) oder brauchen neue Preis-/Historie-Felder in `TripDraft`, die
+eine eigene Design-Entscheidung wären (6.2, 6.6, 6.7, 7.4, 7.12).
+`reports/support-chef.md` (10.09.) listet drei Reibungspunkte; Vorschlag 1
+(einheitliche Löschbestätigung/Undo über fünf Seiten) legt selbst offen,
+dass erst ein Muster festgelegt werden müsste — keine autonome Wahl.
+Vorschlag 2 (Warenkorb-Sackgasse) berührt den noch offenen
+Zahlungsprozess, auch nur in der Textbegründung — bewusst nicht
+angefasst. Vorschlag 3 bietet dagegen selbst einen kurzfristigen,
+architekturfreien Ausweg an: statt der eigentlichen Umsetzung von 7.4
+(eigene Datenmodell-Entscheidung, siehe oben) einfach ehrlich im Text
+klarmachen, dass "Planung fortsetzen" aktuell bei jedem Entwurf denselben
+einen Chat öffnet. Erfüllt alle vier Sicherheitskriterien: kein Auth-/
+Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-/
+Architekturentscheidung (reine Ehrlichkeits-Textergänzung nach dem
+bereits etablierten Muster der Prämienprogramm-Karte in `Dashboard.tsx`),
+klar abgegrenzt auf eine Seite, objektiv über neue Tests prüfbar.
+
+**Ausgewählter Punkt:** Vorschlag 3 aus `reports/support-chef.md`
+(10.09.) — kurzfristiger Teil.
+
+**Umgesetzt:** `src/pages/Reiseentwuerfe.tsx` zeigt jetzt, sobald mehr als
+ein Entwurf existiert, eine gestrichelte Hinweis-Card oberhalb der
+Entwurfskarten ("Hinweis: „Planung fortsetzen" öffnet aktuell bei jedem
+Entwurf denselben KI-Chat, nicht die Details dieses einzelnen Entwurfs —
+mehrere gleichzeitig aktive Planungen unterstützt Travix noch nicht."),
+exakt im selben Stil (gestrichelter Rahmen, `Info`-Icon, gedämpfter Text)
+wie der bestehende Prämienprogramm-Hinweis in `Dashboard.tsx`. Ändert
+nichts am eigentlichen Verhalten des Buttons (verlinkt weiterhin auf
+`/ki-chat`) — die echte, im Bericht ebenfalls skizzierte Lösung (Entwurfs-
+ID mitgeben, passenden Chat laden) bleibt für 7.4 offen, da `tripStorage.ts`
+weiterhin nur einen aktiven Trip speichert. `ZEITPLAN.md` (7.4) und
+`tasks/tasks-prd-travix-platform.md` (7.4) entsprechend ergänzt, Checkbox
+bewusst nicht gesetzt, da die eigentliche Aufgabe (echte Wiederaufnahme)
+weiterhin offen ist. Zwei neue Regressionstests in
+`Reiseentwuerfe.test.tsx` (Hinweis erscheint bei den zwei Demo-Entwürfen;
+verschwindet, sobald durch Löschen nur noch einer übrig ist).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber.
+- `npx tsc --noEmit` (Typecheck) → grün.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm test` → 46 Testdateien, 270 Tests (vorher 46/268), alle grün —
+  zwei neue Tests in `Reiseentwuerfe.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
