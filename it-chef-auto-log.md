@@ -9246,3 +9246,66 @@ Bug gefunden, keine Codeänderung an `TripSummaryCard.tsx` selbst.
   bestehenden Tests angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, niemand live
+dabei. `main` und `it-chef/auto` per `git fetch` geholt: `it-chef/auto`
+lag bereits auf `main` plus zwei eigenen, noch nicht von Freigabe-Chef
+geprüften Commits aus einem vorherigen Lauf (zwei nachgezogene
+Testdateien für `TripSummaryCard.tsx`/`QuickReplies.tsx`) — kein Merge
+nötig, dort weitergearbeitet. `node_modules` fehlte zu Beginn (`npm ci`
+nachgeholt, 650 Pakete, 0 Vulnerabilities). Baseline vor jeder eigenen
+Änderung geprüft: Typecheck (`tsc -b`, grün), Lint (0 Fehler, nur die 3
+bekannten Warnings in `ui/{badge,button,tabs}.tsx`), Tests (`vitest run`:
+50 Dateien, 279 Tests, alle grün) — alles bereits grün vor dieser
+Sitzung.
+
+Suche nach einem sicheren Punkt: `reports/it-chef.md` (11.09.) meldet
+für den PR-Kanal keinen neuen Bug und schlägt weitere gezielte Tests als
+einzig verbleibende risikoarme Arbeit vor. Eigener Scan (alle
+`.ts`/`.tsx` unter `src` ohne `ui/`-Basiskomponenten und ohne reine
+Typdefinitionsdateien mit passender `*.test.ts(x)`-Datei) bestätigt als
+noch offen: `App.tsx`, `AppShell.tsx`, `MobileNav.tsx`, `PageHeader.tsx`,
+`PageTransition.tsx`, `pages/KiChat.tsx` (reiner Wrapper um die bereits
+getestete `components/chat/KiChat.tsx`), `PlaceholderPage.tsx`,
+`lib/design-tokens.ts`, `lib/utils.ts`.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `PageHeader.tsx`
+nachziehen (3.4 in `tasks/tasks-prd-travix-platform.md`, bereits fertige,
+unveränderte Komponente — wiederverwendbarer Seitentitel mit optionaler
+Beschreibung und Aktionen, u. a. in `Dashboard.tsx`, `Favoriten.tsx`,
+`ReiseSuche.tsx`, `KiChat.tsx` verwendet).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Titel/Beschreibung/Aktionen-Props rein,
+Markup raus, keine eigene Logik). Keine offene Produkt-/
+Architekturentscheidung nötig. Klar auf eine Datei abgegrenzt, Verhalten
+vollständig durch bestehenden Code festgelegt. Objektiv über neue Tests
+prüfbar, rein additiv — keine Verhaltensänderung an `PageHeader.tsx`
+selbst.
+
+**Umgesetzt:** Neue `src/components/layout/PageHeader.test.tsx` (3
+Tests, Muster analog `NoResultsMessage.test.tsx`): Titel wird ohne
+Beschreibung/Aktionen gerendert (kein `<p>`-Element vorhanden); die
+Beschreibung erscheint, wenn übergeben; die Aktionen (hier ein Button)
+erscheinen, wenn übergeben. Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`PageHeader.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag
+unter Phase 3); Checkbox 3.4 in `tasks/tasks-prd-travix-platform.md` war
+bereits gesetzt, keine Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 51 Testdateien, 282 Tests (vorher 50/279), alle
+  grün — drei neue Tests in `PageHeader.test.tsx`, keine bestehenden
+  Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

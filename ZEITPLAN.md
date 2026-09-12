@@ -48,6 +48,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ("Seitenleiste einklappen"/"Seitenleiste ausklappen"). Neue
   `Sidebar.test.tsx` (bisher gab es dort keinen Test) prüft beide
   Zustände.
+  Vom autonomen IT-Chef-Lauf am 12.09. eine weitere Testabdeckungslücke
+  geschlossen: `PageHeader.tsx` (3.4, wiederverwendbarer Seitentitel mit
+  optionaler Beschreibung und Aktionen, u. a. in `Dashboard.tsx`,
+  `Favoriten.tsx`, `ReiseSuche.tsx`, `KiChat.tsx` verwendet) hatte bisher
+  keine eigene Testdatei. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `PageHeader.test.tsx` (3 Tests, Muster analog
+  `NoResultsMessage.test.tsx`): Titel ohne Beschreibung/Aktionen, Anzeige
+  der Beschreibung wenn übergeben, Anzeige der Aktionen wenn übergeben.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
