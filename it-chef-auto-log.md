@@ -9482,3 +9482,65 @@ daher keine Checkbox-Änderung nötig.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/it-chef/auto`
+(letzter Commit: der heutige `MobileNav.tsx`-Testabdeckungs-Lauf) und nicht
+hinter `main` zurück — kein Merge nötig, direkt auf dem Branch
+weitergearbeitet. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Die reine Testabdeckungs-Aufräumung ist laut dem
+letzten Lauf heute selbst erschöpft (keine vergleichbar klaren Kandidaten
+mehr übrig). Stattdessen `reports/support-chef.md` (12.09.) geprüft:
+Vorschlag 1 dort beschreibt einen konkreten, im Code nachvollziehbaren
+Fund — `PlaceholderPage.tsx` zeigte auf allen noch nicht gebauten Seiten
+(u. a. `/hilfe`, aber auch Deal Finder/Reisebudget/Premium/Rewards) den
+Satz "Diese Seite ist Teil des Travix-Grundgerüsts." — ein interner
+Entwicklungsbegriff ("Grundgerüst") in nutzersichtbarem Text, den echte
+Nutzerinnen nicht einordnen können.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig für den engen Teil des Fundes (Jargon-Entfernung) — anders als der
+weitergehende Teil von Support-Chefs Vorschlag (Mailto-/Kontakthinweis
+speziell für `/hilfe`), der bewusst NICHT umgesetzt wurde: Laut `ZEITPLAN.md`
+ist "Support-E-Mail live" (Sprint 1, Support-Track) noch nicht
+abgeschlossen, im Code existiert bislang keine einzige Kontaktadresse
+(`grep` über `src/` ohne Treffer für `mailto:`/`@`-Adressen) — eine
+autonom erfundene Adresse wäre eine Annahme über nicht vorhandene Fakten
+und damit gegen Kriterium 3 (keine Interpretation über die Aufgabenliste
+hinaus). Die enge Korrektur dagegen ist klar beschrieben (Fund von
+Support-Chef, Text 1:1 im Code auffindbar) und objektiv über
+Typecheck/Lint/Tests prüfbar.
+
+**Umgesetzt:** In `src/pages/PlaceholderPage.tsx` den zweiten Satz
+("Diese Seite ist Teil des Travix-Grundgerüsts.") ersatzlos entfernt,
+verbleibender Hinweis ("{title} wird als Nächstes gebaut.") bleibt ehrlich
+ohne internen Jargon (passt zur "ehrlich statt verkäuferisch"-Vorgabe in
+`MARKENDESIGN.md`, auch wenn dort keine explizite Platzhalter-Text-Vorgabe
+existiert — bestehende Tonalität beibehalten, nichts Neues erfunden).
+`PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
+entfernten Satz, keine sonstige Verhaltensänderung getestet).
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag direkt nach dem heutigen
+`PlaceholderPage.tsx`-Testabdeckungs-Eintrag unter Phase 3);
+`tasks/tasks-prd-travix-platform.md` hat für `PlaceholderPage.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.5, wie schon beim
+vorherigen Lauf vermerkt), daher keine Checkbox-Änderung nötig. 8.11 Hilfe
+bleibt weiterhin ein eigener offener Punkt (blockiert auf echte
+FAQ-/Kontakt-Inhalte vom Support-Chef).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 54 Testdateien, 290 Tests, alle grün (Testanzahl
+  unverändert gegenüber vorher, da nur eine bestehende Assertion angepasst
+  wurde, kein neuer Test hinzugekommen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
