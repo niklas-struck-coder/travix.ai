@@ -14,7 +14,7 @@ describe('PlaceholderPage', () => {
   it('shows a build-in-progress notice mentioning the page title', () => {
     render(<PlaceholderPage title="Deal Finder" description="Findet die besten Angebote" icon={Compass} />)
 
-    expect(screen.getByText('Deal Finder wird als Nächstes gebaut. Diese Seite ist Teil des Travix-Grundgerüsts.')).toBeInTheDocument()
+    expect(screen.getByText('Deal Finder wird als Nächstes gebaut.')).toBeInTheDocument()
   })
 
   it('renders the given icon', () => {

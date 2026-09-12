@@ -13,9 +13,7 @@ export function PlaceholderPage({ title, description, icon: Icon }: PlaceholderP
       <PageHeader title={title} description={description} />
       <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-24 text-center text-muted-foreground">
         <Icon className="size-10 text-teal" strokeWidth={1.5} />
-        <p className="max-w-sm text-sm">
-          {title} wird als Nächstes gebaut. Diese Seite ist Teil des Travix-Grundgerüsts.
-        </p>
+        <p className="max-w-sm text-sm">{title} wird als Nächstes gebaut.</p>
       </div>
     </div>
   )

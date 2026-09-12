@@ -65,6 +65,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gefunden. Neue `PlaceholderPage.test.tsx` (3 Tests, Muster analog
   `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel/Beschreibung über
   `PageHeader`, Hinweistext mit Seitentitel, sowie das übergebene Icon.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) einen von
+  Support-Chef gemeldeten Befund behoben (siehe `reports/support-chef.md`,
+  12.09., Vorschlag 1): Der Platzhaltertext in `PlaceholderPage.tsx`
+  ("... Diese Seite ist Teil des Travix-Grundgerüsts.") nutzte einen
+  internen Entwicklungsbegriff, der Nutzerinnen auf allen noch nicht
+  gebauten Seiten (u. a. `/hilfe`, Deal Finder, Reisebudget, Premium,
+  Rewards/Loyalty) angezeigt wurde. Satz ersatzlos entfernt, verbleibender
+  Hinweis ("{title} wird als Nächstes gebaut.") bleibt ehrlich und ohne
+  internen Jargon. Der weitergehende Teil des Vorschlags (Mailto-/
+  Kontakthinweis speziell für `/hilfe`) bewusst nicht umgesetzt: Sprint 1
+  "Support-E-Mail live" ist laut diesem Dokument noch nicht abgeschlossen,
+  im Code existiert bisher keine echte Kontaktadresse — eine autonom
+  erfundene Mailto-Adresse wäre keine reine Bugfix-Korrektur, sondern eine
+  Annahme über nicht vorhandene Fakten. Bleibt offener Punkt für 8.11.
+  `PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
+  entfernten Satz).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
