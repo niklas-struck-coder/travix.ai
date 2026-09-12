@@ -9423,3 +9423,62 @@ Verdrahtung, nicht auf Testabdeckung), daher keine Checkbox-Änderung nötig.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war bereits vollständig nach `main`
+gemerged (siehe `freigabe-chef-log.md`, früher Nacht-Check) und `main` war
+seither um 6 weitere Commits (Marketing-/Support-Chef-Berichte, Freigabe-
+Chef-Log, Tagesstatus) vorangekommen. Branch per `git merge --ff-only
+origin/main` auf den aktuellen `main`-Stand gebracht — reiner Fast-Forward,
+kein Konflikt, `main` selbst nicht angerührt.
+
+**Ausgewählter Punkt:** Letzte verbliebene Lücke in derselben
+Testabdeckungs-Aufräumung wie in den vorherigen Läufen: `MobileNav.tsx`
+(3.3, Hamburger-Menü für die mobile Navigation, strukturell das Gegenstück
+zu `Sidebar.tsx` für kleine Bildschirme) hatte bisher keine eigene
+Testdatei — `Sidebar.tsx` ist bereits seit dem 01.09.-Lauf über
+`Sidebar.test.tsx` abgedeckt. Systematisch per Abgleich aller
+`src/**/*.{ts,tsx}`-Dateien gegen vorhandene `*.test.*`-Dateien geprüft;
+verbleibende ungetestete Dateien sind ausschließlich generische
+shadcn/ui-Primitiven (`badge`, `button`, `card`, `dialog`, `input`,
+`label`, `progress`, `select`, `sheet`, `tabs`), reine Typdefinitionen
+(`types/*.ts`), Konstanten (`design-tokens.ts`) sowie Einstiegspunkte
+(`main.tsx`, `App.tsx`, `routes.tsx`) — keiner davon ein vergleichbar
+klarer, eigenständig sinnvoller Testkandidat wie `MobileNav.tsx`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten einer
+fertigen, kleinen Komponente, keine Interpretation über den vorhandenen
+Code (`MobileNav.tsx`, `nav-config.ts`) hinaus nötig. Ergebnis objektiv
+über Typecheck/Lint/Tests prüfbar, rein additiv — keine Verhaltensänderung
+an `MobileNav.tsx` selbst.
+
+**Umgesetzt:** Neue `src/components/layout/MobileNav.test.tsx` (3 Tests,
+Muster analog `Sidebar.test.tsx`): Vor dem Öffnen ist kein Navigationslink
+sichtbar (Radix-Dialog-Inhalt ist ungemountet); ein Klick auf den Button
+"Menü öffnen" zeigt alle drei Gruppenüberschriften (`Planen`, `Meine
+Reise`, `Konto`) sowie die Links mit korrektem `href` (Stichprobe
+`KI-Chat` → `/ki-chat`); ein Klick auf einen Link schließt das Menü wieder
+(`onClick`-Handler in `MobileNav.tsx` setzt `open` auf `false`). Reine
+Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+gefunden, keine Codeänderung an `MobileNav.tsx` selbst. `ZEITPLAN.md`
+entsprechend ergänzt (Eintrag unter Phase 3, direkt nach dem
+`KiChat.tsx`-Seiten-Wrapper-Eintrag vom 12.09.); `tasks/tasks-prd-travix-platform.md`
+hat 3.3 bereits als `[x]` markiert (Implementierung, nicht Testabdeckung),
+daher keine Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 54 Testdateien, 290 Tests (vorher 53/287), alle
+  grün — drei neue Tests in `MobileNav.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

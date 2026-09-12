@@ -376,6 +376,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gefunden. Neue `src/pages/KiChat.test.tsx` (2 Tests, Container-Import
   gemockt, Muster analog `PageHeader.test.tsx`): Seitentitel/-beschreibung
   über `PageHeader`, sowie Rendering des Chat-Containers.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `MobileNav.tsx` (3.3, Hamburger-Menü für
+  die mobile Navigation) hatte bisher keine eigene Testdatei — anders als
+  das strukturell ähnliche `Sidebar.tsx`, das bereits über
+  `Sidebar.test.tsx` abgedeckt ist. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `MobileNav.test.tsx` (3 Tests, Muster analog `Sidebar.test.tsx`): Menü ist
+  vor dem Öffnen nicht sichtbar, Klick auf "Menü öffnen" zeigt alle drei
+  Navigationsgruppen mit ihren Links (inkl. korrektem `href`), Klick auf
+  einen Link schließt das Menü wieder.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
