@@ -57,6 +57,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `PageHeader.test.tsx` (3 Tests, Muster analog
   `NoResultsMessage.test.tsx`): Titel ohne Beschreibung/Aktionen, Anzeige
   der Beschreibung wenn übergeben, Anzeige der Aktionen wenn übergeben.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `PlaceholderPage.tsx` (3.5, Platzhalter
+  für noch nicht gebaute Seiten wie Deal Finder/Reisebudget/Premium, über
+  `routes.tsx` eingebunden) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `PlaceholderPage.test.tsx` (3 Tests, Muster analog
+  `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel/Beschreibung über
+  `PageHeader`, Hinweistext mit Seitentitel, sowie das übergebene Icon.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein

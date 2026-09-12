@@ -9309,3 +9309,63 @@ bereits gesetzt, keine Änderung nötig.
   Tests angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` lag 3 Commits vor `origin/main` (heutiger
+früherer Lauf: fehlende Testdateien für `QuickReplies`, `TripSummaryCard`,
+`PageHeader` nachgezogen, noch nicht von Freigabe-Chef gemergt) und war
+nicht hinter `main` zurück — kein Merge nötig, direkt auf dem Branch
+weitergearbeitet. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Fortsetzung der bereits mehrfach begonnenen
+Testabdeckungs-Aufräumung (siehe die zahlreichen vorherigen "weitere
+Testabdeckungslücke geschlossen"-Einträge oben). Ein systematischer
+Abgleich aller `.tsx`-Dateien außerhalb von `src/components/ui/` gegen
+vorhandene `.test.tsx`-Dateien ergab nur noch acht Dateien ohne eigene
+Testdatei: `PageTransition.tsx`, `MobileNav.tsx`, `AppShell.tsx`,
+`App.tsx`, `main.tsx`, `routes.tsx`, `src/pages/KiChat.tsx` (dünner
+Wrapper um die bereits getestete `components/chat/KiChat.tsx`) und
+`PlaceholderPage.tsx`. Von diesen ist `PlaceholderPage.tsx` (3.5,
+Platzhalter für noch nicht gebaute Seiten wie Deal Finder/Reisebudget/
+Premium, in `routes.tsx` für alle `extraRoutes`-Einträge ohne eigene Seite
+eingebunden) die klarste, am saubersten abgegrenzte Lücke — eine reine,
+bereits fertige Präsentationskomponente ohne Router-/Kontext-Abhängigkeit,
+anders als `AppShell.tsx`/`MobileNav.tsx`/`routes.tsx` (bräuchten
+Router-Mocking, größerer Umfang) oder `App.tsx`/`main.tsx`
+(Einstiegspunkte, in diesem Projekt bisher bewusst ohne eigene Tests).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten einer
+fertigen Komponente, keine Interpretation über den vorhandenen Code hinaus
+nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar, rein additiv
+— keine Verhaltensänderung an `PlaceholderPage.tsx` selbst.
+
+**Umgesetzt:** Neue `src/pages/PlaceholderPage.test.tsx` (3 Tests, Muster
+analog `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel und
+Beschreibung werden über die eingebettete `PageHeader`-Komponente
+angezeigt; der Hinweistext ("... wird als Nächstes gebaut ...") enthält
+den übergebenen Seitentitel; das übergebene Icon (`lucide-react`) wird
+gerendert (geprüft über die vergebene `lucide-<name>`-CSS-Klasse, analog
+`TravixAvatar.test.tsx`). Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`PlaceholderPage.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag
+unter Phase 3, direkt nach dem heutigen `PageHeader.tsx`-Eintrag);
+`tasks/tasks-prd-travix-platform.md` hat für `PlaceholderPage.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.5), daher keine
+Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test -- --run` (vitest) → 52 Testdateien, 285 Tests (vorher 51/282),
+  alle grün — drei neue Tests in `PlaceholderPage.test.tsx`, keine
+  bestehenden Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
