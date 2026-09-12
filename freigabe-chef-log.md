@@ -2873,3 +2873,57 @@ ohne Eingriff nicht von selbst löst (der Branch merged inzwischen zwar
 entweder den 585efea-Eintrag im laufenden `support-chef-auto-log.md`
 selbst korrigieren/entfernen lassen, oder Support-Chef anweisen, vor jedem
 Lauf zu prüfen, ob eigene ältere offene Funde inzwischen behoben wurden.
+
+## 2026-09-12 (früher Nacht-Check, 0-4 Uhr Lauf)
+
+Autonomer Lauf ohne Ni, wie im täglichen frühen Zeitfenster vorgesehen.
+Fokus laut Auftrag speziell auf `it-chef/auto`; `marketing-chef/auto` und
+`support-chef/auto` nur kurz gegengecheckt, da deren Haupt-Lauf erst um
+6 Uhr stattfindet (separater späterer Freigabe-Chef-Lauf).
+
+**Vorbereitung:** `main` per `git fetch`/`git pull` aktualisiert
+(`254e39a` → `70a92a2`, 40 Commits, Fast-Forward, u. a. die gestrigen
+Berichte und Test-Nachzieh-Commits vom 11.09.).
+
+**Prüfung `it-chef/auto`** (5 neue Commits ggü. `main`, alle vom
+11./12.09., alle nach demselben Muster "fehlende Testdatei nachgezogen":
+`fcb8ce7` QuickReplies, `85ba56a` TripSummaryCard, `426ef25` PageHeader,
+`07058d8` PlaceholderPage, `ca0f26f` KiChat-Seiten-Wrapper):
+- Diff genau angeschaut: einzige inhaltliche Änderungen sind 5 neue
+  `*.test.tsx`-Dateien (insgesamt 165 Zeilen) plus Log-/Zeitplan-Einträge
+  (`it-chef-auto-log.md`, `ZEITPLAN.md`). Keine bestehende Quelldatei
+  verändert, kein Scope-Creep über "Testabdeckung nachziehen" hinaus.
+- Kein Auth-/Zahlungs-/Rechtstext-Bezug (reine Präsentationskomponenten:
+  Quick-Reply-Chips, Trip-Zusammenfassungskarte, Seitenkopf, Platzhalter-
+  und Chat-Seiten-Wrapper). Keine UI-Änderung, daher `MARKENDESIGN.md`
+  nicht einschlägig.
+- **Unabhängig selbst verifiziert** (nicht nur den Log-Eintrag geglaubt):
+  frischer `npm ci` (650 Pakete, 0 Vulnerabilities), `npx tsc -b` grün
+  (keine Ausgabe), `npx eslint .` grün (0 Fehler, nur dieselben 3
+  vorbestehenden `react-refresh`-Warnings in
+  `ui/{badge,button,tabs}.tsx`, unverändert), `npx vitest run` grün
+  (53 Testdateien, 287 Tests, alle bestanden).
+- Stichprobe der neuen Tests selbst gelesen: `KiChat.test.tsx` prüft
+  Titel "KI-Chat" und Beschreibung "Dein persönlicher Reiseberater" –
+  gegen `src/pages/KiChat.tsx` gegengelesen, stimmt exakt überein.
+  Wirkt nicht erfunden, sondern sauber gegen echtes Verhalten
+  geschrieben.
+→ **Passt, nach `main` gemergt** (Fast-Forward `70a92a2..ca0f26f`,
+gepusht). `it-chef/auto` liegt danach exakt auf dem neuen `main`-Stand,
+keine weitere Anpassung nötig.
+
+**Kurzcheck `marketing-chef/auto`:** 0 Commits ggü. neuem `main` –
+bereits vollständig gemerged, nichts Neues von heute. Planmäßig
+übersprungen.
+
+**Kurzcheck `support-chef/auto`:** Letzter Commit (`c88f1ac`) datiert auf
+11.09., keine neuen Commits von heute (12.09.) – der 6-Uhr-Lauf mit dem
+eigentlichen Tages-Check steht noch aus. Planmäßig übersprungen; der
+bereits bekannte Blocker (überholter `585efea`-Fund, siehe Eintrag vom
+11.09. oben) besteht unverändert fort und wird beim nächsten
+vollständigen Check erneut geprüft.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`, 5 reine
+Test-Commits), zwei Branches planmäßig übersprungen (keine neuen
+Commits von heute, deren Haupt-Lauf erst später). Keine Auffälligkeit,
+die Ni jetzt schon informiert werden müsste.
