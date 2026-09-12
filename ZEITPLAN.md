@@ -366,6 +366,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Verhalten, kein neuer Bug gefunden. Neue `NoResultsMessage.test.tsx` (2
   Tests): Standardtitel/-text ohne Props, sowie übergebener eigener
   Titel/Text statt der Standardwerte.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `src/pages/KiChat.tsx` (dünner
+  Seiten-Wrapper, der `PageHeader` mit dem Chat-Container aus
+  `src/components/chat/KiChat.tsx` zusammensetzt) war die einzige Seite
+  unter `src/pages/` ohne eigene Testdatei — der Chat-Container selbst ist
+  bereits über `src/components/chat/KiChat.test.tsx` gut abgedeckt. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `src/pages/KiChat.test.tsx` (2 Tests, Container-Import
+  gemockt, Muster analog `PageHeader.test.tsx`): Seitentitel/-beschreibung
+  über `PageHeader`, sowie Rendering des Chat-Containers.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

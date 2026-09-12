@@ -9369,3 +9369,57 @@ Checkbox-Änderung nötig.
   bestehenden Tests angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` lag 4 Commits vor `origin/main` (u. a. der
+heutige, oben protokollierte `PlaceholderPage.tsx`-Lauf) und nicht hinter
+`main` zurück — kein Merge nötig, direkt auf dem Branch weitergearbeitet.
+`main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Der im vorherigen Lauf heute bereits identifizierte,
+aber bewusst zurückgestellte Kandidat aus der Testabdeckungs-Aufräumung:
+`src/pages/KiChat.tsx` (dünner Seiten-Wrapper aus `PageHeader` + dem
+Chat-Container `src/components/chat/KiChat.tsx`) war zu diesem Zeitpunkt
+die einzige verbliebene Seite unter `src/pages/` ohne eigene Testdatei —
+alle anderen Seiten (`Buchung`, `Dashboard`, `Kalender`, `Profil`, usw.)
+haben je eine. Der Chat-Container selbst ist bereits ausführlich über
+`src/components/chat/KiChat.test.tsx` abgedeckt; die verbleibende Lücke
+betraf nur den Seiten-Wrapper selbst (Titel/Beschreibung, Einbindung des
+Containers).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten eines
+fertigen, sehr kleinen Wrappers, keine Interpretation über den vorhandenen
+Code hinaus nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar,
+rein additiv — keine Verhaltensänderung an `KiChat.tsx` selbst.
+
+**Umgesetzt:** Neue `src/pages/KiChat.test.tsx` (2 Tests, Muster analog
+`PageHeader.test.tsx`): Der Chat-Container-Import
+(`@/components/chat/KiChat`) wird gemockt (reiner Platzhalter-Div mit
+`data-testid`), um die Seite isoliert von der aufwendigen Chat-Logik zu
+prüfen. Ein Test prüft Titel ("KI-Chat") und Beschreibung ("Dein
+persönlicher Reiseberater") über `PageHeader`, der andere, dass der
+gemockte Container gerendert wird. Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`KiChat.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag unter
+Phase 3, direkt nach dem heutigen `NoResultsMessage.tsx`-Eintrag);
+`tasks/tasks-prd-travix-platform.md` hat für den `KiChat.tsx`-Seiten-Wrapper
+keine eigene Checkbox (4.14 ist bereits erledigt und bezieht sich auf die
+Verdrahtung, nicht auf Testabdeckung), daher keine Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities (Netzwerkzugriff war in dieser Umgebung,
+  anders als in einigen früheren Läufen, verfügbar).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 53 Testdateien, 287 Tests (vorher 52/285), alle
+  grün — zwei neue Tests in `KiChat.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
