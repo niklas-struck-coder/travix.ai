@@ -4,6 +4,60 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-12
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`4fb18e8` (11.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor` bereits vollständig in `main` gemergt war (Merge-Commit
+`34e43e9`). Neu von aktuellem `origin/main` (`2309d4b`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: nur `marketing/freigabe-uebersicht.md`
+um einen Prüf-Durchlauf ergänzt, kein neuer Tier-4-Kandidat, kein neues
+Content-Stück, keine dritte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` ("Nächster autonomer Lauf") seit dem
+11.09. beantwortet wurde: keine Notiz in `status.md` (Stand weiterhin
+09.09.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument, keine
+neuen Kanal-Links im Repo, kein IT-Chef-Commit zur Mini-Changelog-Seite.
+Alle vier Fragen bleiben offen. Danach `git log 34e43e9..origin/main`
+geprüft: 11 neue Commits, davon keiner content-relevant — ein
+Freigabe-Chef-Log (bestätigt, dass dieser Branch seit dem letzten Merge
+nicht angefasst wurde), fünf reine Testdatei-Nachzüge ohne
+Verhaltensänderung (per Commit-Beschreibung und Diff verifiziert), ein
+Support-Chef-Bericht, der eigene interaktive Marketing-Chef-Bericht vom
+11.09., ein IT-Chef-Bericht ("kein neuer Bug gefunden", per `git show`
+verifiziert nur `reports/it-chef.md` geändert), ein Daily-Status-Update
+und ein weiteres Freigabe-Chef-Log. Keine einzige neue Produkt-
+Codeänderung, also kein fünfter Tier-4-Kandidat — der Topf bleibt bei
+vier (Stand 11.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen nötig, da es
+keinen neuen Punkt gibt, der eine Zahl bräuchte. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück bzw. eine dritte
+  Mini-Changelog-Ausgabe — Kandidatentopf bleibt bei vier, weiterhin auf
+  der Menge, die selbst am 06.09. als "nicht ausreichend" galt.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 12.09. (Prüfung
+  der vier Fragen, Verifikation der 11 neuen Commits als nicht
+  content-relevant), "Nächster autonomer Lauf"-Abschnitt aktualisiert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-11
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
