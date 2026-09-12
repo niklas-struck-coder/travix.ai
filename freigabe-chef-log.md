@@ -2927,3 +2927,100 @@ vollständigen Check erneut geprüft.
 Test-Commits), zwei Branches planmäßig übersprungen (keine neuen
 Commits von heute, deren Haupt-Lauf erst später). Keine Auffälligkeit,
 die Ni jetzt schon informiert werden müsste.
+
+## 2026-09-12, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Vorbereitung:** `main` per `git fetch`/`git pull` aktualisiert
+(`254e39a` → `2309d4b`, Fast-Forward, u. a. der heutige frühe
+Nacht-Check-Commit).
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" um 04 Uhr geprüft und gemergt). Planmäßig
+  übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`6b6e065`, 12.09.).
+- `support-chef/auto` — 7 Commits vor `main` (`585efea` 09.09., `a3da2d5`
+  Merge, `a318d38` 10.09., `1d3ce8b` Merge, `c88f1ac` 11.09., `c5a0b7c`
+  Merge, `c93b1ff` 12.09., neu).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reiner Übersichts-Lauf, keine
+  neue Produkt-Codeänderung seit dem letzten Merge, kein neuer
+  Tier-4-Kandidat, kein neues Content-Stück, keine dritte
+  Mini-Changelog-Ausgabe.
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine offene
+  Positionierungs-Grundsatzfrage berührt, nichts gepostet oder live
+  verändert.
+- `git merge-base --is-ancestor main origin/marketing-chef/auto` bestätigt
+  Fast-Forward möglich.
+→ **Passt, nach `main` gemergt** (Fast-Forward `2309d4b..6b6e065`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt; alle Commits ändern ausschließlich
+`support-chef-auto-log.md`, kein Code-Risiko):
+- `585efea` (09.09., "stayError vs. flightErrors Diskrepanz"): **erneut
+  unabhängig am aktuellen Code-Stand nachgeprüft** (`git show
+  origin/main:src/components/search/HotelResults.tsx` und
+  `src/hooks/useChat.ts`) — weiterhin überholt: `HotelResults.tsx` nimmt
+  bereits `errors: DuffelError[]` und zeigt `error.message` pro Fehler,
+  `useChat.ts` hat bereits `stayErrors: DuffelError[]`. Das ist jetzt das
+  **fünfte Mal in Folge** (09.09., 10.09. Tages-Check, 11.09.
+  Tages-Check, jetzt 12.09.), dass genau dieser eine, unkorrigierte
+  Log-Eintrag den Merge des gesamten Branches blockiert.
+- `a318d38` (10.09., "fehlende hasTripData-Prüfung im
+  Neu-starten-Bestätigungsdialog"): selbst gegen
+  `src/components/chat/KiChat.tsx` nachgelesen (Zeile 124-128) —
+  `DialogTrigger` für den Reset-Dialog ist weiterhin unbedingt gerendert,
+  ohne die im selben File an zwei anderen Stellen (Zeile 68, 175)
+  etablierte `hasTripData(trip)`-Prüfung. Fund weiterhin verifiziert und
+  aktuell.
+- `c88f1ac` (11.09., "ungenaue Hinweis-Karte bei abgeschlossenen
+  Entwürfen"): selbst gegen `src/pages/Reiseentwuerfe.tsx` nachgelesen —
+  `finalizeDraft` (Zeile 84-87) entfernt einen Entwurf weiterhin nicht aus
+  `drafts`, die Hinweis-Karte prüft weiterhin nur `drafts.length > 1`
+  (Zeile 134) statt nur nicht-finalisierte Entwürfe zu zählen. Fund
+  weiterhin verifiziert und aktuell.
+- `c93b1ff` (12.09., neu, "PlaceholderPage.tsx erstmals eigenständig
+  geprüft"): selbst gegen `src/pages/PlaceholderPage.tsx`,
+  `src/lib/nav-config.ts` und `src/routes.tsx` nachgelesen — alle drei
+  Reibungspunkte stimmen: (1) Zeile 17 nutzt wörtlich den internen Begriff
+  "Travix-Grundgerüst" im Nutzertext, (2) die Komponente hat tatsächlich
+  keinerlei Button/Link (anders als `Favoriten.tsx`/`Warenkorb.tsx`), (3)
+  `/hilfe` läuft laut `nav-config.ts:77` und `routes.tsx` tatsächlich über
+  dieselbe generische `PlaceholderPage` wie Premium/Deal-Finder/Budget,
+  ohne jede Kontaktmöglichkeit. Fund ist real, nicht erfunden, und die
+  Einschätzung "besonders gravierend bei /hilfe" nachvollziehbar.
+- Alle drei neuen/gestapelten Funde (`a318d38`, `c88f1ac`, `c93b1ff`) sind
+  für sich genommen legitime, verifizierte Analyse ohne Code-Änderung.
+  Da git-Branches nur als Ganzes gemergt werden und fremde
+  Branch-Historie nicht meine Aufgabe ist zu bereinigen, bleibt der
+  gesamte Branch weiterhin wegen des unkorrigierten `585efea` blockiert.
+→ **Nicht gemergt.** Gleicher Grund wie in den letzten vier Läufen:
+`585efea` würde einen längst behobenen Punkt als aktuell offenen,
+bestätigten Reibungspunkt in `main` festschreiben. Der Rückstau an
+validen, geprüften Funden dahinter wächst jetzt auf drei
+(`a318d38`, `c88f1ac`, `c93b1ff`).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`), ein
+Branch bewusst nicht gemergt (`support-chef/auto`), `it-chef/auto`
+planmäßig übersprungen (keine neuen Commits seit dem früheren Lauf
+heute).
+
+**Info an Ni nötig: Ja, aktiv per Benachrichtigung.** `support-chef/auto`
+ist jetzt zum **fünften Mal in Folge** (09.09. bis 12.09.) ausschließlich
+wegen desselben unkorrigierten, überholten Log-Eintrags (`585efea`) nicht
+mergefähig. Drei an sich gute, unabhängig verifizierte Funde
+(`a318d38`, `c88f1ac`, `c93b1ff` — u. a. eine ausgerechnet auf der
+`/hilfe`-Seite besonders ungünstige Sackgasse) stauen sich dahinter auf
+und erreichen `main` so nicht, obwohl gegen keine einzige inhaltliche
+Regel verstoßen wurde. Das ist strukturell dasselbe Problem wie am 10.09.
+und 11.09. bereits gemeldet, hat sich seither aber nicht von selbst
+gelöst und wird ohne Eingriff auch nicht. Zwei Wege, es aufzulösen: (a)
+den `585efea`-Absatz direkt in `support-chef-auto-log.md` auf `main`
+manuell korrigieren/als erledigt markieren, oder (b) Support-Chef
+anweisen, vor jedem neuen Lauf zu prüfen, ob eigene ältere offene Funde
+inzwischen behoben wurden, und solche Einträge selbst zu aktualisieren
+statt nur oben draufzustapeln.
