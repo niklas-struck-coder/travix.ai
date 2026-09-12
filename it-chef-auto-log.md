@@ -9133,3 +9133,293 @@ keine Änderung nötig.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout, `main` per `git fetch`
+neu geholt und per Fast-Forward-Merge in `it-chef/auto` übernommen (Branch
+lag hinter `main`, keine eigenen unveröffentlichten Änderungen von einem
+vorherigen Lauf vorhanden). `node_modules` fehlte zu Beginn (`npm ci`
+nachgeholt). Baseline vor jeder eigenen Änderung geprüft: Lint (0 Fehler,
+nur die 3 bekannten Warnings in `ui/{badge,button,tabs}.tsx`), Typecheck
+(`tsc -b`, grün), Tests (`vitest run`: 48 Dateien, 272 Tests, alle grün) —
+alles bereits grün vor dieser Sitzung.
+
+Suche nach einem sicheren Punkt: `reports/it-chef.md` (heutiger Stand)
+meldet für den PR-Kanal keinen neuen Bug und schlägt als einzig
+verbleibende risikoarme Arbeit weitere gezielte Tests vor. Der letzte
+Log-Eintrag oben listete bereits eine Reihe noch ungetesteter,
+bestehender Dateien; eigener erneuter Scan (alle `.ts`/`.tsx` unter `src`
+ohne `ui/`-Basiskomponenten mit passender `*.test.ts(x)`-Datei) bestätigt
+davon u. a. weiterhin offen: `QuickReplies.tsx`, `TripSummaryCard.tsx`,
+`PageHeader.tsx`, `PageTransition.tsx`, `MobileNav.tsx`, `AppShell.tsx`,
+`pages/KiChat.tsx` (reiner Wrapper um die bereits getestete
+`components/chat/KiChat.tsx`), `PlaceholderPage.tsx`, sowie reine
+Typdefinitionsdateien (`types/*.ts`, keine eigene Logik).
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `QuickReplies.tsx`
+nachziehen (4.7 in `tasks/tasks-prd-travix-platform.md`, bereits fertige,
+unveränderte Komponente — Chip-Leiste für Chat-Schnellantworten, genutzt
+in `KiChat.tsx` und `Urlaubsmodus.tsx`).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Liste von Optionen rein, Klick-Callback
+raus). Keine offene Produkt-/Architekturentscheidung nötig. Klar auf eine
+Datei abgegrenzt, Verhalten vollständig durch bestehenden Code
+festgelegt (kein Interpretationsspielraum). Objektiv über neue Tests
+prüfbar, rein additiv — keine Verhaltensänderung an `QuickReplies.tsx`
+selbst.
+
+**Umgesetzt:** Neue `src/components/chat/QuickReplies.test.tsx` (3 Tests,
+Muster analog `NoResultsMessage.test.tsx`): kein Rendering bei leerer
+Options-Liste (`container` bleibt leer, deckt den frühen
+`options.length === 0`-Return ab), ein Button pro übergebener Option,
+Klick auf einen Button ruft `onSelect` genau einmal mit dem Options-Text
+auf. Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+neuer Bug gefunden, keine Codeänderung an `QuickReplies.tsx` selbst.
+`TripSummaryCard.tsx` bleibt als nächster ähnlicher Kandidat bewusst
+offen für einen künftigen, eigenständigen Lauf (ein einziger Punkt pro
+Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 49 Testdateien, 275 Tests (vorher 48/272), alle
+  grün — drei neue Tests in `QuickReplies.test.tsx`, keine bestehenden
+  Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-11 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+Frischer, isolierter Cloud-Checkout, niemand live dabei. `main` und
+`it-chef/auto` per `git fetch` geholt: `it-chef/auto` lag exakt auf
+`main` plus dem eigenen Commit aus dem letzten Lauf oben (kein Merge
+nötig, keine offenen unveröffentlichten Änderungen). `node_modules`
+fehlte zu Beginn (`npm ci` nachgeholt, 650 Pakete, 0 Vulnerabilities).
+
+**Ausgewählter Punkt:** Der letzte Log-Eintrag oben ließ
+`TripSummaryCard.tsx` selbst ausdrücklich als nächsten ähnlichen
+Kandidaten offen — fehlende Testdatei für die bereits fertige,
+unveränderte `TripSummaryCard.tsx` (4.8, kompakte Reise-Zusammenfassung
+im KI-Chat, zeigt Ziel/Transportmittel/Reisedaten/Budget/Unterkunft plus
+Link zur Buchungsseite).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Trip-Objekt rein, gefilterte Zeilen plus
+ein Link raus). Keine offene Produkt-/Architekturentscheidung nötig.
+Klar auf eine Datei abgegrenzt, Verhalten vollständig durch bestehenden
+Code festgelegt. Objektiv über neue Tests prüfbar, rein additiv — keine
+Verhaltensänderung an `TripSummaryCard.tsx` selbst.
+
+**Umgesetzt:** Neue `src/components/chat/TripSummaryCard.test.tsx` (4
+Tests, Muster analog `ChecklistPanel.test.tsx`s `MemoryRouter`-Wrapper,
+da die Komponente einen `react-router-dom`-`Link` rendert): kein
+Rendering, wenn kein Trip-Feld gesetzt ist (früher `rows.length ===
+0`-Return); Anzeige nur der tatsächlich gesetzten Felder (Ziel und
+Budget gesetzt, aber kein Transportmittel-Label sichtbar); korrektes
+Transportmittel-Label für den gewählten Modus (hier: Zug); alle Felder
+zusammen inkl. sichtbarem Link "Speichern & ansehen" zu `/buchung`.
+Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer
+Bug gefunden, keine Codeänderung an `TripSummaryCard.tsx` selbst.
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag unter Phase 4).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout) → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc --noEmit -p tsconfig.app.json` (Typecheck) → grün, keine
+  Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 50 Testdateien, 279 Tests (vorher 49/275), alle
+  grün — vier neue Tests in `TripSummaryCard.test.tsx`, keine
+  bestehenden Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, niemand live
+dabei. `main` und `it-chef/auto` per `git fetch` geholt: `it-chef/auto`
+lag bereits auf `main` plus zwei eigenen, noch nicht von Freigabe-Chef
+geprüften Commits aus einem vorherigen Lauf (zwei nachgezogene
+Testdateien für `TripSummaryCard.tsx`/`QuickReplies.tsx`) — kein Merge
+nötig, dort weitergearbeitet. `node_modules` fehlte zu Beginn (`npm ci`
+nachgeholt, 650 Pakete, 0 Vulnerabilities). Baseline vor jeder eigenen
+Änderung geprüft: Typecheck (`tsc -b`, grün), Lint (0 Fehler, nur die 3
+bekannten Warnings in `ui/{badge,button,tabs}.tsx`), Tests (`vitest run`:
+50 Dateien, 279 Tests, alle grün) — alles bereits grün vor dieser
+Sitzung.
+
+Suche nach einem sicheren Punkt: `reports/it-chef.md` (11.09.) meldet
+für den PR-Kanal keinen neuen Bug und schlägt weitere gezielte Tests als
+einzig verbleibende risikoarme Arbeit vor. Eigener Scan (alle
+`.ts`/`.tsx` unter `src` ohne `ui/`-Basiskomponenten und ohne reine
+Typdefinitionsdateien mit passender `*.test.ts(x)`-Datei) bestätigt als
+noch offen: `App.tsx`, `AppShell.tsx`, `MobileNav.tsx`, `PageHeader.tsx`,
+`PageTransition.tsx`, `pages/KiChat.tsx` (reiner Wrapper um die bereits
+getestete `components/chat/KiChat.tsx`), `PlaceholderPage.tsx`,
+`lib/design-tokens.ts`, `lib/utils.ts`.
+
+**Ausgewählter Punkt:** Fehlende Testdatei für `PageHeader.tsx`
+nachziehen (3.4 in `tasks/tasks-prd-travix-platform.md`, bereits fertige,
+unveränderte Komponente — wiederverwendbarer Seitentitel mit optionaler
+Beschreibung und Aktionen, u. a. in `Dashboard.tsx`, `Favoriten.tsx`,
+`ReiseSuche.tsx`, `KiChat.tsx` verwendet).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug
+(reine Präsentationskomponente: Titel/Beschreibung/Aktionen-Props rein,
+Markup raus, keine eigene Logik). Keine offene Produkt-/
+Architekturentscheidung nötig. Klar auf eine Datei abgegrenzt, Verhalten
+vollständig durch bestehenden Code festgelegt. Objektiv über neue Tests
+prüfbar, rein additiv — keine Verhaltensänderung an `PageHeader.tsx`
+selbst.
+
+**Umgesetzt:** Neue `src/components/layout/PageHeader.test.tsx` (3
+Tests, Muster analog `NoResultsMessage.test.tsx`): Titel wird ohne
+Beschreibung/Aktionen gerendert (kein `<p>`-Element vorhanden); die
+Beschreibung erscheint, wenn übergeben; die Aktionen (hier ein Button)
+erscheinen, wenn übergeben. Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`PageHeader.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag
+unter Phase 3); Checkbox 3.4 in `tasks/tasks-prd-travix-platform.md` war
+bereits gesetzt, keine Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 51 Testdateien, 282 Tests (vorher 50/279), alle
+  grün — drei neue Tests in `PageHeader.test.tsx`, keine bestehenden
+  Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` lag 3 Commits vor `origin/main` (heutiger
+früherer Lauf: fehlende Testdateien für `QuickReplies`, `TripSummaryCard`,
+`PageHeader` nachgezogen, noch nicht von Freigabe-Chef gemergt) und war
+nicht hinter `main` zurück — kein Merge nötig, direkt auf dem Branch
+weitergearbeitet. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Fortsetzung der bereits mehrfach begonnenen
+Testabdeckungs-Aufräumung (siehe die zahlreichen vorherigen "weitere
+Testabdeckungslücke geschlossen"-Einträge oben). Ein systematischer
+Abgleich aller `.tsx`-Dateien außerhalb von `src/components/ui/` gegen
+vorhandene `.test.tsx`-Dateien ergab nur noch acht Dateien ohne eigene
+Testdatei: `PageTransition.tsx`, `MobileNav.tsx`, `AppShell.tsx`,
+`App.tsx`, `main.tsx`, `routes.tsx`, `src/pages/KiChat.tsx` (dünner
+Wrapper um die bereits getestete `components/chat/KiChat.tsx`) und
+`PlaceholderPage.tsx`. Von diesen ist `PlaceholderPage.tsx` (3.5,
+Platzhalter für noch nicht gebaute Seiten wie Deal Finder/Reisebudget/
+Premium, in `routes.tsx` für alle `extraRoutes`-Einträge ohne eigene Seite
+eingebunden) die klarste, am saubersten abgegrenzte Lücke — eine reine,
+bereits fertige Präsentationskomponente ohne Router-/Kontext-Abhängigkeit,
+anders als `AppShell.tsx`/`MobileNav.tsx`/`routes.tsx` (bräuchten
+Router-Mocking, größerer Umfang) oder `App.tsx`/`main.tsx`
+(Einstiegspunkte, in diesem Projekt bisher bewusst ohne eigene Tests).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten einer
+fertigen Komponente, keine Interpretation über den vorhandenen Code hinaus
+nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar, rein additiv
+— keine Verhaltensänderung an `PlaceholderPage.tsx` selbst.
+
+**Umgesetzt:** Neue `src/pages/PlaceholderPage.test.tsx` (3 Tests, Muster
+analog `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel und
+Beschreibung werden über die eingebettete `PageHeader`-Komponente
+angezeigt; der Hinweistext ("... wird als Nächstes gebaut ...") enthält
+den übergebenen Seitentitel; das übergebene Icon (`lucide-react`) wird
+gerendert (geprüft über die vergebene `lucide-<name>`-CSS-Klasse, analog
+`TravixAvatar.test.tsx`). Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`PlaceholderPage.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag
+unter Phase 3, direkt nach dem heutigen `PageHeader.tsx`-Eintrag);
+`tasks/tasks-prd-travix-platform.md` hat für `PlaceholderPage.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.5), daher keine
+Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings
+  (die bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test -- --run` (vitest) → 52 Testdateien, 285 Tests (vorher 51/282),
+  alle grün — drei neue Tests in `PlaceholderPage.test.tsx`, keine
+  bestehenden Tests angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` lag 4 Commits vor `origin/main` (u. a. der
+heutige, oben protokollierte `PlaceholderPage.tsx`-Lauf) und nicht hinter
+`main` zurück — kein Merge nötig, direkt auf dem Branch weitergearbeitet.
+`main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Der im vorherigen Lauf heute bereits identifizierte,
+aber bewusst zurückgestellte Kandidat aus der Testabdeckungs-Aufräumung:
+`src/pages/KiChat.tsx` (dünner Seiten-Wrapper aus `PageHeader` + dem
+Chat-Container `src/components/chat/KiChat.tsx`) war zu diesem Zeitpunkt
+die einzige verbliebene Seite unter `src/pages/` ohne eigene Testdatei —
+alle anderen Seiten (`Buchung`, `Dashboard`, `Kalender`, `Profil`, usw.)
+haben je eine. Der Chat-Container selbst ist bereits ausführlich über
+`src/components/chat/KiChat.test.tsx` abgedeckt; die verbleibende Lücke
+betraf nur den Seiten-Wrapper selbst (Titel/Beschreibung, Einbindung des
+Containers).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten eines
+fertigen, sehr kleinen Wrappers, keine Interpretation über den vorhandenen
+Code hinaus nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar,
+rein additiv — keine Verhaltensänderung an `KiChat.tsx` selbst.
+
+**Umgesetzt:** Neue `src/pages/KiChat.test.tsx` (2 Tests, Muster analog
+`PageHeader.test.tsx`): Der Chat-Container-Import
+(`@/components/chat/KiChat`) wird gemockt (reiner Platzhalter-Div mit
+`data-testid`), um die Seite isoliert von der aufwendigen Chat-Logik zu
+prüfen. Ein Test prüft Titel ("KI-Chat") und Beschreibung ("Dein
+persönlicher Reiseberater") über `PageHeader`, der andere, dass der
+gemockte Container gerendert wird. Reine Testabdeckung für bestehendes,
+unverändertes Verhalten, kein neuer Bug gefunden, keine Codeänderung an
+`KiChat.tsx` selbst. `ZEITPLAN.md` entsprechend ergänzt (Eintrag unter
+Phase 3, direkt nach dem heutigen `NoResultsMessage.tsx`-Eintrag);
+`tasks/tasks-prd-travix-platform.md` hat für den `KiChat.tsx`-Seiten-Wrapper
+keine eigene Checkbox (4.14 ist bereits erledigt und bezieht sich auf die
+Verdrahtung, nicht auf Testabdeckung), daher keine Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities (Netzwerkzugriff war in dieser Umgebung,
+  anders als in einigen früheren Läufen, verfügbar).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 53 Testdateien, 287 Tests (vorher 52/285), alle
+  grün — zwei neue Tests in `KiChat.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

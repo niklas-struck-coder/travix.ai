@@ -1,10 +1,81 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-10)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-11)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-11: ein weiterer Tier-4-Kandidat geprüft (Hinweis auf geteilten Chat bei "Planung fortsetzen"), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`5d056c2` (10.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 5d056c2 origin/main` bereits vollständig in `main` gemergt
+war — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Neu von
+aktuellem `origin/main` (`c220923`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand 09.09., seither nicht
+aktualisiert), `ZEITPLAN.md` (6.2 in Zeile 841 weiterhin `[ ]`) oder
+diesem Dokument seit dem 10.09. Keine neuen Kanal-Links, kein Commit zu
+einer IT-Chef-Umsetzung der Mini-Changelog-Seite. Alle vier Fragen bleiben
+offen.
+
+**`git log 5d056c2..origin/main` zeigt 10 neue Commits**, davon neun ohne
+Content-Relevanz (ein Freigabe-Chef-Log, ein Daily-Status-Update, der
+eigene interaktive Marketing-Chef-Bericht vom 10.09., ein IT-Chef-Bericht
+ohne neuen Bug, ein Support-Chef-Bericht der den Reset-Bestätigungsdialog
+als behoben bestätigt und drei weiterhin offene Vorschläge nennt, sowie
+vier reine Testdatei-Nachzüge ohne Verhaltensänderung für `ChatMessage`,
+`NoResultsMessage`, `HotelResults` und `FlightResults`). Eine echte
+Codeänderung per `git show` verifiziert:
+
+- `78c764f` (11.09., später Commit): setzt den kurzfristigen Teil von
+  Vorschlag 3 aus `reports/support-chef.md` (10.09.) um — "Planung
+  fortsetzen" verlinkt auf der Reiseentwürfe-Seite bei jedem Entwurf
+  identisch auf `/ki-chat`, ohne erkennbar zu machen, dass das immer
+  denselben einen aktiven Chat öffnet statt der Details des jeweiligen
+  Entwurfs (`tripStorage.ts` speichert nur einen aktiven Trip; die echte
+  Umsetzung von 7.4, eigene Chat-Historie je Entwurf, bleibt eine offene
+  Datenmodell-Entscheidung). `Reiseentwuerfe.tsx` zeigt jetzt bei mehr als
+  einem Entwurf einen ehrlichen Hinweis dazu, im selben Stil wie die
+  bestehende Prämienprogramm-Card in `Dashboard.tsx`, mit zwei neuen
+  Regressionstests abgesichert. **Content-relevant** — echter,
+  angebundener Nutzerpfad (jeder mit mehr als einem gespeicherten Entwurf
+  sieht den Hinweis), passt inhaltlich exakt zur selben
+  Ehrlichkeits-/Vertrauens-Fundgruppe wie die bisherigen Tier-4-Kandidaten:
+  eine UI-Aussage, die sonst mehr verspräche, als das Produkt aktuell
+  einlösen kann, wird durch einen ehrlichen Zusatzhinweis richtiggestellt.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Nur ein einziger neuer Tier-4-Kandidat seit dem
+10.09. (Topf wächst damit von drei auf vier seit Ausgabe 2) — damit exakt
+auf der Menge, die selbst am 06.09. mit vier Kandidaten noch ausdrücklich
+als "nicht ausreichend" bewertet wurde, und weiterhin deutlich unter den
+acht, die Ausgabe 2 ausgelöst haben. Ein eigenständiges neuntes
+Social-Content-Stück bleibt weiterhin an dieselben drei unbeantworteten
+Fragen gebunden. Die drei am 09.09. gemeldeten Support-Chef-Punkte
+(Löschen ohne Bestätigung, Warenkorb-Sackgasse, Entwurf-Fortsetzen
+generisch) sind laut `ade61af` (Support-Chef-Bericht, 10.09.) weiterhin
+offen — kein neuer verifizierter Commit dazu, also weiterhin kein
+Tier-4-Kandidat daraus (der heutige Fund ist nur der kurzfristige,
+nicht-strukturelle Teil von Vorschlag 3, nicht die vollständige Behebung).
+Stattdessen heute nur diese Übersicht aktualisiert (reiner, sicherer
+Übersichts-Lauf, wie z. B. am 01.-04.09., 06.09., 08.-10.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang,
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der einzige
+neue Punkt stammt aus einem per `git show` einzeln verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Tier-4-Absatz
+unten, Datum im Titel, "Nächster autonomer Lauf" unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-10: ein weiterer Tier-4-Kandidat geprüft (Bestätigungsdialog vor Chat-Reset), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
 
@@ -1136,7 +1207,12 @@ Anfang-bis-Ende-Weg im Code.
    (später Commit) ein dritter Kandidat (siehe Update 2026-09-10 oben):
    der "Neu starten"-Knopf im Chat-Header löscht Chatverlauf, Reiseplan
    und `localStorage` nicht mehr mit einem einzigen, ungeschützten Klick,
-   sondern erst nach einer Bestätigung im Dialog.
+   sondern erst nach einer Bestätigung im Dialog. Seit dem 10.09. (später
+   Commit) ein vierter Kandidat (siehe Update 2026-09-11 oben): "Planung
+   fortsetzen" auf der Reiseentwürfe-Seite verlinkte bisher bei jedem
+   Entwurf identisch auf denselben einen aktiven Chat, ohne das erkennbar
+   zu machen — jetzt zeigt die Seite bei mehr als einem Entwurf einen
+   ehrlichen Hinweis darauf.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -1191,10 +1267,18 @@ Fix) — Stand 09.09. sind erst zwei im Topf (siehe Update 2026-09-09
 oben), also weiterhin zu wenig. Stand 09.10. ist ein dritter Kandidat
 dazugekommen (siehe Update 2026-09-10 oben), damit weiterhin klar unter
 der Menge, die selbst am 06.09. mit vier Kandidaten noch als "nicht
-ausreichend" galt. Die drei am 09.09. gemeldeten, noch offenen
-Support-Chef-Punkte (Löschen ohne Bestätigung, Warenkorb-Sackgasse,
-Entwurf-Fortsetzen generisch) werden erst zu Kandidaten, sobald IT-Chef
-sie tatsächlich behebt — nicht schon durch die Meldung selbst. Sollte Ni
+ausreichend" galt. Stand 09.11. ist ein vierter Kandidat dazugekommen
+(siehe Update 2026-09-11 oben) — damit exakt auf der Menge vom 06.09.,
+weiterhin deutlich unter den acht, die Ausgabe 2 ausgelöst haben; der
+nächste Lauf sollte das nicht automatisch als "jetzt reicht's" werten,
+sondern die eigene Konsistenz mit dem 06.09.-Maßstab explizit
+gegenprüfen, bevor er eine dritte Ausgabe schreibt. Die drei am 09.09.
+gemeldeten, noch offenen Support-Chef-Punkte (Löschen ohne Bestätigung,
+Warenkorb-Sackgasse, Entwurf-Fortsetzen generisch) werden erst zu
+Kandidaten, sobald IT-Chef sie tatsächlich behebt — nicht schon durch die
+Meldung selbst; der 11.09.-Fund deckt nur den kurzfristigen Teil des
+dritten Punkts ab (Hinweis statt echter struktureller Lösung), der Punkt
+bleibt also im Kern weiterhin offen. Sollte Ni
 zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene

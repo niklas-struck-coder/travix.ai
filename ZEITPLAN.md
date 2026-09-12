@@ -48,6 +48,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ("Seitenleiste einklappen"/"Seitenleiste ausklappen"). Neue
   `Sidebar.test.tsx` (bisher gab es dort keinen Test) prüft beide
   Zustände.
+  Vom autonomen IT-Chef-Lauf am 12.09. eine weitere Testabdeckungslücke
+  geschlossen: `PageHeader.tsx` (3.4, wiederverwendbarer Seitentitel mit
+  optionaler Beschreibung und Aktionen, u. a. in `Dashboard.tsx`,
+  `Favoriten.tsx`, `ReiseSuche.tsx`, `KiChat.tsx` verwendet) hatte bisher
+  keine eigene Testdatei. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `PageHeader.test.tsx` (3 Tests, Muster analog
+  `NoResultsMessage.test.tsx`): Titel ohne Beschreibung/Aktionen, Anzeige
+  der Beschreibung wenn übergeben, Anzeige der Aktionen wenn übergeben.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `PlaceholderPage.tsx` (3.5, Platzhalter
+  für noch nicht gebaute Seiten wie Deal Finder/Reisebudget/Premium, über
+  `routes.tsx` eingebunden) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `PlaceholderPage.test.tsx` (3 Tests, Muster analog
+  `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel/Beschreibung über
+  `PageHeader`, Hinweistext mit Seitentitel, sowie das übergebene Icon.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
@@ -349,6 +366,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Verhalten, kein neuer Bug gefunden. Neue `NoResultsMessage.test.tsx` (2
   Tests): Standardtitel/-text ohne Props, sowie übergebener eigener
   Titel/Text statt der Standardwerte.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `src/pages/KiChat.tsx` (dünner
+  Seiten-Wrapper, der `PageHeader` mit dem Chat-Container aus
+  `src/components/chat/KiChat.tsx` zusammensetzt) war die einzige Seite
+  unter `src/pages/` ohne eigene Testdatei — der Chat-Container selbst ist
+  bereits über `src/components/chat/KiChat.test.tsx` gut abgedeckt. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `src/pages/KiChat.test.tsx` (2 Tests, Container-Import
+  gemockt, Muster analog `PageHeader.test.tsx`): Seitentitel/-beschreibung
+  über `PageHeader`, sowie Rendering des Chat-Containers.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -733,6 +760,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `TravixAvatar.test.tsx`): Assistenten-Nachricht zeigt Text, formatierte
   Uhrzeit (`toLocaleTimeString('de-DE', …)`) und den `happy`-Avatar
   (`svg.lucide-smile`); Nutzer-Nachricht zeigt Text ohne Avatar.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `QuickReplies.tsx` (4.7,
+  Chip-Leiste für Chat-Schnellantworten, genutzt in `KiChat.tsx` und
+  `Urlaubsmodus.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `QuickReplies.test.tsx` (3 Tests, Muster analog
+  `NoResultsMessage.test.tsx`): kein Rendering bei leerer Options-Liste,
+  ein Button pro Option, Klick löst `onSelect` mit dem Options-Text aus.
+  Vom autonomen IT-Chef-Lauf am 11.09. (weiterer Lauf) die dort selbst
+  vorgemerkte Schwesterlücke geschlossen: `TripSummaryCard.tsx` (4.8,
+  kompakte Reise-Zusammenfassung im KI-Chat) hatte ebenfalls noch keine
+  eigene Testdatei. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `TripSummaryCard.test.tsx` (4
+  Tests, Muster analog `ChecklistPanel.test.tsx`s `MemoryRouter`-Wrapper
+  für den enthaltenen `Link`): kein Rendering ohne gesetzte Trip-Felder,
+  Anzeige nur der tatsächlich gesetzten Felder, Transportmittel-Label für
+  den gewählten Modus, sowie alle Felder zusammen inkl. Link zu
+  `/buchung`.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
