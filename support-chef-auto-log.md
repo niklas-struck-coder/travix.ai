@@ -2227,3 +2227,102 @@ test.tsx`, `FlightResults.test.tsx`, `HotelResults.test.tsx`,
 `NoResultsMessage.test.tsx`) sind laut deren eigenen Commit-Beschreibungen
 reine Testabdeckung für bestehendes, unverändertes Verhalten ohne neuen
 Code-Pfad — dafür gibt es aus Nutzersicht nichts Neues zu prüfen.
+
+---
+
+## 2026-09-12 — Platzhalter-Seite (`PlaceholderPage.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Seit dem letzten Bericht (11.09.) ist laut
+`ZEITPLAN.md` kein neuer UI-Code mit echter Verhaltensänderung nach `main`
+gelandet — der heutige autonome IT-Chef-Lauf hat ausschließlich fehlende
+Testdateien für bestehende, unveränderte Komponenten nachgezogen
+(`PageHeader.test.tsx`, `PlaceholderPage.test.tsx`, `src/pages/KiChat.test.tsx`
+als dünner Seiten-Wrapper, sowie `TripSummaryCard.test.tsx`,
+`QuickReplies.test.tsx` an früheren Tagen) — jeweils laut eigener
+Commit-Beschreibung "kein neuer Bug gefunden". Da `PlaceholderPage.tsx`
+dadurch heute neu eine eigene Testdatei bekommen hat, aber in diesem Log
+bisher nie als eigenständiger Prüfgegenstand behandelt wurde (nur einmal
+beiläufig am 22.08. erwähnt), wird sie heute erstmals eigenständig aus
+Nutzersicht geprüft:
+
+- `src/pages/PlaceholderPage.tsx`
+- `src/routes.tsx:75-87` (Einbindung für alle noch nicht gebauten Routen)
+- `src/lib/nav-config.ts` (welche Nav-Punkte darüber laufen: `/hilfe`,
+  `/deal-finder`, `/budget`, `/premium`)
+
+Zum Vergleich herangezogen: `src/pages/Favoriten.tsx:44-59` und
+`src/components/search/NoResultsMessage.tsx` (etabliertes
+Leerzustand-Muster mit konkretem Handlungslink).
+
+### Reibungspunkte
+
+**1. Interne Entwickler-Sprache direkt im Nutzertext — "Travix-Grundgerüst"**
+
+`src/pages/PlaceholderPage.tsx:17`: Der einzige Text auf der Seite lautet
+"{title} wird als Nächstes gebaut. Diese Seite ist Teil des
+Travix-Grundgerüsts." Der Begriff "Grundgerüst" ist Entwickler-/
+Projektsprache (vgl. `ZEITPLAN.md` Zeile 32: "Phase 1 Scaffolding") und
+sagt einer Nutzerin nichts über den eigentlichen Inhalt der Seite — sie
+erklärt nicht, was "Grundgerüst" bedeutet oder warum sie das interessieren
+sollte. Der Rest der App vermeidet durchgängig solche internen Begriffe
+(vgl. die durchgehend nutzerorientierten Leertexte in `Favoriten.tsx`,
+`Warenkorb.tsx`, `NoResultsMessage.tsx`) — hier fällt der Ton spürbar aus
+dem sonst etablierten, freundlichen Muster.
+
+*Vorschlag:* Den Satz auf eine reine Nutzerperspektive umformulieren, ohne
+internen Fachbegriff, z. B. "{title} ist bei Travix in Arbeit — schau
+bald wieder vorbei." Der Hinweis auf ein "Grundgerüst" bringt der Nutzerin
+nichts und kann ersatzlos wegfallen.
+
+**2. Einziger Leerzustand in der App ohne jeden Handlungslink — reine Sackgasse**
+
+`src/pages/PlaceholderPage.tsx:14-19`: Anders als jeder andere
+Leer-/Platzhalterzustand in der Codebase — `Favoriten.tsx:54-59` ("Ziele
+entdecken" → `/`), `Warenkorb.tsx` (Link zu `/ki-chat`, laut Log vom
+20.08. bereits als "für gut befunden" dokumentiert), sowie
+`NoResultsMessage.tsx`, das zumindest im umgebenden Kontext (Suchseiten)
+weiterhin Eingabefelder zum erneuten Versuch anbietet — hat
+`PlaceholderPage.tsx` überhaupt keinen Button oder Link. Wer über die
+Sidebar auf einen der vier noch nicht gebauten Punkte klickt (`/hilfe`,
+`/deal-finder`, `/budget`, `/premium`), landet auf einer reinen
+Textfläche ohne jeden nächsten Schritt — nicht einmal ein Link zurück zu
+einer sinnvollen Alternativseite.
+
+*Vorschlag:* Mindestens einen Button/Link ergänzen, der zurück zu einer
+sinnvollen Anlaufstelle führt (z. B. "Zum Dashboard" oder "Mit dem
+KI-Chat planen"), analog zum bereits etablierten Muster bei
+`Favoriten.tsx`/`Warenkorb.tsx`.
+
+**3. Besonders gravierend bei `/hilfe`: ausgerechnet die Hilfeseite bietet
+keinerlei Hilfe oder Kontaktmöglichkeit**
+
+`src/lib/nav-config.ts:77` definiert `/hilfe` ("Hilfe", Beschreibung "FAQ
+und Support") als festen, dauerhaft sichtbaren Punkt im "Konto"-Bereich
+der Sidebar — sie läuft aber laut `src/routes.tsx:27-47` (nicht in
+`builtRoutes`) ebenfalls über `PlaceholderPage.tsx` und zeigt exakt
+denselben generischen "wird als Nächstes gebaut"-Text wie z. B. "Travix
+Premium" oder "Deal Finder". Eine Codesuche über `src/` nach
+"support@"/"mailto:" findet keinerlei hinterlegte Kontaktmöglichkeit
+(passend zu `ZEITPLAN.md`, Sprint 1: "Support-E-Mail live" ist weiterhin
+offen, `[ ]`). Für alle anderen Platzhalter-Seiten (Premium, Deal Finder,
+Budget) ist "wird noch gebaut" eine nachvollziehbare Botschaft — bei einer
+Seite, deren einziger Zweck laut eigener Beschreibung Hilfe und Support
+ist, ist ein wortidentischer, kontextloser Platzhalter für eine Nutzerin
+mit einem echten Problem der denkbar ungünstigste Moment für eine
+Sackgasse ohne jeden Ausweg.
+
+*Vorschlag:* Für `/hilfe` gezielt einen eigenen, nicht-generischen Text
+ergänzen, sobald zumindest eine Übergangslösung existiert — und sei es nur
+ein Link zum KI-Chat ("Frag einfach im Chat nach") als Zwischenlösung, bis
+FAQ-Inhalte (siehe `ZEITPLAN.md`, Support-Track Sprint 2) und eine echte
+Hilfe-Seite stehen. Das ist unabhängig von Punkt 1/2 lösbar, ohne auf die
+allgemeine `PlaceholderPage`-Überarbeitung zu warten.
+
+### Nicht geprüft
+Ob und wie sich eine Sonderbehandlung für `/hilfe` sauber in die generische
+`PlaceholderPage`-Komponente einfügen lässt (z. B. optionale
+`ctaLink`/`ctaLabel`-Props für alle vier betroffenen Routen statt nur
+`/hilfe`), wurde nicht im Detail als Umsetzungsvorschlag ausgearbeitet —
+das wäre eine Design-Entscheidung, die über eine reine Analyse hinausgeht.
