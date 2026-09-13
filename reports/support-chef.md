@@ -1,48 +1,50 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-11
+**Datum:** 2026-09-12
 
-## Was ist seit dem letzten Eintrag (2026-09-10) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-11) passiert?
 
-Vorschlag 3 aus dem letzten Bericht wurde aufgegriffen — allerdings nicht
-mit der vollen Lösung (Entwurfs-ID mitgeben), sondern mit der von mir
-genannten Alternative: In `src/pages/Reiseentwuerfe.tsx` erscheint jetzt
-ein Hinweis-Kästchen, sobald mehr als ein Entwurf vorhanden ist. Es
-erklärt ehrlich, dass "Planung fortsetzen" aktuell bei jedem Entwurf zum
-selben KI-Chat führt und mehrere gleichzeitig aktive Planungen noch nicht
-unterstützt werden. Das nimmt der Verwirrung viel von ihrer Schärfe — eine
-Nutzerin, die das liest, wundert sich nicht mehr, sondern weiß, woran sie
-ist. Die eigentliche Ursache (nur ein gespeicherter Trip in
-`tripStorage.ts`) bleibt aber bestehen, der Hinweis ist laut Code-Kommentar
-bewusst als Zwischenlösung markiert.
+An der eigentlichen Nutzerführung hat sich seit gestern nichts geändert —
+die Commits seit dem letzten Bericht sind ausschließlich neue Testdateien
+(u. a. für `QuickReplies`, `TripSummaryCard`, `PageHeader`, `KiChat`,
+`PlaceholderPage`). Die zwei Vorschläge von gestern habe ich im Code
+gegengeprüft: beide sind unverändert offen.
 
-Ansonsten wurden seit gestern nur weitere Testdateien ergänzt (u. a. für
-`ChatMessage`, `TravixAvatar`, `FlightCard`, `HotelCard`, `Urlaubsmodus`)
-— keine weitere Änderung an Nutzerführung, Texten oder Fehlerbehandlung.
-Ich habe die betroffenen Seiten nochmal geprüft: Die zwei verbleibenden
-Punkte aus dem letzten Bericht sind unverändert offen.
+Dafür ist mir beim Gegenprüfen ein neuer, konkreter Reibungspunkt
+aufgefallen — ausgerechnet auf der Hilfe-Seite. Den nehme ich unten mit
+auf.
 
 ## Meine Vorschläge
 
-1. **Löschen ist an mehreren Stellen sofort und endgültig, ohne
+1. **Die Hilfe-Seite (`/hilfe`) ist selbst nicht hilfreich.** Laut
+   `src/lib/nav-config.ts:77` läuft "Hilfe" (Beschreibung: "FAQ und
+   Support") über dieselbe generische `src/pages/PlaceholderPage.tsx` wie
+   noch nicht gebaute Bereiche. Der Text dort lautet wörtlich: "Diese
+   Seite ist Teil des Travix-Grundgerüsts" — ein interner Begriff, der in
+   Nutzertexten nichts zu suchen hat. Es gibt außerdem keinerlei Button
+   oder Link, nicht mal einen Kontaktweg. Wer auf `/hilfe` klickt, weil er
+   ein Problem hat, findet keine FAQ, keinen Kontakt, nur einen
+   Bau-Hinweis. *Vorschlag:* Für `/hilfe` mindestens einen Mailto-Link
+   oder Kontakthinweis statt der generischen Platzhalter-Komponente
+   verwenden, bis echte FAQ-Inhalte da sind.
+
+2. **Löschen ist an mehreren Stellen sofort und endgültig, ohne
    Bestätigung oder Rückgängig.** Weiterhin so in
-   `src/pages/Preisalarme.tsx` (`removeAlert`) und
-   `src/pages/Favoriten.tsx` (`removeFavorite`), ebenso in
-   `Angebote.tsx`, `Aktivitaeten.tsx` und `Warenkorb.tsx`: Ein Klick auf
-   das Papierkorb-/X-Icon entfernt den Eintrag direkt, ohne Nachfrage und
-   ohne "Rückgängig"-Toast. Bei einem Preisalarm oder Warenkorb-Eintrag,
-   an dem man länger gesucht hat, ist ein Fehlklick besonders ärgerlich.
-   *Vorschlag:* Einheitlich einen kurzen Bestätigungsdialog oder
-   zumindest einen "Rückgängig"-Toast einführen — an einer Stelle
-   festlegen, dann überall gleich anwenden.
+   `src/pages/Preisalarme.tsx` (`removeAlert`), `src/pages/Favoriten.tsx`
+   (`removeFavorite`), `src/pages/Angebote.tsx` (`removeOffer`),
+   `src/pages/Aktivitaeten.tsx` (`removeActivity`) und
+   `src/pages/Warenkorb.tsx` (`removeItem`): ein Klick auf das
+   Papierkorb-/X-Icon entfernt den Eintrag direkt, ohne Nachfrage und ohne
+   "Rückgängig"-Toast. *Vorschlag:* einheitlich einen kurzen
+   Bestätigungsdialog oder zumindest einen "Rückgängig"-Toast einführen —
+   einmal festlegen, dann überall gleich anwenden.
 
-2. **Der Warenkorb ist eine Sackgasse — es gibt keinen "Jetzt
-   buchen"-Button.** `src/pages/Warenkorb.tsx` endet nach der
-   Summen-Karte einfach so, ohne Aktion zur tatsächlichen Buchung. Wer
-   seinen Warenkorb ansieht, erwartet als nächsten Schritt logischerweise
-   einen Buchen-Button. *Vorschlag:* Entweder einen "Jetzt
-   buchen"/"Zur Kasse"-Button ergänzen, oder — falls Direktbuchung
-   bewusst (noch) nicht vorgesehen ist — das der Nutzerin kurz im Text
-   erklären, statt sie ratlos zurückzulassen.
+3. **Der Warenkorb ist eine Sackgasse.** `src/pages/Warenkorb.tsx` endet
+   nach der Summen-Karte, ohne Aktion zur eigentlichen Buchung — keinerlei
+   Verweis auf "buchen" oder "Kasse" im Code. Wer seinen Warenkorb ansieht,
+   erwartet als nächsten Schritt logischerweise einen Buchen-Button.
+   *Vorschlag:* entweder einen "Jetzt buchen"-Button ergänzen, oder — falls
+   Direktbuchung bewusst (noch) nicht vorgesehen ist — das kurz im Text
+   erklären, statt die Nutzerin ratlos zurückzulassen.
 
-_Letztes Update: 2026-09-11_
+_Letztes Update: 2026-09-12_

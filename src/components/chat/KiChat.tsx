@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { useChat } from '@/hooks/useChat'
 import { isSpeechSynthesisSupported, stopSpeaking } from '@/lib/ai/speech'
@@ -92,6 +91,14 @@ export function KiChat() {
     handleReset()
   }
 
+  const handleResetClick = () => {
+    if (hasTripData(trip)) {
+      setResetDialogOpen(true)
+    } else {
+      handleReset()
+    }
+  }
+
   const handleQuickReply = (option: string) => {
     if (option === 'Neue Reise planen') {
       handleReset()
@@ -122,12 +129,16 @@ export function KiChat() {
               {speechEnabled ? <Volume2 className="text-teal" /> : <VolumeX />}
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Neu starten"
+            title="Neu starten"
+            onClick={handleResetClick}
+          >
+            <RotateCcw />
+          </Button>
           <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Neu starten" title="Neu starten">
-                <RotateCcw />
-              </Button>
-            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Neu starten?</DialogTitle>

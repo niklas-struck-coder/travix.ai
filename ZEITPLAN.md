@@ -65,6 +65,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gefunden. Neue `PlaceholderPage.test.tsx` (3 Tests, Muster analog
   `PageHeader.test.tsx`/`TravixAvatar.test.tsx`): Titel/Beschreibung über
   `PageHeader`, Hinweistext mit Seitentitel, sowie das übergebene Icon.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) einen von
+  Support-Chef gemeldeten Befund behoben (siehe `reports/support-chef.md`,
+  12.09., Vorschlag 1): Der Platzhaltertext in `PlaceholderPage.tsx`
+  ("... Diese Seite ist Teil des Travix-Grundgerüsts.") nutzte einen
+  internen Entwicklungsbegriff, der Nutzerinnen auf allen noch nicht
+  gebauten Seiten (u. a. `/hilfe`, Deal Finder, Reisebudget, Premium,
+  Rewards/Loyalty) angezeigt wurde. Satz ersatzlos entfernt, verbleibender
+  Hinweis ("{title} wird als Nächstes gebaut.") bleibt ehrlich und ohne
+  internen Jargon. Der weitergehende Teil des Vorschlags (Mailto-/
+  Kontakthinweis speziell für `/hilfe`) bewusst nicht umgesetzt: Sprint 1
+  "Support-E-Mail live" ist laut diesem Dokument noch nicht abgeschlossen,
+  im Code existiert bisher keine echte Kontaktadresse — eine autonom
+  erfundene Mailto-Adresse wäre keine reine Bugfix-Korrektur, sondern eine
+  Annahme über nicht vorhandene Fakten. Bleibt offener Punkt für 8.11.
+  `PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
+  entfernten Satz).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
@@ -165,6 +181,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gerendert wird; zusätzlich ein Test für den Puls-Ring, der nur im
   Zustand "thinking" erscheint, sowie zwei Tests für Standard- und
   explizit übergebene Größe (`sm`/`md`/`lg`).
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  `support-chef-auto-log.md` (10.09., Commit `a318d38`) gemeldeten und
+  über mehrere Freigabe-Chef-Läufe hinweg unabhängig weiterhin bestätigten
+  Fund behoben: Der "Neu starten"-Bestätigungsdialog in `KiChat.tsx` wurde
+  bisher unbedingt über `DialogTrigger` geöffnet, sobald der Knopf im
+  Chat-Header geklickt wurde — unabhängig vom aktuellen `trip`-Zustand.
+  Direkt nach dem Laden der Seite (frischer Besuch ohne gespeicherten
+  Chat) oder direkt nach einem gerade erst durchgeführten Reset ist
+  `hasTripData(trip)` `false`, es gibt also nichts, was ein erneuter Klick
+  tatsächlich zerstören würde — der Dialog zeigte trotzdem "Neu starten?"
+  / "Deine aktuelle Planung geht verloren." an, obwohl das in diesem
+  Zustand schlicht nicht stimmte, und verlangte einen unnötigen
+  zusätzlichen Bestätigungsklick. Fix: exakt der im Bericht vorgeschlagene
+  Ansatz — der `DialogTrigger` ist einem einfachen `onClick`-Handler
+  (`handleResetClick`) gewichen, der bei `!hasTripData(trip)` direkt
+  `handleReset()` aufruft und sonst wie bisher den Bestätigungsdialog
+  öffnet; derselbe `hasTripData()`-Check, der in derselben Datei bereits
+  an zwei anderen Stellen etabliert ist. Der separate "Neue Reise
+  planen"-Quick-Reply-Chip bleibt unverändert ohne Bestätigung, wie schon
+  im 09.09.-Eintrag dokumentiert. Bestehende Tests in `KiChat.test.tsx`
+  auf einen Trip mit Daten (`{ ...emptyTrip, destination: 'Lissabon' }`)
+  umgestellt, damit sie weiterhin den Bestätigungsdialog prüfen; ein neuer
+  Test bestätigt den Direkt-Reset ohne Dialog bei `emptyTrip`.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -376,6 +415,28 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gefunden. Neue `src/pages/KiChat.test.tsx` (2 Tests, Container-Import
   gemockt, Muster analog `PageHeader.test.tsx`): Seitentitel/-beschreibung
   über `PageHeader`, sowie Rendering des Chat-Containers.
+  Vom autonomen IT-Chef-Lauf am 12.09. (weiterer Lauf) eine weitere
+  Testabdeckungslücke geschlossen: `MobileNav.tsx` (3.3, Hamburger-Menü für
+  die mobile Navigation) hatte bisher keine eigene Testdatei — anders als
+  das strukturell ähnliche `Sidebar.tsx`, das bereits über
+  `Sidebar.test.tsx` abgedeckt ist. Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `MobileNav.test.tsx` (3 Tests, Muster analog `Sidebar.test.tsx`): Menü ist
+  vor dem Öffnen nicht sichtbar, Klick auf "Menü öffnen" zeigt alle drei
+  Navigationsgruppen mit ihren Links (inkl. korrektem `href`), Klick auf
+  einen Link schließt das Menü wieder.
+  Vom autonomen IT-Chef-Lauf am 13.09. eine weitere Testabdeckungslücke
+  geschlossen: `PageTransition.tsx` (3.1, Seitenübergangs-Wrapper um jede
+  Route in `routes.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Von den zuvor am 12.09. verbliebenen acht ungetesteten
+  Nicht-`ui/`-Dateien (`reports/it-chef.md`-Liste vom 12.09.) bleiben damit
+  nur noch `AppShell.tsx`/`routes.tsx` (bräuchten Router-Mocking, größerer
+  Umfang) und `App.tsx`/`main.tsx` (Einstiegspunkte, in diesem Projekt
+  bewusst ohne eigene Tests) übrig. Neue `PageTransition.test.tsx` (2 Tests,
+  Muster analog `ChatMessage.test.tsx`, das dieselbe `framer-motion`-Bibliothek
+  bereits ohne besonderes Mocking nutzt): ein einzelnes Kind wird gerendert,
+  mehrere Kinder (Überschrift + Text) werden unverändert gerendert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -421,7 +482,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   seit 21.08. ebenfalls fertig (auf `it-chef/auto`, noch nicht in `main`
   gemergt); Dashboard-Seite (7.7) seit 27.08. ebenfalls fertig (auf
   `it-chef/auto`, noch nicht in `main` gemergt); Rest (7.4, 7.12) komplett
-  offen
+  offen.
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (11.09., Fund 1, seit vier Freigabe-Chef-Läufen
+  unabhängig als weiterhin aktuell bestätigt, siehe `freigabe-chef-log.md`)
+  gemeldeten Fund behoben: Die "Ehrlich statt irreführend"-Hinweiskarte in
+  `Reiseentwuerfe.tsx` ("Planung fortsetzen" öffnet bei mehreren Entwürfen
+  immer denselben Chat) blendete sich über `drafts.length > 1` ein —
+  `finalizeDraft()` entfernt einen abgeschlossenen Entwurf aber nicht aus
+  `drafts`, nur der Status wechselt auf `finalized`. Schloss man von zwei
+  Entwürfen einen ab, blieb `drafts.length` bei 2, die Karte blieb sichtbar
+  und behauptete weiterhin "mehrere gleichzeitig aktive Planungen", obwohl
+  nur noch eine einzige tatsächlich aktive Planung übrig war — genau die
+  Karte, die laut eigenem Kommentar für Ehrlichkeit steht, wurde dadurch im
+  Abschluss-Fall selbst ungenau. Fix: exakt der im Bericht vorgeschlagene
+  Ansatz — Bedingung zählt jetzt nur noch nicht-finalisierte Entwürfe
+  (`drafts.filter((draft) => draft.status !== 'finalized').length > 1`
+  statt `drafts.length > 1`). Der zweite, im selben Bericht genannte Punkt
+  (fehlender dauerhafter Dismiss-Mechanismus, analog zur
+  Prämienprogramm-Karte in `Dashboard.tsx`) bleibt bewusst offen für einen
+  künftigen, eigenständigen Lauf — eigene, über die reine Zähl-Korrektur
+  hinausgehende Änderung (neuer `localStorage`-Mechanismus). Neuer
+  Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe, einer
+  abgeschlossen → Hinweis verschwindet; vor dem Fix reproduzierbar rot
+  verifiziert).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

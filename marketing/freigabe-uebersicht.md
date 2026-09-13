@@ -1,10 +1,74 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-11)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-12)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-12: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`4fb18e8` (11.09.) hängengeblieben, dessen Inhalt laut `git merge-base
+--is-ancestor 4fb18e8 origin/main` bereits vollständig in `main` gemergt
+war (Merge-Commit `34e43e9`, siehe `freigabe-chef-auto-log.md`,
+"2026-09-11 Tages-Check") — der Branch war also nur noch veraltet, nicht
+mehr in Arbeit. Neu von aktuellem `origin/main` (`2309d4b`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 09.09., seit dem
+letzten Lauf unverändert), `ZEITPLAN.md` (6.2 in Zeile 841 weiterhin
+`[ ]`) oder diesem Dokument seit dem 11.09. Keine neuen Kanal-Links
+(`grep` nach `linkedin.com`/`instagram.com` im gesamten Repo liefert
+weiterhin keinen Treffer), kein Commit zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite (`git log --all --grep="Mini-Changelog"` zeigt nur
+die eigenen bisherigen Ausgaben). Alle vier Fragen bleiben offen.
+
+**`git log 34e43e9..origin/main` zeigt 11 neue Commits, keiner davon
+content-relevant:** ein Freigabe-Chef-Log (12.09., "it-chef/auto
+unabhängig verifiziert und gemergt, marketing/support planmäßig
+übersprungen" — bestätigt, dass dieser Branch seit dem letzten Merge
+nicht angefasst wurde), fünf reine Testdatei-Nachzüge ohne
+Verhaltensänderung (`QuickReplies`, `ChatMessage`/`NoResultsMessage`
+waren bereits im letzten Lauf bekannt, neu: `TripSummaryCard`,
+`PageHeader`, `PlaceholderPage`, `KiChat`-Seiten-Wrapper — jeweils per
+Commit-Beschreibung und Diff bestätigt "kein Bugfix"/"unverändertes
+Verhalten"), ein Support-Chef-Bericht (11.09., ordnet den neuen Hinweis
+zu "Planung fortsetzen" als Zwischenlösung ein, zwei Vorschläge bleiben
+offen — reiner Bericht, keine Codeänderung), der eigene interaktive
+Marketing-Chef-Bericht vom 11.09. (kein neuer Content-Baustein, bestätigt
+dieselbe Kanal-Frage als Flaschenhals), ein IT-Chef-Bericht vom 11.09.
+("kein neuer Bug gefunden", per `git show df73dda --stat` verifiziert:
+nur `reports/it-chef.md` geändert, kein Produkt-Code), ein
+Daily-Status-Update sowie ein weiteres Freigabe-Chef-Log (11.09.). Damit
+gibt es seit dem vierten Tier-4-Kandidaten vom 11.09. keinen fünften —
+der Kandidatentopf bleibt bei vier.
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Keine einzige neue, per `git show` verifizierte
+Produkt-Codeänderung seit dem letzten Lauf, also kein neuer
+Tier-4-Kandidat — der Topf bleibt bei vier (Stand 11.09.), weiterhin
+exakt auf der Menge, die selbst am 06.09. als "nicht ausreichend"
+bewertet wurde, und deutlich unter den acht, die Ausgabe 2 ausgelöst
+haben. Ein eigenständiges neuntes Social-Content-Stück bleibt weiterhin
+an dieselben drei unbeantworteten Fragen gebunden. Stattdessen heute nur
+diese Übersicht aktualisiert (reiner, sicherer Übersichts-Lauf, wie z. B.
+am 01.-04.09., 06.09., 08.-11.09.).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — es gibt
+schlicht keinen neuen Punkt, der eine Zahl bräuchte. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Datum im
+Titel, "Nächster autonomer Lauf" unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-11: ein weiterer Tier-4-Kandidat geprüft (Hinweis auf geteilten Chat bei "Planung fortsetzen"), weiterhin kein achtes Content-Stück und keine dritte Mini-Changelog-Ausgabe
 
@@ -1272,7 +1336,12 @@ ausreichend" galt. Stand 09.11. ist ein vierter Kandidat dazugekommen
 weiterhin deutlich unter den acht, die Ausgabe 2 ausgelöst haben; der
 nächste Lauf sollte das nicht automatisch als "jetzt reicht's" werten,
 sondern die eigene Konsistenz mit dem 06.09.-Maßstab explizit
-gegenprüfen, bevor er eine dritte Ausgabe schreibt. Die drei am 09.09.
+gegenprüfen, bevor er eine dritte Ausgabe schreibt. Stand 09.12. ist kein
+fünfter Kandidat dazugekommen — seit dem letzten Merge (`34e43e9`) gab es
+keine einzige neue, per `git show` verifizierte Produkt-Codeänderung,
+nur Testdatei-Nachzüge und Berichte (siehe Update 2026-09-12 oben). Der
+Topf bleibt bei vier, weiterhin zu wenig für eine dritte Ausgabe. Die
+drei am 09.09.
 gemeldeten, noch offenen Support-Chef-Punkte (Löschen ohne Bestätigung,
 Warenkorb-Sackgasse, Entwurf-Fortsetzen generisch) werden erst zu
 Kandidaten, sobald IT-Chef sie tatsächlich behebt — nicht schon durch die

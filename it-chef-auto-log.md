@@ -9423,3 +9423,327 @@ Verdrahtung, nicht auf Testabdeckung), daher keine Checkbox-Änderung nötig.
   angepasst.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war bereits vollständig nach `main`
+gemerged (siehe `freigabe-chef-log.md`, früher Nacht-Check) und `main` war
+seither um 6 weitere Commits (Marketing-/Support-Chef-Berichte, Freigabe-
+Chef-Log, Tagesstatus) vorangekommen. Branch per `git merge --ff-only
+origin/main` auf den aktuellen `main`-Stand gebracht — reiner Fast-Forward,
+kein Konflikt, `main` selbst nicht angerührt.
+
+**Ausgewählter Punkt:** Letzte verbliebene Lücke in derselben
+Testabdeckungs-Aufräumung wie in den vorherigen Läufen: `MobileNav.tsx`
+(3.3, Hamburger-Menü für die mobile Navigation, strukturell das Gegenstück
+zu `Sidebar.tsx` für kleine Bildschirme) hatte bisher keine eigene
+Testdatei — `Sidebar.tsx` ist bereits seit dem 01.09.-Lauf über
+`Sidebar.test.tsx` abgedeckt. Systematisch per Abgleich aller
+`src/**/*.{ts,tsx}`-Dateien gegen vorhandene `*.test.*`-Dateien geprüft;
+verbleibende ungetestete Dateien sind ausschließlich generische
+shadcn/ui-Primitiven (`badge`, `button`, `card`, `dialog`, `input`,
+`label`, `progress`, `select`, `sheet`, `tabs`), reine Typdefinitionen
+(`types/*.ts`), Konstanten (`design-tokens.ts`) sowie Einstiegspunkte
+(`main.tsx`, `App.tsx`, `routes.tsx`) — keiner davon ein vergleichbar
+klarer, eigenständig sinnvoller Testkandidat wie `MobileNav.tsx`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig — reine Testabdeckung für bestehendes, unverändertes Verhalten einer
+fertigen, kleinen Komponente, keine Interpretation über den vorhandenen
+Code (`MobileNav.tsx`, `nav-config.ts`) hinaus nötig. Ergebnis objektiv
+über Typecheck/Lint/Tests prüfbar, rein additiv — keine Verhaltensänderung
+an `MobileNav.tsx` selbst.
+
+**Umgesetzt:** Neue `src/components/layout/MobileNav.test.tsx` (3 Tests,
+Muster analog `Sidebar.test.tsx`): Vor dem Öffnen ist kein Navigationslink
+sichtbar (Radix-Dialog-Inhalt ist ungemountet); ein Klick auf den Button
+"Menü öffnen" zeigt alle drei Gruppenüberschriften (`Planen`, `Meine
+Reise`, `Konto`) sowie die Links mit korrektem `href` (Stichprobe
+`KI-Chat` → `/ki-chat`); ein Klick auf einen Link schließt das Menü wieder
+(`onClick`-Handler in `MobileNav.tsx` setzt `open` auf `false`). Reine
+Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+gefunden, keine Codeänderung an `MobileNav.tsx` selbst. `ZEITPLAN.md`
+entsprechend ergänzt (Eintrag unter Phase 3, direkt nach dem
+`KiChat.tsx`-Seiten-Wrapper-Eintrag vom 12.09.); `tasks/tasks-prd-travix-platform.md`
+hat 3.3 bereits als `[x]` markiert (Implementierung, nicht Testabdeckung),
+daher keine Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (vitest) → 54 Testdateien, 290 Tests (vorher 53/287), alle
+  grün — drei neue Tests in `MobileNav.test.tsx`, keine bestehenden Tests
+  angepasst.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-12 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/it-chef/auto`
+(letzter Commit: der heutige `MobileNav.tsx`-Testabdeckungs-Lauf) und nicht
+hinter `main` zurück — kein Merge nötig, direkt auf dem Branch
+weitergearbeitet. `main` selbst wurde nicht angerührt.
+
+**Ausgewählter Punkt:** Die reine Testabdeckungs-Aufräumung ist laut dem
+letzten Lauf heute selbst erschöpft (keine vergleichbar klaren Kandidaten
+mehr übrig). Stattdessen `reports/support-chef.md` (12.09.) geprüft:
+Vorschlag 1 dort beschreibt einen konkreten, im Code nachvollziehbaren
+Fund — `PlaceholderPage.tsx` zeigte auf allen noch nicht gebauten Seiten
+(u. a. `/hilfe`, aber auch Deal Finder/Reisebudget/Premium/Rewards) den
+Satz "Diese Seite ist Teil des Travix-Grundgerüsts." — ein interner
+Entwicklungsbegriff ("Grundgerüst") in nutzersichtbarem Text, den echte
+Nutzerinnen nicht einordnen können.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig für den engen Teil des Fundes (Jargon-Entfernung) — anders als der
+weitergehende Teil von Support-Chefs Vorschlag (Mailto-/Kontakthinweis
+speziell für `/hilfe`), der bewusst NICHT umgesetzt wurde: Laut `ZEITPLAN.md`
+ist "Support-E-Mail live" (Sprint 1, Support-Track) noch nicht
+abgeschlossen, im Code existiert bislang keine einzige Kontaktadresse
+(`grep` über `src/` ohne Treffer für `mailto:`/`@`-Adressen) — eine
+autonom erfundene Adresse wäre eine Annahme über nicht vorhandene Fakten
+und damit gegen Kriterium 3 (keine Interpretation über die Aufgabenliste
+hinaus). Die enge Korrektur dagegen ist klar beschrieben (Fund von
+Support-Chef, Text 1:1 im Code auffindbar) und objektiv über
+Typecheck/Lint/Tests prüfbar.
+
+**Umgesetzt:** In `src/pages/PlaceholderPage.tsx` den zweiten Satz
+("Diese Seite ist Teil des Travix-Grundgerüsts.") ersatzlos entfernt,
+verbleibender Hinweis ("{title} wird als Nächstes gebaut.") bleibt ehrlich
+ohne internen Jargon (passt zur "ehrlich statt verkäuferisch"-Vorgabe in
+`MARKENDESIGN.md`, auch wenn dort keine explizite Platzhalter-Text-Vorgabe
+existiert — bestehende Tonalität beibehalten, nichts Neues erfunden).
+`PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
+entfernten Satz, keine sonstige Verhaltensänderung getestet).
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag direkt nach dem heutigen
+`PlaceholderPage.tsx`-Testabdeckungs-Eintrag unter Phase 3);
+`tasks/tasks-prd-travix-platform.md` hat für `PlaceholderPage.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.5, wie schon beim
+vorherigen Lauf vermerkt), daher keine Checkbox-Änderung nötig. 8.11 Hilfe
+bleibt weiterhin ein eigener offener Punkt (blockiert auf echte
+FAQ-/Kontakt-Inhalte vom Support-Chef).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 54 Testdateien, 290 Tests, alle grün (Testanzahl
+  unverändert gegenüber vorher, da nur eine bestehende Assertion angepasst
+  wurde, kein neuer Test hinzugekommen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Fortsetzung der Testabdeckungs-Aufräumung. Ein
+systematischer Abgleich aller `.ts`/`.tsx`-Dateien unter `src/` (außer
+`.test.*`) gegen vorhandene Testdateien ergab noch 23 Dateien ohne eigenen
+Test, davon der Großteil `src/components/ui/*` (shadcn/ui-Primitive, in
+diesem Projekt bewusst ohne eigene Tests), reine Typdefinitionsdateien
+(`types/chat.ts`, `types/duffel.ts`, `types/profile.ts`,
+`types/settings.ts`, `types/trains.ts` — keine Laufzeitlogik) sowie
+`design-tokens.ts`/`utils.ts`/`test/setup.ts` (Konstanten/Testinfrastruktur).
+Von den laut `reports/it-chef.md` (12.09.) verbliebenen acht echten
+Komponenten-/Seiten-Dateien ohne Test war `PageTransition.tsx` (3.1,
+Seitenübergangs-Wrapper, in `routes.tsx` um jede einzelne Route gelegt) die
+klarste, am saubersten abgegrenzte Lücke: eine reine, bereits fertige
+Präsentationskomponente ohne Router-/Kontext-Abhängigkeit (rendert nur
+`children` in einem `framer-motion`-`motion.div`), anders als
+`AppShell.tsx`/`routes.tsx` (bräuchten Router-Mocking, größerer Umfang) oder
+`App.tsx`/`main.tsx` (Einstiegspunkte, in diesem Projekt bisher bewusst ohne
+eigene Tests).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig. Klar genug beschrieben (reine Testabdeckung für bestehendes,
+unverändertes Verhalten), keine Interpretation über den vorhandenen Code
+hinaus nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar, rein
+additiv — keine Verhaltensänderung an `PageTransition.tsx` selbst. Keine
+UI-/Design-Arbeit (keine neue Optik, kein neuer Nutzertext), daher keine
+Vorgabe aus `MARKENDESIGN.md` nötig geprüft/berührt.
+
+**Umgesetzt:** Neue `src/components/layout/PageTransition.test.tsx` (2
+Tests, Muster analog `ChatMessage.test.tsx`/`QuickReplies.test.tsx`, die
+dieselbe `framer-motion`-Bibliothek bereits ohne besonderes Mocking
+verwenden und erfolgreich testen): ein einzelnes Kind wird innerhalb des
+Wrappers gerendert; mehrere Kinder (Überschrift + Text) werden unverändert
+zusammen gerendert. Keine Änderung an `PageTransition.tsx` selbst.
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag direkt nach dem
+`MobileNav.tsx`-Testabdeckungs-Eintrag vom 12.09. unter Phase 3).
+`tasks/tasks-prd-travix-platform.md` hat für `PageTransition.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.1, wie schon bei
+`PlaceholderPage.tsx`/`PageHeader.tsx` vermerkt), daher keine
+Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 292 Tests, alle grün (vorher 54/290,
+  zwei neue Tests in `PageTransition.test.tsx`, keine bestehenden Tests
+  angepasst).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** `reports/it-chef.md` (12.09.) stellte fest, dass
+reine Fehlersuche über bereits mehrfach geprüften Code an ihre Grenzen
+stößt. Statt weiter auf gut Glück nach neuen Bugs zu suchen, `freigabe-chef-log.md`
+gelesen: dort ist ein bereits von Support-Chef verifizierter, aber wegen
+eines unrelated blockierenden Log-Eintrags auf `support-chef/auto`
+gestauter Fund dokumentiert (Commit `a318d38`, 10.09., seit fünf
+Freigabe-Chef-Läufen in Folge unabhängig als weiterhin aktuell bestätigt):
+Der "Neu starten"-Bestätigungsdialog in `src/components/chat/KiChat.tsx`
+wird unbedingt über `DialogTrigger` geöffnet, unabhängig vom `trip`-
+Zustand — bei `hasTripData(trip) === false` (frischer Chat oder direkt
+nach einem Reset) behauptet der Dialog fälschlich, es ginge eine Planung
+verloren, und verlangt einen unnötigen Bestätigungsklick.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+der Fund selbst enthält bereits den exakten Lösungsansatz (denselben
+`hasTripData()`-Check verwenden, der in derselben Datei an zwei anderen
+Stellen, Zeile 68 und 175, schon etabliert ist), keine Interpretation
+darüber hinaus nötig. Ergebnis objektiv prüfbar (Typecheck/Lint/Tests,
+klar definiertes Verhalten: Dialog nur bei vorhandenen Trip-Daten). Kein
+UI-/Design-Aspekt im Sinne von `MARKENDESIGN.md` betroffen (kein neuer
+Nutzertext, keine neue Optik, nur eine geänderte Bedingung, wann der
+bereits bestehende Dialog erscheint).
+
+**Umgesetzt:** `src/components/chat/KiChat.tsx` — der `DialogTrigger` um
+den "Neu starten"-Knopf ist einem `onClick={handleResetClick}` gewichen;
+`handleResetClick` ruft bei `!hasTripData(trip)` direkt `handleReset()`
+auf, sonst `setResetDialogOpen(true)` wie bisher. Der jetzt ungenutzte
+`DialogTrigger`-Import entfernt. Der separate "Neue Reise
+planen"-Quick-Reply-Chip bleibt unverändert ohne Bestätigung (war schon
+laut 09.09.-Eintrag in `ZEITPLAN.md` so beabsichtigt, nicht Teil dieses
+Funds). `src/components/chat/KiChat.test.tsx`: die beiden bestehenden
+Reset-Bestätigungs-Tests sowie der Sprachausgabe-Reset-Test nutzen jetzt
+einen Trip mit Daten (`{ ...emptyTrip, destination: 'Lissabon' }`) statt
+`emptyTrip`, damit sie weiterhin den Bestätigungsdialog prüfen (vorher
+liefen sie zufällig mit `emptyTrip`, für das der Dialog nach diesem Fix
+gar nicht mehr erscheint); ein neuer Test bestätigt den Direkt-Reset ohne
+Dialog bei `emptyTrip`. `ZEITPLAN.md` unter Phase 4 (KI-Chat) entsprechend
+ergänzt. `tasks/tasks-prd-travix-platform.md` hat für diesen Dialog keine
+eigene Checkbox (Teil des bereits abgehakten 4.9 "Assemble KiChat.tsx"),
+daher keine Checkbox-Änderung nötig. `support-chef-auto-log.md` bzw.
+dessen `585efea`-Blockade selbst bewusst nicht angefasst — das ist die
+Datei eines anderen Branches/Skills, nicht Teil dieses einen, klar
+abgegrenzten IT-Chef-Punkts.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 293 Tests, alle grün (vorher 55/292,
+  drei bestehende Tests angepasst, ein neuer Test in `KiChat.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Die reine Testabdeckungs-Aufräumung (Fokus der
+letzten mehreren Läufe) ist jetzt erschöpft: ein erneuter Abgleich aller
+`.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene Testdateien ergibt nur
+noch reine Typdefinitionsdateien (`types/*.ts`), Konstanten
+(`design-tokens.ts`, ein Ein-Zeilen-Wrapper `utils.ts`), Einstiegspunkte
+(`App.tsx`/`main.tsx`, bewusst ohne Tests) sowie `AppShell.tsx`/`routes.tsx`
+(bräuchten Router-Mocking, größerer Umfang) — exakt die Liste, die
+`reports/it-chef.md` (12.09.) bereits als Rest benannt hatte. Stattdessen
+`freigabe-chef-log.md` nach bereits verifizierten, aber noch nicht
+umgesetzten Funden durchsucht: Fund `c88f1ac`
+(`reports/support-chef.md`, 11.09., Fund 1, "ungenaue Hinweis-Karte bei
+abgeschlossenen Entwürfen", `Reiseentwuerfe.tsx`) ist dort seit vier
+Freigabe-Chef-Läufen in Folge (09.09.–12.09.) unabhängig als weiterhin
+aktuell bestätigt, lag aber bisher auf dem blockierten
+`support-chef/auto`-Branch fest (der Branch selbst wird wegen eines
+unrelated, überholten Log-Eintrags nicht gemergt — siehe
+`freigabe-chef-log.md`, 12.09.) und war daher noch nicht in `main`
+gelandet.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Demo-Entwurfsverwaltung. Keine offene
+Produkt-/Architekturentscheidung: der Bericht selbst enthält bereits den
+exakten Lösungsansatz (`drafts.filter((draft) => draft.status !==
+'finalized').length > 1` statt `drafts.length > 1`), keine Interpretation
+darüber hinaus nötig. Ergebnis objektiv prüfbar (Typecheck/Lint/Tests,
+klar definiertes Verhalten: Hinweis blendet sich nur bei 2+ tatsächlich
+aktiven Entwürfen ein). Kein UI-/Design-Aspekt im Sinne von
+`MARKENDESIGN.md` betroffen (kein neuer Nutzertext, keine neue Optik, nur
+eine geänderte Zählbedingung für eine bereits bestehende Karte). Der
+zweite, im selben Bericht genannte Punkt (fehlender dauerhafter
+Dismiss-Mechanismus) bewusst nicht mit umgesetzt, da das eine eigene,
+über die reine Zähl-Korrektur hinausgehende Änderung wäre (neuer
+`localStorage`-Mechanismus) — "einen einzigen Punkt aussuchen" laut
+Skill-Regel.
+
+**Umgesetzt:** `src/pages/Reiseentwuerfe.tsx` — die Sichtbarkeitsbedingung
+der "Ehrlich statt irreführend"-Hinweiskarte zählt jetzt nur noch
+nicht-finalisierte Entwürfe (`drafts.filter((draft) => draft.status !==
+'finalized').length > 1`) statt aller Entwürfe inklusive bereits
+abgeschlossener. Vor dem Fix blieb die Karte nach dem Abschließen eines
+von zwei Entwürfen sichtbar und behauptete weiterhin "mehrere gleichzeitig
+aktive Planungen", obwohl nur noch eine tatsächlich aktive Planung übrig
+war. Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe,
+Kyoto abgeschlossen → Hinweis verschwindet; vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung reproduzierbar rot verifiziert, siehe
+unten). `ZEITPLAN.md` unter Phase 7 entsprechend ergänzt.
+`tasks/tasks-prd-travix-platform.md` bei 7.4 (dort ist die Hinweiskarte
+bereits als Kurzzeit-Mitigation dokumentiert) um einen Satz zur
+Korrektur ergänzt — 7.4 selbst bleibt unverändert offen (echte
+Wiederaufnahme je Entwurf weiterhin architektonisch blockiert).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 294 Tests, alle grün (vorher 55/293,
+  ein neuer Test in `Reiseentwuerfe.test.tsx`). Neuer Test zusätzlich
+  gezielt gegen die alte Bedingung (Quelländerung per `git stash`
+  temporär zurückgenommen, Testdatei behalten) verifiziert: schlägt ohne
+  den Fix reproduzierbar fehl, bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
