@@ -4,6 +4,75 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-13
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`6b6e065` (12.09.) hängengeblieben, dessen Inhalt laut Freigabe-Chef-Log
+vom 12.09. bereits vollständig in `main` gemergt war. Neu von aktuellem
+`origin/main` (`7d3f0fe`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: `marketing/freigabe-uebersicht.md`
+um einen neuen Prüf-Durchlauf ergänzt, ein neuer (fünfter) Tier-4-
+Kandidat eingeordnet, zwei weitere Commits als bloße Verfeinerungen
+bereits gezählter Kandidaten erkannt statt sie mitzuzählen. Kein neues
+Content-Stück, keine dritte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 12.09. beantwortet wurde: keine Notiz in `status.md` (Stand
+weiterhin 12.09.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem
+Dokument, keine neuen Kanal-Links im Repo, keine neue Changelog-Route in
+`src/routes.tsx`/`AppShell.tsx`. Alle vier Fragen bleiben offen. Danach
+`git log 34e43e9..origin/main` geprüft: 12 neue Commits seit dem letzten
+Merge, davon drei mit echter Produkt-Codeänderung (per `git show`
+einzeln verifiziert):
+- `982ec4a`: Der "Neu starten"-Bestätigungsdialog im KI-Chat-Header
+  öffnete sich bisher auch ohne vorhandene Reisedaten und zeigte dann
+  eine falsche Datenverlust-Warnung; `hasTripData(trip)` verhindert das
+  jetzt. Präzisierung des bereits am 10.09. gezählten dritten
+  Kandidaten (Bestätigungsdialog selbst), kein eigenständiger neuer
+  Punkt.
+- `97ec6c8`: Die Hinweiskarte zu "Planung fortsetzen" zählte bisher auch
+  bereits abgeschlossene Entwürfe mit (`drafts.length > 1` statt einer
+  Filterung auf nicht-finalisierte Entwürfe) und blieb dadurch nach
+  Abschluss eines Entwurfs fälschlich sichtbar. Präzisierung des bereits
+  am 11.09. gezählten vierten Kandidaten (dieselbe Hinweiskarte), kein
+  eigenständiger neuer Punkt.
+- `77c499e`: `PlaceholderPage.tsx` zeigte auf allen unfertigen Seiten
+  (u. a. `/hilfe`) den internen Begriff "Travix-Grundgerüst" in
+  nutzersichtbarem Text — jetzt entfernt. Anders als die zwei oben eine
+  eigenständige, neue, verifizierte Textänderung auf einem echten
+  Nutzerpfad → zählt als fünfter Tier-4-Kandidat.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: der neue
+Kandidat stammt aus einem einzeln per `git show` verifizierten, bereits
+in `main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage:
+dieser Lauf trifft keine neue inhaltliche Entscheidung, sondern ordnet
+drei neue Commits sauber in die bestehende Übersicht ein.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück bzw. eine dritte
+  Mini-Changelog-Ausgabe — Kandidatentopf wächst nur von vier auf fünf,
+  weiterhin klar unter den acht, die Ausgabe 2 ausgelöst haben, und nur
+  knapp über der Menge, die selbst am 06.09. als "nicht ausreichend"
+  bewertet wurde.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 13.09. (Prüfung
+  der vier Fragen, Einordnung der drei neuen Commits, davon einer als
+  neuer Tier-4-Kandidat), Tier-4-Abschnitt und "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert, Datum im Titel auf 13.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-12
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
