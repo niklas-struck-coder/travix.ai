@@ -437,6 +437,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Muster analog `ChatMessage.test.tsx`, das dieselbe `framer-motion`-Bibliothek
   bereits ohne besonderes Mocking nutzt): ein einzelnes Kind wird gerendert,
   mehrere Kinder (Überschrift + Text) werden unverändert gerendert.
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  Support-Chef gemeldeten und selbst gegen den Code bestätigten Fund
+  behoben: der Schließen-Button in `src/components/ui/sheet.tsx` (Zeile
+  80, u. a. genutzt vom mobilen Menü `MobileNav.tsx`, 3.3) und in
+  `src/components/ui/dialog.tsx` (Zeile 77, u. a. genutzt vom
+  "Neu starten?"-Dialog in `KiChat.tsx`) hatte als einzigen zugänglichen
+  Namen fest verdrahtet `"Close"` statt Deutsch — anders als jeder sonstige
+  interaktive Text der App (z. B. `aria-label="Menü öffnen"` direkt
+  daneben). Beide auf `"Schließen"` geändert, analog dem bestehenden
+  Muster in `Sidebar.tsx`. Zusätzlich denselben fest verdrahteten Text im
+  bisher ungenutzten `DialogFooter`-Schließen-Button (`dialog.tsx` Zeile
+  116, aktuell nirgends mit `showCloseButton` aufgerufen) aus Konsistenz
+  mitkorrigiert. Neuer Regressionstest in `MobileNav.test.tsx` (Schließen-
+  Button nach dem Öffnen hat den deutschen zugänglichen Namen; vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
+  verifiziert).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

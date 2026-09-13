@@ -9747,3 +9747,74 @@ Wiederaufnahme je Entwurf weiterhin architektonisch blockiert).
   den Fix reproduzierbar fehl, bestätigt danach wieder grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Reine Testabdeckungs-Aufräumung ist weiterhin
+erschöpft (siehe letzter Eintrag). Nächster naheliegender, in `ZEITPLAN.md`
+notierter Sprint-3/4-Programmierpunkt (7.4, 7.12, 8.11 u. a.) ist jeweils
+an eine offene Produkt-/Architekturentscheidung oder fehlende
+FAQ-Inhalte gebunden — keiner davon autonom umsetzbar. Stattdessen
+`support-chef-auto-log.md` (Branch `support-chef/auto`, heutiger Eintrag
+"Mobile Navigation & Seitenübergang") nach frisch verifizierten, noch
+nicht umgesetzten Funden durchsucht: Fund 1 dort (`sheet.tsx`/`dialog.tsx`,
+fest verdrahteter englischer Schließen-Button-Name "Close" mitten in einer
+sonst durchgehend deutschen App) ist mit exakten Zeilenangaben belegt und
+selbst gegen den aktuellen Code nachgeprüft. Fund 2 (fehlende
+`prefers-reduced-motion`-Unterstützung in `PageTransition.tsx`) bewusst
+nicht mit umgesetzt — "einen einzigen Punkt aussuchen" laut Skill-Regel,
+und Fund 1 ist der kleinere, eindeutiger abgegrenzte der beiden.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reiner UI-Text in zwei gemeinsam genutzten
+`components/ui`-Primitiven. Keine offene Produkt-/Architekturentscheidung:
+der Bericht selbst benennt den exakten Fix (Text durch das etablierte
+deutsche `aria-label`-Muster ersetzen, siehe `Sidebar.tsx`/`MobileNav.tsx`),
+keine Interpretation darüber hinaus nötig. Ergebnis objektiv prüfbar
+(Typecheck/Lint/Tests, klar definiertes Verhalten: Schließen-Button hat
+einen deutschen zugänglichen Namen). Kein Widerspruch zu
+`MARKENDESIGN.md` — im Gegenteil, die Änderung setzt die dort bereits
+etablierte durchgängig deutsche Tonalität konsequent fort.
+
+**Umgesetzt:** In `src/components/ui/sheet.tsx` (Zeile 80) und
+`src/components/ui/dialog.tsx` (Zeile 77) den fest verdrahteten
+`sr-only`-Text `"Close"` des jeweiligen Schließen-Buttons durch
+`"Schließen"` ersetzt. Betrifft u. a. den Schließen-Button im mobilen
+Menü (`MobileNav.tsx`, über `Sheet`) und im "Neu starten?"-Bestätigungs-
+dialog (`KiChat.tsx`, über `Dialog`). Zusätzlich denselben fest
+verdrahteten Text im `DialogFooter`-Schließen-Button (`dialog.tsx`,
+sichtbarer Button-Text statt `sr-only`) mitkorrigiert — dieser wird nach
+Prüfung aller drei aktuellen `DialogFooter`-Verwendungen (`Buchung.tsx`,
+`EditMode.tsx`, `KiChat.tsx`) derzeit nirgends mit `showCloseButton`
+aufgerufen, ist also aktuell unerreichbarer Code ohne Verhaltensrisiko,
+aber derselbe Fehler in derselben Datei. Neuer Regressionstest in
+`MobileNav.test.tsx` (Schließen-Button nach dem Öffnen des Menüs hat den
+deutschen zugänglichen Namen "Schließen"; vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung per `git stash` reproduzierbar rot
+verifiziert, danach wieder grün). `ZEITPLAN.md` unter Phase 3
+entsprechend ergänzt. `tasks/tasks-prd-travix-platform.md` bei 3.3 nicht
+geändert — reine Detailkorrektur an einer bereits abgehakten, knapp
+formulierten Zeile, kein neuer Checkbox-Zustand nötig, gleiches Muster
+wie bei anderen reinen Bugfixes ohne eigene Task-Zeile.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 295 Tests, alle grün (vorher 55/294,
+  ein neuer Test in `MobileNav.test.tsx`). Neuer Test zusätzlich gezielt
+  gegen den alten Zustand (Quelländerung an `sheet.tsx`/`dialog.tsx` per
+  `git stash` temporär zurückgenommen, Testdatei behalten) verifiziert:
+  schlägt ohne den Fix reproduzierbar fehl, bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
