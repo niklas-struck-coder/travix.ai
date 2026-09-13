@@ -42,6 +42,17 @@ describe('Reiseentwuerfe', () => {
     expect(screen.queryByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).not.toBeInTheDocument()
   })
 
+  it('hides the multi-draft hint once only one draft remains active (the other finalized)', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Kyoto abschließen' }))
+    expect(screen.queryByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).not.toBeInTheDocument()
+  })
+
   it('pauses and resumes a draft via the pause/play toggle', () => {
     render(
       <MemoryRouter>

@@ -131,7 +131,7 @@ export function Reiseentwuerfe() {
           echte Wiederaufnahme je Entwurf ist Aufgabe 7.4 und weiterhin offen
           (siehe reports/support-chef.md, 10.09.). Nur relevant, sobald es
           mehr als einen Entwurf gibt. */}
-      {drafts.length > 1 && (
+      {drafts.filter((draft) => draft.status !== 'finalized').length > 1 && (
         <Card className="border-dashed">
           <CardContent className="flex items-start gap-3 px-4 py-4 text-sm text-muted-foreground">
             <Info className="mt-0.5 size-5 shrink-0 text-teal" />

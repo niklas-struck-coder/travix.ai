@@ -482,7 +482,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   seit 21.08. ebenfalls fertig (auf `it-chef/auto`, noch nicht in `main`
   gemergt); Dashboard-Seite (7.7) seit 27.08. ebenfalls fertig (auf
   `it-chef/auto`, noch nicht in `main` gemergt); Rest (7.4, 7.12) komplett
-  offen
+  offen.
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (11.09., Fund 1, seit vier Freigabe-Chef-Läufen
+  unabhängig als weiterhin aktuell bestätigt, siehe `freigabe-chef-log.md`)
+  gemeldeten Fund behoben: Die "Ehrlich statt irreführend"-Hinweiskarte in
+  `Reiseentwuerfe.tsx` ("Planung fortsetzen" öffnet bei mehreren Entwürfen
+  immer denselben Chat) blendete sich über `drafts.length > 1` ein —
+  `finalizeDraft()` entfernt einen abgeschlossenen Entwurf aber nicht aus
+  `drafts`, nur der Status wechselt auf `finalized`. Schloss man von zwei
+  Entwürfen einen ab, blieb `drafts.length` bei 2, die Karte blieb sichtbar
+  und behauptete weiterhin "mehrere gleichzeitig aktive Planungen", obwohl
+  nur noch eine einzige tatsächlich aktive Planung übrig war — genau die
+  Karte, die laut eigenem Kommentar für Ehrlichkeit steht, wurde dadurch im
+  Abschluss-Fall selbst ungenau. Fix: exakt der im Bericht vorgeschlagene
+  Ansatz — Bedingung zählt jetzt nur noch nicht-finalisierte Entwürfe
+  (`drafts.filter((draft) => draft.status !== 'finalized').length > 1`
+  statt `drafts.length > 1`). Der zweite, im selben Bericht genannte Punkt
+  (fehlender dauerhafter Dismiss-Mechanismus, analog zur
+  Prämienprogramm-Karte in `Dashboard.tsx`) bleibt bewusst offen für einen
+  künftigen, eigenständigen Lauf — eigene, über die reine Zähl-Korrektur
+  hinausgehende Änderung (neuer `localStorage`-Mechanismus). Neuer
+  Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe, einer
+  abgeschlossen → Hinweis verschwindet; vor dem Fix reproduzierbar rot
+  verifiziert).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

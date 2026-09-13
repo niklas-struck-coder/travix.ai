@@ -9672,3 +9672,78 @@ abgegrenzten IT-Chef-Punkts.
   drei bestehende Tests angepasst, ein neuer Test in `KiChat.test.tsx`).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Die reine Testabdeckungs-Aufräumung (Fokus der
+letzten mehreren Läufe) ist jetzt erschöpft: ein erneuter Abgleich aller
+`.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene Testdateien ergibt nur
+noch reine Typdefinitionsdateien (`types/*.ts`), Konstanten
+(`design-tokens.ts`, ein Ein-Zeilen-Wrapper `utils.ts`), Einstiegspunkte
+(`App.tsx`/`main.tsx`, bewusst ohne Tests) sowie `AppShell.tsx`/`routes.tsx`
+(bräuchten Router-Mocking, größerer Umfang) — exakt die Liste, die
+`reports/it-chef.md` (12.09.) bereits als Rest benannt hatte. Stattdessen
+`freigabe-chef-log.md` nach bereits verifizierten, aber noch nicht
+umgesetzten Funden durchsucht: Fund `c88f1ac`
+(`reports/support-chef.md`, 11.09., Fund 1, "ungenaue Hinweis-Karte bei
+abgeschlossenen Entwürfen", `Reiseentwuerfe.tsx`) ist dort seit vier
+Freigabe-Chef-Läufen in Folge (09.09.–12.09.) unabhängig als weiterhin
+aktuell bestätigt, lag aber bisher auf dem blockierten
+`support-chef/auto`-Branch fest (der Branch selbst wird wegen eines
+unrelated, überholten Log-Eintrags nicht gemergt — siehe
+`freigabe-chef-log.md`, 12.09.) und war daher noch nicht in `main`
+gelandet.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Demo-Entwurfsverwaltung. Keine offene
+Produkt-/Architekturentscheidung: der Bericht selbst enthält bereits den
+exakten Lösungsansatz (`drafts.filter((draft) => draft.status !==
+'finalized').length > 1` statt `drafts.length > 1`), keine Interpretation
+darüber hinaus nötig. Ergebnis objektiv prüfbar (Typecheck/Lint/Tests,
+klar definiertes Verhalten: Hinweis blendet sich nur bei 2+ tatsächlich
+aktiven Entwürfen ein). Kein UI-/Design-Aspekt im Sinne von
+`MARKENDESIGN.md` betroffen (kein neuer Nutzertext, keine neue Optik, nur
+eine geänderte Zählbedingung für eine bereits bestehende Karte). Der
+zweite, im selben Bericht genannte Punkt (fehlender dauerhafter
+Dismiss-Mechanismus) bewusst nicht mit umgesetzt, da das eine eigene,
+über die reine Zähl-Korrektur hinausgehende Änderung wäre (neuer
+`localStorage`-Mechanismus) — "einen einzigen Punkt aussuchen" laut
+Skill-Regel.
+
+**Umgesetzt:** `src/pages/Reiseentwuerfe.tsx` — die Sichtbarkeitsbedingung
+der "Ehrlich statt irreführend"-Hinweiskarte zählt jetzt nur noch
+nicht-finalisierte Entwürfe (`drafts.filter((draft) => draft.status !==
+'finalized').length > 1`) statt aller Entwürfe inklusive bereits
+abgeschlossener. Vor dem Fix blieb die Karte nach dem Abschließen eines
+von zwei Entwürfen sichtbar und behauptete weiterhin "mehrere gleichzeitig
+aktive Planungen", obwohl nur noch eine tatsächlich aktive Planung übrig
+war. Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe,
+Kyoto abgeschlossen → Hinweis verschwindet; vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung reproduzierbar rot verifiziert, siehe
+unten). `ZEITPLAN.md` unter Phase 7 entsprechend ergänzt.
+`tasks/tasks-prd-travix-platform.md` bei 7.4 (dort ist die Hinweiskarte
+bereits als Kurzzeit-Mitigation dokumentiert) um einen Satz zur
+Korrektur ergänzt — 7.4 selbst bleibt unverändert offen (echte
+Wiederaufnahme je Entwurf weiterhin architektonisch blockiert).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 294 Tests, alle grün (vorher 55/293,
+  ein neuer Test in `Reiseentwuerfe.test.tsx`). Neuer Test zusätzlich
+  gezielt gegen die alte Bedingung (Quelländerung per `git stash`
+  temporär zurückgenommen, Testdatei behalten) verifiziert: schlägt ohne
+  den Fix reproduzierbar fehl, bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
