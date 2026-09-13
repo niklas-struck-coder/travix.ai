@@ -453,6 +453,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Button nach dem Öffnen hat den deutschen zugänglichen Namen; vor dem Fix
   durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
   verifiziert).
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) den im
+  vorangegangenen Lauf bewusst zurückgestellten "Fund 2" nachgeholt: einen
+  von `support-chef-auto-log.md` (Branch `support-chef/auto`, Eintrag
+  "Mobile Navigation & Seitenübergang") gemeldeten und von Freigabe-Chef
+  bei der Branch-Prüfung unabhängig gegen den Code bestätigten
+  Barrierefreiheits-Fund behoben: `PageTransition.tsx`
+  (3.7, Seitenübergangs-Wrapper um jede Route) spielte die
+  Opacity-/Verschiebe-Animation bei jedem Routenwechsel unbedingt ab, ohne
+  die Systemeinstellung "Bewegungen reduzieren"
+  (`prefers-reduced-motion`) abzufragen — für Nutzerinnen mit
+  vestibulären Störungen oder Bewegungsempfindlichkeit, die diese
+  Einstellung gezielt aktiviert haben, gab es keine Möglichkeit, die
+  Animation abzuschalten. Fix: neuer `useReducedMotion()`-Hook aus der
+  bereits genutzten `framer-motion`-Bibliothek; bei aktivierter
+  Systemeinstellung werden statische Varianten (`opacity: 1`, keine
+  Verschiebung) und eine Übergangsdauer von 0 verwendet statt der
+  bisherigen 0,2s-Animation, bei deaktivierter Einstellung bleibt das
+  Verhalten unverändert. Neuer Regressionstest in
+  `PageTransition.test.tsx` (mockt `window.matchMedia` auf
+  `prefers-reduced-motion: reduce`, prüft die statischen Stilwerte; vor
+  dem Fix reproduzierbar rot verifiziert).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

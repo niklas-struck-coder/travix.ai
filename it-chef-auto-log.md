@@ -9818,3 +9818,75 @@ wie bei anderen reinen Bugfixes ohne eigene Task-Zeile.
   schlägt ohne den Fix reproduzierbar fehl, bestätigt danach wieder grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` (`538bb25`) hatte einen offenen, noch
+nicht gemergten Commit von einem vorherigen Lauf (Schließen-Button-Fix).
+`origin/main` war seitdem um mehrere Commits weiter (u. a. der eigene
+IT-Chef-Bericht, Marketing-Chef- und Support-Chef-Berichte vom 13.09.).
+`git merge origin/main` in `it-chef/auto` — sauberer Merge ohne
+Konflikte (nur Log-/Berichtsdateien betroffen), `main` selbst nicht
+angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Im vorherigen Lauf (siehe Eintrag direkt oben)
+wurde "Fund 2" aus `support-chef-auto-log.md` (Branch `support-chef/auto`,
+Eintrag "Mobile Navigation & Seitenübergang") bewusst zurückgestellt,
+damit dieser Lauf nur einen einzigen Punkt (den Schließen-Button-Fix)
+umsetzt. Diesen zurückgestellten Fund jetzt umgesetzt: `PageTransition.tsx`
+(3.7, Seitenübergangs-Wrapper um jede Route in `routes.tsx`) spielte bei
+jedem Routenwechsel unbedingt eine Opacity-/Verschiebe-Animation ab, ohne
+die Systemeinstellung "Bewegungen reduzieren" (`prefers-reduced-motion`)
+abzufragen. Der Fund war doppelt belegt: `support-chef-auto-log.md`
+dokumentierte ihn mit `grep`-Beleg (`grep -rn
+"reducedMotion|prefers-reduced-motion|useReducedMotion|MotionConfig"
+src/` ohne Treffer), und `freigabe-chef-log.md` (13.09., Tages-Check)
+hat ihn bei der `support-chef/auto`-Prüfung unabhängig gegen den
+aktuellen Code nachvollzogen und als real bestätigt (kein erfundener
+Reibungspunkt).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Barrierefreiheits-Korrektur an einem
+einzelnen, bereits bestehenden Layout-Wrapper. Keine offene
+Produkt-/Architekturentscheidung: `framer-motion` (bereits Projekt-
+Abhängigkeit) bringt mit `useReducedMotion()` genau den dafür
+vorgesehenen Standard-Hook mit, keine eigene Konzeption nötig. Ergebnis
+objektiv prüfbar (Typecheck/Lint/Tests, klar definiertes Verhalten:
+statische Darstellung bei aktivierter Systemeinstellung, unverändertes
+Verhalten sonst).
+
+**Umsetzung:** `src/components/layout/PageTransition.tsx` ruft jetzt
+`useReducedMotion()` auf; bei `true` werden statische Varianten
+(`opacity: 1`, keine Verschiebung) und `transition={{ duration: 0 }}`
+verwendet statt der bisherigen 0,2s-Animation. Bei `false` (Standardfall,
+auch wenn `window.matchMedia` in der Test-Umgebung fehlt) bleibt das
+Verhalten exakt wie zuvor. Neuer Regressionstest in
+`PageTransition.test.tsx` (mockt `window.matchMedia` auf
+`prefers-reduced-motion: reduce` und prüft `opacity: 1`/`transform: none`
+auf dem äußeren `motion.div`; muss als erster Test in der Datei laufen,
+da `framer-motion` die Systemeinstellung nur einmal pro Prozess abfragt
+und danach cacht — Kommentar direkt im Test dokumentiert das). Test vor
+dem Fix durch temporäres Zurücknehmen der Quelländerung per `git stash`
+reproduzierbar rot verifiziert, danach wieder grün. `ZEITPLAN.md` unter
+Phase 3 entsprechend ergänzt; `tasks/tasks-prd-travix-platform.md` bei
+3.7 nicht geändert (bereits abgehakt, reine Detailkorrektur ohne neuen
+Checkbox-Zustand, gleiches Muster wie beim Schließen-Button-Fix oben).
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 296 Tests, alle grün (vorher 55/295,
+  ein neuer Test in `PageTransition.test.tsx`). Neuer Test zusätzlich
+  gezielt gegen den alten Zustand (Quelländerung an `PageTransition.tsx`
+  per `git stash` temporär zurückgenommen, Testdatei behalten)
+  verifiziert: schlägt ohne den Fix reproduzierbar fehl (`opacity: 0;
+  transform: translateY(8px);` statt der erwarteten statischen Werte),
+  bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
