@@ -3024,3 +3024,89 @@ manuell korrigieren/als erledigt markieren, oder (b) Support-Chef
 anweisen, vor jedem neuen Lauf zu prüfen, ob eigene ältere offene Funde
 inzwischen behoben wurden, und solche Einträge selbst zu aktualisieren
 statt nur oben draufzustapeln.
+
+## 2026-09-13, früher Nacht-Check (0-4 Uhr Lauf)
+
+Fokus laut Auftrag: `it-chef/auto`, da IT-Chef zwischen 0 und 4 Uhr
+mehrfach gelaufen ist. `marketing-chef/auto`/`support-chef/auto` nur kurz
+mitgeprüft, falls schon neue Commits von heute da sind (die laufen
+regulär erst um 6 Uhr, separater späterer Lauf).
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 6 Commits vor `origin/main` (0 dahinter), alle
+  zwischen 22:08 Uhr (12.09.) und 02:09 Uhr (13.09.), vier Läufe laut
+  `it-chef-auto-log.md`: `MobileNav.test.tsx` nachgezogen,
+  `PlaceholderPage.tsx`-Jargon entfernt, `PageTransition.test.tsx`
+  nachgezogen, `KiChat.tsx`-Reset-Dialog-Fix (`hasTripData`-Prüfung),
+  `Reiseentwuerfe.tsx`-Zählkorrektur (nur nicht-finalisierte Entwürfe).
+- `marketing-chef/auto` — 0 Commits vor `main` (letzter Commit `6b6e065`
+  vom 12.09., bereits gemergt). Nichts Neues von heute, wie erwartet
+  übersprungen.
+- `support-chef/auto` — letzter Commit weiterhin `c93b1ff` vom 12.09.
+  04:05 Uhr, kein neuer Commit von heute. Wie im Auftrag vorgesehen bei
+  diesem frühen Lauf **nicht** erneut geprüft — der bereits fünffach
+  dokumentierte Blocker (`585efea`) besteht unverändert fort und ist
+  weiterhin ungelöst, aber nicht Gegenstand dieses Laufs.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Umfang: `ZEITPLAN.md`, `it-chef-auto-log.md`,
+  `KiChat.{tsx,test.tsx}`, `MobileNav.test.tsx` (neu),
+  `PageTransition.test.tsx` (neu), `PlaceholderPage.{tsx,test.tsx}`,
+  `Reiseentwuerfe.{tsx,test.tsx}`, `tasks/tasks-prd-travix-platform.md`.
+  Deckt sich exakt mit den fünf im `it-chef-auto-log.md` beschriebenen
+  Punkten (inkl. der zwei reinen Testabdeckungs-Läufe ohne
+  Verhaltensänderung) — kein Scope-Creep, jeder Commit bleibt beim
+  jeweils beschriebenen einen Punkt.
+- Grep über den vollen Diff auf Auth/Login/Token/Payment/Zahlung/
+  Kreditkarte/AGB/Datenschutz/Impressum ergab keinen Treffer.
+- `KiChat.tsx`-Fix inhaltlich nachvollzogen: `DialogTrigger` weicht einem
+  `onClick={handleResetClick}`, der bei `!hasTripData(trip)` direkt
+  `handleReset()` aufruft statt den Bestätigungsdialog zu öffnen —
+  exakt der Ansatz, der bereits im 10.09.-Fund (`a318d38`, seit fünf
+  Freigabe-Chef-Läufen unabhängig als aktuell bestätigt, siehe oben)
+  beschrieben war. `Reiseentwuerfe.tsx`-Fix ebenfalls nachvollzogen:
+  Zählbedingung nutzt jetzt `drafts.filter((draft) => draft.status !==
+  'finalized').length > 1` statt `drafts.length > 1` — exakt der Ansatz
+  aus dem 11.09.-Fund (`c88f1ac`). Beide damit unabhängig vom blockierten
+  `support-chef/auto`-Branch jetzt sauber über `it-chef/auto` in `main`
+  gelandet.
+- `PlaceholderPage.tsx`: interner Begriff "Diese Seite ist Teil des
+  Travix-Grundgerüsts." ersatzlos entfernt, verbleibender Text bleibt
+  ehrlich ohne Jargon — passt zum 12.09.-Fund (`c93b1ff`). Der
+  weitergehende Teil des Support-Chef-Vorschlags (Mailto-Adresse für
+  `/hilfe`) bewusst nicht mit umgesetzt, da im Code noch keine echte
+  Kontaktadresse existiert (`grep -r "mailto:" src/` ohne Treffer,
+  selbst nachgeprüft) — richtige Zurückhaltung, keine erfundene Adresse.
+- Kein UI-/Design-Aspekt im engeren Sinn (keine neue Optik, keine neuen
+  Marketing-Texte) — `MARKENDESIGN.md`-Abgleich daher nicht nötig.
+- **Unabhängig selbst verifiziert** (Branch ausgecheckt, frisches
+  `npm ci`, danach selbst ausgeführt statt nur dem Log zu glauben):
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `src/components/ui/{badge,button,tabs}.tsx` (react-refresh,
+    unverändert — exakt wie im Log behauptet).
+  - `npx vitest run` → 55 Testdateien, 294 Tests, alle grün — deckt sich
+    exakt mit der letzten Angabe in `it-chef-auto-log.md`.
+  - (Eigener Fehler beim Aufsetzen: ein versehentlich verschachteltes
+    zweites Repo-Klon-Verzeichnis hatte den ersten Testlauf auf
+    108 Testdateien/581 Tests verdoppelt — entfernt, danach sauber
+    neu ausgeführt. Kein Teil des geprüften Branches, rein lokales
+    Artefakt dieses Laufs.)
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward
+`68315a8..97ec6c8`, gepusht). `it-chef/auto` zeigt danach auf denselben
+Commit wie `main` — keine weitere Anpassung nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`),
+`marketing-chef/auto` planmäßig übersprungen (keine neuen Commits seit
+dem letzten Merge), `support-chef/auto` planmäßig nicht erneut geprüft
+(kein neuer Commit von heute, läuft regulär erst um 6 Uhr). Keine neuen
+Auffälligkeiten bei `it-chef/auto`.
+
+**Info an Ni nötig:** Nein für diesen Lauf selbst (`it-chef/auto` sauber
+gemergt, keine Wiederholung eines Problems). Der bereits mehrfach
+gemeldete `support-chef/auto`-Blocker (`585efea`) besteht unverändert
+fort, wurde aber schon in den letzten Läufen aktiv gemeldet — hier nur
+zur Vollständigkeit erwähnt, keine neue Eskalation nötig, solange sich
+beim nächsten (6-Uhr-)Lauf nichts Neues daran zeigt.
