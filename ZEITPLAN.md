@@ -402,6 +402,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   vor dem Öffnen nicht sichtbar, Klick auf "Menü öffnen" zeigt alle drei
   Navigationsgruppen mit ihren Links (inkl. korrektem `href`), Klick auf
   einen Link schließt das Menü wieder.
+  Vom autonomen IT-Chef-Lauf am 13.09. eine weitere Testabdeckungslücke
+  geschlossen: `PageTransition.tsx` (3.1, Seitenübergangs-Wrapper um jede
+  Route in `routes.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Von den zuvor am 12.09. verbliebenen acht ungetesteten
+  Nicht-`ui/`-Dateien (`reports/it-chef.md`-Liste vom 12.09.) bleiben damit
+  nur noch `AppShell.tsx`/`routes.tsx` (bräuchten Router-Mocking, größerer
+  Umfang) und `App.tsx`/`main.tsx` (Einstiegspunkte, in diesem Projekt
+  bewusst ohne eigene Tests) übrig. Neue `PageTransition.test.tsx` (2 Tests,
+  Muster analog `ChatMessage.test.tsx`, das dieselbe `framer-motion`-Bibliothek
+  bereits ohne besonderes Mocking nutzt): ein einzelnes Kind wird gerendert,
+  mehrere Kinder (Überschrift + Text) werden unverändert gerendert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

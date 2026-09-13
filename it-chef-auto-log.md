@@ -9544,3 +9544,65 @@ FAQ-/Kontakt-Inhalte vom Support-Chef).
   wurde, kein neuer Test hinzugekommen).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Fortsetzung der Testabdeckungs-Aufräumung. Ein
+systematischer Abgleich aller `.ts`/`.tsx`-Dateien unter `src/` (außer
+`.test.*`) gegen vorhandene Testdateien ergab noch 23 Dateien ohne eigenen
+Test, davon der Großteil `src/components/ui/*` (shadcn/ui-Primitive, in
+diesem Projekt bewusst ohne eigene Tests), reine Typdefinitionsdateien
+(`types/chat.ts`, `types/duffel.ts`, `types/profile.ts`,
+`types/settings.ts`, `types/trains.ts` — keine Laufzeitlogik) sowie
+`design-tokens.ts`/`utils.ts`/`test/setup.ts` (Konstanten/Testinfrastruktur).
+Von den laut `reports/it-chef.md` (12.09.) verbliebenen acht echten
+Komponenten-/Seiten-Dateien ohne Test war `PageTransition.tsx` (3.1,
+Seitenübergangs-Wrapper, in `routes.tsx` um jede einzelne Route gelegt) die
+klarste, am saubersten abgegrenzte Lücke: eine reine, bereits fertige
+Präsentationskomponente ohne Router-/Kontext-Abhängigkeit (rendert nur
+`children` in einem `framer-motion`-`motion.div`), anders als
+`AppShell.tsx`/`routes.tsx` (bräuchten Router-Mocking, größerer Umfang) oder
+`App.tsx`/`main.tsx` (Einstiegspunkte, in diesem Projekt bisher bewusst ohne
+eigene Tests).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt- oder Architekturentscheidung
+nötig. Klar genug beschrieben (reine Testabdeckung für bestehendes,
+unverändertes Verhalten), keine Interpretation über den vorhandenen Code
+hinaus nötig. Ergebnis objektiv über Typecheck/Lint/Tests prüfbar, rein
+additiv — keine Verhaltensänderung an `PageTransition.tsx` selbst. Keine
+UI-/Design-Arbeit (keine neue Optik, kein neuer Nutzertext), daher keine
+Vorgabe aus `MARKENDESIGN.md` nötig geprüft/berührt.
+
+**Umgesetzt:** Neue `src/components/layout/PageTransition.test.tsx` (2
+Tests, Muster analog `ChatMessage.test.tsx`/`QuickReplies.test.tsx`, die
+dieselbe `framer-motion`-Bibliothek bereits ohne besonderes Mocking
+verwenden und erfolgreich testen): ein einzelnes Kind wird innerhalb des
+Wrappers gerendert; mehrere Kinder (Überschrift + Text) werden unverändert
+zusammen gerendert. Keine Änderung an `PageTransition.tsx` selbst.
+`ZEITPLAN.md` entsprechend ergänzt (Eintrag direkt nach dem
+`MobileNav.tsx`-Testabdeckungs-Eintrag vom 12.09. unter Phase 3).
+`tasks/tasks-prd-travix-platform.md` hat für `PageTransition.tsx` keine
+eigene Checkbox (internes Implementierungsdetail von 3.1, wie schon bei
+`PlaceholderPage.tsx`/`PageHeader.tsx` vermerkt), daher keine
+Checkbox-Änderung nötig.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 292 Tests, alle grün (vorher 54/290,
+  zwei neue Tests in `PageTransition.test.tsx`, keine bestehenden Tests
+  angepasst).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
