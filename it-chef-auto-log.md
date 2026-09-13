@@ -9606,3 +9606,69 @@ Checkbox-Änderung nötig.
   angepasst).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** `reports/it-chef.md` (12.09.) stellte fest, dass
+reine Fehlersuche über bereits mehrfach geprüften Code an ihre Grenzen
+stößt. Statt weiter auf gut Glück nach neuen Bugs zu suchen, `freigabe-chef-log.md`
+gelesen: dort ist ein bereits von Support-Chef verifizierter, aber wegen
+eines unrelated blockierenden Log-Eintrags auf `support-chef/auto`
+gestauter Fund dokumentiert (Commit `a318d38`, 10.09., seit fünf
+Freigabe-Chef-Läufen in Folge unabhängig als weiterhin aktuell bestätigt):
+Der "Neu starten"-Bestätigungsdialog in `src/components/chat/KiChat.tsx`
+wird unbedingt über `DialogTrigger` geöffnet, unabhängig vom `trip`-
+Zustand — bei `hasTripData(trip) === false` (frischer Chat oder direkt
+nach einem Reset) behauptet der Dialog fälschlich, es ginge eine Planung
+verloren, und verlangt einen unnötigen Bestätigungsklick.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+der Fund selbst enthält bereits den exakten Lösungsansatz (denselben
+`hasTripData()`-Check verwenden, der in derselben Datei an zwei anderen
+Stellen, Zeile 68 und 175, schon etabliert ist), keine Interpretation
+darüber hinaus nötig. Ergebnis objektiv prüfbar (Typecheck/Lint/Tests,
+klar definiertes Verhalten: Dialog nur bei vorhandenen Trip-Daten). Kein
+UI-/Design-Aspekt im Sinne von `MARKENDESIGN.md` betroffen (kein neuer
+Nutzertext, keine neue Optik, nur eine geänderte Bedingung, wann der
+bereits bestehende Dialog erscheint).
+
+**Umgesetzt:** `src/components/chat/KiChat.tsx` — der `DialogTrigger` um
+den "Neu starten"-Knopf ist einem `onClick={handleResetClick}` gewichen;
+`handleResetClick` ruft bei `!hasTripData(trip)` direkt `handleReset()`
+auf, sonst `setResetDialogOpen(true)` wie bisher. Der jetzt ungenutzte
+`DialogTrigger`-Import entfernt. Der separate "Neue Reise
+planen"-Quick-Reply-Chip bleibt unverändert ohne Bestätigung (war schon
+laut 09.09.-Eintrag in `ZEITPLAN.md` so beabsichtigt, nicht Teil dieses
+Funds). `src/components/chat/KiChat.test.tsx`: die beiden bestehenden
+Reset-Bestätigungs-Tests sowie der Sprachausgabe-Reset-Test nutzen jetzt
+einen Trip mit Daten (`{ ...emptyTrip, destination: 'Lissabon' }`) statt
+`emptyTrip`, damit sie weiterhin den Bestätigungsdialog prüfen (vorher
+liefen sie zufällig mit `emptyTrip`, für das der Dialog nach diesem Fix
+gar nicht mehr erscheint); ein neuer Test bestätigt den Direkt-Reset ohne
+Dialog bei `emptyTrip`. `ZEITPLAN.md` unter Phase 4 (KI-Chat) entsprechend
+ergänzt. `tasks/tasks-prd-travix-platform.md` hat für diesen Dialog keine
+eigene Checkbox (Teil des bereits abgehakten 4.9 "Assemble KiChat.tsx"),
+daher keine Checkbox-Änderung nötig. `support-chef-auto-log.md` bzw.
+dessen `585efea`-Blockade selbst bewusst nicht angefasst — das ist die
+Datei eines anderen Branches/Skills, nicht Teil dieses einen, klar
+abgegrenzten IT-Chef-Punkts.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 293 Tests, alle grün (vorher 55/292,
+  drei bestehende Tests angepasst, ein neuer Test in `KiChat.test.tsx`).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

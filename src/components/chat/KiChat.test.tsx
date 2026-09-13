@@ -85,7 +85,7 @@ describe('KiChat speech synthesis stop', () => {
   it('stops speaking when the chat is reset', () => {
     vi.mocked(stopSpeaking).mockClear()
     const resetChat = vi.fn()
-    renderKiChat({ resetChat })
+    renderKiChat({ resetChat, trip: { ...emptyTrip, destination: 'Lissabon' } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ja, neu starten' }))
@@ -106,9 +106,9 @@ describe('KiChat speech synthesis stop', () => {
 })
 
 describe('KiChat reset confirmation', () => {
-  it('does not reset immediately, but asks for confirmation first', () => {
+  it('does not reset immediately, but asks for confirmation first when there is a trip to lose', () => {
     const resetChat = vi.fn()
-    renderKiChat({ resetChat })
+    renderKiChat({ resetChat, trip: { ...emptyTrip, destination: 'Lissabon' } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
 
@@ -118,11 +118,21 @@ describe('KiChat reset confirmation', () => {
 
   it('keeps the chat when the confirmation is cancelled', () => {
     const resetChat = vi.fn()
-    renderKiChat({ resetChat })
+    renderKiChat({ resetChat, trip: { ...emptyTrip, destination: 'Lissabon' } })
 
     fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
     fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
 
     expect(resetChat).not.toHaveBeenCalled()
+  })
+
+  it('resets immediately without a confirmation dialog when there is no trip data yet', () => {
+    const resetChat = vi.fn()
+    renderKiChat({ resetChat, trip: emptyTrip })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Neu starten' }))
+
+    expect(resetChat).toHaveBeenCalled()
+    expect(screen.queryByText('Deine aktuelle Planung geht verloren.')).not.toBeInTheDocument()
   })
 })

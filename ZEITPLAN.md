@@ -181,6 +181,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gerendert wird; zusätzlich ein Test für den Puls-Ring, der nur im
   Zustand "thinking" erscheint, sowie zwei Tests für Standard- und
   explizit übergebene Größe (`sm`/`md`/`lg`).
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  `support-chef-auto-log.md` (10.09., Commit `a318d38`) gemeldeten und
+  über mehrere Freigabe-Chef-Läufe hinweg unabhängig weiterhin bestätigten
+  Fund behoben: Der "Neu starten"-Bestätigungsdialog in `KiChat.tsx` wurde
+  bisher unbedingt über `DialogTrigger` geöffnet, sobald der Knopf im
+  Chat-Header geklickt wurde — unabhängig vom aktuellen `trip`-Zustand.
+  Direkt nach dem Laden der Seite (frischer Besuch ohne gespeicherten
+  Chat) oder direkt nach einem gerade erst durchgeführten Reset ist
+  `hasTripData(trip)` `false`, es gibt also nichts, was ein erneuter Klick
+  tatsächlich zerstören würde — der Dialog zeigte trotzdem "Neu starten?"
+  / "Deine aktuelle Planung geht verloren." an, obwohl das in diesem
+  Zustand schlicht nicht stimmte, und verlangte einen unnötigen
+  zusätzlichen Bestätigungsklick. Fix: exakt der im Bericht vorgeschlagene
+  Ansatz — der `DialogTrigger` ist einem einfachen `onClick`-Handler
+  (`handleResetClick`) gewichen, der bei `!hasTripData(trip)` direkt
+  `handleReset()` aufruft und sonst wie bisher den Bestätigungsdialog
+  öffnet; derselbe `hasTripData()`-Check, der in derselben Datei bereits
+  an zwei anderen Stellen etabliert ist. Der separate "Neue Reise
+  planen"-Quick-Reply-Chip bleibt unverändert ohne Bestätigung, wie schon
+  im 09.09.-Eintrag dokumentiert. Bestehende Tests in `KiChat.test.tsx`
+  auf einen Trip mit Daten (`{ ...emptyTrip, destination: 'Lissabon' }`)
+  umgestellt, damit sie weiterhin den Bestätigungsdialog prüfen; ein neuer
+  Test bestätigt den Direkt-Reset ohne Dialog bei `emptyTrip`.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
