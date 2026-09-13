@@ -2326,3 +2326,93 @@ Ob und wie sich eine Sonderbehandlung für `/hilfe` sauber in die generische
 `ctaLink`/`ctaLabel`-Props für alle vier betroffenen Routen statt nur
 `/hilfe`), wurde nicht im Detail als Umsetzungsvorschlag ausgearbeitet —
 das wäre eine Design-Entscheidung, die über eine reine Analyse hinausgeht.
+
+## 2026-09-13 — Mobile Navigation & Seitenübergang (`MobileNav.tsx`, `PageTransition.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` (Phase 3, Abschnitt
+"Programmierung (IT-Chef)") war Phase 3 Layout/Navigation diese Woche
+mehrfach aktiv Thema des autonomen IT-Chef-Laufs — zuletzt am 13.09. mit
+einer neuen `PageTransition.test.tsx` sowie zuvor am 12.09. mit einer
+neuen `MobileNav.test.tsx`, jeweils erste eigene Testdatei für die
+betroffene Komponente. Beide waren bisher in keinem früheren Auto-Log
+eigenständig aus Nutzersicht geprüft worden (nur `Sidebar.tsx`, das
+Desktop-Gegenstück zu `MobileNav.tsx`, kam bisher vor — dort ging es am
+01.09. um den Einklappen-Button). Heute deshalb beide Dateien geprüft:
+
+- `src/components/layout/MobileNav.tsx` (mobiles Hauptmenü, `<lg` sichtbar,
+  eingebunden über `src/components/layout/AppShell.tsx:10` auf jeder
+  Seite)
+- `src/components/layout/PageTransition.tsx` (Seitenübergangs-Wrapper,
+  laut `src/routes.tsx:56-87` ausnahmslos um jede einzelne Route gelegt —
+  auch um die Platzhalterseiten)
+- Zum Vergleich herangezogen: `src/components/ui/sheet.tsx` und
+  `src/components/ui/dialog.tsx` (gemeinsame Basis für den Schließen-Knopf
+  im mobilen Menü bzw. für Dialoge in der App)
+
+### Reibungspunkte
+
+**1. Der Schließen-Knopf im mobilen Menü kündigt sich Screenreader-Nutzerinnen
+auf Englisch an — mitten in einer sonst durchgehend deutschen App**
+
+`MobileNav.tsx` öffnet sein Menü über `<SheetContent>` aus
+`src/components/ui/sheet.tsx`. Dessen eingebauter Schließen-Knopf
+(`src/components/ui/sheet.tsx:71-83`) hat als einzigen zugänglichen Namen
+`<span className="sr-only">Close</span>` (Zeile 80) — fest auf Englisch
+verdrahtet. Jeder andere interaktive Text in der App, den ich in früheren
+Läufen und heute gesehen habe, ist durchgehend Deutsch — inklusive des
+eigenen Menü-Öffnen-Knopfs direkt daneben (`MobileNav.tsx:23`,
+`aria-label="Menü öffnen"`) und des analogen Musters in `Sidebar.tsx:59`
+(`aria-label={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste
+einklappen'}`). Für eine Screenreader-Nutzerin, die das mobile Menü öffnet
+und wieder schließen will, springt die Sprache an genau dieser Stelle
+unvermittelt auf Englisch — ohne sichtbaren Text daneben (der Knopf zeigt
+nur ein X-Icon), ist dieser eine Name die einzige Information, die sie
+bekommt. Derselbe fest verdrahtete Text existiert identisch in
+`src/components/ui/dialog.tsx:77` und betrifft damit z. B. auch den
+"Neu starten?"-Bestätigungsdialog in `KiChat.tsx`.
+
+*Vorschlag:* `"Close"` in beiden Dateien durch einen deutschen Text
+ersetzen (z. B. `"Schließen"`), analog zu den bereits etablierten
+deutschen `aria-label`-Mustern in `MobileNav.tsx`/`Sidebar.tsx`. Eine
+zentrale Stelle für beide Komponenten, da der Text identisch in
+`sheet.tsx` und `dialog.tsx` steht.
+
+**2. Jeder Seitenwechsel animiert, ohne die Systemeinstellung "Bewegung
+reduzieren" zu respektieren**
+
+`PageTransition.tsx:4-8` definiert eine feste Ein-/Ausblend- und
+Verschiebe-Animation (Opacity 0→1, `y` 8px→0px beim Erscheinen, 0px→-8px
+beim Verlassen), die laut `src/routes.tsx:56-87` ausnahmslos um jede
+Route der gesamten App gelegt ist — ohne Ausnahme, auch um die noch nicht
+gebauten Platzhalterseiten. Eine Codesuche über `src/` nach
+`reducedMotion`/`useReducedMotion`/`MotionConfig`/`prefers-reduced-motion`
+findet keinerlei Treffer — die Animation läuft unverändert für jede
+Nutzerin, unabhängig davon, ob sie auf Betriebssystem- oder
+Browser-Ebene "Bewegung reduzieren" aktiviert hat. Das betrifft Menschen
+mit vestibulären Störungen oder Reisekrankheit-ähnlicher
+Bewegungsempfindlichkeit potenziell bei praktisch jedem Klick in der App,
+nicht nur an einer einzelnen Stelle — `framer-motion` (bereits
+Projektabhängigkeit, siehe `ChatMessage.tsx`-Nutzung laut Log vom 13.09.)
+bietet mit `useReducedMotion()`/`<MotionConfig reducedMotion="user">`
+eine eingebaute Lösung genau dafür, die hier bisher nicht verwendet wird.
+
+*Vorschlag:* `PageTransition.tsx` über `useReducedMotion()` (oder global
+per `<MotionConfig reducedMotion="user">` einmal um die gesamte App) an
+die Systemeinstellung koppeln, sodass bei aktivierter Präferenz nur noch
+ein reiner Opacity-Wechsel (oder gar keine Animation) läuft statt der
+Verschiebung. Kleine, lokal begrenzte Änderung an einer einzigen Datei,
+mit systemweiter Wirkung, weil `PageTransition` bereits jede Route
+umschließt.
+
+### Sonst unauffällig
+Restliches Verhalten von `MobileNav.tsx` sauber: Klick auf einen
+Nav-Link schließt das Menü zuverlässig (`onClick={() => setOpen(false)}`,
+Zeile 45), der Öffnen-Knopf hat bereits ein deutsches `aria-label`
+(Zeile 23, exakt im Muster des `Sidebar.tsx`-Fixes vom 01.09.), und die
+Gruppierung übernimmt unverändert dieselbe `navGroups`-Quelle wie die
+Desktop-Sidebar (keine Abweichung zwischen beiden Ansichten). Für
+`PageTransition.tsx` selbst (abgesehen von Punkt 2) keine weiteren
+Auffälligkeiten — Dauer (0.2s) und Easing sind über alle Routen
+konsistent.
