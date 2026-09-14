@@ -41,4 +41,16 @@ describe('MobileNav', () => {
 
     expect(screen.queryByRole('link', { name: /KI-Chat/ })).not.toBeInTheDocument()
   })
+
+  it('kündigt den Schließen-Button des geöffneten Menüs auf Deutsch an', () => {
+    render(
+      <MemoryRouter>
+        <MobileNav />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menü öffnen' }))
+
+    expect(screen.getByRole('button', { name: 'Schließen' })).toBeInTheDocument()
+  })
 })

@@ -1,45 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-12
+**Datum:** 2026-09-13
 
-## Was ist seit dem letzten Eintrag (2026-09-11) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-12) passiert?
 
-Wieder ehrlich: nichts Neues, das einen frischen Marketing-Vorschlag
-rechtfertigt.
+Ehrlich: wieder nichts, das einen inhaltlich neuen Marketing-Vorschlag
+rechtfertigen würde. Seit gestern kamen dazu:
 
-- Seit gestern kamen nur fünf nachgezogene Testdateien (KiChat-Wrapper,
-  PlaceholderPage, PageHeader, TripSummaryCard, QuickReplies) sowie ein
-  IT-Chef-Bericht ohne neuen Bugfund dazu — keine davon mit sichtbarer
-  Verhaltensänderung fürs Produkt.
-- Der autonome Marketing-Chef-Lauf auf `marketing-chef/auto` kommt für
-  den 12.09. zum selben Schluss: kein fünfter Tier-4-Kandidat, alle vier
-  offenen Fragen an dich (Kanal ja/nein, Warenkorb-Content vs. 6.2,
-  wiederkehrendes Social-Format ja/nein, Mini-Changelog-Seite ja/nein)
-  bleiben unbeantwortet.
+- Drei kleine UX-/Text-Fixes im Produkt: Der "Neu starten"-Dialog im
+  KI-Chat warnt nicht mehr fälschlich vor Datenverlust, wenn gar keine
+  Reisedaten vorliegen; die Hinweiskarte zu geteilten Chats zählt
+  abgeschlossene Entwürfe nicht mehr fälschlich mit; und der interne
+  Begriff "Travix-Grundgerüst" wurde aus dem Platzhaltertext auf
+  unfertigen Seiten (u. a. /hilfe) entfernt. Alles sinnvolle Politur,
+  aber keine neue Funktion und keine neue Story.
+- IT-Chef hat bei einer breiten Prüfung toten Code für eine nie fertig
+  gebaute Zugsuche gefunden (kein Bugfund, nur Aufräum-Hinweis).
+- Der autonome Marketing-Chef-Lauf (`marketing-chef/auto`) kommt für den
+  13.09. zum selben Schluss wie ich: kein neues eigenständiges
+  Content-Stück, die vier offenen Fragen an dich bleiben unbeantwortet.
 - Keine neuen Nutzungs- oder Erfolgszahlen bekannt — bleibt außen vor.
 
 ## Vorschläge
 
-1. **Die Kanal-Frage ist jetzt seit über drei Wochen offen — das kostet
-   real.** Reset-Bestätigung, echte Fehlermeldungen, Duplikat-Hinweis bei
-   Reiseentwürfen und mehr liegen fertig da, ohne dass sie irgendwo
-   ankommen. Ich schlage vor: kein neuer Content-Vorschlag von mir, bis
-   du kurz Go/No-Go zu LinkedIn+Instagram gibst — das ist der eine Hebel,
-   der gerade mehr bewegt als jede zusätzliche Idee.
-2. **Mini-Changelog-Seite unabhängig davon entscheiden.** Die zwei
-   fertigen Ausgaben brauchen weder Kanal noch Content-Format-Grundsatz —
-   nur ein Ja und die Footer-Seite vom IT-Chef. Das ist der am
-   schnellsten umsetzbare der vier offenen Punkte und würde sofort
-   bestehende Arbeit nutzbar machen, ohne neue Entscheidungen bei den
-   anderen drei Fragen vorauszusetzen.
-3. **Wenn eine Entscheidung fällt, dann alle vier auf einmal einsammeln
-   statt einzeln nachzufragen.** Kanal, Warenkorb/6.2-Reihenfolge,
-   Social-Format-Grundsatz und Mini-Changelog liegen seit Wochen bereit —
-   ein einziges kurzes Antwort-Update von dir würde direkt mehrere
-   Baustellen gleichzeitig lösen, statt dass ich Woche für Woche dieselbe
-   Frage wiederhole.
-4. **Keine erfundenen Kennzahlen.** Weiterhin keine Nutzungs- oder
-   Erfolgszahlen bekannt — Content bleibt an konkreten, nachprüfbaren
-   Produktverbesserungen statt an Reichweite oder Nutzerzahlen.
+1. **Testlauf statt Vollentscheidung bei der Kanal-Frage.** Die
+   Ja/Nein-Entscheidung zu LinkedIn+Instagram steht seit über drei
+   Wochen aus und wird dadurch offenbar nicht leichter. Vorschlag: einen
+   der fertigen Text-Entwürfe (z. B. den Reset-Fix von heute oder den
+   Duplikat-Hinweis) probeweise über dein privates LinkedIn-Profil
+   posten — ganz ohne Marken-Channel anzulegen. Das gibt dir ein echtes
+   Gefühl für Resonanz, bevor die größere Entscheidung fällt, und kostet
+   nichts an Vorbereitung.
+2. **Mini-Changelog-Seite weiterhin der schnellste Hebel.** Zwei fertige
+   Ausgaben liegen bereit, brauchen nur dein Ja plus eine Footer-Seite
+   vom IT-Chef — unabhängig von der Kanal-Frage sofort umsetzbar und
+   würde bestehende Arbeit endlich sichtbar machen.
+3. **Die heutigen Aufräum-Fixes sind ein Content-Beweis, kein Content
+   selbst — für später vormerken.** Dass wir internen Jargon aus
+   Nutzertexten entfernen und tote Zugsuche-Reste finden und benennen
+   statt sie zu verstecken, ist genau die "Ehrlichkeit als Feature"-Story
+   aus MARKENDESIGN.md — aber erst nutzbar, sobald ein Kanal existiert.
+   Kein Grund, jetzt schon Content dafür zu bauen.
+4. **Bündel-Antwort statt Einzelfragen.** Die vier offenen Punkte (Kanal,
+   Warenkorb-Content vs. 6.2, wiederkehrendes Social-Format,
+   Mini-Changelog) ließen sich mit einem kurzen Ja/Nein pro Punkt auf
+   einmal klären, statt dass ich sie Tag für Tag wiederhole. Kein
+   ausführliches Briefing nötig — vier Kreuzchen reichen.
 
-_Letztes Update: 2026-09-12_
+_Letztes Update: 2026-09-13_

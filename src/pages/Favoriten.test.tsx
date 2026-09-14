@@ -17,7 +17,7 @@ describe('Favoriten', () => {
     expect(screen.getByText('Island')).toBeInTheDocument()
   })
 
-  it('removes a favorite when its heart button is clicked, and shows the empty state once none are left', () => {
+  it('asks for confirmation before removing a favorite, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
         <Favoriten />
@@ -25,10 +25,28 @@ describe('Favoriten', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Kapstadt aus Favoriten entfernen' }))
+    expect(screen.getByText('Aus Favoriten entfernen?')).toBeInTheDocument()
+    expect(screen.getByText(/Kapstadt wird aus deinen Favoriten entfernt/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+    expect(screen.queryByText('Aus Favoriten entfernen?')).not.toBeInTheDocument()
+    expect(screen.getByText('Kapstadt')).toBeInTheDocument()
+  })
+
+  it('removes a favorite once its removal is confirmed, and shows the empty state once none are left', () => {
+    render(
+      <MemoryRouter>
+        <Favoriten />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Kapstadt aus Favoriten entfernen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.queryByText('Kapstadt')).not.toBeInTheDocument()
     expect(screen.getByText('Reykjavik')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Reykjavik aus Favoriten entfernen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.getByText('Noch keine Favoriten gespeichert')).toBeInTheDocument()
   })
 })

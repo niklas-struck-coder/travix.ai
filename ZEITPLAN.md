@@ -437,6 +437,43 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Muster analog `ChatMessage.test.tsx`, das dieselbe `framer-motion`-Bibliothek
   bereits ohne besonderes Mocking nutzt): ein einzelnes Kind wird gerendert,
   mehrere Kinder (Überschrift + Text) werden unverändert gerendert.
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) einen von
+  Support-Chef gemeldeten und selbst gegen den Code bestätigten Fund
+  behoben: der Schließen-Button in `src/components/ui/sheet.tsx` (Zeile
+  80, u. a. genutzt vom mobilen Menü `MobileNav.tsx`, 3.3) und in
+  `src/components/ui/dialog.tsx` (Zeile 77, u. a. genutzt vom
+  "Neu starten?"-Dialog in `KiChat.tsx`) hatte als einzigen zugänglichen
+  Namen fest verdrahtet `"Close"` statt Deutsch — anders als jeder sonstige
+  interaktive Text der App (z. B. `aria-label="Menü öffnen"` direkt
+  daneben). Beide auf `"Schließen"` geändert, analog dem bestehenden
+  Muster in `Sidebar.tsx`. Zusätzlich denselben fest verdrahteten Text im
+  bisher ungenutzten `DialogFooter`-Schließen-Button (`dialog.tsx` Zeile
+  116, aktuell nirgends mit `showCloseButton` aufgerufen) aus Konsistenz
+  mitkorrigiert. Neuer Regressionstest in `MobileNav.test.tsx` (Schließen-
+  Button nach dem Öffnen hat den deutschen zugänglichen Namen; vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
+  verifiziert).
+  Vom autonomen IT-Chef-Lauf am 13.09. (weiterer Lauf) den im
+  vorangegangenen Lauf bewusst zurückgestellten "Fund 2" nachgeholt: einen
+  von `support-chef-auto-log.md` (Branch `support-chef/auto`, Eintrag
+  "Mobile Navigation & Seitenübergang") gemeldeten und von Freigabe-Chef
+  bei der Branch-Prüfung unabhängig gegen den Code bestätigten
+  Barrierefreiheits-Fund behoben: `PageTransition.tsx`
+  (3.7, Seitenübergangs-Wrapper um jede Route) spielte die
+  Opacity-/Verschiebe-Animation bei jedem Routenwechsel unbedingt ab, ohne
+  die Systemeinstellung "Bewegungen reduzieren"
+  (`prefers-reduced-motion`) abzufragen — für Nutzerinnen mit
+  vestibulären Störungen oder Bewegungsempfindlichkeit, die diese
+  Einstellung gezielt aktiviert haben, gab es keine Möglichkeit, die
+  Animation abzuschalten. Fix: neuer `useReducedMotion()`-Hook aus der
+  bereits genutzten `framer-motion`-Bibliothek; bei aktivierter
+  Systemeinstellung werden statische Varianten (`opacity: 1`, keine
+  Verschiebung) und eine Übergangsdauer von 0 verwendet statt der
+  bisherigen 0,2s-Animation, bei deaktivierter Einstellung bleibt das
+  Verhalten unverändert. Neuer Regressionstest in
+  `PageTransition.test.tsx` (mockt `window.matchMedia` auf
+  `prefers-reduced-motion: reduce`, prüft die statischen Stilwerte; vor
+  dem Fix reproduzierbar rot verifiziert).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -506,6 +543,62 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe, einer
   abgeschlossen → Hinweis verschwindet; vor dem Fix reproduzierbar rot
   verifiziert).
+  Vom autonomen IT-Chef-Lauf am 14.09. einen von `reports/support-chef.md`
+  (13.09., Vorschlag 2) gemeldeten Fund für die Preisalarme-Seite (7.10)
+  behoben: Der Entfernen-Button (`Preisalarme.tsx`) löschte einen
+  Preisalarm bisher mit einem einzigen Klick sofort und endgültig, ohne
+  Rückfrage. Der Bericht listet fünf betroffene Seiten
+  (`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`/
+  `Warenkorb.tsx`) und schlägt vor, "einmal festlegen, dann überall gleich
+  anwenden" — dieser Lauf setzt bewusst nur die Preisalarme-Seite um (ein
+  einzelner, klar abgegrenzter Punkt gemäß Autonomer-Tagesmodus-Regel),
+  exakt nach dem bereits etablierten Bestätigungsdialog-Muster aus dem
+  "Neu starten?"-Dialog in `KiChat.tsx` (gleiche `Dialog`-Komponente,
+  gleiches Abbrechen/destructive-Button-Layout), statt einen neuen,
+  bisher im Code nicht existierenden Rückgängig-Toast-Mechanismus zu
+  erfinden. Ein Klick auf das Papierkorb-Icon öffnet jetzt
+  "Preisalarm entfernen?" mit dem betroffenen Routennamen, erst "Ja,
+  entfernen" löst `removeAlert()` aus, "Abbrechen" schließt den Dialog
+  ohne Änderung. Die übrigen vier Seiten aus dem Bericht bleiben bewusst
+  offen für künftige Läufe, um dasselbe Muster dort ebenfalls anzuwenden.
+  Bestehende Tests in `Preisalarme.test.tsx` auf den zusätzlichen
+  Bestätigungsklick angepasst, ein neuer Test dort (Abbrechen verwirft die
+  Löschung, Alarm bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe, am
+  gleichen Tag etablierte Bestätigungsdialog-Muster auf die
+  Favoriten-Seite (7.9) übertragen: Der Entfernen-Button (Herz-Icon,
+  `Favoriten.tsx`) löschte einen Favoriten bisher ebenfalls mit einem
+  einzigen Klick sofort und endgültig, ohne Rückfrage — derselbe, im
+  obigen Preisalarme-Eintrag beschriebene Fund aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier nur die nächste
+  der dort bewusst offen gelassenen vier Seiten. Exakt dasselbe Muster
+  wie in `Preisalarme.tsx` (gleiche `Dialog`-Komponente, gleicher
+  Abbrechen/destructive-Button-Aufbau, keine neue Design-Entscheidung
+  nötig): Ein Klick auf das Herz-Icon öffnet jetzt "Aus Favoriten
+  entfernen?" mit dem betroffenen Zielnamen, erst "Ja, entfernen" löst
+  `removeFavorite()` aus, "Abbrechen" schließt den Dialog ohne Änderung.
+  Die übrigen drei Seiten (`Angebote.tsx`, `Aktivitaeten.tsx`,
+  `Warenkorb.tsx`) bleiben weiterhin bewusst offen für künftige Läufe.
+  Bestehender Test in `Favoriten.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt, ein neuer Test dort ergänzt (Abbrechen
+  verwirft die Löschung, Favorit bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Angebote-Seite (7.8) übertragen: Der Entfernen-Button (X-Icon,
+  `Angebote.tsx`) löschte ein gespeichertes Angebot bisher ebenfalls mit
+  einem einzigen Klick sofort und endgültig, ohne Rückfrage — dieselbe,
+  in den beiden obigen Einträgen beschriebene Fund-Quelle aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier die nächste der
+  dort bewusst offen gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx` (gleiche `Dialog`-Komponente, gleicher
+  Abbrechen/destructive-Button-Aufbau, keine neue Design-Entscheidung
+  nötig): Ein Klick auf das X-Icon öffnet jetzt "Angebot entfernen?" mit
+  der betroffenen Angebotszusammenfassung, erst "Ja, entfernen" löst
+  `removeOffer()` aus, "Abbrechen" schließt den Dialog ohne Änderung. Die
+  übrigen zwei Seiten (`Aktivitaeten.tsx`, `Warenkorb.tsx`) bleiben
+  weiterhin bewusst offen für künftige Läufe. Bestehender Test in
+  `Angebote.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
+  ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Angebot
+  bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

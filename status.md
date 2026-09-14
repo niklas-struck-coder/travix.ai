@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-11):**
-- Weitere fehlende Testdateien nachgezogen (u. a. KiChat-Seiten-Wrapper,
-  PlaceholderPage, PageHeader, TripSummaryCard, QuickReplies) —
-  Testabdeckung weiter verbessert
-- Marketing-Chef: keine neuen Tier-4-Kandidaten, die vier offenen Fragen
-  bestehen weiter
-- Freigabe-Chef hat IT-Chef- und Marketing-Chef-Änderungen geprüft und
-  gemergt; ein Support-Chef-Vorschlag wurde erneut (5. Mal) als überholt
-  eingestuft und nicht gemergt
+**Seit letztem Update (2026-09-12):**
+- Zwei Bugfixes: irreführender Datenverlust-Hinweis im Neu-starten-Dialog behoben,
+  sowie eine Zählung in der Hinweiskarte zu geteiltem Chat korrigiert
+- Support-Chef-Fund auf der Hilfe-Seite (Platzhalter statt echtem Kontakt) sowie
+  internen Jargon in Platzhaltertexten entfernt
+- Weitere fehlende Testdateien nachgezogen (u. a. für Chat-, Layout- und
+  Suchkomponenten) — Testabdeckung weiter verbessert
+- Freigabe-Chef hat IT-Chef- und Marketing-Chef-Änderungen geprüft und gemergt;
+  ein Support-Chef-Vorschlag bleibt weiterhin blockiert
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-12_
+_Letztes Update: 2026-09-13_

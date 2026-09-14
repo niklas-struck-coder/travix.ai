@@ -1,10 +1,109 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-12)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-13)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-13: ein fünfter Tier-4-Kandidat (Jargon aus Platzhaltertext entfernt), zwei weitere Commits als Verfeinerung bestehender Kandidaten eingeordnet, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`6b6e065` (12.09.) hängengeblieben, dessen Inhalt laut `git log
+main..origin/marketing-chef/auto` bereits vollständig in `main` gemergt
+war (siehe `freigabe-chef-log.md`, "2026-09-12 Tages-Check") — der Branch
+war also nur noch veraltet, nicht mehr in Arbeit. Neu von aktuellem
+`origin/main` (`7d3f0fe`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 12.09., seit dem
+letzten Lauf unverändert), `ZEITPLAN.md` (6.2 in Zeile 1009 weiterhin
+`[ ]`) oder diesem Dokument seit dem 12.09. Keine neuen Kanal-Links
+(`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` im gesamten
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein Commit zu
+einer IT-Chef-Umsetzung der Mini-Changelog-Seite (kein `changelog`-Treffer
+in `src/routes.tsx`/`AppShell.tsx`, keine neue Route). Alle vier Fragen
+bleiben offen.
+
+**`git log 34e43e9..origin/main` zeigt 12 neue Commits, drei davon mit
+echter Produkt-Codeänderung, per `git show` einzeln geprüft:**
+- `982ec4a` (13.09.): Der "Neu starten"-Bestätigungsdialog im
+  KI-Chat-Header öffnete sich bisher auch dann, wenn noch gar keine
+  Reisedaten existierten (frischer Chat oder direkt nach einem Reset) —
+  `hasTripData(trip)` entscheidet jetzt, ob der Dialog überhaupt
+  aufgeht, sonst setzt der Knopf direkt zurück statt eine falsche
+  "Deine Planung geht verloren"-Warnung zu zeigen. Das ist eine
+  Korrektur *am selben* Bestätigungsdialog, der bereits am 10.09. als
+  dritter Tier-4-Kandidat gezählt wurde (siehe Update 2026-09-10 und
+  Tier 4 unten) — kein eigenständiger fünfter Kandidat, sondern eine
+  Präzisierung des dritten.
+- `97ec6c8` (13.09.): Die "ehrlich statt irreführend"-Hinweiskarte zu
+  "Planung fortsetzen" auf der Reiseentwürfe-Seite zählte
+  `drafts.length > 1` und damit auch bereits abgeschlossene Entwürfe mit
+  (`finalizeDraft()` entfernt einen Entwurf nicht aus dem Array, setzt
+  nur den Status um) — blieb dadurch nach Abschluss eines von zwei
+  Entwürfen fälschlich sichtbar. Fix zählt jetzt nur noch
+  nicht-finalisierte Entwürfe. Das ist eine Korrektur *an derselben*
+  Hinweiskarte, die bereits am 11.09. als vierter Tier-4-Kandidat gezählt
+  wurde (siehe Update 2026-09-11 und Tier 4 unten) — ebenfalls keine
+  eigenständige Ergänzung, sondern eine Präzisierung des vierten. Der im
+  selben Support-Chef-Bericht genannte zweite Punkt (fehlender Dismiss-
+  Mechanismus) bleibt laut Commit-Beschreibung bewusst offen für einen
+  eigenen Lauf.
+- `77c499e` (12.09.): `PlaceholderPage.tsx` zeigte auf allen noch nicht
+  gebauten Seiten (u. a. `/hilfe`) den Satz "Diese Seite ist Teil des
+  Travix-Grundgerüsts" — ein interner Entwicklungsbegriff in
+  nutzersichtbarem Text. Satz entfernt, verbleibender Hinweis bleibt
+  ehrlich ohne Jargon. Anders als die zwei oben ist das *keine*
+  Verfeinerung eines bereits gezählten Punktes, sondern eine neue,
+  eigenständige, verifizierte Textänderung auf einem echten (wenn auch
+  noch unfertigen) Nutzerpfad — zählt als **fünfter Tier-4-Kandidat**.
+
+Die restlichen neun Commits ohne Content-Relevanz: ein Freigabe-Chef-Log
+(13.09., bestätigt reine Vorabprüfung), zwei reine Testdatei-Nachzüge
+(`PageTransition`, `MobileNav`, jeweils per Commit-Beschreibung als
+"kein Bugfix" verifiziert), zwei IT-Chef-Berichte (12.09., je einmal
+"kein neuer Bug" bzw. Beschreibung der eigenen Fixes — reine
+`reports/it-chef.md`-Änderung), ein Support-Chef-Bericht (12.09., neuer
+Fund zu `/hilfe`, der in `77c499e` bereits behoben wurde), der eigene
+interaktive Marketing-Chef-Bericht vom 12.09., ein Daily-Status-Update
+und ein weiteres Freigabe-Chef-Log (12.09.).
+
+**Warum heute kein neues Content-Stück und keine dritte
+Mini-Changelog-Ausgabe:** Der Kandidatentopf wächst von vier auf fünf
+(nur `77c499e` ist wirklich neu, die anderen zwei Commits verfeinern
+bereits gezählte Kandidaten statt neue zu schaffen) — damit weiterhin
+klar unter den acht, die Ausgabe 2 ausgelöst haben, und nur knapp über
+der Menge, die selbst am 06.09. als "nicht ausreichend" bewertet wurde.
+Ein eigenständiges neuntes Social-Content-Stück bleibt weiterhin an
+dieselben drei unbeantworteten Fragen gebunden. Stattdessen heute nur
+diese Übersicht aktualisiert (reiner, sicherer Übersichts-Lauf, wie z. B.
+am 01.-04.09., 06.09., 08.-12.09.).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück bzw. eine dritte
+  Mini-Changelog-Ausgabe — Kandidatentopf bei fünf, weiterhin unter der
+  Menge, die selbst am 06.09. als "nicht ausreichend" galt.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen — der neue
+Punkt stammt aus einem einzeln per `git show` verifizierten, bereits in
+`main` gemergten Commit. Keine offene Positionierungs-Grundsatzfrage:
+dieser Lauf trifft keine neue inhaltliche Entscheidung, sondern
+dokumentiert nur den unveränderten Stand und ordnet drei neue Commits
+sauber ein.
+
+**Umgesetzt:** Dieses Dokument aktualisiert (dieser Abschnitt, Datum im
+Titel, Tier-4-Abschnitt und "Nächster autonomer Lauf" unten).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-12: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
 
@@ -1276,7 +1375,16 @@ Anfang-bis-Ende-Weg im Code.
    fortsetzen" auf der Reiseentwürfe-Seite verlinkte bisher bei jedem
    Entwurf identisch auf denselben einen aktiven Chat, ohne das erkennbar
    zu machen — jetzt zeigt die Seite bei mehr als einem Entwurf einen
-   ehrlichen Hinweis darauf.
+   ehrlichen Hinweis darauf. Seit dem 12./13.09. ein fünfter Kandidat
+   (siehe Update 2026-09-13 oben): `PlaceholderPage.tsx` zeigte auf allen
+   noch nicht gebauten Seiten (u. a. `/hilfe`) den internen
+   Entwicklungsbegriff "Travix-Grundgerüst" in nutzersichtbarem Text —
+   jetzt entfernt, verbleibender Hinweis bleibt ehrlich ohne Jargon. Zwei
+   weitere Commits im selben Zeitraum (`982ec4a`, `97ec6c8`) verfeinern
+   nur den dritten bzw. vierten Kandidaten weiter (Bestätigungsdialog
+   löste sich bisher fälschlich auch ohne Reisedaten aus; Hinweiskarte
+   zählte bereits abgeschlossene Entwürfe fälschlich mit) und zählen
+   deshalb nicht als eigene, sechste Kandidaten.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -1347,7 +1455,16 @@ Warenkorb-Sackgasse, Entwurf-Fortsetzen generisch) werden erst zu
 Kandidaten, sobald IT-Chef sie tatsächlich behebt — nicht schon durch die
 Meldung selbst; der 11.09.-Fund deckt nur den kurzfristigen Teil des
 dritten Punkts ab (Hinweis statt echter struktureller Lösung), der Punkt
-bleibt also im Kern weiterhin offen. Sollte Ni
+bleibt also im Kern weiterhin offen. Stand 09.13. ist ein fünfter
+Kandidat dazugekommen (siehe Update 2026-09-13 oben, `77c499e`: Jargon
+"Travix-Grundgerüst" aus `PlaceholderPage.tsx` entfernt) — zwei weitere
+Commits desselben Tages (`982ec4a`, `97ec6c8`) verfeinern nur bereits
+gezählte Kandidaten (drei und vier) und erhöhen den Topf nicht weiter.
+Fünf bleibt weiterhin klar unter den acht, die Ausgabe 2 ausgelöst haben,
+und nur knapp über der Menge, die am 06.09. selbst als "nicht
+ausreichend" galt — der nächste Lauf sollte auch das explizit gegen den
+06.09.-Maßstab prüfen, statt allein die Bewegung von vier auf fünf als
+Auslöser zu werten. Sollte Ni
 zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene

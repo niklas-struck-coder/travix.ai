@@ -9747,3 +9747,343 @@ Wiederaufnahme je Entwurf weiterhin architektonisch blockiert).
   den Fix reproduzierbar fehl, bestätigt danach wieder grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` war deckungsgleich mit `origin/main`
+(keine offenen, noch nicht gemergten Commits von einem vorherigen Lauf) —
+direkt auf dem aktuellen Stand weitergearbeitet, kein Merge nötig. `main`
+selbst nicht angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Reine Testabdeckungs-Aufräumung ist weiterhin
+erschöpft (siehe letzter Eintrag). Nächster naheliegender, in `ZEITPLAN.md`
+notierter Sprint-3/4-Programmierpunkt (7.4, 7.12, 8.11 u. a.) ist jeweils
+an eine offene Produkt-/Architekturentscheidung oder fehlende
+FAQ-Inhalte gebunden — keiner davon autonom umsetzbar. Stattdessen
+`support-chef-auto-log.md` (Branch `support-chef/auto`, heutiger Eintrag
+"Mobile Navigation & Seitenübergang") nach frisch verifizierten, noch
+nicht umgesetzten Funden durchsucht: Fund 1 dort (`sheet.tsx`/`dialog.tsx`,
+fest verdrahteter englischer Schließen-Button-Name "Close" mitten in einer
+sonst durchgehend deutschen App) ist mit exakten Zeilenangaben belegt und
+selbst gegen den aktuellen Code nachgeprüft. Fund 2 (fehlende
+`prefers-reduced-motion`-Unterstützung in `PageTransition.tsx`) bewusst
+nicht mit umgesetzt — "einen einzigen Punkt aussuchen" laut Skill-Regel,
+und Fund 1 ist der kleinere, eindeutiger abgegrenzte der beiden.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reiner UI-Text in zwei gemeinsam genutzten
+`components/ui`-Primitiven. Keine offene Produkt-/Architekturentscheidung:
+der Bericht selbst benennt den exakten Fix (Text durch das etablierte
+deutsche `aria-label`-Muster ersetzen, siehe `Sidebar.tsx`/`MobileNav.tsx`),
+keine Interpretation darüber hinaus nötig. Ergebnis objektiv prüfbar
+(Typecheck/Lint/Tests, klar definiertes Verhalten: Schließen-Button hat
+einen deutschen zugänglichen Namen). Kein Widerspruch zu
+`MARKENDESIGN.md` — im Gegenteil, die Änderung setzt die dort bereits
+etablierte durchgängig deutsche Tonalität konsequent fort.
+
+**Umgesetzt:** In `src/components/ui/sheet.tsx` (Zeile 80) und
+`src/components/ui/dialog.tsx` (Zeile 77) den fest verdrahteten
+`sr-only`-Text `"Close"` des jeweiligen Schließen-Buttons durch
+`"Schließen"` ersetzt. Betrifft u. a. den Schließen-Button im mobilen
+Menü (`MobileNav.tsx`, über `Sheet`) und im "Neu starten?"-Bestätigungs-
+dialog (`KiChat.tsx`, über `Dialog`). Zusätzlich denselben fest
+verdrahteten Text im `DialogFooter`-Schließen-Button (`dialog.tsx`,
+sichtbarer Button-Text statt `sr-only`) mitkorrigiert — dieser wird nach
+Prüfung aller drei aktuellen `DialogFooter`-Verwendungen (`Buchung.tsx`,
+`EditMode.tsx`, `KiChat.tsx`) derzeit nirgends mit `showCloseButton`
+aufgerufen, ist also aktuell unerreichbarer Code ohne Verhaltensrisiko,
+aber derselbe Fehler in derselben Datei. Neuer Regressionstest in
+`MobileNav.test.tsx` (Schließen-Button nach dem Öffnen des Menüs hat den
+deutschen zugänglichen Namen "Schließen"; vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung per `git stash` reproduzierbar rot
+verifiziert, danach wieder grün). `ZEITPLAN.md` unter Phase 3
+entsprechend ergänzt. `tasks/tasks-prd-travix-platform.md` bei 3.3 nicht
+geändert — reine Detailkorrektur an einer bereits abgehakten, knapp
+formulierten Zeile, kein neuer Checkbox-Zustand nötig, gleiches Muster
+wie bei anderen reinen Bugfixes ohne eigene Task-Zeile.
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) → sauber,
+  650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 295 Tests, alle grün (vorher 55/294,
+  ein neuer Test in `MobileNav.test.tsx`). Neuer Test zusätzlich gezielt
+  gegen den alten Zustand (Quelländerung an `sheet.tsx`/`dialog.tsx` per
+  `git stash` temporär zurückgenommen, Testdatei behalten) verifiziert:
+  schlägt ohne den Fix reproduzierbar fehl, bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-13 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Vorbereitung:** `it-chef/auto` (`538bb25`) hatte einen offenen, noch
+nicht gemergten Commit von einem vorherigen Lauf (Schließen-Button-Fix).
+`origin/main` war seitdem um mehrere Commits weiter (u. a. der eigene
+IT-Chef-Bericht, Marketing-Chef- und Support-Chef-Berichte vom 13.09.).
+`git merge origin/main` in `it-chef/auto` — sauberer Merge ohne
+Konflikte (nur Log-/Berichtsdateien betroffen), `main` selbst nicht
+angerührt, kein Push dorthin.
+
+**Ausgewählter Punkt:** Im vorherigen Lauf (siehe Eintrag direkt oben)
+wurde "Fund 2" aus `support-chef-auto-log.md` (Branch `support-chef/auto`,
+Eintrag "Mobile Navigation & Seitenübergang") bewusst zurückgestellt,
+damit dieser Lauf nur einen einzigen Punkt (den Schließen-Button-Fix)
+umsetzt. Diesen zurückgestellten Fund jetzt umgesetzt: `PageTransition.tsx`
+(3.7, Seitenübergangs-Wrapper um jede Route in `routes.tsx`) spielte bei
+jedem Routenwechsel unbedingt eine Opacity-/Verschiebe-Animation ab, ohne
+die Systemeinstellung "Bewegungen reduzieren" (`prefers-reduced-motion`)
+abzufragen. Der Fund war doppelt belegt: `support-chef-auto-log.md`
+dokumentierte ihn mit `grep`-Beleg (`grep -rn
+"reducedMotion|prefers-reduced-motion|useReducedMotion|MotionConfig"
+src/` ohne Treffer), und `freigabe-chef-log.md` (13.09., Tages-Check)
+hat ihn bei der `support-chef/auto`-Prüfung unabhängig gegen den
+aktuellen Code nachvollzogen und als real bestätigt (kein erfundener
+Reibungspunkt).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Barrierefreiheits-Korrektur an einem
+einzelnen, bereits bestehenden Layout-Wrapper. Keine offene
+Produkt-/Architekturentscheidung: `framer-motion` (bereits Projekt-
+Abhängigkeit) bringt mit `useReducedMotion()` genau den dafür
+vorgesehenen Standard-Hook mit, keine eigene Konzeption nötig. Ergebnis
+objektiv prüfbar (Typecheck/Lint/Tests, klar definiertes Verhalten:
+statische Darstellung bei aktivierter Systemeinstellung, unverändertes
+Verhalten sonst).
+
+**Umsetzung:** `src/components/layout/PageTransition.tsx` ruft jetzt
+`useReducedMotion()` auf; bei `true` werden statische Varianten
+(`opacity: 1`, keine Verschiebung) und `transition={{ duration: 0 }}`
+verwendet statt der bisherigen 0,2s-Animation. Bei `false` (Standardfall,
+auch wenn `window.matchMedia` in der Test-Umgebung fehlt) bleibt das
+Verhalten exakt wie zuvor. Neuer Regressionstest in
+`PageTransition.test.tsx` (mockt `window.matchMedia` auf
+`prefers-reduced-motion: reduce` und prüft `opacity: 1`/`transform: none`
+auf dem äußeren `motion.div`; muss als erster Test in der Datei laufen,
+da `framer-motion` die Systemeinstellung nur einmal pro Prozess abfragt
+und danach cacht — Kommentar direkt im Test dokumentiert das). Test vor
+dem Fix durch temporäres Zurücknehmen der Quelländerung per `git stash`
+reproduzierbar rot verifiziert, danach wieder grün. `ZEITPLAN.md` unter
+Phase 3 entsprechend ergänzt; `tasks/tasks-prd-travix-platform.md` bei
+3.7 nicht geändert (bereits abgehakt, reine Detailkorrektur ohne neuen
+Checkbox-Zustand, gleiches Muster wie beim Schließen-Button-Fix oben).
+
+**Geprüft (grün):**
+- `npm install` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` → 55 Testdateien, 296 Tests, alle grün (vorher 55/295,
+  ein neuer Test in `PageTransition.test.tsx`). Neuer Test zusätzlich
+  gezielt gegen den alten Zustand (Quelländerung an `PageTransition.tsx`
+  per `git stash` temporär zurückgenommen, Testdatei behalten)
+  verifiziert: schlägt ohne den Fix reproduzierbar fehl (`opacity: 0;
+  transform: translateY(8px);` statt der erwarteten statischen Werte),
+  bestätigt danach wieder grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md` (13.09.):
+Löschen ist an mehreren Stellen sofort und endgültig, ohne Bestätigung
+oder Rückgängig — konkret `Preisalarme.tsx` (`removeAlert`),
+`Favoriten.tsx` (`removeFavorite`), `Angebote.tsx` (`removeOffer`),
+`Aktivitaeten.tsx` (`removeActivity`) und `Warenkorb.tsx` (`removeItem`).
+`reports/it-chef.md` (13.09.) bestätigt unabhängig: nach sehr breiter
+Prüfung fast des gesamten `src`-Ordners kein neuer eigenständiger Bug
+mehr gefunden, praktisch alle unblockierten Testlücken bereits
+geschlossen — dieser Support-Chef-Fund war der klarste verbleibende
+Kandidat.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — alle fünf betroffenen Seiten arbeiten ohnehin
+nur mit lokalem Demo-State (keine echte Backend-Persistenz, siehe
+`ZEITPLAN.md`). Keine offene Produkt-/Architekturentscheidung: der
+Bericht nennt zwar zwei mögliche Lösungsrichtungen
+(Bestätigungsdialog vs. Rückgängig-Toast), aber im Code existiert dafür
+bereits ein etabliertes, mehrfach verwendetes Muster (`Dialog` aus
+`src/components/ui/dialog.tsx`, siehe "Neu starten?"-Dialog in
+`KiChat.tsx`) — ein Rückgängig-Toast-Mechanismus existiert dagegen
+nirgends im Code (`grep` nach `toast|Toast|AlertDialog` in `src/` ohne
+Treffer) und wäre eine neue, nicht triviale Infrastruktur-Entscheidung.
+Also: bestehendes Muster übernehmen statt neu erfinden. Klar genug
+beschrieben (identischer Fix, nur auf fünf strukturell gleiche
+Lösch-Buttons angewendet) und objektiv prüfbar (Test: Klick auf
+Löschen öffnet Dialog statt sofort zu löschen; "Abbrechen" verwirft,
+"Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht fünf:** Gemäß Regel "einen einzigen Punkt
+aussuchen, nicht mehrere gleichzeitig" wird in diesem Lauf bewusst nur
+eine der fünf Seiten umgesetzt (`Preisalarme.tsx`, kleinste/klarste
+Instanz). Die übrigen vier (`Favoriten.tsx`, `Angebote.tsx`,
+`Aktivitaeten.tsx`, `Warenkorb.tsx`) bleiben absichtlich unverändert für
+künftige Läufe, die exakt dasselbe jetzt etablierte Muster übernehmen
+können — kein neuer Design-Entscheid mehr nötig, nur Wiederholung.
+
+**Umsetzung:**
+- `src/pages/Preisalarme.tsx`: Klick auf den Papierkorb-Button setzt jetzt
+  `pendingRemoval` (den betroffenen Alert) statt direkt `removeAlert()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie der
+  "Neu starten?"-Dialog in `KiChat.tsx`: `DialogHeader`/`DialogTitle`
+  "Preisalarm entfernen?", `DialogDescription` nennt die betroffene
+  Route, `DialogFooter` mit `Abbrechen`- (`DialogClose`) und
+  destruktivem `Ja, entfernen`-Button). Erst der Klick auf "Ja,
+  entfernen" ruft `removeAlert()` auf und schließt den Dialog;
+  "Abbrechen" (oder Schließen des Dialogs) verwirft `pendingRemoval`
+  ohne Änderung.
+- `src/pages/Preisalarme.test.tsx`: bestehender Lösch-Test auf den
+  zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt
+  (Abbrechen verwirft die Löschung, Alarm bleibt sichtbar und im
+  Dokument).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.10); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.10 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Muster wie
+  bei den vorherigen Detail-Fixes).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` (voller Lauf) → 55 Testdateien, 297 Tests, alle grün
+  (vorher 55/296, ein neuer Test in `Preisalarme.test.tsx`, ein
+  bestehender Test dort umbenannt/angepasst).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (geplanter autonomer Tagesmodus, weiterer Lauf)
+
+**Ausgewählter Punkt:** Die zweite der vier im vorherigen Lauf desselben
+Tages bewusst offen gelassenen Seiten aus `reports/support-chef.md`
+(13.09., Vorschlag 2): sofortiges, unbestätigtes Löschen ohne Rückfrage,
+diesmal für die Favoriten-Seite (`Favoriten.tsx`, Herz-Icon-Button,
+`removeFavorite()`). Vor der Umsetzung per `grep` bestätigt, dass
+`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`/`Warenkorb.tsx` weiterhin
+alle vier unverändert direkt löschen (kein `Dialog`-Import in einer der
+vier Dateien).
+
+**Warum sicher genug:** Identische Begründung wie beim Preisalarme-Lauf
+desselben Tages — kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten (`Favoriten.tsx` arbeitet nur mit lokalem Demo-State,
+`initialFavorites`, keine echte Backend-Persistenz). Keine offene
+Produkt-/Architekturentscheidung mehr nötig: das Bestätigungsdialog-Muster
+wurde im vorherigen Lauf heute bereits etabliert (`Preisalarme.tsx`), hier
+nur wiederholt, keine neue Design-Wahl. Klar genug beschrieben (identischer
+Fix, nur auf die nächste der fünf im Bericht genannten Seiten angewendet)
+und objektiv prüfbar (Test: Klick auf den Herz-Button öffnet den Dialog
+statt sofort zu löschen; "Abbrechen" verwirft, "Ja, entfernen" löst die
+Löschung aus).
+
+**Einen einzigen Punkt, nicht drei:** Wieder nur eine der verbleibenden
+Seiten (`Favoriten.tsx`). `Angebote.tsx`, `Aktivitaeten.tsx` und
+`Warenkorb.tsx` bleiben bewusst unverändert für künftige Läufe, die
+dasselbe Muster dort ebenfalls übernehmen können.
+
+**Umsetzung:**
+- `src/pages/Favoriten.tsx`: Klick auf den Herz-Button setzt jetzt
+  `pendingRemoval` (den betroffenen Favoriten) statt direkt
+  `removeFavorite()` aufzurufen. Neuer `Dialog` (exakt gleiche
+  Struktur/Klassen wie in `Preisalarme.tsx`: `DialogHeader`/`DialogTitle`
+  "Aus Favoriten entfernen?", `DialogDescription` nennt den betroffenen
+  Zielnamen, `DialogFooter` mit `Abbrechen`- (`DialogClose`) und
+  destruktivem `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen"
+  ruft `removeFavorite()` auf und schließt den Dialog; "Abbrechen" (oder
+  Schließen des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Favoriten.test.tsx`: bestehender Lösch-Test durch zwei Tests
+  ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach dem
+  letzten Favoriten).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.9); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.9 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  beim Preisalarme-Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` (voller Lauf) → 55 Testdateien, 298 Tests, alle grün
+  (vorher 55/297, ein neuer Test in `Favoriten.test.tsx`, ein bestehender
+  Test dort in zwei aufgeteilt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Die dritte der vier ursprünglich in
+`reports/support-chef.md` (13.09., Vorschlag 2) genannten Seiten mit
+sofortigem, unbestätigtem Löschen ohne Rückfrage — diesmal für die
+Angebote-Seite (`Angebote.tsx`, X-Icon-Button, `removeOffer()`). Vor der
+Umsetzung per `grep` bestätigt, dass `Angebote.tsx`/`Aktivitaeten.tsx`/
+`Warenkorb.tsx` zu diesem Zeitpunkt weiterhin unverändert direkt löschen
+(kein `Dialog`-Import in einer der drei verbliebenen Dateien);
+`Preisalarme.tsx`/`Favoriten.tsx` wurden in den beiden vorherigen Läufen
+desselben Tages bereits auf das Bestätigungsdialog-Muster umgestellt.
+
+**Warum sicher genug:** Identische Begründung wie bei den beiden
+vorherigen Läufen desselben Tages — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Angebote.tsx` arbeitet nur mit
+lokalem Demo-State, `initialOffers`, keine echte Backend-Persistenz).
+Keine offene Produkt-/Architekturentscheidung mehr nötig: das
+Bestätigungsdialog-Muster ist bereits zweifach etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`), hier nur ein drittes Mal wiederholt,
+keine neue Design-Wahl. Klar genug beschrieben (identischer Fix, nur auf
+die nächste der vier im Bericht genannten Seiten angewendet) und objektiv
+prüfbar (Test: Klick auf den X-Button öffnet den Dialog statt sofort zu
+löschen; "Abbrechen" verwirft, "Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht zwei:** Nur `Angebote.tsx` geändert.
+`Aktivitaeten.tsx` und `Warenkorb.tsx` bleiben bewusst unverändert für
+künftige Läufe, die dasselbe Muster dort ebenfalls übernehmen können.
+
+**Umsetzung:**
+- `src/pages/Angebote.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (das betroffene Angebot) statt direkt `removeOffer()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`: `DialogHeader`/`DialogTitle`
+  "Angebot entfernen?", `DialogDescription` nennt die betroffene
+  Angebotszusammenfassung, `DialogFooter` mit `Abbrechen`-
+  (`DialogClose`) und destruktivem `Ja, entfernen`-Button). Erst der
+  Klick auf "Ja, entfernen" ruft `removeOffer()` auf und schließt den
+  Dialog; "Abbrechen" (oder Schließen des Dialogs) verwirft
+  `pendingRemoval` ohne Änderung.
+- `src/pages/Angebote.test.tsx`: bestehender Lösch-Test durch zwei Tests
+  ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach dem
+  letzten Angebot).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.8); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.8 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den beiden vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test -- --run` (voller Lauf) → 55 Testdateien, 299 Tests, alle
+  grün (vorher 55/298, ein neuer Test in `Angebote.test.tsx`, ein
+  bestehender Test dort in zwei aufgeteilt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

@@ -3110,3 +3110,188 @@ gemeldete `support-chef/auto`-Blocker (`585efea`) besteht unverändert
 fort, wurde aber schon in den letzten Läufen aktiv gemeldet — hier nur
 zur Vollständigkeit erwähnt, keine neue Eskalation nötig, solange sich
 beim nächsten (6-Uhr-)Lauf nichts Neues daran zeigt.
+
+## 2026-09-13, Tages-Check (6-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+Lokales `main` war beim Start um 59 Commits hinter `origin/main`
+zurück (letzter lokaler Stand `254e39a`) — per `git checkout main &&
+git merge --ff-only origin/main` zunächst auf `7d3f0fe` gebracht (den
+bereits im "früher Nacht-Check" von heute gemergten Stand inkl.
+`it-chef/auto`).
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" geprüft und gemergt). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`1af1fb5`).
+- `support-chef/auto` — 1 neuer Commit (`631691b`) oben auf der bereits
+  bekannten, seit 09.09. blockierten Kette (`585efea` … `c93b1ff`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Umfang: ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Übersichts-Pflege,
+  kein Produkt-Code, kein Live-Vorgang (Text sagt explizit "nichts wird
+  gepostet oder verändert").
+- Inhaltlich nachvollzogen: Ordnet drei neue `main`-Commits ein (`982ec4a`,
+  `97ec6c8` als Verfeinerung bereits gezählter Tier-4-Kandidaten vom
+  10./11.09.; `77c499e` als neuer, fünfter Kandidat). Stichprobe per
+  `git merge-base --is-ancestor 77c499e origin/main` bestätigt: dieser
+  Commit ist tatsächlich bereits in `main` gelandet, die Beschreibung
+  ("internen Begriff aus Platzhaltertext entfernt") stimmt mit der
+  Commit-Message überein.
+- Keine erfundenen Kennzahlen/Nutzerzahlen/Kampagnen-Ergebnisse gefunden.
+  Text ist vollständig ausformuliert (keine bloße Stichpunkt-Skizze).
+  Kein Hinweis auf tatsächliches Posten/Versenden.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `7d3f0fe..1af1fb5`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Umfang gegenüber `main` weiterhin nur `support-chef-auto-log.md`,
+  rein additiv (+376/-0 Zeilen) — der bereits fünffach dokumentierte,
+  überholte Fund `585efea` (09.09., "stayError vs. flightErrors") ist
+  unverändert Teil des Diffs.
+- **Erneut unabhängig am aktuellen Code-Stand nachgeprüft**
+  (`grep -n "error" src/components/search/HotelResults.tsx` und
+  `grep -n "stayError" src/hooks/useChat.ts`): `HotelResults.tsx` nimmt
+  inzwischen `errors: DuffelError[]` entgegen und zeigt `error.message`
+  je Fehler an, `useChat.ts` führt `stayErrors: DuffelError[]` statt des
+  im Fund beschriebenen `boolean`. Der Fund ist also weiterhin sachlich
+  überholt — der Branch würde ihn unverändert als aktuell offenen,
+  bestätigten Reibungspunkt in `main` festschreiben.
+- Der neue Commit von heute (`631691b`, "Mobile Navigation &
+  Seitenübergang") wurde unabhängig geprüft und ist inhaltlich stichhaltig:
+  - `grep -n "Close" src/components/ui/sheet.tsx` und
+    `.../dialog.tsx` bestätigen den fest verdrahteten englischen
+    `<span className="sr-only">Close</span>` in beiden Dateien.
+  - `grep -n "aria-label" src/components/layout/MobileNav.tsx` bestätigt
+    das deutsche `aria-label="Menü öffnen"` daneben — der beschriebene
+    Sprachbruch ist real.
+  - `grep -rn "reducedMotion|prefers-reduced-motion|useReducedMotion|MotionConfig" src/`
+    ergab keinen Treffer, `PageTransition.tsx` bestätigt die feste,
+    ungedrosselte Opacity-/Verschiebe-Animation ohne jede Abfrage der
+    Systemeinstellung — beide Funde reproduzierbar, kein erfundener
+    Reibungspunkt.
+  - Reine Analyse ohne Code-Änderung, für sich genommen unbedenklich.
+- Da git-Branches nur als Ganzes gemergt werden und das Bereinigen
+  fremder Branch-Historie nicht meine Aufgabe ist (siehe Grundsatz dieses
+  Skills), bleibt der gesamte Branch weiterhin wegen des unkorrigierten
+  `585efea` blockiert.
+→ **Nicht gemergt.** Gleicher Grund wie in den letzten fünf Läufen:
+`585efea` würde einen längst behobenen Punkt als aktuell offenen,
+bestätigten Reibungspunkt in `main` festschreiben. Der Rückstau an
+validen, geprüften Funden dahinter wächst weiter — inzwischen vier
+(`a318d38`, `c88f1ac`, `c93b1ff`, jetzt `631691b`), von denen die ersten
+drei ihre eigentlichen Code-Fixes über separate `it-chef/auto`-Läufe
+bereits unabhängig in `main` bekommen haben (siehe "früher Nacht-Check"
+von heute) — nur die zugehörigen Analyse-Log-Einträge selbst fehlen
+weiterhin in `main`.
+
+**Ergebnis:** Zwei Branches geprüft, einer gemergt
+(`marketing-chef/auto`), einer weiterhin bewusst nicht gemergt
+(`support-chef/auto`), `it-chef/auto` planmäßig übersprungen (keine
+neuen Commits).
+
+**Info an Ni nötig:** Nein als erneute Eskalation — der
+`support-chef/auto`-Blocker (`585efea`) wurde bereits fünfmal aktiv
+gemeldet, die Faktenlage hat sich seit der letzten Meldung (12.09.) nicht
+verändert, nur der bereits bekannte Rückstau ist um einen weiteren,
+soliden Fund gewachsen. Der praktische Schaden bleibt gering, da die
+eigentlichen Bugfixes trotzdem über `it-chef/auto` nach `main` finden —
+betroffen ist nur die Analyse-Dokumentation selbst. Bleibt der Blocker
+auch nach dem nächsten Lauf unverändert bestehen, sollte spätestens dann
+erneut aktiv gemeldet werden, auch ohne neue Fakten, allein wegen der
+Laufzeit des Problems seit 09.09.
+
+## 2026-09-14, früher Nacht-Check (0-4-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+**Vorbemerkung — lokaler `main`-Stand war unbrauchbar:** Der lokal
+ausgecheckte `main`-Branch dieser Umgebung zeigte noch auf `254e39a`
+(IT-Chef Bericht 08.09.) und hatte **keinen gemeinsamen Vorfahren mehr**
+mit `origin/main` (`git merge-base main origin/main` liefert nichts,
+`git merge --ff-only` schlägt mit "refusing to merge unrelated
+histories" fehl). Der `git fetch` zu Beginn meldete zusätzlich explizit
+einen "forced update" auf `main`. Das deutet auf einen Force-Push/eine
+History-Neuschreibung von `origin/main` irgendwann zwischen dieser
+Container-Erstellung und jetzt hin — nicht auf eigene, ungesicherte
+Arbeit dieser Sitzung. Working Tree war sauber (nichts zu committen),
+der lokale `main`-Branch war nirgends mit eigenem Inhalt bestückt,
+sondern nur ein veralteter Zeiger. Da kein Verlust eigener Arbeit
+möglich war, wurde `main` unabhängig via `git reset --hard origin/main`
+auf den aktuellen Remote-Stand gebracht (statt eines riskanten Merges
+nicht verwandter Historien), erst danach der eigentliche Freigabe-Check
+durchgeführt. **Info an Ni nötig:** Ja, kurz — falls das bei einem
+Menschen dieselbe Verwirrung auslösen würde: irgendwas hat `origin/main`
+zwischenzeitlich per Force-Push umgeschrieben (Inhalt/Commits inhaltlich
+identisch zur erwarteten Historie, nur mit neuen SHAs). Kein Hinweis
+darauf, dass dabei echte Arbeit verloren ging, aber ungewöhnlich genug,
+um es einmal aktiv zu erwähnen.
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 6 neue Commits vor `main` (`538bb25` … `c79a5a9`,
+  davon einer ein reiner Merge von `main`).
+- `marketing-chef/auto` — 0 Commits vor `main`. Wie in dieser
+  Auftragsbeschreibung für den frühen Lauf vorgesehen, planmäßig
+  übersprungen (läuft erst im 6-Uhr-Slot).
+- `support-chef/auto` — neuester Commit (`631691b`) stammt vom 13.09.
+  und wurde bereits im gestrigen Tages-Check (siehe Eintrag oben)
+  unabhängig geprüft und wegen des unveränderten `585efea`-Fundes nicht
+  gemergt. Keine neuen Commits von heute (14.09.) — wie in dieser
+  Auftragsbeschreibung vorgesehen, für diesen frühen Lauf planmäßig
+  übersprungen; der Blocker bleibt für den nächsten (6-Uhr-)Lauf
+  vorgemerkt.
+
+**Prüfung `it-chef/auto`** (unabhängig nachvollzogen, nicht nur dem Log
+geglaubt):
+- Diff zu `main` gelesen: fünf inhaltliche Fixes plus ein reiner
+  Main-Merge-Commit.
+  - `538bb25`: `sr-only`-Text "Close" in `sheet.tsx`/`dialog.tsx` auf
+    "Schließen" korrigiert (inkl. sichtbarem `DialogFooter`-Button-Text).
+  - `2f110f7`: `PageTransition.tsx` fragt jetzt `useReducedMotion()` ab
+    und zeigt bei aktivierter Systemeinstellung statische Varianten
+    ohne Animation.
+  - `567b9dc`, `0c2e802`, `c79a5a9`: Preisalarme/Favoriten/Angebote —
+    Löschen öffnet jetzt jeweils einen Bestätigungsdialog (exakt gleiche
+    Struktur wie der bestehende "Neu starten?"-Dialog in `KiChat.tsx`:
+    `DialogHeader`/`DialogTitle`, `DialogDescription`, `DialogFooter` mit
+    `Abbrechen`/`Ja, entfernen`) statt sofort endgültig zu löschen.
+- Scope pro Commit sauber abgegrenzt (jeweils eine Datei/ein
+  Reibungspunkt), kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+  rechtlichen Texten in keinem der fünf Diffs bestätigt (betroffene
+  Dateien: `sheet.tsx`, `dialog.tsx`, `PageTransition.tsx`,
+  `Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx` samt Tests,
+  `ZEITPLAN.md`, `it-chef-auto-log.md`).
+- Design-Konsistenz stichprobenartig gegen `MARKENDESIGN.md` geprüft:
+  Löschen-Icons (`Trash2`/`Heart`/`X`) unverändert, keiner der Fixes
+  widerspricht der dortigen Vorgabe zu ehrlichen, eindeutigen
+  Löschen-Icons; neue Dialoge sind wortgleich im Aufbau zum bereits
+  etablierten `KiChat.tsx`-Muster, keine neue Design-Entscheidung.
+- **Unabhängig selbst ausgeführt** (eigener `git worktree` auf
+  `origin/it-chef/auto`, nicht nur den Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 Pakete, 0 Vulnerabilities.
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `badge.tsx`/`button.tsx`/`tabs.tsx` (unverändert, nicht durch diesen
+    Branch verursacht).
+  - `npm run build` → grün, keine neuen Warnings (Chunk-Size-Warnung
+    unverändert vorbestehend).
+  - `npx vitest run` → 55 Testdateien, **299 Tests, alle grün**.
+→ **Alles grün und passt zum beschriebenen Scope, nach `main` gemergt**
+(Fast-Forward `33dcedd..c79a5a9`, gepusht). `it-chef/auto` zeigt danach
+auf denselben Commit wie `main` — kein separates Nacharbeiten des
+Branches nötig.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`, 5 Fixes),
+zwei Branches planmäßig ohne inhaltliche Prüfung übersprungen
+(`marketing-chef/auto` mangels neuer Commits, `support-chef/auto` da
+neuester Commit bereits gestern geprüft wurde und kein heutiger
+Commit vorliegt).
+
+**Info an Ni nötig:** Nur die oben erwähnte `main`-History-Anomalie
+(Force-Push, lokaler Stand musste per `reset --hard` auf `origin/main`
+korrigiert werden, bevor überhaupt geprüft werden konnte) — der
+eigentliche `it-chef/auto`-Check selbst verlief unauffällig und wurde
+sauber gemergt. Der weiterhin offene `support-chef/auto`-Blocker
+(`585efea`) wurde für diesen frühen Lauf bewusst nicht neu bewertet
+(siehe Auftragsbeschreibung); er steht für den nächsten (6-Uhr-)Lauf
+weiterhin an.
