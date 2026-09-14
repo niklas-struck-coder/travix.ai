@@ -4,6 +4,86 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-14
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`1af1fb5` (13.09.) hängengeblieben, dessen Inhalt laut Branch-Vergleich
+bereits vollständig in `main` gemergt war. Neu von aktuellem
+`origin/main` (`66d3990`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: dritte Ausgabe des
+Mini-Changelog-Konzepts (`marketing/mini-changelog-konzept.md`), plus
+`marketing/freigabe-uebersicht.md` und `ZEITPLAN.md` aktualisiert.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 13.09. beantwortet wurde: keine Notiz in `status.md` (Stand
+weiterhin 12.09.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem
+Dokument, keine neuen Kanal-Links im Repo, keine neue Changelog-Route in
+`src/routes.tsx`. Alle vier Fragen bleiben offen. Danach `git log
+1af1fb5..origin/main` geprüft: 11 neue Commits seit dem letzten Merge,
+fünf mit echter Produkt-Codeänderung (per `git show` einzeln
+verifiziert):
+- `567b9dc`, `0c2e802`, `c79a5a9` (13./14.09.): das bereits bestehende
+  "Neu starten?"-Bestätigungsdialog-Muster wurde auf die Preisalarme-,
+  Favoriten- und Angebote-Seite übertragen — dort löschte der
+  Entfernen-Button bisher jeweils mit einem einzigen Klick sofort und
+  endgültig, ohne Rückfrage. Drei eigenständige, neue Tier-4-Kandidaten
+  (je eigene Seite, eigener Nutzerpfad).
+- `2f110f7` (13.09.): Seitenübergänge respektieren jetzt
+  `prefers-reduced-motion`. Echter, verifizierter Barrierefreiheits-Fix,
+  aber bewusst **nicht** als Tier-4-Kandidat gezählt — passt nicht zur
+  "Ehrlichkeit/Vertrauen"-Erzählung, die dieses spezifische Format trägt
+  (gleiche Begründung wie frühere Formatierungs-/Validierungs-
+  Ausschlüsse).
+- `538bb25` (13.09.): Screenreader-Text der Schließen-Buttons von
+  "Close" auf "Schließen" korrigiert. Reine Sprachkonsistenz-Korrektur,
+  ebenfalls **nicht** aufgenommen.
+
+Mit den drei neuen Kandidaten wuchs der seit Ausgabe 2 (07.09.) im Topf
+gesammelte Bestand von fünf (Stand 13.09.) auf **acht** — exakt die
+Menge, die schon Ausgabe 2 ausgelöst hatte, und klar über der Menge
+(vier), die selbst am 06.09. noch als "nicht ausreichend" bewertet
+wurde. Damit ist die eigene Gating-Bedingung für eine dritte Ausgabe
+diesmal eindeutig erfüllt, nicht nur knapp erreicht wie zuletzt am
+13.09.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument für
+dieselbe, noch nicht gebaute Footer-Seite wie Ausgabe 1/2 — kein
+Live-Vorgang, nichts gepostet, keine Seite gebaut. Keine erfundenen
+Kennzahlen — jeder der acht Punkte stammt aus einem einzeln per
+`git show` verifizierten, bereits in `main` gemergten Commit. Keine
+offene Positionierungs-Grundsatzfrage: wendet nur die bestehende
+Positionierung ("Ehrlichkeit als Feature") an, entscheidet sie nicht neu.
+Berührt keine der vier offenen Fragen an Ni — hängt an derselben, bereits
+gestellten vierten Frage wie Ausgabe 1/2.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben drei unbeantworteten Fragen gebunden.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: neuer Abschnitt "Ausgabe 3" —
+  acht Vorher/Nachher-Punkte in drei Themenblöcken (Löschen mit
+  Bestätigung statt sofort endgültig, ehrlichere Hinweise rund um die
+  Unterkunftssuche, mehr Klarheit auf Reiseentwürfe-/Platzhalterseiten).
+- `marketing/freigabe-uebersicht.md`: neues Update vom 14.09. (Prüfung
+  der vier Fragen, Einordnung der fünf neuen Commits inkl. Begründung für
+  die zwei Ausschlüsse), Tier-4- und Tier-5-Abschnitt sowie "Nächster
+  autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf 14.09.
+  gesetzt.
+- `ZEITPLAN.md` (Marketing Sprint 4, Ist-Stand-Notiz): Ausgabe 2/3 des
+  Mini-Changelogs ergänzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-13
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf

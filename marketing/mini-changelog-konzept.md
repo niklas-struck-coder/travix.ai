@@ -401,3 +401,106 @@ nötig, nur zur Kenntnis: der Kandidatentopf für künftige Ausgaben wächst
 weiter, und die Sprachfunktion hat seit heute keinen bekannten technischen
 Blocker mehr (bleibt aber an die drei alten Fragen gebunden, bevor daraus
 eigener Content wird).
+
+---
+
+## Ausgabe 3 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-09-14
+
+Wie Ausgabe 1/2: **nichts davon ist live.** Reiner Textentwurf für dieselbe,
+noch nicht gebaute Footer-Seite — hängt an derselben vierten Frage wie
+Ausgabe 1/2 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine dritte Ausgabe
+
+Die eigene Selbstauflage seit dem 06.09.-Lauf: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue, einzeln
+verifizierte Tier-4-Kandidaten angesammelt haben — als Richtwert gilt
+weiterhin der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst,
+vier galten explizit als "nicht ausreichend"). Der Kandidatentopf war laut
+`marketing/freigabe-uebersicht.md` (Update 2026-09-13) seit Ausgabe 2 auf
+fünf gewachsen — für sich allein weiterhin unter der Achter-Schwelle.
+
+Vor der Auswahl `git log 1af1fb5..origin/main` geprüft (letzter
+Marketing-Lauf, 13.09., laut Branch-Vergleich bereits vollständig in `main`
+gemergt): 11 neue Commits. Fünf echte Produkt-Codeänderungen einzeln per
+`git show` geprüft, drei davon neu und content-relevant:
+
+- **`567b9dc` (13.09. spät):** Der Entfernen-Button auf `/preisalarme`
+  löschte einen Preisalarm bisher mit einem einzigen Klick sofort und
+  endgültig, ohne Rückfrage. Jetzt fragt ein Bestätigungsdialog erst nach
+  (gleiches Muster wie beim "Neu starten?"-Dialog im Chat).
+- **`0c2e802` (14.09.):** Dasselbe Muster für die Favoriten-Seite
+  übertragen — ein Favorit verschwand bisher ohne Rückfrage.
+- **`c79a5a9` (14.09.):** Dasselbe Muster für die Angebote-Seite
+  übertragen — ein gespeichertes Angebot verschwand bisher ohne Rückfrage.
+
+Zusammen mit den fünf bereits im Topf wartenden Kandidaten (siehe
+`marketing/freigabe-uebersicht.md`, Tier 4: Bearbeiten-Pfad-Widerspruch bei
+unbekanntem Ziel, konkrete Fehlermeldung bei der Unterkunftssuche, der
+"Neu starten?"-Bestätigungsdialog im Chat, der ehrliche Hinweis bei
+mehreren Reiseentwürfen, sowie der entfernte interne Jargon auf
+Platzhalterseiten) ergeben sich **acht** Kandidaten — exakt die Menge, die
+bereits Ausgabe 2 ausgelöst hat.
+
+Zwei weitere geprüfte Commits **nicht** aufgenommen (reale, verifizierte
+Fixes, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung, die dieses Format
+trägt — gleiche Einstufung wie frühere reine Formatierungs-/
+Validierungs-Ausschlüsse):
+- **`2f110f7` (13.09.):** Seitenübergänge respektieren jetzt die
+  Systemeinstellung "Bewegungen reduzieren" — echter
+  Barrierefreiheits-Fix, aber kein Fall von irreführender Information oder
+  ungeschütztem Datenverlust.
+- **`538bb25` (13.09.):** Schließen-Buttons in Dialogen zeigten den
+  Screenreader-Text "Close" statt "Schließen" — reine
+  Sprachkonsistenz-Korrektur, kein Ehrlichkeits-/Vertrauensfund.
+
+### Dritte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 07.09. bis 14.09.2026, alle bereits gemergt in `main`.
+Ergänzt Ausgabe 1 und 2, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Du wirst gefragt, bevor etwas unwiderruflich gelöscht wird**
+- Der "Neu starten"-Knopf im Chat-Header setzt Chatverlauf und Reiseplan
+  nicht mehr mit einem einzigen, ungeschützten Klick zurück — erst nach
+  einer Bestätigung im Dialog. Gibt es noch gar keine Planung, reagiert der
+  Knopf weiterhin sofort, ohne eine falsche Warnung vorzutäuschen.
+- Dasselbe Sicherheitsnetz gibt es jetzt auch beim Entfernen eines
+  Preisalarms, eines Favoriten oder eines gespeicherten Angebots: vorher
+  war der Klick sofort endgültig, jetzt fragt ein Dialog erst nach.
+
+**Ehrlichere Hinweise rund um die Unterkunftssuche**
+- Kennt der Chat dein Reiseziel noch nicht, zeigte der
+  "Bearbeiten"-Bereich bisher zwei sich widersprechende Nachrichten
+  hintereinander (erst ein Suchversprechen, direkt gefolgt von der
+  ehrlichen Absage) — jetzt erscheint von vornherein nur die ehrliche
+  Nachricht.
+- Schlägt die Unterkunftssuche im Chat wirklich fehl, siehst du jetzt die
+  konkrete Fehlermeldung statt immer desselben festen Textes — genau wie
+  bei der Flugsuche schon zuvor.
+
+**Mehr Klarheit auf Reiseentwürfe- und Platzhalterseiten**
+- Hast du mehrere Reiseentwürfe gespeichert, zeigt "Planung fortsetzen"
+  jetzt einen ehrlichen Hinweis, dass das immer denselben einen aktiven
+  Chat öffnet — vorher wirkte der Link so, als führe er direkt zu den
+  Details des jeweiligen Entwurfs.
+- Noch nicht gebaute Seiten (z. B. die Hilfe-Seite) zeigten bisher einen
+  internen Entwicklungsbegriff im Text — jetzt ein klarer, unternehmens-
+  interner Jargon-freier Hinweis.
+
+---
+
+*Wie in Ausgabe 1/2: keine neue Funktion dabei, nur Korrekturen an etwas,
+das vorher nicht ehrlich, nicht sorgfältig oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 3 hängt an derselben vierten Frage wie Ausgabe 1/2 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer (siehe
+`marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab jetzt für
+eine mögliche vierte Ausgabe.
