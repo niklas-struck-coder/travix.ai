@@ -10025,3 +10025,65 @@ dasselbe Muster dort ebenfalls übernehmen können.
   Test dort in zwei aufgeteilt).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf)
+
+**Ausgewählter Punkt:** Die dritte der vier ursprünglich in
+`reports/support-chef.md` (13.09., Vorschlag 2) genannten Seiten mit
+sofortigem, unbestätigtem Löschen ohne Rückfrage — diesmal für die
+Angebote-Seite (`Angebote.tsx`, X-Icon-Button, `removeOffer()`). Vor der
+Umsetzung per `grep` bestätigt, dass `Angebote.tsx`/`Aktivitaeten.tsx`/
+`Warenkorb.tsx` zu diesem Zeitpunkt weiterhin unverändert direkt löschen
+(kein `Dialog`-Import in einer der drei verbliebenen Dateien);
+`Preisalarme.tsx`/`Favoriten.tsx` wurden in den beiden vorherigen Läufen
+desselben Tages bereits auf das Bestätigungsdialog-Muster umgestellt.
+
+**Warum sicher genug:** Identische Begründung wie bei den beiden
+vorherigen Läufen desselben Tages — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Angebote.tsx` arbeitet nur mit
+lokalem Demo-State, `initialOffers`, keine echte Backend-Persistenz).
+Keine offene Produkt-/Architekturentscheidung mehr nötig: das
+Bestätigungsdialog-Muster ist bereits zweifach etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`), hier nur ein drittes Mal wiederholt,
+keine neue Design-Wahl. Klar genug beschrieben (identischer Fix, nur auf
+die nächste der vier im Bericht genannten Seiten angewendet) und objektiv
+prüfbar (Test: Klick auf den X-Button öffnet den Dialog statt sofort zu
+löschen; "Abbrechen" verwirft, "Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht zwei:** Nur `Angebote.tsx` geändert.
+`Aktivitaeten.tsx` und `Warenkorb.tsx` bleiben bewusst unverändert für
+künftige Läufe, die dasselbe Muster dort ebenfalls übernehmen können.
+
+**Umsetzung:**
+- `src/pages/Angebote.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (das betroffene Angebot) statt direkt `removeOffer()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`: `DialogHeader`/`DialogTitle`
+  "Angebot entfernen?", `DialogDescription` nennt die betroffene
+  Angebotszusammenfassung, `DialogFooter` mit `Abbrechen`-
+  (`DialogClose`) und destruktivem `Ja, entfernen`-Button). Erst der
+  Klick auf "Ja, entfernen" ruft `removeOffer()` auf und schließt den
+  Dialog; "Abbrechen" (oder Schließen des Dialogs) verwirft
+  `pendingRemoval` ohne Änderung.
+- `src/pages/Angebote.test.tsx`: bestehender Lösch-Test durch zwei Tests
+  ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach dem
+  letzten Angebot).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.8); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.8 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den beiden vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test -- --run` (voller Lauf) → 55 Testdateien, 299 Tests, alle
+  grün (vorher 55/298, ein neuer Test in `Angebote.test.tsx`, ein
+  bestehender Test dort in zwei aufgeteilt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

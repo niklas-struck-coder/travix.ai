@@ -582,6 +582,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Bestehender Test in `Favoriten.test.tsx` auf den zusätzlichen
   Bestätigungsklick umgestellt, ein neuer Test dort ergänzt (Abbrechen
   verwirft die Löschung, Favorit bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Angebote-Seite (7.8) übertragen: Der Entfernen-Button (X-Icon,
+  `Angebote.tsx`) löschte ein gespeichertes Angebot bisher ebenfalls mit
+  einem einzigen Klick sofort und endgültig, ohne Rückfrage — dieselbe,
+  in den beiden obigen Einträgen beschriebene Fund-Quelle aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier die nächste der
+  dort bewusst offen gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx` (gleiche `Dialog`-Komponente, gleicher
+  Abbrechen/destructive-Button-Aufbau, keine neue Design-Entscheidung
+  nötig): Ein Klick auf das X-Icon öffnet jetzt "Angebot entfernen?" mit
+  der betroffenen Angebotszusammenfassung, erst "Ja, entfernen" löst
+  `removeOffer()` aus, "Abbrechen" schließt den Dialog ohne Änderung. Die
+  übrigen zwei Seiten (`Aktivitaeten.tsx`, `Warenkorb.tsx`) bleiben
+  weiterhin bewusst offen für künftige Läufe. Bestehender Test in
+  `Angebote.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
+  ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Angebot
+  bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

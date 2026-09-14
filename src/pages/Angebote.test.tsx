@@ -22,7 +22,7 @@ describe('Angebote', () => {
     expect(screen.getByText('Unterkunft')).toBeInTheDocument()
   })
 
-  it('removes an offer when its remove button is clicked, and shows the empty state once none are left', () => {
+  it('asks for confirmation before removing an offer, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
         <Angebote />
@@ -32,12 +32,34 @@ describe('Angebote', () => {
     fireEvent.click(
       screen.getByRole('button', { name: 'Berlin → Lissabon, Hin- und Rückflug aus gespeicherten Angeboten entfernen' }),
     )
+    expect(screen.getByText('Angebot entfernen?')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Berlin → Lissabon, Hin- und Rückflug wird aus deinen gespeicherten Angeboten entfernt/),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+    expect(screen.queryByText('Angebot entfernen?')).not.toBeInTheDocument()
+    expect(screen.getByText('Lissabon')).toBeInTheDocument()
+  })
+
+  it('removes an offer once its removal is confirmed, and shows the empty state once none are left', () => {
+    render(
+      <MemoryRouter>
+        <Angebote />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Berlin → Lissabon, Hin- und Rückflug aus gespeicherten Angeboten entfernen' }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.queryByText('Lissabon')).not.toBeInTheDocument()
     expect(screen.getByText('Kyoto')).toBeInTheDocument()
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Hotel Gion Nanba, 7 Nächte aus gespeicherten Angeboten entfernen' }),
     )
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.getByText('Noch keine Angebote gespeichert')).toBeInTheDocument()
   })
 })

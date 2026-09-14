@@ -5,6 +5,15 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface SavedOffer {
   id: string
@@ -45,9 +54,16 @@ function formatPrice(price: number, currency: string) {
 
 export function Angebote() {
   const [offers, setOffers] = useState(initialOffers)
+  const [pendingRemoval, setPendingRemoval] = useState<SavedOffer | null>(null)
 
   function removeOffer(id: string) {
     setOffers((current) => current.filter((offer) => offer.id !== id))
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    removeOffer(pendingRemoval.id)
+    setPendingRemoval(null)
   }
 
   if (offers.length === 0) {
@@ -100,7 +116,7 @@ export function Angebote() {
                   className="size-8 text-muted-foreground hover:text-foreground"
                   aria-label={`${offer.summary} aus gespeicherten Angeboten entfernen`}
                   title="Angebot entfernen"
-                  onClick={() => removeOffer(offer.id)}
+                  onClick={() => setPendingRemoval(offer)}
                 >
                   <X className="size-4" />
                 </Button>
@@ -113,6 +129,26 @@ export function Angebote() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Angebot entfernen?</DialogTitle>
+            <DialogDescription>
+              {pendingRemoval?.summary} wird aus deinen gespeicherten Angeboten entfernt. Das lässt sich nicht
+              rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
