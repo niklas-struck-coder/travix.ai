@@ -616,6 +616,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Aktivitaeten.test.tsx` auf den zusätzlichen Bestätigungsklick
   umgestellt, ein neuer Test dort ergänzt (Abbrechen verwirft die
   Löschung, Aktivität bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Warenkorb-Seite (7.6) übertragen — damit ist die in
+  `reports/support-chef.md` (13.09., Vorschlag 2) gemeldete Liste aller
+  fünf Seiten abgearbeitet: Der Entfernen-Button (X-Icon, `Warenkorb.tsx`)
+  löschte eine Position bisher ebenfalls mit einem einzigen Klick sofort
+  und endgültig, ohne Rückfrage — dieselbe, in den obigen Einträgen
+  beschriebene Fund-Quelle, hier die letzte der dort bewusst offen
+  gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`
+  (gleiche `Dialog`-Komponente, gleicher Abbrechen/destructive-
+  Button-Aufbau, keine neue Design-Entscheidung nötig): Ein Klick auf das
+  X-Icon öffnet jetzt "Aus dem Warenkorb entfernen?" mit der betroffenen
+  Positionsbezeichnung, erst "Ja, entfernen" löst `removeItem()` aus,
+  "Abbrechen" schließt den Dialog ohne Änderung. Bestehende Tests in
+  `Warenkorb.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
+  ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Position
+  bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

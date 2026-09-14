@@ -10159,3 +10159,69 @@ dasselbe Muster dort ebenfalls übernehmen kann.
 - `npm test` (voller Lauf) → 55 Testdateien, 300 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md`
+(13.09.) — sofortiges, endgültiges Löschen ohne Rückfrage auf fünf
+Seiten (`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/
+`Aktivitaeten.tsx`/`Warenkorb.tsx`) — war in den vier vorherigen Läufen
+für die ersten vier Seiten bereits umgesetzt. `Warenkorb.tsx` blieb als
+letzte der fünf Seiten bewusst offen. Vor dem Start `git status`/`git
+log`/direkter Blick in den Code geprüft: `it-chef/auto` lag bereits
+einen Commit vor `main` (`c849a60`, Aktivitäten-Fix von 22:10 Uhr desselben
+Tages, noch nicht von Freigabe-Chef gemergt) — laut Regel 1 auf diesem
+Branch weitergearbeitet, `main` dabei nicht angerührt. `Warenkorb.tsx`
+löschte eine Position tatsächlich noch mit einem einzigen Klick auf das
+X-Icon sofort und endgültig, ohne `Dialog`-Import.
+
+**Warum sicher genug:** Identische Begründung wie bei den vier
+vorherigen Läufen zu diesem Fund — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Warenkorb.tsx` arbeitet nur mit
+lokalem Demo-State, `initialItems`, keine echte Backend-Persistenz oder
+echte Zahlungsabwicklung — der eigentliche Bezahlvorgang findet laut
+Code-Kommentar/PRD an dieser Stelle noch gar nicht statt, es wird nur
+eine Position aus der lokalen Vormerkliste entfernt). Keine offene
+Produkt-/Architekturentscheidung mehr nötig: das
+Bestätigungsdialog-Muster ist bereits viermal etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`),
+hier nur ein fünftes und letztes Mal wiederholt, keine neue
+Design-Wahl. Klar genug beschrieben (identischer Fix, letzte der fünf im
+Bericht genannten Seiten) und objektiv prüfbar (Test: Klick auf den
+X-Button öffnet den Dialog statt sofort zu löschen; "Abbrechen" verwirft,
+"Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt:** Nur `Warenkorb.tsx` geändert — damit ist die
+vom Support-Chef-Bericht genannte Fünf-Seiten-Liste vollständig
+abgearbeitet.
+
+**Umsetzung:**
+- `src/pages/Warenkorb.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (die betroffene Position) statt direkt `removeItem()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`:
+  `DialogHeader`/`DialogTitle` "Aus dem Warenkorb entfernen?",
+  `DialogDescription` nennt die betroffene Positionsbezeichnung,
+  `DialogFooter` mit `Abbrechen`- (`DialogClose`) und destruktivem
+  `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen" ruft
+  `removeItem()` auf und schließt den Dialog; "Abbrechen" (oder Schließen
+  des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Warenkorb.test.tsx`: bestehenden Lösch-Test durch einen
+  neuen Bestätigungs-/Abbrechen-Test ersetzt, den Recalculate-Test auf
+  den zusätzlichen Bestätigungsklick umgestellt, und den
+  Leerzustand-Test um den Bestätigungsklick je Position ergänzt.
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.6); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.6 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den vier vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (voller Lauf) → 55 Testdateien, 301 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

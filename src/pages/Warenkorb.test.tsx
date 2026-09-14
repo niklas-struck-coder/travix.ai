@@ -34,7 +34,7 @@ describe('Warenkorb', () => {
     expect(screen.getByText('843 €')).toBeInTheDocument()
   })
 
-  it('recalculates group subtotal and grand total when an item is removed', () => {
+  it('asks for confirmation before removing an item, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
         <Warenkorb />
@@ -42,6 +42,23 @@ describe('Warenkorb', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Tagesausflug nach Sintra aus dem Warenkorb entfernen' }))
+    expect(screen.getByText('Aus dem Warenkorb entfernen?')).toBeInTheDocument()
+    expect(screen.getByText(/Tagesausflug nach Sintra wird aus deinem Warenkorb entfernt/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+    expect(screen.queryByText('Aus dem Warenkorb entfernen?')).not.toBeInTheDocument()
+    expect(screen.getByText('Tagesausflug nach Sintra')).toBeInTheDocument()
+  })
+
+  it('recalculates group subtotal and grand total once an item removal is confirmed', () => {
+    render(
+      <MemoryRouter>
+        <Warenkorb />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tagesausflug nach Sintra aus dem Warenkorb entfernen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
 
     expect(screen.queryByText('Tagesausflug nach Sintra')).not.toBeInTheDocument()
     expect(screen.queryByText('Aktivitäten')).not.toBeInTheDocument()
@@ -63,6 +80,7 @@ describe('Warenkorb', () => {
       'Reise-Krankenversicherung, 10 Tage',
     ]) {
       fireEvent.click(screen.getByRole('button', { name: `${label} aus dem Warenkorb entfernen` }))
+      fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     }
 
     expect(screen.getByText('Noch nichts im Warenkorb')).toBeInTheDocument()
