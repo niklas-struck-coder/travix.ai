@@ -9963,3 +9963,65 @@ können — kein neuer Design-Entscheid mehr nötig, nur Wiederholung.
   bestehender Test dort umbenannt/angepasst).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (geplanter autonomer Tagesmodus, weiterer Lauf)
+
+**Ausgewählter Punkt:** Die zweite der vier im vorherigen Lauf desselben
+Tages bewusst offen gelassenen Seiten aus `reports/support-chef.md`
+(13.09., Vorschlag 2): sofortiges, unbestätigtes Löschen ohne Rückfrage,
+diesmal für die Favoriten-Seite (`Favoriten.tsx`, Herz-Icon-Button,
+`removeFavorite()`). Vor der Umsetzung per `grep` bestätigt, dass
+`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`/`Warenkorb.tsx` weiterhin
+alle vier unverändert direkt löschen (kein `Dialog`-Import in einer der
+vier Dateien).
+
+**Warum sicher genug:** Identische Begründung wie beim Preisalarme-Lauf
+desselben Tages — kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten (`Favoriten.tsx` arbeitet nur mit lokalem Demo-State,
+`initialFavorites`, keine echte Backend-Persistenz). Keine offene
+Produkt-/Architekturentscheidung mehr nötig: das Bestätigungsdialog-Muster
+wurde im vorherigen Lauf heute bereits etabliert (`Preisalarme.tsx`), hier
+nur wiederholt, keine neue Design-Wahl. Klar genug beschrieben (identischer
+Fix, nur auf die nächste der fünf im Bericht genannten Seiten angewendet)
+und objektiv prüfbar (Test: Klick auf den Herz-Button öffnet den Dialog
+statt sofort zu löschen; "Abbrechen" verwirft, "Ja, entfernen" löst die
+Löschung aus).
+
+**Einen einzigen Punkt, nicht drei:** Wieder nur eine der verbleibenden
+Seiten (`Favoriten.tsx`). `Angebote.tsx`, `Aktivitaeten.tsx` und
+`Warenkorb.tsx` bleiben bewusst unverändert für künftige Läufe, die
+dasselbe Muster dort ebenfalls übernehmen können.
+
+**Umsetzung:**
+- `src/pages/Favoriten.tsx`: Klick auf den Herz-Button setzt jetzt
+  `pendingRemoval` (den betroffenen Favoriten) statt direkt
+  `removeFavorite()` aufzurufen. Neuer `Dialog` (exakt gleiche
+  Struktur/Klassen wie in `Preisalarme.tsx`: `DialogHeader`/`DialogTitle`
+  "Aus Favoriten entfernen?", `DialogDescription` nennt den betroffenen
+  Zielnamen, `DialogFooter` mit `Abbrechen`- (`DialogClose`) und
+  destruktivem `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen"
+  ruft `removeFavorite()` auf und schließt den Dialog; "Abbrechen" (oder
+  Schließen des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Favoriten.test.tsx`: bestehender Lösch-Test durch zwei Tests
+  ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach dem
+  letzten Favoriten).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.9); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.9 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  beim Preisalarme-Lauf).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` (voller Lauf) → 55 Testdateien, 298 Tests, alle grün
+  (vorher 55/297, ein neuer Test in `Favoriten.test.tsx`, ein bestehender
+  Test dort in zwei aufgeteilt).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.

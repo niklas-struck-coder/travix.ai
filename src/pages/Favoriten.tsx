@@ -4,6 +4,15 @@ import { Heart, MapPin, MessageCircle, Sparkles } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface Favorite {
   id: string
@@ -36,9 +45,16 @@ const initialFavorites: Favorite[] = [
 
 export function Favoriten() {
   const [favorites, setFavorites] = useState(initialFavorites)
+  const [pendingRemoval, setPendingRemoval] = useState<Favorite | null>(null)
 
   function removeFavorite(id: string) {
     setFavorites((current) => current.filter((favorite) => favorite.id !== id))
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    removeFavorite(pendingRemoval.id)
+    setPendingRemoval(null)
   }
 
   if (favorites.length === 0) {
@@ -85,7 +101,7 @@ export function Favoriten() {
                   className="size-8 text-teal hover:text-teal/80"
                   aria-label={`${favorite.destination} aus Favoriten entfernen`}
                   title="Aus Favoriten entfernen"
-                  onClick={() => removeFavorite(favorite.id)}
+                  onClick={() => setPendingRemoval(favorite)}
                 >
                   <Heart className="size-4 fill-current" />
                 </Button>
@@ -103,6 +119,26 @@ export function Favoriten() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aus Favoriten entfernen?</DialogTitle>
+            <DialogDescription>
+              {pendingRemoval?.destination} wird aus deinen Favoriten entfernt. Das lässt sich nicht rückgängig
+              machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

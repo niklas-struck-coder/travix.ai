@@ -564,6 +564,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Bestehende Tests in `Preisalarme.test.tsx` auf den zusätzlichen
   Bestätigungsklick angepasst, ein neuer Test dort (Abbrechen verwirft die
   Löschung, Alarm bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe, am
+  gleichen Tag etablierte Bestätigungsdialog-Muster auf die
+  Favoriten-Seite (7.9) übertragen: Der Entfernen-Button (Herz-Icon,
+  `Favoriten.tsx`) löschte einen Favoriten bisher ebenfalls mit einem
+  einzigen Klick sofort und endgültig, ohne Rückfrage — derselbe, im
+  obigen Preisalarme-Eintrag beschriebene Fund aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier nur die nächste
+  der dort bewusst offen gelassenen vier Seiten. Exakt dasselbe Muster
+  wie in `Preisalarme.tsx` (gleiche `Dialog`-Komponente, gleicher
+  Abbrechen/destructive-Button-Aufbau, keine neue Design-Entscheidung
+  nötig): Ein Klick auf das Herz-Icon öffnet jetzt "Aus Favoriten
+  entfernen?" mit dem betroffenen Zielnamen, erst "Ja, entfernen" löst
+  `removeFavorite()` aus, "Abbrechen" schließt den Dialog ohne Änderung.
+  Die übrigen drei Seiten (`Angebote.tsx`, `Aktivitaeten.tsx`,
+  `Warenkorb.tsx`) bleiben weiterhin bewusst offen für künftige Läufe.
+  Bestehender Test in `Favoriten.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt, ein neuer Test dort ergänzt (Abbrechen
+  verwirft die Löschung, Favorit bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
