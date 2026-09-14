@@ -3295,3 +3295,96 @@ sauber gemergt. Der weiterhin offene `support-chef/auto`-Blocker
 (`585efea`) wurde für diesen frühen Lauf bewusst nicht neu bewertet
 (siehe Auftragsbeschreibung); er steht für den nächsten (6-Uhr-)Lauf
 weiterhin an.
+
+## 2026-09-14, Tages-Check (6-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+Container erneut frisch (Shallow-Clone), lokaler `main` per `git fetch
+--unshallow` und `git checkout -B main origin/main` sauber auf
+`66d3990` gebracht — keine der gestern Nacht beobachteten Anomalien
+diesmal.
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im heutigen "früher
+  Nacht-Check" geprüft und gemergt). Planmäßig übersprungen, keine
+  Nachprüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`95cfc90`).
+- `support-chef/auto` — 1 neuer Commit von heute (`71093af`) oben auf
+  der seit 09.09. bekannten, blockierten Kette (`585efea` … `631691b`).
+
+**Prüfung `marketing-chef/auto`** (Diff des neuen Commits gegen `main`
+gelesen, nicht nur den Log-Eintrag geglaubt; wegen des großen
+Datei-Alters von `marketing-chef/auto` wurde gezielt nur der Diff von
+`95cfc90` selbst betrachtet, nicht der irreführend große direkte
+Branch-zu-Branch-Diff, der auch längst in `main` gelandete, dem Branch
+selbst aber fehlende Commits mitzählt):
+- Ändert `ZEITPLAN.md`, `marketing-chef-auto-log.md`,
+  `marketing/freigabe-uebersicht.md`, `marketing/mini-changelog-konzept.md`
+  — reine Markdown-Content-Pflege, kein Produkt-Code.
+- Ordnet fünf neue `main`-Commits seit dem letzten Marketing-Lauf ein und
+  begründet für jeden einzeln (per `git show` nachvollzogen, stimmt):
+  `567b9dc`/`0c2e802`/`c79a5a9` (Löschbestätigung Preisalarme/
+  Favoriten/Angebote) als drei neue Tier-4-Kandidaten aufgenommen,
+  `2f110f7` (reduzierte Bewegung) und `538bb25`
+  (Schließen-Button-Sprache) bewusst nicht aufgenommen mit nachvollziehbarer
+  Begründung (passen nicht zur Ehrlichkeits-/Vertrauens-Erzählung des
+  Formats).
+- Stichprobe: `grep -n "errors\|stayErrors" src/components/search/HotelResults.tsx
+  src/hooks/useChat.ts` bestätigt indirekt, dass die im Text zitierten
+  Commits real und bereits in `main` sind (unabhängig von diesem
+  Marketing-Diff selbst geprüft, siehe `support-chef/auto`-Prüfung unten).
+- Keine erfundenen Kennzahlen/Nutzerzahlen/Ergebnisse. Text ist
+  vollständig ausformuliert, keine Stichpunkt-Skizze. Explizit und
+  wiederholt: "nichts wird gepostet oder verändert", "kein Live-Vorgang".
+  Kein Hinweis auf tatsächliches Posten/Versenden.
+→ **Alles passt, nach `main` gemergt** (`git merge --no-ff
+origin/marketing-chef/auto`, sauber ohne Konflikte bis auf einen
+automatisch aufgelösten Kontext-Overlap in `ZEITPLAN.md`; Ergebnis
+geprüft, entspricht exakt dem erwarteten Diff des einen neuen Commits;
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- **`585efea` (09.09., "stayError vs. flightErrors") erneut unabhängig
+  am aktuellen Code-Stand nachgeprüft:**
+  `grep -n "error" src/components/search/HotelResults.tsx` zeigt
+  `errors: DuffelError[]` (Zeile 11) und `errors.map((error, index) =>
+  ... error.message)` (Zeile 26-32); `grep -n "stayError"
+  src/hooks/useChat.ts` zeigt `stayErrors` als `DuffelError[]`-State
+  (Zeile 78) statt des im Fund beschriebenen `boolean`. Der Fund bleibt
+  also weiterhin sachlich überholt — unverändert seit dem letzten Check.
+- **Neuer Commit von heute (`71093af`, "Bestätigungsdialoge auf
+  Preisalarme/Favoriten/Angebote geprüft") unabhängig geprüft, beide
+  neuen Funde stichhaltig:**
+  - Fund 1 (Herz-Icon auf `Favoriten.tsx` löst jetzt einen
+    Bestätigungsdialog statt Sofort-Toggle aus): `sed -n '90,142p'
+    src/pages/Favoriten.tsx` bestätigt das gefüllte `Heart`-Icon
+    (`fill-current`) mit `onClick={() => setPendingRemoval(favorite)}`
+    und den nachgelagerten Dialog "Aus Favoriten entfernen?" — Fund real.
+  - Fund 2 (`Preisalarme.tsx` ohne Handlungs-Link bei erreichtem
+    Zielpreis): `sed -n '100,125p' src/pages/Preisalarme.tsx` bestätigt,
+    dass bei `targetReached` nur der Badge "Ziel erreicht" erscheint,
+    kein Button/Link in der Nähe — Fund real.
+  - Zusatz-Behauptung (`Aktivitaeten.tsx`/`Warenkorb.tsx` haben den
+    Dialog-Fix noch nicht): beide Dateien geprüft, `onClick={() =>
+    removeActivity(activity.id)}` bzw. `onClick={() =>
+    removeItem(item.id)}` lösen weiterhin ohne Dialog sofort aus —
+    bestätigt.
+  - Reine Analyse ohne Code-Änderung, für sich genommen unbedenklich.
+- Da Branches nur als Ganzes gemergt werden, bleibt der gesamte Branch
+  weiterhin wegen des unkorrigierten `585efea` blockiert — jetzt seit
+  sechs aufeinanderfolgenden Läufen (09.09. bis heute), Rückstau an
+  validen, geprüften Funden dahinter erneut gewachsen: inzwischen fünf
+  (`a318d38`, `c88f1ac`, `c93b1ff`, `631691b`, jetzt `71093af`).
+→ **Nicht gemergt.** Gleicher Grund wie in den letzten sechs Läufen.
+
+**Ergebnis:** Zwei Branches inhaltlich geprüft, einer gemergt
+(`marketing-chef/auto`), einer weiterhin bewusst nicht gemergt
+(`support-chef/auto`), `it-chef/auto` planmäßig übersprungen (keine
+neuen Commits).
+
+**Info an Ni nötig:** Ja — wie im gestrigen Tages-Check-Eintrag
+angekündigt ("sollte spätestens dann erneut aktiv gemeldet werden, auch
+ohne neue Fakten, allein wegen der Laufzeit des Problems seit 09.09."):
+der `support-chef/auto`-Blocker durch `585efea` ist jetzt seit sechs
+Läufen ununterbrochen ungelöst, der Rückstau an validen Funden dahinter
+auf fünf gewachsen. Aktive Meldung an Ni ausgelöst.
