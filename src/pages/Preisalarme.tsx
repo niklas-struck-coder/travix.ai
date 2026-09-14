@@ -5,6 +5,15 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface PriceAlert {
   id: string
@@ -41,9 +50,16 @@ function formatEuro(amount: number) {
 
 export function Preisalarme() {
   const [alerts, setAlerts] = useState(initialAlerts)
+  const [pendingRemoval, setPendingRemoval] = useState<PriceAlert | null>(null)
 
   function removeAlert(id: string) {
     setAlerts((current) => current.filter((alert) => alert.id !== id))
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    removeAlert(pendingRemoval.id)
+    setPendingRemoval(null)
   }
 
   if (alerts.length === 0) {
@@ -91,7 +107,7 @@ export function Preisalarme() {
                     className="size-8 text-muted-foreground hover:text-foreground"
                     aria-label={`Preisalarm für ${alert.route} entfernen`}
                     title="Preisalarm entfernen"
-                    onClick={() => removeAlert(alert.id)}
+                    onClick={() => setPendingRemoval(alert)}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -115,6 +131,25 @@ export function Preisalarme() {
           )
         })}
       </div>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Preisalarm entfernen?</DialogTitle>
+            <DialogDescription>
+              Der Preisalarm für {pendingRemoval?.route} wird gelöscht. Das lässt sich nicht rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -543,6 +543,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `Reiseentwuerfe.test.tsx` (zwei Entwürfe, einer
   abgeschlossen → Hinweis verschwindet; vor dem Fix reproduzierbar rot
   verifiziert).
+  Vom autonomen IT-Chef-Lauf am 14.09. einen von `reports/support-chef.md`
+  (13.09., Vorschlag 2) gemeldeten Fund für die Preisalarme-Seite (7.10)
+  behoben: Der Entfernen-Button (`Preisalarme.tsx`) löschte einen
+  Preisalarm bisher mit einem einzigen Klick sofort und endgültig, ohne
+  Rückfrage. Der Bericht listet fünf betroffene Seiten
+  (`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`/
+  `Warenkorb.tsx`) und schlägt vor, "einmal festlegen, dann überall gleich
+  anwenden" — dieser Lauf setzt bewusst nur die Preisalarme-Seite um (ein
+  einzelner, klar abgegrenzter Punkt gemäß Autonomer-Tagesmodus-Regel),
+  exakt nach dem bereits etablierten Bestätigungsdialog-Muster aus dem
+  "Neu starten?"-Dialog in `KiChat.tsx` (gleiche `Dialog`-Komponente,
+  gleiches Abbrechen/destructive-Button-Layout), statt einen neuen,
+  bisher im Code nicht existierenden Rückgängig-Toast-Mechanismus zu
+  erfinden. Ein Klick auf das Papierkorb-Icon öffnet jetzt
+  "Preisalarm entfernen?" mit dem betroffenen Routennamen, erst "Ja,
+  entfernen" löst `removeAlert()` aus, "Abbrechen" schließt den Dialog
+  ohne Änderung. Die übrigen vier Seiten aus dem Bericht bleiben bewusst
+  offen für künftige Läufe, um dasselbe Muster dort ebenfalls anzuwenden.
+  Bestehende Tests in `Preisalarme.test.tsx` auf den zusätzlichen
+  Bestätigungsklick angepasst, ein neuer Test dort (Abbrechen verwirft die
+  Löschung, Alarm bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

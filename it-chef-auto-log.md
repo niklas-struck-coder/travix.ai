@@ -9890,3 +9890,76 @@ Checkbox-Zustand, gleiches Muster wie beim Schließen-Button-Fix oben).
   bestätigt danach wieder grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md` (13.09.):
+Löschen ist an mehreren Stellen sofort und endgültig, ohne Bestätigung
+oder Rückgängig — konkret `Preisalarme.tsx` (`removeAlert`),
+`Favoriten.tsx` (`removeFavorite`), `Angebote.tsx` (`removeOffer`),
+`Aktivitaeten.tsx` (`removeActivity`) und `Warenkorb.tsx` (`removeItem`).
+`reports/it-chef.md` (13.09.) bestätigt unabhängig: nach sehr breiter
+Prüfung fast des gesamten `src`-Ordners kein neuer eigenständiger Bug
+mehr gefunden, praktisch alle unblockierten Testlücken bereits
+geschlossen — dieser Support-Chef-Fund war der klarste verbleibende
+Kandidat.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — alle fünf betroffenen Seiten arbeiten ohnehin
+nur mit lokalem Demo-State (keine echte Backend-Persistenz, siehe
+`ZEITPLAN.md`). Keine offene Produkt-/Architekturentscheidung: der
+Bericht nennt zwar zwei mögliche Lösungsrichtungen
+(Bestätigungsdialog vs. Rückgängig-Toast), aber im Code existiert dafür
+bereits ein etabliertes, mehrfach verwendetes Muster (`Dialog` aus
+`src/components/ui/dialog.tsx`, siehe "Neu starten?"-Dialog in
+`KiChat.tsx`) — ein Rückgängig-Toast-Mechanismus existiert dagegen
+nirgends im Code (`grep` nach `toast|Toast|AlertDialog` in `src/` ohne
+Treffer) und wäre eine neue, nicht triviale Infrastruktur-Entscheidung.
+Also: bestehendes Muster übernehmen statt neu erfinden. Klar genug
+beschrieben (identischer Fix, nur auf fünf strukturell gleiche
+Lösch-Buttons angewendet) und objektiv prüfbar (Test: Klick auf
+Löschen öffnet Dialog statt sofort zu löschen; "Abbrechen" verwirft,
+"Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht fünf:** Gemäß Regel "einen einzigen Punkt
+aussuchen, nicht mehrere gleichzeitig" wird in diesem Lauf bewusst nur
+eine der fünf Seiten umgesetzt (`Preisalarme.tsx`, kleinste/klarste
+Instanz). Die übrigen vier (`Favoriten.tsx`, `Angebote.tsx`,
+`Aktivitaeten.tsx`, `Warenkorb.tsx`) bleiben absichtlich unverändert für
+künftige Läufe, die exakt dasselbe jetzt etablierte Muster übernehmen
+können — kein neuer Design-Entscheid mehr nötig, nur Wiederholung.
+
+**Umsetzung:**
+- `src/pages/Preisalarme.tsx`: Klick auf den Papierkorb-Button setzt jetzt
+  `pendingRemoval` (den betroffenen Alert) statt direkt `removeAlert()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie der
+  "Neu starten?"-Dialog in `KiChat.tsx`: `DialogHeader`/`DialogTitle`
+  "Preisalarm entfernen?", `DialogDescription` nennt die betroffene
+  Route, `DialogFooter` mit `Abbrechen`- (`DialogClose`) und
+  destruktivem `Ja, entfernen`-Button). Erst der Klick auf "Ja,
+  entfernen" ruft `removeAlert()` auf und schließt den Dialog;
+  "Abbrechen" (oder Schließen des Dialogs) verwirft `pendingRemoval`
+  ohne Änderung.
+- `src/pages/Preisalarme.test.tsx`: bestehender Lösch-Test auf den
+  zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt
+  (Abbrechen verwirft die Löschung, Alarm bleibt sichtbar und im
+  Dokument).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.10); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.10 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Muster wie
+  bei den vorherigen Detail-Fixes).
+
+**Geprüft (grün):**
+- `npm ci` (frischer Checkout, `node_modules` fehlte zu Beginn) →
+  sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Ausgabe.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm run build` (tsc -b + vite build) → grün, keine neuen Warnings (die
+  bestehende Chunk-Size-Warnung ist unverändert vorbestehend).
+- `npx vitest run` (voller Lauf) → 55 Testdateien, 297 Tests, alle grün
+  (vorher 55/296, ein neuer Test in `Preisalarme.test.tsx`, ein
+  bestehender Test dort umbenannt/angepasst).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
