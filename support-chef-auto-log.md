@@ -2416,3 +2416,80 @@ Desktop-Sidebar (keine Abweichung zwischen beiden Ansichten). Für
 `PageTransition.tsx` selbst (abgesehen von Punkt 2) keine weiteren
 Auffälligkeiten — Dauer (0.2s) und Easing sind über alle Routen
 konsistent.
+
+---
+
+## 2026-09-14 — Bestätigungsdialoge auf Preisalarme/Favoriten/Angebote (`/preisalarme`, `/favoriten`, `/angebote`)
+
+**Geprüfter Bereich:** `src/pages/Preisalarme.tsx`, `src/pages/Favoriten.tsx`
+und `src/pages/Angebote.tsx` — laut `ZEITPLAN.md` heute vom autonomen
+IT-Chef-Lauf umgesetzt: genau der am 13.09. in `reports/support-chef.md`
+(Vorschlag 2) gemeldete Fund ("Löschen ist an mehreren Stellen sofort und
+endgültig, ohne Bestätigung") ist für diese drei von fünf betroffenen
+Seiten jetzt behoben, über dasselbe `Dialog`-Muster wie beim bestehenden
+"Neu starten?"-Dialog in `KiChat.tsx`.
+
+Positiv zuerst: Die drei Umsetzungen sind wirklich einheitlich (gleicher
+`pendingRemoval`-State, gleiche `DialogTitle`/`DialogDescription`-Struktur,
+gleiches Abbrechen/destructive-Button-Layout, korrekte deutsche
+`aria-label`/`title` pro Karte) — genau das "einmal festlegen, dann
+überall gleich anwenden", das der ursprüngliche Bericht vorschlug. Auch
+der frühere Fund vom 26.08. (Entfernen-Icon `BellOff` in
+`Preisalarme.tsx` las sich wie "Stummschalten") ist inzwischen behoben:
+die Seite nutzt jetzt `Trash2` (Zeile 3, 112), passend zum Vorschlag von
+damals.
+
+### Reibungspunkte
+
+**1. Auf `Favoriten.tsx` löst ausgerechnet das Herz-Icon jetzt einen
+Bestätigungsdialog aus — das widerspricht der Bedeutung des Icons selbst**
+
+`Favoriten.tsx:98-107`: Der Entfernen-Button pro Karte zeigt ein
+ausgefülltes `Heart`-Icon (`fill-current`) in Teal — optisch identisch
+mit dem "gespeichert/geliked"-Herz, das in praktisch jeder bekannten App
+(Instagram, Pinterest, Airbnb, Booking.com) per einzelnem Klick sofort
+umschaltet, ohne Rückfrage. Seit dem heutigen Fix öffnet ein Klick darauf
+aber den Bestätigungsdialog "Aus Favoriten entfernen?" (Zeile 123-141) —
+dieselbe Bestätigungslogik wie bei einem eindeutigen Löschen-Icon
+(`Trash2`/`X` bei `Preisalarme.tsx`/`Angebote.tsx`, wo sie zur
+Icon-Bedeutung passt). Bei `Favoriten.tsx` verlangt ein Icon, das überall
+sonst "sofort umschaltbar" bedeutet, plötzlich einen zusätzlichen Klick —
+das kann verwirren, gerade weil die Nutzerin aus anderen Apps genau das
+Gegenteil gewohnt ist.
+
+*Vorschlag:* Entweder das Icon bei `Favoriten.tsx` auf ein eindeutiges
+Löschen-Symbol ändern (analog `Trash2`/`X` bei den beiden Schwesterseiten,
+dann passt der Dialog zur Ikonografie), oder — sobald es einen echten
+"Ziel erneut zu Favoriten hinzufügen"-Weg gibt — beim Herz-Icon speziell
+beim sofortigen Umschalten ohne Dialog bleiben, wie in jeder Referenz-App.
+
+**2. Erreicht ein Preisalarm sein Ziel, gibt es keinen einzigen
+Handlungs-Link — genau der Moment, für den die Funktion gedacht ist**
+
+`Preisalarme.tsx:116-121`: Ist `targetReached` wahr, erscheint nur der
+Badge "Ziel erreicht" neben dem Preis — keine weitere Aktion auf der
+Karte. Anders als bei `Favoriten.tsx:112-117`, wo jede Karte einen
+"Reise mit KI planen"-Button hat, oder bei `Angebote.tsx`, wo die Karte
+immerhin das gespeicherte Angebot zeigt: Wer nach einem erreichten
+Preisziel als Nächstes bucht/sucht, muss die App komplett verlassen und
+selbst zum Chat oder zur Flug-/Hotelsuche navigieren, ohne dass die Karte
+selbst dorthin verlinkt. Der eigentliche Zweck eines Preisalarms — "dein
+Wunschpreis ist da, jetzt handeln" — bleibt an genau der Stelle, wo er am
+wichtigsten wäre, ohne jeden Ausweg.
+
+*Vorschlag:* Bei `targetReached` einen zusätzlichen Button auf der Karte
+("Jetzt buchen" / "Reise mit KI planen", analog `Favoriten.tsx:112-117`)
+anzeigen, der zum Chat (mit vorbefüllter Route, falls machbar) oder zur
+manuellen Flugsuche führt.
+
+### Bereits bekannt, hier nur bestätigt weiterhin aktuell
+`src/pages/Aktivitaeten.tsx:82` und `src/pages/Warenkorb.tsx:95` haben
+den heutigen Bestätigungsdialog-Fix noch nicht bekommen — ein Klick auf
+den Entfernen-Button löscht dort weiterhin sofort und endgültig, exakt
+das Verhalten, das auf den drei anderen Seiten heute behoben wurde. Laut
+`ZEITPLAN.md` (14.09.-Einträge) ist das bewusst für künftige Läufe offen
+gelassen, kein neuer Fund — aber die Lücke zwischen den fünf
+gleichartigen Listenseiten ist jetzt spürbarer: eine Nutzerin, die auf
+`/favoriten` gerade gelernt hat, dass Löschen nachgefragt wird, trifft
+auf `/aktivitaeten` und `/warenkorb` unangekündigt wieder auf das
+alte, sofortige Verhalten.
