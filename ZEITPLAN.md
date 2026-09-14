@@ -599,6 +599,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Angebote.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
   ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Angebot
   bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Aktivitäten-Seite (7.13) übertragen: Der Entfernen-Button (X-Icon,
+  `Aktivitaeten.tsx`) löschte eine geplante Aktivität bisher ebenfalls mit
+  einem einzigen Klick sofort und endgültig, ohne Rückfrage — dieselbe,
+  in den obigen Einträgen beschriebene Fund-Quelle aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier die vorletzte der
+  dort bewusst offen gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx` (gleiche
+  `Dialog`-Komponente, gleicher Abbrechen/destructive-Button-Aufbau, keine
+  neue Design-Entscheidung nötig): Ein Klick auf das X-Icon öffnet jetzt
+  "Aktivität entfernen?" mit dem betroffenen Aktivitätsnamen, erst "Ja,
+  entfernen" löst `removeActivity()` aus, "Abbrechen" schließt den Dialog
+  ohne Änderung. Die letzte verbleibende Seite (`Warenkorb.tsx`) bleibt
+  weiterhin bewusst offen für einen künftigen Lauf. Bestehender Test in
+  `Aktivitaeten.test.tsx` auf den zusätzlichen Bestätigungsklick
+  umgestellt, ein neuer Test dort ergänzt (Abbrechen verwirft die
+  Löschung, Aktivität bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

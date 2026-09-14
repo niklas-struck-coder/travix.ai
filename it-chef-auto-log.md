@@ -10087,3 +10087,75 @@ künftige Läufe, die dasselbe Muster dort ebenfalls übernehmen können.
   bestehender Test dort in zwei aufgeteilt).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf, autonomer Cloud-Tageslauf)
+
+**Ausgangslage:** Frischer, isolierter Checkout in einem geplanten
+Cloud-Lauf, niemand live dabei. `it-chef/auto` war zum Start bereits
+vollständig nach `main` gemergt (Commit `c79a5a9` als Spitze, identisch
+mit `main`) — Branch neu von `origin/main` aufgesetzt, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` für diesen Fall vorgesehen. Das
+lokale `main` im Container war veraltet (`origin/main` war zwischen den
+letzten Läufen force-gepusht worden); da `main` keine eigenen, in
+`origin/main` fehlenden Commits hatte, per `git reset --hard origin/main`
+synchronisiert, bevor `it-chef/auto` davon abgezweigt wurde — `main`
+selbst wurde dabei nicht verändert, nur der lokale Zeiger auf den
+korrekten Fernstand gebracht.
+
+**Ausgewählter Punkt:** Die vorletzte der ursprünglich vier in
+`reports/support-chef.md` (13.09., Vorschlag 2) genannten Seiten mit
+sofortigem, unbestätigtem Löschen ohne Rückfrage — diesmal für die
+Aktivitäten-Seite (`Aktivitaeten.tsx`, X-Icon-Button, `removeActivity()`).
+Der heutige Support-Chef-Bericht (`93de852`, "drei von fünf
+Löschbestätigungs-Fixes bestätigt ... Warenkorb-Sackgasse weiterhin
+offen") und der direkte Blick in den Code bestätigten, dass
+`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx` bereits umgestellt sind,
+`Aktivitaeten.tsx` aber weiterhin ohne `Dialog`-Import direkt löscht.
+
+**Warum sicher genug:** Identische Begründung wie bei den drei
+vorherigen Läufen zu diesem Fund — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Aktivitaeten.tsx` arbeitet nur mit
+lokalem Demo-State, `initialActivities`, keine echte
+Backend-Persistenz). Keine offene Produkt-/Architekturentscheidung mehr
+nötig: das Bestätigungsdialog-Muster ist bereits dreifach etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`), hier nur ein
+viertes Mal wiederholt, keine neue Design-Wahl. Klar genug beschrieben
+(identischer Fix, nur auf die vorletzte der vier im Bericht genannten
+Seiten angewendet) und objektiv prüfbar (Test: Klick auf den X-Button
+öffnet den Dialog statt sofort zu löschen; "Abbrechen" verwirft, "Ja,
+entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht zwei:** Nur `Aktivitaeten.tsx` geändert.
+`Warenkorb.tsx` bleibt bewusst unverändert für einen künftigen Lauf, der
+dasselbe Muster dort ebenfalls übernehmen kann.
+
+**Umsetzung:**
+- `src/pages/Aktivitaeten.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (die betroffene Aktivität) statt direkt
+  `removeActivity()` aufzurufen. Neuer `Dialog` (exakt gleiche
+  Struktur/Klassen wie in `Preisalarme.tsx`/`Favoriten.tsx`/
+  `Angebote.tsx`: `DialogHeader`/`DialogTitle` "Aktivität entfernen?",
+  `DialogDescription` nennt den betroffenen Aktivitätsnamen,
+  `DialogFooter` mit `Abbrechen`- (`DialogClose`) und destruktivem
+  `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen" ruft
+  `removeActivity()` auf und schließt den Dialog; "Abbrechen" (oder
+  Schließen des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Aktivitaeten.test.tsx`: bestehender Lösch-Test durch zwei
+  Tests ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach der
+  letzten Aktivität).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.13); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.13 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den drei vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (voller Lauf) → 55 Testdateien, 300 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
