@@ -10354,3 +10354,61 @@ bestätigt wurde — ein erneuter identischer Lauf ohne Codeänderung
 dazwischen hätte keinen neuen Erkenntniswert.
 
 **Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-15, vierter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Erneuter frischer, isolierter Checkout. `it-chef/auto`
+war identisch mit `origin/it-chef/auto` (`d012869`), aber `main` war
+seit dem dritten Lauf um zehn Commits weitergelaufen — Fast-Forward-Merge
+von `origin/main` nach `it-chef/auto` (keine Konflikte). Inhaltlich waren
+das ausschließlich Berichts-/Log-Dateien (`freigabe-chef-log.md`,
+`marketing-chef-auto-log.md`, `marketing/freigabe-uebersicht.md`,
+`reports/*.md`, `status.md`) — keine Codeänderung im gemergten Bereich.
+
+**Eigene, unabhängige Prüfung:** `reports/support-chef.md` (15.09.) frisch
+gelesen, da dieser Bericht seit dem dritten Lauf neu auf `main` gelandet
+war: Vorschlag 1 ("Nach dem Bestätigen eines Lösch-Dialogs geht der Fokus
+verloren", betrifft mutmaßlich alle fünf Seiten mit dem
+Entfernen-Bestätigungsdialog-Muster) direkt gegen den Code geprüft
+(`src/components/ui/dialog.tsx`, `Aktivitaeten.tsx`) — Fund bestätigt:
+kein `onCloseAutoFocus`-Handling vorhanden, `DialogContent` verlässt sich
+vollständig auf Radix' eingebautes Verhalten, das beim Verschwinden des
+auslösenden Elements den Fokus lautlos auf `<body>` fallen lässt. Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Recht, keine offene Produktentscheidung, klar beschrieben (inkl.
+vorgeschlagenem Fix-Ansatz und Zielort im Bericht selbst), objektiv
+prüfbar (Fokus-Ziel per Test feststellbar).
+
+**Umgesetzt:** zentraler Fix in `DialogContent`
+(`src/components/ui/dialog.tsx`) statt fünffacher Duplikation, siehe
+Detailbeschreibung in `ZEITPLAN.md` (Phase 7). Kurz: `onOpenAutoFocus`
+merkt sich das auslösende Element, `onCloseAutoFocus` übernimmt die
+Fokus-Steuerung beim Schließen selbst (`preventDefault()`) — Element noch
+vorhanden → zurückfokussieren wie bisher, Element verschwunden (nach
+bestätigter Löschung) → Fokus auf die Seitenüberschrift (`h1`) mit
+temporärem `tabindex="-1"`.
+
+Beim Implementieren zunächst eine timing-basierte Variante versucht
+(`setTimeout` nach Radix' eigenem asynchronem Fokus-Restore-Versuch), die
+sich beim Testen als unzuverlässig erwies: In der jsdom-Testumgebung
+restauriert Radix' eingebautes `onCloseAutoFocus`-Standardverhalten den
+Fokus nachweislich gar nicht zuverlässig (mit einem isolierten
+Reproduktionstest gegen die unveränderte `radix-ui`-Bibliothek verifiziert
+— `document.activeElement` blieb dort dauerhaft `<body>`, obwohl das
+auslösende Element weiterhin existierte). Deshalb übernimmt der Fix die
+Fokus-Steuerung beim Schließen vollständig selbst, statt sich auf Radix'
+Default zu verlassen — dadurch sowohl im Test deterministisch prüfbar als
+auch unabhängig von dieser Timing-Unsicherheit im echten Browser robuster.
+
+**Geprüft:** `npm ci` (frischer Checkout, keine `node_modules` im
+Container), volle Testsuite (`npx vitest run`: 56 Testdateien, 303 Tests,
+davon 2 neue in `src/components/ui/dialog.test.tsx` — vor dem Fix mit der
+timing-basierten Zwischenversion reproduzierbar rot verifiziert, siehe
+oben), `npm run lint` (0 Fehler, nur drei vorbestehende
+`react-refresh/only-export-components`-Warnungen in unveränderten
+Dateien), `npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/ui/dialog.tsx` (Fix),
+`src/components/ui/dialog.test.tsx` (neu, 2 Tests), `ZEITPLAN.md`
+(Eintrag ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

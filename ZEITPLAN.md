@@ -633,6 +633,38 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Warenkorb.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
   ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Position
   bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 15.09. (vierter Lauf) einen von
+  `reports/support-chef.md` (15.09., Vorschlag 1) gemeldeten
+  Barrierefreiheits-Fund zum eben abgeschlossenen Fünf-Seiten-Katalog
+  behoben: Der Entfernen-Button pro Karte auf allen fünf Seiten
+  (`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`/
+  `Warenkorb.tsx`) ist kein `DialogTrigger`, sondern ein normaler `Button`
+  — `confirmRemoval()`/`removeAlert()`/etc. entfernt die Karte samt ihrem
+  Button im selben Moment, in dem der Bestätigungsdialog schließt. Radix'
+  eingebaute Fokus-Rückgabe versucht danach, genau diesen inzwischen aus
+  dem DOM entfernten Button erneut zu fokussieren — das schlägt lautlos
+  fehl, der Fokus landet auf `<body>`. Wer per Tastatur oder Screenreader
+  mehrere Einträge hintereinander entfernen will, muss sich nach jedem
+  "Ja, entfernen" unerkennbar neu durch die Seite tabben. Fix: exakt der
+  im Bericht vorgeschlagene Ansatz, zentral in `src/components/ui/dialog.tsx`
+  (`DialogContent`) statt fünffach dupliziert. Ein neuer `onOpenAutoFocus`
+  merkt sich beim Öffnen, welches Element gerade fokussiert war (der
+  angeklickte Entfernen-Button); der neue `onCloseAutoFocus` übernimmt
+  beim Schließen die Fokus-Steuerung komplett selbst (`preventDefault()`)
+  statt sich auf Radix' eingebautes Verhalten zu verlassen: existiert
+  dieses Element beim Schließen noch (z. B. beim Abbrechen), bekommt es
+  den Fokus zurück wie bisher; existiert es nicht mehr (nach einer
+  bestätigten Löschung), wandert der Fokus stattdessen auf die
+  Seitenüberschrift (`h1`, wie in jeder Seite über `PageHeader`
+  vorhanden — vom Bericht als Ziel vorgeschlagen), mit einem temporären
+  `tabindex="-1"`, der beim nächsten Fokuswechsel automatisch wieder
+  entfernt wird. Betrifft automatisch alle fünf Seiten sowie jeden
+  künftigen Dialog, der dasselbe Muster nutzt (z. B. den "Neu
+  starten?"-Dialog in `KiChat.tsx`), ohne dort etwas ändern zu müssen.
+  Neue `src/components/ui/dialog.test.tsx` (2 Tests): Bestätigen einer
+  Löschung, bei der der auslösende Button verschwindet, bringt den Fokus
+  auf die Seitenüberschrift; Abbrechen (auslösender Button bleibt
+  bestehen) bringt den Fokus weiterhin dorthin zurück.
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
