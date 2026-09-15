@@ -3477,3 +3477,88 @@ bereits Gemeldete hinausgeht; die `main`-Stand-Anomalie ist bekanntes,
 bereits eingeordnetes Verhalten dieser Umgebung. Die MARKENDESIGN.md-
 Beobachtung zum `X`-Icon ist eine Kleinigkeit für einen künftigen
 IT-Chef-Lauf, kein akuter Handlungsbedarf.
+
+## 2026-09-15, Tages-Check (6-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+**Vorbemerkung — Container erneut mit veraltetem, shallow `main`-Zeiger:**
+Lokaler `main` zeigte zu Laufbeginn wieder auf `254e39a` (08.09.), diesmal
+zusätzlich als flacher Klon ohne gemeinsamen Vorfahren zu `origin/main`
+(`git merge-base` schlug fehl, `git log --reverse` zeigte unterschiedliche
+Root-Commits). Anders als am 14./15.09. früh vermutet ist das kein reines
+Zeiger-Problem, sondern eine Folge des Shallow-Clones dieser
+Container-Instanz. Mit `git fetch --unshallow` behoben (danach gemeinsame
+Historie vorhanden, `main` sauber per `git merge --ff-only origin/main`
+aktualisiert). Kein Hinweis auf verlorene Arbeit; für künftige Läufe
+festgehalten, damit das nicht wieder als neue Anomalie missverstanden
+wird.
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im heutigen "früher
+  Nacht-Check" geprüft und gemergt). Planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit (`4832eed`).
+- `support-chef/auto` — 1 neuer Commit von heute (`d8569dc`) oben auf der
+  seit 09.09. bekannten, blockierten Kette (`585efea` … `71093af`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Übersichts-Ergänzung (zwei
+  neue Tier-4-Kandidaten: Aktivitäten-/Warenkorb-Löschbestätigung), keine
+  vierte Mini-Changelog-Ausgabe, nichts gepostet oder live verändert.
+- Beide referenzierten Commits (`c849a60`, `38a1f47`) per `git show`
+  gegengelesen: existieren wie beschrieben, bereits Teil von `main`.
+- Keine erfundenen Kennzahlen/Nutzerzahlen, keine offene
+  Positionierungs-Grundsatzfrage berührt, Text vollständig ausformuliert.
+→ **Passt, nach `main` gemergt** (`git merge --no-ff
+origin/marketing-chef/auto`, ohne Konflikte, gepusht als `466021f`).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt) **— hier ist mir ein eigener Fehler unterlaufen,
+korrigiert im selben Lauf:**
+- Beim ersten Durchgang habe ich den gesamten Branch gemergt (Commit
+  `0d7b5fa`), weil die Stichprobe der Datei-/Zeilenangaben in allen
+  sieben neuen Log-Einträgen (09.09. bis 15.09., inkl. dem heutigen
+  `d8569dc`) plausibel und nicht erfunden war. Dabei habe ich übersehen,
+  dass genau dieser Branch laut diesem Log bereits seit dem 09.09. wegen
+  desselben, unkorrigierten `585efea`-Eintrags ("stayError vs.
+  flightErrors") sechsmal in Folge bewusst nicht gemergt wurde — zuletzt
+  gestern (14.09.) mit aktiver Meldung an Ni, weil dieser überholte
+  Befund als "bestätigter, offener Reibungspunkt" sachlich falsch in
+  `main` landen würde. Diese Einordnung gilt unverändert: `grep -n
+  "errors\|stayError" src/components/search/HotelResults.tsx
+  src/hooks/useChat.ts` bestätigt erneut `errors: DuffelError[]` bzw.
+  `stayErrors: DuffelError[]` — der Fund ist weiterhin überholt.
+- Nach Erkennen dieses Widerspruchs zur eigenen, dokumentierten
+  Vorgeschichte: Merge-Commit `0d7b5fa` per `git revert -m 1` rückgängig
+  gemacht (Revert-Commit `ab96c36`) und gepusht. `main` enthält
+  `support-chef-auto-log.md` danach wieder exakt im Stand vor diesem
+  Lauf; der `marketing-chef/auto`-Merge (unabhängiger Commit, s.o.) ist
+  davon nicht betroffen und bleibt bestehen.
+- Die beiden neuen, seit gestern hinzugekommenen Funde in `d8569dc`
+  (Fokus-Rückgabe nach Bestätigung geht auf `Aktivitaeten.tsx`/
+  `Warenkorb.tsx` verloren, da kein `DialogTrigger` verwendet wird) selbst
+  gegen den Code geprüft: `grep -n "DialogTrigger\|onClick.*setPendingRemoval"
+  src/pages/Aktivitaeten.tsx` zeigt tatsächlich einen einfachen
+  `onClick`-Handler statt eines `DialogTrigger` — Fund plausibel, nicht
+  erfunden.
+→ **Nicht gemergt** (nach Korrektur des eigenen Fehlers). Gleicher Grund
+wie in den letzten sechs Läufen, jetzt zum siebten Mal: der unkorrigierte
+`585efea`-Eintrag blockiert weiterhin den gesamten Branch. Rückstau an
+validen, geprüften Funden dahinter jetzt bei sechs
+(`a318d38`, `c88f1ac`, `c93b1ff`, `631691b`, `71093af`, `d8569dc`).
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`marketing-chef/auto`), ein
+Branch geprüft, versehentlich gemergt und noch im selben Lauf wieder
+zurückgesetzt (`support-chef/auto`, weiterhin blockiert), `it-chef/auto`
+planmäßig übersprungen.
+
+**Info an Ni nötig:** Ja — aus zwei Gründen. Erstens: der
+`support-chef/auto`-Blocker ist jetzt seit sieben aufeinanderfolgenden
+Läufen (09.09.–15.09.) ununterbrochen ungelöst, der Rückstau an validen
+Funden auf sechs gewachsen; das strukturelle Problem (niemand korrigiert
+oder entfernt den einzelnen überholten `585efea`-Absatz in
+`support-chef-auto-log.md`) besteht trotz der aktiven Meldung von gestern
+unverändert fort. Zweitens: in diesem Lauf ist mir selbst ein Fehler
+unterlaufen (versehentlicher Merge trotz dokumentierter Vorgeschichte),
+den ich zwar noch im selben Lauf per Revert korrigiert habe, der aber
+Ni transparent gemeldet werden sollte.
