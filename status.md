@@ -13,16 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-13):**
-- Drei Bugfixes: Löschen von Angebot, Favorit und Preisalarm erfolgt jetzt
-  sofort endgültig statt mit irreführender Rückfrage
-- Fix: PageTransition-Animation respektiert jetzt die Systemeinstellung
-  "Bewegungen reduzieren"
-- Marketing-Chef hat eine dritte Mini-Changelog-Ausgabe zur Löschbestätigung
-  auf drei Seiten veröffentlicht
-- Freigabe-Chef hat IT-Chef- und Marketing-Chef-Änderungen geprüft und gemergt;
-  ein Support-Chef-Vorschlag bleibt weiterhin blockiert
+**Seit letztem Update (2026-09-14):**
+- Zwei weitere Bugfixes: Löschen von Aktivität und Warenkorb erfolgt jetzt
+  ebenfalls sofort endgültig statt mit irreführender Rückfrage
+- Support-Chef hat als neuen Fund gemeldet, dass der Fokus nach Bestätigungsdialogen
+  nicht korrekt zurückgesetzt wird
+- Marketing-Chef hat zwei neue Kandidaten für die nächste Mini-Changelog-Ausgabe
+  identifiziert, aber noch nicht veröffentlicht
+- Ein Merge-Versuch des Support-Chef-Vorschlags wurde vom Freigabe-Chef wieder
+  zurückgenommen (eigener Fehler korrigiert); IT-Chef fand in mehreren Läufen
+  keinen neuen sicheren Punkt zum Umsetzen
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-14_
+_Letztes Update: 2026-09-15_
