@@ -10225,3 +10225,62 @@ abgearbeitet.
 - `npm test` (voller Lauf) → 55 Testdateien, 301 Tests, alle grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+
+## 2026-09-15 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout in einem geplanten
+Cloud-Lauf, niemand live dabei. `it-chef/auto` lag zu Beginn zwei
+Commits vor `main` (`c849a60`/`38a1f47`, Aktivitäten-/Warenkorb-
+Löschbestätigung vom Vorlauf, noch nicht von Freigabe-Chef gemergt) —
+`main` war Vorfahre von `it-chef/auto`, also ohne Merge direkt auf
+diesem Branch weitergearbeitet, `main` dabei nicht angerührt.
+
+**Gesuchter, aber nicht gefundener Punkt:** `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` durchsucht — alle verbleibenden
+offenen Punkte in Sprint 2/3 (6.2, 6.6, 6.7, 7.4, 7.12) hängen laut
+bestehender Dokumentation entweder an der offenen Backend-/
+Architekturentscheidung oder an fehlenden `TripDraft`-Feldern
+(Item-/Provider-URL, Transport-/Unterkunftspreise) — kein neuer,
+eigenständig umsetzbarer Punkt darunter. Die zuletzt in
+`reports/support-chef.md` (14.09.) und `reports/it-chef.md` (14.09.)
+offen genannten Funde (Aktivitäten-/Warenkorb-Löschbestätigung) sind mit
+den letzten beiden Läufen bereits erledigt — der Fünf-Seiten-Katalog aus
+`reports/support-chef.md` (13.09., Vorschlag 2) ist damit vollständig
+abgearbeitet.
+
+Zusätzlich `freigabe-chef-log.md` geprüft: dort ein neuer, von
+Freigabe-Chef unabhängig bestätigter Fund auf dem separaten
+`support-chef/auto`-Branch (Commit `71093af`) — `Preisalarme.tsx` zeigt
+bei erreichtem Zielpreis nur den Badge "Ziel erreicht", ohne
+Handlungs-Link. Bewusst nicht selbst umgesetzt: Kriterium 3 (klar genug
+beschrieben, keine Interpretation nötig) ist nicht erfüllt — die
+Demo-Alerts in `Preisalarme.tsx` (`initialAlerts`) sind reine
+Text-Routen ohne Verknüpfung zu einer echten Such-/Buchungs-Entität;
+wohin ein "Jetzt buchen/suchen"-Link führen sollte, steht nirgends fest
+und wäre eine eigene Annahme, kein reiner Bugfix.
+
+`reports/it-chef.md` (14.09.) selbst hält fest, dass praktisch der
+gesamte `src`-Ordner seit mehreren Tagen wiederholt gelesen wurde, ohne
+neuen unabhängigen Fund — eigene stichprobenartige Prüfung heute
+(`tripStorage.ts`, `Warenkorb.tsx`, TODO/FIXME-Suche über `src/`, Suche
+nach Quelldateien ohne Testdatei) bestätigt das: keine neue Lücke
+gefunden, die verbleibenden Dateien ohne Testdatei (`src/types/*.ts`,
+`App.tsx`, `main.tsx`, `routes.tsx`, `design-tokens.ts`, `lib/utils.ts`)
+sind reine Typdefinitionen, Einstiegspunkte oder trivialer
+Bibliotheks-Wrapper ohne eigene Logik.
+
+**Ergebnis: kein sicherer Punkt für einen autonomen Fix gefunden.**
+Kein Code geändert.
+
+**Geprüft (grün, Branch-Gesundheit ohne eigene Änderung bestätigt):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm test -- --run` (voller Lauf) → 55 Testdateien, 301 Tests, alle
+  grün.
+
+**Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf
+`it-chef/auto`.
