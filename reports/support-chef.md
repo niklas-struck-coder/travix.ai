@@ -1,39 +1,41 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-14
+**Datum:** 2026-09-15
 
-## Was ist seit dem letzten Eintrag (2026-09-13) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-14) passiert?
 
-Guter Tag: Drei von fünf "Löschen ohne Rückfrage"-Stellen aus meinem
-zweiten Vorschlag sind jetzt behoben. Preisalarme (`removeAlert`),
-Favoriten (`removeFavorite`) und Angebote (`removeOffer`) fragen vor dem
-endgültigen Entfernen jetzt mit einem Bestätigungsdialog nach — genau das
-einheitliche Muster, das ich vorgeschlagen hatte. Zusätzlich respektiert
-die Seitenübergangs-Animation jetzt die Systemeinstellung "Bewegungen
-reduzieren", und Schließen-Buttons in Dialogen/Sheets sind nicht mehr
-fest auf Englisch verdrahtet, auch wenn die App auf Deutsch läuft — beides
-kleine, aber echte Verbesserungen für Nutzer:innen mit entsprechenden
-Bedürfnissen.
+Punkt 1 von gestern ist jetzt vollständig erledigt: Auch Aktivitäten
+(`src/pages/Aktivitaeten.tsx`) und Warenkorb (`src/pages/Warenkorb.tsx`)
+fragen vor dem endgültigen Entfernen jetzt mit einem Bestätigungsdialog
+nach — die komplette Fünf-Seiten-Liste (Preisalarme, Favoriten, Angebote,
+Aktivitäten, Warenkorb) hat damit das einheitliche, sichere Muster.
 
-Noch offen sind Aktivitäten (`removeActivity` in `src/pages/Aktivitaeten.tsx`)
-und Warenkorb (`removeItem` in `src/pages/Warenkorb.tsx`) — dort löscht ein
-Klick auf das X-Icon weiterhin sofort und endgültig, siehe Punkt 1. Laut
-IT-Chef ist das bewusst so gelassen, weil ein anderer interner Kanal genau
-diese zwei Seiten schon als nächste Kandidaten vorgemerkt hat — also
-absehbar, kein Übersehen.
+Beim genaueren Hinsehen auf genau dieses neue Verhalten ist mir aber ein
+neuer, echter Reibungspunkt aufgefallen (siehe Vorschlag 1) — betrifft
+vermutlich alle fünf Seiten gleichermaßen, nicht nur die zwei neuesten.
 
 Die Hilfe-Seite (Punkt 2) und der Warenkorb als Sackgasse (Punkt 3) sind
 im Code unverändert gegenüber gestern.
 
 ## Meine Vorschläge
 
-1. **Löschen ohne Bestätigung bei Aktivitäten und Warenkorb.** Als letzte
-   zwei von ursprünglich fünf Stellen fehlt hier weiterhin der
-   Bestätigungsdialog, den es bei Preisalarmen, Favoriten und Angeboten
-   jetzt schon gibt (`src/pages/Aktivitaeten.tsx`, `removeActivity`, und
-   `src/pages/Warenkorb.tsx`, `removeItem`). *Vorschlag:* das gleiche,
-   bereits dreifach bewährte Muster einfach auf diese zwei Seiten
-   übertragen — technisch ein kleiner, risikoarmer Schritt.
+1. **Nach dem Bestätigen eines Lösch-Dialogs geht der Fokus verloren.**
+   `src/pages/Aktivitaeten.tsx:98` und `src/pages/Warenkorb.tsx:111`
+   (ebenso vermutlich `Preisalarme.tsx:110`, `Favoriten.tsx:104`,
+   `Angebote.tsx:119`, die dasselbe Muster verwenden): Der
+   Entfernen-Button pro Karte ist kein `DialogTrigger`, sondern ein
+   normaler `Button`. `confirmRemoval()` entfernt die Karte samt ihrem
+   Button im selben Moment, in dem der Dialog schließt — genau der
+   DOM-Knoten, auf den der Fokus danach automatisch zurückspringen
+   sollte, existiert dann schon nicht mehr. Wer per Tastatur oder
+   Screenreader mehrere Einträge hintereinander entfernen will, landet
+   nach jedem "Ja, entfernen" unerkennbar auf `<body>` und muss sich
+   jedes Mal neu durch die Seite tabben. *Vorschlag:* auf
+   `DialogPrimitive.Content` ein `onCloseAutoFocus` setzen, das den
+   Fokus gezielt auf ein noch vorhandenes Element legt (z. B. die
+   Seitenüberschrift oder die nächste verbliebene Karte) — idealerweise
+   zentral in `src/components/ui/dialog.tsx`, da das Muster fünffach
+   wiederholt wird.
 
 2. **Die Hilfe-Seite (`/hilfe`) hilft immer noch nicht wirklich.**
    `src/pages/PlaceholderPage.tsx` zeigt weiterhin nur "Hilfe wird als
@@ -45,11 +47,11 @@ im Code unverändert gegenüber gestern.
 
 3. **Der Warenkorb bleibt eine Sackgasse.** `src/pages/Warenkorb.tsx`
    endet weiterhin nach der Summen-Karte ohne Buchen-Button oder
-   Buchungs-Hinweis. Das hängt vermutlich weiterhin an der offenen
-   Grundsatzfrage "eigener Zahlungsprozess vs. Buchung beim Anbieter"
-   (siehe "Offene Entscheidungen" in `ZEITPLAN.md`). *Vorschlag:* Solange
-   die Entscheidung aussteht, wenigstens einen kurzen erklärenden Satz
-   einblenden ("Buchung folgt in Kürze" o.ä.), statt die Nutzerin
-   kommentarlos vor der Summen-Karte stehen zu lassen.
+   Buchungs-Hinweis. Das hängt weiterhin an der offenen Grundsatzfrage
+   "eigener Zahlungsprozess vs. Buchung beim Anbieter" (siehe
+   `ZEITPLAN.md`, Sprint 5). *Vorschlag:* Solange die Entscheidung
+   aussteht, wenigstens einen kurzen erklärenden Satz einblenden
+   ("Buchung folgt in Kürze" o.ä.), statt die Nutzerin kommentarlos vor
+   der Summen-Karte stehen zu lassen.
 
-_Letztes Update: 2026-09-14_
+_Letztes Update: 2026-09-15_
