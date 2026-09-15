@@ -1,46 +1,54 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-14
+**Datum:** 2026-09-15
 
-## Was ist seit dem letzten Eintrag (2026-09-13) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-14) passiert?
 
-- Drei Löschbestätigungs-Fixes: Preisalarme, Favoriten und Angebote
-  löschten bisher mit einem Klick sofort und endgültig, ohne Rückfrage.
-  Jetzt fragt überall derselbe Dialog nach ("lässt sich nicht rückgängig
-  machen") — dieselbe Vertrauens-Erzählung wie beim "Neu starten"-Dialog
-  im KI-Chat.
-- Barrierefreiheit: Seitenübergänge respektieren jetzt die
-  Systemeinstellung "Bewegungen reduzieren".
-- Der autonome Marketing-Chef-Lauf hat dazu die dritte
-  Mini-Changelog-Ausgabe geschrieben (Thema: die drei
-  Löschbestätigungs-Fixes) — Entwurf liegt fertig in `marketing/`, wartet
-  weiter auf deine Freigabe.
+- Die Löschbestätigung ist jetzt auf **allen fünf** betroffenen Seiten
+  live: Preisalarme, Favoriten und Angebote kamen am 14.09., Aktivitäten
+  und Warenkorb sind heute dazugekommen. Damit ist die komplette Liste
+  aus dem Support-Chef-Fund vom 13.09. abgearbeitet — kein halbes
+  Muster mehr, sondern ein durchgängiges Prinzip in der ganzen App.
+- IT-Chef hat nebenbei eine echte Absturzlücke gefunden und per PR #20
+  gefixt: Bei beschädigten/alten `localStorage`-Daten konnte der Chat
+  abstürzen, weil `messages`/`quickReplies` ungeschützt gelesen wurden.
+  Noch nicht gemerged, aber ein Beispiel für "wir härten die Basis ab",
+  bevor an der Oberfläche gebaut wird.
+- Neuer, noch nicht gemergter Support-Chef-Fund: Nach dem Bestätigen
+  eines Lösch-Dialogs geht der Fokus verloren (Barrierefreiheit) — zu
+  früh für Content, aber ein Kandidat für später.
+- Der Mini-Changelog-Kandidatentopf steht erst bei zwei (Aktivitäten/
+  Warenkorb selbst), klar zu wenig für eine vierte Ausgabe nach dem
+  bisherigen Maßstab (acht hat Ausgabe 3 ausgelöst).
 - Die vier offenen Fragen (Kanal, Warenkorb-Content, wiederkehrendes
   Social-Format, Mini-Changelog-Start) sind laut
-  `marketing/freigabe-uebersicht.md` weiterhin unbeantwortet — seit rund
-  drei Wochen unverändert.
+  `marketing/freigabe-uebersicht.md` weiterhin unbeantwortet — jetzt
+  seit rund vier Wochen, nicht mehr nur drei.
 - Keine neuen Nutzungs- oder Erfolgszahlen bekannt — bleibt außen vor.
 
 ## Vorschläge
 
-1. **Löschbestätigung als kleinen, eigenständigen Trust-Beleg
-   einplanen.** Drei Seiten in einem Rutsch von "sofort weg" auf "fragt
-   erst nach" umgestellt — genau die Art Beleg, die im Mini-Changelog
-   gut wirkt. Sobald ein Kanal existiert, wäre das ein naheliegender
-   erster, ehrlicher Post ("Wir haben zu leicht Löschbares gefixt" statt
-   Marketing-Sprech).
-2. **Mini-Changelog jetzt freigeben statt weiter sammeln.** Drei fertige
-   Ausgaben liegen bereit, der Content-Vorrat wächst schneller als die
-   Entscheidung. Für dich bleibt nur ein Ja/Nein plus eine Footer-Seite
-   vom IT-Chef — der Text ist längst geschrieben.
-3. **Barrierefreiheits-Fix separat vormerken, nicht ins
-   Ehrlichkeits-Log mischen.** Der Reduced-Motion-Fix passt inhaltlich
-   nicht zur "Ehrlichkeit als Feature"-Erzählung, ist aber für eine
-   andere Zielgruppe (bewegungsempfindliche Nutzer:innen) relevant genug
-   für eine eigene, kurze Erwähnung — sobald ein Kanal existiert.
-4. **Die vier Fragen als Kreuzchen-Liste statt Fließtext schicken.** Drei
-   Wochen Stillstand sprechen dafür, die Antwort-Hürde kleiner zu
-   machen: vier Punkte mit Ja/Nein/Später statt einer Entscheidung, die
-   sich wie ein großes Projekt anfühlt.
+1. **Die "komplette Liste abgearbeitet"-Marke als eigenen Anlass
+   nutzen.** Nicht "noch ein Fix", sondern "wir fragen jetzt überall
+   nach, bevor wir löschen" — ein sauberer, in sich abgeschlossener
+   Satz für den ersten Post, sobald ein Kanal steht. Fünf von fünf ist
+   ein besseres Bild als drei von fünf.
+2. **Bei der Kanal-Frage die Hürde senken statt weiter offen zu
+   lassen.** Vier Wochen Stillstand bei derselben Frage sprechen dafür,
+   nicht länger "alle vier Fragen auf einmal" zu erwarten. Mein
+   Vorschlag: Wenn du dich für irgendeinen Start entscheiden musst,
+   fang mit dem Mini-Changelog auf der eigenen Produktseite an (Tier 5)
+   — der braucht laut Übersicht nur deine Umsetzungs-Freigabe, keinen
+   externen Kanal, kein Social-Format.
+3. **Die Absturz-Fix-Geschichte separat vormerken, nicht in den
+   Vertrauens-Post mischen.** "Wir haben eine Abstürzlücke geschlossen,
+   bevor sie auffiel" ist ein guter Baustein für eine spätere
+   "Zuverlässigkeit hinter den Kulissen"-Ausgabe, passt aber inhaltlich
+   nicht zur Lösch-Bestätigungs-Erzählung — eigener Slot, sobald ein
+   Kanal existiert.
+4. **Vor der vierten Mini-Changelog-Ausgabe nicht vorpreschen.** Der
+   Topf ist gerade erst wieder bei zwei nach der dritten Ausgabe — hier
+   ist Geduld richtig, lieber weiter sammeln als eine Ausgabe mit zu
+   wenig Substanz erzwingen.
 
-_Letztes Update: 2026-09-14_
+_Letztes Update: 2026-09-15_
