@@ -4,6 +4,76 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-15
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`95cfc90` (14.09., dritte Mini-Changelog-Ausgabe) hängengeblieben, dessen
+Inhalt laut Freigabe-Chef-Log vom 14.09. bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`ccdf3de`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret nur `marketing/freigabe-uebersicht.md`
+um einen neuen Prüf-Durchlauf ergänzt (zwei neue Tier-4-Kandidaten
+eingeordnet). Kein neues eigenständiges Content-Stück, keine vierte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 14.09. beantwortet wurde: keine Notiz in `status.md`,
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument, keine neuen
+Kanal-Links in `src/`/`index.html`, keine neue Changelog-Route in
+`src/routes.tsx`. Alle vier Fragen bleiben offen. Danach `git log
+66d3990..origin/main` geprüft (66d3990 war die Basis der letzten
+Analyse vom 14.09.): 13 neue Commits, davon zwei mit echter
+Produkt-Codeänderung, per `git show` einzeln verifiziert:
+- `c849a60` (14.09. spät): überträgt das etablierte
+  Bestätigungsdialog-Muster auf die Aktivitäten-Seite (`removeActivity`).
+  Neunter Tier-4-Kandidat.
+- `38a1f47` (14.09. spät): überträgt dasselbe Muster auf die
+  Warenkorb-Seite (`removeItem`) — die letzte der fünf Seiten aus dem
+  13.09.-Support-Chef-Fund. Zehnter Tier-4-Kandidat; die dort gemeldete
+  Fünf-Seiten-Liste ist damit vollständig abgearbeitet.
+
+Die übrigen elf Commits (drei IT-Chef-Auto-Log-Einträge ohne neuen
+Punkt, Support-/Marketing-/IT-Chef-Berichte vom 14.09., ein
+Daily-Status-Update, zwei Freigabe-Chef-Logs, der bereits verarbeitete
+Merge-Commit sowie der eigene vorherige Auto-Lauf-Commit) enthalten
+keine neue, für dieses Format relevante Codeänderung.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: beide neuen
+Kandidaten stammen aus einzeln per `git show` verifizierten, bereits in
+`main` gemergten Commits. Keine offene Positionierungs-Grundsatzfrage:
+dieser Lauf trifft keine neue inhaltliche Entscheidung, sondern ordnet
+zwei neue Commits in die bestehende Übersicht ein.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine vierte Mini-Changelog-Ausgabe schon jetzt schreiben — der
+  Kandidatentopf steht erst bei zwei, klar unter der Menge (vier), die
+  selbst am 06.09. noch als "nicht ausreichend" bewertet wurde, und weit
+  unter der Achter-Schwelle, die Ausgabe 2 und 3 ausgelöst hat. Dass mit
+  `38a1f47` die komplette Fünf-Seiten-Liste aus dem 13.09.-Fund
+  abgearbeitet ist, ist ein inhaltlicher Meilenstein, aber kein Grund,
+  den eigenen Mengen-Maßstab aufzuweichen.
+- Ein neuntes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben vier unbeantworteten Fragen gebunden.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 15.09. (Prüfung
+  der vier Fragen, Einordnung der zwei neuen Commits als Tier-4-
+  Kandidaten neun/zehn, Begründung warum noch keine vierte Ausgabe),
+  "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf
+  15.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-14
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
