@@ -13,12 +13,15 @@ export function loadStoredChat(): StoredChatState | null {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as StoredChatState
-    // Legacy/corrupted stored trips can be missing `activities` entirely (see
-    // hasTripData below). Every consumer of the loaded trip (Buchung.tsx,
-    // ChecklistPanel, EditMode) reads `trip.activities.length` unguarded, so
-    // this must always come back as an array.
+    // Legacy/corrupted stored trips can be missing `activities`, `messages`
+    // or `quickReplies` entirely. useChat.ts reads `stored.messages.length`
+    // right after loading, and QuickReplies renders `options.length` off
+    // `quickReplies` unguarded — same reasoning as the `activities` guard
+    // below (see hasTripData), so all three must always come back as arrays.
     return {
       ...parsed,
+      messages: Array.isArray(parsed.messages) ? parsed.messages : [],
+      quickReplies: Array.isArray(parsed.quickReplies) ? parsed.quickReplies : [],
       trip: { ...parsed.trip, activities: Array.isArray(parsed.trip.activities) ? parsed.trip.activities : [] },
     }
   } catch {
