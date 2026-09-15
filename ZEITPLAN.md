@@ -599,6 +599,40 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Angebote.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
   ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Angebot
   bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Aktivitäten-Seite (7.13) übertragen: Der Entfernen-Button (X-Icon,
+  `Aktivitaeten.tsx`) löschte eine geplante Aktivität bisher ebenfalls mit
+  einem einzigen Klick sofort und endgültig, ohne Rückfrage — dieselbe,
+  in den obigen Einträgen beschriebene Fund-Quelle aus
+  `reports/support-chef.md` (13.09., Vorschlag 2), hier die vorletzte der
+  dort bewusst offen gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx` (gleiche
+  `Dialog`-Komponente, gleicher Abbrechen/destructive-Button-Aufbau, keine
+  neue Design-Entscheidung nötig): Ein Klick auf das X-Icon öffnet jetzt
+  "Aktivität entfernen?" mit dem betroffenen Aktivitätsnamen, erst "Ja,
+  entfernen" löst `removeActivity()` aus, "Abbrechen" schließt den Dialog
+  ohne Änderung. Die letzte verbleibende Seite (`Warenkorb.tsx`) bleibt
+  weiterhin bewusst offen für einen künftigen Lauf. Bestehender Test in
+  `Aktivitaeten.test.tsx` auf den zusätzlichen Bestätigungsklick
+  umgestellt, ein neuer Test dort ergänzt (Abbrechen verwirft die
+  Löschung, Aktivität bleibt sichtbar).
+  Vom autonomen IT-Chef-Lauf am 14.09. (weiterer Lauf) dasselbe Muster auf
+  die Warenkorb-Seite (7.6) übertragen — damit ist die in
+  `reports/support-chef.md` (13.09., Vorschlag 2) gemeldete Liste aller
+  fünf Seiten abgearbeitet: Der Entfernen-Button (X-Icon, `Warenkorb.tsx`)
+  löschte eine Position bisher ebenfalls mit einem einzigen Klick sofort
+  und endgültig, ohne Rückfrage — dieselbe, in den obigen Einträgen
+  beschriebene Fund-Quelle, hier die letzte der dort bewusst offen
+  gelassenen Seiten. Exakt dasselbe Muster wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`
+  (gleiche `Dialog`-Komponente, gleicher Abbrechen/destructive-
+  Button-Aufbau, keine neue Design-Entscheidung nötig): Ein Klick auf das
+  X-Icon öffnet jetzt "Aus dem Warenkorb entfernen?" mit der betroffenen
+  Positionsbezeichnung, erst "Ja, entfernen" löst `removeItem()` aus,
+  "Abbrechen" schließt den Dialog ohne Änderung. Bestehende Tests in
+  `Warenkorb.test.tsx` auf den zusätzlichen Bestätigungsklick umgestellt,
+  ein neuer Test dort ergänzt (Abbrechen verwirft die Löschung, Position
+  bleibt sichtbar).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
@@ -1413,7 +1447,12 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   konzept.md` — kein Social-Post, sondern Konzept + fertige erste
   Ausgabe für eine öffentliche "Was wurde besser"-Seite im Produkt
   selbst, wartet auf Nis Freigabe (siehe
-  `marketing/freigabe-uebersicht.md`, Tier 5).
+  `marketing/freigabe-uebersicht.md`, Tier 5). Am 07.09. Ausgabe 2 und am
+  14.09. Ausgabe 3 desselben Dokuments ergänzt (jeweils weitere
+  Vorher/Nachher-Punkte aus seither gemergten Ehrlichkeits-/
+  Vertrauens-Fixes, u. a. Löschbestätigung vor unwiderruflichem Entfernen
+  von Preisalarm/Favorit/Angebot) — weiterhin an dieselbe, noch
+  unbeantwortete Freigabe-Frage gebunden.
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)

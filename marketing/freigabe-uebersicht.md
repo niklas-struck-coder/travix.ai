@@ -1,10 +1,110 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-13)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-14)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-14: dritte Mini-Changelog-Ausgabe geschrieben (drei neue Tier-4-Kandidaten, Topf erreicht die Achter-Schwelle von Ausgabe 2), zwei Commits bewusst ausgeschlossen, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`1af1fb5` (13.09.) hängengeblieben, dessen Inhalt laut `git log
+origin/main ^origin/marketing-chef/auto` bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in Arbeit.
+Neu von aktuellem `origin/main` (`66d3990`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 12.09., seit dem
+letzten Lauf unverändert), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem
+Dokument seit dem 13.09. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein Commit zu einer IT-Chef-Umsetzung
+der Mini-Changelog-Seite (kein `changelog`-Treffer in `src/routes.tsx`).
+Alle vier Fragen bleiben offen.
+
+**`git log 1af1fb5..origin/main` zeigt 11 neue Commits, fünf davon mit
+echter Produkt-Codeänderung, per `git show` einzeln geprüft:**
+- `567b9dc` (13.09. spät): Der Entfernen-Button auf `/preisalarme`
+  löschte einen Preisalarm bisher mit einem Klick sofort und endgültig,
+  ohne Bestätigung oder Rückgängig. Fix nach dem bereits etablierten
+  Bestätigungsdialog-Muster aus dem "Neu starten?"-Dialog im Chat (gleiche
+  Dialog-Komponente statt eines neu erfundenen Rückgängig-Mechanismus).
+  **Neuer, eigenständiger sechster Tier-4-Kandidat** — echter,
+  angebundener Nutzerpfad, passt zur selben Vertrauens-/Sorgfalts-
+  Fundgruppe wie der bereits gezählte "Neu starten"-Dialog (dritter
+  Kandidat, siehe Tier 4 unten).
+- `0c2e802` (14.09.): Überträgt dasselbe Bestätigungsdialog-Muster auf die
+  Favoriten-Seite (`removeFavorite`). **Siebter Tier-4-Kandidat** —
+  eigene Seite, eigener Nutzerpfad, keine bloße Verfeinerung des
+  Preisalarm-Fixes.
+- `c79a5a9` (14.09.): Überträgt dasselbe Muster auf die Angebote-Seite.
+  **Achter Tier-4-Kandidat** — ebenfalls eigene Seite, eigener
+  Nutzerpfad.
+- `2f110f7` (13.09.): Seitenübergänge (`PageTransition.tsx`) respektieren
+  jetzt `prefers-reduced-motion`. Echter, verifizierter
+  Barrierefreiheits-Fix — **bewusst nicht** in den Tier-4-Kandidatentopf
+  aufgenommen: die Kandidatenliste hier trägt durchgängig eine
+  "Ehrlichkeit/Vertrauen"-Erzählung (falsche Information, ungeschützter
+  Datenverlust, irreführende Nachrichten) — ein Barrierefreiheits-Fix zu
+  Bewegungsreduktion ist ein echtes, wichtiges Thema, passt aber nicht zu
+  dieser spezifischen Erzählung, gleiche Begründung wie frühere
+  Formatierungs-/Validierungs-Ausschlüsse (z. B. `2daeb05`, `26f7edd`).
+- `538bb25` (13.09.): Screenreader-Text der Schließen-Buttons in
+  Dialog/Sheet von "Close" auf "Schließen" korrigiert. **Bewusst nicht**
+  aufgenommen — reine Sprachkonsistenz-Korrektur, keine "falsche
+  Information ohne Erkennbarkeit"-Erzählung.
+
+Die restlichen sechs Commits ohne Content-Relevanz: ein Freigabe-Chef-Log
+(14.09., früher Nacht-Check), ein Merge-Commit (main in it-chef/auto), ein
+Support-Chef-Bericht (13.09., zwei ältere Funde bestätigt behoben,
+Hilfe-Seite teilkorrigiert), der eigene interaktive Marketing-Chef-Bericht
+vom 13.09. (kein neuer Content-Baustein), ein IT-Chef-Bericht (13.09.,
+breite Prüfung, kein neuer Bug) und ein Daily-Status-Update.
+
+**Warum heute eine dritte Mini-Changelog-Ausgabe statt nur einer
+Übersichts-Ergänzung:** Mit den drei neuen, eigenständigen Kandidaten
+(Preisalarm-, Favoriten-, Angebote-Löschbestätigung) wächst der seit
+Ausgabe 2 gesammelte Tier-4-Topf von fünf auf **acht** — exakt die Menge,
+die selbst am 06.09. als Auslöser für Ausgabe 2 galt, und klar über der
+Menge (vier), die am selben Tag noch als "nicht ausreichend" bewertet
+wurde. Die eigene Vorgabe aus dem letzten Update (die Bewegung von vier auf
+fünf nicht vorschnell als "jetzt reicht's" werten, sondern explizit gegen
+den 06.09.-Maßstab prüfen) ist damit sauber erfüllt, nicht nur behauptet.
+Ausgabe 3 fasst alle acht Kandidaten in drei Themenblöcken zusammen (siehe
+`marketing/mini-changelog-konzept.md`).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben drei unbeantworteten Fragen gebunden, unverändert seit 20.08.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Warum sicher genug:** Ausgabe 3 ist wie Ausgabe 1/2 ein reines
+Entwurfsdokument für dieselbe, noch nicht gebaute Seite — kein Live-
+Vorgang, nichts gepostet, keine Seite gebaut. Keine erfundenen Kennzahlen
+— jeder der acht Punkte stammt aus einem einzeln per `git show`
+verifizierten, bereits in `main` gemergten Commit. Keine offene
+Positionierungs-Grundsatzfrage: wendet nur die bestehende Positionierung
+("Ehrlichkeit als Feature") an, entscheidet sie nicht neu. Berührt keine
+der vier offenen Fragen — hängt an derselben, bereits gestellten vierten
+Frage wie Ausgabe 1/2.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: neuer Abschnitt "Ausgabe 3" —
+  acht Vorher/Nachher-Punkte in drei Themenblöcken (Löschen mit
+  Bestätigung, ehrlichere Hinweise zur Unterkunftssuche, mehr Klarheit auf
+  Reiseentwürfe-/Platzhalterseiten).
+- `marketing/freigabe-uebersicht.md` (dieses Dokument): neues Update vom
+  14.09., Tier-4- und Tier-5-Abschnitt sowie "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert, Datum im Titel auf 14.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-13: ein fünfter Tier-4-Kandidat (Jargon aus Platzhaltertext entfernt), zwei weitere Commits als Verfeinerung bestehender Kandidaten eingeordnet, alle vier Fragen weiterhin offen
 
@@ -1384,16 +1484,31 @@ Anfang-bis-Ende-Weg im Code.
    nur den dritten bzw. vierten Kandidaten weiter (Bestätigungsdialog
    löste sich bisher fälschlich auch ohne Reisedaten aus; Hinweiskarte
    zählte bereits abgeschlossene Entwürfe fälschlich mit) und zählen
-   deshalb nicht als eigene, sechste Kandidaten.
+   deshalb nicht als eigene, sechste Kandidaten. Seit dem 13./14.09. drei
+   weitere Kandidaten (siehe Update 2026-09-14 oben): der "Neu
+   starten"-Bestätigungsdialog wurde auf die Preisalarme-, Favoriten- und
+   Angebote-Seite übertragen — löschte dort bisher jeweils mit einem
+   einzigen Klick sofort und endgültig, jetzt fragt derselbe
+   Bestätigungsdialog vorher nach. **Alle acht seit Ausgabe 2 gesammelten
+   Kandidaten sind seit dem 14.09. in Ausgabe 3 des Mini-Changelogs
+   verarbeitet** (siehe Tier 5 unten) — der Kandidatentopf hier ist damit
+   vorerst wieder leer, neue Funde sammeln sich ab jetzt für eine mögliche
+   vierte Ausgabe. Zwei zusätzlich am 13.09. geprüfte, aber bewusst nicht
+   aufgenommene Commits: `2f110f7` (Seitenübergänge respektieren jetzt
+   `prefers-reduced-motion` — echter Barrierefreiheits-Fix, aber ohne die
+   "Ehrlichkeit/Vertrauen"-Erzählung dieses Formats) und `538bb25`
+   (Schließen-Buttons jetzt auf Deutsch — reine Sprachkonsistenz-
+   Korrektur, gleiche Begründung wie frühere Formatierungsausschlüsse).
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
-8. **`mini-changelog-konzept.md`** (05.09., Ausgabe 2 am 07.09. ergänzt) —
-   Konzept + zwei fertige Ausgaben für einen öffentlichen Mini-Changelog
-   *im Produkt* (Footer-Seite), nicht für Social Media gedacht. Bündelt
-   den gesamten seitherigen Tier-4-Kandidatentopf in neun kuratierten
-   Themenblöcken über beide Ausgaben. Berührt bewusst keine der drei
-   Fragen unten — hat dafür eine eigene, vierte Frage (siehe unten).
+8. **`mini-changelog-konzept.md`** (05.09., Ausgabe 2 am 07.09., Ausgabe 3
+   am 14.09. ergänzt) — Konzept + drei fertige Ausgaben für einen
+   öffentlichen Mini-Changelog *im Produkt* (Footer-Seite), nicht für
+   Social Media gedacht. Bündelt den gesamten seitherigen
+   Tier-4-Kandidatentopf in zwölf kuratierten Themenblöcken über alle drei
+   Ausgaben. Berührt bewusst keine der drei Fragen unten — hat dafür eine
+   eigene, vierte Frage (siehe unten).
 
 ## Für Ni: die eigentliche Entscheidung
 
@@ -1411,7 +1526,7 @@ autonome Lauf nicht vorwegnehmen. Konkret zu entscheiden bleibt
 - **Neu seit 05.09.:** Soll der Mini-Changelog (Tier 5, Seite im Produkt
   statt Social) gebaut werden? Unabhängig von den drei Fragen oben zu
   beantworten — braucht weder Kanal noch 6.2 noch eine Social-Format-
-  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen zwei
+  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen drei
   fertige Ausgaben, die auf diese eine Antwort warten.
 - **Kein neuer Entscheidungsbedarf, nur zur Kenntnis (seit 07.09.):** Die
   Vorlesen-Funktion im Chat hat seit heute keinen bekannten technischen
@@ -1464,7 +1579,14 @@ Fünf bleibt weiterhin klar unter den acht, die Ausgabe 2 ausgelöst haben,
 und nur knapp über der Menge, die am 06.09. selbst als "nicht
 ausreichend" galt — der nächste Lauf sollte auch das explizit gegen den
 06.09.-Maßstab prüfen, statt allein die Bewegung von vier auf fünf als
-Auslöser zu werten. Sollte Ni
+Auslöser zu werten. Stand 09.14 sind drei weitere Kandidaten
+dazugekommen (Löschbestätigung auf Preisalarme-, Favoriten- und
+Angebote-Seite, siehe Update 2026-09-14 oben) — der Topf erreichte damit
+acht, exakt die Menge, die bereits Ausgabe 2 ausgelöst hatte, und wurde
+deshalb vollständig in Ausgabe 3 verarbeitet. Der Kandidatentopf ist damit
+wieder leer; der nächste Lauf sammelt neue Funde von vorn, mit demselben
+06.09.-Maßstab (acht = genug, vier = eher nicht) als Richtwert für eine
+vierte Ausgabe. Sollte Ni
 zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene

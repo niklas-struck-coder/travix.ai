@@ -10087,3 +10087,270 @@ künftige Läufe, die dasselbe Muster dort ebenfalls übernehmen können.
   bestehender Test dort in zwei aufgeteilt).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf, autonomer Cloud-Tageslauf)
+
+**Ausgangslage:** Frischer, isolierter Checkout in einem geplanten
+Cloud-Lauf, niemand live dabei. `it-chef/auto` war zum Start bereits
+vollständig nach `main` gemergt (Commit `c79a5a9` als Spitze, identisch
+mit `main`) — Branch neu von `origin/main` aufgesetzt, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` für diesen Fall vorgesehen. Das
+lokale `main` im Container war veraltet (`origin/main` war zwischen den
+letzten Läufen force-gepusht worden); da `main` keine eigenen, in
+`origin/main` fehlenden Commits hatte, per `git reset --hard origin/main`
+synchronisiert, bevor `it-chef/auto` davon abgezweigt wurde — `main`
+selbst wurde dabei nicht verändert, nur der lokale Zeiger auf den
+korrekten Fernstand gebracht.
+
+**Ausgewählter Punkt:** Die vorletzte der ursprünglich vier in
+`reports/support-chef.md` (13.09., Vorschlag 2) genannten Seiten mit
+sofortigem, unbestätigtem Löschen ohne Rückfrage — diesmal für die
+Aktivitäten-Seite (`Aktivitaeten.tsx`, X-Icon-Button, `removeActivity()`).
+Der heutige Support-Chef-Bericht (`93de852`, "drei von fünf
+Löschbestätigungs-Fixes bestätigt ... Warenkorb-Sackgasse weiterhin
+offen") und der direkte Blick in den Code bestätigten, dass
+`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx` bereits umgestellt sind,
+`Aktivitaeten.tsx` aber weiterhin ohne `Dialog`-Import direkt löscht.
+
+**Warum sicher genug:** Identische Begründung wie bei den drei
+vorherigen Läufen zu diesem Fund — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Aktivitaeten.tsx` arbeitet nur mit
+lokalem Demo-State, `initialActivities`, keine echte
+Backend-Persistenz). Keine offene Produkt-/Architekturentscheidung mehr
+nötig: das Bestätigungsdialog-Muster ist bereits dreifach etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`), hier nur ein
+viertes Mal wiederholt, keine neue Design-Wahl. Klar genug beschrieben
+(identischer Fix, nur auf die vorletzte der vier im Bericht genannten
+Seiten angewendet) und objektiv prüfbar (Test: Klick auf den X-Button
+öffnet den Dialog statt sofort zu löschen; "Abbrechen" verwirft, "Ja,
+entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt, nicht zwei:** Nur `Aktivitaeten.tsx` geändert.
+`Warenkorb.tsx` bleibt bewusst unverändert für einen künftigen Lauf, der
+dasselbe Muster dort ebenfalls übernehmen kann.
+
+**Umsetzung:**
+- `src/pages/Aktivitaeten.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (die betroffene Aktivität) statt direkt
+  `removeActivity()` aufzurufen. Neuer `Dialog` (exakt gleiche
+  Struktur/Klassen wie in `Preisalarme.tsx`/`Favoriten.tsx`/
+  `Angebote.tsx`: `DialogHeader`/`DialogTitle` "Aktivität entfernen?",
+  `DialogDescription` nennt den betroffenen Aktivitätsnamen,
+  `DialogFooter` mit `Abbrechen`- (`DialogClose`) und destruktivem
+  `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen" ruft
+  `removeActivity()` auf und schließt den Dialog; "Abbrechen" (oder
+  Schließen des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Aktivitaeten.test.tsx`: bestehender Lösch-Test durch zwei
+  Tests ersetzt (Bestätigungsdialog erscheint und Abbrechen verwirft die
+  Löschung; Löschung erfolgt erst nach Bestätigung, Leerzustand nach der
+  letzten Aktivität).
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.13); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.13 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den drei vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (voller Lauf) → 55 Testdateien, 300 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-09-14 (weiterer Lauf, geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md`
+(13.09.) — sofortiges, endgültiges Löschen ohne Rückfrage auf fünf
+Seiten (`Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/
+`Aktivitaeten.tsx`/`Warenkorb.tsx`) — war in den vier vorherigen Läufen
+für die ersten vier Seiten bereits umgesetzt. `Warenkorb.tsx` blieb als
+letzte der fünf Seiten bewusst offen. Vor dem Start `git status`/`git
+log`/direkter Blick in den Code geprüft: `it-chef/auto` lag bereits
+einen Commit vor `main` (`c849a60`, Aktivitäten-Fix von 22:10 Uhr desselben
+Tages, noch nicht von Freigabe-Chef gemergt) — laut Regel 1 auf diesem
+Branch weitergearbeitet, `main` dabei nicht angerührt. `Warenkorb.tsx`
+löschte eine Position tatsächlich noch mit einem einzigen Klick auf das
+X-Icon sofort und endgültig, ohne `Dialog`-Import.
+
+**Warum sicher genug:** Identische Begründung wie bei den vier
+vorherigen Läufen zu diesem Fund — kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten (`Warenkorb.tsx` arbeitet nur mit
+lokalem Demo-State, `initialItems`, keine echte Backend-Persistenz oder
+echte Zahlungsabwicklung — der eigentliche Bezahlvorgang findet laut
+Code-Kommentar/PRD an dieser Stelle noch gar nicht statt, es wird nur
+eine Position aus der lokalen Vormerkliste entfernt). Keine offene
+Produkt-/Architekturentscheidung mehr nötig: das
+Bestätigungsdialog-Muster ist bereits viermal etabliert
+(`Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`),
+hier nur ein fünftes und letztes Mal wiederholt, keine neue
+Design-Wahl. Klar genug beschrieben (identischer Fix, letzte der fünf im
+Bericht genannten Seiten) und objektiv prüfbar (Test: Klick auf den
+X-Button öffnet den Dialog statt sofort zu löschen; "Abbrechen" verwirft,
+"Ja, entfernen" löst die Löschung aus).
+
+**Einen einzigen Punkt:** Nur `Warenkorb.tsx` geändert — damit ist die
+vom Support-Chef-Bericht genannte Fünf-Seiten-Liste vollständig
+abgearbeitet.
+
+**Umsetzung:**
+- `src/pages/Warenkorb.tsx`: Klick auf den X-Button setzt jetzt
+  `pendingRemoval` (die betroffene Position) statt direkt `removeItem()`
+  aufzurufen. Neuer `Dialog` (exakt gleiche Struktur/Klassen wie in
+  `Preisalarme.tsx`/`Favoriten.tsx`/`Angebote.tsx`/`Aktivitaeten.tsx`:
+  `DialogHeader`/`DialogTitle` "Aus dem Warenkorb entfernen?",
+  `DialogDescription` nennt die betroffene Positionsbezeichnung,
+  `DialogFooter` mit `Abbrechen`- (`DialogClose`) und destruktivem
+  `Ja, entfernen`-Button). Erst der Klick auf "Ja, entfernen" ruft
+  `removeItem()` auf und schließt den Dialog; "Abbrechen" (oder Schließen
+  des Dialogs) verwirft `pendingRemoval` ohne Änderung.
+- `src/pages/Warenkorb.test.tsx`: bestehenden Lösch-Test durch einen
+  neuen Bestätigungs-/Abbrechen-Test ersetzt, den Recalculate-Test auf
+  den zusätzlichen Bestätigungsklick umgestellt, und den
+  Leerzustand-Test um den Bestätigungsklick je Position ergänzt.
+- `ZEITPLAN.md` unter Phase 7 ergänzt (7.6); `tasks/tasks-prd-
+  travix-platform.md` nicht geändert (7.6 war bereits abgehakt, reine
+  UX-Detailkorrektur ohne neuen Checkbox-Zustand, gleiches Vorgehen wie
+  bei den vier vorherigen Läufen).
+
+**Geprüft (grün):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert, nicht durch
+  diesen Change verursacht).
+- `npm test` (voller Lauf) → 55 Testdateien, 301 Tests, alle grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+
+## 2026-09-15 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout in einem geplanten
+Cloud-Lauf, niemand live dabei. `it-chef/auto` lag zu Beginn zwei
+Commits vor `main` (`c849a60`/`38a1f47`, Aktivitäten-/Warenkorb-
+Löschbestätigung vom Vorlauf, noch nicht von Freigabe-Chef gemergt) —
+`main` war Vorfahre von `it-chef/auto`, also ohne Merge direkt auf
+diesem Branch weitergearbeitet, `main` dabei nicht angerührt.
+
+**Gesuchter, aber nicht gefundener Punkt:** `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` durchsucht — alle verbleibenden
+offenen Punkte in Sprint 2/3 (6.2, 6.6, 6.7, 7.4, 7.12) hängen laut
+bestehender Dokumentation entweder an der offenen Backend-/
+Architekturentscheidung oder an fehlenden `TripDraft`-Feldern
+(Item-/Provider-URL, Transport-/Unterkunftspreise) — kein neuer,
+eigenständig umsetzbarer Punkt darunter. Die zuletzt in
+`reports/support-chef.md` (14.09.) und `reports/it-chef.md` (14.09.)
+offen genannten Funde (Aktivitäten-/Warenkorb-Löschbestätigung) sind mit
+den letzten beiden Läufen bereits erledigt — der Fünf-Seiten-Katalog aus
+`reports/support-chef.md` (13.09., Vorschlag 2) ist damit vollständig
+abgearbeitet.
+
+Zusätzlich `freigabe-chef-log.md` geprüft: dort ein neuer, von
+Freigabe-Chef unabhängig bestätigter Fund auf dem separaten
+`support-chef/auto`-Branch (Commit `71093af`) — `Preisalarme.tsx` zeigt
+bei erreichtem Zielpreis nur den Badge "Ziel erreicht", ohne
+Handlungs-Link. Bewusst nicht selbst umgesetzt: Kriterium 3 (klar genug
+beschrieben, keine Interpretation nötig) ist nicht erfüllt — die
+Demo-Alerts in `Preisalarme.tsx` (`initialAlerts`) sind reine
+Text-Routen ohne Verknüpfung zu einer echten Such-/Buchungs-Entität;
+wohin ein "Jetzt buchen/suchen"-Link führen sollte, steht nirgends fest
+und wäre eine eigene Annahme, kein reiner Bugfix.
+
+`reports/it-chef.md` (14.09.) selbst hält fest, dass praktisch der
+gesamte `src`-Ordner seit mehreren Tagen wiederholt gelesen wurde, ohne
+neuen unabhängigen Fund — eigene stichprobenartige Prüfung heute
+(`tripStorage.ts`, `Warenkorb.tsx`, TODO/FIXME-Suche über `src/`, Suche
+nach Quelldateien ohne Testdatei) bestätigt das: keine neue Lücke
+gefunden, die verbleibenden Dateien ohne Testdatei (`src/types/*.ts`,
+`App.tsx`, `main.tsx`, `routes.tsx`, `design-tokens.ts`, `lib/utils.ts`)
+sind reine Typdefinitionen, Einstiegspunkte oder trivialer
+Bibliotheks-Wrapper ohne eigene Logik.
+
+**Ergebnis: kein sicherer Punkt für einen autonomen Fix gefunden.**
+Kein Code geändert.
+
+**Geprüft (grün, Branch-Gesundheit ohne eigene Änderung bestätigt):**
+- `node_modules` fehlte zu Beginn im frischen Checkout, per `npm ci`
+  nachinstalliert → sauber, 650 Pakete, 0 Vulnerabilities.
+- `npx tsc -b` (Typecheck) → grün, keine Fehler.
+- `npm run lint` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+  `src/components/ui/{badge,button,tabs}.tsx` (unverändert).
+- `npm test -- --run` (voller Lauf) → 55 Testdateien, 301 Tests, alle
+  grün.
+
+**Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf
+`it-chef/auto`.
+
+## 2026-09-15, zweiter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Erneuter frischer, isolierter Checkout, ca. eine Stunde
+nach dem vorherigen Lauf (`6229dd1`, 00:08 UTC). `it-chef/auto` war
+identisch mit `origin/it-chef/auto`, `main` weiterhin Vorfahre — kein
+Merge nötig, `main` nicht angerührt. Keine neuen Commits seit dem
+vorherigen Lauf auf `it-chef/auto`, `support-chef/auto` oder
+`marketing-chef/auto`; `reports/it-chef.md`, `reports/support-chef.md`
+und `freigabe-chef-log.md` unverändert seit ihrem letzten, im vorherigen
+Eintrag bereits berücksichtigten Stand.
+
+**Eigene, unabhängige Prüfung statt bloßer Übernahme des Vorlaufs:**
+`ZEITPLAN.md` erneut nach offenen Punkten durchsucht (⚪/🔴/🟡-Markierungen)
+sowie die dort genannten Aufgaben 6.2, 6.6, 6.7, 7.4 und 7.12 direkt in
+`tasks/tasks-prd-travix-platform.md` nachgelesen: alle fünf hängen
+weiterhin unverändert an fehlenden `TripDraft`-Feldern (Item-/Provider-
+URL, Transport-/Unterkunftspreise) oder einer offenen Architektur-
+entscheidung (Datenmodell für mehrere gleichzeitig gespeicherte
+Chat-Historien bei 7.4) — kein autonom umsetzbarer Punkt darunter.
+Zusätzlich frische Suche nach `TODO`/`FIXME` in `src/` (0 Treffer) und
+Prüfung des `support-chef/auto`-Blockers (`585efea`, seit sechs Läufen
+ungelöst laut `freigabe-chef-log.md`) — unverändert, keine neue eigene
+Erkenntnis, die eine autonome Änderung rechtfertigen würde.
+
+**Ergebnis: erneut kein sicherer Punkt für einen autonomen Fix
+gefunden.** Kein Code geändert.
+
+**Branch-Gesundheit:** nicht erneut per vollem `npm ci`/`tsc`/`lint`/
+`test`-Lauf geprüft, da `it-chef/auto` seit dem vorherigen Lauf (identischer
+Commit `6229dd1`) unverändert ist und dort bereits grün bestätigt wurde
+(Typecheck, Lint, 55 Testdateien/301 Tests) — ein erneuter identischer
+Lauf ohne Codeänderung dazwischen hätte keinen neuen Erkenntniswert.
+
+**Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf
+`it-chef/auto`.
+
+## 2026-09-15, dritter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Erneuter frischer, isolierter Checkout, ca. eine Stunde
+nach dem vorherigen Lauf (`07217fe`, 01:06 UTC). Über alle Branches hinweg
+(`main`, `it-chef/auto`, `support-chef/auto`, `marketing-chef/auto`) keine
+einzige neue Commit seit dem vorherigen Lauf — `it-chef/auto` war
+identisch mit `origin/it-chef/auto`, `main` weiterhin Vorfahre, kein Merge
+nötig, `main` nicht angerührt.
+
+**Eigene, unabhängige Prüfung:** Da sich am Repo-Zustand seit dem
+vorherigen Lauf nachweislich nichts geändert hat, wurde die Prüfung
+gezielt auf die dort offen gelassenen Punkte fokussiert statt sie
+ungeprüft zu übernehmen: die fünf in `ZEITPLAN.md` als offen markierten
+Aufgaben 6.2, 6.6, 6.7, 7.4 und 7.12 direkt in
+`tasks/tasks-prd-travix-platform.md` erneut nachgelesen — alle fünf
+hängen unverändert an fehlenden `TripDraft`-Feldern (Item-/Provider-URL,
+Transport-/Unterkunftspreise) oder der offenen Architekturentscheidung
+zum Chat-Historien-Datenmodell (7.4). Der `support-chef/auto`-Blocker aus
+`freigabe-chef-log.md` (Preisalarme.tsx ohne Handlungs-Link bei
+erreichtem Zielpreis) ist ebenfalls unverändert und bleibt aus dem
+gleichen Grund wie im vorherigen Lauf (Kriterium 3, Ziel-Route der
+Demo-Alerts nicht definiert) keine autonom umsetzbare Aufgabe.
+
+**Ergebnis: erneut kein sicherer Punkt für einen autonomen Fix
+gefunden.** Kein Code geändert.
+
+**Branch-Gesundheit:** nicht erneut per vollem `npm ci`/`tsc`/`lint`/
+`test`-Lauf geprüft, da `it-chef/auto` seit dem vorherigen Lauf
+(identischer Commit `07217fe`) unverändert ist und dort bereits grün
+bestätigt wurde — ein erneuter identischer Lauf ohne Codeänderung
+dazwischen hätte keinen neuen Erkenntniswert.
+
+**Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf `it-chef/auto`.

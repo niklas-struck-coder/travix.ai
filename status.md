@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-12):**
-- Zwei Bugfixes: irreführender Datenverlust-Hinweis im Neu-starten-Dialog behoben,
-  sowie eine Zählung in der Hinweiskarte zu geteiltem Chat korrigiert
-- Support-Chef-Fund auf der Hilfe-Seite (Platzhalter statt echtem Kontakt) sowie
-  internen Jargon in Platzhaltertexten entfernt
-- Weitere fehlende Testdateien nachgezogen (u. a. für Chat-, Layout- und
-  Suchkomponenten) — Testabdeckung weiter verbessert
+**Seit letztem Update (2026-09-13):**
+- Drei Bugfixes: Löschen von Angebot, Favorit und Preisalarm erfolgt jetzt
+  sofort endgültig statt mit irreführender Rückfrage
+- Fix: PageTransition-Animation respektiert jetzt die Systemeinstellung
+  "Bewegungen reduzieren"
+- Marketing-Chef hat eine dritte Mini-Changelog-Ausgabe zur Löschbestätigung
+  auf drei Seiten veröffentlicht
 - Freigabe-Chef hat IT-Chef- und Marketing-Chef-Änderungen geprüft und gemergt;
   ein Support-Chef-Vorschlag bleibt weiterhin blockiert
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-13_
+_Letztes Update: 2026-09-14_

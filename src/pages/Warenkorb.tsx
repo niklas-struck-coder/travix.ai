@@ -4,6 +4,15 @@ import { Plane, BedDouble, Train, Ticket, ShieldCheck, X, ShoppingCart, Sparkles
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { groupCartItems, calculateCartTotal, type CartItem, type CartItemType } from '@/lib/trip/cartTotals'
 
 const TYPE_META: Record<CartItemType, { label: string; icon: LucideIcon }> = {
@@ -31,9 +40,16 @@ function formatEuro(amount: number) {
 
 export function Warenkorb() {
   const [items, setItems] = useState(initialItems)
+  const [pendingRemoval, setPendingRemoval] = useState<CartItem | null>(null)
 
   function removeItem(id: string) {
     setItems((current) => current.filter((item) => item.id !== id))
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    removeItem(pendingRemoval.id)
+    setPendingRemoval(null)
   }
 
   if (items.length === 0) {
@@ -92,7 +108,7 @@ export function Warenkorb() {
                           className="size-8 text-muted-foreground hover:text-foreground"
                           aria-label={`${item.label} aus dem Warenkorb entfernen`}
                           title="Entfernen"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => setPendingRemoval(item)}
                         >
                           <X className="size-4" />
                         </Button>
@@ -112,6 +128,25 @@ export function Warenkorb() {
           <span className="font-heading text-xl font-semibold text-navy">{formatEuro(total)}</span>
         </CardContent>
       </Card>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aus dem Warenkorb entfernen?</DialogTitle>
+            <DialogDescription>
+              {pendingRemoval?.label} wird aus deinem Warenkorb entfernt. Das lässt sich nicht rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

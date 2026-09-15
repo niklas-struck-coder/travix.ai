@@ -1,56 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-13
+**Datum:** 2026-09-14
 
-## Was ist seit dem letzten Eintrag (2026-09-12) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-13) passiert?
 
-Gute Nachrichten zuerst: Zwei ältere Support-Chef-Funde wurden seit
-gestern tatsächlich behoben. Der Neu-starten-Dialog im KI-Chat zeigt
-jetzt nicht mehr fälschlich eine "Deine Planung geht verloren"-Warnung,
-wenn noch gar keine Trip-Daten existieren (`src/components/chat/KiChat.tsx`).
-Und die Hinweiskarte zu geteilten Chats auf `/reiseentwuerfe` zählt
-abgeschlossene Entwürfe nicht mehr fälschlich mit. Beide waren echte
-Verwirrungspunkte für Nutzer:innen — schön, dass sie draußen sind.
+Guter Tag: Drei von fünf "Löschen ohne Rückfrage"-Stellen aus meinem
+zweiten Vorschlag sind jetzt behoben. Preisalarme (`removeAlert`),
+Favoriten (`removeFavorite`) und Angebote (`removeOffer`) fragen vor dem
+endgültigen Entfernen jetzt mit einem Bestätigungsdialog nach — genau das
+einheitliche Muster, das ich vorgeschlagen hatte. Zusätzlich respektiert
+die Seitenübergangs-Animation jetzt die Systemeinstellung "Bewegungen
+reduzieren", und Schließen-Buttons in Dialogen/Sheets sind nicht mehr
+fest auf Englisch verdrahtet, auch wenn die App auf Deutsch läuft — beides
+kleine, aber echte Verbesserungen für Nutzer:innen mit entsprechenden
+Bedürfnissen.
 
-Bei der Hilfe-Seite von gestern gab es eine Teil-Korrektur: Der interne
-Begriff "Travix-Grundgerüst" wurde aus dem Platzhaltertext entfernt
-(`src/pages/PlaceholderPage.tsx`). Das eigentliche Problem — keine
-FAQ, kein Kontaktweg auf `/hilfe` — besteht aber weiter, siehe Punkt 1.
-Laut `ZEITPLAN.md` ist echter FAQ-Inhalt für Sprint 2 vorgesehen, das ist
-also bekannt und eingeplant, nicht übersehen.
+Noch offen sind Aktivitäten (`removeActivity` in `src/pages/Aktivitaeten.tsx`)
+und Warenkorb (`removeItem` in `src/pages/Warenkorb.tsx`) — dort löscht ein
+Klick auf das X-Icon weiterhin sofort und endgültig, siehe Punkt 1. Laut
+IT-Chef ist das bewusst so gelassen, weil ein anderer interner Kanal genau
+diese zwei Seiten schon als nächste Kandidaten vorgemerkt hat — also
+absehbar, kein Übersehen.
 
-Meine zwei anderen Vorschläge von gestern (Löschen ohne Bestätigung,
-Warenkorb ohne Buchen-Button) habe ich im aktuellen Code gegengeprüft:
-beide unverändert offen.
+Die Hilfe-Seite (Punkt 2) und der Warenkorb als Sackgasse (Punkt 3) sind
+im Code unverändert gegenüber gestern.
 
 ## Meine Vorschläge
 
-1. **Die Hilfe-Seite (`/hilfe`) hilft immer noch nicht wirklich.** Der
-   interne Jargon ist raus, aber `src/pages/PlaceholderPage.tsx` zeigt
-   weiterhin nur "Hilfe wird als Nächstes gebaut" — keine FAQ, kein
-   Kontaktweg, kein Link. Wer mit einem Problem auf `/hilfe` klickt,
-   geht leer aus. *Vorschlag:* Bis die echten FAQ-Inhalte aus Sprint 2
-   stehen, würde schon ein einziger Satz mit Kontakthinweis reichen,
-   damit die Seite nicht komplett ins Leere läuft.
+1. **Löschen ohne Bestätigung bei Aktivitäten und Warenkorb.** Als letzte
+   zwei von ursprünglich fünf Stellen fehlt hier weiterhin der
+   Bestätigungsdialog, den es bei Preisalarmen, Favoriten und Angeboten
+   jetzt schon gibt (`src/pages/Aktivitaeten.tsx`, `removeActivity`, und
+   `src/pages/Warenkorb.tsx`, `removeItem`). *Vorschlag:* das gleiche,
+   bereits dreifach bewährte Muster einfach auf diese zwei Seiten
+   übertragen — technisch ein kleiner, risikoarmer Schritt.
 
-2. **Löschen ist an mehreren Stellen sofort und endgültig, ohne
-   Bestätigung oder Rückgängig.** Weiterhin so in
-   `src/pages/Preisalarme.tsx` (`removeAlert`), `src/pages/Favoriten.tsx`
-   (`removeFavorite`), `src/pages/Angebote.tsx` (`removeOffer`),
-   `src/pages/Aktivitaeten.tsx` (`removeActivity`) und
-   `src/pages/Warenkorb.tsx` (`removeItem`): ein Klick auf das X-Icon
-   entfernt den Eintrag direkt. *Vorschlag:* einheitlich einen kurzen
-   Bestätigungsdialog oder einen "Rückgängig"-Toast einführen — einmal
-   festlegen, dann überall gleich anwenden.
+2. **Die Hilfe-Seite (`/hilfe`) hilft immer noch nicht wirklich.**
+   `src/pages/PlaceholderPage.tsx` zeigt weiterhin nur "Hilfe wird als
+   Nächstes gebaut" — keine FAQ, kein Kontaktweg, kein Link. Wer mit einem
+   Problem auf `/hilfe` klickt, geht leer aus. Laut `ZEITPLAN.md` ist
+   echter FAQ-Inhalt für Sprint 2 vorgesehen, also bekannt und eingeplant.
+   *Vorschlag:* Bis dahin würde schon ein einziger Satz mit Kontakthinweis
+   reichen, damit die Seite nicht komplett ins Leere läuft.
 
 3. **Der Warenkorb bleibt eine Sackgasse.** `src/pages/Warenkorb.tsx`
    endet weiterhin nach der Summen-Karte ohne Buchen-Button oder
-   Buchungs-Hinweis. Das hängt vermutlich mit der noch offenen
+   Buchungs-Hinweis. Das hängt vermutlich weiterhin an der offenen
    Grundsatzfrage "eigener Zahlungsprozess vs. Buchung beim Anbieter"
-   zusammen (siehe "Offene Entscheidungen" in `ZEITPLAN.md`) — nachvoll-
-   ziehbar, dass das noch wartet. *Vorschlag:* Solange die Entscheidung
-   aussteht, wenigstens einen kurzen erklärenden Satz einblenden ("Buchung
-   folgt in Kürze" o.ä.), statt die Nutzerin kommentarlos vor der
-   Summen-Karte stehen zu lassen.
+   (siehe "Offene Entscheidungen" in `ZEITPLAN.md`). *Vorschlag:* Solange
+   die Entscheidung aussteht, wenigstens einen kurzen erklärenden Satz
+   einblenden ("Buchung folgt in Kürze" o.ä.), statt die Nutzerin
+   kommentarlos vor der Summen-Karte stehen zu lassen.
 
-_Letztes Update: 2026-09-13_
+_Letztes Update: 2026-09-14_
