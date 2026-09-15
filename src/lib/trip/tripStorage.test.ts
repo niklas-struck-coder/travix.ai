@@ -164,6 +164,28 @@ describe('loadStoredChat', () => {
 
     expect(loaded?.trip.activities).toEqual([])
   })
+
+  it('normalizes a missing messages field to an empty array (legacy/corrupted stored trip)', () => {
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({ trip: { ...emptyTrip, destination: 'Lissabon' }, quickReplies: [] }),
+    )
+
+    const loaded = loadStoredChat()
+
+    expect(loaded?.messages).toEqual([])
+  })
+
+  it('normalizes a missing quickReplies field to an empty array (legacy/corrupted stored trip)', () => {
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({ messages: [], trip: { ...emptyTrip, destination: 'Lissabon' } }),
+    )
+
+    const loaded = loadStoredChat()
+
+    expect(loaded?.quickReplies).toEqual([])
+  })
 })
 
 describe('hasTripData', () => {
