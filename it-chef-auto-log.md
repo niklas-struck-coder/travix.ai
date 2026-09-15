@@ -10412,3 +10412,59 @@ erfolgreich).
 **Commit:** `src/components/ui/dialog.tsx` (Fix),
 `src/components/ui/dialog.test.tsx` (neu, 2 Tests), `ZEITPLAN.md`
 (Eintrag ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-15, fünfter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Erneuter frischer, isolierter Checkout, ca. eine Stunde
+nach dem vorherigen Lauf (`2d0f024`, 22:12 UTC). `it-chef/auto` war
+identisch mit `origin/it-chef/auto`, `main` weiterhin unverändert
+Vorfahre (kein neuer Commit auf `main` seit dem vierten Lauf), kein Merge
+nötig, `main` nicht angerührt.
+
+**Eigene, unabhängige Prüfung:** `reports/support-chef.md` und
+`reports/it-chef.md` (beide 15.09.) frisch gelesen. Vorschlag 1 aus
+`reports/support-chef.md` (Fokus-Verlust nach Bestätigungsdialogen) ist
+bereits durch den vierten Lauf heute erledigt (Commit `2d0f024`).
+Vorschlag 2 (Hilfe-Seite ohne echten Kontaktweg) und Vorschlag 3
+(Warenkorb als Sackgasse) bleiben aus denselben, bereits in früheren
+Läufen dokumentierten Gründen unangetastet: beide hängen an einer
+fehlenden Tatsachengrundlage bzw. einer noch offenen Produktentscheidung
+(keine echte Support-Kontaktadresse im Code; Zahlungsprozess-Entscheidung
+laut `ZEITPLAN.md` Sprint 5 noch offen) — Kriterium 2 nicht erfüllt.
+
+Stattdessen `reports/it-chef.md` (15.09., "Automatisch gefixt") direkt
+gegen den aktuellen Code geprüft: PR #20
+(`it-chef-autofix/loadstoredchat-missing-messages-2026-09-15`) behebt
+einen dort bereits vollständig diagnostizierten Bug in `loadStoredChat()`
+(`tripStorage.ts`) — nur `trip.activities` wird beim Laden aus
+`localStorage` gegen fehlende/kaputte Werte normalisiert, `messages` und
+`quickReplies` nicht. Beide unguarded-Zugriffe im PR-Bericht selbst
+verifiziert: `useChat.ts:115` (`stored.messages.length`) und
+`QuickReplies.tsx:9` (`options.length`). Erfüllt alle vier
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht
+(reine `localStorage`-Normalisierung, gleiches Muster wie der bereits
+gemergte `activities`-Fix vom 04.09.), keine offene Produktentscheidung,
+klar beschrieben (Diagnose und Fix-Ansatz stehen bereits vollständig im
+PR/Bericht), objektiv prüfbar (Regressionstests, Typecheck, Build).
+
+**Umgesetzt:** in `loadStoredChat()` (`src/lib/trip/tripStorage.ts`)
+zusätzlich zu `trip.activities` auch `messages` und `quickReplies` über
+dasselbe bestehende `Array.isArray(...) ? ... : []`-Muster normalisiert,
+direkt auf `it-chef/auto` (nicht über Merge des Auto-Fix-PR-Branches,
+gleiches Vorgehen wie bei vergleichbaren Fällen in früheren Läufen, z. B.
+07.09./PR #19). Zwei neue Regressionstests in `tripStorage.test.ts`
+(fehlendes `messages`- bzw. `quickReplies`-Feld im gespeicherten Zustand
+wird beim Laden zu `[]` normalisiert).
+
+**Geprüft:** `npm ci` (frischer Checkout, keine `node_modules` im
+Container), volle Testsuite (`npx vitest run`: 56 Testdateien, 305 Tests,
+davon 2 neu — alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen in
+unveränderten Dateien), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich).
+
+**Commit:** `src/lib/trip/tripStorage.ts` (Fix),
+`src/lib/trip/tripStorage.test.ts` (2 neue Tests), `ZEITPLAN.md`
+(Eintrag ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht. Der
+ursprüngliche Auto-Fix-PR #20 bleibt als überholt zurück (kann bei
+nächster PR-Hygiene-Aufräumung geschlossen werden).

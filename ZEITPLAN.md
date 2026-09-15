@@ -204,6 +204,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   auf einen Trip mit Daten (`{ ...emptyTrip, destination: 'Lissabon' }`)
   umgestellt, damit sie weiterhin den Bestätigungsdialog prüfen; ein neuer
   Test bestätigt den Direkt-Reset ohne Dialog bei `emptyTrip`.
+  Vom autonomen IT-Chef-Lauf am 15.09. (fünfter Lauf) einen von
+  `reports/it-chef.md` (15.09.) gemeldeten und bereits über einen offenen,
+  aber noch nicht gemergten Auto-Fix-PR (#20,
+  `it-chef-autofix/loadstoredchat-missing-messages-2026-09-15`)
+  vollständig diagnostizierten Bug direkt auf `it-chef/auto` behoben:
+  `loadStoredChat()` (`tripStorage.ts`) normalisierte bisher nur
+  `trip.activities` gegen fehlende Felder in legacy/korrupten
+  `localStorage`-Daten (siehe 04.09.-Eintrag oben), nicht aber `messages`
+  und `quickReplies` — obwohl `useChat.ts` direkt nach dem Laden
+  ungeschützt `stored.messages.length` liest und `QuickReplies.tsx`
+  `options.length` auf `quickReplies` aufruft. Fehlt eines der beiden
+  Felder (Alt-Daten, halb geschriebener Wert), wirft das einen
+  `TypeError` beim Laden eines gespeicherten Chats. Fix: exakt dasselbe
+  bereits etablierte `Array.isArray(...) ? ... : []`-Muster zusätzlich
+  auf `messages` und `quickReplies` angewendet. Zwei neue
+  Regressionstests in `tripStorage.test.ts` (fehlendes `messages`- bzw.
+  `quickReplies`-Feld wird beim Laden zu `[]` normalisiert). Der
+  ursprüngliche Auto-Fix-PR #20 bleibt als überholt zurück (kann bei
+  nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
