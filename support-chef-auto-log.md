@@ -2493,3 +2493,73 @@ gleichartigen Listenseiten ist jetzt spürbarer: eine Nutzerin, die auf
 `/favoriten` gerade gelernt hat, dass Löschen nachgefragt wird, trifft
 auf `/aktivitaeten` und `/warenkorb` unangekündigt wieder auf das
 alte, sofortige Verhalten.
+
+---
+
+## 2026-09-15 — Bestätigungsdialoge auf Aktivitäten/Warenkorb (`/aktivitaeten`, `/warenkorb`)
+
+**Geprüfter Bereich:** `src/pages/Aktivitaeten.tsx` und
+`src/pages/Warenkorb.tsx` — laut `git log` gestern Abend (Commits
+`c849a60`, 22:10 Uhr, und `38a1f47`, 23:07 Uhr) vom autonomen
+IT-Chef-Lauf mit demselben Bestätigungsdialog-Muster ausgestattet, das
+im obigen Eintrag vom 14.09. bereits für Preisalarme/Favoriten/Angebote
+geprüft wurde — die beiden letzten der ursprünglichen Fünf-Seiten-Liste
+aus `reports/support-chef.md` (13.09., Vorschlag 2), damit heute erstmals
+selbst geprüft, nicht nur zum Vergleich herangezogen.
+
+### Reibungspunkte
+
+**1. Nach dem Bestätigen geht der Tastatur-/Screenreader-Fokus verloren, statt auf der Liste zu bleiben**
+
+`src/pages/Aktivitaeten.tsx:98` und `src/pages/Warenkorb.tsx:111`: Der
+Entfernen-Button pro Karte ist ein normaler `Button` mit `onClick={() =>
+setPendingRemoval(...)}` — anders als beim "Neu starten?"-Dialog in
+`KiChat.tsx` liegt hier kein `DialogTrigger` um den Knopf, den Radix beim
+Schließen automatisch wieder fokussieren könnte. `confirmRemoval()`
+(`Aktivitaeten.tsx:49-53`, `Warenkorb.tsx:49-53`) entfernt die Karte
+(inkl. ihres Entfernen-Buttons) aus dem Array und schließt den Dialog im
+selben Zug (`setPendingRemoval(null)`), sodass genau der DOM-Knoten, zu
+dem Radix beim Schließen des Dialogs den Fokus zurückgeben würde, in
+diesem Moment bereits verschwunden ist. Für Tastatur- und
+Screenreader-Nutzer:innen bedeutet das: Nach "Ja, entfernen" landet der
+Fokus nicht mehr erkennbar auf der Liste (z. B. auf der nächsten Karte),
+sondern fällt auf das `<body>`-Element zurück — wer mehrere Aktivitäten
+oder Warenkorb-Positionen hintereinander per Tastatur entfernen will,
+muss sich nach jedem einzelnen Entfernen erneut von ganz oben durch die
+Seite tabben. Die bestehenden Tests (`Aktivitaeten.test.tsx:40-66`,
+`Warenkorb.test.tsx:53-88`) decken nur ab, dass die richtige Karte
+verschwindet, nicht wohin der Fokus nach dem Schließen wandert — das
+Verhalten ist damit unbemerkt geblieben. Da `Preisalarme.tsx`,
+`Favoriten.tsx` und `Angebote.tsx` (gestern geprüft) exakt dasselbe
+Dialog-Muster ohne `DialogTrigger` verwenden (`Preisalarme.tsx:110`,
+`Favoriten.tsx:104`, `Angebote.tsx:119`), betrifft dieser Fund
+vermutlich alle fünf Seiten gleichermaßen — im gestrigen Eintrag war er
+noch nicht aufgefallen.
+
+*Vorschlag:* Auf `DialogPrimitive.Content` ein eigenes
+`onCloseAutoFocus` setzen, das den Fokus gezielt auf ein noch
+vorhandenes Element legt (z. B. die Seitenüberschrift per `PageHeader`
+oder den Entfernen-Button der nächsten verbliebenen Karte), statt sich
+auf Radix' Standard-Rückgabe an einen inzwischen entfernten Knoten zu
+verlassen. Da das Dialog-Muster identisch in fünf Dateien wiederholt
+wird, wäre eine zentrale Lösung in `src/components/ui/dialog.tsx` oder
+ein gemeinsamer kleiner Hook sinnvoller als eine Einzellösung pro Seite.
+
+### Bereits bekannt, hier nur bestätigt weiterhin aktuell
+`src/pages/Warenkorb.tsx` hat auch nach dem gestrigen Dialog-Fix
+weiterhin keinen Weg von der Kassenübersicht zur eigentlichen Buchung —
+eine Codesuche nach "Weiter zur Buchung"/"checkout"/"/buchung" in der
+Datei findet nichts. Der bereits am 20.08. gemeldete Fund ("Kein Weg von
+der Kassenübersicht zur eigentlichen Buchung") bleibt damit unverändert
+offen; der gestrige Lauf hat gezielt nur das Löschen-Verhalten
+angefasst, nicht diesen Punkt. `src/pages/Aktivitaeten.tsx` hat
+ebenfalls weiterhin keine Handlungsmöglichkeit pro Karte außer Entfernen
+(bereits am 17.08. gemeldet) — auch das unverändert seit dem gestrigen
+Dialog-Fix.
+
+### Nicht geprüft
+Das im Eintrag vom 14.09. bei `Favoriten.tsx` gemeldete
+Icon-Bedeutungs-Problem (Herz-Icon löst einen Löschen-Dialog aus) wurde
+nicht erneut geprüft, da es dort bereits dokumentiert ist und
+`Aktivitaeten.tsx`/`Warenkorb.tsx` beide das eindeutige `X`-Icon
+verwenden, wo dieses spezielle Problem nicht auftritt.
