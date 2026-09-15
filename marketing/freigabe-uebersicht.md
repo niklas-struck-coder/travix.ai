@@ -1,10 +1,98 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-14)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-15)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-15: zwei neue Tier-4-Kandidaten (Aktivitäten-/Warenkorb-Löschbestätigung, letzte zwei der Fünf-Seiten-Liste aus dem 13.09.-Support-Chef-Fund), Topf damit bei zwei — noch keine vierte Mini-Changelog-Ausgabe, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`95cfc90` (14.09., dritte Mini-Changelog-Ausgabe) hängengeblieben, dessen
+Inhalt laut Freigabe-Chef-Log vom 14.09. bereits vollständig in `main`
+gemergt war. Neu von aktuellem `origin/main` (`ccdf3de`) aus angelegt. Für
+den Commit-Abgleich unten als Basislinie bewusst nicht `95cfc90` selbst
+verwendet, sondern `66d3990` — der `origin/main`-Stand, auf dessen
+Grundlage der 14.09.-Lauf seine Analyse gemacht und `567b9dc`/`0c2e802`/
+`c79a5a9`/`2f110f7`/`538bb25` bereits eingeordnet hatte (drei davon als
+Kandidaten 6-8 in Ausgabe 3 verarbeitet, zwei bewusst ausgeschlossen) —
+so werden diese fünf nicht versehentlich ein zweites Mal gezählt, obwohl
+sie technisch kein Vorfahre von `95cfc90` selbst sind (separate
+`it-chef/auto`-Merge-Linie).
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 13.09. zum
+Redaktionsschluss dieses Laufs, keine neue Antwort zu Kanal/Format/Start),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument seit dem 14.09.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen Treffer),
+kein Commit zu einer IT-Chef-Umsetzung der Mini-Changelog-Seite (kein
+`changelog`-Treffer in `src/routes.tsx`). Alle vier Fragen bleiben offen.
+
+**`git log 66d3990..origin/main` zeigt 13 neue Commits, zwei davon mit
+echter, für die Ehrlichkeits-/Vertrauens-Erzählung relevanter
+Produkt-Codeänderung, per `git show` einzeln geprüft:**
+- `c849a60` (14.09. spät): Überträgt das bereits am 14.09. für
+  Preisalarme/Favoriten/Angebote etablierte Bestätigungsdialog-Muster
+  ("… entfernen?" mit Abbrechen/destructive-Button, gleiche
+  `Dialog`-Komponente wie beim "Neu starten?"-Dialog) auf die
+  Aktivitäten-Seite (`removeActivity` in `Aktivitaeten.tsx`). **Neunter,
+  eigenständiger Tier-4-Kandidat** seit Beginn der Zählung — eigene
+  Seite, eigener Nutzerpfad, keine bloße Verfeinerung eines bereits
+  gezählten Fixes. Zugehöriger Test in `Aktivitaeten.test.tsx` erweitert
+  (Abbrechen verwirft die Löschung).
+- `38a1f47` (14.09. spät): Überträgt dasselbe Muster auf die letzte
+  verbleibende Seite aus der ursprünglichen Fünf-Seiten-Liste von
+  `reports/support-chef.md` (13.09., Vorschlag 2): `Warenkorb.tsx`
+  (`removeItem`). **Zehnter Tier-4-Kandidat.** Damit ist die dort
+  gemeldete Liste (Preisalarme/Favoriten/Angebote/Aktivitäten/Warenkorb)
+  jetzt vollständig abgearbeitet — ein sauberer Abschluss-Punkt für sich,
+  unabhängig von der Kandidatenzählung.
+
+Die restlichen 11 Commits ohne neue Content-Relevanz für dieses Format:
+zwei Freigabe-Chef-Logs (14.09. Tages-Check, 15.09. früher Nacht-Check —
+beide bestätigen nur Merge-Zustände, keine eigene Codeänderung), drei
+IT-Chef-Auto-Log-Einträge ("kein neuer sicherer Punkt gefunden", 15.09.,
+per `git show` verifiziert nur Log-Datei geändert), ein
+Support-Chef-Bericht (14.09.: drei von fünf Löschbestätigungs-Fixes
+bestätigt, Hilfe-Seite und Warenkorb-Sackgasse weiterhin offen — beides
+keine neue Codeänderung, nur Beobachtung), der eigene interaktive
+Marketing-Chef-Bericht vom 14.09. (deckt sich inhaltlich mit diesem
+Lauf, siehe unten), ein IT-Chef-Bericht (14.09.: breite Prüfung, kein
+neuer Bug, Löschbestätigung auf Aktivitäten/Warenkorb bewusst nicht
+parallel gefixt — genau die zwei Seiten, die dieser Lauf jetzt als
+umgesetzt vorfindet), ein Daily-Status-Update sowie der bereits in
+Ausgabe 3 verarbeitete Merge-Commit `78f4c0b` und der eigene vorherige
+Auto-Lauf-Commit `95cfc90` selbst.
+
+**Warum sicher genug (für diese Übersichts-Ergänzung):** Reine
+Übersichts-Ergänzung, kein Live-Vorgang — nichts gepostet oder
+verändert. Keine erfundenen Kennzahlen: beide neuen Kandidaten stammen
+aus einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commits. Keine offene Positionierungs-Grundsatzfrage: wendet nur die
+bestehende Positionierung ("Ehrlichkeit als Feature") an, entscheidet sie
+nicht neu. Berührt keine der vier offenen Fragen an Ni.
+
+**Warum (noch) keine vierte Mini-Changelog-Ausgabe:** Der Kandidatentopf
+war nach Ausgabe 3 leer (siehe Update 2026-09-14) und steht jetzt bei
+zwei — klar unter der Menge (vier), die selbst am 06.09. noch als "nicht
+ausreichend" bewertet wurde, und weit unter der Achter-Schwelle, die
+Ausgabe 2 und 3 ausgelöst hat. Der Umstand, dass mit `38a1f47` die
+komplette Fünf-Seiten-Liste aus dem 13.09.-Support-Chef-Fund
+abgearbeitet ist, ist zwar ein inhaltlicher Meilenstein, aber kein Grund,
+den eigenen Mengen-Maßstab aufzuweichen — sonst würde jede einzelne
+neue Löschbestätigung künftig eine eigene Mini-Ausgabe auslösen, was dem
+Grundgedanken ("Zusammenfassung statt Einzelmeldungen") widerspricht.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neuntes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben vier unbeantworteten Fragen gebunden.
+- Eine vierte Mini-Changelog-Ausgabe schon jetzt schreiben — siehe oben,
+  Kandidatentopf zu klein.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
 
 ## Update 2026-09-14: dritte Mini-Changelog-Ausgabe geschrieben (drei neue Tier-4-Kandidaten, Topf erreicht die Achter-Schwelle von Ausgabe 2), zwei Commits bewusst ausgeschlossen, alle vier Fragen weiterhin offen
 
@@ -1586,7 +1674,14 @@ acht, exakt die Menge, die bereits Ausgabe 2 ausgelöst hatte, und wurde
 deshalb vollständig in Ausgabe 3 verarbeitet. Der Kandidatentopf ist damit
 wieder leer; der nächste Lauf sammelt neue Funde von vorn, mit demselben
 06.09.-Maßstab (acht = genug, vier = eher nicht) als Richtwert für eine
-vierte Ausgabe. Sollte Ni
+vierte Ausgabe. Stand 09.15 sind zwei weitere Kandidaten dazugekommen
+(Löschbestätigung auf Aktivitäten- und Warenkorb-Seite, siehe Update
+2026-09-15 oben) — damit ist die komplette Fünf-Seiten-Liste aus dem
+13.09.-Support-Chef-Fund abgearbeitet, aber der Topf steht erst bei zwei,
+klar unter der Menge, die selbst am 06.09. noch als "nicht ausreichend"
+galt. Der nächste Lauf sollte weiter sammeln, nicht allein wegen des
+inhaltlichen Abschlusses der Fünf-Seiten-Liste vorzeitig eine vierte
+Ausgabe schreiben. Sollte Ni
 zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene
