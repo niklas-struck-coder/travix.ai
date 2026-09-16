@@ -258,6 +258,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Begrüßungsnachricht zurücksetzt). Der ursprüngliche Auto-Fix-PR-Branch
   bleibt als vollständig überholt zurück (kann bei nächster
   PR-Hygiene-Aufräumung gelöscht werden).
+  Vom autonomen IT-Chef-Lauf am 16.09. (fünfter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (16.09., Vorschlag 1) gemeldeten
+  Reibungspunkt behoben: Der Papierkorb-Button in `EditMode.tsx`
+  (Aktivität im Bearbeiten-Dialog löschen, erreichbar u. a. über
+  `Buchung.tsx`) entfernte eine Aktivität bisher sofort und endgültig,
+  ohne Rückfrage — anders als dasselbe Löschen auf der
+  Aktivitäten-Übersichtsseite (`/aktivitaeten`), das bereits über das
+  etablierte Bestätigungsdialog-Muster abgesichert ist (siehe
+  `Aktivitaeten.tsx`). Fix: exakt dasselbe Muster übernommen — ein
+  zweiter, per `pendingRemoval`-State gesteuerter Dialog
+  ("Aktivität entfernen?"/"Ja, entfernen"/"Abbrechen"), kein neuer
+  Entwurf. Zwei neue Regressionstests in `EditMode.test.tsx` (Klick auf
+  "entfernen" öffnet die Bestätigung ohne sofortige Änderung; "Abbrechen"
+  lässt die Aktivität unverändert), bestehender Entfernen-Test und der
+  zugehörige Test in `Buchung.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import {
   Dialog,
@@ -25,6 +25,7 @@ interface EditModeProps {
 export function EditMode({ activities, onChange, children }: EditModeProps) {
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
+  const [pendingRemoval, setPendingRemoval] = useState<TripActivity | null>(null)
 
   function addActivity() {
     const trimmedName = name.trim()
@@ -40,8 +41,10 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
     setPrice('')
   }
 
-  function removeActivity(id: string) {
-    onChange(activities.filter((activity) => activity.id !== id))
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    onChange(activities.filter((activity) => activity.id !== pendingRemoval.id))
+    setPendingRemoval(null)
   }
 
   function updatePrice(id: string, value: string) {
@@ -51,77 +54,98 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Aktivitäten bearbeiten</DialogTitle>
-          <DialogDescription>Aktivitäten manuell hinzufügen, entfernen oder den Preis anpassen.</DialogDescription>
-        </DialogHeader>
+    <Fragment>
+      <Dialog>
+        <DialogTrigger asChild>{children}</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aktivitäten bearbeiten</DialogTitle>
+            <DialogDescription>Aktivitäten manuell hinzufügen, entfernen oder den Preis anpassen.</DialogDescription>
+          </DialogHeader>
 
-        {activities.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Noch keine Aktivitäten hinzugefügt.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {activities.map((activity) => (
-              <li key={activity.id} className="flex items-center gap-2">
-                <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
-                <Input
-                  aria-label={`Preis für ${activity.name}`}
-                  className="w-24"
-                  placeholder="Preis"
-                  value={activity.price ?? ''}
-                  onChange={(event) => updatePrice(activity.id, event.target.value)}
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  aria-label={`${activity.name} entfernen`}
-                  onClick={() => removeActivity(activity.id)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
+          {activities.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Noch keine Aktivitäten hinzugefügt.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {activities.map((activity) => (
+                <li key={activity.id} className="flex items-center gap-2">
+                  <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
+                  <Input
+                    aria-label={`Preis für ${activity.name}`}
+                    className="w-24"
+                    placeholder="Preis"
+                    value={activity.price ?? ''}
+                    onChange={(event) => updatePrice(activity.id, event.target.value)}
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label={`${activity.name} entfernen`}
+                    onClick={() => setPendingRemoval(activity)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
 
-        <div className="flex items-end gap-2 border-t border-border pt-3">
-          <div className="flex-1">
-            <Label htmlFor="activity-name">Neue Aktivität</Label>
-            <Input
-              id="activity-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
-              }}
-              placeholder="z. B. Stadtführung"
-            />
+          <div className="flex items-end gap-2 border-t border-border pt-3">
+            <div className="flex-1">
+              <Label htmlFor="activity-name">Neue Aktivität</Label>
+              <Input
+                id="activity-name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
+                }}
+                placeholder="z. B. Stadtführung"
+              />
+            </div>
+            <div className="w-24">
+              <Label htmlFor="activity-price">Preis</Label>
+              <Input
+                id="activity-price"
+                value={price}
+                onChange={(event) => setPrice(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
+                }}
+                placeholder="optional"
+              />
+            </div>
+            <Button aria-label="Aktivität hinzufügen" onClick={addActivity} disabled={!name.trim()}>
+              <Plus className="size-4" />
+            </Button>
           </div>
-          <div className="w-24">
-            <Label htmlFor="activity-price">Preis</Label>
-            <Input
-              id="activity-price"
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
-              }}
-              placeholder="optional"
-            />
-          </div>
-          <Button aria-label="Aktivität hinzufügen" onClick={addActivity} disabled={!name.trim()}>
-            <Plus className="size-4" />
-          </Button>
-        </div>
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Fertig</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Fertig</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aktivität entfernen?</DialogTitle>
+            <DialogDescription>
+              {pendingRemoval?.name} wird aus dieser Reise entfernt. Das lässt sich nicht rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Fragment>
   )
 }

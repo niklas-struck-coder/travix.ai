@@ -10706,3 +10706,62 @@ build`, kein Typfehler, Build erfolgreich).
 dieser Log-Eintrag — auf `it-chef/auto` gepusht. Der ursprüngliche
 Auto-Fix-PR #21 bleibt als überholt zurück (kann bei nächster
 PR-Hygiene-Aufräumung geschlossen werden).
+
+## 2026-09-16, fünfter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `e87973b`, identisch mit `origin/it-chef/auto`) — `main`
+selbst unverändert seit dem letzten Lauf, kein Merge nötig. `npm ci`
+(frisch, keine `node_modules` im Container). Baseline vorab bestätigt:
+`npx vitest run` (56 Testdateien, 315 Tests, alle grün), `npm run lint`
+(0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — die offenen
+Sprint-3/4-Punkte (7.4 Rest, 7.12, 8.2-8.7) hängen weiterhin an offenen
+Architektur-/Produktentscheidungen oder größeren, nicht autonom fällbaren
+Features (Vision-Analyse, Deal Finder). Stattdessen `reports/support-chef.md`
+(16.09.) gelesen: Vorschlag 1 beschreibt einen klar umrissenen, gegen den
+aktuellen Code verifizierten Reibungspunkt — `EditMode.tsx:76-83`, der
+Papierkorb-Button zum Entfernen einer Aktivität im Bearbeiten-Dialog,
+löschte bisher sofort und endgültig ohne Rückfrage, obwohl exakt dasselbe
+Löschen auf der Aktivitäten-Übersichtsseite (`Aktivitaeten.tsx`) bereits
+über ein etabliertes Bestätigungsdialog-Muster (`pendingRemoval`-State,
+zweiter `Dialog` mit "Ja, entfernen"/"Abbrechen") abgesichert ist. Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine lokale Demo-State-Aktion, gleiches Muster wie der
+bereits gemergte Fix in `Aktivitaeten.tsx`), keine offene Produkt-/
+Architekturentscheidung, klar umrissen (Diagnose und Fix-Muster standen
+bereits vollständig im Bericht, hier nur 1:1 auf `EditMode.tsx`
+übertragen), objektiv prüfbar (Regressionstests für Bestätigung/Abbruch,
+Typecheck, Build).
+
+**Fix:** `EditMode.tsx` von einem einzelnen `Dialog` auf zwei
+Geschwister-`Dialog`s in einem `Fragment` umgestellt (statt eines
+verschachtelten Dialogs, um dem bestehenden `Aktivitaeten.tsx`-Muster
+exakt zu folgen): der bestehende Bearbeiten-Dialog bleibt unverändert,
+ein zweiter Dialog (`open={pendingRemoval !== null}`) zeigt "Aktivität
+entfernen?" mit Name und "Das lässt sich nicht rückgängig machen." Der
+Papierkorb-Button setzt jetzt `pendingRemoval` statt direkt zu entfernen;
+`confirmRemoval()` entfernt die Aktivität erst nach Klick auf "Ja,
+entfernen". Zwei neue Regressionstests in `EditMode.test.tsx` (Klick auf
+"entfernen" öffnet die Bestätigung, ohne dass `onChange` schon aufgerufen
+wird; "Abbrechen" lässt die Aktivität unverändert). Bestehender
+Entfernen-Test in `EditMode.test.tsx` sowie der zugehörige Test in
+`Buchung.test.tsx` (nutzt `EditMode.tsx` über die Buchungsseite) auf den
+zusätzlichen Bestätigungsklick umgestellt.
+
+**Geprüft:** `npx vitest run src/components/trip/EditMode.test.tsx`
+(gezielt, 11 Tests grün), danach volle Suite `npx vitest run` (56
+Testdateien, 315 Tests, davon 2 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/trip/EditMode.tsx` (Fix),
+`src/components/trip/EditMode.test.tsx`, `src/pages/Buchung.test.tsx`
+(Testanpassung), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
