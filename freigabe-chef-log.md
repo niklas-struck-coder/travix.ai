@@ -1,5 +1,98 @@
 # Freigabe-Chef-Log
 
+## 2026-09-16, 6-Uhr-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" geprüft und gemergt, `19ab0e3..97f96ae`).
+  Planmäßig übersprungen, keine neue Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`811302a`).
+- `support-chef/auto` — 1 neuer Commit (`28b9885`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+  Produktcode betroffen, kein Build/Lint/Test nötig.
+- Ordnet drei neue, bereits auf `main` gelandete IT-Chef-Commits als
+  Tier-4-Kandidaten elf bis dreizehn ein (`loadStoredChat()`-
+  Normalisierung, `resetChat()`-Robustheit, mit ausdrücklichem Vorbehalt
+  die IME-Enter-Korrektur), schließt einen vierten Commit (Fokus-
+  Rückgabe-Fix `2d0f024`) bewusst und nachvollziehbar begründet aus. Der
+  Grenzfall (IME-Fix) ist transparent als solcher gekennzeichnet, keine
+  stillschweigende Gleichsetzung.
+- Keine erfundenen Kennzahlen (keine Follower-/Reichweiten-/
+  Ersparnis-Zahlen), kein Hinweis auf tatsächliches Posten/Versenden,
+  keine neue Positionierungs-Entscheidung — wendet nur bereits
+  bestehende Einordnung an. Vollständiger, kohärenter Text, keine
+  Stichpunkt-Skizze.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `901993e..811302a`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, Diff-Stat
+zunächst irreführend groß — Ursache geklärt, siehe unten):
+- `git diff origin/main origin/support-chef/auto --stat` zeigte auf den
+  ersten Blick Änderungen an `ZEITPLAN.md`, `it-chef-auto-log.md`,
+  mehreren Test- und Produktcode-Dateien (`ChatInput.tsx`, `EditMode.tsx`,
+  `dialog.tsx`, `useChat.ts`, `tripStorage.ts`). Beim genaueren Hinsehen:
+  reine Artefakte davon, dass `support-chef/auto` seit dem 15.09. nicht
+  neu von `main` abgezweigt wurde (Merge-Base `c07a360`, sechs Commits
+  hinter dem heutigen `main`-Stand) — der Branch selbst ändert laut
+  `git log --stat origin/main..origin/support-chef/auto` in seinem
+  einzigen neuen Commit (`28b9885`) ausschließlich
+  `support-chef-auto-log.md` (620 neue Zeilen). Testmerge lokal
+  durchgeführt (`git merge --no-commit --no-ff`): konfliktfrei, einzige
+  geänderte Datei laut `git status` war `support-chef-auto-log.md` — die
+  scheinbaren Diffs an Produktcode lösen sich beim echten Merge
+  vollständig auf, da `main` diese Dateien bereits weiterentwickelt hat
+  und der Branch sie unangetastet lässt.
+- Inhaltlich geprüft: Der seit 09.09. blockierende, überholte Fund
+  (`585efea`, `stayError: boolean` vs. tatsächlich bereits
+  `stayErrors: DuffelError[]`) ist jetzt mit einem klar gekennzeichneten
+  "Nachtrag (16.09., Korrektur)" als behoben markiert, inkl. korrekter
+  Referenz auf den tatsächlichen Fix-Commit `7068653` (08.09.) —
+  unabhängig gegengeprüft: `git show origin/main:src/hooks/useChat.ts`
+  zeigt tatsächlich `const [stayErrors, setStayErrors] =
+  useState<DuffelError[]>([])`. Der alte Eintrag wurde nicht gelöscht,
+  sondern transparent als überholt markiert — nachvollziehbar und ehrlich.
+- Die sechs dahinter aufgestauten, bereits in früheren Läufen als valide
+  eingestuften Analyse-Einträge (09.–15.09.) sind unverändert wieder
+  enthalten (Bestätigungsdialog-Rollout auf fünf Seiten, Mobile-Nav-
+  Übersetzung, PageTransition-Bewegungsreduktion, PlaceholderPage-Funde,
+  Fokus-Verlust nach Bestätigung).
+- Zwei neue Funde vom 16.09. stichprobenartig gegen den aktuellen Code
+  geprüft, nicht nur geglaubt:
+  - "Spracheingabe lässt sich nicht abbrechen": `git show
+    origin/main:src/components/chat/ChatInput.tsx` bestätigt
+    `handleMicClick()` bricht bei `listening === true` sofort ab, der
+    `recognition`-Rückgabewert von `startListening()` wird nirgends
+    gehalten — Fund plausibel.
+  - "`EditMode.tsx` löscht Aktivitäten ohne Bestätigung": `git show
+    origin/main:src/components/trip/EditMode.tsx` bestätigt einen
+    einfachen `onClick={() => removeActivity(activity.id)}` ohne Dialog —
+    Fund plausibel.
+- Reine Analyse-/Log-Datei, kein Produktcode geändert, kein Build/Lint/
+  Test nötig.
+→ **Alles passt, nach `main` gemergt** (regulärer 3-Wege-Merge, kein
+Fast-Forward möglich, konfliktfrei, Commit `996f68e`, gepusht).
+
+**Branch-Stand aktualisiert:** `marketing-chef/auto` und
+`support-chef/auto` per `git push origin main:refs/heads/<branch>` auf
+den neuen `main`-Stand (`996f68e`) gebracht, damit beide Branches nicht
+erneut als "veraltet" erscheinen.
+
+**Ergebnis:** Zwei Branches inhaltlich geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), ein Branch planmäßig ohne
+neue Prüfung übersprungen (`it-chef/auto`, keine neuen Commits seit dem
+früheren Lauf heute).
+
+**Info an Ni nötig:** Ja, kurz — der seit dem 09.09. über sieben Läufe
+hinweg gemeldete `585efea`-Blocker auf `support-chef/auto` ist heute
+aufgelöst und der komplette Rückstau (sechs Analysen plus zwei neue
+Funde) endlich nach `main` gemergt. Kein neuer Fehler, aber das war ein
+länger laufendes, wiederholt gemeldetes Problem, dessen Auflösung
+Ni interessieren dürfte.
+
 ## 2026-09-10, Tages-Check
 
 **Geprüfte Branches:**
