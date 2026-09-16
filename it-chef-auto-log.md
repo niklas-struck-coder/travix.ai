@@ -10657,3 +10657,52 @@ Tests), `ZEITPLAN.md` (Eintrag ergänzt), dieser Log-Eintrag — auf
 `it-chef-autofix/localstorage-write-unprotected-2026-08-12` bleibt jetzt
 vollständig überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
 gelöscht werden, wie die anderen 13 bereits überholten Branches).
+
+## 2026-09-16, vierter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand
+vor diesem Lauf: `312dd4e`, identisch mit `origin/it-chef/auto` nach
+Fast-Forward-Merge von `origin/main` — dieser brachte ausschließlich
+Berichts-/Log-Dateien, keine Codeänderung im gemergten Bereich) — `main`
+selbst wurde nicht angerührt. `npm ci` (frisch, keine `node_modules` im
+Container), Baseline vorab bestätigt: `npx vitest run` (56 Testdateien,
+312 Tests, alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen).
+
+**Eigene, unabhängige Prüfung:** `reports/it-chef.md` (heute, 16.09.
+aktualisiert nach dem Merge von `main`) gelesen: dort dokumentiert PR #21
+(`it-chef-autofix/duration-days-component-2026-09-16`) einen bereits
+vollständig diagnostizierten Bug — `formatDuration()` in `FlightCard.tsx`
+und `TrainCard.tsx` matcht nur `PT<h>H<m>M`, nicht die ISO-8601-Form mit
+Tages-Komponente (`P<n>DT<h>H<m>M`). Gegen den aktuellen Code auf
+`it-chef/auto` verifiziert: Fix aus PR #21 war dort noch nicht gelandet
+(beide Dateien hatten weiterhin die alte Regex ohne Tage-Gruppe). Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reiner Regex-Parsing-Fix für eine Dauer-Anzeige), keine
+offene Produkt-/Architekturentscheidung, klar umrissen (Diagnose und
+Fix-Ansatz standen bereits vollständig im Bericht/PR), objektiv prüfbar
+(Regressionstest für eine konkrete Beispieldauer, Typecheck, Build).
+
+**Fix:** in `formatDuration()` (`FlightCard.tsx` und wortgleich
+`TrainCard.tsx`) die Regex um eine optionale Tage-Gruppe vor dem `T`
+ergänzt (`P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?`); Tage werden in Stunden
+umgerechnet (Tage × 24 + Stunden) und mit den bestehenden Stunden
+zusammengeführt, bevor der bestehende Formatierungscode (Stunden/Minuten
+zu `"Xh Ymin"`) greift. Für Dauern ohne Tage-Komponente identisches
+Verhalten wie zuvor. Zwei neue Regressionstests (`FlightCard.test.tsx`,
+`TrainCard.test.tsx`): eine Dauer von `P1DT2H30M` (26h30min) zeigt
+`"26h 30min"` statt den rohen ISO-String.
+
+**Geprüft:** `npx vitest run src/components/search/FlightCard.test.tsx
+src/components/search/TrainCard.test.tsx` (gezielt, 11 Tests grün),
+danach volle Suite `npx vitest run` (56 Testdateien, 314 Tests, davon 2
+neu — alle grün), `npm run lint` (0 Fehler, nur die drei vorbestehenden
+Warnungen in unveränderten Dateien), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/FlightCard.tsx`,
+`src/components/search/TrainCard.tsx` (Fix), `FlightCard.test.tsx`,
+`TrainCard.test.tsx` (2 neue Tests), `ZEITPLAN.md` (Eintrag ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht. Der ursprüngliche
+Auto-Fix-PR #21 bleibt als überholt zurück (kann bei nächster
+PR-Hygiene-Aufräumung geschlossen werden).

@@ -11,10 +11,11 @@ function formatTime(isoString: string) {
 }
 
 function formatDuration(isoDuration: string) {
-  const match = /PT(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
+  const match = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
   if (!match) return isoDuration
-  const [, hours, minutes] = match
-  return [hours && `${hours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
+  const [, days, hours, minutes] = match
+  const totalHours = Number(days || 0) * 24 + Number(hours || 0)
+  return [totalHours && `${totalHours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
 }
 
 interface TrainCardProps {

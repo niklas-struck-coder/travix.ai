@@ -528,6 +528,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `PageTransition.test.tsx` (mockt `window.matchMedia` auf
   `prefers-reduced-motion: reduce`, prüft die statischen Stilwerte; vor
   dem Fix reproduzierbar rot verifiziert).
+  Vom autonomen IT-Chef-Lauf am 16.09. (vierter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (16.09., "Automatisch gefixt", PR #21) bereits
+  vollständig diagnostizierten Bug direkt auf `it-chef/auto` behoben, statt
+  auf den offenen Auto-Fix-PR zu warten: `formatDuration()` in
+  `FlightCard.tsx` und (wortgleich dupliziert) `TrainCard.tsx` matchte nur
+  ISO-8601-Dauern der Form `PT<h>H<m>M`, nicht aber die Form mit
+  Tages-Komponente (`P<n>DT<h>H<m>M`, z. B. `P1DT2H30M` für 26h30min) — bei
+  jeder Flugverbindung mit ≥24h Gesamtdauer (Übernacht-/Mehrfach-
+  Umstiegs-Langstrecke) erschien dadurch die rohe ISO-Zeichenkette statt
+  einer lesbaren Dauer in der UI. Fix: Regex um eine optionale Tage-Gruppe
+  vor dem `T` ergänzt (`P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?`), Tage werden
+  in Stunden umgerechnet (Tage × 24 + Stunden) und mit den bestehenden
+  Stunden zusammengeführt. Rein additiv für den Normalfall unter 24h —
+  bestehende Duffel-Antworten ohne Tages-Komponente verhalten sich
+  identisch (leere Tage-Gruppe ⇒ `Number(undefined || 0) === 0`). Zwei neue
+  Regressionstests (`FlightCard.test.tsx`, `TrainCard.test.tsx`), die eine
+  26h30min-Dauer (`P1DT2H30M`) auf `26h 30min` statt den rohen ISO-String
+  prüfen. Der ursprüngliche Auto-Fix-PR #21 bleibt als überholt zurück
+  (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

@@ -28,4 +28,12 @@ describe('TrainCard', () => {
     expect(screen.getByText(`129,00${NBSP}€`)).toBeInTheDocument()
     expect(screen.queryByText('129.00 EUR')).not.toBeInTheDocument()
   })
+
+  it('formats a duration with a days component instead of showing the raw ISO string', () => {
+    const offer: TrainOffer = { ...baseOffer, duration: 'P1DT2H30M' }
+    render(<TrainCard offer={offer} />)
+
+    expect(screen.getByText('26h 30min')).toBeInTheDocument()
+    expect(screen.queryByText('P1DT2H30M')).not.toBeInTheDocument()
+  })
 })
