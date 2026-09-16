@@ -4,6 +4,92 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-16
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`4832eed` (15.09., zwei neue Tier-4-Kandidaten) hängengeblieben, dessen
+Inhalt laut Freigabe-Chef-Log vom 16.09. bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. `origin/main` (`901993e`) per Fast-Forward-Merge in diesen Branch
+eingebracht, bevor der eigentliche Lauf begann.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret nur `marketing/freigabe-uebersicht.md`
+um einen neuen Prüf-Durchlauf ergänzt (zwei bis drei neue Tier-4-
+Kandidaten eingeordnet, ein Fund bewusst ausgeschlossen).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 15.09. beantwortet wurde: keine Notiz in `status.md`,
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder `marketing/freigabe-uebersicht.md`,
+keine neuen Kanal-Links in `src/`/`index.html`, keine neue Changelog-Route
+in `src/routes.tsx`. Alle vier Fragen bleiben offen (laut dem eigenen
+interaktiven Bericht vom 15.09. jetzt seit rund vier Wochen). Danach
+`git log 4832eed..origin/main` geprüft: 24 neue Commits, davon vier mit
+echter Produkt-Codeänderung, per `git show` einzeln verifiziert:
+- `2d0f024` (15.09. spät): Fokus-Rückgabe nach Bestätigungsdialogen
+  zentral in `DialogContent` behoben — echter Barrierefreiheits-Fix,
+  aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung dieses Formats.
+  **Bewusst nicht** als Tier-4-Kandidat aufgenommen (gleiche Begründung
+  wie bei `2f110f7`/`538bb25` am 13./14.09.).
+- `46e586b` (15.09. spät): `loadStoredChat()` normalisiert jetzt auch
+  `messages`/`quickReplies` gegen fehlende Felder in alten/korrupten
+  `localStorage`-Daten. Elfter Tier-4-Kandidat — dieselbe Fundgruppe wie
+  die `activities`-Normalisierung aus Ausgabe 2 (PR #18).
+- `97f96ae` (16.09.): `resetChat()` bricht nicht mehr ab, wenn
+  `localStorage.removeItem` wirft. Zwölfter Tier-4-Kandidat — dieselbe
+  Fundgruppe wie der Speicherfehler-Hinweis aus Ausgabe 2.
+- `5685f5c` (16.09.): Enter bricht eine laufende IME-Komposition
+  (Japanisch/Chinesisch/Koreanisch) in `ChatInput`/`EditMode` nicht mehr
+  ab. Mit Vorbehalt als dreizehnter Tier-4-Kandidat eingeordnet — anderer
+  Bug-Typ als die übrigen (keine Ehrlichkeitsaussage im engeren Sinn),
+  aber inhaltlich verwandt mit den bereits gezählten Wortgrenzen-Bugs
+  (stille, vom Bug verursachte Fehlaktion). Einordnung transparent als
+  Grenzfall markiert, damit ein späterer Lauf sie bei Bedarf revidieren
+  kann, ohne dass das die Zählung verfälscht.
+
+Die übrigen 20 Commits (mehrere Freigabe-Chef-Logs, ein IT-Chef-Auto-Log
+ohne neuen Punkt, Support-/Marketing-/IT-Chef-Berichte vom 15.09., ein
+Daily-Status-Update, ein zwischenzeitlich gemergter und wieder
+revertierter Support-Chef-Merge sowie mehrere Support-Chef-Auto-Log-
+Einträge samt zugehöriger Main-Merges) enthalten keine neue, für dieses
+Format relevante Codeänderung.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: alle drei
+neuen Kandidaten stammen aus einzeln per `git show` verifizierten,
+bereits in `main` gemergten Commits; der Grenzfall (IME-Fix) ist
+transparent als Grenzfall gekennzeichnet statt stillschweigend
+gleichgesetzt. Keine offene Positionierungs-Grundsatzfrage: dieser Lauf
+trifft keine neue inhaltliche Entscheidung, sondern ordnet vier neue
+Commits in die bestehende Übersicht ein.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine vierte Mini-Changelog-Ausgabe schon jetzt schreiben — der
+  Kandidatentopf steht bei fünf, klar unter der Achter-Schwelle, die
+  Ausgabe 2 und 3 ausgelöst hat, und nur knapp über der Menge (vier), die
+  selbst am 06.09. noch als "nicht ausreichend" bewertet wurde.
+- Ein elftes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben vier unbeantworteten Fragen gebunden.
+- Den Fokus-Rückgabe-Fix (`2d0f024`) als Tier-4-Kandidaten zählen — passt
+  nicht zur Ehrlichkeits-/Vertrauens-Erzählung dieses Formats (echter,
+  aber andersartiger Barrierefreiheits-Fund).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 16.09. (Prüfung
+  der vier Fragen, Einordnung der neuen Commits als Tier-4-Kandidaten elf
+  bis dreizehn, ein Commit bewusst ausgeschlossen, Begründung warum noch
+  keine vierte Ausgabe), Tier-4-Abschnitt und "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert, Datum im Titel auf 16.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-15
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf

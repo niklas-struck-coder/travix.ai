@@ -1,10 +1,138 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-15)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-16)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-16: zwei bis drei neue Tier-4-Kandidaten (loadStoredChat()-Normalisierung, resetChat()-Robustheit, mit Vorbehalt die IME-Enter-Korrektur), ein Fokus-Fix bewusst als reiner Barrierefreiheits-Fund ausgeschlossen — Topf damit bei fünf, weiterhin keine vierte Mini-Changelog-Ausgabe, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`4832eed` (15.09., zwei neue Tier-4-Kandidaten) hängengeblieben, dessen
+Inhalt laut Freigabe-Chef-Log vom 16.09. bereits vollständig in `main`
+gemergt war — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. `origin/main` (`901993e`) per Fast-Forward-Merge in diesen Branch
+eingebracht, bevor der eigentliche Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 15.09., keine neue
+Antwort zu Kanal/Format/Start), `ZEITPLAN.md` (6.2 in Zeile 1222
+weiterhin `[ ]`) oder diesem Dokument seit dem 15.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein Commit zu
+einer IT-Chef-Umsetzung der Mini-Changelog-Seite (kein `changelog`-Treffer
+in `src/routes.tsx`). Alle vier Fragen bleiben offen — laut dem eigenen
+interaktiven Bericht vom 15.09. (`reports/marketing-chef.md`) jetzt seit
+rund vier Wochen.
+
+**`git log 4832eed..origin/main` zeigt 24 neue Commits, vier davon mit
+echter Produkt-Codeänderung, per `git show` einzeln geprüft:**
+- `2d0f024` (15.09. spät): Behebt Support-Chef-Vorschlag 1 vom 15.09. —
+  nach dem Bestätigen eines Lösch-Dialogs (Preisalarme/Favoriten/
+  Angebote/Aktivitäten/Warenkorb) landete der Fokus auf `<body>`, weil
+  Radix' eingebaute Fokus-Rückgabe erfolglos versuchte, das inzwischen
+  entfernte Element erneut zu fokussieren. `DialogContent` übernimmt die
+  Fokus-Steuerung jetzt zentral selbst. **Bewusst nicht** in den
+  Tier-4-Kandidatentopf aufgenommen: echter, wichtiger
+  Barrierefreiheits-Fix, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung
+  dieses Formats (falsche Information, ungeschützter Datenverlust,
+  irreführende Nachrichten) — gleiche Begründung wie bei den bereits am
+  13./14.09. ausgeschlossenen `2f110f7` (reduzierte Bewegung) und
+  `538bb25` (Schließen-Button-Übersetzung).
+- `46e586b` (15.09. spät): `loadStoredChat()` normalisierte bislang nur
+  `trip.activities` gegen fehlende Felder in alten/korrupten
+  `localStorage`-Daten, nicht aber `messages` und `quickReplies` — beide
+  wurden ungeschützt gelesen und konnten bei fehlendem Feld einen
+  `TypeError` auslösen. Gleiches, bereits etabliertes Muster jetzt auch
+  auf diese zwei Felder angewendet. **Elfter Tier-4-Kandidat** — inhaltlich
+  dieselbe Fundgruppe wie der bereits am 05./06.09. gezählte, in Ausgabe 2
+  verarbeitete `activities`-Normalisierungs-Fix (PR #18): ein alter
+  Reiseplan-Datensatz soll die App nicht zum Absturz bringen, sondern
+  sauber weiterlaufen.
+- `97f96ae` (16.09.): `resetChat()` rief `localStorage.removeItem(...)`
+  bisher ungeschützt auf — anders als `saveStoredChat()`, das
+  Schreibfehler bereits abfängt. Bei vollem Speicher, deaktiviertem
+  Storage (privates Surfen) oder restriktiven Webviews hätte das den
+  eigentlich rein im Speicher stattfindenden Reset mitten in der "Neu
+  starten?"-Aktion abbrechen können. Neue `clearStoredChat()`-
+  Hilfsfunktion nach demselben Try/Catch-Muster. **Zwölfter
+  Tier-4-Kandidat** — dieselbe Fundgruppe wie der bereits in Ausgabe 2
+  verarbeitete, am 05./06.09. gezählte Speicherfehler-Hinweis: ein
+  einzelner Klick auf "Neu starten" soll zuverlässig funktionieren, statt
+  bei bestimmten Browser-/Speicher-Konstellationen lautlos hängen zu
+  bleiben.
+- `5685f5c` (16.09.): `ChatInput.tsx` und `EditMode.tsx` prüften bei
+  Enter bisher nur `event.key`, nicht `event.nativeEvent.isComposing`.
+  Bei IME-Eingabe (z. B. Japanisch/Chinesisch/Koreanisch) löste das
+  Bestätigen eines Zeichen-Kandidaten per Enter ein vorzeitiges Senden
+  bzw. Anlegen mit unvollständigem Text aus. **Mit Vorbehalt als
+  dreizehnter Tier-4-Kandidat eingeordnet:** anders als die übrigen
+  Kandidaten geht es hier nicht um eine Ehrlichkeits-/Vertrauensaussage
+  im engeren Sinn, sondern um denselben Bug-Typ wie die bereits gezählten
+  Wortgrenzen-Fehler bei der Zielname-/Transportmittel-Erkennung — eine
+  stille, vom Bug verursachte falsche Aktion (hier: verfrühtes Absenden
+  unvollständigen Texts), die die Nutzerin nicht beabsichtigt hat. Sollte
+  Ni diese Einordnung für zu weit gefasst halten, lässt sich der Punkt vor
+  der nächsten Ausgabe jederzeit wieder herausnehmen, ohne dass das den
+  Topf unter die Vierer-Schwelle vom 06.09. drückt.
+
+Die restlichen 20 Commits ohne neue Content-Relevanz für dieses Format:
+mehrere Freigabe-Chef-Logs (15./16.09., bestätigen nur Merge-Zustände),
+ein IT-Chef-Auto-Log ("kein neuer sicherer Punkt gefunden", 16.09.), ein
+Support-Chef-Bericht (15.09., bestätigt die komplette Fünf-Seiten-Liste
+und meldet den oben behandelten Fokus-Fund), der eigene interaktive
+Marketing-Chef-Bericht vom 15.09. (deckt sich inhaltlich mit diesem
+Lauf), ein IT-Chef-Bericht (15.09., PR #20 eingeordnet), ein
+Daily-Status-Update, ein zwischenzeitlich gemergter und wieder
+revertierter Support-Chef-Merge (reiner Analyse-Log ohne Codeänderung,
+laut `git status` nach dem Fast-Forward ohne Wirkung auf den aktuellen
+Stand) sowie mehrere Support-Chef-Auto-Log-Einträge (09.-15.09., reine
+UX-Analyse ohne eigene Codeänderung) und die zugehörigen
+Main-Merge-Commits auf dem `support-chef/auto`-Branch.
+
+**Warum sicher genug (für diese Übersichts-Ergänzung):** Reine
+Übersichts-Ergänzung, kein Live-Vorgang — nichts gepostet oder
+verändert. Keine erfundenen Kennzahlen: alle drei neuen Kandidaten
+stammen aus einzeln per `git show` verifizierten, bereits in `main`
+gemergten Commits, die Einordnung des dritten (IME-Fix) ist transparent
+als Grenzfall gekennzeichnet statt stillschweigend gleichgesetzt. Keine
+offene Positionierungs-Grundsatzfrage: wendet nur die bestehende
+Positionierung ("Ehrlichkeit als Feature") an, entscheidet sie nicht neu.
+Berührt keine der vier offenen Fragen an Ni.
+
+**Warum (noch) keine vierte Mini-Changelog-Ausgabe:** Der Kandidatentopf
+wächst von zwei (Stand 15.09.) auf fünf — klar unter der Menge (acht),
+die Ausgabe 2 und 3 ausgelöst hat, und nur knapp über der Menge (vier),
+die selbst am 06.09. noch ausdrücklich als "nicht ausreichend" bewertet
+wurde. Selbst wenn der IME-Fix als zu weit gefasst wieder herausfallen
+sollte, blieben es vier — weiterhin kein klarer Auslöser für eine vierte
+Ausgabe nach dem etablierten Maßstab.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein elftes eigenständiges Social-Content-Stück — bleibt weiterhin an
+  dieselben vier unbeantworteten Fragen gebunden.
+- Eine vierte Mini-Changelog-Ausgabe schon jetzt schreiben — siehe oben,
+  Kandidatentopf zu klein.
+- Der Fokus-Verlust-Fix (`2d0f024`) als Tier-4-Kandidat — siehe oben,
+  passt nicht zur Ehrlichkeits-/Vertrauens-Erzählung dieses Formats.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 16.09. (Prüfung
+  der vier Fragen, Einordnung von zwei bis drei neuen Commits als
+  Tier-4-Kandidaten elf bis dreizehn, ein Commit bewusst als
+  Barrierefreiheits-Fund ausgeschlossen, Begründung warum noch keine
+  vierte Ausgabe), "Nächster autonomer Lauf"-Abschnitt aktualisiert,
+  Datum im Titel auf 16.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-15: zwei neue Tier-4-Kandidaten (Aktivitäten-/Warenkorb-Löschbestätigung, letzte zwei der Fünf-Seiten-Liste aus dem 13.09.-Support-Chef-Fund), Topf damit bei zwei — noch keine vierte Mini-Changelog-Ausgabe, alle vier Fragen weiterhin offen
 
@@ -1587,6 +1715,30 @@ Anfang-bis-Ende-Weg im Code.
    "Ehrlichkeit/Vertrauen"-Erzählung dieses Formats) und `538bb25`
    (Schließen-Buttons jetzt auf Deutsch — reine Sprachkonsistenz-
    Korrektur, gleiche Begründung wie frühere Formatierungsausschlüsse).
+   Seit dem 14./15.09. zwei weitere Kandidaten (siehe Update 2026-09-15
+   oben): das etablierte Bestätigungsdialog-Muster wurde auf die
+   Aktivitäten- (**neunter Kandidat**) und die Warenkorb-Seite (**zehnter
+   Kandidat**) übertragen — damit ist die komplette Fünf-Seiten-Liste aus
+   dem 13.09.-Support-Chef-Fund abgearbeitet. Seit dem 15./16.09. zwei
+   weitere Kandidaten (siehe Update 2026-09-16 oben): `loadStoredChat()`
+   normalisiert jetzt auch `messages`/`quickReplies` gegen fehlende Felder
+   in alten/korrupten `localStorage`-Daten (**elfter Kandidat**, dieselbe
+   Fundgruppe wie die `activities`-Normalisierung aus Ausgabe 2), und
+   `resetChat()` bricht nicht mehr ab, wenn `localStorage.removeItem`
+   wirft (**zwölfter Kandidat**, dieselbe Fundgruppe wie der
+   Speicherfehler-Hinweis aus Ausgabe 2). Mit Vorbehalt außerdem ein
+   **dreizehnter Kandidat**: die Korrektur, dass Enter eine laufende
+   IME-Komposition (Japanisch/Chinesisch/Koreanisch) in `ChatInput`/
+   `EditMode` nicht mehr abbricht — anders eingeordnet als die übrigen
+   Kandidaten, da hier keine Ehrlichkeits-/Vertrauensaussage im engeren
+   Sinn korrigiert wird, sondern derselbe Bug-Typ wie bei den
+   Wortgrenzen-Fehlern (stille, vom Bug verursachte Fehlaktion); siehe
+   Update 2026-09-16 oben für die vollständige Begründung. Ein weiterer,
+   am 15.09. geprüfter Commit bewusst nicht aufgenommen: `2d0f024`
+   (Fokus-Rückgabe nach Bestätigungsdialogen zentral in `DialogContent`
+   behoben — echter Barrierefreiheits-Fix, gleiche Ausschlussbegründung
+   wie bei `2f110f7`/`538bb25`). Kandidatentopf seit Ausgabe 3 damit bei
+   fünf (Kandidaten 9-13, davon einer mit Vorbehalt).
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -1681,7 +1833,19 @@ vierte Ausgabe. Stand 09.15 sind zwei weitere Kandidaten dazugekommen
 klar unter der Menge, die selbst am 06.09. noch als "nicht ausreichend"
 galt. Der nächste Lauf sollte weiter sammeln, nicht allein wegen des
 inhaltlichen Abschlusses der Fünf-Seiten-Liste vorzeitig eine vierte
-Ausgabe schreiben. Sollte Ni
+Ausgabe schreiben. Stand 09.16 sind zwei bis drei weitere Kandidaten
+dazugekommen (`loadStoredChat()`-Normalisierung und `resetChat()`-
+Robustheit sicher, die IME-Enter-Korrektur mit Vorbehalt, siehe Update
+2026-09-16 oben) — der Topf steht damit bei fünf, weiterhin klar unter
+den acht, die Ausgabe 2 und 3 ausgelöst haben, und nur knapp über der
+Menge, die am 06.09. als "nicht ausreichend" galt. Ein am selben Tag
+geprüfter Fokus-Rückgabe-Fix (`2d0f024`) wurde bewusst nicht
+aufgenommen (reiner Barrierefreiheits-Fund, keine Ehrlichkeits-/
+Vertrauens-Erzählung). Der nächste Lauf sollte auch das wieder explizit
+gegen den 06.09.-Maßstab prüfen, statt die Bewegung von zwei auf fünf
+vorschnell als Auslöser zu werten, und außerdem prüfen, ob die
+IME-Einordnung bei einem erneuten Blick weiterhin trägt oder eher als
+reiner Korrektheits-Fix ohne diese Erzählung auszusortieren ist. Sollte Ni
 zwischenzeitlich einen Kanal für
 die Vorlesen-Funktion oder ein Social-Format freigeben, ist der Fix
 `ac0e188` (Stopp-Knopf) plus der bereits am 05.09. behobene
