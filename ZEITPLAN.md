@@ -223,6 +223,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `quickReplies`-Feld wird beim Laden zu `[]` normalisiert). Der
   ursprüngliche Auto-Fix-PR #20 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 16.09. (zweiter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug direkt auf `it-chef/auto` behoben:
+  `ChatInput.tsx` und `EditMode.tsx` (beide Enter-Handler) sendeten die
+  Nachricht bzw. legten die Aktivität schon bei jedem `keydown` mit
+  `key === 'Enter'` an — auch dann, wenn dieses Enter nur eine laufende
+  IME-Komposition (japanische/chinesische/koreanische Eingabemethoden)
+  bestätigt hat. Das schickte den halb fertig komponierten Text
+  vorzeitig ab bzw. legte eine Aktivität mit unvollständigem Namen an.
+  Fix: zusätzliche Prüfung `!event.nativeEvent.isComposing` in allen
+  drei betroffenen `onKeyDown`-Handlern (`ChatInput.tsx` sowie beide
+  Enter-Handler in `EditMode.tsx`). Vier neue Regressionstests
+  (`ChatInput.test.tsx`, `EditMode.test.tsx`), die ein `keydown` mit
+  `isComposing: true` simulieren und bestätigen, dass weder gesendet
+  noch eine Aktivität angelegt wird.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

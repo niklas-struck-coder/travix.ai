@@ -10530,3 +10530,62 @@ Dateien) — `it-chef/auto` bleibt grün.
 
 **Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf
 `it-chef/auto`.
+
+## 2026-09-16, zweiter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto`
+(`6b0b155`) identisch mit `origin/it-chef/auto`, `main` weiterhin
+unverändert Vorfahre — kein Merge nötig, `main` nicht angerührt. `npm
+ci` (frisch, keine `node_modules` im Container), Baseline vorab
+bestätigt: `npx vitest run` (56 Testdateien, 305 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — unveränderter
+Stand seit dem ersten Lauf heute (00:11 UTC), alle offenen Sprint-3/4-
+Punkte hängen weiterhin an offenen Architektur-/Produktentscheidungen
+(Kriterium 1/2 nicht erfüllt). `main`, `marketing-chef/auto` und
+`support-chef/auto` haben seit dem ersten Lauf heute keine neuen Commits
+— keine neuen Berichte oder Auto-Fix-PRs zu prüfen. Keine
+TODO/FIXME-Kommentare in `src/`.
+
+Zusätzlich eine eigenständige Codelektüre über bisher noch nicht in
+dieser Tiefe geprüfte Bereiche durchgeführt: `src/components/chat/**`,
+`src/components/search/**`, `src/components/trip/**`,
+`src/components/layout/**`, `src/lib/duffel/client.ts`,
+`src/lib/ai/speech.ts`, `src/lib/format.ts`, `src/lib/utils.ts`,
+`src/lib/nav-config.ts`, `src/hooks/useConcierge.ts`, sowie `tsc
+--noEmit` gegen kaputte Importe (sauber).
+
+**Fund:** `ChatInput.tsx:57-59` und `EditMode.tsx:96-98`/`:108-110`
+prüften in ihren `onKeyDown`-Handlern nur `event.key === 'Enter'`, ohne
+`event.nativeEvent.isComposing` zu berücksichtigen. Bei Eingabe über
+eine IME (japanische/chinesische/koreanische Tastatur) löst das
+Bestätigen eines Kandidaten per Enter einen nativen `keydown` mit
+`key === 'Enter'` aus, während die Komposition noch läuft — die App
+schickte dadurch in `ChatInput.tsx` den halb komponierten Text
+vorzeitig als Chat-Nachricht ab (Rest der Eingabe ging verloren), bzw.
+legte in `EditMode.tsx` eine Aktivität mit unvollständigem Namen an.
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten, keine offene Produkt-/
+Architekturentscheidung, klar umrissen (bekanntes React/IME-Bugmuster,
+Standard-Fix), objektiv prüfbar per Unit-Test.
+
+**Fix:** zusätzliche Bedingung `!event.nativeEvent.isComposing` in allen
+drei betroffenen `onKeyDown`-Handlern ergänzt (`ChatInput.tsx`,
+`EditMode.tsx` Namensfeld, `EditMode.tsx` Preisfeld). Vier neue
+Regressionstests: zwei in `ChatInput.test.tsx` (Enter sendet normal;
+Enter mit `isComposing: true` sendet nicht), zwei in `EditMode.test.tsx`
+(Enter mit `isComposing: true` legt weder im Namens- noch im
+Preisfeld eine Aktivität an).
+
+**Geprüft:** `npx vitest run` (56 Testdateien, 309 Tests, davon 4 neu —
+alle grün), `npm run lint` (0 Fehler, nur die drei vorbestehenden
+Warnings in unveränderten Dateien), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/chat/ChatInput.tsx`,
+`src/components/trip/EditMode.tsx` (Fix), `ChatInput.test.tsx`,
+`EditMode.test.tsx` (4 neue Tests), `ZEITPLAN.md` (Eintrag ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.

@@ -94,7 +94,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
               value={name}
               onChange={(event) => setName(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') addActivity()
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
               }}
               placeholder="z. B. Stadtführung"
             />
@@ -106,7 +106,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
               value={price}
               onChange={(event) => setPrice(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') addActivity()
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
               }}
               placeholder="optional"
             />

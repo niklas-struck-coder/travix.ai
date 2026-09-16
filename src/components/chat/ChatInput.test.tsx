@@ -89,3 +89,32 @@ describe('ChatInput microphone errors', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Spracheingabe hat nicht geklappt')
   })
 })
+
+describe('ChatInput Enter key', () => {
+  it('sends the message when pressing Enter', () => {
+    const onSend = vi.fn()
+    render(<ChatInput onSend={onSend} />)
+
+    fireEvent.change(screen.getByPlaceholderText('Beschreibe deine Traumreise…'), {
+      target: { value: 'Hallo' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText('Beschreibe deine Traumreise…'), { key: 'Enter' })
+
+    expect(onSend).toHaveBeenCalledWith('Hallo')
+  })
+
+  it('does not send the message when Enter confirms an IME composition', () => {
+    const onSend = vi.fn()
+    render(<ChatInput onSend={onSend} />)
+
+    fireEvent.change(screen.getByPlaceholderText('Beschreibe deine Traumreise…'), {
+      target: { value: 'こんにちは' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText('Beschreibe deine Traumreise…'), {
+      key: 'Enter',
+      isComposing: true,
+    })
+
+    expect(onSend).not.toHaveBeenCalled()
+  })
+})

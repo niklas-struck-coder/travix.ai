@@ -55,7 +55,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
           value={value}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') handleSend()
+            if (event.key === 'Enter' && !event.nativeEvent.isComposing) handleSend()
           }}
           placeholder={placeholder}
           disabled={disabled}

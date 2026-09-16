@@ -68,6 +68,25 @@ describe('EditMode', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('does not add an activity when Enter confirms an IME composition in the name field', () => {
+    const onChange = renderEditMode([])
+
+    fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'すし' } })
+    fireEvent.keyDown(screen.getByLabelText('Neue Aktivität'), { key: 'Enter', isComposing: true })
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('does not add an activity when Enter confirms an IME composition in the price field', () => {
+    const onChange = renderEditMode([])
+
+    fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'Stadtführung' } })
+    fireEvent.change(screen.getByLabelText('Preis'), { target: { value: '25' } })
+    fireEvent.keyDown(screen.getByLabelText('Preis'), { key: 'Enter', isComposing: true })
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('removes an existing activity', () => {
     const onChange = renderEditMode([{ id: '1', name: 'Museum', price: '10 €' }])
 
