@@ -10468,3 +10468,65 @@ Typfehler, Build erfolgreich).
 (Eintrag ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht. Der
 ursprüngliche Auto-Fix-PR #20 bleibt als überholt zurück (kann bei
 nächster PR-Hygiene-Aufräumung geschlossen werden).
+
+## 2026-09-16 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto`
+(`46e586b`) war identisch mit `origin/it-chef/auto`, `main` weiterhin
+unverändert Vorfahre (kein neuer Commit auf `main` seit dem fünften Lauf
+am 15.09.) — kein Merge nötig, `main` nicht angerührt.
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md` (aktueller Sprint 3,
+KW37-39) und `tasks/tasks-prd-travix-platform.md` durchgesehen: alle
+offenen Punkte in Sprint 3/4 (7.4, 7.12, 8.2-8.7, 8.9, 8.11, 8.12, 8.13)
+hängen unverändert an einer offenen Architektur-/Backend-Entscheidung
+(Mehrfach-Chat-Historien, echte Preisfelder in `TripDraft`), einer noch
+ausstehenden Produktentscheidung (Zahlungsprozess, Premium-Tarife,
+Rewards-Regeln laut PRD OQ-04) oder fehlendem Vorlauf-Content (Hilfe-FAQ
+vom Support-Chef, PRD-Frage OQ-05 zur Sprachumschaltung) — Kriterium 1/2
+nicht erfüllt, keiner davon neu seit dem letzten Lauf.
+
+`reports/it-chef.md` und `reports/support-chef.md` (beide 15.09.) erneut
+gegen den aktuellen Code geprüft: Der einzig noch offene Punkt aus
+`reports/it-chef.md` (Fokus-Rückgabe nach Bestätigungsdialogen) ist
+bereits durch den vierten Lauf vom 15.09. erledigt (`2d0f024`); der
+`loadStoredChat()`-Fund ebenfalls bereits durch den fünften Lauf erledigt
+(`46e586b`), der zugehörige Auto-Fix-PR #20 bleibt entsprechend überholt
+liegen (unverändert seit dem letzten Bericht, keine neue PR seit dem
+15.09. laut GitHub). Die beiden verbleibenden Support-Chef-Vorschläge
+(Hilfe-Seite ohne Kontaktweg, Warenkorb als Sackgasse) bleiben aus
+denselben bereits mehrfach dokumentierten Gründen unangetastet: beide
+würden ohne echte Tatsachengrundlage bzw. vor einer offenen
+Produktentscheidung Inhalte erfinden (Kriterium 2/3 nicht erfüllt).
+
+Zusätzlich eine frische, eigenständige Codelektüre über die zuvor noch
+nicht in dieser Tiefe geprüften Bereiche durchgeführt (`tripStorage.ts`,
+`useChat.ts`, `mockAdvisor.ts`, alle `src/pages/*.tsx` auf Tippfehler und
+kaputte Links, `cartTotals.ts`/`calendarUtils.ts`/`checklistRules.ts` auf
+Rechenfehler, `dialog.tsx` vs. `sheet.tsx` auf das gleiche
+Fokus-Verlust-Muster, `routes.tsx`/`nav-config.ts` auf verwaiste oder
+unerreichbare Routen): keine neuen ungeschützten Zugriffe, keine
+Tippfehler, keine kaputten Links, keine Rechenfehler gefunden. `sheet.tsx`
+übernimmt das `onCloseAutoFocus`-Muster aus `dialog.tsx` bewusst nicht —
+zu Recht, da `Sheet` nur in `MobileNav.tsx` mit einem statischen,
+nie verschwindenden Trigger verwendet wird, das Problem (Trigger
+verschwindet während der Dialog offen ist) dort also gar nicht auftreten
+kann. Einzige Beobachtung ohne Bug-Charakter: `calculateProgress.ts`
+gewichtet Aktivitäten anders als `isTripComplete()` in `tripStorage.ts`
+(0-80%-Fortschritt vs. bewusst ausgeklammert für "vollständig") — laut
+Code-Kommentaren gewolltes Design, beide Anzeigen erscheinen nie
+gleichzeitig auf derselben Seite, daher kein Fund.
+
+Keine neuen offenen Auto-Fix-PRs seit `#20` (15.09., bereits überholt).
+
+**Ergebnis: kein sicherer Punkt für einen autonomen Fix gefunden.** Kein
+Code geändert.
+
+**Branch-Gesundheit trotzdem geprüft:** frischer `npm ci`, volle
+Testsuite (`npx vitest run`: 56 Testdateien, 305 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen in unveränderten
+Dateien) — `it-chef/auto` bleibt grün.
+
+**Commit:** nur dieser Log-Eintrag, siehe Git-Historie auf
+`it-chef/auto`.
