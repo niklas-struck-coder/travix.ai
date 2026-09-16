@@ -3562,3 +3562,67 @@ unverändert fort. Zweitens: in diesem Lauf ist mir selbst ein Fehler
 unterlaufen (versehentlicher Merge trotz dokumentierter Vorgeschichte),
 den ich zwar noch im selben Lauf per Revert korrigiert habe, der aber
 Ni transparent gemeldet werden sollte.
+
+## 2026-09-16, früher Nacht-Check (0-4-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (`2d0f024` … `97f96ae`),
+  davon vier inhaltliche Fixes und ein reiner "kein neuer sicherer
+  Punkt gefunden"-Log-Eintrag.
+- `marketing-chef/auto` — 0 Commits vor `main`. Wie in der
+  Auftragsbeschreibung für den frühen Lauf vorgesehen, planmäßig
+  übersprungen (läuft erst im 6-Uhr-Slot, heute noch keine neuen
+  Commits).
+- `support-chef/auto` — 0 Commits vor `main`. Ebenfalls planmäßig
+  übersprungen; der seit dem 09.09. bekannte `585efea`-Blocker bleibt
+  unverändert für den nächsten (6-Uhr-)Lauf vorgemerkt.
+
+**Prüfung `it-chef/auto`** (unabhängig nachvollzogen, nicht nur dem Log
+geglaubt):
+- Diff zu `main` gelesen (`git log --stat origin/main..origin/it-chef/auto`):
+  vier Fix-Commits, jeweils sauber auf einen Punkt begrenzt (Datei(en) +
+  zugehöriger Test + `ZEITPLAN.md`/`it-chef-auto-log.md`), plus ein reiner
+  Log-Commit ohne Code-Änderung.
+  - `2d0f024`: Fokus-Rückgabe nach Bestätigungsdialogen (Löschen) zentral
+    in `dialog.tsx` behoben — `DialogContent` merkt sich das auslösende
+    Element vor dem Öffnen und fokussiert es beim Schließen zurück, sonst
+    die Seitenüberschrift. Genau der von Support-Chef am 15.09. gemeldete
+    Fund (`d8569dc`), nur als zentraler Fix statt fünffacher Duplizierung.
+  - `46e586b`: `loadStoredChat()` normalisiert jetzt zusätzlich zu
+    `trip.activities` auch `messages`/`quickReplies` gegen fehlende Felder
+    in Legacy-/korrupten `localStorage`-Daten (gleiches
+    `Array.isArray(...) ? ... : []`-Muster wie beim bestehenden
+    `activities`-Guard).
+  - `5685f5c`: `ChatInput`/`EditMode` prüfen bei Enter jetzt zusätzlich
+    `event.nativeEvent.isComposing`, damit das Bestätigen eines
+    IME-Kandidaten (z. B. Japanisch/Chinesisch/Koreanisch) nicht mehr ein
+    vorzeitiges Senden/Anlegen mit unvollständigem Text auslöst.
+  - `97f96ae`: neue `clearStoredChat()`-Hilfsfunktion in `tripStorage.ts`
+    nach dem bestehenden `saveStoredChat()`-Muster (try/catch); `resetChat()`
+    nutzt sie jetzt statt eines ungeschützten `localStorage.removeItem`-Aufrufs.
+  - `6b0b155`: reiner Log-Eintrag ("kein neuer sicherer Punkt gefunden"),
+    keine Code-Änderung.
+- Scope pro Fix-Commit sauber abgegrenzt, kein Bezug zu Auth, Zahlungen
+  oder rechtlichen Texten in allen vier Diffs bestätigt.
+- Design-Konsistenz gegen `MARKENDESIGN.md` geprüft: der `dialog.tsx`-Fix
+  ist reines Fokus-/Tastatur-Verhalten ohne visuelle Änderung (kein neues
+  Markup, keine Farben/Abstände geändert), die übrigen drei Fixes betreffen
+  gar keine UI-Darstellung — keine Design-Frage berührt.
+- **Unabhängig selbst ausgeführt** (frischer Checkout von
+  `origin/it-chef/auto`, nicht nur den Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 Pakete, 0 Vulnerabilities.
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `badge.tsx`/`button.tsx`/`tabs.tsx` (unverändert, nicht durch diesen
+    Branch verursacht).
+  - `npx vitest run` → 56 Testdateien, **312 Tests, alle grün**.
+→ **Alles grün und passt zum beschriebenen Scope, nach `main` gemergt**
+(Fast-Forward `19ab0e3..97f96ae`, gepusht).
+
+**Ergebnis:** Ein Branch inhaltlich geprüft und gemergt (`it-chef/auto`,
+4 Fixes + 1 Log-Eintrag), zwei Branches planmäßig ohne neue Prüfung
+übersprungen (`marketing-chef/auto`, `support-chef/auto` — beide ohne
+neue Commits von heute).
+
+**Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
+bereits Dokumentierte hinausgeht.
