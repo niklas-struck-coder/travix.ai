@@ -2040,3 +2040,623 @@ Werte ab (`formatTime`/`formatDuration` liefern `—` statt kaputter
 Ausgabe), Umstiege werden korrekt nur ab 1 angezeigt und pluralisiert, der
 Nulltreffer-Fall nutzt bereits die etablierte, ehrliche
 `NoResultsMessage`-Komponente statt eigenem Text.
+
+## 2026-09-09 — Fehlgeschlagene Unterkunftssuche im Chat (`HotelResults.tsx`, `useChat.ts`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** `reports/it-chef.md` (Stand 08.09.) nennt als
+heute gefundenen, aber noch nicht behobenen Punkt die fehlende
+`stayErrors`-Angleichung an das Flug-Vorbild — dieselbe Stelle war schon
+im eigenen Bericht vom 01.09. ausdrücklich als "nicht geprüft"
+vermerkt (siehe dort). Heute aus reiner Nutzersicht nachvollzogen, ob
+das tatsächlich als Reibungspunkt spürbar wird:
+
+- `src/components/search/HotelResults.tsx`
+- `src/components/search/FlightResults.tsx` (zum Vergleich)
+- `src/hooks/useChat.ts:179-206` und `:326-355` (beide `searchStays()`-
+  Aufrufstellen: Haupt-Chat-Ablauf und der "Bearbeiten"-Pfad)
+- `src/lib/duffel/client.ts:15-53` (`callDuffelProxy`)
+
+### Reibungspunkt
+
+**Eine fehlgeschlagene Unterkunftssuche zeigt immer denselben Satz, egal
+was wirklich schiefging — während dieselbe Infrastruktur bei Flügen den
+konkreten Grund anzeigt**
+
+`callDuffelProxy()` (`client.ts:15-53`) unterscheidet beim Fehlschlag
+bereits sauber zwischen drei Fällen und liefert für jeden eine eigene,
+für Nutzer:innen verständliche deutsche Meldung: ein Netzwerk-/Parse-
+Fehler ("bitte prüfe deine Internetverbindung …", Zeile 50), ein Duffel-
+API-Fehler mit Eingaben-Bezug ("bitte prüfe deine Eingaben …", Zeile 34)
+oder ein reiner Status-Code-Fallback (Zeile 37). `searchStays()` reicht
+diese `DuffelError[]` unverändert durch (`client.ts:200`) — die
+Information ist also an der Quelle für Flüge und Unterkünfte
+gleichermaßen vorhanden.
+
+`FlightResults.tsx:25-36` gibt genau diese `errors`-Liste 1:1 an die
+Nutzerin weiter (`error.message`). `HotelResults.tsx:8-32` hat dagegen
+gar keine Möglichkeit dazu: Die `error`-Prop ist ein reines `boolean`
+(Zeile 10), und Zeile 29 zeigt immer denselben festen Text ("Die
+Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal."),
+egal ob eigentlich ein Netzwerkproblem, eine falsche Eingabe oder ein
+Server-Fehler vorlag. `useChat.ts` verwirft die konkrete Meldung an
+beiden Aufrufstellen aktiv, statt sie nur nicht zu nutzen:
+`result.errors.length > 0` löst jeweils nur `setStayError(true)` aus
+(Zeile 191 und 341), der eigentliche Inhalt von `result.errors` wird nie
+gelesen. Aus Nutzersicht bedeutet das: Bei einem einfachen
+Internet-Aussetzer bekommt man exakt dieselbe Meldung wie bei einem
+tieferliegenden Problem, das ein "versuch's gleich nochmal" gar nicht
+lösen würde — während dieselbe Situation bei der Flugsuche im selben
+Chat unmittelbar daneben schon differenziert erklärt wird. Das fällt
+besonders auf, weil beide Ergebnisblöcke (`KiChat.tsx:133-139`) im
+selben Chatverlauf direkt untereinander erscheinen können.
+
+*Vorschlag:* Deckt sich mit dem bereits im IT-Chef-Bericht vom 08.09.
+vorgeschlagenen Fix — aus Nutzersicht bestätigt: `stayError: boolean`
+(useChat.ts, `KiChat.tsx`, `HotelResults.tsx`) durch `stayErrors:
+DuffelError[]` ersetzen, exakt nach dem Vorbild von `flightErrors`/
+`FlightResults.tsx`. Kein neues Konzept nötig, nur dasselbe bereits
+etablierte und bewährte Muster von Flug auf Unterkunft übertragen.
+
+### Nicht geprüft
+Der Nulltreffer-Fall (`offers.length === 0`) ist davon nicht betroffen —
+der nutzt bereits korrekt die ehrliche `NoResultsMessage`-Komponente statt
+einer Fehlermeldung. Ebenfalls nicht vertieft: ob nach einem Fehler ein
+erneuter Versuch innerhalb desselben Chats möglich sein sollte (aktuell
+bei Flug und Unterkunft identisch nur "Neue Reise planen") — das ist ein
+eigenständiges, größeres Verhaltensthema und kein Teil dieses Fundes.
+
+### Nachtrag (16.09., Korrektur)
+Dieser Fund ist inzwischen behoben und **überholt** — hier stehen
+gelassen, weil er tagelang der einzige Grund war, warum Freigabe-Chef
+diesen gesamten Branch nicht nach `main` mergen konnte (siehe
+`freigabe-chef-log.md`, 09.–15.09., sieben Läufe in Folge blockiert).
+Aktueller Code (`src/hooks/useChat.ts:78`, `git grep stayErrors`)
+zeigt bereits `const [stayErrors, setStayErrors] = useState<DuffelError[]>([])`
+— der oben beschriebene `stayError: boolean` existiert nicht mehr, der
+Fix wurde am 08.09. um 22:11 UTC über Commit `7068653` ("Fix:
+Unterkunftssuche im Chat zeigt jetzt die konkrete Duffel-Fehlermeldung")
+umgesetzt und ist bereits Teil von `main`. Für künftige Läufe: Vor dem
+erneuten Melden eines Fundes den aktuellen Code gegenprüfen, nicht nur
+den eigenen älteren Bericht fortschreiben.
+
+---
+
+## 2026-09-10 — Bestätigungsdialog beim Chat-Neustart (`KiChat.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` hat der autonome IT-Chef-Lauf am
+09.09. genau den eigenen Vorschlag vom selben Tag (`reports/support-chef.md`)
+umgesetzt: Der bis dahin ungeschützte "Neu starten"-Icon-Knopf im
+Chat-Header (`KiChat.tsx`) löst `resetChat()` jetzt nicht mehr sofort aus,
+sondern öffnet erst einen Bestätigungsdialog. Diese Änderung kam erst nach
+dem letzten eigenen Bericht (09.09., anderer Fund oben) in `main` an und
+wurde bisher noch nicht aus Nutzersicht nachvollzogen — heute geprüft:
+
+- `src/components/chat/KiChat.tsx:29-101` (Dialog-State, `handleReset`,
+  `confirmReset`, `handleQuickReply`)
+- `src/components/chat/KiChat.tsx:125-145` (Dialog-Markup)
+- `src/lib/trip/tripStorage.ts:74-77` (`hasTripData()`, zum Vergleich)
+- `src/components/chat/KiChat.test.tsx` (bestehende Tests zum Dialog)
+
+### Reibungspunkt
+
+**Der Bestätigungsdialog erscheint auch dann, wenn es noch gar nichts zu
+verlieren gibt — und behauptet dann fälschlich das Gegenteil**
+
+Der Dialog in `KiChat.tsx:125-145` wird unbedingt gerendert, sobald der
+Knopf geklickt wird — unabhängig vom aktuellen `trip`-Zustand. Genau
+dieselbe Datei hat aber bereits an zwei anderen Stellen (Zeile 68 und 175)
+das etablierte Muster, per `hasTripData(trip)` zu prüfen, ob überhaupt eine
+nennenswerte Planung existiert. Direkt nach dem Laden der Seite (frischer
+Besuch ohne gespeicherten Chat, `trip` ist `emptyTrip`, siehe
+`useChat.ts:110-127`) oder direkt nach einem gerade erst durchgeführten
+Reset ist `hasTripData(trip)` `false` — es gibt nichts, was ein erneuter
+Klick auf "Neu starten" tatsächlich zerstören würde. Der Dialog zeigt in
+genau diesem Fall trotzdem denselben Text an: "Neu starten?" /
+"Deine aktuelle Planung geht verloren." (Zeile 133-134) — eine Aussage, die
+in diesem Zustand schlicht nicht stimmt. Für die Nutzerin bedeutet das
+einen unnötigen zusätzlichen Klick ("Ja, neu starten" bestätigen für eine
+Aktion, die ohnehin folgenlos wäre) und eine leicht verunsichernde,
+falsche Warnung ("was geht denn verloren, ich hab doch noch gar nichts
+gemacht?").
+
+*Vorschlag:* Den Dialog nur öffnen, wenn `hasTripData(trip)` `true` ist —
+z. B. `DialogTrigger` durch einen einfachen `onClick`-Handler ersetzen, der
+bei fehlender Planung direkt `handleReset()` aufruft und sonst
+`setResetDialogOpen(true)` setzt. Kein neues Konzept, nur dieselbe Prüfung
+übertragen, die in derselben Datei (Zeile 68, 175) schon etabliert ist.
+
+### Nicht geprüft
+Ob der separate "Neue Reise planen"-Quick-Reply-Chip (`handleQuickReply`,
+Zeile 95-101) weiterhin bewusst ohne Bestätigung bleiben soll, ist bereits
+in `ZEITPLAN.md` (09.09.-Eintrag) als Absicht dokumentiert und war nicht
+Teil dieser Prüfung. Die Dialog-Bedienung selbst (Fokus, Tastatur,
+Screenreader) wirkt über die verwendete `Dialog`-Komponente konsistent zu
+den bereits an anderer Stelle genutzten Mustern (`EditMode.tsx`,
+`Buchung.tsx`) und wurde nicht erneut im Detail geprüft.
+
+---
+
+## 2026-09-11 — Hinweis-Karte zu geteiltem Chat (`Reiseentwuerfe.tsx`)
+
+**Geprüfter Bereich:** `src/pages/Reiseentwuerfe.tsx` (`/entwuerfe`),
+die neue Hinweis-Karte (Zeile 134-146), die der autonome IT-Chef-Lauf
+heute Nacht (Commit `78c764f`, "Vorschlag 3 aus reports/support-chef.md,
+10.09.") ergänzt hat: Sie soll ehrlich darauf hinweisen, dass "Planung
+fortsetzen" bei mehreren Entwürfen immer denselben KI-Chat öffnet statt
+den jeweiligen Entwurf.
+
+### Reibungspunkte
+
+**1. Die Bedingung zählt alle Entwürfe, nicht nur wirklich aktive —
+der Hinweis wird dadurch selbst ungenau**
+
+Die Karte wird über `drafts.length > 1` (Zeile 134) eingeblendet, und der
+Text behauptet dann unbedingt: „mehrere gleichzeitig aktive Planungen
+unterstützt Travix noch nicht" (Zeile 141-142). `finalizeDraft` (Zeile
+84-88) entfernt einen abgeschlossenen Entwurf aber nicht aus `drafts` —
+er bleibt mit Status `finalized` im Array. Schließt man im Demo-Zustand
+einen der beiden Entwürfe ab (z. B. Kyoto über den "Abschließen"-Button),
+bleibt `drafts.length` weiterhin 2, die Karte bleibt sichtbar — obwohl
+es jetzt nur noch eine einzige tatsächlich aktive Planung gibt (Lissabon).
+Schließt man beide ab, zeigt die Karte immer noch "mehrere gleichzeitig
+aktive Planungen", obwohl es null aktive gibt. Ausgerechnet die Karte,
+die laut Code-Kommentar (Zeile 127-133) für "ehrlich statt irreführend"
+steht, wird damit in genau dem Fall selbst irreführend, für den
+`finalizeDraft` sichtbar gemacht wurde.
+
+*Vorschlag:* Für die Bedingung und den Text nur nicht-finalisierte
+Entwürfe zählen, z. B. `drafts.filter((d) => d.status !== 'finalized').length > 1`
+statt `drafts.length > 1`.
+
+**2. Kein Weg, den Hinweis dauerhaft auszublenden**
+
+Die Karte (Zeile 134-146) hat keinerlei Dismiss-Mechanik — sie wird bei
+jedem Seitenaufruf erneut angezeigt, solange mehr als ein Entwurf
+existiert, ohne "Verstanden"-Button oder Speicherung einer
+Ausgeblendet-Präferenz. Für eine Nutzerin mit dauerhaft mehreren echten
+Reiseplanungen (der Normalfall, sobald es keine Demo-Daten mehr sind)
+liest sie denselben Hinweistext bei jedem einzelnen Besuch der Seite,
+ohne dass sich je etwas ändert. Das folgt zwar demselben bereits
+etablierten Muster wie die Prämienprogramm-Karte in `Dashboard.tsx`
+(auf die der Code-Kommentar in Zeile 128 selbst verweist) — ist an
+dieser zweiten Stelle im Produkt aber kein neues Problem, sondern eine
+Wiederholung desselben grundsätzlichen Reibungspunkts.
+
+*Vorschlag:* Wie bei `Dashboard.tsx` würde sich auch hier ein einmaliges
+"Verstanden, nicht mehr zeigen" lohnen (z. B. per `localStorage`-Flag),
+statt beide Stellen dauerhaft unbedingt einzublenden.
+
+### Nicht geprüft
+Die drei bereits am 19.08. gemeldeten Reibungspunkte zu dieser Datei
+(sofortiges Löschen ohne Rückgängig, "Planung fortsetzen" bei
+abgeschlossenen Entwürfen, nicht unterscheidbare duplizierte Karte)
+bestehen laut heutigem Code-Stand unverändert fort, wurden hier aber
+nicht erneut im Detail wiederholt, da sie bereits dokumentiert sind. Die
+übrigen, heute vom IT-Chef-Auto-Lauf gemergten Änderungen (`ChatMessage.
+test.tsx`, `FlightResults.test.tsx`, `HotelResults.test.tsx`,
+`NoResultsMessage.test.tsx`) sind laut deren eigenen Commit-Beschreibungen
+reine Testabdeckung für bestehendes, unverändertes Verhalten ohne neuen
+Code-Pfad — dafür gibt es aus Nutzersicht nichts Neues zu prüfen.
+
+---
+
+## 2026-09-12 — Platzhalter-Seite (`PlaceholderPage.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Seit dem letzten Bericht (11.09.) ist laut
+`ZEITPLAN.md` kein neuer UI-Code mit echter Verhaltensänderung nach `main`
+gelandet — der heutige autonome IT-Chef-Lauf hat ausschließlich fehlende
+Testdateien für bestehende, unveränderte Komponenten nachgezogen
+(`PageHeader.test.tsx`, `PlaceholderPage.test.tsx`, `src/pages/KiChat.test.tsx`
+als dünner Seiten-Wrapper, sowie `TripSummaryCard.test.tsx`,
+`QuickReplies.test.tsx` an früheren Tagen) — jeweils laut eigener
+Commit-Beschreibung "kein neuer Bug gefunden". Da `PlaceholderPage.tsx`
+dadurch heute neu eine eigene Testdatei bekommen hat, aber in diesem Log
+bisher nie als eigenständiger Prüfgegenstand behandelt wurde (nur einmal
+beiläufig am 22.08. erwähnt), wird sie heute erstmals eigenständig aus
+Nutzersicht geprüft:
+
+- `src/pages/PlaceholderPage.tsx`
+- `src/routes.tsx:75-87` (Einbindung für alle noch nicht gebauten Routen)
+- `src/lib/nav-config.ts` (welche Nav-Punkte darüber laufen: `/hilfe`,
+  `/deal-finder`, `/budget`, `/premium`)
+
+Zum Vergleich herangezogen: `src/pages/Favoriten.tsx:44-59` und
+`src/components/search/NoResultsMessage.tsx` (etabliertes
+Leerzustand-Muster mit konkretem Handlungslink).
+
+### Reibungspunkte
+
+**1. Interne Entwickler-Sprache direkt im Nutzertext — "Travix-Grundgerüst"**
+
+`src/pages/PlaceholderPage.tsx:17`: Der einzige Text auf der Seite lautet
+"{title} wird als Nächstes gebaut. Diese Seite ist Teil des
+Travix-Grundgerüsts." Der Begriff "Grundgerüst" ist Entwickler-/
+Projektsprache (vgl. `ZEITPLAN.md` Zeile 32: "Phase 1 Scaffolding") und
+sagt einer Nutzerin nichts über den eigentlichen Inhalt der Seite — sie
+erklärt nicht, was "Grundgerüst" bedeutet oder warum sie das interessieren
+sollte. Der Rest der App vermeidet durchgängig solche internen Begriffe
+(vgl. die durchgehend nutzerorientierten Leertexte in `Favoriten.tsx`,
+`Warenkorb.tsx`, `NoResultsMessage.tsx`) — hier fällt der Ton spürbar aus
+dem sonst etablierten, freundlichen Muster.
+
+*Vorschlag:* Den Satz auf eine reine Nutzerperspektive umformulieren, ohne
+internen Fachbegriff, z. B. "{title} ist bei Travix in Arbeit — schau
+bald wieder vorbei." Der Hinweis auf ein "Grundgerüst" bringt der Nutzerin
+nichts und kann ersatzlos wegfallen.
+
+**2. Einziger Leerzustand in der App ohne jeden Handlungslink — reine Sackgasse**
+
+`src/pages/PlaceholderPage.tsx:14-19`: Anders als jeder andere
+Leer-/Platzhalterzustand in der Codebase — `Favoriten.tsx:54-59` ("Ziele
+entdecken" → `/`), `Warenkorb.tsx` (Link zu `/ki-chat`, laut Log vom
+20.08. bereits als "für gut befunden" dokumentiert), sowie
+`NoResultsMessage.tsx`, das zumindest im umgebenden Kontext (Suchseiten)
+weiterhin Eingabefelder zum erneuten Versuch anbietet — hat
+`PlaceholderPage.tsx` überhaupt keinen Button oder Link. Wer über die
+Sidebar auf einen der vier noch nicht gebauten Punkte klickt (`/hilfe`,
+`/deal-finder`, `/budget`, `/premium`), landet auf einer reinen
+Textfläche ohne jeden nächsten Schritt — nicht einmal ein Link zurück zu
+einer sinnvollen Alternativseite.
+
+*Vorschlag:* Mindestens einen Button/Link ergänzen, der zurück zu einer
+sinnvollen Anlaufstelle führt (z. B. "Zum Dashboard" oder "Mit dem
+KI-Chat planen"), analog zum bereits etablierten Muster bei
+`Favoriten.tsx`/`Warenkorb.tsx`.
+
+**3. Besonders gravierend bei `/hilfe`: ausgerechnet die Hilfeseite bietet
+keinerlei Hilfe oder Kontaktmöglichkeit**
+
+`src/lib/nav-config.ts:77` definiert `/hilfe` ("Hilfe", Beschreibung "FAQ
+und Support") als festen, dauerhaft sichtbaren Punkt im "Konto"-Bereich
+der Sidebar — sie läuft aber laut `src/routes.tsx:27-47` (nicht in
+`builtRoutes`) ebenfalls über `PlaceholderPage.tsx` und zeigt exakt
+denselben generischen "wird als Nächstes gebaut"-Text wie z. B. "Travix
+Premium" oder "Deal Finder". Eine Codesuche über `src/` nach
+"support@"/"mailto:" findet keinerlei hinterlegte Kontaktmöglichkeit
+(passend zu `ZEITPLAN.md`, Sprint 1: "Support-E-Mail live" ist weiterhin
+offen, `[ ]`). Für alle anderen Platzhalter-Seiten (Premium, Deal Finder,
+Budget) ist "wird noch gebaut" eine nachvollziehbare Botschaft — bei einer
+Seite, deren einziger Zweck laut eigener Beschreibung Hilfe und Support
+ist, ist ein wortidentischer, kontextloser Platzhalter für eine Nutzerin
+mit einem echten Problem der denkbar ungünstigste Moment für eine
+Sackgasse ohne jeden Ausweg.
+
+*Vorschlag:* Für `/hilfe` gezielt einen eigenen, nicht-generischen Text
+ergänzen, sobald zumindest eine Übergangslösung existiert — und sei es nur
+ein Link zum KI-Chat ("Frag einfach im Chat nach") als Zwischenlösung, bis
+FAQ-Inhalte (siehe `ZEITPLAN.md`, Support-Track Sprint 2) und eine echte
+Hilfe-Seite stehen. Das ist unabhängig von Punkt 1/2 lösbar, ohne auf die
+allgemeine `PlaceholderPage`-Überarbeitung zu warten.
+
+### Nicht geprüft
+Ob und wie sich eine Sonderbehandlung für `/hilfe` sauber in die generische
+`PlaceholderPage`-Komponente einfügen lässt (z. B. optionale
+`ctaLink`/`ctaLabel`-Props für alle vier betroffenen Routen statt nur
+`/hilfe`), wurde nicht im Detail als Umsetzungsvorschlag ausgearbeitet —
+das wäre eine Design-Entscheidung, die über eine reine Analyse hinausgeht.
+
+## 2026-09-13 — Mobile Navigation & Seitenübergang (`MobileNav.tsx`, `PageTransition.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` (Phase 3, Abschnitt
+"Programmierung (IT-Chef)") war Phase 3 Layout/Navigation diese Woche
+mehrfach aktiv Thema des autonomen IT-Chef-Laufs — zuletzt am 13.09. mit
+einer neuen `PageTransition.test.tsx` sowie zuvor am 12.09. mit einer
+neuen `MobileNav.test.tsx`, jeweils erste eigene Testdatei für die
+betroffene Komponente. Beide waren bisher in keinem früheren Auto-Log
+eigenständig aus Nutzersicht geprüft worden (nur `Sidebar.tsx`, das
+Desktop-Gegenstück zu `MobileNav.tsx`, kam bisher vor — dort ging es am
+01.09. um den Einklappen-Button). Heute deshalb beide Dateien geprüft:
+
+- `src/components/layout/MobileNav.tsx` (mobiles Hauptmenü, `<lg` sichtbar,
+  eingebunden über `src/components/layout/AppShell.tsx:10` auf jeder
+  Seite)
+- `src/components/layout/PageTransition.tsx` (Seitenübergangs-Wrapper,
+  laut `src/routes.tsx:56-87` ausnahmslos um jede einzelne Route gelegt —
+  auch um die Platzhalterseiten)
+- Zum Vergleich herangezogen: `src/components/ui/sheet.tsx` und
+  `src/components/ui/dialog.tsx` (gemeinsame Basis für den Schließen-Knopf
+  im mobilen Menü bzw. für Dialoge in der App)
+
+### Reibungspunkte
+
+**1. Der Schließen-Knopf im mobilen Menü kündigt sich Screenreader-Nutzerinnen
+auf Englisch an — mitten in einer sonst durchgehend deutschen App**
+
+`MobileNav.tsx` öffnet sein Menü über `<SheetContent>` aus
+`src/components/ui/sheet.tsx`. Dessen eingebauter Schließen-Knopf
+(`src/components/ui/sheet.tsx:71-83`) hat als einzigen zugänglichen Namen
+`<span className="sr-only">Close</span>` (Zeile 80) — fest auf Englisch
+verdrahtet. Jeder andere interaktive Text in der App, den ich in früheren
+Läufen und heute gesehen habe, ist durchgehend Deutsch — inklusive des
+eigenen Menü-Öffnen-Knopfs direkt daneben (`MobileNav.tsx:23`,
+`aria-label="Menü öffnen"`) und des analogen Musters in `Sidebar.tsx:59`
+(`aria-label={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste
+einklappen'}`). Für eine Screenreader-Nutzerin, die das mobile Menü öffnet
+und wieder schließen will, springt die Sprache an genau dieser Stelle
+unvermittelt auf Englisch — ohne sichtbaren Text daneben (der Knopf zeigt
+nur ein X-Icon), ist dieser eine Name die einzige Information, die sie
+bekommt. Derselbe fest verdrahtete Text existiert identisch in
+`src/components/ui/dialog.tsx:77` und betrifft damit z. B. auch den
+"Neu starten?"-Bestätigungsdialog in `KiChat.tsx`.
+
+*Vorschlag:* `"Close"` in beiden Dateien durch einen deutschen Text
+ersetzen (z. B. `"Schließen"`), analog zu den bereits etablierten
+deutschen `aria-label`-Mustern in `MobileNav.tsx`/`Sidebar.tsx`. Eine
+zentrale Stelle für beide Komponenten, da der Text identisch in
+`sheet.tsx` und `dialog.tsx` steht.
+
+**2. Jeder Seitenwechsel animiert, ohne die Systemeinstellung "Bewegung
+reduzieren" zu respektieren**
+
+`PageTransition.tsx:4-8` definiert eine feste Ein-/Ausblend- und
+Verschiebe-Animation (Opacity 0→1, `y` 8px→0px beim Erscheinen, 0px→-8px
+beim Verlassen), die laut `src/routes.tsx:56-87` ausnahmslos um jede
+Route der gesamten App gelegt ist — ohne Ausnahme, auch um die noch nicht
+gebauten Platzhalterseiten. Eine Codesuche über `src/` nach
+`reducedMotion`/`useReducedMotion`/`MotionConfig`/`prefers-reduced-motion`
+findet keinerlei Treffer — die Animation läuft unverändert für jede
+Nutzerin, unabhängig davon, ob sie auf Betriebssystem- oder
+Browser-Ebene "Bewegung reduzieren" aktiviert hat. Das betrifft Menschen
+mit vestibulären Störungen oder Reisekrankheit-ähnlicher
+Bewegungsempfindlichkeit potenziell bei praktisch jedem Klick in der App,
+nicht nur an einer einzelnen Stelle — `framer-motion` (bereits
+Projektabhängigkeit, siehe `ChatMessage.tsx`-Nutzung laut Log vom 13.09.)
+bietet mit `useReducedMotion()`/`<MotionConfig reducedMotion="user">`
+eine eingebaute Lösung genau dafür, die hier bisher nicht verwendet wird.
+
+*Vorschlag:* `PageTransition.tsx` über `useReducedMotion()` (oder global
+per `<MotionConfig reducedMotion="user">` einmal um die gesamte App) an
+die Systemeinstellung koppeln, sodass bei aktivierter Präferenz nur noch
+ein reiner Opacity-Wechsel (oder gar keine Animation) läuft statt der
+Verschiebung. Kleine, lokal begrenzte Änderung an einer einzigen Datei,
+mit systemweiter Wirkung, weil `PageTransition` bereits jede Route
+umschließt.
+
+### Sonst unauffällig
+Restliches Verhalten von `MobileNav.tsx` sauber: Klick auf einen
+Nav-Link schließt das Menü zuverlässig (`onClick={() => setOpen(false)}`,
+Zeile 45), der Öffnen-Knopf hat bereits ein deutsches `aria-label`
+(Zeile 23, exakt im Muster des `Sidebar.tsx`-Fixes vom 01.09.), und die
+Gruppierung übernimmt unverändert dieselbe `navGroups`-Quelle wie die
+Desktop-Sidebar (keine Abweichung zwischen beiden Ansichten). Für
+`PageTransition.tsx` selbst (abgesehen von Punkt 2) keine weiteren
+Auffälligkeiten — Dauer (0.2s) und Easing sind über alle Routen
+konsistent.
+
+---
+
+## 2026-09-14 — Bestätigungsdialoge auf Preisalarme/Favoriten/Angebote (`/preisalarme`, `/favoriten`, `/angebote`)
+
+**Geprüfter Bereich:** `src/pages/Preisalarme.tsx`, `src/pages/Favoriten.tsx`
+und `src/pages/Angebote.tsx` — laut `ZEITPLAN.md` heute vom autonomen
+IT-Chef-Lauf umgesetzt: genau der am 13.09. in `reports/support-chef.md`
+(Vorschlag 2) gemeldete Fund ("Löschen ist an mehreren Stellen sofort und
+endgültig, ohne Bestätigung") ist für diese drei von fünf betroffenen
+Seiten jetzt behoben, über dasselbe `Dialog`-Muster wie beim bestehenden
+"Neu starten?"-Dialog in `KiChat.tsx`.
+
+Positiv zuerst: Die drei Umsetzungen sind wirklich einheitlich (gleicher
+`pendingRemoval`-State, gleiche `DialogTitle`/`DialogDescription`-Struktur,
+gleiches Abbrechen/destructive-Button-Layout, korrekte deutsche
+`aria-label`/`title` pro Karte) — genau das "einmal festlegen, dann
+überall gleich anwenden", das der ursprüngliche Bericht vorschlug. Auch
+der frühere Fund vom 26.08. (Entfernen-Icon `BellOff` in
+`Preisalarme.tsx` las sich wie "Stummschalten") ist inzwischen behoben:
+die Seite nutzt jetzt `Trash2` (Zeile 3, 112), passend zum Vorschlag von
+damals.
+
+### Reibungspunkte
+
+**1. Auf `Favoriten.tsx` löst ausgerechnet das Herz-Icon jetzt einen
+Bestätigungsdialog aus — das widerspricht der Bedeutung des Icons selbst**
+
+`Favoriten.tsx:98-107`: Der Entfernen-Button pro Karte zeigt ein
+ausgefülltes `Heart`-Icon (`fill-current`) in Teal — optisch identisch
+mit dem "gespeichert/geliked"-Herz, das in praktisch jeder bekannten App
+(Instagram, Pinterest, Airbnb, Booking.com) per einzelnem Klick sofort
+umschaltet, ohne Rückfrage. Seit dem heutigen Fix öffnet ein Klick darauf
+aber den Bestätigungsdialog "Aus Favoriten entfernen?" (Zeile 123-141) —
+dieselbe Bestätigungslogik wie bei einem eindeutigen Löschen-Icon
+(`Trash2`/`X` bei `Preisalarme.tsx`/`Angebote.tsx`, wo sie zur
+Icon-Bedeutung passt). Bei `Favoriten.tsx` verlangt ein Icon, das überall
+sonst "sofort umschaltbar" bedeutet, plötzlich einen zusätzlichen Klick —
+das kann verwirren, gerade weil die Nutzerin aus anderen Apps genau das
+Gegenteil gewohnt ist.
+
+*Vorschlag:* Entweder das Icon bei `Favoriten.tsx` auf ein eindeutiges
+Löschen-Symbol ändern (analog `Trash2`/`X` bei den beiden Schwesterseiten,
+dann passt der Dialog zur Ikonografie), oder — sobald es einen echten
+"Ziel erneut zu Favoriten hinzufügen"-Weg gibt — beim Herz-Icon speziell
+beim sofortigen Umschalten ohne Dialog bleiben, wie in jeder Referenz-App.
+
+**2. Erreicht ein Preisalarm sein Ziel, gibt es keinen einzigen
+Handlungs-Link — genau der Moment, für den die Funktion gedacht ist**
+
+`Preisalarme.tsx:116-121`: Ist `targetReached` wahr, erscheint nur der
+Badge "Ziel erreicht" neben dem Preis — keine weitere Aktion auf der
+Karte. Anders als bei `Favoriten.tsx:112-117`, wo jede Karte einen
+"Reise mit KI planen"-Button hat, oder bei `Angebote.tsx`, wo die Karte
+immerhin das gespeicherte Angebot zeigt: Wer nach einem erreichten
+Preisziel als Nächstes bucht/sucht, muss die App komplett verlassen und
+selbst zum Chat oder zur Flug-/Hotelsuche navigieren, ohne dass die Karte
+selbst dorthin verlinkt. Der eigentliche Zweck eines Preisalarms — "dein
+Wunschpreis ist da, jetzt handeln" — bleibt an genau der Stelle, wo er am
+wichtigsten wäre, ohne jeden Ausweg.
+
+*Vorschlag:* Bei `targetReached` einen zusätzlichen Button auf der Karte
+("Jetzt buchen" / "Reise mit KI planen", analog `Favoriten.tsx:112-117`)
+anzeigen, der zum Chat (mit vorbefüllter Route, falls machbar) oder zur
+manuellen Flugsuche führt.
+
+### Bereits bekannt, hier nur bestätigt weiterhin aktuell
+`src/pages/Aktivitaeten.tsx:82` und `src/pages/Warenkorb.tsx:95` haben
+den heutigen Bestätigungsdialog-Fix noch nicht bekommen — ein Klick auf
+den Entfernen-Button löscht dort weiterhin sofort und endgültig, exakt
+das Verhalten, das auf den drei anderen Seiten heute behoben wurde. Laut
+`ZEITPLAN.md` (14.09.-Einträge) ist das bewusst für künftige Läufe offen
+gelassen, kein neuer Fund — aber die Lücke zwischen den fünf
+gleichartigen Listenseiten ist jetzt spürbarer: eine Nutzerin, die auf
+`/favoriten` gerade gelernt hat, dass Löschen nachgefragt wird, trifft
+auf `/aktivitaeten` und `/warenkorb` unangekündigt wieder auf das
+alte, sofortige Verhalten.
+
+---
+
+## 2026-09-15 — Bestätigungsdialoge auf Aktivitäten/Warenkorb (`/aktivitaeten`, `/warenkorb`)
+
+**Geprüfter Bereich:** `src/pages/Aktivitaeten.tsx` und
+`src/pages/Warenkorb.tsx` — laut `git log` gestern Abend (Commits
+`c849a60`, 22:10 Uhr, und `38a1f47`, 23:07 Uhr) vom autonomen
+IT-Chef-Lauf mit demselben Bestätigungsdialog-Muster ausgestattet, das
+im obigen Eintrag vom 14.09. bereits für Preisalarme/Favoriten/Angebote
+geprüft wurde — die beiden letzten der ursprünglichen Fünf-Seiten-Liste
+aus `reports/support-chef.md` (13.09., Vorschlag 2), damit heute erstmals
+selbst geprüft, nicht nur zum Vergleich herangezogen.
+
+### Reibungspunkte
+
+**1. Nach dem Bestätigen geht der Tastatur-/Screenreader-Fokus verloren, statt auf der Liste zu bleiben**
+
+`src/pages/Aktivitaeten.tsx:98` und `src/pages/Warenkorb.tsx:111`: Der
+Entfernen-Button pro Karte ist ein normaler `Button` mit `onClick={() =>
+setPendingRemoval(...)}` — anders als beim "Neu starten?"-Dialog in
+`KiChat.tsx` liegt hier kein `DialogTrigger` um den Knopf, den Radix beim
+Schließen automatisch wieder fokussieren könnte. `confirmRemoval()`
+(`Aktivitaeten.tsx:49-53`, `Warenkorb.tsx:49-53`) entfernt die Karte
+(inkl. ihres Entfernen-Buttons) aus dem Array und schließt den Dialog im
+selben Zug (`setPendingRemoval(null)`), sodass genau der DOM-Knoten, zu
+dem Radix beim Schließen des Dialogs den Fokus zurückgeben würde, in
+diesem Moment bereits verschwunden ist. Für Tastatur- und
+Screenreader-Nutzer:innen bedeutet das: Nach "Ja, entfernen" landet der
+Fokus nicht mehr erkennbar auf der Liste (z. B. auf der nächsten Karte),
+sondern fällt auf das `<body>`-Element zurück — wer mehrere Aktivitäten
+oder Warenkorb-Positionen hintereinander per Tastatur entfernen will,
+muss sich nach jedem einzelnen Entfernen erneut von ganz oben durch die
+Seite tabben. Die bestehenden Tests (`Aktivitaeten.test.tsx:40-66`,
+`Warenkorb.test.tsx:53-88`) decken nur ab, dass die richtige Karte
+verschwindet, nicht wohin der Fokus nach dem Schließen wandert — das
+Verhalten ist damit unbemerkt geblieben. Da `Preisalarme.tsx`,
+`Favoriten.tsx` und `Angebote.tsx` (gestern geprüft) exakt dasselbe
+Dialog-Muster ohne `DialogTrigger` verwenden (`Preisalarme.tsx:110`,
+`Favoriten.tsx:104`, `Angebote.tsx:119`), betrifft dieser Fund
+vermutlich alle fünf Seiten gleichermaßen — im gestrigen Eintrag war er
+noch nicht aufgefallen.
+
+*Vorschlag:* Auf `DialogPrimitive.Content` ein eigenes
+`onCloseAutoFocus` setzen, das den Fokus gezielt auf ein noch
+vorhandenes Element legt (z. B. die Seitenüberschrift per `PageHeader`
+oder den Entfernen-Button der nächsten verbliebenen Karte), statt sich
+auf Radix' Standard-Rückgabe an einen inzwischen entfernten Knoten zu
+verlassen. Da das Dialog-Muster identisch in fünf Dateien wiederholt
+wird, wäre eine zentrale Lösung in `src/components/ui/dialog.tsx` oder
+ein gemeinsamer kleiner Hook sinnvoller als eine Einzellösung pro Seite.
+
+### Bereits bekannt, hier nur bestätigt weiterhin aktuell
+`src/pages/Warenkorb.tsx` hat auch nach dem gestrigen Dialog-Fix
+weiterhin keinen Weg von der Kassenübersicht zur eigentlichen Buchung —
+eine Codesuche nach "Weiter zur Buchung"/"checkout"/"/buchung" in der
+Datei findet nichts. Der bereits am 20.08. gemeldete Fund ("Kein Weg von
+der Kassenübersicht zur eigentlichen Buchung") bleibt damit unverändert
+offen; der gestrige Lauf hat gezielt nur das Löschen-Verhalten
+angefasst, nicht diesen Punkt. `src/pages/Aktivitaeten.tsx` hat
+ebenfalls weiterhin keine Handlungsmöglichkeit pro Karte außer Entfernen
+(bereits am 17.08. gemeldet) — auch das unverändert seit dem gestrigen
+Dialog-Fix.
+
+### Nicht geprüft
+Das im Eintrag vom 14.09. bei `Favoriten.tsx` gemeldete
+Icon-Bedeutungs-Problem (Herz-Icon löst einen Löschen-Dialog aus) wurde
+nicht erneut geprüft, da es dort bereits dokumentiert ist und
+`Aktivitaeten.tsx`/`Warenkorb.tsx` beide das eindeutige `X`-Icon
+verwenden, wo dieses spezielle Problem nicht auftritt.
+
+## 2026-09-16 — Chat-/Aktivitäten-Eingabefelder (`ChatInput.tsx`, `EditMode.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `it-chef-auto-log.md` hat der autonome
+IT-Chef-Lauf heute früh (zweiter Lauf) `src/components/chat/ChatInput.tsx`
+und `src/components/trip/EditMode.tsx` geändert (Commit `5685f5c`,
+`!event.nativeEvent.isComposing`-Bedingung in allen drei Enter-Handlern
+ergänzt, gegen ein vorzeitiges Absenden bei laufender IME-Komposition).
+Dieser Fix ist bisher nur auf `it-chef/auto` gepusht, noch nicht von
+Freigabe-Chef nach `main` gemergt — hier trotzdem schon anhand des
+Branch-Stands geprüft, da es sich um denselben, bereits mehrfach als
+zuverlässig bestätigten Freigabe-Kanal handelt. Zum Vergleich der eigene
+ältere Eintrag vom 18.08. zu `EditMode.tsx`.
+
+### Bestätigt: Enter-Taste im Namensfeld funktioniert jetzt wie erwartet
+Der am 18.08. gemeldete Fund 1 ("Enter-Taste im 'Neue Aktivität'-Feld tut
+nichts") ist mit diesem Fix erledigt — `EditMode.tsx:96-98`/`:108-110`
+lösen `addActivity()` jetzt bei Enter aus, korrekt ohne vorzeitiges
+Auslösen mitten in einer IME-Komposition. Keine neue Lücke durch den Fix
+selbst gefunden (beide betroffenen Felder — Name und Preis — sowie
+`ChatInput.tsx` konsistent auf dasselbe Muster umgestellt).
+
+### Reibungspunkte
+
+**1. Eine laufende Spracheingabe lässt sich nicht abbrechen**
+`src/components/chat/ChatInput.tsx:26-33`: `handleMicClick()` bricht
+sofort ab (`if (!isSpeechRecognitionSupported() || listening) return`),
+sobald `listening` bereits `true` ist — ein zweiter Klick auf denselben
+Button während der pulsierenden Aufnahme-Anzeige tut also nichts. Der
+von `startListening()` (`src/lib/ai/speech.ts:32-56`) zurückgegebene
+`recognition`-Wert (der eine funktionierende `.stop()`-Methode hätte)
+wird beim Aufruf in `ChatInput.tsx:29` gar nicht erst aufgefangen. Da
+`recognition.continuous = false` gesetzt ist, endet eine gestartete
+Aufnahme nur durch die eigene Stille-Erkennung des Browsers, einen
+erkannten Satz oder einen Fehler — nicht durch eine bewusste Nutzer:innen-
+Aktion. Wer aus Versehen auf das Mikrofon tippt (z. B. im Chat-Header
+direkt neben anderen kleinen Icon-Buttons) und es sich sofort anders
+überlegt, hat keine Möglichkeit, das abzubrechen, sondern muss abwarten
+oder etwas hineinsprechen, das dann ungewollt als Nachricht übernommen
+wird (`onResult`, Zeile 29, hängt den Text direkt an das Eingabefeld an).
+
+*Vorschlag:* Den `recognition`-Rückgabewert von `startListening()` in
+einer Ref halten und in `handleMicClick()` bei `listening === true`
+stattdessen `recognition.stop()` aufrufen (Klick wird dann zum
+Ein-/Ausschalter), analog zum bereits etablierten Muster "zweiter Klick
+= Gegenaktion" bei den kürzlich gebauten Bestätigungsdialogen
+(z. B. Preisalarme/Favoriten/Angebote/Aktivitäten/Warenkorb).
+
+**2. `EditMode.tsx`: Aktivität entfernen bleibt die letzte Stelle im
+Produkt ohne jede Rückfrage vor endgültigem Löschen**
+`src/components/trip/EditMode.tsx:76-83`: Ein Klick auf den
+`Trash2`-Icon-Button ruft weiterhin direkt `removeActivity(activity.id)`
+auf — keine Bestätigung, kein Rückgängig. Das ist derselbe Fund, der
+hier bereits am 18.08. (Punkt 2) gemeldet wurde, damals mit dem Vorschlag
+eines "Rückgängig"-Toasts. Inzwischen hat der IT-Chef-Kanal genau das
+zugrunde liegende Muster ("X-Klick löscht sofort und endgültig") über
+fünf verschiedene Seiten hinweg mit demselben Bestätigungsdialog
+behoben — `Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`,
+`Aktivitaeten.tsx` (die Seite `/aktivitaeten`, zu unterscheiden von
+diesem `EditMode.tsx`-Dialog) und `Warenkorb.tsx` (siehe
+`it-chef-auto-log.md`, 14./15.09.). `EditMode.tsx` selbst — der Dialog,
+über den man dieselben Aktivitäten manuell bearbeitet — wurde dabei nicht
+mitgenommen, vermutlich weil er nicht in der ursprünglichen Fünf-Seiten-
+Liste aus `reports/support-chef.md` (13.09.) stand. Für Nutzer:innen ist
+das inzwischen eine auffällige Ausnahme: Auf der Aktivitäten-Liste selbst
+fragt travix.ai vor dem Entfernen extra nach, im dazugehörigen
+Bearbeiten-Dialog für dieselben Aktivitäten aber nicht.
+
+*Vorschlag:* Exakt dasselbe, bereits fünffach erprobte `Dialog`-Muster
+(Bestätigungstext mit Aktivitätsnamen, "Abbrechen"/"Ja, entfernen") auch
+hier auf den `Trash2`-Button anwenden, statt eine neue Lösung (Toast) zu
+entwerfen — konsistenter für Nutzer:innen und kein neuer Entwurfsaufwand,
+da das Muster bereits fertig vorliegt.
+
+### Nicht geprüft
+Der am 18.08. gemeldete Fund 3 (Preisfeld ohne Währungssymbol/Format,
+`EditMode.tsx:69-75`/`:100-106`) bleibt unverändert offen, hier nicht
+erneut vertieft, da er durch den heutigen Fix nicht berührt wurde und
+bereits dokumentiert ist. `Urlaubsmodus.tsx` als zweite Einbindungsstelle
+von `ChatInput` wurde nicht gesondert geprüft — der Mikrofon-Fund gilt
+dort identisch, da `ChatInput` unverändert wiederverwendet wird.
