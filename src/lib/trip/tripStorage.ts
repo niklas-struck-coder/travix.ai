@@ -44,6 +44,17 @@ export function saveStoredChat(state: StoredChatState): boolean {
   }
 }
 
+// Same reasoning as saveStoredChat's try/catch above: resetChat() in useChat.ts
+// must reset its in-memory state even if removeItem itself throws (private
+// browsing, restrictive webviews).
+export function clearStoredChat(): void {
+  try {
+    localStorage.removeItem(CHAT_STORAGE_KEY)
+  } catch (error) {
+    console.error('Lokales Löschen des Chat-Zustands fehlgeschlagen', error)
+  }
+}
+
 /**
  * Merges a partial trip update (e.g. a flight selected outside the chat, on
  * the standalone Flugsuche page) into the currently stored trip. No-op if no

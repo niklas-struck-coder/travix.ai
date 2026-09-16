@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { CHAT_STORAGE_KEY, hasTripData, loadStoredChat, saveStoredChat, updateStoredTrip } from '@/lib/trip/tripStorage'
+import {
+  CHAT_STORAGE_KEY,
+  clearStoredChat,
+  hasTripData,
+  loadStoredChat,
+  saveStoredChat,
+  updateStoredTrip,
+} from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 
@@ -102,6 +109,38 @@ describe('saveStoredChat', () => {
     }
 
     expect(saveStoredChat(state)).toBe(true)
+  })
+})
+
+describe('clearStoredChat', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('does not throw when localStorage.removeItem throws (e.g. private browsing)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new DOMException('SecurityError')
+    })
+
+    expect(() => clearStoredChat()).not.toThrow()
+  })
+
+  it('still removes the stored chat when localStorage works', () => {
+    const state: StoredChatState = {
+      messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
+      trip: { ...emptyTrip, destination: 'Lissabon' },
+      quickReplies: [],
+    }
+    saveStoredChat(state)
+
+    clearStoredChat()
+
+    expect(loadStoredChat()).toBeNull()
   })
 })
 

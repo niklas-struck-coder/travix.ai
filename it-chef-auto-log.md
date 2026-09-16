@@ -10589,3 +10589,71 @@ build`, kein Typfehler, Build erfolgreich).
 `src/components/trip/EditMode.tsx` (Fix), `ChatInput.test.tsx`,
 `EditMode.test.tsx` (4 neue Tests), `ZEITPLAN.md` (Eintrag ergänzt),
 dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-16, dritter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto`
+(`5685f5c`) identisch mit `origin/it-chef/auto`, `main` weiterhin
+unverändert Vorfahre (kein neuer Commit auf `main`, `marketing-chef/auto`
+oder `support-chef/auto` seit dem zweiten Lauf heute) — kein Merge nötig,
+`main` nicht angerührt. Baseline vorab bestätigt: `npx vitest run` (56
+Testdateien, 309 Tests, alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — unveränderter
+Stand seit den ersten beiden Läufen heute, alle offenen Sprint-3/4-Punkte
+hängen weiterhin an offenen Architektur-/Produktentscheidungen (Kriterium
+1/2 nicht erfüllt). Statt einer erneuten vollständigen Codelektüre (bereits
+in den letzten beiden Läufen sehr breit abgedeckt) gezielt die verbliebenen
+14 offenen `it-chef-autofix/*`-Branches gegen den aktuellen Code auf
+`it-chef/auto` geprüft, ob einer davon ein noch nicht behobenes Problem
+beschreibt. 13 der 14 sind vollständig überholt (der jeweils diagnostizierte
+Bug ist inzwischen über einen unabhängig entwickelten, oft robusteren Fix
+bereits behoben — u. a. `concierge-question-word-boundary`,
+`duffel-network-error-message`, `flightwizard-passengers-nan`,
+`flugsuche-missing-search-reset`/`-stale-results`,
+`mainflow-accommodation-quickreplies`, `past-date-departure-checkin`,
+`preisformat-de`, `stay-search-resolved-errors`,
+`transportmode-word-boundary`, beide `ueberrasch-mich-*`-Branches,
+`unhandled-stay-search-promise`).
+
+**Fund:** `it-chef-autofix/localstorage-write-unprotected-2026-08-12` war
+nur noch teilweise überholt: drei der vier ursprünglich gemeldeten
+ungeschützten `localStorage`-Zugriffe sind seither über `saveStoredChat()`
+(`tripStorage.ts`) abgesichert, `resetChat()` (`useChat.ts:381`) rief
+`localStorage.removeItem(CHAT_STORAGE_KEY)` aber weiterhin direkt auf, ohne
+`try`/`catch`. Bei vollem Speicher, deaktiviertem Storage (privates
+Surfen) oder in restriktiven Webviews hätte das mitten in der
+"Neu starten?"/"Neue Reise planen"-Aktion geworfen und den eigentlich rein
+im Speicher stattfindenden Reset abgebrochen. Erfüllt alle vier
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine `localStorage`-Fehlerbehandlung, gleiches Muster wie
+der bereits gemergte `saveStoredChat()`-Fix), keine offene
+Produktentscheidung, klar umrissen (Diagnose und Fix-Mechanismus standen
+bereits im alten Auto-Fix-Branch, hier nur an den aktuellen Code
+angepasst), objektiv prüfbar (Regressionstest mit geworfenem
+`removeItem`, Typecheck, Build).
+
+**Fix:** neue `clearStoredChat()`-Hilfsfunktion in `tripStorage.ts`, exakt
+nach dem bestehenden `saveStoredChat()`-Muster (Aufruf in `try`/`catch`,
+Fehler nur über `console.error` geloggt statt geworfen); `resetChat()`
+nutzt sie jetzt statt des rohen `localStorage.removeItem`-Aufrufs. Drei
+neue Regressionstests: zwei in `tripStorage.test.ts` (`clearStoredChat()`
+wirft nicht, wenn `removeItem` wirft; löscht weiterhin normal, wenn
+`localStorage` funktioniert), einer in `useChat.test.ts` (`removeItem`
+wirft eine `DOMException`, `resetChat()` wirft trotzdem nicht und setzt
+den Chat auf die einzelne Begrüßungsnachricht zurück).
+
+**Geprüft:** `npx vitest run` (56 Testdateien, 312 Tests, davon 3 neu —
+alle grün), `npm run lint` (0 Fehler, nur die drei vorbestehenden
+Warnungen in unveränderten Dateien), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/lib/trip/tripStorage.ts`, `src/hooks/useChat.ts` (Fix),
+`src/lib/trip/tripStorage.test.ts`, `src/hooks/useChat.test.ts` (3 neue
+Tests), `ZEITPLAN.md` (Eintrag ergänzt), dieser Log-Eintrag — auf
+`it-chef/auto` gepusht. Der ursprüngliche Auto-Fix-Branch
+`it-chef-autofix/localstorage-write-unprotected-2026-08-12` bleibt jetzt
+vollständig überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
+gelöscht werden, wie die anderen 13 bereits überholten Branches).

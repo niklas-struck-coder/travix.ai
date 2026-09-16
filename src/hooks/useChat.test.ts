@@ -495,6 +495,25 @@ describe('useChat persistence resilience', () => {
 
     expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow()
   })
+
+  it('still resets the in-memory chat when localStorage.removeItem throws (e.g. private browsing)', () => {
+    const { result } = renderHook(() => useChat(false))
+    act(() => {
+      result.current.sendMessage(KNOWN_DESTINATION)
+    })
+
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new DOMException('SecurityError')
+    })
+
+    expect(() => {
+      act(() => {
+        result.current.resetChat()
+      })
+    }).not.toThrow()
+    expect(result.current.messages.length).toBe(1)
+  })
 })
 
 describe('useChat selectFlight confirmation message', () => {

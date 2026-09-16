@@ -237,6 +237,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (`ChatInput.test.tsx`, `EditMode.test.tsx`), die ein `keydown` mit
   `isComposing: true` simulieren und bestätigen, dass weder gesendet
   noch eine Aktivität angelegt wird.
+  Vom autonomen IT-Chef-Lauf am 16.09. (dritter Lauf desselben Tages) den
+  letzten noch offenen Rest aus dem alten, bereits größtenteils
+  überholten Auto-Fix-PR-Branch
+  `it-chef-autofix/localstorage-write-unprotected-2026-08-12` nachgezogen:
+  drei der vier ursprünglich ungeschützten `localStorage`-Zugriffe sind
+  seither bereits über `saveStoredChat()` (`tripStorage.ts`) abgesichert,
+  `resetChat()` (`useChat.ts`) rief `localStorage.removeItem(...)` aber
+  weiterhin direkt und ungeschützt auf — bei vollem Speicher, deaktiviertem
+  Storage oder in restriktiven Webviews hätte das mitten in der
+  "Neu starten?"/"Neue Reise planen"-Aktion geworfen und den (an sich rein
+  im Speicher stattfindenden) Reset abgebrochen. Fix: neue
+  `clearStoredChat()`-Hilfsfunktion in `tripStorage.ts`, exakt nach dem
+  bestehenden `saveStoredChat()`-Muster (Aufruf in `try`/`catch`, Fehler nur
+  geloggt statt geworfen); `resetChat()` nutzt sie jetzt statt des rohen
+  `localStorage.removeItem`-Aufrufs. Drei neue Regressionstests (zwei in
+  `tripStorage.test.ts` für `clearStoredChat()` selbst, einer in
+  `useChat.test.ts`, der `Storage.prototype.removeItem` werfen lässt und
+  bestätigt, dass `resetChat()` trotzdem nicht wirft und den Chat auf die
+  Begrüßungsnachricht zurücksetzt). Der ursprüngliche Auto-Fix-PR-Branch
+  bleibt als vollständig überholt zurück (kann bei nächster
+  PR-Hygiene-Aufräumung gelöscht werden).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -6,7 +6,7 @@ import { searchFlights, searchStays } from '@/lib/duffel/client'
 import { findKnownDestination } from '@/types/stays'
 import type { StayOffer } from '@/types/stays'
 import type { DuffelError, FlightOffer } from '@/types/duffel'
-import { CHAT_STORAGE_KEY, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
+import { clearStoredChat, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
 import { formatOfferPrice } from '@/lib/format'
@@ -378,7 +378,7 @@ export function useChat(speechEnabled: boolean) {
   }
 
   const resetChat = () => {
-    localStorage.removeItem(CHAT_STORAGE_KEY)
+    clearStoredChat()
     const greeting = getGreeting()
     setMessages([makeMessage('assistant', greeting.content)])
     setTrip(greeting.trip)
