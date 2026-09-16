@@ -13,17 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-14):**
-- Zwei weitere Bugfixes: Löschen von Aktivität und Warenkorb erfolgt jetzt
-  ebenfalls sofort endgültig statt mit irreführender Rückfrage
-- Support-Chef hat als neuen Fund gemeldet, dass der Fokus nach Bestätigungsdialogen
-  nicht korrekt zurückgesetzt wird
-- Marketing-Chef hat zwei neue Kandidaten für die nächste Mini-Changelog-Ausgabe
-  identifiziert, aber noch nicht veröffentlicht
-- Ein Merge-Versuch des Support-Chef-Vorschlags wurde vom Freigabe-Chef wieder
-  zurückgenommen (eigener Fehler korrigiert); IT-Chef fand in mehreren Läufen
-  keinen neuen sicheren Punkt zum Umsetzen
+**Seit letztem Update (2026-09-15):**
+- Fokus-Verlust nach Bestätigungsdialogen (Löschen) ist jetzt zentral behoben
+  (gestern von Support-Chef als neuer Fund gemeldet)
+- Drei weitere Robustheits-Fixes im Chat: Enter bricht laufende IME-Komposition
+  nicht mehr ab, resetChat() und loadStoredChat() fangen jetzt Fehlerfälle sauber ab
+- Support-Chef hat Mikrofon-Abbruch und Löschbestätigung im Bearbeiten-Modus als
+  neue Funde gemeldet; Marketing-Chef drei weitere Tier-4-Kandidaten identifiziert
+- Freigabe-Chef hat alle drei Auto-Zweige (IT/Marketing/Support) geprüft und
+  gemergt, ein länger offener Blocker wurde dabei aufgelöst
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-15_
+_Letztes Update: 2026-09-16_
