@@ -1,51 +1,52 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-16
+**Datum:** 2026-09-17
 
-## Was ist seit dem letzten Eintrag (2026-09-15) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-16) passiert?
 
-- Der gestern gemeldete Fokus-Verlust nach Lösch-Bestätigungen ist bereits
-  gemergt und zentral in `DialogContent` behoben — von Fund zu Fix in
-  einem Tag.
-- Drei weitere Robustheits-Fixes im Chat sind gelandet: Enter bricht eine
-  laufende IME-Komposition nicht mehr ab, `resetChat()` und
-  `loadStoredChat()` fangen jetzt kaputte oder alte `localStorage`-Daten
-  sauber ab, statt abzustürzen bzw. Felder stillschweigend zu verlieren.
-- IT-Chef hat einen neuen, unabhängigen Bug gefunden: `formatDuration()`
-  zeigt bei Flügen/Zügen ab 24 Stunden Gesamtdauer den rohen ISO-Code
-  (z. B. „P1DT2H30M") statt einer lesbaren Zeit. Fix liegt auf PR #21,
-  noch nicht gemerged — also noch kein Content-Kandidat.
-- Freigabe-Chef hat die drei Auto-Zweige geprüft, gemergt und dabei einen
-  länger blockierten Support-Chef-Zweig aufgelöst. Reine interne
-  Maschinerie, nach außen ändert das nichts.
-- Der Tier-4-Kandidatentopf für die nächste Mini-Changelog-Ausgabe steht
-  jetzt bei fünf (laut `marketing/freigabe-uebersicht.md`) — weiterhin
-  unter der Schwelle, die frühere Ausgaben ausgelöst hat.
+- Der gestern noch offene `formatDuration()`-Fund (PR #21, rohe ISO-Dauer
+  wie „P1DT2H30M" bei Flügen/Zügen ab 24h) ist jetzt gemerged — damit
+  offiziell ein Content-Kandidat.
+- Zwei weitere Löschbestätigungen sind gelandet: im Bearbeiten-Modus
+  einer Reise (Aktivität entfernen) und auf der Reiseentwürfe-Seite. Das
+  Muster zieht sich damit über praktisch alle Lösch-Aktionen im Produkt.
+- Der Mikrofon-Knopf im Chat stoppt eine laufende Aufnahme jetzt
+  zuverlässig beim zweiten Klick; die „Heute"-Markierung im Kalender ist
+  jetzt auch für Screenreader erkennbar (reiner Barrierefreiheits-Fix,
+  ohne die Ehrlichkeits-Erzählung der anderen Funde).
+- Der autonome Marketing-Lauf hat aus diesen vier neuen Funden plus fünf
+  bereits wartenden **Ausgabe 4** des Mini-Changelog-Entwurfs geschrieben
+  (`marketing/mini-changelog-konzept.md`) — der Kandidatentopf ist damit
+  wieder leer. Es liegen jetzt **vier fertige Entwurfs-Ausgaben** bereit,
+  keine einzige live.
+- Support-Chef hat die Reiseentwürfe-Seite geprüft und zwei neue
+  UX-Funde gemeldet (Details in `reports/support-chef.md`).
 - Die vier offenen Fragen (Kanal, Warenkorb-Content, wiederkehrendes
-  Social-Format, Mini-Changelog-Start) sind weiterhin unbeantwortet —
-  jetzt seit über vier Wochen.
+  Social-Format, Mini-Changelog-Start) sind weiterhin unbeantwortet.
 - Keine neuen Nutzungs- oder Erfolgszahlen bekannt — bleibt ehrlich außen
   vor.
 
 ## Vorschläge
 
-1. **Die Robustheits-Fixes der letzten Tage sammeln statt einzeln
-   verheizen.** IME-Enter, `resetChat()`, `loadStoredChat()` und bald
-   `formatDuration()` (sobald PR #21 gemerged ist) erzählen zusammen eine
-   Geschichte: „Wir härten die Basis ab, bevor sie auffällt" — deutlich
-   stärker als vier separate Mini-Posts. Guter Kandidat für eine spätere
-   „Zuverlässigkeit hinter den Kulissen"-Ausgabe, sobald ein Kanal steht.
-2. **Bei der Kanal-Frage weiter auf den Mini-Changelog als Einstieg
-   setzen.** Über vier Wochen Stillstand bei derselben Frage — mein
-   Vorschlag bleibt: Der Mini-Changelog auf der eigenen Produktseite
-   (Tier 5) ist die einzige der vier Fragen, die ausschließlich deine
-   Freigabe braucht, keinen externen Kanal und keine Social-Format-
-   Entscheidung. Das wäre der niedrigste Aufwand, um überhaupt mal live
-   zu gehen.
-3. **Den formatDuration-Fund vormerken, nicht überstürzen.** Sobald PR #21
-   gemerged ist, ist „wir zeigen bei 24h+ Flügen jetzt eine echte Dauer
-   statt eines rohen Codes" ein guter, konkreter Baustein für die nächste
-   Mini-Changelog-Ausgabe oder die Zuverlässigkeits-Geschichte aus
-   Vorschlag 1 — aber erst nach dem Merge, nicht vorher.
+1. **Die Mini-Changelog-Frage jetzt wirklich entscheiden, nicht mehr nur
+   wiederholen.** Vier fertige Ausgaben liegen im Entwurf, die vierte
+   erscheint zeitnah nach der dritten – das ist kein Ideenmangel mehr,
+   sondern reiner Freigabe-Stau. Konkreter Vorschlag: Nicht alle vier auf
+   einmal veröffentlichen, sondern nur Ausgabe 1 als „Testballon" live
+   schalten, um zu sehen, ob das Format überhaupt jemand liest, bevor
+   Ausgabe 2-4 nachziehen.
+2. **Die gesammelten Robustheits-/Ehrlichkeits-Fixes als eigene Story
+   behandeln, sobald ein Kanal steht.** formatDuration, die durchgängige
+   Löschbestätigung, IME-Enter, resetChat() und jetzt der Mikrofon-Fix
+   ergeben zusammen eine klare Erzählung: „Wir polieren die Basis, bevor
+   sie jemandem auffällt." Stärker als vier Einzel-Posts.
+3. **Barrierefreiheits-Fixes (z. B. die Kalender-Screenreader-Markierung)
+   bewusst getrennt von der Ehrlichkeits-Reihe sammeln.** Passt nicht zur
+   „falsche Info korrigiert"-Erzählung, wäre aber ein eigener, ehrlicher
+   Baustein für eine spätere „Barrierefreiheit ernst nehmen"-Notiz, falls
+   sich genug solcher Fixes ansammeln.
+4. **Bei der Kanal-Frage weiter auf den Mini-Changelog als Einstieg
+   pochen.** Unverändert die einzige der vier Fragen, die nur deine
+   Freigabe braucht, keinen externen Kanal.
 
-_Letztes Update: 2026-09-16_
+_Letztes Update: 2026-09-17_
