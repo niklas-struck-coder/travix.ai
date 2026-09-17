@@ -504,3 +504,109 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer (siehe
 `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab jetzt für
 eine mögliche vierte Ausgabe.
+
+## Ausgabe 4 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-09-17
+
+Wie Ausgabe 1/2/3: **nichts davon ist live.** Reiner Textentwurf für
+dieselbe, noch nicht gebaute Footer-Seite — hängt an derselben vierten
+Frage wie Ausgabe 1/2/3 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine vierte Ausgabe
+
+Dieselbe Selbstauflage wie bei Ausgabe 2/3: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue,
+einzeln verifizierte Tier-4-Kandidaten angesammelt haben — Richtwert
+bleibt der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst,
+vier galten explizit als "nicht ausreichend"). Der Kandidatentopf war
+laut `marketing/freigabe-uebersicht.md` seit Ausgabe 3 auf fünf
+gewachsen (Kandidaten 9-13: Aktivitäten-/Warenkorb-Löschbestätigung,
+`loadStoredChat()`-Normalisierung, `resetChat()`-Robustheit, mit
+Vorbehalt die IME-Enter-Korrektur) — für sich allein weiterhin unter der
+Achter-Schwelle.
+
+Vor der Auswahl `git log 811302a..origin/main` geprüft (letzter
+Marketing-Lauf, 16.09., laut Branch-Vergleich bereits vollständig in
+`main` gemergt): elf neue Commits. Fünf echte Produkt-Codeänderungen
+einzeln per `git show` geprüft, vier davon neu und content-relevant:
+
+- **`e87973b` (16.09. spät):** der bereits im Bericht vom 16.09.
+  vorgemerkte `formatDuration()`-Fund ist jetzt gemerged (PR #21) — ISO-
+  Dauern mit Tages-Komponente erschienen bei Flug-/Zugverbindungen ab
+  24 Stunden bisher als roher Code (`P1DT2H30M`) statt einer lesbaren
+  Zeit.
+- **`d61cc25` (16.09. spät):** das etablierte Bestätigungsdialog-Muster
+  auf den Bearbeiten-Dialog einer Reise übertragen — der Papierkorb-
+  Button dort löschte eine Aktivität bisher sofort und endgültig, anders
+  als dasselbe Löschen auf `/aktivitaeten`.
+- **`f57c31c` (17.09.):** ein zweiter Klick auf das Mikrofon-Symbol im
+  Chat tat bisher nichts — die laufende Aufnahme lief unbemerkt weiter.
+  Jetzt beendet ein zweiter Klick sie zuverlässig.
+- **`27cdc50` (17.09.):** dasselbe Bestätigungsdialog-Muster auch für
+  Reiseentwurf-Karten übertragen — Löschen war dort bisher sofort und
+  endgültig.
+
+Zusammen mit den fünf bereits im Topf wartenden Kandidaten (siehe
+`marketing/freigabe-uebersicht.md`, Tier 4: Aktivitäten- und
+Warenkorb-Löschbestätigung, `loadStoredChat()`-Normalisierung,
+`resetChat()`-Robustheit, die IME-Enter-Korrektur) ergeben sich **neun**
+Kandidaten — über der Menge, die bereits Ausgabe 2 und 3 ausgelöst hat.
+
+Ein weiterer geprüfter Commit **nicht** aufgenommen (ein realer,
+verifizierter Fix, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung, die
+dieses Format trägt — gleiche Einstufung wie die früheren
+Barrierefreiheits-Ausschlüsse):
+- **`17b61f5` (17.09.):** die "Heute"-Zelle im Kalendergitter war bisher
+  rein farblich markiert, ohne Text-Alternative für Screenreader — echter
+  Barrierefreiheits-Fix, aber kein Fall von irreführender Information
+  oder ungeschütztem Datenverlust.
+
+### Vierte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 15.09. bis 17.09.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-3, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Du wirst gefragt, bevor etwas unwiderruflich gelöscht wird**
+- Dasselbe Sicherheitsnetz wie bei Preisalarmen, Favoriten und Angeboten
+  gibt es jetzt auch bei Aktivitäten und im Warenkorb: Löschen fragt
+  vorher nach, statt sofort und endgültig zu entfernen.
+- Der Papierkorb-Button im Bearbeiten-Dialog einer Reise löschte eine
+  Aktivität bisher ohne Rückfrage — jetzt fragt derselbe
+  Bestätigungsdialog wie überall sonst zuerst nach.
+- Auch eine gespeicherte Reiseentwurf-Karte verschwindet nicht mehr mit
+  einem einzigen Klick: Löschen fragt jetzt genauso nach wie an allen
+  anderen Stellen.
+
+**Verlässlichere Technik im Hintergrund**
+- Alte oder beschädigte gespeicherte Chatdaten lassen den Chatverlauf
+  nicht mehr lückenhaft wirken: fehlende Angaben werden jetzt sauber
+  ergänzt statt unbemerkt zu fehlen.
+- Ein "Neu starten" schlägt nicht mehr fehl, nur weil das Löschen der
+  gespeicherten Daten selbst einen Fehler wirft.
+- Tippst du auf Japanisch, Chinesisch oder Koreanisch, bricht die
+  Eingabetaste eine noch laufende Zeichen-Zusammensetzung nicht mehr
+  versehentlich ab.
+- Ein zweiter Klick auf das Mikrofon-Symbol beendet jetzt zuverlässig die
+  laufende Aufnahme, statt wirkungslos zu bleiben.
+
+**Echte statt verwirrende Angaben**
+- Bei Flug- oder Zugverbindungen ab 24 Stunden Gesamtdauer siehst du
+  jetzt eine lesbare Zeitangabe statt eines rohen technischen Codes.
+
+---
+
+*Wie in Ausgabe 1/2/3: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig oder nicht klar genug
+war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 4 hängt an derselben vierten Frage wie Ausgabe 1/2/3 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche fünfte Ausgabe.

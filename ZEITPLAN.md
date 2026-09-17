@@ -1609,12 +1609,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   konzept.md` — kein Social-Post, sondern Konzept + fertige erste
   Ausgabe für eine öffentliche "Was wurde besser"-Seite im Produkt
   selbst, wartet auf Nis Freigabe (siehe
-  `marketing/freigabe-uebersicht.md`, Tier 5). Am 07.09. Ausgabe 2 und am
-  14.09. Ausgabe 3 desselben Dokuments ergänzt (jeweils weitere
-  Vorher/Nachher-Punkte aus seither gemergten Ehrlichkeits-/
-  Vertrauens-Fixes, u. a. Löschbestätigung vor unwiderruflichem Entfernen
-  von Preisalarm/Favorit/Angebot) — weiterhin an dieselbe, noch
-  unbeantwortete Freigabe-Frage gebunden.
+  `marketing/freigabe-uebersicht.md`, Tier 5). Am 07.09. Ausgabe 2, am
+  14.09. Ausgabe 3 und am 17.09. Ausgabe 4 desselben Dokuments ergänzt
+  (jeweils weitere Vorher/Nachher-Punkte aus seither gemergten
+  Ehrlichkeits-/Vertrauens-Fixes, u. a. Löschbestätigung vor
+  unwiderruflichem Entfernen von Preisalarm/Favorit/Angebot/Aktivität/
+  Reiseentwurf sowie zuletzt eine korrekte Tages-Anzeige bei langen
+  Reisedauern) — weiterhin an dieselbe, noch unbeantwortete
+  Freigabe-Frage gebunden.
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)

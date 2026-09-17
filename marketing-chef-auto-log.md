@@ -4,6 +4,87 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-17
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`7e97458` (16.09., letzter Freigabe-Chef-Merge) hängengeblieben, dessen
+Inhalt bereits vollständig in `main` enthalten war — der Branch war
+also nur noch veraltet, nicht mehr in Arbeit. `origin/main` (`44ec538`)
+per Fast-Forward-Merge in diesen Branch eingebracht, bevor der
+eigentliche Lauf begann.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret `marketing/freigabe-uebersicht.md`
+um einen neuen Prüf-Durchlauf ergänzt (vier neue Tier-4-Kandidaten
+eingeordnet, ein Fund bewusst ausgeschlossen) und darauf aufbauend
+**Ausgabe 4** von `marketing/mini-changelog-konzept.md` geschrieben.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 16.09. beantwortet wurde: keine Notiz in `status.md`,
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder `marketing/freigabe-uebersicht.md`,
+keine neuen Kanal-Links in `src/`/`index.html`, keine neue Changelog-Route
+in `src/routes.tsx`. Alle vier Fragen bleiben offen (jetzt seit über vier
+Wochen). Danach `git log 811302a..origin/main` geprüft: elf neue Commits,
+davon fünf mit echter Produkt-Codeänderung, per `git show` einzeln
+verifiziert:
+- `e87973b` (16.09. spät): der bereits im Bericht vom 16.09. vorgemerkte
+  `formatDuration()`-Fund (PR #21) ist jetzt gemerged — ISO-Dauern mit
+  Tages-Komponente erschienen bisher als roher Code statt lesbarer Zeit.
+  Vierzehnter Tier-4-Kandidat.
+- `d61cc25` (16.09. spät): das etablierte Bestätigungsdialog-Muster auf
+  den Bearbeiten-Dialog einer Reise übertragen (Aktivität löschen).
+  Fünfzehnter Tier-4-Kandidat.
+- `f57c31c` (17.09.): ein zweiter Klick auf das Mikrofon-Symbol beendet
+  jetzt zuverlässig die laufende Aufnahme, statt wirkungslos zu bleiben.
+  Sechzehnter Tier-4-Kandidat.
+- `27cdc50` (17.09.): dasselbe Bestätigungsdialog-Muster auch für
+  Reiseentwurf-Karten übertragen. Siebzehnter Tier-4-Kandidat.
+- `17b61f5` (17.09.): Kalender-„Heute"-Zelle jetzt auch für Screenreader
+  markiert — echter Barrierefreiheits-Fix, aber ohne die
+  "Ehrlichkeit/Vertrauen"-Erzählung dieses Formats. **Bewusst nicht**
+  aufgenommen, gleiche Begründung wie bei früheren reinen
+  Barrierefreiheits-Funden (`2d0f024`, `2f110f7`, `538bb25`).
+
+Zusammen mit den fünf bereits im Topf wartenden Kandidaten (Aktivitäten-/
+Warenkorb-Löschbestätigung, `loadStoredChat()`-Normalisierung,
+`resetChat()`-Robustheit, mit Vorbehalt die IME-Enter-Korrektur) ergaben
+sich **neun** Kandidaten — über der Achter-Schwelle, die bereits Ausgabe 2
+und 3 ausgelöst hat. Deshalb heute Ausgabe 4 geschrieben, statt weiter zu
+sammeln.
+
+**Warum sicher genug:** Ergebnis ist eine reine Übersichts-Ergänzung plus
+ein neues Entwurfskapitel in einem bestehenden Konzeptdokument, kein
+Live-Vorgang — nichts gepostet oder verändert, die Footer-Seite selbst
+bleibt ungebaut. Keine erfundenen Kennzahlen: alle vier neuen Kandidaten
+stammen aus einzeln per `git show` verifizierten, bereits in `main`
+gemergten Commits. Keine offene Positionierungs-Grundsatzfrage: dieser
+Lauf wendet nur die bereits am 06.09. etablierte Achter-Schwelle an,
+trifft keine neue inhaltliche Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neues *Social*-Content-Stück schreiben — bleibt an die drei seit
+  Wochen unbeantworteten Fragen (Kanal, Warenkorb-Content, Social-Format)
+  gebunden, siehe Selbstbeschränkung in `marketing/freigabe-uebersicht.md`.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt an der ebenfalls
+  unbeantworteten Landingpage/Warteliste-Frage (Sprint 2), ein reiner
+  Konzept-Vorentwurf dazu würde ohne echten Kanal/Ort ins Leere laufen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` — neuer Update-Abschnitt
+  (2026-09-17), Tier-4-Liste um Kandidaten 14-17 ergänzt, Tier-5-Eintrag
+  und Schlussabschnitt aktualisiert.
+- `marketing/mini-changelog-konzept.md` — Ausgabe 4 ergänzt (drei
+  Themenblöcke: Löschbestätigungen, Robustheit im Hintergrund, echte
+  statt verwirrende Angaben).
+- `ZEITPLAN.md` — Sprint-4-Notiz im Marketing-Bereich um Ausgabe 4
+  ergänzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-16
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf

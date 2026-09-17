@@ -1,10 +1,69 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-16)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-17)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-17: vier neue Tier-4-Kandidaten (EditMode-Löschbestätigung für Aktivitäten, Mikrofon-Stopp bei zweitem Klick, Reiseentwurf-Löschbestätigung, formatDuration-Tagesanzeige), ein Screenreader-Fix bewusst ausgeschlossen — Topf erreicht mit neun die Achter-Schwelle, vierte Mini-Changelog-Ausgabe geschrieben, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`7e97458` (16.09., letzter Freigabe-Chef-Merge) hängengeblieben.
+`origin/main` (`44ec538`) per Fast-Forward-Merge in diesen Branch
+eingebracht, bevor der eigentliche Lauf begann — kein eigener
+Merge-Commit nötig.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 16.09.), `ZEITPLAN.md`
+(6.2 in Zeile 1285 weiterhin `[ ]`) oder diesem Dokument seit dem 16.09.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen
+Treffer), kein Commit zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite (kein `changelog`-Treffer in `src/routes.tsx`).
+Alle vier Fragen bleiben offen — jetzt seit über vier Wochen.
+
+**`git log 811302a..origin/main` zeigt elf neue Commits, fünf davon mit
+echter Produkt-Codeänderung, per `git show` einzeln geprüft:**
+- `e87973b` (16.09. spät): der am 16.09. bereits vorgemerkte
+  `formatDuration()`-Fund (PR #21) ist jetzt gemerged — ISO-Dauern mit
+  Tages-Komponente (`P1DT2H30M`) erschienen bei Flug-/Zugverbindungen ab
+  24 Stunden bisher als roher Code statt einer lesbaren Zeit. **Vierzehnter
+  Kandidat** — passt in dieselbe "echte statt verwirrende Angabe"-Gruppe
+  wie die früheren Fehlermeldungs- und Preisformat-Funde.
+- `d61cc25` (16.09. spät): der Papierkorb-Button im Bearbeiten-Dialog
+  einer Reise löschte eine Aktivität bisher sofort und endgültig, anders
+  als dasselbe Löschen auf `/aktivitaeten` (Kandidat 9). Übernimmt exakt
+  dasselbe Bestätigungsdialog-Muster. **Fünfzehnter Kandidat** —
+  dieselbe Fundgruppe wie die Löschbestätigungen auf Preisalarme-/
+  Favoriten-/Angebote-/Aktivitäten-/Warenkorb-Seite.
+- `f57c31c` (17.09.): ein zweiter Klick auf das Mikrofon-Symbol in
+  `ChatInput.tsx` tat bisher nichts — die laufende Aufnahme lief weiter,
+  weil die `SpeechRecognition`-Instanz verworfen statt gehalten wurde.
+  Jetzt beendet ein zweiter Klick die Aufnahme zuverlässig. **Sechzehnter
+  Kandidat** — nach Vorschlag 2 aus `reports/support-chef.md` (16.09.),
+  derselbe Bug-Typ (stille Fehlaktion durch einen Bug) wie die bereits
+  gezählten `resetChat()`-/IME-Enter-Funde.
+- `27cdc50` (17.09.): dasselbe Bestätigungsdialog-Muster wie bei
+  Preisalarme-/Favoriten-/Angebote-/Aktivitäten-/Warenkorb-Seite jetzt
+  auch für Reiseentwurf-Karten auf `/reiseentwuerfe` übertragen — Löschen
+  war bisher sofort und endgültig. **Siebzehnter Kandidat.**
+- `17b61f5` (17.09.): die "Heute"-Zelle im Kalendergitter war bisher rein
+  farblich markiert, ohne Text-Alternative für Screenreader — jetzt mit
+  `aria-current="date"` und einem sr-only-Zusatz behoben. **Bewusst nicht**
+  in den Tier-4-Kandidatentopf aufgenommen: echter
+  Barrierefreiheits-Fix, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung
+  dieses Formats — gleiche Begründung wie bei den bereits ausgeschlossenen
+  `2d0f024`, `2f110f7` und `538bb25`.
+
+**Damit reicht der Kandidatentopf von neun** (Kandidaten 9-17, davon
+einer — die IME-Enter-Korrektur — weiterhin mit Vorbehalt) **die
+Achter-Schwelle**, die bereits Ausgabe 2 und 3 ausgelöst hat — deutlich
+über der Menge, die am 06.09. noch als "nicht ausreichend" galt. Alle
+neun sind seit heute in **Ausgabe 4** des Mini-Changelogs verarbeitet
+(siehe `marketing/mini-changelog-konzept.md` und Tier 5 unten) — der
+Kandidatentopf ist damit wieder leer, neue Funde sammeln sich ab jetzt
+für eine mögliche fünfte Ausgabe.
 
 ## Update 2026-09-16: zwei bis drei neue Tier-4-Kandidaten (loadStoredChat()-Normalisierung, resetChat()-Robustheit, mit Vorbehalt die IME-Enter-Korrektur), ein Fokus-Fix bewusst als reiner Barrierefreiheits-Fund ausgeschlossen — Topf damit bei fünf, weiterhin keine vierte Mini-Changelog-Ausgabe, alle vier Fragen weiterhin offen
 
@@ -1737,18 +1796,31 @@ Anfang-bis-Ende-Weg im Code.
    am 15.09. geprüfter Commit bewusst nicht aufgenommen: `2d0f024`
    (Fokus-Rückgabe nach Bestätigungsdialogen zentral in `DialogContent`
    behoben — echter Barrierefreiheits-Fix, gleiche Ausschlussbegründung
-   wie bei `2f110f7`/`538bb25`). Kandidatentopf seit Ausgabe 3 damit bei
-   fünf (Kandidaten 9-13, davon einer mit Vorbehalt).
+   wie bei `2f110f7`/`538bb25`). Seit dem 16./17.09. vier weitere
+   Kandidaten (siehe Update 2026-09-17 oben): der bereits vorgemerkte
+   `formatDuration()`-Fund (**vierzehnter Kandidat**, PR #21 jetzt
+   gemerged), das Bestätigungsdialog-Muster auf den Bearbeiten-Dialog
+   einer Aktivität übertragen (**fünfzehnter Kandidat**), der jetzt
+   zuverlässige Mikrofon-Stopp bei einem zweiten Klick (**sechzehnter
+   Kandidat**) sowie dasselbe Bestätigungsdialog-Muster auf
+   Reiseentwurf-Karten übertragen (**siebzehnter Kandidat**). Ein am
+   selben Tag geprüfter Commit bewusst nicht aufgenommen: `17b61f5`
+   (Kalender-„Heute"-Zelle jetzt auch für Screenreader markiert — echter
+   Barrierefreiheits-Fix, gleiche Ausschlussbegründung wie bei `2d0f024`,
+   `2f110f7` und `538bb25`). **Kandidatentopf damit bei neun (Kandidaten
+   9-17, davon einer mit Vorbehalt) — exakt über der Achter-Schwelle von
+   Ausgabe 2/3, alle neun seit dem 17.09. in Ausgabe 4 verarbeitet.** Der
+   Kandidatentopf ist damit wieder leer.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
 8. **`mini-changelog-konzept.md`** (05.09., Ausgabe 2 am 07.09., Ausgabe 3
-   am 14.09. ergänzt) — Konzept + drei fertige Ausgaben für einen
-   öffentlichen Mini-Changelog *im Produkt* (Footer-Seite), nicht für
-   Social Media gedacht. Bündelt den gesamten seitherigen
-   Tier-4-Kandidatentopf in zwölf kuratierten Themenblöcken über alle drei
-   Ausgaben. Berührt bewusst keine der drei Fragen unten — hat dafür eine
-   eigene, vierte Frage (siehe unten).
+   am 14.09., Ausgabe 4 am 17.09. ergänzt) — Konzept + vier fertige
+   Ausgaben für einen öffentlichen Mini-Changelog *im Produkt*
+   (Footer-Seite), nicht für Social Media gedacht. Bündelt den gesamten
+   seitherigen Tier-4-Kandidatentopf in fünfzehn kuratierten
+   Themenblöcken über alle vier Ausgaben. Berührt bewusst keine der drei
+   Fragen unten — hat dafür eine eigene, vierte Frage (siehe unten).
 
 ## Für Ni: die eigentliche Entscheidung
 
@@ -1766,7 +1838,7 @@ autonome Lauf nicht vorwegnehmen. Konkret zu entscheiden bleibt
 - **Neu seit 05.09.:** Soll der Mini-Changelog (Tier 5, Seite im Produkt
   statt Social) gebaut werden? Unabhängig von den drei Fragen oben zu
   beantworten — braucht weder Kanal noch 6.2 noch eine Social-Format-
-  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen drei
+  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen vier
   fertige Ausgaben, die auf diese eine Antwort warten.
 - **Kein neuer Entscheidungsbedarf, nur zur Kenntnis (seit 07.09.):** Die
   Vorlesen-Funktion im Chat hat seit heute keinen bekannten technischen
@@ -1854,4 +1926,16 @@ zusammen die Funktion erstmals durchgängig zuverlässig machen. Sobald 5.7
 (Zug/Bus/Fähre-Anbindung) umgesetzt wird, wird zusätzlich der bereits
 vorab korrigierte `TrainResults`-Ladetext (`b5fac18`, 08.09., siehe
 Update 2026-09-09 oben) rückwirkend zum Tier-4-Kandidaten, da die
-Komponente dann erstmals einen echten Nutzerpfad hat.
+Komponente dann erstmals einen echten Nutzerpfad hat. Stand 09.16/09.17
+sind vier weitere Kandidaten dazugekommen (formatDuration-Tagesanzeige,
+EditMode-Löschbestätigung, Mikrofon-Stopp bei zweitem Klick,
+Reiseentwurf-Löschbestätigung, siehe Update 2026-09-17 oben) — zusammen
+mit den fünf seit Ausgabe 3 gesammelten Kandidaten reichte der Topf mit
+neun die Achter-Schwelle, deshalb wurde heute **Ausgabe 4** geschrieben
+(siehe `marketing/mini-changelog-konzept.md`). Der Kandidatentopf ist
+damit wieder leer; der nächste Lauf sammelt neue Funde von vorn, mit
+demselben 06.09.-Maßstab (acht = genug, vier = eher nicht) als Richtwert
+für eine fünfte Ausgabe. Weiterhin unverändert: erst prüfen, ob Ni
+zwischenzeitlich eine der vier Fragen beantwortet hat, bevor wieder ein
+neuer *Social*-Text geschrieben wird — die Selbstbeschränkung dazu gilt
+unverändert weiter.
