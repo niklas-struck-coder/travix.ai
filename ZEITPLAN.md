@@ -563,6 +563,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   26h30min-Dauer (`P1DT2H30M`) auf `26h 30min` statt den rohen ISO-String
   prüfen. Der ursprüngliche Auto-Fix-PR #21 bleibt als überholt zurück
   (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) die zuletzt am
+  13.09. dokumentierte, verbliebene Testabdeckungslücke geschlossen:
+  `AppShell.tsx` (3.2, Sidebar/MobileNav-Wrapper um jede Route) war die
+  letzte Nicht-`ui/`-Datei ohne eigene Testdatei, die nicht aus einem der
+  beiden dokumentierten Gründe (Router-Mocking-Umfang bei `routes.tsx`,
+  bewusst ungetestete Einstiegspunkte `App.tsx`/`main.tsx`) zurückgestellt
+  war — anders als vermutet, brauchte sie kein zusätzliches
+  Router-Mocking: `Sidebar`/`MobileNav` rendern beide bereits eigenständig
+  unter einem einfachen `MemoryRouter`-Wrapper (siehe deren jeweils
+  bestehende Testdateien), `AppShell` selbst setzt beide nur nebeneinander.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer
+  Bug gefunden. Neue `AppShell.test.tsx` (1 Test, Muster analog
+  `Sidebar.test.tsx`/`MobileNav.test.tsx`): rendert `children` sowie je
+  einen erreichbaren Namen aus Sidebar ("Seitenleiste einklappen") und
+  MobileNav ("Menü öffnen"), um zu bestätigen, dass beide tatsächlich
+  eingebunden sind. `routes.tsx` bleibt aus dem am 13.09. genannten Grund
+  weiterhin offen (Test würde jede eingebundene Seite mitrendern — deutlich
+  größerer, nicht mehr als "ein einzelner, klar abgegrenzter Punkt"
+  einzustufender Umfang).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

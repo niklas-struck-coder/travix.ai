@@ -11033,3 +11033,64 @@ erfolgreich).
 `src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (fünfter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Zunächst geprüft: `reports/support-chef.md`
+(17.09.), Vorschlag 2 ("Abschließen" in `Reiseentwuerfe.tsx` ohne
+Bestätigung). Ein Fix wurde probeweise umgesetzt, dann aber wieder
+verworfen (siehe unten) — der tatsächlich umgesetzte Punkt ist Task 3.1
+(`AppShell.tsx`) aus `tasks/tasks-prd-travix-platform.md`: letzte
+verbliebene Testabdeckungslücke unter den nicht-`ui/`-Dateien, die im
+13.09.-Eintrag von `ZEITPLAN.md` noch als "bräuchte Router-Mocking,
+größerer Umfang" zurückgestellt war.
+
+**Verworfener erster Versuch:** Vorschlag 2 aus `reports/support-chef.md`
+(17.09.) probeweise mit einem Bestätigungsdialog umgesetzt (identisches
+Muster wie beim bestehenden Löschen-Dialog auf derselben Seite). Beim
+Aktualisieren von `ZEITPLAN.md` fiel auf, dass der direkt vorangegangene
+Lauf desselben Tages genau diesen Punkt bereits bewusst abgelehnt hatte:
+der Bericht selbst nennt zwei gleichwertige Lösungsansätze
+(Bestätigungsdialog vs. kurzer Rückgängig-Hinweis) ohne Vorentscheidung —
+die Wahl zwischen beiden ist Interpretation über das hinaus, was der
+Bericht tatsächlich festlegt, verletzt also Kriterium 3 der
+Sicherheitskriterien. Um diese bereits dokumentierte, weiterhin gültige
+Entscheidung nicht widersprüchlich zu überschreiben, wurden alle
+Änderungen an `Reiseentwuerfe.tsx`/`Reiseentwuerfe.test.tsx`/
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` per `git checkout --`
+verworfen, bevor irgendetwas committet wurde.
+
+**Warum AppShell.tsx sicher genug:** Reine Testabdeckungsergänzung für
+bestehendes, unverändertes Layout-Verhalten — kein Bezug zu Auth,
+Zahlungen, Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-
+oder Architekturentscheidung: `AppShell.tsx` ist fertig und stabil, nur
+ungetestet. Klar umrissen (ein einzelner Test, etabliertes Muster). Beim
+genaueren Hinsehen stellte sich heraus, dass der am 13.09. vermutete
+Router-Mocking-Aufwand nicht zutrifft: `Sidebar`/`MobileNav` rendern
+bereits eigenständig unter einem einfachen `MemoryRouter` (siehe deren
+bestehende Testdateien), `AppShell` setzt beide nur nebeneinander mit
+`children` — objektiv über einen Test prüfbar.
+
+**Umgesetzt:**
+- Neue `src/components/layout/AppShell.test.tsx` (1 Test, Muster analog
+  `Sidebar.test.tsx`/`MobileNav.test.tsx`): rendert `children` sowie je
+  einen erreichbaren Namen aus Sidebar ("Seitenleiste einklappen") und
+  MobileNav ("Menü öffnen") innerhalb eines `MemoryRouter`, um zu
+  bestätigen, dass beide tatsächlich eingebunden werden.
+- Checkbox 3.1 in `tasks/tasks-prd-travix-platform.md` sowie der
+  entsprechende Absatz in `ZEITPLAN.md` ergänzt.
+- `routes.tsx` bleibt bewusst weiterhin ohne eigene Testdatei: ein Test
+  dort würde jede eingebundene Seite mitrendern (deutlich größerer,
+  nicht mehr als "ein einzelner Punkt" einzustufender Umfang) — passend
+  zur bereits am 13.09. dokumentierten Einschätzung.
+
+**Geprüft:** `npx vitest run src/components/layout/AppShell.test.tsx`
+(gezielt, 1 Test grün), danach volle Suite `npx vitest run` (57
+Testdateien, 321 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden `react-refresh/only-export-components`-
+Warnungen in unveränderten Dateien), `npx tsc --noEmit` sowie `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/layout/AppShell.test.tsx` (neu),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.

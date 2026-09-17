@@ -146,7 +146,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 2.10 Add protected route wrapper that redirects unauthenticated users
 
 - [x] 3.0 Core layout & navigation — Sidebar, route shells, responsive shell
-  - [x] 3.1 Create `AppShell.tsx` layout wrapper with sidebar + main content area
+  - [x] 3.1 Create `AppShell.tsx` layout wrapper with sidebar + main content area — Vom autonomen IT-Chef-Lauf am 17.09. eine Testabdeckungslücke geschlossen: neue `AppShell.test.tsx` (1 Test, `MemoryRouter`-Wrapper wie bei `Sidebar.test.tsx`/`MobileNav.test.tsx`) bestätigt, dass `children`, Sidebar und MobileNav zusammen gerendert werden. Reine Testabdeckung, kein neuer Bug, keine Verhaltensänderung.
   - [x] 3.2 Create `Sidebar.tsx` with navigation links for all 20+ routes and collapsible behavior
   - [x] 3.3 Create `MobileNav.tsx` with hamburger menu / bottom nav for mobile
   - [x] 3.4 Create `PageHeader.tsx` reusable component with title, breadcrumbs, and actions
