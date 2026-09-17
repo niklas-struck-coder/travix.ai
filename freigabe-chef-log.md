@@ -3775,3 +3775,64 @@ neue Commits von heute, laufen erst um 6 Uhr).
 
 **Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
 bereits Dokumentierte hinausgeht.
+
+## 2026-09-17, 6-Uhr-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (Stand `17b61f5`, bereits im
+  heutigen "früher Nacht-Check" geprüft und gemergt). Keine neue Prüfung
+  nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`a924d6f`).
+- `support-chef/auto` — 1 neuer Commit (`8b0beab`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert `marketing-chef-auto-log.md`, `marketing/freigabe-uebersicht.md`,
+  `marketing/mini-changelog-konzept.md` (neue Ausgabe 4) und `ZEITPLAN.md`
+  (Statusnotiz) — reine Markdown-Ergänzung, kein Produkt-Code betroffen,
+  kein Build/Lint/Test nötig.
+- Inhaltlich geprüft: Ausgabe 4 des Mini-Changelog-Entwurfs stützt sich
+  ausschließlich auf fünf bereits in `main` gemergte Commits
+  (`e87973b`, `d61cc25`, `f57c31c`, `27cdc50`, plus der bewusst
+  ausgeschlossene `17b61f5`) — keine erfundenen Kennzahlen oder
+  Ergebnisse, jede Aussage ist auf einen echten, verifizierbaren Fix
+  zurückgeführt. Mehrfach und deutlich als reiner Entwurf markiert
+  ("nichts davon ist live", "kein Social-Post... nichts wird gepostet
+  oder verändert") — kein Hinweis auf tatsächliches Posten/Versenden.
+  Text ist vollständig ausformuliert (drei Themenblöcke mit ganzen
+  Sätzen), keine bloße Stichpunkt-Skizze. Ausschluss von `17b61f5`
+  (reiner Screenreader-Fix ohne "Ehrlichkeit/Vertrauen"-Bezug)
+  nachvollziehbar und konsistent mit früheren Ausschlüssen
+  (`2d0f024`, `2f110f7`, `538bb25`).
+→ **Passt, nach `main` gemergt** (Fast-Forward `44ec538..a924d6f`).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen):
+- Ändert ausschließlich `support-chef-auto-log.md` — reine
+  Analyse-Ergänzung, kein Code geändert, niedrigstes Risiko der drei
+  Branches.
+- Neuer Bericht zu `src/pages/Reiseentwuerfe.tsx`, zwei Funde. Stichprobe
+  gegen den echten Code gezogen (`Read` der ganzen Datei):
+  1. Alle vier Aktions-Buttons pro Karte (Zeilen 209, 221, 232, 242)
+     beziehen ihr `aria-label` ausschließlich aus `draft.destination`;
+     `duplicateDraft()` (Zeile 100-108) übernimmt exakt dasselbe
+     `destination`-Feld in die Kopie — Zeilenangaben stimmen exakt,
+     Fund nachvollziehbar (zwei Karten mit identischem `aria-label` nach
+     einem Duplizieren-Klick).
+  2. `finalizeDraft()` (Zeile 94-98) setzt `status` ohne Rückfrage auf
+     `'finalized'`, danach verschwinden Pausieren- und
+     Abschließen-Button (Zeile 204/216, beide an `status !== 'finalized'`
+     geknüpft) unwiderruflich, während "Löschen" auf derselben Karte
+     (Zeile 238-247) einen Bestätigungsdialog hat (Zeile 255-272) — Fund
+     stimmt, Inkonsistenz real vorhanden, Zeilenangaben exakt.
+  Kein Hinweis auf erfundene Reibungspunkte.
+→ **Passt, nach `main` gemergt** (regulärer Merge, da Branch nicht mehr
+Fast-Forward-fähig nach dem Marketing-Merge; kein Konflikt, andere
+Dateien betroffen).
+
+**Ergebnis:** Zwei Branches inhaltlich geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), ein Branch planmäßig ohne
+neue Prüfung übersprungen (`it-chef/auto` — bereits im früheren
+Nacht-Check des Tages gemergt, keine neuen Commits seither).
+
+**Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
+bereits Dokumentierte hinausgeht.
