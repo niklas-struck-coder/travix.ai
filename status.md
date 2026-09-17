@@ -13,16 +13,15 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-15):**
-- Fokus-Verlust nach Bestätigungsdialogen (Löschen) ist jetzt zentral behoben
-  (gestern von Support-Chef als neuer Fund gemeldet)
-- Drei weitere Robustheits-Fixes im Chat: Enter bricht laufende IME-Komposition
-  nicht mehr ab, resetChat() und loadStoredChat() fangen jetzt Fehlerfälle sauber ab
-- Support-Chef hat Mikrofon-Abbruch und Löschbestätigung im Bearbeiten-Modus als
-  neue Funde gemeldet; Marketing-Chef drei weitere Tier-4-Kandidaten identifiziert
-- Freigabe-Chef hat alle drei Auto-Zweige (IT/Marketing/Support) geprüft und
-  gemergt, ein länger offener Blocker wurde dabei aufgelöst
+**Seit letztem Update (2026-09-16):**
+- Fünf weitere Fixes: formatDuration()-Tagesanzeige (PR #21), Löschbestätigung
+  für Reiseentwürfe und im Bearbeiten-Modus, Mikrofon-Button stoppt Aufnahme
+  jetzt sauber, "Heute" im Kalender ist jetzt auch für Screenreader markiert
+- Support-Chef hat die Reiseentwürfe-Seite geprüft und zwei neue UX-Funde
+  gemeldet; Marketing-Chef vier weitere Tier-4-Kandidaten identifiziert
+- Freigabe-Chef hat alle drei Auto-Zweige (IT/Marketing/Support) mehrfach
+  geprüft und ohne offene Blocker gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-16_
+_Letztes Update: 2026-09-17_
