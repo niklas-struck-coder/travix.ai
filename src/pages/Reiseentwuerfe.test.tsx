@@ -93,6 +93,22 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getAllByText('In Bearbeitung')).toHaveLength(2)
   })
 
+  it('gives duplicated drafts distinct aria-labels so screen reader users can tell them apart', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+
+    expect(screen.getByRole('button', { name: 'Lissabon (Eintrag 1) löschen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Lissabon (Eintrag 2) löschen' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Lissabon löschen' })).not.toBeInTheDocument()
+    // Ein nicht duplizierter Entwurf bleibt unverändert ohne den Zusatz.
+    expect(screen.getByRole('button', { name: 'Kyoto löschen' })).toBeInTheDocument()
+  })
+
   it('asks for confirmation before deleting a draft, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>

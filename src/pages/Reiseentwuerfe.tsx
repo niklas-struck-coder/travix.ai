@@ -162,8 +162,20 @@ export function Reiseentwuerfe() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {drafts.map((draft) => {
+        {drafts.map((draft, index) => {
           const progress = calculateProgress(draft.trip)
+          // Duplizieren (siehe duplicateDraft) kann zwei Karten mit
+          // identischem destination hinterlassen — ohne diese Ergänzung
+          // wären ihre aria-labels für Screenreader nicht unterscheidbar
+          // (reports/support-chef.md, 17.09., Vorschlag 1).
+          const hasDuplicates =
+            drafts.filter((other) => other.destination === draft.destination).length > 1
+          const occurrence =
+            drafts.slice(0, index + 1).filter((other) => other.destination === draft.destination)
+              .length
+          const draftLabel = hasDuplicates
+            ? `${draft.destination} (Eintrag ${occurrence})`
+            : draft.destination
           return (
             <Card key={draft.id} className="overflow-hidden py-0">
               <div className={`h-28 bg-gradient-to-br ${draft.gradient}`} />
@@ -206,7 +218,7 @@ export function Reiseentwuerfe() {
                       size="icon"
                       variant="ghost"
                       className="size-8 text-muted-foreground hover:text-foreground"
-                      aria-label={draft.status === 'paused' ? `${draft.destination} fortsetzen` : `${draft.destination} pausieren`}
+                      aria-label={draft.status === 'paused' ? `${draftLabel} fortsetzen` : `${draftLabel} pausieren`}
                       title={draft.status === 'paused' ? 'Fortsetzen' : 'Pausieren'}
                       onClick={() => togglePause(draft.id)}
                     >
@@ -218,7 +230,7 @@ export function Reiseentwuerfe() {
                       size="icon"
                       variant="ghost"
                       className="size-8 text-muted-foreground hover:text-foreground"
-                      aria-label={`${draft.destination} abschließen`}
+                      aria-label={`${draftLabel} abschließen`}
                       title="Abschließen"
                       onClick={() => finalizeDraft(draft.id)}
                     >
@@ -229,7 +241,7 @@ export function Reiseentwuerfe() {
                     size="icon"
                     variant="ghost"
                     className="size-8 text-muted-foreground hover:text-foreground"
-                    aria-label={`${draft.destination} duplizieren`}
+                    aria-label={`${draftLabel} duplizieren`}
                     title="Duplizieren"
                     onClick={() => duplicateDraft(draft.id)}
                   >
@@ -239,7 +251,7 @@ export function Reiseentwuerfe() {
                     size="icon"
                     variant="ghost"
                     className="size-8 text-muted-foreground hover:text-destructive"
-                    aria-label={`${draft.destination} löschen`}
+                    aria-label={`${draftLabel} löschen`}
                     title="Löschen"
                     onClick={() => setPendingRemoval(draft)}
                   >

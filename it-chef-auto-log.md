@@ -10964,3 +10964,72 @@ erfolgreich).
 **Commit:** `src/pages/Kalender.tsx` (Fix), `src/pages/Kalender.test.tsx`
 (1 neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (vierter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `origin/it-chef/auto` war
+zu Beginn dieses Laufs bereits identisch mit `origin/main` (vollständig
+gemerged, siehe `git merge-base --is-ancestor` — Freigabe-Chef hat die
+drei vorherigen Läufe von heute zwischenzeitlich geprüft und gemergt),
+`it-chef/auto` daher frisch von `origin/main` (`cbb845d`) neu angelegt.
+`npm ci` (frisch, keine `node_modules` im Container). Baseline vorab
+bestätigt: `npx vitest run` (56 Testdateien, 319 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Punkte hängen weiterhin an offenen Architektur-/Produkt-
+entscheidungen oder fehlenden Backend-Credentials (unverändert
+gegenüber den vorherigen Läufen von heute). `reports/support-chef.md`
+(17.09.) gelesen: Vorschlag 1 gegen den aktuellen Code verifiziert —
+`src/pages/Reiseentwuerfe.tsx` bildet die `aria-label` aller vier
+Aktions-Buttons (Pausieren/Fortsetzen, Abschließen, Duplizieren, Löschen)
+nur aus `draft.destination`. `duplicateDraft()` fügt eine Kopie mit
+identischem `destination` ein — Original und Kopie tragen danach exakt
+dasselbe Label (z. B. zweimal "Lissabon löschen"), für Screenreader-
+Nutzer:innen nicht mehr unterscheidbar. Vorschlag 2 (Bestätigung vor
+"Abschließen") bewusst nicht angegangen: der Bericht selbst nennt zwei
+gleichwertige Lösungsansätze (Bestätigungsdialog vs. Rückgängig-Hinweis)
+ohne Vorentscheidung — genau die Art von Interpretationsspielraum, die
+laut Sicherheitskriterien einem autonomen Lauf nicht zusteht. Vorschlag 3
+(Hilfe-Seite) bleibt aus denselben, bereits mehrfach dokumentierten
+Gründen offen (keine echte Kontaktadresse im Code, siehe 12.09.-Eintrag
+in `ZEITPLAN.md`). Vorschlag 1 erfüllt alle vier Kriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reiner lokaler Demo-State, nur
+clientseitige Darstellung), keine offene Architekturentscheidung (der
+Bericht schlägt zwei konkrete, mechanische Differenzierungsmerkmale vor;
+Kartenindex ist davon das eindeutig objektive, ohne Annahmen über echte
+Reisedaten), klar umrissen (eine Ergänzung an vier bereits bestehenden
+`aria-label`-Stellen), objektiv prüfbar (Regressionstest, Typecheck,
+Lint, Build).
+
+**Fix:** In `src/pages/Reiseentwuerfe.tsx` wird pro Karte jetzt geprüft,
+ob ihr `destination` mehrfach unter den aktuellen `drafts` vorkommt
+(`hasDuplicates`); bei mehreren gleichnamigen Einträgen wird ein
+`draftLabel` mit Zusatz "(Eintrag N)" gebildet, wobei N die 1-basierte
+Position unter den gleichnamigen Einträgen ist (Kartenindex, nicht
+Reisedatum — Duplikate übernehmen laut `duplicateDraft()` exakt dieselben
+`trip`-Daten, ein Datum wäre dort also ebenfalls nicht eindeutig). Ohne
+Duplikate bleibt `draftLabel` unverändert `draft.destination` — keine
+Verhaltensänderung für den bisherigen Normalfall. Alle vier
+`aria-label`-Stellen (Pausieren/Fortsetzen, Abschließen, Duplizieren,
+Löschen) nutzen jetzt `draftLabel` statt `draft.destination`. Neuer
+Regressionstest in `Reiseentwuerfe.test.tsx`: nach Klick auf "Lissabon
+duplizieren" tragen die beiden Lissabon-Karten die Labels
+"Lissabon (Eintrag 1) löschen"/"Lissabon (Eintrag 2) löschen" statt des
+alten, jetzt nicht mehr vorhandenen "Lissabon löschen"; der unveränderte
+Kyoto-Entwurf behält weiterhin "Kyoto löschen" ohne Zusatz.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (gezielt,
+10 Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 320 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.

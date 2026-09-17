@@ -1413,6 +1413,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf
   "löschen" öffnet die Bestätigung; "Abbrechen" lässt den Entwurf
   unverändert).
+  Vom autonomen IT-Chef-Lauf am 17.09. (vierter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (17.09., Vorschlag 1) gemeldeten Fund
+  behoben: Nach "Duplizieren" (`duplicateDraft()`) trugen Original und
+  Kopie exakt dasselbe `aria-label` (bisher nur aus `draft.destination`
+  gebildet, z. B. zweimal "Lissabon löschen") — für Screenreader-Nutzer:innen
+  waren die beiden Karten an dieser Stelle nicht mehr auseinanderzuhalten.
+  Fix: alle vier Aktions-Buttons (Pausieren/Fortsetzen, Abschließen,
+  Duplizieren, Löschen) hängen jetzt bei mehreren gleichnamigen Entwürfen
+  zusätzlich "(Eintrag N)" an (N = Position unter den gleichnamigen
+  Einträgen), rein additiv — ohne Duplikate bleibt das Label unverändert.
+  Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (nach Duplizieren
+  tragen beide Lissabon-Karten unterscheidbare Labels, ein nicht
+  duplizierter Entwurf bleibt unverändert).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
