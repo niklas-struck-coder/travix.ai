@@ -39,6 +39,7 @@ describe('Reiseentwuerfe', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon löschen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.queryByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).not.toBeInTheDocument()
   })
 
@@ -92,7 +93,7 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getAllByText('In Bearbeitung')).toHaveLength(2)
   })
 
-  it('deletes a draft, and shows the empty state once none are left', () => {
+  it('asks for confirmation before deleting a draft, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
         <Reiseentwuerfe />
@@ -100,10 +101,28 @@ describe('Reiseentwuerfe', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon löschen' }))
+    expect(screen.getByText('Entwurf löschen?')).toBeInTheDocument()
+    expect(screen.getByText(/Der Entwurf für Lissabon wird gelöscht/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+    expect(screen.queryByText('Entwurf löschen?')).not.toBeInTheDocument()
+    expect(screen.getByText('Lissabon')).toBeInTheDocument()
+  })
+
+  it('deletes a draft once its removal is confirmed, and shows the empty state once none are left', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon löschen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.queryByText('Lissabon')).not.toBeInTheDocument()
     expect(screen.getByText('Kyoto')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Kyoto löschen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
     expect(screen.getByText('Noch keine Reiseentwürfe')).toBeInTheDocument()
   })
 })

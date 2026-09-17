@@ -103,6 +103,7 @@ export function Kalender() {
               return (
                 <div
                   key={cell.date}
+                  aria-current={isToday ? 'date' : undefined}
                   className={cn(
                     'flex min-h-16 flex-col items-start gap-1 rounded-lg border border-transparent p-1.5 text-xs',
                     cell.inCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40',
@@ -110,7 +111,10 @@ export function Kalender() {
                     isToday && 'border-gold',
                   )}
                 >
-                  <span className={cn('font-medium', isToday && 'text-gold')}>{cell.day}</span>
+                  <span className={cn('font-medium', isToday && 'text-gold')}>
+                    {cell.day}
+                    {isToday && <span className="sr-only"> (Heute)</span>}
+                  </span>
                   {cellTrips.map((trip) => (
                     <span key={trip.id} className="truncate rounded-full bg-teal/20 px-1.5 py-0.5 text-[10px] font-medium text-navy">
                       {trip.destination}

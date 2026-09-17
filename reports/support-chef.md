@@ -1,57 +1,57 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-15
+**Datum:** 2026-09-16
 
-## Was ist seit dem letzten Eintrag (2026-09-14) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-15) passiert?
 
-Punkt 1 von gestern ist jetzt vollständig erledigt: Auch Aktivitäten
-(`src/pages/Aktivitaeten.tsx`) und Warenkorb (`src/pages/Warenkorb.tsx`)
-fragen vor dem endgültigen Entfernen jetzt mit einem Bestätigungsdialog
-nach — die komplette Fünf-Seiten-Liste (Preisalarme, Favoriten, Angebote,
-Aktivitäten, Warenkorb) hat damit das einheitliche, sichere Muster.
+Guter Fortschritt: Der Fokus-Verlust nach Bestätigungsdialogen, den ich
+gestern als neuen Reibungspunkt gemeldet hatte, ist jetzt zentral in
+`src/components/ui/dialog.tsx` (`DialogContent`) behoben — einmal für
+alle fünf betroffenen Seiten (Preisalarme, Favoriten, Angebote,
+Aktivitäten, Warenkorb), statt fünf Einzellösungen. Außerdem bricht
+Enter jetzt keine laufende IME-Komposition mehr ab, das heißt
+Nutzer:innen mit japanischer/koreanischer/chinesischer Eingabe können im
+Chat und in `EditMode.tsx` wieder problemlos tippen, ohne dass ihre Eingabe
+vorzeitig abgeschickt wird. Auch technisch robuster: `formatDuration()`
+zeigte bei Flug-/Zugverbindungen mit mehr als 24 Stunden Gesamtdauer
+bisher einen rohen technischen Zeitstempel statt einer lesbaren Dauer an
+— das ist jetzt gefixt.
 
-Beim genaueren Hinsehen auf genau dieses neue Verhalten ist mir aber ein
-neuer, echter Reibungspunkt aufgefallen (siehe Vorschlag 1) — betrifft
-vermutlich alle fünf Seiten gleichermaßen, nicht nur die zwei neuesten.
-
-Die Hilfe-Seite (Punkt 2) und der Warenkorb als Sackgasse (Punkt 3) sind
-im Code unverändert gegenüber gestern.
+Die Hilfe-Seite (`/hilfe`) und der Warenkorb als Sackgasse sind
+gegenüber gestern unverändert offen geblieben.
 
 ## Meine Vorschläge
 
-1. **Nach dem Bestätigen eines Lösch-Dialogs geht der Fokus verloren.**
-   `src/pages/Aktivitaeten.tsx:98` und `src/pages/Warenkorb.tsx:111`
-   (ebenso vermutlich `Preisalarme.tsx:110`, `Favoriten.tsx:104`,
-   `Angebote.tsx:119`, die dasselbe Muster verwenden): Der
-   Entfernen-Button pro Karte ist kein `DialogTrigger`, sondern ein
-   normaler `Button`. `confirmRemoval()` entfernt die Karte samt ihrem
-   Button im selben Moment, in dem der Dialog schließt — genau der
-   DOM-Knoten, auf den der Fokus danach automatisch zurückspringen
-   sollte, existiert dann schon nicht mehr. Wer per Tastatur oder
-   Screenreader mehrere Einträge hintereinander entfernen will, landet
-   nach jedem "Ja, entfernen" unerkennbar auf `<body>` und muss sich
-   jedes Mal neu durch die Seite tabben. *Vorschlag:* auf
-   `DialogPrimitive.Content` ein `onCloseAutoFocus` setzen, das den
-   Fokus gezielt auf ein noch vorhandenes Element legt (z. B. die
-   Seitenüberschrift oder die nächste verbliebene Karte) — idealerweise
-   zentral in `src/components/ui/dialog.tsx`, da das Muster fünffach
-   wiederholt wird.
+1. **Aktivität im Bearbeiten-Dialog löschen fragt nicht nach — als
+   einzige Stelle mehr.** `src/components/trip/EditMode.tsx:76-83`: Der
+   Papierkorb-Button entfernt eine Aktivität weiterhin sofort und
+   endgültig, ohne Rückfrage. Das fällt jetzt besonders auf, weil genau
+   dasselbe Löschen auf der Aktivitäten-Liste (`/aktivitaeten`)
+   inzwischen mit dem bewährten Bestätigungsdialog abgesichert ist —
+   im dazugehörigen Bearbeiten-Dialog für dieselben Aktivitäten aber
+   nicht. *Vorschlag:* das bereits fünffach genutzte Dialog-Muster auch
+   hier auf den Trash-Button anwenden, kein neuer Entwurf nötig.
 
-2. **Die Hilfe-Seite (`/hilfe`) hilft immer noch nicht wirklich.**
-   `src/pages/PlaceholderPage.tsx` zeigt weiterhin nur "Hilfe wird als
-   Nächstes gebaut" — keine FAQ, kein Kontaktweg, kein Link. Wer mit einem
-   Problem auf `/hilfe` klickt, geht leer aus. Laut `ZEITPLAN.md` ist
-   echter FAQ-Inhalt für Sprint 2 vorgesehen, also bekannt und eingeplant.
-   *Vorschlag:* Bis dahin würde schon ein einziger Satz mit Kontakthinweis
-   reichen, damit die Seite nicht komplett ins Leere läuft.
+2. **Laufende Spracheingabe lässt sich nicht abbrechen.**
+   `src/components/chat/ChatInput.tsx:26-33`: Ein zweiter Klick auf das
+   Mikrofon-Icon während der Aufnahme tut nichts — `handleMicClick()`
+   bricht einfach ab, wenn schon aufgenommen wird. Wer aus Versehen
+   draufklickt, muss abwarten, bis der Browser von selbst aufhört, oder
+   riskiert eine ungewollt übernommene Nachricht. *Vorschlag:* den
+   `recognition`-Rückgabewert von `startListening()` merken und bei
+   erneutem Klick `recognition.stop()` aufrufen, damit der Button als
+   echter Ein-/Ausschalter funktioniert.
 
-3. **Der Warenkorb bleibt eine Sackgasse.** `src/pages/Warenkorb.tsx`
-   endet weiterhin nach der Summen-Karte ohne Buchen-Button oder
-   Buchungs-Hinweis. Das hängt weiterhin an der offenen Grundsatzfrage
-   "eigener Zahlungsprozess vs. Buchung beim Anbieter" (siehe
-   `ZEITPLAN.md`, Sprint 5). *Vorschlag:* Solange die Entscheidung
-   aussteht, wenigstens einen kurzen erklärenden Satz einblenden
-   ("Buchung folgt in Kürze" o.ä.), statt die Nutzerin kommentarlos vor
-   der Summen-Karte stehen zu lassen.
+3. **Die Hilfe-Seite (`/hilfe`) hilft weiterhin nicht wirklich.**
+   `src/pages/PlaceholderPage.tsx` zeigt nach wie vor nur "Hilfe wird als
+   Nächstes gebaut" — kein FAQ, kein Kontaktweg. Wer mit einem Problem
+   dorthin klickt, geht leer aus. *Vorschlag:* bis der echte FAQ-Inhalt
+   kommt, reicht vorerst schon ein Satz mit Kontakthinweis.
 
-_Letztes Update: 2026-09-15_
+4. **Der Warenkorb bleibt eine Sackgasse.** `src/pages/Warenkorb.tsx`
+   endet weiterhin nach der Summen-Karte, ohne Buchen-Button oder
+   Buchungs-Hinweis. *Vorschlag:* solange die Grundsatzfrage zum
+   Zahlungsprozess offen ist, wenigstens einen kurzen erklärenden Satz
+   einblenden ("Buchung folgt in Kürze" o. Ä.).
+
+_Letztes Update: 2026-09-16_

@@ -10657,3 +10657,310 @@ Tests), `ZEITPLAN.md` (Eintrag ergänzt), dieser Log-Eintrag — auf
 `it-chef-autofix/localstorage-write-unprotected-2026-08-12` bleibt jetzt
 vollständig überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
 gelöscht werden, wie die anderen 13 bereits überholten Branches).
+
+## 2026-09-16, vierter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand
+vor diesem Lauf: `312dd4e`, identisch mit `origin/it-chef/auto` nach
+Fast-Forward-Merge von `origin/main` — dieser brachte ausschließlich
+Berichts-/Log-Dateien, keine Codeänderung im gemergten Bereich) — `main`
+selbst wurde nicht angerührt. `npm ci` (frisch, keine `node_modules` im
+Container), Baseline vorab bestätigt: `npx vitest run` (56 Testdateien,
+312 Tests, alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen).
+
+**Eigene, unabhängige Prüfung:** `reports/it-chef.md` (heute, 16.09.
+aktualisiert nach dem Merge von `main`) gelesen: dort dokumentiert PR #21
+(`it-chef-autofix/duration-days-component-2026-09-16`) einen bereits
+vollständig diagnostizierten Bug — `formatDuration()` in `FlightCard.tsx`
+und `TrainCard.tsx` matcht nur `PT<h>H<m>M`, nicht die ISO-8601-Form mit
+Tages-Komponente (`P<n>DT<h>H<m>M`). Gegen den aktuellen Code auf
+`it-chef/auto` verifiziert: Fix aus PR #21 war dort noch nicht gelandet
+(beide Dateien hatten weiterhin die alte Regex ohne Tage-Gruppe). Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reiner Regex-Parsing-Fix für eine Dauer-Anzeige), keine
+offene Produkt-/Architekturentscheidung, klar umrissen (Diagnose und
+Fix-Ansatz standen bereits vollständig im Bericht/PR), objektiv prüfbar
+(Regressionstest für eine konkrete Beispieldauer, Typecheck, Build).
+
+**Fix:** in `formatDuration()` (`FlightCard.tsx` und wortgleich
+`TrainCard.tsx`) die Regex um eine optionale Tage-Gruppe vor dem `T`
+ergänzt (`P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?`); Tage werden in Stunden
+umgerechnet (Tage × 24 + Stunden) und mit den bestehenden Stunden
+zusammengeführt, bevor der bestehende Formatierungscode (Stunden/Minuten
+zu `"Xh Ymin"`) greift. Für Dauern ohne Tage-Komponente identisches
+Verhalten wie zuvor. Zwei neue Regressionstests (`FlightCard.test.tsx`,
+`TrainCard.test.tsx`): eine Dauer von `P1DT2H30M` (26h30min) zeigt
+`"26h 30min"` statt den rohen ISO-String.
+
+**Geprüft:** `npx vitest run src/components/search/FlightCard.test.tsx
+src/components/search/TrainCard.test.tsx` (gezielt, 11 Tests grün),
+danach volle Suite `npx vitest run` (56 Testdateien, 314 Tests, davon 2
+neu — alle grün), `npm run lint` (0 Fehler, nur die drei vorbestehenden
+Warnungen in unveränderten Dateien), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/FlightCard.tsx`,
+`src/components/search/TrainCard.tsx` (Fix), `FlightCard.test.tsx`,
+`TrainCard.test.tsx` (2 neue Tests), `ZEITPLAN.md` (Eintrag ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht. Der ursprüngliche
+Auto-Fix-PR #21 bleibt als überholt zurück (kann bei nächster
+PR-Hygiene-Aufräumung geschlossen werden).
+
+## 2026-09-16, fünfter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `e87973b`, identisch mit `origin/it-chef/auto`) — `main`
+selbst unverändert seit dem letzten Lauf, kein Merge nötig. `npm ci`
+(frisch, keine `node_modules` im Container). Baseline vorab bestätigt:
+`npx vitest run` (56 Testdateien, 315 Tests, alle grün), `npm run lint`
+(0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — die offenen
+Sprint-3/4-Punkte (7.4 Rest, 7.12, 8.2-8.7) hängen weiterhin an offenen
+Architektur-/Produktentscheidungen oder größeren, nicht autonom fällbaren
+Features (Vision-Analyse, Deal Finder). Stattdessen `reports/support-chef.md`
+(16.09.) gelesen: Vorschlag 1 beschreibt einen klar umrissenen, gegen den
+aktuellen Code verifizierten Reibungspunkt — `EditMode.tsx:76-83`, der
+Papierkorb-Button zum Entfernen einer Aktivität im Bearbeiten-Dialog,
+löschte bisher sofort und endgültig ohne Rückfrage, obwohl exakt dasselbe
+Löschen auf der Aktivitäten-Übersichtsseite (`Aktivitaeten.tsx`) bereits
+über ein etabliertes Bestätigungsdialog-Muster (`pendingRemoval`-State,
+zweiter `Dialog` mit "Ja, entfernen"/"Abbrechen") abgesichert ist. Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine lokale Demo-State-Aktion, gleiches Muster wie der
+bereits gemergte Fix in `Aktivitaeten.tsx`), keine offene Produkt-/
+Architekturentscheidung, klar umrissen (Diagnose und Fix-Muster standen
+bereits vollständig im Bericht, hier nur 1:1 auf `EditMode.tsx`
+übertragen), objektiv prüfbar (Regressionstests für Bestätigung/Abbruch,
+Typecheck, Build).
+
+**Fix:** `EditMode.tsx` von einem einzelnen `Dialog` auf zwei
+Geschwister-`Dialog`s in einem `Fragment` umgestellt (statt eines
+verschachtelten Dialogs, um dem bestehenden `Aktivitaeten.tsx`-Muster
+exakt zu folgen): der bestehende Bearbeiten-Dialog bleibt unverändert,
+ein zweiter Dialog (`open={pendingRemoval !== null}`) zeigt "Aktivität
+entfernen?" mit Name und "Das lässt sich nicht rückgängig machen." Der
+Papierkorb-Button setzt jetzt `pendingRemoval` statt direkt zu entfernen;
+`confirmRemoval()` entfernt die Aktivität erst nach Klick auf "Ja,
+entfernen". Zwei neue Regressionstests in `EditMode.test.tsx` (Klick auf
+"entfernen" öffnet die Bestätigung, ohne dass `onChange` schon aufgerufen
+wird; "Abbrechen" lässt die Aktivität unverändert). Bestehender
+Entfernen-Test in `EditMode.test.tsx` sowie der zugehörige Test in
+`Buchung.test.tsx` (nutzt `EditMode.tsx` über die Buchungsseite) auf den
+zusätzlichen Bestätigungsklick umgestellt.
+
+**Geprüft:** `npx vitest run src/components/trip/EditMode.test.tsx`
+(gezielt, 11 Tests grün), danach volle Suite `npx vitest run` (56
+Testdateien, 315 Tests, davon 2 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/trip/EditMode.tsx` (Fix),
+`src/components/trip/EditMode.test.tsx`, `src/pages/Buchung.test.tsx`
+(Testanpassung), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `d61cc25`, identisch mit `origin/it-chef/auto`) — `main`
+seit dem letzten Lauf unverändert (`origin/main` = `312dd4e`, bereits
+Vorfahre von `it-chef/auto`), kein Merge nötig. `npm ci` (frisch, keine
+`node_modules` im Container). Baseline vorab bestätigt: `npx vitest run`
+(56 Testdateien, 315 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Sprint-3-Punkte (7.4 Rest, 7.12) hängen weiterhin an der offenen
+Architektur-/Datenmodell-Entscheidung bzw. fehlenden Preisfeldern in
+`TripDraft`, Sprint-4-Punkte (8.1-8.7) an Vision-Analyse/Deal-Finder/
+Backend-Entscheidung, keine davon autonom fällbar. Stattdessen
+`reports/support-chef.md` (16.09.) gelesen: Vorschlag 1 (EditMode-
+Löschbestätigung) ist bereits im letzten Lauf gefixt. Vorschlag 2 ist
+noch offen und gegen den aktuellen Code verifiziert:
+`src/components/chat/ChatInput.tsx:27-28` (`handleMicClick`) brach
+bisher einfach ab, wenn schon aufgenommen wurde (`if (... || listening)
+return`), statt die laufende Aufnahme zu stoppen — ein zweiter Klick auf
+das Mikrofon-Icon tat also nichts. `startListening()`
+(`src/lib/ai/speech.ts`) gibt die `SpeechRecognition`-Instanz (oder
+`null`) bereits zurück, `ChatInput.tsx` hat den Rückgabewert aber nie
+gespeichert. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine lokale UI-Interaktion,
+kein Datenzugriff), keine offene Produkt-/Architekturentscheidung, klar
+umrissen (Diagnose und Fix-Ansatz "`recognition`-Rückgabewert merken und
+bei erneutem Klick `recognition.stop()` aufrufen" standen bereits
+wörtlich im Bericht), objektiv prüfbar (Regressionstest mit der
+bestehenden `FakeSpeechRecognition`-Teststruktur in
+`ChatInput.test.tsx`, Typecheck, Build).
+
+**Fix:** neuer `recognitionRef` (`useRef<ReturnType<typeof
+startListening>>(null)`) in `ChatInput.tsx`. `handleMicClick()`
+unterscheidet jetzt zwei Fälle: läuft bereits eine Aufnahme, ruft es nur
+noch `recognitionRef.current?.stop()` auf und kehrt zurück; sonst startet
+es wie bisher eine neue Aufnahme und speichert die von `startListening()`
+zurückgegebene Instanz in der Ref. Das bestehende `onend`
+(`() => setListening(false)`) übernimmt nach dem `stop()` weiterhin das
+Zurücksetzen des UI-Zustands — kein zusätzlicher State-Umweg nötig, exakt
+wie bei einem echten Browser-Abbruch. Zwei neue Regressionstests in
+`ChatInput.test.tsx`: ein zweiter Klick während der Aufnahme ruft
+`stop()` auf der laufenden Instanz auf, ohne eine zweite Instanz zu
+erzeugen; nach `onend()` zeigt der Button wieder den
+"Spracheingabe starten"-Zustand.
+
+**Geprüft:** `npx vitest run src/components/chat/ChatInput.test.tsx`
+(gezielt, 8 Tests grün, davon 2 neu), danach volle Suite `npx vitest run`
+(56 Testdateien, 317 Tests, davon 2 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/chat/ChatInput.tsx` (Fix),
+`src/components/chat/ChatInput.test.tsx` (2 neue Tests), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (weiterer autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `f57c31c`, identisch mit `origin/it-chef/auto`, 3 Commits
+vor `origin/main` — noch nicht von Freigabe-Chef gemergt) — `main` seit
+dem letzten Lauf unverändert, kein Merge nötig. `npm ci` (frisch, keine
+`node_modules` im Container). Baseline vorab bestätigt: `npx vitest run`
+(56 Testdateien, 317 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Punkte (2.0 Auth, 4.1-4.3 KI-Backend, 5.7 Zug/Bus/Fähre-Anbieter,
+6.2/6.6/6.7/7.4/7.12 Preisfeld-/Datenmodell-Lücken, 8.1-8.9 Vision/
+Deal-Finder/Premium) hängen alle an einer offenen Architektur-/
+Produktentscheidung oder an fehlenden Backend-Credentials, keine davon
+autonom fällbar. `reports/it-chef.md` (16.09.) und `reports/support-chef.md`
+(16.09.) gelesen: beide dort noch offenen Funde (Mikrofon-Abbruch,
+EditMode-Löschbestätigung) sind bereits durch die beiden vorangegangenen
+Läufe von heute erledigt. Zusätzlich einen Explore-Agenten gezielt auf
+bisher seltener geprüfte Seiten/Dateien angesetzt (u. a. `Kalender.tsx`,
+`Kartenansicht.tsx`, `Profil.tsx`, `Einstellungen.tsx`, `Dashboard.tsx`,
+`calendarUtils.ts`, `cartTotals.ts`, `duffel/client.ts`, `TrainCard.tsx`/
+`TrainResults.tsx`, `mockAdvisor.ts`, `mockConcierge.ts`, `speech.ts`,
+UI-Primitives) — die meisten davon zeigten keine neuen Funde mehr
+(bereits mehrfach iteriert). Ein Fund erfüllte alle vier
+Sicherheitskriterien und wurde gegen den Code verifiziert:
+`src/pages/Reiseentwuerfe.tsx:225-231` — der Löschen-Button (Trash2-Icon)
+auf einer Entwurfskarte rief `deleteDraft(draft.id)` bisher direkt beim
+Klick auf, ohne Rückfrage. Fünf strukturell identische Löschen-Buttons
+auf `Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`
+und `Warenkorb.tsx` sind bereits über dasselbe `pendingRemoval`-plus-
+`Dialog`-Muster abgesichert (siehe `ZEITPLAN.md`-Einträge vom 13.-14.09.)
+— `Reiseentwuerfe.tsx` wurde dabei übersehen, weil die Seite (16.08.)
+vor der Einführung dieses Musters (14.09.) entstand. Erfüllt alle vier
+Kriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/Rechtstexten (reiner
+lokaler Demo-State, nur clientseitige UI), keine offene Architektur-
+entscheidung (identisches Muster bereits fünffach im Code etabliert und
+1:1 übertragbar), klar umrissen (Copy des bestehenden Musters, keine
+Interpretation nötig), objektiv prüfbar (Regressionstest analog den
+fünf bereits bestehenden, plus Typecheck/Build).
+
+**Fix:** `Reiseentwuerfe.tsx` bekommt einen neuen `pendingRemoval:
+Draft | null`-State. Der Löschen-Button ruft jetzt `setPendingRemoval(draft)`
+auf statt `deleteDraft(draft.id)` direkt; ein neuer `Dialog`-Block
+("Entwurf löschen?" / "Der Entwurf für {destination} wird gelöscht. Das
+lässt sich nicht rückgängig machen." / "Abbrechen" / "Ja, entfernen")
+exakt nach dem Muster aus `Preisalarme.tsx` übernommen, `confirmRemoval()`
+ruft die bestehende `deleteDraft()` erst nach Bestätigung auf. Bestehender
+Löschen-Test in `Reiseentwuerfe.test.tsx` (inkl. des Tests für das
+Verschwinden des Mehrfach-Entwurf-Hinweises) auf den zusätzlichen
+Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf "löschen"
+öffnet die Bestätigung ohne sofortige Löschung; "Abbrechen" lässt den
+Entwurf unverändert) — analog `Preisalarme.test.tsx`.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (gezielt,
+9 Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 318 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test, bestehender Test
+angepasst), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (dritter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `27cdc50`, identisch mit `origin/it-chef/auto`, 4 Commits vor
+`origin/main` — noch nicht von Freigabe-Chef gemergt) — `main` seit dem
+letzten Lauf unverändert (`origin/main` = `312dd4e`, bereits Vorfahre von
+`it-chef/auto`), kein Merge nötig. `npm ci` (frisch, keine `node_modules`
+im Container). Baseline vorab bestätigt: `npx vitest run` (56
+Testdateien, 318 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — die
+verbleibenden offenen Punkte (7.4 Rest, 7.12, 8.1-8.9 größtenteils, PR-
+Aufräumung, TrainCard/TrainResults-Verdrahtung) hängen weiterhin an
+offenen Architektur-/Produktentscheidungen oder sind nicht autonom
+umsetzbar (siehe frühere Log-Einträge). `reports/it-chef.md` und
+`reports/support-chef.md` (beide 16.09.) enthalten keine neuen, noch
+offenen Funde — die dort gemeldeten Punkte sind bereits über die beiden
+vorherigen Läufe von heute gefixt. Eigene TODO/FIXME-Suche über `src/`:
+0 Treffer. Zusätzlich einen Explore-Agenten gezielt auf 16 bisher
+seltener geprüfte Dateien angesetzt (u. a. `AppShell.tsx`, `routes.tsx`,
+`design-tokens.ts`, `calendarUtils.ts`, `Kalender.tsx`,
+`Kartenansicht.tsx`, `Dashboard.tsx`, `Profil.tsx`, `Einstellungen.tsx`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `QuickReplies.tsx`,
+`ChatMessage.tsx`, `speech.ts`, `duffel/client.ts`, `cartTotals.ts`),
+jeweils gegen die zugehörige Testdatei abgeglichen. Die meisten zeigten
+keine neuen Funde mehr (bereits gut getestet bzw. dokumentierte
+Absichts-Entscheidungen). Ein Fund erfüllte alle vier
+Sicherheitskriterien und wurde gegen den Code verifiziert:
+`src/pages/Kalender.tsx:104-113` — die "Heute"-Markierung im
+Kalendergitter war bisher rein farblich (goldener Zellenrand plus
+goldene Tageszahl), ohne jede Text-Alternative für Screenreader. Genau
+dieselbe Seite löst ein analoges Problem bei den Trip-Badges bereits
+über eine zusätzliche textliche Liste unterhalb des Gitters, mit dem
+Code-Kommentar "Farbige Zellen allein sind für Screenreader nicht
+zugänglich" — die "Heute"-Zelle selbst wurde dabei aber übersehen.
+Erfüllt alle vier Kriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine clientseitige Darstellung, keine echten Trip-Daten
+betroffen), keine offene Architekturentscheidung (mechanische Anwendung
+eines bereits zweifach im Code etablierten Musters — derselbe
+Screenreader-Gedanke auf derselben Seite, sowie der `sr-only`-Zusatz aus
+`ChecklistPanel.tsx`), klar umrissen (eine Zelle, ein bereits berechnetes
+`isToday`-Flag, keine Interpretation nötig), objektiv prüfbar
+(Regressionstest über die bestehende `vi.setSystemTime`-Teststruktur in
+`Kalender.test.tsx`, plus Typecheck/Lint/Build).
+
+**Fix:** `src/pages/Kalender.tsx` bekommt `aria-current={isToday ? 'date'
+: undefined}` auf der jeweiligen Tageszelle sowie einen `sr-only`-Zusatz
+"(Heute)" neben der Tageszahl, exakt nach dem in `ChecklistPanel.tsx`
+etablierten Muster (dortiger `sr-only`-Zusatz ", bearbeiten"). Rein
+additiv — betrifft ausschließlich die eine Zelle, für die `isToday` wahr
+ist, keine Verhaltensänderung für alle anderen Zellen. Neuer
+Regressionstest in `Kalender.test.tsx`: bei der im Testsetup fixierten
+Systemzeit (20.08.2026) trägt genau eine Zelle sowohl `aria-current="date"`
+als auch den "(Heute)"-Text, und dieser Text erscheint insgesamt nur
+einmal im gerenderten Kalender.
+
+**Geprüft:** `npx vitest run src/pages/Kalender.test.tsx` (gezielt, 4
+Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 319 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Kalender.tsx` (Fix), `src/pages/Kalender.test.tsx`
+(1 neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

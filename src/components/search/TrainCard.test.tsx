@@ -29,7 +29,7 @@ describe('TrainCard', () => {
     expect(screen.queryByText('129.00 EUR')).not.toBeInTheDocument()
   })
 
-  it('formats a duration with a day component instead of showing the raw ISO string', () => {
+  it('formats a duration with a days component instead of showing the raw ISO string', () => {
     const offer: TrainOffer = { ...baseOffer, duration: 'P1DT2H30M' }
     render(<TrainCard offer={offer} />)
 

@@ -49,7 +49,7 @@ describe('FlightCard', () => {
     expect(screen.getByText('3h 15min')).toBeInTheDocument()
   })
 
-  it('formats a duration with a day component instead of showing the raw ISO string', () => {
+  it('formats a duration with a days component instead of showing the raw ISO string', () => {
     const offer: FlightOffer = {
       ...baseOffer,
       slices: [{ ...directSlice, duration: 'P1DT2H30M' }],

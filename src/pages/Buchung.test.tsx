@@ -170,6 +170,7 @@ describe('Buchung – Aktivitäten', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Aktivitäten bearbeiten' }))
     fireEvent.click(screen.getByRole('button', { name: 'Museum entfernen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
 
     expect(screen.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
   })

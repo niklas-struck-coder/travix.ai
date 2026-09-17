@@ -16,6 +16,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { calculateProgress } from '@/lib/trip/calculateProgress'
 import type { TripDraft } from '@/types/chat'
 
@@ -70,6 +79,7 @@ const initialDrafts: Draft[] = [
 
 export function Reiseentwuerfe() {
   const [drafts, setDrafts] = useState(initialDrafts)
+  const [pendingRemoval, setPendingRemoval] = useState<Draft | null>(null)
 
   function togglePause(id: string) {
     setDrafts((current) =>
@@ -99,6 +109,12 @@ export function Reiseentwuerfe() {
 
   function deleteDraft(id: string) {
     setDrafts((current) => current.filter((draft) => draft.id !== id))
+  }
+
+  function confirmRemoval() {
+    if (!pendingRemoval) return
+    deleteDraft(pendingRemoval.id)
+    setPendingRemoval(null)
   }
 
   if (drafts.length === 0) {
@@ -225,7 +241,7 @@ export function Reiseentwuerfe() {
                     className="size-8 text-muted-foreground hover:text-destructive"
                     aria-label={`${draft.destination} löschen`}
                     title="Löschen"
-                    onClick={() => deleteDraft(draft.id)}
+                    onClick={() => setPendingRemoval(draft)}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -235,6 +251,25 @@ export function Reiseentwuerfe() {
           )
         })}
       </div>
+
+      <Dialog open={pendingRemoval !== null} onOpenChange={(open) => !open && setPendingRemoval(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Entwurf löschen?</DialogTitle>
+            <DialogDescription>
+              Der Entwurf für {pendingRemoval?.destination} wird gelöscht. Das lässt sich nicht rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmRemoval}>
+              Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -3719,3 +3719,59 @@ neue Commits von heute).
 
 **Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
 bereits Dokumentierte hinausgeht.
+
+## 2026-09-17, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (`312dd4e..17b61f5`).
+- `marketing-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr).
+- `support-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr).
+
+**Prüfung `it-chef/auto`:**
+- `it-chef-auto-log.md` gelesen (5 Einträge vom 16./17.09., je einem
+  Commit zugeordnet):
+  - `e87973b`: `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx` —
+    Regex um optionale ISO-8601-Tages-Komponente (`P<n>DT...`) ergänzt,
+    vorher nur `PT<h>H<m>M` erkannt.
+  - `d61cc25`: `EditMode.tsx` — Löschen-Button für Aktivitäten fragt jetzt
+    per Dialog nach ("Ja, entfernen"/"Abbrechen"), analog dem bereits
+    etablierten Muster in `Aktivitaeten.tsx`.
+  - `f57c31c`: `ChatInput.tsx` — zweiter Klick auf das Mikrofon-Icon
+    stoppt jetzt die laufende Aufnahme (`recognitionRef.current?.stop()`)
+    statt wirkungslos zu sein.
+  - `27cdc50`: `Reiseentwuerfe.tsx` — Löschen-Button für Entwürfe fragt
+    jetzt per Dialog nach, 1:1 nach demselben Muster wie in
+    `Preisalarme.tsx`/`Aktivitaeten.tsx`/`Favoriten.tsx` etc.
+  - `17b61f5`: `Kalender.tsx` — "Heute"-Zelle bekommt `aria-current="date"`
+    plus `sr-only`-Text "(Heute)", vorher rein farblich markiert.
+- Diffs aller fünf Commits selbst gelesen (nicht nur den Log-Eintrag
+  geglaubt): Scope pro Commit deckt sich exakt mit der Beschreibung, kein
+  Scope-Creep. Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+  Rechtstexten in irgendeinem der fünf Diffs — `Buchung.test.tsx` ist nur
+  als Testanpassung wegen des geänderten `EditMode.tsx`-Verhaltens
+  betroffen, `Buchung.tsx` selbst unverändert.
+- Design-Konsistenz: `Reiseentwuerfe.tsx` und `EditMode.tsx` übernehmen
+  exakt das bestehende `Dialog`-Bestätigungsmuster (gleiche Komponenten,
+  gleicher Aufbau wie in bereits gemergten Fixes), `Kalender.tsx` fügt nur
+  `aria-current` plus `sr-only`-Text hinzu, keine visuelle Änderung — keine
+  neue Design-Frage berührt, `MARKENDESIGN.md` nicht einschlägig.
+- **Unabhängig selbst ausgeführt** (frischer Checkout von
+  `origin/it-chef/auto`, nicht nur den Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 Pakete, 0 Vulnerabilities.
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `badge.tsx`/`button.tsx`/`tabs.tsx` (unverändert, nicht durch diesen
+    Branch verursacht).
+  - `npx vitest run` → 56 Testdateien, **319 Tests, alle grün**.
+→ **Alles grün und passt zum beschriebenen Scope, nach `main` gemergt**
+(Fast-Forward `312dd4e..17b61f5`, gepusht).
+
+**Ergebnis:** Ein Branch inhaltlich geprüft und gemergt (`it-chef/auto`,
+5 Fixes + 1 Log-Eintrag), zwei Branches planmäßig ohne neue Prüfung
+übersprungen (`marketing-chef/auto`, `support-chef/auto` — beide ohne
+neue Commits von heute, laufen erst um 6 Uhr).
+
+**Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
+bereits Dokumentierte hinausgeht.

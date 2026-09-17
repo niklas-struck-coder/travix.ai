@@ -258,6 +258,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Begrüßungsnachricht zurücksetzt). Der ursprüngliche Auto-Fix-PR-Branch
   bleibt als vollständig überholt zurück (kann bei nächster
   PR-Hygiene-Aufräumung gelöscht werden).
+  Vom autonomen IT-Chef-Lauf am 16.09. (fünfter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (16.09., Vorschlag 1) gemeldeten
+  Reibungspunkt behoben: Der Papierkorb-Button in `EditMode.tsx`
+  (Aktivität im Bearbeiten-Dialog löschen, erreichbar u. a. über
+  `Buchung.tsx`) entfernte eine Aktivität bisher sofort und endgültig,
+  ohne Rückfrage — anders als dasselbe Löschen auf der
+  Aktivitäten-Übersichtsseite (`/aktivitaeten`), das bereits über das
+  etablierte Bestätigungsdialog-Muster abgesichert ist (siehe
+  `Aktivitaeten.tsx`). Fix: exakt dasselbe Muster übernommen — ein
+  zweiter, per `pendingRemoval`-State gesteuerter Dialog
+  ("Aktivität entfernen?"/"Ja, entfernen"/"Abbrechen"), kein neuer
+  Entwurf. Zwei neue Regressionstests in `EditMode.test.tsx` (Klick auf
+  "entfernen" öffnet die Bestätigung ohne sofortige Änderung; "Abbrechen"
+  lässt die Aktivität unverändert), bestehender Entfernen-Test und der
+  zugehörige Test in `Buchung.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -528,6 +544,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `PageTransition.test.tsx` (mockt `window.matchMedia` auf
   `prefers-reduced-motion: reduce`, prüft die statischen Stilwerte; vor
   dem Fix reproduzierbar rot verifiziert).
+  Vom autonomen IT-Chef-Lauf am 16.09. (vierter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (16.09., "Automatisch gefixt", PR #21) bereits
+  vollständig diagnostizierten Bug direkt auf `it-chef/auto` behoben, statt
+  auf den offenen Auto-Fix-PR zu warten: `formatDuration()` in
+  `FlightCard.tsx` und (wortgleich dupliziert) `TrainCard.tsx` matchte nur
+  ISO-8601-Dauern der Form `PT<h>H<m>M`, nicht aber die Form mit
+  Tages-Komponente (`P<n>DT<h>H<m>M`, z. B. `P1DT2H30M` für 26h30min) — bei
+  jeder Flugverbindung mit ≥24h Gesamtdauer (Übernacht-/Mehrfach-
+  Umstiegs-Langstrecke) erschien dadurch die rohe ISO-Zeichenkette statt
+  einer lesbaren Dauer in der UI. Fix: Regex um eine optionale Tage-Gruppe
+  vor dem `T` ergänzt (`P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?`), Tage werden
+  in Stunden umgerechnet (Tage × 24 + Stunden) und mit den bestehenden
+  Stunden zusammengeführt. Rein additiv für den Normalfall unter 24h —
+  bestehende Duffel-Antworten ohne Tages-Komponente verhalten sich
+  identisch (leere Tage-Gruppe ⇒ `Number(undefined || 0) === 0`). Zwei neue
+  Regressionstests (`FlightCard.test.tsx`, `TrainCard.test.tsx`), die eine
+  26h30min-Dauer (`P1DT2H30M`) auf `26h 30min` statt den rohen ISO-String
+  prüfen. Der ursprüngliche Auto-Fix-PR #21 bleibt als überholt zurück
+  (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -719,6 +754,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Löschung, bei der der auslösende Button verschwindet, bringt den Fokus
   auf die Seitenüberschrift; Abbrechen (auslösender Button bleibt
   bestehen) bringt den Fokus weiterhin dorthin zurück.
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) einen von einem
+  gezielt angesetzten Explore-Agenten gefundenen Barrierefreiheits-Fund
+  behoben: Die "Heute"-Markierung im Kalendergitter (`Kalender.tsx`,
+  7.11) war bisher rein farblich (goldener Rand plus goldene Zahl), ohne
+  jede Text-Alternative für Screenreader — anders als die Trip-Badges
+  direkt darunter, für die dieselbe Seite bereits eine eigene textliche
+  Liste hat, "weil Kalenderzellen allein für Screenreader nicht
+  zugänglich sind" (Kommentar im Code). Fix: `aria-current="date"` auf
+  der betroffenen Tageszelle sowie ein `sr-only`-Zusatz "(Heute)" neben
+  der Tageszahl, exakt nach dem in `ChecklistPanel.tsx` etablierten
+  Muster (dortiger `sr-only`-Zusatz ", bearbeiten"). Neuer
+  Regressionstest in `Kalender.test.tsx` (bei fixierter Systemzeit trägt
+  genau eine Zelle `aria-current="date"` und den "(Heute)"-Text).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
@@ -1075,6 +1123,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Anzeige nur der tatsächlich gesetzten Felder, Transportmittel-Label für
   den gewählten Modus, sowie alle Felder zusammen inkl. Link zu
   `/buchung`.
+  Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
+  `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
+  Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`
+  brach einfach ab, solange schon aufgenommen wurde, statt die laufende
+  Aufnahme zu stoppen. Wer aus Versehen draufklickte, musste abwarten, bis
+  der Browser von selbst aufhörte, oder riskierte eine ungewollt übernommene
+  Nachricht. `startListening()` (`src/lib/ai/speech.ts`) gab die
+  `SpeechRecognition`-Instanz zwar schon zurück, `ChatInput.tsx` warf sie
+  aber weg. Jetzt wird sie in einem `useRef` gehalten; ein Klick während
+  der Aufnahme ruft `recognition.stop()` darauf auf, das bestehende
+  `onend` setzt `listening` danach wie gewohnt zurück — echtes
+  Ein-/Ausschalten statt totem Button. Zwei neue Regressionstests in
+  `ChatInput.test.tsx` (zweiter Klick stoppt die laufende Instanz statt
+  eine neue zu starten; Zustand kehrt nach `onend` zur Ausgangslage
+  zurück).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
@@ -1337,6 +1400,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zwei neue Regressionstests in `Reiseentwuerfe.test.tsx` (Hinweis
   erscheint bei mehreren Entwürfen, verschwindet, sobald nur noch einer
   übrig ist).
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) einen eigenständig
+  gefundenen Reibungspunkt behoben (per Explore-Agent gezielt gesucht,
+  gegen den Code verifiziert): Der Löschen-Button in `Reiseentwuerfe.tsx`
+  entfernte einen Entwurf bisher sofort und endgültig, ohne Rückfrage —
+  anders als dasselbe Löschen auf `Preisalarme.tsx`/`Favoriten.tsx`/
+  `Angebote.tsx`/`Aktivitaeten.tsx`/`Warenkorb.tsx`, die alle bereits über
+  das etablierte Bestätigungsdialog-Muster abgesichert sind. Fix: exakt
+  dasselbe Muster übernommen — `pendingRemoval`-State plus `Dialog`
+  ("Entwurf löschen?"/"Ja, entfernen"/"Abbrechen"), kein neuer Entwurf.
+  Bestehender Löschen-Test in `Reiseentwuerfe.test.tsx` auf den
+  zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf
+  "löschen" öffnet die Bestätigung; "Abbrechen" lässt den Entwurf
+  unverändert).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

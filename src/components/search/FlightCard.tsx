@@ -13,9 +13,9 @@ function formatTime(isoString: string) {
 function formatDuration(isoDuration: string) {
   const match = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
   if (!match) return isoDuration
-  const [, days, hoursPart, minutes] = match
-  const hours = Number(days ?? 0) * 24 + Number(hoursPart ?? 0)
-  return [hours > 0 && `${hours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
+  const [, days, hours, minutes] = match
+  const totalHours = Number(days || 0) * 24 + Number(hours || 0)
+  return [totalHours && `${totalHours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
 }
 
 interface FlightCardProps {

@@ -87,12 +87,27 @@ describe('EditMode', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it('removes an existing activity', () => {
+  it('asks for confirmation before removing an activity', () => {
     const onChange = renderEditMode([{ id: '1', name: 'Museum', price: '10 €' }])
 
     fireEvent.click(screen.getByRole('button', { name: 'Museum entfernen' }))
 
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText('Aktivität entfernen?')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, entfernen' }))
+
     expect(onChange).toHaveBeenCalledWith([])
+  })
+
+  it('keeps the activity when the removal confirmation is cancelled', () => {
+    const onChange = renderEditMode([{ id: '1', name: 'Museum', price: '10 €' }])
+
+    fireEvent.click(screen.getByRole('button', { name: 'Museum entfernen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.queryByText('Aktivität entfernen?')).not.toBeInTheDocument()
   })
 
   it('updates the price of an existing activity', () => {
