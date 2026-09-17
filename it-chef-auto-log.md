@@ -10894,3 +10894,73 @@ erfolgreich).
 `src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test, bestehender Test
 angepasst), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
 ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (dritter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `27cdc50`, identisch mit `origin/it-chef/auto`, 4 Commits vor
+`origin/main` — noch nicht von Freigabe-Chef gemergt) — `main` seit dem
+letzten Lauf unverändert (`origin/main` = `312dd4e`, bereits Vorfahre von
+`it-chef/auto`), kein Merge nötig. `npm ci` (frisch, keine `node_modules`
+im Container). Baseline vorab bestätigt: `npx vitest run` (56
+Testdateien, 318 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — die
+verbleibenden offenen Punkte (7.4 Rest, 7.12, 8.1-8.9 größtenteils, PR-
+Aufräumung, TrainCard/TrainResults-Verdrahtung) hängen weiterhin an
+offenen Architektur-/Produktentscheidungen oder sind nicht autonom
+umsetzbar (siehe frühere Log-Einträge). `reports/it-chef.md` und
+`reports/support-chef.md` (beide 16.09.) enthalten keine neuen, noch
+offenen Funde — die dort gemeldeten Punkte sind bereits über die beiden
+vorherigen Läufe von heute gefixt. Eigene TODO/FIXME-Suche über `src/`:
+0 Treffer. Zusätzlich einen Explore-Agenten gezielt auf 16 bisher
+seltener geprüfte Dateien angesetzt (u. a. `AppShell.tsx`, `routes.tsx`,
+`design-tokens.ts`, `calendarUtils.ts`, `Kalender.tsx`,
+`Kartenansicht.tsx`, `Dashboard.tsx`, `Profil.tsx`, `Einstellungen.tsx`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `QuickReplies.tsx`,
+`ChatMessage.tsx`, `speech.ts`, `duffel/client.ts`, `cartTotals.ts`),
+jeweils gegen die zugehörige Testdatei abgeglichen. Die meisten zeigten
+keine neuen Funde mehr (bereits gut getestet bzw. dokumentierte
+Absichts-Entscheidungen). Ein Fund erfüllte alle vier
+Sicherheitskriterien und wurde gegen den Code verifiziert:
+`src/pages/Kalender.tsx:104-113` — die "Heute"-Markierung im
+Kalendergitter war bisher rein farblich (goldener Zellenrand plus
+goldene Tageszahl), ohne jede Text-Alternative für Screenreader. Genau
+dieselbe Seite löst ein analoges Problem bei den Trip-Badges bereits
+über eine zusätzliche textliche Liste unterhalb des Gitters, mit dem
+Code-Kommentar "Farbige Zellen allein sind für Screenreader nicht
+zugänglich" — die "Heute"-Zelle selbst wurde dabei aber übersehen.
+Erfüllt alle vier Kriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine clientseitige Darstellung, keine echten Trip-Daten
+betroffen), keine offene Architekturentscheidung (mechanische Anwendung
+eines bereits zweifach im Code etablierten Musters — derselbe
+Screenreader-Gedanke auf derselben Seite, sowie der `sr-only`-Zusatz aus
+`ChecklistPanel.tsx`), klar umrissen (eine Zelle, ein bereits berechnetes
+`isToday`-Flag, keine Interpretation nötig), objektiv prüfbar
+(Regressionstest über die bestehende `vi.setSystemTime`-Teststruktur in
+`Kalender.test.tsx`, plus Typecheck/Lint/Build).
+
+**Fix:** `src/pages/Kalender.tsx` bekommt `aria-current={isToday ? 'date'
+: undefined}` auf der jeweiligen Tageszelle sowie einen `sr-only`-Zusatz
+"(Heute)" neben der Tageszahl, exakt nach dem in `ChecklistPanel.tsx`
+etablierten Muster (dortiger `sr-only`-Zusatz ", bearbeiten"). Rein
+additiv — betrifft ausschließlich die eine Zelle, für die `isToday` wahr
+ist, keine Verhaltensänderung für alle anderen Zellen. Neuer
+Regressionstest in `Kalender.test.tsx`: bei der im Testsetup fixierten
+Systemzeit (20.08.2026) trägt genau eine Zelle sowohl `aria-current="date"`
+als auch den "(Heute)"-Text, und dieser Text erscheint insgesamt nur
+einmal im gerenderten Kalender.
+
+**Geprüft:** `npx vitest run src/pages/Kalender.test.tsx` (gezielt, 4
+Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 319 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Kalender.tsx` (Fix), `src/pages/Kalender.test.tsx`
+(1 neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

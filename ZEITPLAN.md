@@ -754,6 +754,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Löschung, bei der der auslösende Button verschwindet, bringt den Fokus
   auf die Seitenüberschrift; Abbrechen (auslösender Button bleibt
   bestehen) bringt den Fokus weiterhin dorthin zurück.
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) einen von einem
+  gezielt angesetzten Explore-Agenten gefundenen Barrierefreiheits-Fund
+  behoben: Die "Heute"-Markierung im Kalendergitter (`Kalender.tsx`,
+  7.11) war bisher rein farblich (goldener Rand plus goldene Zahl), ohne
+  jede Text-Alternative für Screenreader — anders als die Trip-Badges
+  direkt darunter, für die dieselbe Seite bereits eine eigene textliche
+  Liste hat, "weil Kalenderzellen allein für Screenreader nicht
+  zugänglich sind" (Kommentar im Code). Fix: `aria-current="date"` auf
+  der betroffenen Tageszelle sowie ein `sr-only`-Zusatz "(Heute)" neben
+  der Tageszahl, exakt nach dem in `ChecklistPanel.tsx` etablierten
+  Muster (dortiger `sr-only`-Zusatz ", bearbeiten"). Neuer
+  Regressionstest in `Kalender.test.tsx` (bei fixierter Systemzeit trägt
+  genau eine Zelle `aria-current="date"` und den "(Heute)"-Text).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

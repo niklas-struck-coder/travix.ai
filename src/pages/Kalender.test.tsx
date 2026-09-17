@@ -46,6 +46,21 @@ describe('Kalender', () => {
     expect(screen.getAllByText('Lissabon')).toHaveLength(9)
   })
 
+  it('marks today with an accessible indicator, not just a color cue', () => {
+    render(
+      <MemoryRouter>
+        <Kalender />
+      </MemoryRouter>,
+    )
+
+    const todayCell = screen.getByText('(Heute)', { exact: false }).closest('[aria-current="date"]')
+    expect(todayCell).not.toBeNull()
+    expect(todayCell).toHaveTextContent('20')
+
+    // Only the current day carries the marker.
+    expect(screen.getAllByText('(Heute)', { exact: false })).toHaveLength(1)
+  })
+
   it('navigates to the previous month and back to today via the "Heute" button', () => {
     render(
       <MemoryRouter>
