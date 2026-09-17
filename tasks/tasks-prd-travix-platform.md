@@ -166,7 +166,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 4.8 Build `TripSummaryCard.tsx` with inline trip summary and "save & view" action
   - [x] 4.9 Assemble `KiChat.tsx` main chat container integrating all chat components
   - [x] 4.10 Implement `useChat.ts` hook for message state, sending, and AI response parsing — parses against mock advisor for now, drop-in swap once 4.3 is real
-  - [x] 4.11 Implement voice input via browser speech recognition in `src/lib/ai/speech.ts` — browser SpeechRecognition API used instead of Base44 TranscribeAudio (no backend yet)
+  - [x] 4.11 Implement voice input via browser speech recognition in `src/lib/ai/speech.ts` — browser SpeechRecognition API used instead of Base44 TranscribeAudio (no backend yet). Vom autonomen IT-Chef-Lauf am 17.09. nachgebessert: ein zweiter Klick auf das Mikrofon-Icon in `ChatInput.tsx` stoppte die laufende Aufnahme bisher nicht (tat einfach nichts), jetzt hält ein `useRef` die von `startListening()` zurückgegebene `SpeechRecognition`-Instanz und ein erneuter Klick ruft `recognition.stop()` darauf auf
   - [x] 4.12 Implement text-to-speech output via browser SpeechSynthesis — used instead of Base44 GenerateSpeech (no backend yet)
   - [x] 4.13 Persist chat history and trip data on page leave and reload — implemented inline in `useChat.ts` (localStorage) rather than a separate `useAutoSave.ts` hook
   - [x] 4.14 Wire KiChat page (`/ki-chat`) with trip creation on first message and trip loading for resume

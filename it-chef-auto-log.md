@@ -10765,3 +10765,64 @@ erfolgreich).
 (Testanpassung), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `d61cc25`, identisch mit `origin/it-chef/auto`) — `main`
+seit dem letzten Lauf unverändert (`origin/main` = `312dd4e`, bereits
+Vorfahre von `it-chef/auto`), kein Merge nötig. `npm ci` (frisch, keine
+`node_modules` im Container). Baseline vorab bestätigt: `npx vitest run`
+(56 Testdateien, 315 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Sprint-3-Punkte (7.4 Rest, 7.12) hängen weiterhin an der offenen
+Architektur-/Datenmodell-Entscheidung bzw. fehlenden Preisfeldern in
+`TripDraft`, Sprint-4-Punkte (8.1-8.7) an Vision-Analyse/Deal-Finder/
+Backend-Entscheidung, keine davon autonom fällbar. Stattdessen
+`reports/support-chef.md` (16.09.) gelesen: Vorschlag 1 (EditMode-
+Löschbestätigung) ist bereits im letzten Lauf gefixt. Vorschlag 2 ist
+noch offen und gegen den aktuellen Code verifiziert:
+`src/components/chat/ChatInput.tsx:27-28` (`handleMicClick`) brach
+bisher einfach ab, wenn schon aufgenommen wurde (`if (... || listening)
+return`), statt die laufende Aufnahme zu stoppen — ein zweiter Klick auf
+das Mikrofon-Icon tat also nichts. `startListening()`
+(`src/lib/ai/speech.ts`) gibt die `SpeechRecognition`-Instanz (oder
+`null`) bereits zurück, `ChatInput.tsx` hat den Rückgabewert aber nie
+gespeichert. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine lokale UI-Interaktion,
+kein Datenzugriff), keine offene Produkt-/Architekturentscheidung, klar
+umrissen (Diagnose und Fix-Ansatz "`recognition`-Rückgabewert merken und
+bei erneutem Klick `recognition.stop()` aufrufen" standen bereits
+wörtlich im Bericht), objektiv prüfbar (Regressionstest mit der
+bestehenden `FakeSpeechRecognition`-Teststruktur in
+`ChatInput.test.tsx`, Typecheck, Build).
+
+**Fix:** neuer `recognitionRef` (`useRef<ReturnType<typeof
+startListening>>(null)`) in `ChatInput.tsx`. `handleMicClick()`
+unterscheidet jetzt zwei Fälle: läuft bereits eine Aufnahme, ruft es nur
+noch `recognitionRef.current?.stop()` auf und kehrt zurück; sonst startet
+es wie bisher eine neue Aufnahme und speichert die von `startListening()`
+zurückgegebene Instanz in der Ref. Das bestehende `onend`
+(`() => setListening(false)`) übernimmt nach dem `stop()` weiterhin das
+Zurücksetzen des UI-Zustands — kein zusätzlicher State-Umweg nötig, exakt
+wie bei einem echten Browser-Abbruch. Zwei neue Regressionstests in
+`ChatInput.test.tsx`: ein zweiter Klick während der Aufnahme ruft
+`stop()` auf der laufenden Instanz auf, ohne eine zweite Instanz zu
+erzeugen; nach `onend()` zeigt der Button wieder den
+"Spracheingabe starten"-Zustand.
+
+**Geprüft:** `npx vitest run src/components/chat/ChatInput.test.tsx`
+(gezielt, 8 Tests grün, davon 2 neu), danach volle Suite `npx vitest run`
+(56 Testdateien, 317 Tests, davon 2 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/chat/ChatInput.tsx` (Fix),
+`src/components/chat/ChatInput.test.tsx` (2 neue Tests), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.

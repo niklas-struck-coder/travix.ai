@@ -90,6 +90,42 @@ describe('ChatInput microphone errors', () => {
   })
 })
 
+describe('ChatInput microphone stop', () => {
+  afterEach(() => {
+    // @ts-expect-error test-only global cleanup
+    delete window.SpeechRecognition
+  })
+
+  it('stops the running recognition instead of starting a new one on a second click', () => {
+    // @ts-expect-error test-only global stub
+    window.SpeechRecognition = FakeSpeechRecognition
+
+    render(<ChatInput onSend={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
+    expect(lastInstance?.start).toHaveBeenCalledTimes(1)
+    const runningInstance = lastInstance
+
+    fireEvent.click(screen.getByLabelText('Aufnahme läuft'))
+
+    expect(runningInstance?.stop).toHaveBeenCalledTimes(1)
+    expect(lastInstance).toBe(runningInstance)
+  })
+
+  it('goes back to the idle state once the stopped recognition fires onend', () => {
+    // @ts-expect-error test-only global stub
+    window.SpeechRecognition = FakeSpeechRecognition
+
+    render(<ChatInput onSend={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
+    fireEvent.click(screen.getByLabelText('Aufnahme läuft'))
+    act(() => lastInstance?.onend?.())
+
+    expect(screen.getByLabelText('Spracheingabe starten')).toBeInTheDocument()
+  })
+})
+
 describe('ChatInput Enter key', () => {
   it('sends the message when pressing Enter', () => {
     const onSend = vi.fn()

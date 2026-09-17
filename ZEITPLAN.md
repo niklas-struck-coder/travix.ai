@@ -1110,6 +1110,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Anzeige nur der tatsächlich gesetzten Felder, Transportmittel-Label für
   den gewählten Modus, sowie alle Felder zusammen inkl. Link zu
   `/buchung`.
+  Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
+  `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
+  Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`
+  brach einfach ab, solange schon aufgenommen wurde, statt die laufende
+  Aufnahme zu stoppen. Wer aus Versehen draufklickte, musste abwarten, bis
+  der Browser von selbst aufhörte, oder riskierte eine ungewollt übernommene
+  Nachricht. `startListening()` (`src/lib/ai/speech.ts`) gab die
+  `SpeechRecognition`-Instanz zwar schon zurück, `ChatInput.tsx` warf sie
+  aber weg. Jetzt wird sie in einem `useRef` gehalten; ein Klick während
+  der Aufnahme ruft `recognition.stop()` darauf auf, das bestehende
+  `onend` setzt `listening` danach wie gewohnt zurück — echtes
+  Ein-/Ausschalten statt totem Button. Zwei neue Regressionstests in
+  `ChatInput.test.tsx` (zweiter Klick stoppt die laufende Instanz statt
+  eine neue zu starten; Zustand kehrt nach `onend` zur Ausgangslage
+  zurück).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

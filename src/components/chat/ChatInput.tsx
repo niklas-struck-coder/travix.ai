@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Mic, MicOff, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
   const [value, setValue] = useState('')
   const [listening, setListening] = useState(false)
   const [micError, setMicError] = useState<string | null>(null)
+  const recognitionRef = useRef<ReturnType<typeof startListening>>(null)
 
   const handleSend = () => {
     const trimmed = value.trim()
@@ -25,10 +26,14 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
   }
 
   const handleMicClick = () => {
-    if (!isSpeechRecognitionSupported() || listening) return
+    if (!isSpeechRecognitionSupported()) return
+    if (listening) {
+      recognitionRef.current?.stop()
+      return
+    }
     setMicError(null)
     setListening(true)
-    startListening(
+    recognitionRef.current = startListening(
       (transcript) => setValue((prev) => (prev ? `${prev} ${transcript}` : transcript)),
       () => setListening(false),
       () => setMicError('Spracheingabe hat nicht geklappt — bitte tippe deine Nachricht stattdessen.'),
