@@ -2660,3 +2660,83 @@ erneut vertieft, da er durch den heutigen Fix nicht berührt wurde und
 bereits dokumentiert ist. `Urlaubsmodus.tsx` als zweite Einbindungsstelle
 von `ChatInput` wurde nicht gesondert geprüft — der Mikrofon-Fund gilt
 dort identisch, da `ChatInput` unverändert wiederverwendet wird.
+
+## 2026-09-17 — Reiseentwürfe (`Reiseentwuerfe.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md`/`it-chef-auto-log.md` hat der
+autonome IT-Chef-Lauf heute (Commit `27cdc50`, bereits nach `main`
+gemergt) `src/pages/Reiseentwuerfe.tsx` mit demselben
+Lösch-Bestätigungsdialog ausgestattet, den Support-Chef bereits auf fünf
+anderen Seiten geprüft hat (Preisalarme/Favoriten/Angebote am 14.09.,
+Aktivitäten/Warenkorb am 15.09.) — heute erstmals auf dieser sechsten
+Seite selbst geprüft. Per Codelesen bestätigt: der zentrale Fokus-Fix in
+`dialog.tsx` (16.09., `2d0f024`) gilt automatisch auch hier
+(`onCloseAutoFocus` in `DialogContent`, `src/components/ui/dialog.tsx:76-98`)
+— keine gesonderte Prüfung nötig, kein neuer Fund an dieser Stelle.
+
+### Reibungspunkte
+
+**1. Duplizierte Entwürfe teilen sich exakt denselben
+Bedienelement-Namen — für Screenreader-Nutzer:innen nicht mehr
+unterscheidbar**
+
+`src/pages/Reiseentwuerfe.tsx:209`, `:221`, `:232`, `:242`: Alle vier
+Aktions-Buttons pro Karte (Pausieren/Fortsetzen, Abschließen,
+Duplizieren, Löschen) bekommen ihr `aria-label` ausschließlich aus
+`draft.destination` (z. B. `` `${draft.destination} löschen` ``).
+`duplicateDraft()` (Zeile 100-108) legt eine vollständige Kopie mit
+identischem `destination`-Feld an, nur die `id` ist neu. Nach einem Klick
+auf "Duplizieren" existieren damit zwei (oder bei mehrfachem
+Duplizieren noch mehr) Karten mit exakt demselben `aria-label` je
+Aktion, z. B. zweimal "Lissabon löschen". Mit einem temporären, nicht
+committeten Testfall lokal reproduziert: Nach einem Klick auf "Lissabon
+duplizieren" liefert `getAllByRole('button', { name: 'Lissabon löschen'
+})` zwei Treffer. Für sehende Nutzer:innen ist die Bildschirmposition
+noch ein schwacher Anhaltspunkt, für Screenreader-Nutzer:innen, die per
+Rotor/Buttonliste navigieren, sind beide Karten an dieser Stelle nicht
+mehr auseinanderzuhalten — sie können nicht sicher sagen, welchen der
+beiden gleichnamigen "Löschen"-Buttons sie gerade aktivieren.
+
+*Vorschlag:* Die `aria-label`s um ein unterscheidendes Merkmal ergänzen,
+z. B. die Reisedaten, sofern vorhanden, oder ersatzweise den
+Kartenindex. Robuster wäre, sobald es echte Datensätze statt der
+Demo-Liste gibt, ein Erstellungsdatum/Zeitstempel-Feld pro Entwurf — das
+würde Original und Kopie auch inhaltlich unterscheidbar machen, nicht
+nur im `aria-label`.
+
+**2. "Abschließen" ist ohne Rückfrage endgültig — anders als "Löschen"
+auf derselben Karte, obwohl es genauso keinen Weg zurück gibt**
+
+`src/pages/Reiseentwuerfe.tsx:216-227` (Button), Handler
+`finalizeDraft()` Zeile 94-98: Ein Klick auf "Abschließen" setzt
+`status` sofort auf `'finalized'`, ohne Bestätigungsdialog. Danach
+verschwinden auf dieser Karte sowohl der Pausieren- als auch der
+Abschließen-Button (Zeile 204, 216: beide nur bei `draft.status !==
+'finalized'` sichtbar) — im gesamten Datei-Inhalt gibt es keine
+Möglichkeit, eine abgeschlossene Karte wieder zu öffnen. Die einzige
+verbleibende Aktion, die neuen, bearbeitbaren Status erzeugt, ist
+"Duplizieren" — das legt aber einen komplett neuen Entwurf mit neuer
+`id` an, es stellt nicht den Originaleintrag wieder her. Für eine
+Nutzerin, die aus Versehen "Abschließen" statt "Pausieren" trifft (beide
+Buttons stehen nebeneinander, Zeile 204-227, nur durchs Icon
+unterschieden: `PauseCircle`/`PlayCircle` vs. `CheckCircle2`), gibt es
+keinen Weg, den Fehlklick direkt rückgängig zu machen — obwohl
+"Löschen" auf derselben Karte, das ebenfalls endgültig ist, extra
+nachfragt (Zeile 255-272).
+
+*Vorschlag:* Entweder dieselbe Bestätigungsdialog-Komponente auch vor
+"Abschließen" schalten (konsistent mit dem bereits etablierten Muster),
+oder — vermutlich die bessere Lösung, weil "Abschließen" seltener ein
+Fehlklick sein dürfte als "Löschen" — einen einfachen
+"Rückgängig"-Hinweis direkt nach dem Klick anzeigen, der den Status für
+ein paar Sekunden zurücksetzen kann, ohne einen zusätzlichen Dialog in
+den normalen Ablauf einzubauen.
+
+### Nicht geprüft
+Die bereits dokumentierte Ehrlichkeits-Einschränkung ("Planung
+fortsetzen" führt bei jedem Entwurf zum selben aktiven Chat, Zeile
+143-162, Aufgabe 7.4) wurde hier nicht erneut vertieft, da sie im Code
+selbst bereits als bekannte, offene Einschränkung kommentiert und schon
+im Bericht vom 10.09. gemeldet ist.
