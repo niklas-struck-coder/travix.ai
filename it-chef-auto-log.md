@@ -10826,3 +10826,71 @@ erfolgreich).
 `src/components/chat/ChatInput.test.tsx` (2 neue Tests), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (weiterer autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` (Stand vor
+diesem Lauf: `f57c31c`, identisch mit `origin/it-chef/auto`, 3 Commits
+vor `origin/main` — noch nicht von Freigabe-Chef gemergt) — `main` seit
+dem letzten Lauf unverändert, kein Merge nötig. `npm ci` (frisch, keine
+`node_modules` im Container). Baseline vorab bestätigt: `npx vitest run`
+(56 Testdateien, 317 Tests, alle grün), `npm run lint` (0 Fehler, nur die
+drei vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Punkte (2.0 Auth, 4.1-4.3 KI-Backend, 5.7 Zug/Bus/Fähre-Anbieter,
+6.2/6.6/6.7/7.4/7.12 Preisfeld-/Datenmodell-Lücken, 8.1-8.9 Vision/
+Deal-Finder/Premium) hängen alle an einer offenen Architektur-/
+Produktentscheidung oder an fehlenden Backend-Credentials, keine davon
+autonom fällbar. `reports/it-chef.md` (16.09.) und `reports/support-chef.md`
+(16.09.) gelesen: beide dort noch offenen Funde (Mikrofon-Abbruch,
+EditMode-Löschbestätigung) sind bereits durch die beiden vorangegangenen
+Läufe von heute erledigt. Zusätzlich einen Explore-Agenten gezielt auf
+bisher seltener geprüfte Seiten/Dateien angesetzt (u. a. `Kalender.tsx`,
+`Kartenansicht.tsx`, `Profil.tsx`, `Einstellungen.tsx`, `Dashboard.tsx`,
+`calendarUtils.ts`, `cartTotals.ts`, `duffel/client.ts`, `TrainCard.tsx`/
+`TrainResults.tsx`, `mockAdvisor.ts`, `mockConcierge.ts`, `speech.ts`,
+UI-Primitives) — die meisten davon zeigten keine neuen Funde mehr
+(bereits mehrfach iteriert). Ein Fund erfüllte alle vier
+Sicherheitskriterien und wurde gegen den Code verifiziert:
+`src/pages/Reiseentwuerfe.tsx:225-231` — der Löschen-Button (Trash2-Icon)
+auf einer Entwurfskarte rief `deleteDraft(draft.id)` bisher direkt beim
+Klick auf, ohne Rückfrage. Fünf strukturell identische Löschen-Buttons
+auf `Preisalarme.tsx`, `Favoriten.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`
+und `Warenkorb.tsx` sind bereits über dasselbe `pendingRemoval`-plus-
+`Dialog`-Muster abgesichert (siehe `ZEITPLAN.md`-Einträge vom 13.-14.09.)
+— `Reiseentwuerfe.tsx` wurde dabei übersehen, weil die Seite (16.08.)
+vor der Einführung dieses Musters (14.09.) entstand. Erfüllt alle vier
+Kriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/Rechtstexten (reiner
+lokaler Demo-State, nur clientseitige UI), keine offene Architektur-
+entscheidung (identisches Muster bereits fünffach im Code etabliert und
+1:1 übertragbar), klar umrissen (Copy des bestehenden Musters, keine
+Interpretation nötig), objektiv prüfbar (Regressionstest analog den
+fünf bereits bestehenden, plus Typecheck/Build).
+
+**Fix:** `Reiseentwuerfe.tsx` bekommt einen neuen `pendingRemoval:
+Draft | null`-State. Der Löschen-Button ruft jetzt `setPendingRemoval(draft)`
+auf statt `deleteDraft(draft.id)` direkt; ein neuer `Dialog`-Block
+("Entwurf löschen?" / "Der Entwurf für {destination} wird gelöscht. Das
+lässt sich nicht rückgängig machen." / "Abbrechen" / "Ja, entfernen")
+exakt nach dem Muster aus `Preisalarme.tsx` übernommen, `confirmRemoval()`
+ruft die bestehende `deleteDraft()` erst nach Bestätigung auf. Bestehender
+Löschen-Test in `Reiseentwuerfe.test.tsx` (inkl. des Tests für das
+Verschwinden des Mehrfach-Entwurf-Hinweises) auf den zusätzlichen
+Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf "löschen"
+öffnet die Bestätigung ohne sofortige Löschung; "Abbrechen" lässt den
+Entwurf unverändert) — analog `Preisalarme.test.tsx`.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (gezielt,
+9 Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 318 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test, bestehender Test
+angepasst), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

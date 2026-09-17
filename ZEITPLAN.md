@@ -1387,6 +1387,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zwei neue Regressionstests in `Reiseentwuerfe.test.tsx` (Hinweis
   erscheint bei mehreren Entwürfen, verschwindet, sobald nur noch einer
   übrig ist).
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) einen eigenständig
+  gefundenen Reibungspunkt behoben (per Explore-Agent gezielt gesucht,
+  gegen den Code verifiziert): Der Löschen-Button in `Reiseentwuerfe.tsx`
+  entfernte einen Entwurf bisher sofort und endgültig, ohne Rückfrage —
+  anders als dasselbe Löschen auf `Preisalarme.tsx`/`Favoriten.tsx`/
+  `Angebote.tsx`/`Aktivitaeten.tsx`/`Warenkorb.tsx`, die alle bereits über
+  das etablierte Bestätigungsdialog-Muster abgesichert sind. Fix: exakt
+  dasselbe Muster übernommen — `pendingRemoval`-State plus `Dialog`
+  ("Entwurf löschen?"/"Ja, entfernen"/"Abbrechen"), kein neuer Entwurf.
+  Bestehender Löschen-Test in `Reiseentwuerfe.test.tsx` auf den
+  zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf
+  "löschen" öffnet die Bestätigung; "Abbrechen" lässt den Entwurf
+  unverändert).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
