@@ -3836,3 +3836,83 @@ Nacht-Check des Tages gemergt, keine neuen Commits seither).
 
 **Info an Ni nötig:** Nein. Alles grün, kein neuer Befund, der über das
 bereits Dokumentierte hinausgeht.
+
+## 2026-09-18, früher Nacht-Check (0-4-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main`
+  (`b07e3aa..03a1e6b`).
+- `marketing-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr).
+- `support-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr).
+
+**Prüfung `it-chef/auto`:**
+- `it-chef-auto-log.md` gelesen (mehrere Einträge vom 17./18.09., zwei
+  davon reine "kein neuer sicherer Punkt gefunden"-Läufe ohne
+  Codeänderung):
+  - `b07e3aa`: `Reiseentwuerfe.tsx` — `aria-label` aller vier
+    Aktions-Buttons bekommt bei mehreren gleichnamigen Entwürfen
+    zusätzlich "(Eintrag N)", damit Duplikate für Screenreader wieder
+    unterscheidbar sind (Fund aus `reports/support-chef.md`, 17.09.).
+  - `88d6e9f`: neue `AppShell.test.tsx` — reine Testabdeckungslücke
+    geschlossen, kein Verhalten geändert.
+  - `577c4ef`: `TrainCard.tsx` bekommt die `selected`-Prop, die
+    `FlightCard`/`HotelCard` bereits hatten (Button wird nach Auswahl
+    disabled, zeigt "Ausgewählt" mit Check-Icon) — 1:1 nach etabliertem
+    Muster, `TrainCard` ist noch nirgends live eingebunden.
+  - `c1095d4`: reiner Log-Eintrag, kein Code geändert.
+  - `03a1e6b`: `sheet.tsx`s `SheetContent` bekommt denselben
+    `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback wie `dialog.tsx`s
+    `DialogContent` (Fokus zur Seiten-`<h1>`, falls der öffnende Auslöser
+    beim Schließen aus dem DOM entfernt wurde) — mechanische 1:1-Parität
+    zu einer bereits gemergten Dialog-Änderung.
+- Diffs aller Commits selbst gelesen (`git diff origin/main...origin/it-chef/auto`),
+  nicht nur den Log-Eintrag geglaubt: Scope jedes Commits deckt sich
+  exakt mit der Beschreibung, kein Scope-Creep. Kein Bezug zu Auth,
+  Zahlungen, Nutzerdaten oder Rechtstexten in irgendeinem Diff.
+- Design-Konsistenz: keine visuelle Änderung, alle drei Code-Fixes
+  übernehmen wortgleich bereits etablierte Muster aus Schwester-
+  Komponenten (`FlightCard`/`HotelCard` für `TrainCard`, `dialog.tsx` für
+  `sheet.tsx`) — `MARKENDESIGN.md` nicht einschlägig.
+- **Unabhängig selbst ausgeführt** (frischer Checkout von
+  `origin/it-chef/auto` auf einen separaten lokalen Review-Branch,
+  nicht nur den Log-Eintrag geglaubt):
+  - `npm install` → sauber, 650 Pakete, 0 Vulnerabilities.
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 3 vorbestehenden Warnings in
+    `badge.tsx`/`button.tsx`/`tabs.tsx` (unverändert).
+  - `npx vitest run` → 58 Testdateien, **324 Tests, alle grün** — deckt
+    sich exakt mit der im Branch-eigenen Log behaupteten Baseline.
+  - Zusätzlich `npm run build` (`tsc -b && vite build`) zur Sicherheit
+    mitlaufen lassen → erfolgreich, kein Typfehler (nur die
+    vorbestehende Chunk-Size-Warnung, unabhängig vom Diff).
+- Fast-Forward-Check: `git merge-base main origin/it-chef/auto` ==
+  `main`-HEAD (`cbb845d`) → sauberer Fast-Forward ohne Konflikt möglich.
+
+→ **Inhaltlich und technisch alles grün, entspricht dem beschriebenen
+Scope — aber NICHT gemergt.** Der `git merge --ff-only`-Aufruf selbst
+wurde von der Sandbox-Berechtigungsebene dieser Session mit "Permission
+for this action was denied by the Claude Code auto mode classifier.
+Reason: [Merge Without Review]" blockiert — kein inhaltliches Problem
+am Branch, sondern eine Berechtigungsgrenze der laufenden Session, die
+in keinem früheren Lauf so aufgetreten ist. Bewusst keinen Versuch
+unternommen, das über einen anderen Weg zu umgehen (z. B. GitHub-API
+statt lokalem `git merge`), da das dem erkennbaren Zweck dieser Sperre
+zuwiderlaufen würde. `main` bleibt unverändert bei `cbb845d`,
+`origin/it-chef/auto` bleibt unverändert bei `03a1e6b` (kein Push
+vorgenommen).
+
+**Ergebnis:** Ein Branch inhaltlich vollständig geprüft und für gut
+befunden (`it-chef/auto`, 3 Fixes + 2 reine Log-Einträge), aber
+**nicht gemergt** wegen einer Session-Berechtigungssperre (nicht wegen
+eines Befunds am Code). Zwei Branches planmäßig ohne neue Prüfung
+übersprungen (`marketing-chef/auto`, `support-chef/auto` — beide ohne
+neue Commits von heute, laufen erst um 6 Uhr).
+
+**Info an Ni nötig:** Ja — ungewöhnlicher Fall, kein normaler
+"nicht bestanden"-Befund. Ni per Notification informiert: geprüfter,
+für gut befundener Branch liegt bereit, der Merge selbst konnte diese
+Session aber technisch nicht ausführen. Braucht entweder einen manuellen
+Merge durch Ni oder eine Anpassung der Session-Berechtigungen, damit
+künftige Nacht-Checks wie vorgesehen eigenständig mergen können.
