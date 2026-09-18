@@ -3916,3 +3916,88 @@ für gut befundener Branch liegt bereit, der Merge selbst konnte diese
 Session aber technisch nicht ausführen. Braucht entweder einen manuellen
 Merge durch Ni oder eine Anpassung der Session-Berechtigungen, damit
 künftige Nacht-Checks wie vorgesehen eigenständig mergen können.
+
+## 2026-09-18, geplanter Tageslauf (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** `it-chef/auto` (5 neue Commits vor `main`,
+`b07e3aa..03a1e6b` — identisch zum gestern Nacht bereits inhaltlich
+geprüften Stand), `marketing-chef/auto` (1 neuer Commit, `63c255a`),
+`support-chef/auto` (1 neuer Commit, `ae21921`).
+
+**`marketing-chef/auto`:** Diff gelesen (`marketing/freigabe-uebersicht.md`,
+`marketing-chef-auto-log.md`) — reiner Übersichts-Lauf: prüft, ob sich an
+den vier seit Wochen offenen Fragen etwas geändert hat (nein) und
+verifiziert per `git show --stat` für alle acht seit dem letzten
+Branch-Update neuen `main`-Commits, dass keiner Produktcode unter `src/`
+berührt (kein neuer Tier-4-Kandidat). Keine erfundenen Kennzahlen, kein
+Hinweis auf tatsächliches Posten/Versenden, Text vollständig und
+kohärent. **Kriterien erfüllt → gemergt** (`--no-ff` nach lokalem
+`main`, dann nach `origin/main` gepusht, `f84399b..462d150`).
+
+**`support-chef/auto`:** Diff gelesen (`support-chef-auto-log.md`,
+neuer Abschnitt "Fokus nach dem mobilen Menü") — reine Analyse ohne
+Codeänderung. Stichprobenartig gegen den tatsächlichen Code auf
+`it-chef/auto` verifiziert: `MobileNav.tsx` (Hamburger-Button
+`aria-label="Menü öffnen"`, `NavLink onClick={() => setOpen(false)}`),
+`AppShell.tsx` (rendert `MobileNav` außerhalb von `<main>`, wird bei
+Routenwechsel nicht neu montiert) und `sheet.tsx:78-101`
+(`onOpenAutoFocus`/`onCloseAutoFocus`-Fallback) — alle zitierten
+Datei-/Zeilenangaben stimmen mit dem tatsächlichen Code überein, Fund
+nachvollziehbar und nicht erfunden. **Kriterien erfüllt → gemergt**
+(`--no-ff`, mitgepusht in selbem Push wie oben).
+
+**`it-chef/auto`:** Diffs zu allen 5 Commits selbst gelesen (`git diff
+origin/main...origin/it-chef/auto`, Code- und Log-Anteil getrennt) —
+Scope jedes Commits deckt sich exakt mit der Beschreibung (Reiseentwuerfe
+aria-label-Fix, AppShell-Testabdeckung, TrainCard `selected`-Prop,
+sheet.tsx-Fokus-Parität zu dialog.tsx), kein Scope-Creep, kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten, keine visuelle/Design-Änderung
+(nur mechanische 1:1-Übertragung bestehender Muster) — `MARKENDESIGN.md`
+nicht einschlägig.
+
+**Unabhängige Verifikation nicht möglich — technischer Blocker, kein
+Codeproblem:** Frischer, isolierter `git worktree` von `origin/it-chef/auto`
+(`03a1e6b`) angelegt. `npm ci` schlug zweimal fehl mit `npm error code
+E503 - 503 Service Unavailable - GET
+https://registry.npmjs.org/zod-to-json-schema/-/zod-to-json-schema-3.25.2.tgz`.
+Nicht vorschnell als Branch-Problem gewertet, sondern die Gegenprobe
+gemacht: `curl` gegen `registry.npmjs.org`, `pypi.org` und `jsr.io`
+(alle drei per `no_proxy` direkt angebunden, nicht über den
+Agent-Proxy) liefern alle drei durchgehend `503` mit der Envoy-typischen
+Meldung "upstream connect error or disconnect/reset before headers ...
+connection timeout" — ein Infrastruktur-/Netzwerkproblem der
+Sandbox-Umgebung selbst (Egress-Route für direkt angebundene Registries),
+nicht ein Problem von `npm`, `zod-to-json-schema` oder gar vom Branch.
+Mehrfach mit Backoff erneut versucht (sofort, nach 5s/10s/20s, nach
+weiteren 60s) — durchgehend `503`, keine Besserung innerhalb der
+Laufzeit dieser Session. Ohne lauffähiges `node_modules` können
+`npx tsc -b`, `npx eslint .` und `npx vitest run` nicht sinnvoll gegen
+den tatsächlichen Branch-Code ausgeführt werden (ein `tsc -b`-Versuch
+mit fehlendem `node_modules` bestätigt das erwartungsgemäß nur mit
+Modul-nicht-gefunden-Fehlern in Config-Dateien, keine echte Aussage über
+den Branch-Diff).
+
+→ **Inhaltlich sieht `it-chef/auto` nach eigener Diff-Lese genauso sauber
+aus wie beim gestrigen Nacht-Check bereits unabhängig bestätigt (npm
+install/tsc/eslint/vitest damals alle grün) — aber diese Session konnte
+die geforderte eigene Testausführung heute mangels erreichbarer
+npm-Registry nicht wiederholen.** Dem wichtigsten Grundsatz dieses Skills
+folgend (selbst nachprüfen, nicht nur dem Log glauben) **nicht gemergt**,
+obwohl der Branch seit gestern Nacht unverändert ist und damals bereits
+vollständig grün getestet wurde — eine über zwölf Stunden alte fremde
+Testausführung ersetzt keine eigene. `main` bleibt für `it-chef/auto`
+unverändert, `origin/it-chef/auto` bleibt bei `03a1e6b`.
+
+**Ergebnis:** Zwei von drei Branches gemergt (`marketing-chef/auto`,
+`support-chef/auto`). `it-chef/auto` zum zweiten Mal in Folge nicht
+gemergt — diesmal nicht wegen der Session-Berechtigungssperre von
+gestern Nacht (die trat bei den heutigen Merges von
+`marketing-chef/auto`/`support-chef/auto` nicht wieder auf, `git merge`
+und `git push` liefen ohne Blockade durch), sondern weil die
+npm-Registry-Infrastruktur der Sandbox während des gesamten Laufs nicht
+erreichbar war.
+
+**Info an Ni nötig:** Ja — `it-chef/auto` konnte jetzt zwei Läufe in
+Folge nicht gemergt werden (gestern: Berechtigungssperre; heute:
+npm-Registry nicht erreichbar), obwohl der Branch inhaltlich seit
+gestern Nacht als sauber bestätigt ist. Ni per Notification informiert.
