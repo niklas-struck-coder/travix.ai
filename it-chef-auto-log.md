@@ -11300,3 +11300,82 @@ erfolgreich).
 **Commit:** `src/components/ui/sheet.tsx` (Fix), `src/components/ui/sheet.test.tsx`
 (neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, dritter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `03a1e6b`
+(sheet.tsx-Fokus-Fix aus dem vorigen Lauf) und war gegenüber
+`origin/main` (`8a15d00`) um zehn Commits zurück (Marketing-/Support-/
+IT-Chef-Berichte vom 18.09. sowie deren gemergte `/auto`-Branches) —
+`main` selbst enthielt umgekehrt keine neuen Programmierungs-Änderungen,
+nur Berichte/Log-Dateien. `origin/main` sauber in `it-chef/auto`
+gemergt (keine Konflikte). `npm ci` (diesmal ohne Registry-Ausfall),
+danach Baseline bestätigt: `npx vitest run` (58 Testdateien, 326 Tests,
+alle grün), `npm run lint` (0 Fehler, drei vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Eigene Prüfung:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+durchgesehen — die verbleibenden offenen Top-Level-Punkte sind
+unverändert blockiert oder zu groß für einen einzelnen autonomen Punkt.
+Den frisch gemergten `reports/support-chef.md` (18.09.) gelesen: dessen
+Vorschlag 1 ist ein direkter Anschlussfehler an den im vorigen Lauf
+gemergten `sheet.tsx`-Fokus-Fix und erfüllt alle vier
+Sicherheitskriterien — kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine Fokus-Verwaltung), keine offene Architektur-
+entscheidung (das gewünschte Verhalten ist im Bericht exakt
+beschrieben: nach echter Navigation zur neuen Seite springen, bei
+Schließen ohne Navigation weiterhin zum Auslöser zurückkehren), klar
+umrissen (zwei benannte Dateien, eine konkrete Ursache), objektiv
+prüfbar (Fokusziel per Regressionstest feststellbar). Die übrigen drei
+Vorschläge des Berichts unverändert nicht autonom umsetzbar: Vorschlag 2
+(doppelte aria-labels) ist bereits seit `b07e3aa` behoben, Vorschlag 3
+("Abschließen" ohne Rückfrage) verletzt weiterhin Kriterium 3 (zwei
+gleichwertige Lösungsansätze ohne Vorentscheidung), Vorschlag 4
+(Hilfe-Seite ohne Kontaktweg) bräuchte erfundene Kontaktdaten.
+
+**Fund/Fix:** `src/components/layout/MobileNav.tsx` schließt das Menü
+bei jedem Klick auf einen `NavLink` zusätzlich zur Navigation
+(`onClick={() => setOpen(false)}`). Weil der Hamburger-Knopf als
+`SheetTrigger` nach jedem Seitenwechsel im DOM bleibt, griff der im
+vorigen Lauf ergänzte Fokus-Fallback aus `sheet.tsx` und schickte den
+Fokus beim Schließen unbedingt zurück zum Knopf — die neu geladene
+Seite (und ihre `<h1>`) wurde nie erreicht. Fix: `sheet.tsx` exportiert
+die bisher rein interne Fokus-auf-`<h1>`-Hilfsfunktion jetzt zusätzlich
+als `focusPageHeading()` (keine Verhaltensänderung an `SheetContent`
+selbst, nur Extraktion). `MobileNav.tsx` merkt sich per `navigatedRef`
+(einem `useRef`), ob das aktuelle Schließen durch einen echten
+Navigationsklick ausgelöst wurde, und übergibt `SheetContent` ein
+eigenes `onCloseAutoFocus`: bei gesetztem `navigatedRef` wird der
+generische Trigger-Fallback per `event.preventDefault()` übersprungen
+und direkt `focusPageHeading()` aufgerufen; sonst (Escape,
+Overlay-Klick, X-Knopf) läuft `sheet.tsx`s bestehender Fallback
+unverändert weiter und kehrt zum Hamburger-Knopf zurück. Zwei neue
+Regressionstests in `MobileNav.test.tsx` (Muster analog
+`sheet.test.tsx`s `RemovableListHarness`, hier mit einer simulierten
+Seiten-`<h1>` neben `MobileNav`): Fokus landet nach einem Klick auf
+einen Navigationslink auf der `<h1>`; Fokus kehrt beim Schließen ohne
+Navigation (Klick auf den Schließen-Button) weiterhin zum
+Hamburger-Knopf zurück.
+
+**Geprüft:** `npx vitest run src/components/layout/MobileNav.test.tsx
+src/components/ui/sheet.test.tsx` (gezielt, 8 Tests grün, davon 2 neu —
+ein erster Testlauf ohne `menuButton.focus()` vor dem Öffnen schlug
+beim "Schließen ohne Navigation"-Test fehl, weil `openerRef` in diesem
+Fall nie den Knopf als `document.activeElement` erfasste; nach
+Ergänzung von `menuButton.focus()`, analog dem bereits etablierten
+Muster in `sheet.test.tsx`, grün), danach volle Suite `npx vitest run`
+(58 Testdateien, 326 Tests, davon 2 neu — alle grün), `npm run lint`
+(0 Fehler, jetzt vier statt drei vorbestehende
+`react-refresh/only-export-components`-Warnungen — dieselbe, bereits in
+`badge.tsx`/`button.tsx`/`tabs.tsx` tolerierte Warnungsklasse, ausgelöst
+durch den neuen `focusPageHeading`-Export neben den Sheet-Komponenten
+in derselben Datei, keine neue Fehlerklasse), `npm run build` (`tsc -b
+&& vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/ui/sheet.tsx` (Helper extrahiert und
+exportiert), `src/components/layout/MobileNav.tsx` (Fix),
+`src/components/layout/MobileNav.test.tsx` (zwei neue Tests),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.

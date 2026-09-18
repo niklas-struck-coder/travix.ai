@@ -1173,6 +1173,31 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `RemovableListHarness`): Fokus landet auf der `<h1>`, wenn Bestätigen
   das öffnende Element entfernt; Fokus kehrt bei Abbruch weiterhin zum
   Auslöser zurück.
+  Vom autonomen IT-Chef-Lauf am 18.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (18.09., Vorschlag 1) gemeldeten
+  Anschlussfehler an genau diesem neuen Fokus-Fallback behoben: Jeder
+  Menüpunkt in `MobileNav.tsx` (3.3) schließt beim Klick zusätzlich zur
+  Navigation das Menü (`SheetContent`s Schließen-Vorgang) — weil der
+  Hamburger-Knopf als `SheetTrigger` nach jedem Seitenwechsel im DOM
+  bleibt, griff der eben ergänzte Fokus-Fallback aus `sheet.tsx` und
+  schickte den Fokus beim Schließen zurück zum Knopf statt zur `<h1>` der
+  neu geladenen Seite. Wer per Tastatur oder Screenreader z. B. von
+  "Aktivitäten" zu "Warenkorb" wechselt, musste sich nach jedem
+  Menüpunkt erneut durch Kopfzeile und Menü zur eigentlichen Seite
+  vorarbeiten. Fix: exakt der im Bericht vorgeschlagene Ansatz — beim
+  Klick auf einen `NavLink` wird jetzt zusätzlich ein `navigatedRef`
+  gesetzt; `MobileNav.tsx` übergibt `SheetContent` ein eigenes
+  `onCloseAutoFocus`, das bei gesetztem `navigatedRef` den generischen
+  Trigger-Fallback per `event.preventDefault()` überspringt und
+  stattdessen direkt zur Seiten-`<h1>` springt (dafür exportiert
+  `sheet.tsx` die bisher interne Fokus-Hilfsfunktion jetzt als
+  `focusPageHeading()`, damit sie nicht dupliziert werden muss). Reine
+  Schließen-ohne-Navigation-Fälle (Escape, Overlay-Klick, X-Knopf)
+  kehren unverändert zum Hamburger-Knopf zurück, da dort kein
+  `navigatedRef` gesetzt wird. Zwei neue Regressionstests in
+  `MobileNav.test.tsx`: Fokus landet nach einem Navigationslink auf der
+  `<h1>` der neuen Seite; Fokus kehrt beim Schließen ohne Navigation
+  weiterhin zum Menü-Button zurück.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
