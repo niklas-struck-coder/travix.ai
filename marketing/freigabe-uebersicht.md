@@ -1,10 +1,52 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-17)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-18)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-18: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`a924d6f` (17.09., vierte Mini-Changelog-Ausgabe) hängengeblieben, dessen
+Inhalt laut `freigabe-chef-log.md` ("2026-09-17 6-Uhr-Check") bereits
+vollständig in `main` gemergt war — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. `origin/main` (`f84399b`) per
+Fast-Forward-Merge in diesen Branch eingebracht, bevor der eigentliche
+Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 16.09.), `ZEITPLAN.md`
+(6.2 in Zeile 1285 weiterhin `[ ]`) oder diesem Dokument seit dem 17.09.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen
+Treffer), kein Commit zu einer IT-Chef-Umsetzung der
+Mini-Changelog-Seite (kein `changelog`-Treffer in `src/routes.tsx`).
+Alle vier Fragen bleiben offen — jetzt seit über fünf Wochen.
+
+**`git log a924d6f..origin/main` zeigt acht neue Commits, keiner davon
+content-relevant:** ein Support-Chef-Bericht (17.09., zwei neue
+UX-Funde zu Reiseentwürfen — doppelte aria-labels, Abschließen ohne
+Rückfrage — noch nicht von IT-Chef behoben, werden laut Selbstbeschränkung
+dieses Dokuments erst bei tatsächlicher Behebung zu Kandidaten), der
+eigene interaktive Marketing-Chef-Bericht vom 17.09., ein IT-Chef-Bericht
+(17.09., kein neuer Bug im PR-Kanal), ein Daily-Status-Update, zwei
+Freigabe-Chef-Logs (17.09. 6-Uhr-Check und 18.09. früher Nacht-Check) und
+ein Support-Chef-Auto-Log samt zugehörigem Main-Merge (17.09.,
+Reiseentwürfe-Analyse — dieselben zwei Funde wie im Bericht oben, reine
+Analyse ohne Codeänderung). Jeder Commit per `git show --stat` geprüft:
+ausschließlich `reports/*.md`, `status.md`, `freigabe-chef-log.md` und
+`support-chef-auto-log.md` geändert, kein einziger Treffer unter `src/`.
+Keine einzige neue, per `git show` verifizierte Produkt-Codeänderung seit
+dem letzten Lauf, also kein achtzehnter Tier-4-Kandidat — der
+Kandidatentopf bleibt bei null (seit Ausgabe 4 am 17.09. geleert).
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen nötig, da es
+keinen neuen Punkt gibt, der eine Zahl bräuchte. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand.
 
 ## Update 2026-09-17: vier neue Tier-4-Kandidaten (EditMode-Löschbestätigung für Aktivitäten, Mikrofon-Stopp bei zweitem Klick, Reiseentwurf-Löschbestätigung, formatDuration-Tagesanzeige), ein Screenreader-Fix bewusst ausgeschlossen — Topf erreicht mit neun die Achter-Schwelle, vierte Mini-Changelog-Ausgabe geschrieben, alle vier Fragen weiterhin offen
 
@@ -1938,4 +1980,13 @@ demselben 06.09.-Maßstab (acht = genug, vier = eher nicht) als Richtwert
 für eine fünfte Ausgabe. Weiterhin unverändert: erst prüfen, ob Ni
 zwischenzeitlich eine der vier Fragen beantwortet hat, bevor wieder ein
 neuer *Social*-Text geschrieben wird — die Selbstbeschränkung dazu gilt
-unverändert weiter.
+unverändert weiter. Stand 09.18 ist kein neuer Kandidat dazugekommen —
+seit dem letzten Merge (`a924d6f`) gab es keine einzige neue, per
+`git show` verifizierte Produkt-Codeänderung, nur Berichte, Logs und ein
+Daily-Status-Update (siehe Update 2026-09-18 oben). Der Topf bleibt bei
+null. Zwei von Support-Chef am 17.09. gemeldete neue UX-Funde
+(doppelte aria-labels bei Reiseentwürfen, Abschließen ohne Rückfrage)
+werden erst zu Kandidaten, sobald IT-Chef sie tatsächlich behebt — nicht
+schon durch die Meldung selbst, gleiche Regel wie bei früheren
+Support-Chef-Funden. Der nächste Lauf sollte weiterhin zuerst die vier
+offenen Fragen gegenprüfen, bevor er neue Inhalte erstellt.
