@@ -2740,3 +2740,92 @@ fortsetzen" führt bei jedem Entwurf zum selben aktiven Chat, Zeile
 143-162, Aufgabe 7.4) wurde hier nicht erneut vertieft, da sie im Code
 selbst bereits als bekannte, offene Einschränkung kommentiert und schon
 im Bericht vom 10.09. gemeldet ist.
+
+## 2026-09-18 — Fokus nach dem mobilen Menü (`sheet.tsx`, `MobileNav.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** Der aktuellste Stand auf Branch `it-chef/auto`
+(noch nicht nach `main` gemergt, laut heutigem Freigabe-Chef-Bericht auf
+`main` durch eine Session-Berechtigungssperre blockiert) zeigt als
+jüngste inhaltliche Änderung Commit `03a1e6b` (18.09., "sheet.tsx -
+Fokus-Fallback-Parität mit dialog.tsx nachgezogen"): `SheetContent`
+(`src/components/ui/sheet.tsx:78-102`) bekommt denselben
+`onOpenAutoFocus`/`onCloseAutoFocus`-Fallback, den `DialogContent` am
+15.09. bekam — merkt sich beim Öffnen das zuvor fokussierte Element
+(`openerRef`) und gibt ihm beim Schließen den Fokus zurück, sofern es
+noch im DOM existiert (Zeile 86-89), sonst wandert der Fokus stattdessen
+zur Seiten-`<h1>` (Zeile 91-101). Da `SheetContent` die einzige echte
+Nutzung im Produktcode über `MobileNav.tsx` (mobiles Hauptmenü) läuft,
+heute gezielt geprüft, wie sich dieser neue Fokus-Mechanismus dort
+tatsächlich auswirkt — nicht nur, ob der neue Code selbst fehlerfrei ist
+(das bestätigt bereits die neue `sheet.test.tsx` des Laufs selbst),
+sondern was er für eine Nutzerin bedeutet, die das mobile Menü über
+Tastatur oder Screenreader bedient.
+
+### Reibungspunkte
+
+**1. Nach der Auswahl eines Menüpunkts im mobilen Menü landet der Fokus
+wieder auf dem Hamburger-Knopf statt auf der neu geladenen Seite**
+
+`MobileNav.tsx:20-28`: Der Hamburger-Knopf (`aria-label="Menü öffnen"`)
+ist der `SheetTrigger` und wird von `AppShell.tsx:10` außerhalb des
+Routen-Inhalts gerendert — er bleibt bei jedem Seitenwechsel unverändert
+im DOM, weil `AppShell` selbst nicht neu montiert wird, nur der Bereich
+innerhalb von `<main>` (`AppShell.tsx:11`). Jeder `NavLink` im Menü
+schließt das Menü beim Klick zusätzlich zur Navigation
+(`MobileNav.tsx:45`, `onClick={() => setOpen(false)}`). Genau das ist
+der Fall, für den der neue Fallback in `sheet.tsx:86-89` greift: Da der
+Hamburger-Knopf beim Schließen immer noch im DOM ist
+(`document.body.contains(opener)` ist wahr), bekommt er den Fokus
+zurück — die neu geladene Seite dahinter (samt ihrer eigenen `<h1>` aus
+`PageHeader.tsx:13`) wird dabei nie erreicht. Für eine Tastatur- oder
+Screenreader-Nutzerin, die z. B. von "Aktivitäten" zu "Warenkorb"
+wechselt, bedeutet das: nach dem Klick auf den Menüpunkt steht der Fokus
+wieder ganz vorn beim Hamburger-Knopf in der Kopfzeile, nicht auf der
+neuen Seite — sie muss sich per Tab erneut durch Kopfzeile und
+(geschlossenes) Menü zur eigentlichen Warenkorb-Seite vorarbeiten, bei
+jedem einzelnen Menüpunktwechsel erneut. Der bereits vorhandene zweite
+Test der neuen `sheet.test.tsx`
+("still returns focus to the trigger on cancel, where it still exists")
+bestätigt exakt diesen Mechanismus — er ist dort bewusst als
+korrektes Verhalten für ein reines Abbrechen gedacht, trifft aber
+identisch auf den Navigations-Fall zu, wo er es nicht sein sollte. Eine
+Suche in `PageTransition.tsx` und `AppShell.tsx` nach eigener
+Fokus-Steuerung beim Routenwechsel (z. B. Fokus auf `<main>` oder die
+neue Seiten-`<h1>` legen) findet nichts — die App hat aktuell an keiner
+Stelle eine solche Steuerung, der neue Sheet-Fallback ist also die
+einzige Stelle, die hier mitreden könnte. Dieses Verhalten bestand in der
+Sache schon vor dem heutigen Fix (Radix stellt den Fokus standardmäßig
+ebenfalls auf den Trigger zurück, wenn er noch existiert) — der heutige
+Fallback ändert daran für `MobileNav.tsx` nichts, macht die
+Entscheidung aber jetzt explizit im Code sichtbar, während sein
+eigentlicher Zweck (Absturz auf `<body>` bei entferntem Auslöser) für
+diese eine Nutzungsstelle mangels je entfernten Triggers gar nicht
+greifen kann — im Commit selbst bereits so vermerkt.
+
+*Vorschlag:* Für den Navigations-Fall (Klick auf einen `NavLink`,
+`MobileNav.tsx:45`) den Fokus nach dem Schließen gezielt auf die
+`<h1>` der neu geladenen Seite legen, statt sich auf den generischen
+Trigger-Fallback aus `sheet.tsx` zu verlassen — am einfachsten, indem
+der `NavLink`-Klick-Handler nicht nur `setOpen(false)` aufruft, sondern
+nach dem Schließen zusätzlich denselben `heading.focus()`-Mechanismus
+gezielt auslöst (bzw. `onCloseAutoFocus` an `SheetContent` von
+`MobileNav.tsx` aus mit einem eigenen Handler überschreibt, der bei
+einer erkannten Navigation immer zur `<h1>` statt zum Trigger springt).
+Reine Schließen-ohne-Navigation-Fälle (Overlay-Klick, Escape, der
+eingebaute X-Knopf) sollten weiterhin zum Hamburger-Knopf zurückkehren
+— das ist dort weiterhin das richtige Verhalten.
+
+### Nicht geprüft
+Die beiden übrigen, ebenfalls seit gestern auf `it-chef/auto` liegenden
+Änderungen wurden nur überflogen, nicht vertieft: Die neue
+`aria-current="date"`-Markierung in `Kalender.tsx` (17.09., aus einem
+gezielten Explore-Agenten-Fund) und der jetzt tatsächlich stoppende
+Mikrofon-Knopf in `ChatInput.tsx` (17.09., Vorschlag 2 aus dem
+gestrigen Bericht dieser Datei) sind beides eng abgegrenzte,
+eigenständig mit Regressionstests abgesicherte Einzelfixes ohne
+erkennbare neue Randfälle — für Letzteren war der ursprüngliche
+Reibungspunkt bereits Teil des Berichts vom 17.09. selbst, ein erneutes
+Draufschauen auf denselben, jetzt behobenen Punkt hätte nichts Neues
+ergeben.

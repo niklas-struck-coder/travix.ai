@@ -1,40 +1,47 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-09-17
+**Datum:** 2026-09-18
 
-## Was ist seit dem letzten Eintrag (2026-09-16) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-17) passiert?
 
-Über den `it-chef-eigen`-Autonomiekanal (`it-chef/auto`, von Freigabe-Chef
-geprüft und nach `main` gemergt) sind seit dem letzten Bericht fünf
-weitere Fixes gelandet: `formatDuration()` zeigt ISO-Dauern mit
-Tages-Komponente jetzt korrekt an (identisch zum gestern hier gemeldeten
-Fund, siehe unten), `EditMode` fragt vor dem Entfernen einer Aktivität
-jetzt nach, der Mikrofon-Button in `ChatInput.tsx` stoppt jetzt eine
-laufende Aufnahme statt eine neue zu starten, `Reiseentwuerfe.tsx` fragt
-jetzt vor dem Löschen eines Entwurfs nach, und `Kalender.tsx` markiert
-"Heute" jetzt auch für Screenreader (`aria-current` + `sr-only`-Text statt
-nur farblicher Markierung).
+Auf `main` sind seit dem letzten Bericht keine neuen Code-Änderungen
+gelandet — die Commits seit `f1f4105` sind Berichte von Marketing-Chef,
+Support-Chef und Freigabe-Chef sowie deren gemergte `/auto`-Branches
+(Fokus nach Menüwahl im mobilen Menü, Freigabe-Übersicht). Der separate
+`it-chef-eigen`-Autonomiekanal (`it-chef/auto`) hat parallel weitere
+kleine, isolierte Nachzieh-Fixes gesammelt (`sheet.tsx`
+Fokus-Fallback-Parität mit `dialog.tsx`, `TrainCard.tsx` fehlende
+`selected`-Prop, `AppShell.tsx` Testabdeckung, `Reiseentwuerfe.tsx`
+unterscheidbare aria-labels) — laut Freigabe-Chef-Bericht vom 18.09.
+bislang wegen eines npm-Registry-Ausfalls nicht verifizierbar und daher
+noch nicht gemergt. Das läuft über einen eigenen Prüf-/Merge-Prozess,
+unabhängig von dieser Session.
 
-Eigene gezielte Bug-Suche in dieser Session (PR-Kanal, unabhängig von
-`it-chef-eigen`, ohne `npm install`/Testlauf): Ein Explore-Agent hat 26
-Dateien vollständig gelesen (u. a. `Angebote.tsx`, `Aktivitaeten.tsx`,
-`Favoriten.tsx`, `Home.tsx`, `MeineReisen.tsx`, `Warenkorb.tsx`,
-`Buchung.tsx`, `ReiseSuche.tsx`, `useChat.ts`, `useConcierge.ts`,
-`tripStorage.ts`, `calculateProgress.ts`, `checklistRules.ts`,
-`cartTotals.ts`, `format.ts`, `utils.ts`, `nav-config.ts`,
-`PageHeader.tsx`, `PageTransition.tsx`, `Sidebar.tsx`, `MobileNav.tsx`,
-`TripSummaryCard.tsx`, `ChecklistPanel.tsx`, `HotelCard.tsx`,
-`HotelResults.tsx`, `NoResultsMessage.tsx`, UI-Primitive `select.tsx`/
-`sheet.tsx`/`tabs.tsx`, plus `routes.tsx`/`App.tsx` auf kaputte
-Routen/Links). Zusätzlich selbst `FlightWizard.tsx`, `HotelWizard.tsx`,
-`ChatMessage.tsx`, `QuickReplies.tsx` und `progress.tsx` gelesen. Keine
-TODOs/FIXMEs, keine kaputten Routen/Imports, keine unbehandelten
-Promise-Rejections, keine neuen Edge-Case- oder Logikfehler gefunden —
-die geprüften Formulare (Flug-/Hotelsuche) fangen NaN, gleiche
-Flughäfen und ungültige Datumsbereiche bereits sauber ab. Der gestern
-gemeldete `formatDuration()`-Bug (PR #21) ist zwischenzeitlich exakt
-gleichlautend über `it-chef/auto` gemergt worden (Commit `e87973b`) —
-PR #21 ist damit inhaltlich erledigt, aber noch offen (siehe Vorschläge).
+Eigene gezielte Bug-Suche in dieser Session (unabhängig vom
+`it-chef-eigen`-Kanal, PR-Kanal-Fokus, ohne `npm install`/Testlauf): 19
+bisher nicht in früheren Berichten protokollierte Dateien vollständig
+gelesen — `Preisalarme.tsx`, `Einstellungen.tsx`, `Profil.tsx`,
+`Dashboard.tsx`, `Kartenansicht.tsx`, `Urlaubsmodus.tsx`, `KiChat.tsx`
+(Page + Chat-Container-Komponente), `useConcierge.ts`, `useChat.ts`
+(im Detail, inkl. Edit-/Flugsuche-Zwischenschritte), `TravixAvatar.tsx`,
+`TrainResults.tsx`, `speech.ts`, `calendarUtils.ts`, `duffel/client.ts`,
+`mockAdvisor.ts`, `mockConcierge.ts`, `checklistRules.ts`,
+`ChecklistPanel.tsx`, `EditMode.tsx`, `ChatInput.tsx`,
+`QuickReplies.tsx`, `ChatMessage.tsx`, `nav-config.ts`,
+`PlaceholderPage.tsx`, `format.ts`, `tripStorage.ts` (erneut, gegen die
+aktuelle Fassung geprüft). Zusätzlich per Grep der gesamte `src`-Ordner
+auf TODO/FIXME/XXX/HACK durchsucht — keine Treffer außer einem
+absichtlichen Test-Fixture-String.
+
+Kein neuer Bug gefunden: keine offenen TODOs, keine kaputten Imports
+oder Routen (`routes.tsx` gegen `nav-config.ts` abgeglichen, inkl.
+`/hilfe`, das bewusst noch als `PlaceholderPage` läuft), keine
+unbehandelten Promise-Rejections (`duffel/client.ts` fängt sowohl
+Netzwerk- als auch JSON-Parse-Fehler ab, `useChat.ts`s Flug-/
+Unterkunftssuchen haben durchgängig `.catch()`), keine neuen
+Logik- oder Edge-Case-Fehler. Die Demo-Seiten (`Preisalarme.tsx`,
+`Einstellungen.tsx`, `Profil.tsx`, `Dashboard.tsx`) sind bewusst als
+lokaler Demo-State dokumentiert und intern konsistent.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -44,11 +51,9 @@ gerechtfertigt hätte.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine. Ein geprüfter Grenzfall in `tripStorage.ts:25`
-(`parsed.trip.activities` bei komplett fehlendem `trip`-Feld) wurde
-bewusst nicht als Bug gewertet: Das umgebende `try/catch` fängt den
-theoretischen `TypeError` bereits ab und degradiert gutartig auf "kein
-gespeicherter Chat" — kein sichtbares Fehlverhalten für Nutzer.
+Keine neuen. Weiterhin unverändert: 18 offene Auto-Fix-PRs von früheren
+Läufen warten auf Ni's manuelle Entscheidung (siehe Vorschläge), plus
+der separate, noch unverifizierte `it-chef/auto`-Branch.
 
 ## Weitere Vorschläge
 
@@ -57,20 +62,17 @@ gespeicherter Chat" — kein sichtbares Fehlverhalten für Nutzer.
    [#4](https://github.com/niklas-struck-coder/travix.ai/pull/4)–[#18](https://github.com/niklas-struck-coder/travix.ai/pull/18),
    [#20](https://github.com/niklas-struck-coder/travix.ai/pull/20),
    [#21](https://github.com/niklas-struck-coder/travix.ai/pull/21).
-   Bestätigt: PR #21 (`formatDuration`) ist inhaltlich bereits identisch
-   über `it-chef/auto` auf `main` gelandet (Commit `e87973b`) und kann
-   geschlossen werden. Die meisten übrigen älteren PRs sind laut
-   `it-chef-eigen`-Log ebenfalls längst inhaltlich auf `main`, nur mit
-   eigenständigem statt exakt identischem Fix. Reine Aufräumarbeit ohne
-   Coderisiko, aber nur Ni kann PRs schließen.
-2. **`TrainCard`/`TrainResults` weiterhin unverdrahteter toter Code.**
+   PR #21 (`formatDuration`) ist inhaltlich bereits identisch über
+   `it-chef/auto` auf `main` gelandet und kann geschlossen werden. Reine
+   Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs schließen.
+2. **`it-chef/auto`-Branch wartet auf Verifizierung.** Vier kleine
+   Nachzieh-Fixes (`sheet.tsx`, `TrainCard.tsx`, `AppShell.tsx`,
+   `Reiseentwuerfe.tsx`) hängen seit dem npm-Registry-Ausfall am 18.09.
+   fest. Sobald die Registry wieder zuverlässig erreichbar ist, sollte
+   der nächste Freigabe-Chef-Lauf sie regulär verifizieren und mergen.
+3. **`TrainCard`/`TrainResults` weiterhin unverdrahteter toter Code.**
    Unverändert seit mehreren Berichten: keine Zugsuche-Seite, kein
    Nav-Eintrag, keine echte Datenquelle. Entweder verdrahten oder
    entfernen — Produktentscheidung, keine autonome Umsetzung.
-3. **Kein neuer Kandidat für Automatisierung heute.** Die Codebasis wirkt
-   inzwischen breit durch `it-chef-eigen` abgedeckt (Fehlerbehandlung,
-   Bestätigungsdialoge, Barrierefreiheit); weitere Läufe dieses
-   PR-Kanals werden voraussichtlich seltener neue, eigenständige Funde
-   liefern als in den ersten Wochen.
 
-_Letztes Update: 2026-09-17_
+_Letztes Update: 2026-09-18_

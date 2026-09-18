@@ -1,52 +1,52 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-17
+**Datum:** 2026-09-18
 
-## Was ist seit dem letzten Eintrag (2026-09-16) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-17) passiert?
 
-- Der gestern noch offene `formatDuration()`-Fund (PR #21, rohe ISO-Dauer
-  wie „P1DT2H30M" bei Flügen/Zügen ab 24h) ist jetzt gemerged — damit
-  offiziell ein Content-Kandidat.
-- Zwei weitere Löschbestätigungen sind gelandet: im Bearbeiten-Modus
-  einer Reise (Aktivität entfernen) und auf der Reiseentwürfe-Seite. Das
-  Muster zieht sich damit über praktisch alle Lösch-Aktionen im Produkt.
-- Der Mikrofon-Knopf im Chat stoppt eine laufende Aufnahme jetzt
-  zuverlässig beim zweiten Klick; die „Heute"-Markierung im Kalender ist
-  jetzt auch für Screenreader erkennbar (reiner Barrierefreiheits-Fix,
-  ohne die Ehrlichkeits-Erzählung der anderen Funde).
-- Der autonome Marketing-Lauf hat aus diesen vier neuen Funden plus fünf
-  bereits wartenden **Ausgabe 4** des Mini-Changelog-Entwurfs geschrieben
-  (`marketing/mini-changelog-konzept.md`) — der Kandidatentopf ist damit
-  wieder leer. Es liegen jetzt **vier fertige Entwurfs-Ausgaben** bereit,
-  keine einzige live.
-- Support-Chef hat die Reiseentwürfe-Seite geprüft und zwei neue
-  UX-Funde gemeldet (Details in `reports/support-chef.md`).
-- Die vier offenen Fragen (Kanal, Warenkorb-Content, wiederkehrendes
-  Social-Format, Mini-Changelog-Start) sind weiterhin unbeantwortet.
-- Keine neuen Nutzungs- oder Erfolgszahlen bekannt — bleibt ehrlich außen
-  vor.
+Ehrlich gesagt: inhaltlich wenig. Seit gestern gab es **keine neue
+Produkt-Codeänderung** – das bestätigen sowohl der interne
+Übersichts-Lauf (`marketing/freigabe-uebersicht.md`) als auch der
+IT-Chef-Bericht vom 18.09. unabhängig voneinander. Die Commits seit
+gestern sind ausschließlich Berichte, Logs und ein Status-Update.
+
+Support-Chef hat zwar zwei neue Reibungspunkte auf der
+Reiseentwürfe-Seite gemeldet (doppelte `aria-label`s nach dem
+Duplizieren einer Karte, "Abschließen" ohne Rückfrage – anders als
+"Löschen" auf derselben Karte). Beide sind aber noch nicht behoben,
+zählen also noch nicht als Content-Kandidat. Der Kandidatentopf für
+eine fünfte Mini-Changelog-Ausgabe bleibt bei null.
+
+Damit bleibt der eigentliche Stand unverändert gegenüber gestern: vier
+fertige Entwurfs-Ausgaben liegen bereit, keine live, und die vier
+offenen Fragen (Kanal, Warenkorb-Content, wiederkehrendes
+Social-Format, Mini-Changelog-Start) sind jetzt seit über **fünf
+Wochen** unbeantwortet. Keine neuen Nutzungs- oder Erfolgszahlen
+bekannt – bleibt ehrlich außen vor.
 
 ## Vorschläge
 
-1. **Die Mini-Changelog-Frage jetzt wirklich entscheiden, nicht mehr nur
-   wiederholen.** Vier fertige Ausgaben liegen im Entwurf, die vierte
-   erscheint zeitnah nach der dritten – das ist kein Ideenmangel mehr,
-   sondern reiner Freigabe-Stau. Konkreter Vorschlag: Nicht alle vier auf
-   einmal veröffentlichen, sondern nur Ausgabe 1 als „Testballon" live
-   schalten, um zu sehen, ob das Format überhaupt jemand liest, bevor
-   Ausgabe 2-4 nachziehen.
-2. **Die gesammelten Robustheits-/Ehrlichkeits-Fixes als eigene Story
-   behandeln, sobald ein Kanal steht.** formatDuration, die durchgängige
-   Löschbestätigung, IME-Enter, resetChat() und jetzt der Mikrofon-Fix
-   ergeben zusammen eine klare Erzählung: „Wir polieren die Basis, bevor
-   sie jemandem auffällt." Stärker als vier Einzel-Posts.
-3. **Barrierefreiheits-Fixes (z. B. die Kalender-Screenreader-Markierung)
-   bewusst getrennt von der Ehrlichkeits-Reihe sammeln.** Passt nicht zur
-   „falsche Info korrigiert"-Erzählung, wäre aber ein eigener, ehrlicher
-   Baustein für eine spätere „Barrierefreiheit ernst nehmen"-Notiz, falls
-   sich genug solcher Fixes ansammeln.
-4. **Bei der Kanal-Frage weiter auf den Mini-Changelog als Einstieg
-   pochen.** Unverändert die einzige der vier Fragen, die nur deine
-   Freigabe braucht, keinen externen Kanal.
+1. **Fünf Wochen Stillstand sind ein Signal, nicht nur eine Wartezeit.**
+   Statt die Mini-Changelog-Frage zum sechsten Mal zu wiederholen: Ich
+   schlage vor, Ausgabe 1 diese Woche als Testballon zu veröffentlichen
+   – notfalls auf dem einfachsten verfügbaren Kanal (z. B. als
+   einfacher Blogpost oder Notiz an bestehende Kontakte), statt auf die
+   "perfekte" Kanalentscheidung zu warten. Lieber klein und live als
+   fertig und unsichtbar.
+2. **Die zwei neuen Reiseentwürfe-Funde vormerken, nicht liegen lassen.**
+   Sobald IT-Chef sie behebt, passen beide exakt in die bestehende
+   "Ehrlichkeit als Feature"-Erzählung (konsistentes Verhalten über alle
+   Lösch-/Abschluss-Aktionen). Das wäre dann Kandidat 18 und 19 für eine
+   fünfte Ausgabe – schon jetzt als nächstes Thema einplanen.
+3. **Die gesammelten Robustheits-/Ehrlichkeits-Fixes weiterhin als eine
+   Story bündeln, nicht als Einzelposts.** formatDuration, durchgängige
+   Löschbestätigung, Mikrofon-Fix und bald die Reiseentwürfe-Konsistenz
+   ergeben zusammen die stärkste Erzählung: "Wir polieren die Basis,
+   bevor sie jemandem auffällt."
+4. **Bei der Kanal-Frage nicht mehr nur pochen, sondern eine
+   Bring-a-friend-Alternative anbieten:** Falls die volle Kanal-Wahl
+   weiterhin blockiert, würde ein einziger fester Termin (z. B. jeden
+   Freitag ein kurzer Text-Post, egal wo) reichen, um überhaupt
+   Erfahrungswerte zu sammeln – Format vor Perfektion.
 
-_Letztes Update: 2026-09-17_
+_Letztes Update: 2026-09-18_
