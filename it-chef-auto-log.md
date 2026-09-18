@@ -11222,3 +11222,81 @@ Test-/Lint-/Build-Lauf nach der Prüfung nötig — die Baseline oben bleibt
 unverändert gültig.
 
 **Commit:** nur dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `c1095d4` (Ergebnis
+des ersten Laufs heute: "kein neuer sicherer Punkt gefunden", nach einer
+sehr gründlichen 45-Dateien-Suche) und enthielt `origin/main` (`cbb845d`)
+bereits vollständig — kein Merge nötig. `npm ci` (frisch), Baseline
+bestätigt: `npx vitest run` (57 Testdateien, 322 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich) — identisch
+zur im letzten Eintrag dokumentierten Baseline.
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — alle verbleibenden
+offenen Top-Level-Punkte (2.0 Auth/Backend, 4.1-4.3 Base44/Gemini-
+Credentials, 5.7/6.2/6.6/6.7/7.4/7.12 fehlendes Datenmodell oder
+Architekturentscheidung, 8.x größere Feature-Blöcke) sind unverändert
+blockiert oder zu groß für einen einzelnen autonomen Punkt.
+`reports/it-chef.md` und `reports/support-chef.md` (beide 17.09.) erneut
+gelesen: die dort gemeldeten offenen Punkte (Reiseentwuerfe "Abschließen"
+ohne Rückfrage — zwei gleichwertige Lösungen ohne Vorentscheidung;
+Hilfe-Seite ohne echte Kontaktadresse) sind unverändert nicht autonom
+umsetzbar (Kriterium 3 verletzt bzw. erfundene Daten nötig); der
+gemeldete Fund 1 (doppelte `aria-label`s bei Duplikaten) ist bereits
+seit `b07e3aa` behoben.
+
+Zusätzlich einen Explore-Agenten unabhängig auf die Suche nach einem
+neuen Parität-/Logik-/Barrierefreiheits-Bug angesetzt, mit explizitem
+Ausschluss der schon bekannten, nicht geeigneten Kandidaten, diesmal
+gezielt auf Bereiche, die die gestrige 45-Dateien-Suche vermutlich
+weniger abgedeckt hat (UI-Primitive in `src/components/ui/`, Test-
+Abdeckungslücken zwischen Geschwister-Komponenten, zuletzt oft
+geänderte Dateien, doppelte Formatierungslogik).
+
+**Fund:** `src/components/ui/dialog.tsx` bekam am 15.09.
+(`2d0f024`) einen `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback in
+`DialogContent`: Beim Öffnen wird das zuvor fokussierte Element
+gemerkt; beim Schließen bekommt es den Fokus zurück, falls es noch im
+DOM existiert, sonst wandert der Fokus stattdessen zur Seiten-`<h1>` —
+verhindert, dass der Fokus auf `<body>` strandet, wenn z. B. eine
+Löschbestätigung das Element entfernt, das den Dialog geöffnet hat.
+`src/components/ui/sheet.tsx`s `SheetContent` (genutzt von
+`MobileNav.tsx`, 3.3) wickelt exakt dieselbe Radix-Primitive
+(`Dialog as SheetPrimitive` aus `radix-ui`) in identischer Struktur
+(Portal → Overlay → Content → optionaler Close-Button), hatte diesen
+Fallback aber nie bekommen — dieselbe Fokus-Strandungs-Lücke, bisher
+unbemerkt, weil `MobileNav.tsx` sein Trigger-Element nie aus dem DOM
+entfernt. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine Fokus-Verwaltung in
+einer UI-Primitive), keine offene Architekturentscheidung (Verhalten
+durch `DialogContent` bereits exakt festgelegt, mechanisch 1:1
+übertragbar auf eine strukturell identische Schwester-Komponente),
+klar umrissen (derselbe Block Code, dieselbe Radix-Primitive), objektiv
+prüfbar (Regressionstest analog `dialog.test.tsx`s
+`RemovableListHarness`).
+
+**Fix:** `src/components/ui/sheet.tsx`s `SheetContent` bekommt denselben
+`openerRef` + `onOpenAutoFocus`/`onCloseAutoFocus`-Block wie
+`DialogContent`, wortgleich übernommen (inkl. Kommentar). Neue
+`src/components/ui/sheet.test.tsx` (2 Tests, 1:1 nach
+`dialog.test.tsx`s `RemovableListHarness`, aber mit `SheetContent
+side="left"` und dessen eingebautem Schließen-Button statt eines
+separaten Abbrechen-Buttons): Fokus landet auf der `<h1>`, wenn
+Bestätigen das öffnende Element entfernt; Fokus kehrt beim Schließen
+weiterhin zum Auslöser zurück, wenn der noch existiert.
+
+**Geprüft:** `npx vitest run src/components/ui/sheet.test.tsx` (gezielt,
+2 Tests grün, beide neu), danach volle Suite `npx vitest run`
+(58 Testdateien, 324 Tests, davon 2 neu — alle grün), `npm run lint`
+(0 Fehler, nur die drei vorbestehenden Warnungen in unveränderten
+Dateien), `npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/ui/sheet.tsx` (Fix), `src/components/ui/sheet.test.tsx`
+(neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

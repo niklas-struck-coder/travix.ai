@@ -148,7 +148,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
 - [x] 3.0 Core layout & navigation — Sidebar, route shells, responsive shell
   - [x] 3.1 Create `AppShell.tsx` layout wrapper with sidebar + main content area — Vom autonomen IT-Chef-Lauf am 17.09. eine Testabdeckungslücke geschlossen: neue `AppShell.test.tsx` (1 Test, `MemoryRouter`-Wrapper wie bei `Sidebar.test.tsx`/`MobileNav.test.tsx`) bestätigt, dass `children`, Sidebar und MobileNav zusammen gerendert werden. Reine Testabdeckung, kein neuer Bug, keine Verhaltensänderung.
   - [x] 3.2 Create `Sidebar.tsx` with navigation links for all 20+ routes and collapsible behavior
-  - [x] 3.3 Create `MobileNav.tsx` with hamburger menu / bottom nav for mobile
+  - [x] 3.3 Create `MobileNav.tsx` with hamburger menu / bottom nav for mobile — vom autonomen IT-Chef-Lauf am 18.09. (weiterer Lauf) eine Fokus-Parität in `src/components/ui/sheet.tsx` nachgezogen (das `MobileNav.tsx` als Menü-Container nutzt): `SheetContent` bekam denselben `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback wie `DialogContent` (Fokus zur Seiten-`<h1>`, falls der öffnende Auslöser beim Schließen schon aus dem DOM entfernt wurde), bisher unbemerkt, weil `MobileNav.tsx`s Trigger nie entfernt wird. Neue `sheet.test.tsx`.
   - [x] 3.4 Create `PageHeader.tsx` reusable component with title, breadcrumbs, and actions
   - [x] 3.5 Create placeholder page components for all routes (empty shells with page title) — shared `PlaceholderPage.tsx` driven by `nav-config.ts`, not one file per route
   - [x] 3.6 Implement responsive breakpoints: sidebar visible on desktop, mobile nav on small screens

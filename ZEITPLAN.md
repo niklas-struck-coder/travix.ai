@@ -1157,6 +1157,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `ChatInput.test.tsx` (zweiter Klick stoppt die laufende Instanz statt
   eine neue zu starten; Zustand kehrt nach `onend` zur Ausgangslage
   zurück).
+  Vom autonomen IT-Chef-Lauf am 18.09. (weiterer Lauf) eine
+  Fokus-Parität nachgezogen: `DialogContent` (`src/components/ui/dialog.tsx`)
+  bekam am 15.09. einen `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback, der
+  Fokus nach dem Schließen entweder zum ursprünglichen Auslöser oder,
+  falls der inzwischen aus dem DOM entfernt wurde (z. B. eine
+  Löschbestätigung, deren Karte gerade verschwindet), zur Seiten-`<h1>`
+  bewegt — sonst würde der Fokus auf `<body>` landen. `SheetContent`
+  (`src/components/ui/sheet.tsx`, genutzt von `MobileNav.tsx`, 3.3) ist
+  strukturell identisch (dieselbe Radix-Primitive, Portal/Overlay/Content/
+  Close-Button) und hatte dieselbe Lücke, bisher unbemerkt, weil
+  `MobileNav.tsx` sein Trigger-Element nie entfernt. Jetzt exakt
+  denselben Fallback nach `SheetContent` übertragen. Neue
+  `sheet.test.tsx` (2 Tests, Muster analog `dialog.test.tsx`s
+  `RemovableListHarness`): Fokus landet auf der `<h1>`, wenn Bestätigen
+  das öffnende Element entfernt; Fokus kehrt bei Abbruch weiterhin zum
+  Auslöser zurück.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
