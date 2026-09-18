@@ -11379,3 +11379,73 @@ exportiert), `src/components/layout/MobileNav.tsx` (Fix),
 `src/components/layout/MobileNav.test.tsx` (zwei neue Tests),
 `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
 dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, vierter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `7b2cf09`
+(MobileNav.tsx-Fokus-Fix aus dem vorigen Lauf) und war identisch mit
+`origin/main` (`8a15d00`, `git merge origin/main` meldete "Already
+up to date") — die drei neuesten Commits auf `main` seit dem letzten
+Lauf sind ausschließlich Berichte (IT-Chef: gezielte 19-Dateien-Suche
+ohne neuen Fund; Marketing-Chef: keine neue Produkt-Codeänderung;
+Support-Chef: kein neuer Code, drei bereits bekannte Punkte
+unverändert). `npm ci` lief diesmal ohne Registry-Ausfall durch.
+Baseline bestätigt: `npx vitest run` (58 Testdateien, 326 Tests, alle
+grün), `npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Eigene Prüfung:** `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (alle 18.09.) gelesen — keiner enthält einen
+neuen, noch nicht behobenen oder bereits als nicht-autonom eingestuften
+Kandidaten (Support-Chef-Vorschlag 1 ist bereits seit dem vorigen Lauf
+behoben, Vorschlag 2 seit `b07e3aa`, Vorschlag 3 verletzt weiterhin
+Kriterium 3, Vorschlag 4 bräuchte erfundene Kontaktdaten). Zusätzlich
+einen Explore-Agenten unabhängig auf die Suche nach einem neuen
+Parität-/Validierungs-/Robustheits-Bug angesetzt, mit explizitem
+Ausschluss der bereits bekannten, nicht geeigneten Kandidaten und Fokus
+auf Bereiche, die frühere Läufe vermutlich weniger abgedeckt haben
+(Eingabevalidierung numerischer Felder, ungeschützter
+localStorage-/JSON-Zugriff, Aria-Label-Paritäten).
+
+**Fund:** `clampGuestCount()` (`src/components/search/HotelWizard.tsx:11-14`,
+Felder "Zimmer"/"Gäste") und `clampPassengerCount()`
+(`src/components/search/FlightWizard.tsx:23-26`, Feld "Passagiere") — am
+04.09. (einunddreißigster Lauf) eingeführt, um `NaN` bei
+nicht-numerischer Eingabe abzufangen — schützten seither nur gegen `NaN`
+und Werte außerhalb 1-9, nicht aber gegen Nachkommazahlen:
+`Number('1.5')` ist kein `NaN`, `Math.min(9, Math.max(1, 1.5))` liefert
+`1.5` unverändert zurück. Ein eingetipptes oder eingefügtes "1.5"/"2.9"
+blieb dadurch dauerhaft als Bruchzahl im jeweiligen Feld stehen, obwohl
+`min={1}`/`max={9}` auf den Feldern sowie der Funktionsname selbst
+("Count") eine ganze Zahl klar als beabsichtigtes Verhalten festlegen —
+kein neuer Interpretationsspielraum, rein mechanische Lücke im
+bestehenden Schutz. Erfüllt alle vier Sicherheitskriterien: kein Bezug
+zu Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine Formularvalidierung in
+einem Demo-Such-Wizard), keine offene Architekturentscheidung
+(Verhalten bereits durch die bestehende Funktion/Attribute festgelegt),
+klar umrissen (zwei strukturell identische Hilfsfunktionen, eine
+mechanische Ergänzung), objektiv prüfbar (Regressionstest analog den
+bestehenden NaN-/Clamp-Tests).
+
+**Fix:** Beide Hilfsfunktionen runden den geparsten Wert jetzt vor dem
+Clamp zusätzlich mit `Math.round` — exakt dieselbe Stelle wie der
+bestehende `NaN`-Schutz, keine Verhaltensänderung für bereits gültige
+ganzzahlige Eingaben. Zwei neue Regressionstests
+(`HotelWizard.test.tsx`, `FlightWizard.test.tsx`): "1.5" wird zu 2
+gerundet, "2.4" wird zu 2 gerundet — vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung (`git stash` nur der beiden `.tsx`-Dateien)
+reproduzierbar rot verifiziert (`toHaveValue(2)` erhielt `1.5`).
+
+**Geprüft:** `npx vitest run src/components/search/HotelWizard.test.tsx
+src/components/search/FlightWizard.test.tsx` (gezielt, 12 Tests grün,
+davon 2 neu), danach volle Suite `npx vitest run` (58 Testdateien, 328
+Tests, davon 2 neu — alle grün), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden Warnungen), `npm run build` (`tsc -b &&
+vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/HotelWizard.tsx`,
+`src/components/search/FlightWizard.tsx` (Fix), `HotelWizard.test.tsx`,
+`FlightWizard.test.tsx` (je ein neuer Test), `ZEITPLAN.md` (Eintrag
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

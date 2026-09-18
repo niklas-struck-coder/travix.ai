@@ -582,6 +582,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   weiterhin offen (Test würde jede eingebundene Seite mitrendern — deutlich
   größerer, nicht mehr als "ein einzelner, klar abgegrenzter Punkt"
   einzustufender Umfang).
+  Vom autonomen IT-Chef-Lauf am 18.09. (vierter Lauf desselben Tages) eine
+  Lücke im am 04.09. eingeführten NaN-Schutz nachgezogen: `clampGuestCount()`
+  (`HotelWizard.tsx`, Felder "Zimmer"/"Gäste") und `clampPassengerCount()`
+  (`FlightWizard.tsx`, Feld "Passagiere") schützten bisher nur gegen
+  nicht-numerische Eingaben und Werte außerhalb 1-9, nicht aber gegen
+  Nachkommazahlen — `Number('1.5')` ist kein `NaN`, also gab
+  `Math.min(9, Math.max(1, parsed))` `1.5` unverändert zurück. Ein
+  eingetipptes oder eingefügtes "1.5"/"2.9" blieb dadurch dauerhaft als
+  Bruchzahl in Zimmer-/Gäste-/Passagierzahl stehen, obwohl `min`/`max` auf
+  den Feldern sowie der Name der Hilfsfunktionen eine ganze Zahl von 1-9
+  klar als beabsichtigtes Verhalten festlegen. Fix: beide Hilfsfunktionen
+  runden den geparsten Wert jetzt vor dem Clamp zusätzlich mit `Math.round`,
+  exakt dieselbe Stelle wie der bestehende NaN-Schutz. Zwei neue
+  Regressionstests (`HotelWizard.test.tsx`, `FlightWizard.test.tsx`), die
+  "1.5" auf 2 und "2.4" auf 2 gerundet prüfen — vor dem Fix reproduzierbar
+  rot verifiziert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

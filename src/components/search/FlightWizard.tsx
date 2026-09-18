@@ -22,7 +22,7 @@ function getTodayIso(): string {
 
 function clampPassengerCount(value: string) {
   const parsed = Number(value)
-  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
+  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, Math.round(parsed)))
 }
 
 const IATA_CODE_PATTERN = /^[a-zA-Z]{3}$/

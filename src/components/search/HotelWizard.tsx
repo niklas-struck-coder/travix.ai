@@ -10,7 +10,7 @@ import type { StaySearchParams } from '@/types/stays'
 
 function clampGuestCount(value: string) {
   const parsed = Number(value)
-  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, parsed))
+  return Number.isNaN(parsed) ? 1 : Math.min(9, Math.max(1, Math.round(parsed)))
 }
 
 function getTodayIso(): string {

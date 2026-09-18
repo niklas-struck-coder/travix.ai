@@ -23,6 +23,17 @@ describe('HotelWizard', () => {
     expect(rooms).toHaveValue(1)
   })
 
+  it('rounds a fractional guest count to the nearest whole number', () => {
+    render(<HotelWizard onSearch={vi.fn()} loading={false} />)
+
+    const guests = screen.getByLabelText('Gäste')
+    fireEvent.change(guests, { target: { value: '1.5' } })
+    expect(guests).toHaveValue(2)
+
+    fireEvent.change(guests, { target: { value: '2.4' } })
+    expect(guests).toHaveValue(2)
+  })
+
   it('does not allow picking a check-in date before today', () => {
     render(<HotelWizard onSearch={vi.fn()} loading={false} />)
 
