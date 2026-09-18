@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { TrainCard } from './TrainCard'
 import type { TrainOffer } from '@/types/trains'
 
@@ -35,5 +35,16 @@ describe('TrainCard', () => {
 
     expect(screen.getByText('26h 30min')).toBeInTheDocument()
     expect(screen.queryByText('P1DT2H30M')).not.toBeInTheDocument()
+  })
+
+  it('shows a disabled "Ausgewählt" state instead of the select button when selected', () => {
+    const onSelect = vi.fn()
+    render(<TrainCard offer={baseOffer} onSelect={onSelect} selected />)
+
+    const button = screen.getByRole('button', { name: 'Ausgewählt' })
+    expect(button).toBeDisabled()
+
+    fireEvent.click(button)
+    expect(onSelect).not.toHaveBeenCalled()
   })
 })

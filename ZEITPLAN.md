@@ -1166,7 +1166,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 4.3 Echter `invokeLLM.ts`-Wrapper — ersetzt `mockAdvisor.ts`
 - [x] 5.4 `TrainCard.tsx` (Zug/Bus/Fähre-Verbindung) — Kartenkomponente steht,
   inkl. `src/types/trains.ts` (`TrainOffer`); noch nicht in KI-Chat
-  eingebunden (5.7 offen)
+  eingebunden (5.7 offen). Vom autonomen IT-Chef-Lauf am 18.09. einen
+  Paritäts-Fund behoben: Anders als `FlightCard`/`HotelCard` hatte
+  `TrainCard` keine `selected`-Prop — der "Auswählen"-Button blieb nach
+  einer Auswahl unverändert aktiv klickbar, ohne "Ausgewählt"-Zustand
+  oder Check-Icon. Fix 1:1 nach demselben, in beiden anderen Karten
+  bereits etablierten Muster: neue `selected?: boolean`-Prop,
+  `disabled={selected}` am Button, Inhalt schaltet bedingt auf
+  `<Check /> Ausgewählt` um. Betrifft aktuell noch keine echte Nutzerin
+  (5.7 weiterhin offen, `TrainCard` noch nirgends live eingebunden),
+  aber die Komponente selbst ist jetzt konsistent mit den anderen beiden
+  und bereit für die spätere Einbindung. Neuer Regressionstest in
+  `TrainCard.test.tsx` (analog zum bestehenden `FlightCard.test.tsx`-Test
+  für denselben Zustand).
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —

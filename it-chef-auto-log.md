@@ -11094,3 +11094,74 @@ build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
 **Commit:** `src/components/layout/AppShell.test.tsx` (neu),
 `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
 dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `origin/it-chef/auto`
+(Stand vor diesem Lauf: `88d6e9f`) enthält `origin/main` (`cbb845d`)
+bereits vollständig (`git merge-base --is-ancestor` bestätigt), kein
+Merge nötig — der letzte Lauf vom 17.09. wurde noch nicht von
+Freigabe-Chef geprüft/gemergt. `npm ci` (frisch, keine `node_modules` im
+Container). Baseline vorab bestätigt: `npx vitest run` (57 Testdateien,
+321 Tests, alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — verbleibende offene
+Punkte hängen weiterhin an Backend-/Architekturentscheidungen
+(unverändert). `reports/support-chef.md` (17.09.) gelesen: Vorschlag 1
+(duplizierte aria-labels) ist bereits über den vierten Lauf vom 17.09.
+gefixt; Vorschlag 2 (Abschließen-Bestätigung) bleibt laut demselben
+Bericht bewusst offen (zwei gleichwertige Lösungsansätze ohne
+Vorentscheidung, verletzt Kriterium 3); Vorschlag 3 (Hilfe-Seite) bleibt
+offen (keine echte Kontaktadresse im Code). `reports/it-chef.md` (17.09.)
+gelesen: dort explizit "kein neuer Kandidat für Automatisierung heute"
+vermerkt, plus Liste bereits geprüfter, sauberer Dateien. Reine
+Test-Coverage-Lücken sind ausgeschöpft: alle verbleibenden Dateien ohne
+Testdatei sind entweder reine Typdefinitionen ohne Logik (`types/*.ts`),
+triviale Utility-Wrapper (`utils.ts`, `design-tokens.ts`) oder bereits
+mehrfach bewusst als "zu groß für einen Punkt" zurückgestellt
+(`routes.tsx`, `App.tsx`, `main.tsx`).
+
+Deshalb gezielt einen Explore-Agenten auf die Suche nach neuen
+Paritäts-Bugs angesetzt (bisher ergiebigste Fundmethode) — insbesondere
+in Dateien, die in den beiden letzten Berichten nicht als "gelesen,
+sauber" markiert waren. Fund: `src/components/search/TrainCard.tsx`
+hatte anders als die beiden strukturell identischen `FlightCard.tsx`
+(Zeilen 21-25, 65-79) und `HotelCard.tsx` (Zeilen 7-11, 39-54) keine
+`selected`-Prop — der "Auswählen"-Button blieb nach einer Auswahl
+unverändert aktiv klickbar, ohne "Ausgewählt"-Zustand mit Check-Icon,
+kein visuelles Feedback, mehrfaches `onSelect` möglich. Erfüllt alle
+vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine clientseitige Darstellungskomponente), keine offene
+Architekturentscheidung (Verhalten an zwei Stellen im Code bereits exakt
+festgelegt, mechanisch 1:1 übertragbar), klar umrissen (eine Prop, ein
+Button, vollständig identisches Muster), objektiv prüfbar
+(Regressionstest analog `FlightCard.test.tsx`, plus Typecheck/Lint/
+Build). Dass `TrainCard`/`TrainResults` noch in keiner Seite/keinem
+Chat-Flow eingebunden sind (5.7 weiterhin offen, siehe
+`reports/it-chef.md` Vorschlag 2), ändert daran nichts — der Fix betrifft
+ausschließlich die Komponente selbst, keine Einbindungsentscheidung.
+
+**Fix:** `src/components/search/TrainCard.tsx` bekommt eine neue
+`selected?: boolean`-Prop; der "Auswählen"-Button ist jetzt
+`disabled={selected}` und zeigt bei `selected` `<Check /> Ausgewählt`
+statt `'Auswählen'` — Import von `Check` aus `lucide-react` ergänzt,
+sonst identisch zum bereits bestehenden Muster in `FlightCard.tsx`/
+`HotelCard.tsx`. Neuer Regressionstest in `TrainCard.test.tsx`
+(1:1 nach dem bestehenden `FlightCard.test.tsx`-Test für denselben
+Zustand): Button zeigt "Ausgewählt", ist deaktiviert, ein Klick darauf
+löst `onSelect` nicht aus.
+
+**Geprüft:** `npx vitest run src/components/search/TrainCard.test.tsx`
+(gezielt, 3 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (57 Testdateien, 322 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden Warnungen in
+unveränderten Dateien), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/TrainCard.tsx` (Fix),
+`src/components/search/TrainCard.test.tsx` (1 neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
