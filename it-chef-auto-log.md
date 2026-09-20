@@ -11449,3 +11449,68 @@ vite build`, kein Typfehler, Build erfolgreich).
 `src/components/search/FlightWizard.tsx` (Fix), `HotelWizard.test.tsx`,
 `FlightWizard.test.tsx` (je ein neuer Test), `ZEITPLAN.md` (Eintrag
 ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-20 (autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout.
+`origin/it-chef/auto` stand bei `5e8b07e` (Rundungs-Fix vom 18.09.) und
+war identisch mit `origin/main` — kein Merge nötig, `main` blieb
+unberührt. `npm ci` lief ohne Probleme durch. Baseline bestätigt:
+`npx vitest run` (58 Testdateien, 329 Tests, alle grün), `npm run lint`
+(0 Fehler, vier vorbestehende `react-refresh/only-export-components`-
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Ausgewählter Punkt:** `reports/support-chef.md` (18.09., Vorschlag 3)
+gelesen: der "Abschließen"-Button in `src/pages/Reiseentwuerfe.tsx`
+setzte den Status einer Entwurfskarte bisher sofort und endgültig, ohne
+Rückfrage — anders als "Löschen" auf derselben Karte, das seit dem
+17.09.-Lauf bereits über den etablierten Bestätigungsdialog
+(`pendingRemoval`-State + `Dialog`) abgesichert ist. Beide Buttons
+stehen direkt nebeneinander und unterscheiden sich nur durchs Icon.
+Vorschlag 2 desselben Berichts (doppelte aria-labels nach dem
+Duplizieren) ist bereits seit dem 17.09.-Lauf behoben, Vorschlag 1
+(MobileNav-Fokus) seit `7b2cf09` — im aktuellen Code gegen die Datei
+verifiziert. Vorschlag 4 (Hilfe-Seite) bewusst nicht aufgegriffen: laut
+`ZEITPLAN.md` (12.09.-Eintrag) bräuchte ein echter Kontakthinweis eine
+tatsächlich existierende Support-Adresse, die es im Code noch nicht
+gibt — eine autonom erfundene Adresse wäre keine reine Korrektur,
+sondern eine Annahme über nicht vorhandene Fakten (Kriterium 3
+verletzt).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (rein lokaler Demo-Zustand in einer
+Formularkarte). Keine offene Architektur-/Produktentscheidung — das
+Bestätigungsdialog-Muster ist über Löschen auf sechs weiteren Seiten
+(Preisalarme, Favoriten, Angebote, Aktivitäten, Warenkorb, jetzt
+Reiseentwürfe) sowie "Neu starten" im Chat und die Aktivitäts-Entfernung
+in `EditMode.tsx` bereits fest etabliert. Klar umrissen (exakt derselbe
+Dialog wie beim Löschen daneben, eine mechanische Ergänzung ohne neue
+Interpretation). Objektiv prüfbar (Regressionstest analog den
+bestehenden Löschen-Tests).
+
+**Fix:** Neuer `pendingFinalize`-State in `Reiseentwuerfe.tsx`, exakt
+nach dem Muster von `pendingRemoval`. Der "Abschließen"-Button setzt
+jetzt `pendingFinalize` statt `finalizeDraft()` direkt aufzurufen; ein
+zweiter `Dialog` ("Entwurf abschließen?"/"Der Entwurf für {destination}
+wird abgeschlossen. Das lässt sich nicht rückgängig machen."/
+"Abbrechen"/"Ja, abschließen") neben dem bestehenden Löschen-Dialog,
+`variant="destructive"` auf dem Bestätigen-Button analog dem "Neu
+starten?"-Dialog in `KiChat.tsx` (ebenfalls eine irreversible, aber
+nicht datenlöschende Aktion). Zwei bestehende Tests in
+`Reiseentwuerfe.test.tsx`, die bisher direkt auf den Abschließen-Klick
+prüften, um den zusätzlichen Bestätigungsklick ergänzt; ein neuer Test
+prüft, dass der Dialog vor jeder Statusänderung erscheint und
+"Abbrechen" den Entwurf unverändert "In Bearbeitung" lässt.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx`
+(gezielt, 11 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (58 Testdateien, 330 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (zwei Tests angepasst, ein neuer
+Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

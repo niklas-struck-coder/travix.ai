@@ -51,6 +51,7 @@ describe('Reiseentwuerfe', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Kyoto abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
     expect(screen.queryByText(/öffnet aktuell bei jedem Entwurf denselben KI-Chat/)).not.toBeInTheDocument()
   })
 
@@ -76,9 +77,27 @@ describe('Reiseentwuerfe', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
     expect(screen.getByText('Abgeschlossen')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Lissabon pausieren' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Lissabon abschließen' })).not.toBeInTheDocument()
+  })
+
+  it('asks for confirmation before finalizing a draft, and keeps it in progress if cancelled', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    expect(screen.getByText('Entwurf abschließen?')).toBeInTheDocument()
+    expect(screen.getByText(/Der Entwurf für Lissabon wird abgeschlossen/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
+    expect(screen.queryByText('Entwurf abschließen?')).not.toBeInTheDocument()
+    expect(screen.getByText('In Bearbeitung')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Lissabon abschließen' })).toBeInTheDocument()
   })
 
   it('duplicates a draft, inserting a second card with the same destination', () => {

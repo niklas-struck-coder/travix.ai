@@ -1514,6 +1514,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (nach Duplizieren
   tragen beide Lissabon-Karten unterscheidbare Labels, ein nicht
   duplizierter Entwurf bleibt unverändert).
+  Vom autonomen IT-Chef-Lauf am 20.09. einen von `reports/support-chef.md`
+  (18.09., Vorschlag 3) gemeldeten Fund behoben: "Abschließen" setzte den
+  Status einer Karte bisher sofort und endgültig, ohne Rückfrage — anders
+  als "Löschen" auf derselben Karte, das seit dem 17.09.-Fix bereits über
+  denselben Bestätigungsdialog abgesichert ist; die beiden Buttons stehen
+  direkt nebeneinander und unterscheiden sich nur durchs Icon, ein
+  Fehlklick war damit leicht möglich und nicht rückgängig zu machen. Fix:
+  exakt dasselbe Muster übernommen — ein zweiter, per
+  `pendingFinalize`-State gesteuerter Dialog ("Entwurf abschließen?"/
+  "Ja, abschließen"/"Abbrechen"), kein neuer Entwurf. Zwei bestehende
+  Tests in `Reiseentwuerfe.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt, ein neuer Test ergänzt (Klick auf
+  "abschließen" öffnet die Bestätigung ohne sofortige Statusänderung;
+  "Abbrechen" lässt den Entwurf unverändert "In Bearbeitung").
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
