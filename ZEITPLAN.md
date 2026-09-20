@@ -1447,6 +1447,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   beim Drücken von Enter `addActivity()` aus, mit derselben
   Leer-Namen-Schutzbedingung wie der bestehende Button. Drei neue
   Tests in `EditMode.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 20.09. (weiterer Lauf) einen
+  eigenständig gefundenen Barrierefreiheits-Fund behoben (per
+  Explore-Agent gezielt gesucht, gegen den Code verifiziert): Preis-Input
+  und Entfernen-Button jeder Aktivität bildeten ihr `aria-label` nur aus
+  `activity.name` — `addActivity()` prüft nicht auf Eindeutigkeit, zwei
+  gleichnamige Aktivitäten (z. B. zweimal "Spaziergang") waren für
+  Screenreader-Nutzer:innen nicht mehr auseinanderzuhalten. Derselbe
+  Fund/dieselbe Fix-Idee wie bei den Reiseentwürfen (17.09.). Fix: analog
+  `Reiseentwuerfe.tsx` bei Namensduplikaten "(Eintrag N)" an beide Labels
+  angehängt, eindeutige Namen bleiben unverändert. Vor dem Fix
+  reproduzierbar rot verifiziert (`git stash` nur der Quelländerung, neuer
+  Test schlug fehl). Neuer Regressionstest in `EditMode.test.tsx` (zwei
+  gleichnamige plus eine eindeutig benannte Aktivität, alle vier Labels
+  unterscheidbar).
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)

@@ -67,26 +67,37 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
             <p className="text-sm text-muted-foreground">Noch keine Aktivitäten hinzugefügt.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {activities.map((activity) => (
-                <li key={activity.id} className="flex items-center gap-2">
-                  <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
-                  <Input
-                    aria-label={`Preis für ${activity.name}`}
-                    className="w-24"
-                    placeholder="Preis"
-                    value={activity.price ?? ''}
-                    onChange={(event) => updatePrice(activity.id, event.target.value)}
-                  />
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    aria-label={`${activity.name} entfernen`}
-                    onClick={() => setPendingRemoval(activity)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </li>
-              ))}
+              {activities.map((activity, index) => {
+                // Zwei Aktivitäten können denselben frei getippten Namen tragen
+                // (addActivity prüft nicht auf Eindeutigkeit) — ohne diese
+                // Ergänzung wären ihre aria-labels für Screenreader nicht
+                // unterscheidbar (analog Reiseentwuerfe.tsx, 17.09.).
+                const hasDuplicates =
+                  activities.filter((other) => other.name === activity.name).length > 1
+                const occurrence =
+                  activities.slice(0, index + 1).filter((other) => other.name === activity.name).length
+                const activityLabel = hasDuplicates ? `${activity.name} (Eintrag ${occurrence})` : activity.name
+                return (
+                  <li key={activity.id} className="flex items-center gap-2">
+                    <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
+                    <Input
+                      aria-label={`Preis für ${activityLabel}`}
+                      className="w-24"
+                      placeholder="Preis"
+                      value={activity.price ?? ''}
+                      onChange={(event) => updatePrice(activity.id, event.target.value)}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`${activityLabel} entfernen`}
+                      onClick={() => setPendingRemoval(activity)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </li>
+                )
+              })}
             </ul>
           )}
 

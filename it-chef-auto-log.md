@@ -11514,3 +11514,61 @@ Build erfolgreich).
 `src/pages/Reiseentwuerfe.test.tsx` (zwei Tests angepasst, ein neuer
 Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
 ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-20 (autonomer Tagesmodus-Lauf, weiterer Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `it-chef/auto` stand bereits bei `4123ccc`
+(Abschließen-Bestätigungsdialog vom ersten Lauf heute) und war identisch
+mit `origin/main` — kein Merge nötig, `main` blieb unberührt. `npm ci`
+lief ohne Probleme durch. Baseline bestätigt: `npx vitest run` (58
+Testdateien, 329 Tests, alle grün), `npm run lint` (0 Fehler, vier
+vorbestehende Warnungen), `npm run build` (kein Typfehler, Build
+erfolgreich).
+
+**Ausgewählter Punkt:** Da die vier support-chef-Vorschläge vom 18.09.
+bereits alle behandelt waren (drei behoben, einer — Hilfe-Seite —
+bewusst zurückgestellt, da eine echte Kontaktadresse fehlt), per
+Explore-Agent gezielt nach einem weiteren, strukturell ähnlichen Fund
+gesucht (Parität zwischen ähnlichen Komponenten, fehlende
+Testabdeckung, wiederkehrende Bug-Muster aus früheren Läufen). Fund:
+`src/components/trip/EditMode.tsx` (Zeilen 73-89) bildet das
+`aria-label` von Preis-Input und Entfernen-Button jeder Aktivität nur
+aus `activity.name` — `addActivity()` prüft nicht auf Eindeutigkeit,
+zwei gleichnamige Aktivitäten (z. B. zweimal "Spaziergang") sind für
+Screenreader-Nutzer:innen nicht mehr auseinanderzuhalten. Exakt derselbe
+Fund/dieselbe Ursache wie bei `Reiseentwuerfe.tsx` (17.09., support-chef
+Vorschlag 1) — dieselbe strukturelle Form (nach `id` geschlüsselte
+Liste, Label nur aus frei getipptem Namen, Aktions-Buttons pro Zeile),
+aber die dort bereits gebaute Lösung war für `EditMode.tsx` nie
+nachgezogen worden.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Beschriftung in
+einem Aktivitäten-Editor). Keine offene Architektur-/Produktentscheidung
+— mechanische Wiederverwendung eines bereits im selben Repo für exakt
+dasselbe Problem gebauten und verifizierten Musters
+(`hasDuplicates`/`occurrence`-Suffix). Klar umrissen (Namenskollision im
+Code objektiv sichtbar, keine eigene Interpretation nötig). Objektiv
+prüfbar (Regressionstest mit zwei gleichnamigen Aktivitäten, analog dem
+bestehenden Reiseentwürfe-Test).
+
+**Fix:** In `EditMode.tsx` denselben `hasDuplicates`/`occurrence`-Ansatz
+wie in `Reiseentwuerfe.tsx` übernommen, basierend auf `activity.name`
+statt `draft.destination`. Bei Namensduplikaten wird "(Eintrag N)" an
+beide Labels (`Preis für {label}`, `{label} entfernen`) angehängt,
+eindeutige Namen bleiben unverändert. Vor dem Fix reproduzierbar rot
+verifiziert (`git stash` nur der Quelländerung in `EditMode.tsx`, neuer
+Test schlug mit "Unable to find a label with the text of: ..." fehl).
+
+**Geprüft:** `npx vitest run src/components/trip/EditMode.test.tsx`
+(gezielt, 12 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (58 Testdateien, 330 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Commit:** `src/components/trip/EditMode.tsx` (Fix),
+`src/components/trip/EditMode.test.tsx` (ein neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
