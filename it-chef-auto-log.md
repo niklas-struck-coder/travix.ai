@@ -11572,3 +11572,72 @@ Build erfolgreich).
 `src/components/trip/EditMode.test.tsx` (ein neuer Test), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout.
+`origin/it-chef/auto` stand bei `6a12606` (aria-label-Fix in
+`EditMode.tsx` vom 20.09.) und war identisch mit `origin/main` — kein
+Merge nötig, `main` blieb unberührt. `npm ci` lief ohne Probleme durch.
+Baseline bestätigt: `npx vitest run` (58 Testdateien, 330 Tests, alle
+grün), `npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten keinen neuen, eindeutig umsetzbaren offenen Punkt mehr, der
+alle vier Sicherheitskriterien erfüllt (die meisten offenen Punkte sind
+entweder durch Base44/Gemini-Zugangsdaten blockiert oder erfordern eine
+Produkt-/Architekturentscheidung, die Ni treffen muss). Zwei
+Explore-Agenten haben deshalb gezielt nach einem weiteren,
+strukturell abgesicherten Fund gesucht (dasselbe Vorgehen wie beim
+"weiteren Lauf" am 20.09.): der erste prüfte, ob das
+Duplikat-aria-label-Muster (`Reiseentwuerfe.tsx`/`EditMode.tsx`) noch an
+anderer Stelle unbehoben ist — Ergebnis: nein, `Favoriten.tsx`,
+`Angebote.tsx`, `Preisalarme.tsx`, `Aktivitaeten.tsx` und
+`Warenkorb.tsx` sind alle reine Entfernen-Listen mit fest verdrahteten
+Demo-Daten ohne Erstellungspfad, Namenskollisionen sind dort im
+aktuellen Code gar nicht möglich. Der zweite Agent hat vier weitere
+Winkel geprüft (fehlende Bestätigungsdialoge, Rundungs-/Clamp-Paritäten
+bei Zahleneingaben, Prop-Paritäten zwischen Geschwister-Komponenten,
+Fokus-/aria-live-Lücken im Chat) und einen bestätigten Fund gemeldet.
+
+Fund: Der "Travix denkt nach …"-Ladehinweis in `KiChat.tsx`
+(`isThinking`-Block, Zeile 171-176) und der identische, duplizierte
+Block in `Urlaubsmodus.tsx` (Zeile 52-57) hatten kein `role="status"` —
+obwohl `KiChat.tsx`s eigener `storageWarning`-Hinweis nur zehn Zeilen
+darüber (Zeile 160-164) exakt dieses Muster für dieselbe Art von Inhalt
+(kurzlebiger, dynamisch erscheinender Statustext) bereits verwendet,
+ebenso `ChatInput.tsx`, `Buchung.tsx`, `Hotelsuche.tsx` und
+`Flugsuche.tsx`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Auszeichnung eines
+Ladehinweises). Keine offene Architektur-/Produktentscheidung —
+mechanische Wiederverwendung eines im selben Code (`KiChat.tsx`, Zeile
+161) bereits etablierten und verifizierten Musters (`role="status"` für
+transiente Statustexte), keine eigene Interpretation nötig. Klar
+umrissen (zwei strukturell identische Textblöcke, ein Attribut
+ergänzen). Objektiv prüfbar (Regressionstest mit `getByRole('status')`,
+analog den bestehenden `storageWarning`-Tests).
+
+**Fix:** `role="status"` auf den `isThinking`-Block in `KiChat.tsx`
+sowie den identischen Block in `Urlaubsmodus.tsx` ergänzt — reine
+Attribut-Ergänzung, keine Verhaltensänderung für sehende Nutzer:innen.
+Vor dem Fix reproduzierbar rot verifiziert (`git stash` nur der beiden
+`.tsx`-Quelländerungen, beide neuen/angepassten Tests schlugen danach
+mit "Unable to find an accessible element with the role of: status"
+fehl).
+
+**Geprüft:** `npx vitest run src/components/chat/KiChat.test.tsx
+src/pages/Urlaubsmodus.test.tsx` (gezielt, 17 Tests grün, davon 1 neu
+und 1 angepasst), danach volle Suite `npx vitest run` (58 Testdateien,
+332 Tests, davon 2 neu — alle grün), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/chat/KiChat.tsx`, `src/pages/Urlaubsmodus.tsx`
+(Fix), `src/components/chat/KiChat.test.tsx` (ein neuer Test),
+`src/pages/Urlaubsmodus.test.tsx` (ein Test angepasst), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.

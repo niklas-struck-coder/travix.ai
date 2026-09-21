@@ -164,7 +164,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 4.6 Build `ChatInput.tsx` with text input, voice button, and send action
   - [x] 4.7 Build `QuickReplies.tsx` with context-aware suggestion chips
   - [x] 4.8 Build `TripSummaryCard.tsx` with inline trip summary and "save & view" action
-  - [x] 4.9 Assemble `KiChat.tsx` main chat container integrating all chat components
+  - [x] 4.9 Assemble `KiChat.tsx` main chat container integrating all chat components — vom autonomen IT-Chef-Lauf am 21.09. eine Accessibility-Lücke geschlossen: der "Travix denkt nach …"-Ladehinweis bekam `role="status"`, analog dem direkt daneben liegenden `storageWarning`-Hinweis, siehe `ZEITPLAN.md` (21.09.-Eintrag)
   - [x] 4.10 Implement `useChat.ts` hook for message state, sending, and AI response parsing — parses against mock advisor for now, drop-in swap once 4.3 is real
   - [x] 4.11 Implement voice input via browser speech recognition in `src/lib/ai/speech.ts` — browser SpeechRecognition API used instead of Base44 TranscribeAudio (no backend yet). Vom autonomen IT-Chef-Lauf am 17.09. nachgebessert: ein zweiter Klick auf das Mikrofon-Icon in `ChatInput.tsx` stoppte die laufende Aufnahme bisher nicht (tat einfach nichts), jetzt hält ein `useRef` die von `startListening()` zurückgegebene `SpeechRecognition`-Instanz und ein erneuter Klick ruft `recognition.stop()` darauf auf
   - [x] 4.12 Implement text-to-speech output via browser SpeechSynthesis — used instead of Base44 GenerateSpeech (no backend yet)
@@ -217,7 +217,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 7.15 Build ReiseSuche page (`/reise-planen`) as trip planning search entry point — vom autonomen IT-Chef-Lauf am 21.08. gebaut: `src/pages/ReiseSuche.tsx`, drei Karten (KI-Chat empfohlen/hervorgehoben, Flugsuche, Hotelsuche), jede mit kurzer Beschreibung und Link-Button. Schließt eine echte Lücke: `Home.tsx`s "Selbst durchsuchen"-Button verlinkte bereits auf `/reise-planen`, das bisher nur die `PlaceholderPage` zeigte. Kein Zug/Bus/Fähre-Kärtchen, da dafür noch keine eigenständige Route existiert (5.7 offen, `TrainCard`/`TrainResults` sind bisher nur in den KI-Chat-Flow eingebunden). Keine erfundenen Daten, reine Navigation zu bereits bestehenden Seiten.
 
 - [ ] 8.0 Holiday mode, deal finder, account — Urlaubsmodus, DealFinderChat, profile, Premium, settings
-  - [ ] 8.1 Build Urlaubsmodus page (`/urlaubsmodus`) tied to active/booked trip with daily itinerary display
+  - [ ] 8.1 Build Urlaubsmodus page (`/urlaubsmodus`) tied to active/booked trip with daily itinerary display — Grundgerüst (Concierge-Chat) steht bereits, Rest (Tagesitinerar) weiterhin offen. Vom autonomen IT-Chef-Lauf am 21.09. eine Accessibility-Lücke im bestehenden Teil geschlossen: der "Travix denkt nach …"-Ladehinweis bekam `role="status"`, analog `KiChat.tsx`, siehe `ZEITPLAN.md` (21.09.-Eintrag)
   - [ ] 8.2 Implement photo upload and InvokeLLM vision analysis (menus, landmarks, signs)
   - [ ] 8.3 Implement context-aware AI responses based on active trip destination, dates, and itinerary
   - [ ] 8.4 Add quick action buttons (find restaurant, translate sign, get directions)

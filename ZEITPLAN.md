@@ -274,6 +274,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   lässt die Aktivität unverändert), bestehender Entfernen-Test und der
   zugehörige Test in `Buchung.test.tsx` auf den zusätzlichen
   Bestätigungsklick umgestellt.
+  Vom autonomen IT-Chef-Lauf am 21.09. eine Accessibility-Lücke
+  geschlossen: Der "Travix denkt nach …"-Ladehinweis in `KiChat.tsx`
+  (Zeile 171-176) und der identische, duplizierte Block in
+  `Urlaubsmodus.tsx` (Zeile 52-57) hatten kein `role="status"`, obwohl
+  `KiChat.tsx`s eigener `storageWarning`-Hinweis nur zehn Zeilen darüber
+  (Zeile 160-164) genau dieses Muster für exakt dieselbe Art von Inhalt
+  (kurzlebiger, sich dynamisch ändernder Statustext) bereits verwendet —
+  ebenso `ChatInput.tsx`, `Buchung.tsx`, `Hotelsuche.tsx` und
+  `Flugsuche.tsx`. Ohne `role="status"` (implizit `aria-live="polite"`)
+  bekommen Screenreader-Nutzer:innen nicht automatisch mitgeteilt, dass
+  Travix gerade eine Antwort vorbereitet. Fix: `role="status"` auf beide
+  `isThinking`-Blöcke ergänzt, mechanische Übernahme des bereits im
+  selben Code etablierten Musters, keine neue Design-Entscheidung. Zwei
+  neue Regressionstests (`KiChat.test.tsx`: `getByRole('status')` zeigt
+  den Ladehinweis, kein Status-Element ohne `isThinking`;
+  `Urlaubsmodus.test.tsx`: bestehender Test auf `getByRole('status')`
+  umgestellt) — vor dem Fix durch temporäres Zurücknehmen der beiden
+  Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
