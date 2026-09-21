@@ -1,78 +1,74 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-09-18
+**Datum:** 2026-09-21
 
-## Was ist seit dem letzten Eintrag (2026-09-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-18) passiert?
 
-Auf `main` sind seit dem letzten Bericht keine neuen Code-Änderungen
-gelandet — die Commits seit `f1f4105` sind Berichte von Marketing-Chef,
-Support-Chef und Freigabe-Chef sowie deren gemergte `/auto`-Branches
-(Fokus nach Menüwahl im mobilen Menü, Freigabe-Übersicht). Der separate
-`it-chef-eigen`-Autonomiekanal (`it-chef/auto`) hat parallel weitere
-kleine, isolierte Nachzieh-Fixes gesammelt (`sheet.tsx`
-Fokus-Fallback-Parität mit `dialog.tsx`, `TrainCard.tsx` fehlende
-`selected`-Prop, `AppShell.tsx` Testabdeckung, `Reiseentwuerfe.tsx`
-unterscheidbare aria-labels) — laut Freigabe-Chef-Bericht vom 18.09.
-bislang wegen eines npm-Registry-Ausfalls nicht verifizierbar und daher
-noch nicht gemergt. Das läuft über einen eigenen Prüf-/Merge-Prozess,
-unabhängig von dieser Session.
+Seit dem letzten Bericht ist auf `main` einiges gelandet: Der separate
+`it-chef-eigen`-Autonomiekanal (`it-chef/auto`) wurde vom Freigabe-Chef
+verifiziert und gemergt (13 Commits — u. a. Fokus-Sprung nach
+Menü-Navigation im mobilen Menü, gerundete Zimmer-/Gäste-/Passagierzahlen
+in Hotel-/FlightWizard, Bestätigungsdialog vor dem endgültigen
+Abschließen eines Reiseentwurfs, unterscheidbare aria-labels bei
+gleichnamigen Aktivitäten/Entwürfen, `role="status"` auf den
+Ladehinweisen von Flug-/Hotel-/Zugsuche und KI-Chat, fehlender
+`NoResultsMessage`-Titel bei der Flugsuche nachgezogen). Außerdem wurden
+ein Marketing-Chef- und ein Support-Chef-Bericht samt ihrer
+`/auto`-Branches unabhängig geprüft und gemergt.
 
-Eigene gezielte Bug-Suche in dieser Session (unabhängig vom
-`it-chef-eigen`-Kanal, PR-Kanal-Fokus, ohne `npm install`/Testlauf): 19
-bisher nicht in früheren Berichten protokollierte Dateien vollständig
-gelesen — `Preisalarme.tsx`, `Einstellungen.tsx`, `Profil.tsx`,
-`Dashboard.tsx`, `Kartenansicht.tsx`, `Urlaubsmodus.tsx`, `KiChat.tsx`
-(Page + Chat-Container-Komponente), `useConcierge.ts`, `useChat.ts`
-(im Detail, inkl. Edit-/Flugsuche-Zwischenschritte), `TravixAvatar.tsx`,
-`TrainResults.tsx`, `speech.ts`, `calendarUtils.ts`, `duffel/client.ts`,
-`mockAdvisor.ts`, `mockConcierge.ts`, `checklistRules.ts`,
-`ChecklistPanel.tsx`, `EditMode.tsx`, `ChatInput.tsx`,
-`QuickReplies.tsx`, `ChatMessage.tsx`, `nav-config.ts`,
-`PlaceholderPage.tsx`, `format.ts`, `tripStorage.ts` (erneut, gegen die
-aktuelle Fassung geprüft). Zusätzlich per Grep der gesamte `src`-Ordner
-auf TODO/FIXME/XXX/HACK durchsucht — keine Treffer außer einem
-absichtlichen Test-Fixture-String.
-
-Kein neuer Bug gefunden: keine offenen TODOs, keine kaputten Imports
-oder Routen (`routes.tsx` gegen `nav-config.ts` abgeglichen, inkl.
-`/hilfe`, das bewusst noch als `PlaceholderPage` läuft), keine
-unbehandelten Promise-Rejections (`duffel/client.ts` fängt sowohl
-Netzwerk- als auch JSON-Parse-Fehler ab, `useChat.ts`s Flug-/
-Unterkunftssuchen haben durchgängig `.catch()`), keine neuen
-Logik- oder Edge-Case-Fehler. Die Demo-Seiten (`Preisalarme.tsx`,
-`Einstellungen.tsx`, `Profil.tsx`, `Dashboard.tsx`) sind bewusst als
-lokaler Demo-State dokumentiert und intern konsistent.
+Eigene gezielte Bug-Suche in dieser Session (ohne `npm install`/Testlauf,
+wie für diesen Kanal vorgeschrieben): gezielt Dateien gelesen, die in
+den bisherigen Berichten noch nicht im Detail durchgegangen waren bzw.
+seit dem letzten Lauf verändert wurden — u. a. die Diffs von
+`MobileNav.tsx`, `EditMode.tsx` und `Reiseentwuerfe.tsx` aus dem
+`it-chef/auto`-Merge, dazu `FlightResults.tsx`, `HotelResults.tsx`,
+`TrainResults.tsx`, `routes.tsx`/`nav-config.ts` (Pfad-Abgleich),
+`cartTotals.ts`, `calculateProgress.ts`, `tripStorage.ts` und die
+`.then()`-Aufrufe in `useChat.ts` (alle mit `.catch()` abgesichert).
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine. In der heutigen gezielten Suche wurde kein neuer, ausreichend
-sicherer und isolierter Bug gefunden, der einen eigenen Fix-Branch
-gerechtfertigt hätte.
+- **[PR #22](https://github.com/niklas-struck-coder/travix.ai/pull/22)
+  — `role="alert"` auf Fehlermeldungen in `FlightResults.tsx` und
+  `HotelResults.tsx`.** Der Ladezustand dieser beiden Komponenten hat
+  bereits `role="status"`, der direkt danebenliegende Fehlerzustand
+  (fehlgeschlagene Flug-/Hotelsuche) hatte aber kein ARIA-Live-Region-
+  Attribut — Screenreader-Nutzer:innen bekamen Suchfehler nicht
+  automatisch angekündigt. Reine Attribut-Ergänzung, keine
+  Verhaltensänderung für sehende Nutzer:innen. Dieser Fund deckt sich
+  mit dem Support-Chef-Bericht vom 21.09. und dem letzten
+  `it-chef/auto`-Log-Eintrag, die ihn beide bereits als nächsten
+  Kandidaten notiert hatten — hier wurde er jetzt eigenständig
+  bestätigt und über den regulären PR-Kanal umgesetzt. **Hinweis:** In
+  diesem Kanal ist `npm install`/`build`/`test` nicht erlaubt, der Fix
+  wurde daher nur durch sorgfältiges Lesen verifiziert, nicht per
+  Testlauf — das sollte vor dem Merge nachgeholt werden.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine neuen. Weiterhin unverändert: 18 offene Auto-Fix-PRs von früheren
-Läufen warten auf Ni's manuelle Entscheidung (siehe Vorschläge), plus
-der separate, noch unverifizierte `it-chef/auto`-Branch.
+Keine neuen unsicheren/riskanten Funde in dieser Session. Weiterhin
+offen: 18 ältere Auto-Fix-PRs (#1, #4–#18, #20, #21) warten auf Ni's
+manuelle Entscheidung — jetzt zusammen mit #22 also 19 offene PRs aus
+diesem Kanal.
 
 ## Weitere Vorschläge
 
-1. **PR-Aufräumung weiterhin offen, jetzt 18 offene Auto-Fix-PRs.**
+1. **PR-Aufräumung, jetzt 19 offene Auto-Fix-PRs.**
    [#1](https://github.com/niklas-struck-coder/travix.ai/pull/1),
    [#4](https://github.com/niklas-struck-coder/travix.ai/pull/4)–[#18](https://github.com/niklas-struck-coder/travix.ai/pull/18),
    [#20](https://github.com/niklas-struck-coder/travix.ai/pull/20),
-   [#21](https://github.com/niklas-struck-coder/travix.ai/pull/21).
-   PR #21 (`formatDuration`) ist inhaltlich bereits identisch über
-   `it-chef/auto` auf `main` gelandet und kann geschlossen werden. Reine
-   Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs schließen.
-2. **`it-chef/auto`-Branch wartet auf Verifizierung.** Vier kleine
-   Nachzieh-Fixes (`sheet.tsx`, `TrainCard.tsx`, `AppShell.tsx`,
-   `Reiseentwuerfe.tsx`) hängen seit dem npm-Registry-Ausfall am 18.09.
-   fest. Sobald die Registry wieder zuverlässig erreichbar ist, sollte
-   der nächste Freigabe-Chef-Lauf sie regulär verifizieren und mergen.
-3. **`TrainCard`/`TrainResults` weiterhin unverdrahteter toter Code.**
+   [#21](https://github.com/niklas-struck-coder/travix.ai/pull/21),
+   [#22](https://github.com/niklas-struck-coder/travix.ai/pull/22).
+   Reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs mergen
+   oder schließen.
+2. **`TrainCard`/`TrainResults` weiterhin unverdrahteter toter Code.**
    Unverändert seit mehreren Berichten: keine Zugsuche-Seite, kein
-   Nav-Eintrag, keine echte Datenquelle. Entweder verdrahten oder
-   entfernen — Produktentscheidung, keine autonome Umsetzung.
+   Nav-Eintrag, keine echte Datenquelle — nur in der eigenen Testdatei
+   referenziert. Entweder verdrahten oder entfernen, Produktentscheidung.
+3. **Fehlende Tests für PR #22.** Da dieser Kanal keine Testläufe
+   ausführen darf, hat der Fix in PR #22 keinen begleitenden
+   Regressionstest bekommen (anders als vergleichbare
+   `role="status"`-Fixes aus dem `it-chef/auto`-Kanal). Beim Review
+   wäre ein kurzer Test mit `getByRole('alert')` sinnvoll.
 
-_Letztes Update: 2026-09-18_
+_Letztes Update: 2026-09-21_
