@@ -1,58 +1,55 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-18
+**Datum:** 2026-09-21
 
-## Was ist seit dem letzten Eintrag (2026-09-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-18) passiert?
 
-Am Code selbst hat sich seit gestern nichts Neues getan — IT-Chef hat
-heute gezielt nach Bugs gesucht und keinen gefunden. Die beiden Punkte
-aus meinem letzten Bericht (`Reiseentwuerfe.tsx`: doppelte aria-labels
-nach dem Duplizieren, "Abschließen" ohne Rückfrage) sind weiterhin
-unverändert offen, ebenso die Hilfe-Seite (`/hilfe`) mit ihrem
-Platzhaltertext.
+Einiges hat sich getan, und die drei damals offenen Punkte sind
+inzwischen behoben — ich hab's im aktuellen Code nachgeprüft:
 
-Neu ist ein Fund aus der parallelen Auto-Analyse von heute: Der neue
-Fokus-Fallback in `src/components/ui/sheet.tsx` (analog zum
-Dialog-Fokus-Fix vom 15.09.) wurde am mobilen Hauptmenü geprüft — dabei
-zeigt sich ein Reibungspunkt beim Navigieren über das Menü, siehe unten.
+- **Mobiles Menü:** Der Fokus springt nach der Menüwahl jetzt zur `<h1>`
+  der neu geladenen Seite statt zum Hamburger-Knopf zurück
+  (`src/components/layout/MobileNav.tsx:17-27,50-55`).
+- **Duplizierte Reiseentwürfe:** aria-labels sind jetzt unterscheidbar,
+  z. B. "Lissabon (Eintrag 2)" (`src/pages/Reiseentwuerfe.tsx:174-185`).
+- **"Abschließen":** fragt jetzt per Bestätigungsdialog nach, bevor der
+  Status endgültig gesetzt wird (`src/pages/Reiseentwuerfe.tsx:293-309`).
+
+Schön zu sehen, dass die Punkte tatsächlich ankommen. Beim erneuten
+Draufschauen sind mir aber zwei neue Reibungspunkte aufgefallen, plus
+der alte Hilfe-Seiten-Punkt ist weiterhin offen.
 
 ## Meine Vorschläge
 
-1. **Nach der Menüwahl im mobilen Hauptmenü landet der Fokus wieder auf
-   dem Hamburger-Knopf statt auf der neuen Seite.**
-   `src/components/layout/MobileNav.tsx:20-28,45`: Jeder Menüpunkt
-   schließt beim Klick zusätzlich zur Navigation das Menü
-   (`onClick={() => setOpen(false)}`). Weil der Hamburger-Knopf als
-   `SheetTrigger` bei jedem Seitenwechsel im DOM bleibt, greift der neue
-   Fokus-Fallback aus `sheet.tsx:86-89` und schickt den Fokus beim
-   Schließen zurück zum Knopf — die neu geladene Seite (und ihre `<h1>`)
-   wird nie erreicht. Wer per Tastatur oder Screenreader z. B. von
-   "Aktivitäten" zu "Warenkorb" wechselt, muss sich nach jedem
-   Menüpunkt erneut durch Kopfzeile und Menü zur eigentlichen Seite
-   vorarbeiten. *Vorschlag:* Beim Klick auf einen `NavLink` nach dem
-   Schließen gezielt zur `<h1>` der neuen Seite springen, statt sich auf
-   den generischen Trigger-Fallback zu verlassen — reine
-   Schließen-ohne-Navigation-Fälle (Escape, Overlay-Klick, X-Knopf)
-   sollen weiterhin zum Hamburger-Knopf zurückkehren.
+1. **Fehlermeldungen bei der Flug-/Hotelsuche werden
+   Screenreader-Nutzer:innen nicht automatisch angesagt.**
+   `src/components/search/FlightResults.tsx:25-36` und
+   `src/components/search/HotelResults.tsx:26-37`: Schlägt die Suche
+   fehl, erscheint ein rot umrandeter Fehlerblock — aber ohne
+   `role="alert"` (oder `aria-live`). Der Ladehinweis direkt darüber hat
+   seit heute `role="status"`, der mindestens genauso wichtige
+   Fehlerfall daneben aber nicht. Wer mit Screenreader im KI-Chat nach
+   Flügen sucht, merkt eine fehlgeschlagene Suche also nur, wenn sie
+   zufällig zurücknavigiert. *Vorschlag:* `role="alert"` auf die beiden
+   Fehler-`div`s ergänzen — genau das Gegenstück zum bereits
+   vorhandenen `role="status"`. Ein passender Fix liegt dafür bereits
+   als PR #22 vor, wartet aber noch auf Merge.
 
-2. **Duplizierte Reiseentwürfe sind für Screenreader-Nutzer:innen nicht
-   mehr unterscheidbar.** `src/pages/Reiseentwuerfe.tsx:209,221,232,242`:
-   Alle Aktions-Buttons einer Karte bekommen ihr `aria-label` nur aus
-   `draft.destination`. Nach "Duplizieren" (`duplicateDraft()`, Zeile
-   100-108) tragen Original und Kopie exakt dasselbe Label, z. B.
-   zweimal "Lissabon löschen". *Vorschlag:* Labels um ein
-   unterscheidendes Merkmal ergänzen, z. B. Reisedatum oder Kartenindex.
+2. **Ein abgeschlossener Reiseentwurf lädt weiterhin genauso aktiv zum
+   "Weiterplanen" ein wie ein aktiver.**
+   `src/pages/Reiseentwuerfe.tsx:220-222`: Der teal hervorgehobene
+   Button "Planung fortsetzen" wird für jede Karte gerendert, egal ob
+   `finalized` oder nicht — anders als "Pausieren" und "Abschließen",
+   die bei abgeschlossenen Entwürfen korrekt ausgeblendet werden. Wer
+   gerade bewusst "Ja, abschließen" bestätigt hat (der neue Dialog sagt
+   ausdrücklich "das lässt sich nicht rückgängig machen"), sieht direkt
+   danach eine Karte, die optisch fast unverändert weiter zum
+   Weitermachen einlädt — nur das Badge wechselt zu "Abgeschlossen", in
+   derselben Farbe wie "Pausiert". *Vorschlag:* "Planung fortsetzen" bei
+   `status === 'finalized'` ausblenden oder durch einen neutralen
+   Button ohne Teal-Hervorhebung ersetzen (z. B. "Details ansehen").
 
-3. **"Abschließen" ist ohne Rückfrage endgültig — anders als "Löschen"
-   auf derselben Karte.** `src/pages/Reiseentwuerfe.tsx:216-227` bzw.
-   `finalizeDraft()` Zeile 94-98: Ein Klick setzt den Status sofort und
-   dauerhaft auf "finalized", ein Zurück gibt es nicht. Der Button steht
-   direkt neben "Pausieren" und unterscheidet sich nur durchs Icon — ein
-   Fehlklick ist leicht möglich. *Vorschlag:* denselben
-   Bestätigungsdialog wie beim Löschen auch vor "Abschließen" schalten,
-   oder zumindest kurz einen "Rückgängig"-Hinweis nach dem Klick zeigen.
-
-4. **Die Hilfe-Seite (`/hilfe`) hilft weiterhin nicht wirklich.**
+3. **Die Hilfe-Seite (`/hilfe`) hilft weiterhin nicht wirklich.**
    `src/pages/PlaceholderPage.tsx:16` zeigt nach wie vor nur "Hilfe wird
    als Nächstes gebaut" — kein FAQ, kein Kontaktweg. Wer mit einem
    Problem dorthin klickt, geht leer aus. *Vorschlag:* bis der echte

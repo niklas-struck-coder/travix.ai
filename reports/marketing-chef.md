@@ -1,52 +1,52 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-18
+**Datum:** 2026-09-21
 
-## Was ist seit dem letzten Eintrag (2026-09-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-18) passiert?
 
-Ehrlich gesagt: inhaltlich wenig. Seit gestern gab es **keine neue
-Produkt-Codeänderung** – das bestätigen sowohl der interne
-Übersichts-Lauf (`marketing/freigabe-uebersicht.md`) als auch der
-IT-Chef-Bericht vom 18.09. unabhängig voneinander. Die Commits seit
-gestern sind ausschließlich Berichte, Logs und ein Status-Update.
+Diesmal gibt's echte Bewegung, nicht nur Verwaltung: IT-Chef hat in den
+letzten drei Tagen genau die zwei Reiseentwürfe-Fixes geliefert, die ich
+am 18.09. als Content-Kandidaten vorgemerkt hatte — "Abschließen" fragt
+jetzt nach, bevor der Status endgültig gesetzt wird, und Karten
+bekommen nach dem Duplizieren unterscheidbare aria-labels. Dazu kamen
+acht weitere reine Barrierefreiheits-/Fokus-Fixes (Ladehinweise bei
+Flug-/Hotel-/Zugsuche und KI-Chat jetzt korrekt angesagt, Fokus springt
+nach Menü-Navigation mit, gerundete Zimmer-/Gästezahlen) sowie ein noch
+offener PR (#22) für fehlende Fehler-Ansagen bei der Flug-/Hotelsuche.
 
-Support-Chef hat zwar zwei neue Reibungspunkte auf der
-Reiseentwürfe-Seite gemeldet (doppelte `aria-label`s nach dem
-Duplizieren einer Karte, "Abschließen" ohne Rückfrage – anders als
-"Löschen" auf derselben Karte). Beide sind aber noch nicht behoben,
-zählen also noch nicht als Content-Kandidat. Der Kandidatentopf für
-eine fünfte Mini-Changelog-Ausgabe bleibt bei null.
-
-Damit bleibt der eigentliche Stand unverändert gegenüber gestern: vier
-fertige Entwurfs-Ausgaben liegen bereit, keine live, und die vier
-offenen Fragen (Kanal, Warenkorb-Content, wiederkehrendes
-Social-Format, Mini-Changelog-Start) sind jetzt seit über **fünf
-Wochen** unbeantwortet. Keine neuen Nutzungs- oder Erfolgszahlen
-bekannt – bleibt ehrlich außen vor.
+Für die "Ehrlichkeit als Feature"-Erzählung ist das gutes Material: alle
+Fixes ziehen dieselbe Linie durch (konsistentes, verlässliches Verhalten
+statt Überraschungen). Trotzdem bleibt der Kandidatentopf für eine
+fünfte Mini-Changelog-Ausgabe bei eins von acht nötigen — noch nicht
+so weit. Und die vier offenen Grundsatzfragen (Kanal, Warenkorb-Content,
+wiederkehrendes Social-Format, Mini-Changelog-Start) sind jetzt seit
+über fünf Wochen unbeantwortet. Keine neuen Nutzungs- oder
+Erfolgszahlen bekannt — bleibt ehrlich außen vor.
 
 ## Vorschläge
 
-1. **Fünf Wochen Stillstand sind ein Signal, nicht nur eine Wartezeit.**
-   Statt die Mini-Changelog-Frage zum sechsten Mal zu wiederholen: Ich
-   schlage vor, Ausgabe 1 diese Woche als Testballon zu veröffentlichen
-   – notfalls auf dem einfachsten verfügbaren Kanal (z. B. als
-   einfacher Blogpost oder Notiz an bestehende Kontakte), statt auf die
-   "perfekte" Kanalentscheidung zu warten. Lieber klein und live als
-   fertig und unsichtbar.
-2. **Die zwei neuen Reiseentwürfe-Funde vormerken, nicht liegen lassen.**
-   Sobald IT-Chef sie behebt, passen beide exakt in die bestehende
-   "Ehrlichkeit als Feature"-Erzählung (konsistentes Verhalten über alle
-   Lösch-/Abschluss-Aktionen). Das wäre dann Kandidat 18 und 19 für eine
-   fünfte Ausgabe – schon jetzt als nächstes Thema einplanen.
-3. **Die gesammelten Robustheits-/Ehrlichkeits-Fixes weiterhin als eine
-   Story bündeln, nicht als Einzelposts.** formatDuration, durchgängige
-   Löschbestätigung, Mikrofon-Fix und bald die Reiseentwürfe-Konsistenz
-   ergeben zusammen die stärkste Erzählung: "Wir polieren die Basis,
-   bevor sie jemandem auffällt."
-4. **Bei der Kanal-Frage nicht mehr nur pochen, sondern eine
-   Bring-a-friend-Alternative anbieten:** Falls die volle Kanal-Wahl
-   weiterhin blockiert, würde ein einziger fester Termin (z. B. jeden
-   Freitag ein kurzer Text-Post, egal wo) reichen, um überhaupt
-   Erfahrungswerte zu sammeln – Format vor Perfektion.
+1. **Die Reiseentwürfe-Konsistenz-Story jetzt bündeln, nicht auf die
+   Achter-Schwelle warten.** Bestätigungsdialog vor "Abschließen" plus
+   unterscheidbare Karten-Labels sind inhaltlich fertig und passen
+   perfekt zusammen ("wir fragen nach, bevor wir was Endgültiges tun").
+   Statt auf sechs weitere Kandidaten zu warten: als eigenständiges
+   kurzes Content-Stück nutzen, sobald ein Kanal steht — die Regel
+   "erst ab 8 Kandidaten" war für Sammel-Ausgaben gedacht, nicht als
+   Blockade für ein einzelnes, klar erzählbares Thema.
+2. **Fünf Wochen Stillstand bei den vier Grundsatzfragen sind jetzt
+   ein Muster, kein Ausreißer mehr.** Ich schlage konkret vor: diese
+   Woche eine einzige davon fix entscheiden lassen (z. B. nur den
+   Kanal für Ausgabe 1) statt weiter alle vier gemeinsam offenzuhalten
+   — kleine Entscheidung statt große Blockade.
+3. **Barrierefreiheit als eigene, ehrliche Erzählung testen.** Die
+   Häufung an a11y-Fixes (Fokus, Ladehinweise, ARIA-Labels) ist mehr
+   als Nebensache – ein kurzer, unaufgeregter Post ("wir bauen das
+   auch für Screenreader-Nutzer:innen richtig, bevor's auffällt")
+   würde die Ehrlichkeits-Positionierung um eine neue Zielgruppen-
+   Facette erweitern, ohne etwas zu beschönigen.
+4. **PR #22 (fehlende Fehler-Ansage bei Flug-/Hotelsuche) im Blick
+   behalten.** Läuft noch, ist aber nur eine Attribut-Ergänzung ohne
+   Verhaltensänderung – sobald gemerged, ist das ein weiterer
+   naheliegender Kandidat für dieselbe Konsistenz-Story wie unter 1.
 
-_Letztes Update: 2026-09-18_
+_Letztes Update: 2026-09-21_

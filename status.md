@@ -13,14 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-17):**
-- Keine neuen Code-Fixes im Repo — reiner Report-/Prüf-Tag der Auto-Chefs
-- Support-Chef hat den mobilen Menü-Fokus geprüft; Marketing-Chef einen
-  reinen Übersichts-Lauf ohne neue Tier-4-Kandidaten gemacht
-- Freigabe-Chef hat Marketing- und Support-Zweig geprüft und gemergt;
-  der IT-Chef-Auto-Lauf war wegen eines npm-Registry-Ausfalls nicht
-  verifizierbar und blieb ungemergt
+**Seit letztem Update (2026-09-18):**
+- IT-Chef Auto hat 13 Accessibility-Fixes gemergt: Fokus nach Menü-Navigation,
+  eindeutige aria-labels, Ladehinweise mit role="status", Bestätigung vor
+  endgültigem Abschließen von Reiseentwürfen, gerundete Zimmer-/Gästezahlen
+- Marketing-Chef hat einen neuen UX-Kandidaten (Abschließen-Bestätigung)
+  vorgemerkt, acht Fixes bewusst ausgeschlossen; vier offene Fragen weiterhin
+  unbeantwortet
+- Support-Chef hat fehlendes role="alert" bei Flug-/Hotelsuche-Fehlern
+  gefunden; Freigabe-Chef hat alle drei Auto-Zweige unabhängig geprüft
+  und Marketing/Support gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-18_
+_Letztes Update: 2026-09-21_
