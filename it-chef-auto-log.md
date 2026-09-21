@@ -11858,3 +11858,49 @@ Testdateien, 338 Tests, davon 2 neu — alle grün).
 `src/components/search/HotelResults.test.tsx` (je ein neuer Test),
 `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
 dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, fünfter Lauf)
+
+**Branch-Stand:** `it-chef/auto` hatte zu Laufbeginn einen offenen,
+noch nicht von Freigabe-Chef gemergten Commit aus dem vierten Lauf
+heute (`role="alert"` in `FlightResults.tsx`/`HotelResults.tsx`).
+Darauf weitergearbeitet, zusätzlich frischen Stand von `main` konfliktfrei
+reingemergt (nur Berichts-/Status-Dateien geändert, kein Codekonflikt).
+
+**Ausgewählter Punkt:** Der im vierten Lauf heute bewusst zurückgestellte
+Kandidat umgesetzt: Die standalone Seiten `Flugsuche.tsx` (Zeile 44) und
+`Hotelsuche.tsx` (Zeile 43) haben ihre eigene Fehler-Box für eine
+fehlgeschlagene Suche (unabhängig von `FlightResults.tsx`/
+`HotelResults.tsx`, die im vierten Lauf bereits repariert wurden) — auch
+diese hatte kein ARIA-Live-Region-Attribut.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine ARIA-Attribut-Ergänzung). Keine
+offene Architektur-/Produktentscheidung — mechanische 1:1-Übernahme des
+im selben Lauf-Kontext bereits etablierten und verifizierten Musters
+(`role="alert"` auf strukturell identischem Fehler-Markup, dieselben
+CSS-Klassen, derselbe `errors`-State). Klar umrissen (ein Attribut auf
+je einer bereits benannten Zeile in zwei Dateien). Objektiv prüfbar
+(Regressionstest mit `getByRole('alert')`).
+
+**Fix:** `role="alert"` auf das Fehler-`<div>` in `Flugsuche.tsx` und
+`Hotelsuche.tsx` ergänzt — reine Attribut-Ergänzung, keine sonstige
+Verhaltensänderung. Je ein neuer Regressionstest in
+`Flugsuche.test.tsx`/`Hotelsuche.test.tsx` (`getByRole('alert')` zeigt
+die Fehlermeldung) — vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `Flugsuche.tsx`/`Hotelsuche.tsx`)
+reproduzierbar rot verifiziert.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte),
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten Warnungen),
+gezielt `npx vitest run src/pages/Flugsuche.test.tsx
+src/pages/Hotelsuche.test.tsx` (2 Testdateien, 10 Tests, davon 2 neu —
+alle grün), danach volle Suite `npm test` (58 Testdateien, 340 Tests,
+davon 2 neu — alle grün), zusätzlich `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/pages/Flugsuche.tsx`, `src/pages/Hotelsuche.tsx` (Fix),
+`src/pages/Flugsuche.test.tsx`, `src/pages/Hotelsuche.test.tsx` (je ein
+neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

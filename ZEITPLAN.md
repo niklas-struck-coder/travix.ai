@@ -329,6 +329,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bleibt bewusst unangetastet — das war nicht Teil des diagnostizierten
   Fundes, bleibt aber ein naheliegender Kandidat für einen künftigen,
   eigenständig neu bewerteten Lauf.
+  Vom autonomen IT-Chef-Lauf am 21.09. (fünfter Lauf desselben Tages)
+  genau diesen im vierten Lauf zurückgestellten Kandidaten umgesetzt: Der
+  Fehlerzustand (fehlgeschlagene Suche) in den standalone Seiten
+  `Flugsuche.tsx` (Zeile 44) und `Hotelsuche.tsx` (Zeile 43) hatte
+  dasselbe fehlende ARIA-Live-Region-Attribut wie zuvor `FlightResults.tsx`/
+  `HotelResults.tsx` — strukturell identisches Fehler-`<div>` (dieselben
+  Klassen, derselbe `errors`-State), nur an einer anderen Stelle im Code
+  (die Seiten rendern ihre eigene Fehlerbox statt die Ergebnis-Komponenten
+  zu nutzen). Fix: `role="alert"` auf beide Fehler-`<div>`s ergänzt,
+  mechanische Attribut-Ergänzung ohne Verhaltensänderung für sehende
+  Nutzer:innen — 1:1 dasselbe Muster wie im vierten Lauf. Je ein neuer
+  Regressionstest in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
+  (`getByRole('alert')` zeigt die Fehlermeldung) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `Flugsuche.tsx`/`Hotelsuche.tsx`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

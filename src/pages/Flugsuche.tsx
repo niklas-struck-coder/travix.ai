@@ -41,7 +41,10 @@ export function Flugsuche() {
       <FlightWizard onSearch={handleSearch} loading={loading} />
 
       {errors.length > 0 && (
-        <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+        >
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <div className="flex flex-col gap-1">
             {errors.map((error, index) => (

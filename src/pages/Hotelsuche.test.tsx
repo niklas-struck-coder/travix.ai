@@ -117,6 +117,21 @@ describe('Hotelsuche', () => {
     expect(screen.getAllByRole('button', { name: 'Auswählen' })[0]).not.toBeDisabled()
   })
 
+  it('announces a search error to assistive tech via role="alert"', async () => {
+    const searchStaysMock = vi.mocked(searchStays)
+    searchStaysMock.mockResolvedValueOnce({ offers: [], errors: [{ message: 'Duffel ist gerade nicht erreichbar.' }] })
+
+    render(
+      <MemoryRouter>
+        <Hotelsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Duffel ist gerade nicht erreichbar.')
+  })
+
   describe('when localStorage is unavailable (e.g. quota exceeded)', () => {
     afterEach(() => {
       vi.restoreAllMocks()
