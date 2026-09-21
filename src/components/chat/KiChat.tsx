@@ -169,7 +169,7 @@ export function KiChat() {
         ))}
 
         {isThinking && (
-          <div className="flex items-center gap-2">
+          <div role="status" className="flex items-center gap-2">
             <TravixAvatar state="thinking" size="sm" />
             <span className="text-sm text-muted-foreground">Travix denkt nach …</span>
           </div>

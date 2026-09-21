@@ -80,6 +80,7 @@ const initialDrafts: Draft[] = [
 export function Reiseentwuerfe() {
   const [drafts, setDrafts] = useState(initialDrafts)
   const [pendingRemoval, setPendingRemoval] = useState<Draft | null>(null)
+  const [pendingFinalize, setPendingFinalize] = useState<Draft | null>(null)
 
   function togglePause(id: string) {
     setDrafts((current) =>
@@ -115,6 +116,12 @@ export function Reiseentwuerfe() {
     if (!pendingRemoval) return
     deleteDraft(pendingRemoval.id)
     setPendingRemoval(null)
+  }
+
+  function confirmFinalize() {
+    if (!pendingFinalize) return
+    finalizeDraft(pendingFinalize.id)
+    setPendingFinalize(null)
   }
 
   if (drafts.length === 0) {
@@ -162,8 +169,20 @@ export function Reiseentwuerfe() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {drafts.map((draft) => {
+        {drafts.map((draft, index) => {
           const progress = calculateProgress(draft.trip)
+          // Duplizieren (siehe duplicateDraft) kann zwei Karten mit
+          // identischem destination hinterlassen — ohne diese Ergänzung
+          // wären ihre aria-labels für Screenreader nicht unterscheidbar
+          // (reports/support-chef.md, 17.09., Vorschlag 1).
+          const hasDuplicates =
+            drafts.filter((other) => other.destination === draft.destination).length > 1
+          const occurrence =
+            drafts.slice(0, index + 1).filter((other) => other.destination === draft.destination)
+              .length
+          const draftLabel = hasDuplicates
+            ? `${draft.destination} (Eintrag ${occurrence})`
+            : draft.destination
           return (
             <Card key={draft.id} className="overflow-hidden py-0">
               <div className={`h-28 bg-gradient-to-br ${draft.gradient}`} />
@@ -206,7 +225,7 @@ export function Reiseentwuerfe() {
                       size="icon"
                       variant="ghost"
                       className="size-8 text-muted-foreground hover:text-foreground"
-                      aria-label={draft.status === 'paused' ? `${draft.destination} fortsetzen` : `${draft.destination} pausieren`}
+                      aria-label={draft.status === 'paused' ? `${draftLabel} fortsetzen` : `${draftLabel} pausieren`}
                       title={draft.status === 'paused' ? 'Fortsetzen' : 'Pausieren'}
                       onClick={() => togglePause(draft.id)}
                     >
@@ -218,9 +237,9 @@ export function Reiseentwuerfe() {
                       size="icon"
                       variant="ghost"
                       className="size-8 text-muted-foreground hover:text-foreground"
-                      aria-label={`${draft.destination} abschließen`}
+                      aria-label={`${draftLabel} abschließen`}
                       title="Abschließen"
-                      onClick={() => finalizeDraft(draft.id)}
+                      onClick={() => setPendingFinalize(draft)}
                     >
                       <CheckCircle2 className="size-4" />
                     </Button>
@@ -229,7 +248,7 @@ export function Reiseentwuerfe() {
                     size="icon"
                     variant="ghost"
                     className="size-8 text-muted-foreground hover:text-foreground"
-                    aria-label={`${draft.destination} duplizieren`}
+                    aria-label={`${draftLabel} duplizieren`}
                     title="Duplizieren"
                     onClick={() => duplicateDraft(draft.id)}
                   >
@@ -239,7 +258,7 @@ export function Reiseentwuerfe() {
                     size="icon"
                     variant="ghost"
                     className="size-8 text-muted-foreground hover:text-destructive"
-                    aria-label={`${draft.destination} löschen`}
+                    aria-label={`${draftLabel} löschen`}
                     title="Löschen"
                     onClick={() => setPendingRemoval(draft)}
                   >
@@ -266,6 +285,25 @@ export function Reiseentwuerfe() {
             </DialogClose>
             <Button variant="destructive" onClick={confirmRemoval}>
               Ja, entfernen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pendingFinalize !== null} onOpenChange={(open) => !open && setPendingFinalize(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Entwurf abschließen?</DialogTitle>
+            <DialogDescription>
+              Der Entwurf für {pendingFinalize?.destination} wird abgeschlossen. Das lässt sich nicht rückgängig machen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Abbrechen</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmFinalize}>
+              Ja, abschließen
             </Button>
           </DialogFooter>
         </DialogContent>

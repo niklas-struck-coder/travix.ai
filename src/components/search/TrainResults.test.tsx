@@ -29,6 +29,12 @@ describe('TrainResults', () => {
     expect(screen.getByText('Travix sucht nach Zug-, Bus- und Fährverbindungen …')).toBeInTheDocument()
   })
 
+  it('announces the loading state to assistive tech via role="status"', () => {
+    render(<TrainResults offers={null} loading onSelect={() => {}} />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Travix sucht nach Zug-, Bus- und Fährverbindungen …')
+  })
+
   it('renders nothing while not loading and no offers are set', () => {
     const { container } = render(<TrainResults offers={null} loading={false} onSelect={() => {}} />)
 

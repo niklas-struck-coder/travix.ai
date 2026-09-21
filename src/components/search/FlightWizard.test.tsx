@@ -53,6 +53,17 @@ describe('FlightWizard', () => {
     expect(passengers).toHaveValue(1)
   })
 
+  it('rounds a fractional passenger count to the nearest whole number', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    const passengers = screen.getByLabelText('Passagiere')
+    fireEvent.change(passengers, { target: { value: '1.5' } })
+    expect(passengers).toHaveValue(2)
+
+    fireEvent.change(passengers, { target: { value: '2.4' } })
+    expect(passengers).toHaveValue(2)
+  })
+
   it('keeps the search button disabled for a non-letter airport code', () => {
     render(<FlightWizard onSearch={vi.fn()} loading={false} />)
 

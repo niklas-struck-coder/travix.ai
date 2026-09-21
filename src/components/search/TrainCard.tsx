@@ -1,4 +1,4 @@
-import { Train, ArrowRight, Clock } from 'lucide-react'
+import { Train, ArrowRight, Clock, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,9 +21,10 @@ function formatDuration(isoDuration: string) {
 interface TrainCardProps {
   offer: TrainOffer
   onSelect?: (offer: TrainOffer) => void
+  selected?: boolean
 }
 
-export function TrainCard({ offer, onSelect }: TrainCardProps) {
+export function TrainCard({ offer, onSelect, selected }: TrainCardProps) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-3 px-5 py-4">
@@ -65,8 +66,19 @@ export function TrainCard({ offer, onSelect }: TrainCardProps) {
             {formatOfferPrice(offer.totalAmount, offer.totalCurrency)}
           </span>
           {onSelect && (
-            <Button size="sm" onClick={() => onSelect(offer)} className="bg-teal text-navy hover:bg-teal/90">
-              Auswählen
+            <Button
+              size="sm"
+              onClick={() => onSelect(offer)}
+              disabled={selected}
+              className="bg-teal text-navy hover:bg-teal/90"
+            >
+              {selected ? (
+                <>
+                  <Check /> Ausgewählt
+                </>
+              ) : (
+                'Auswählen'
+              )}
             </Button>
           )}
         </div>

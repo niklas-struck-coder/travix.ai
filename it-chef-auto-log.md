@@ -10964,3 +10964,845 @@ erfolgreich).
 **Commit:** `src/pages/Kalender.tsx` (Fix), `src/pages/Kalender.test.tsx`
 (1 neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (vierter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `origin/it-chef/auto` war
+zu Beginn dieses Laufs bereits identisch mit `origin/main` (vollständig
+gemerged, siehe `git merge-base --is-ancestor` — Freigabe-Chef hat die
+drei vorherigen Läufe von heute zwischenzeitlich geprüft und gemergt),
+`it-chef/auto` daher frisch von `origin/main` (`cbb845d`) neu angelegt.
+`npm ci` (frisch, keine `node_modules` im Container). Baseline vorab
+bestätigt: `npx vitest run` (56 Testdateien, 319 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — die verbleibenden
+offenen Punkte hängen weiterhin an offenen Architektur-/Produkt-
+entscheidungen oder fehlenden Backend-Credentials (unverändert
+gegenüber den vorherigen Läufen von heute). `reports/support-chef.md`
+(17.09.) gelesen: Vorschlag 1 gegen den aktuellen Code verifiziert —
+`src/pages/Reiseentwuerfe.tsx` bildet die `aria-label` aller vier
+Aktions-Buttons (Pausieren/Fortsetzen, Abschließen, Duplizieren, Löschen)
+nur aus `draft.destination`. `duplicateDraft()` fügt eine Kopie mit
+identischem `destination` ein — Original und Kopie tragen danach exakt
+dasselbe Label (z. B. zweimal "Lissabon löschen"), für Screenreader-
+Nutzer:innen nicht mehr unterscheidbar. Vorschlag 2 (Bestätigung vor
+"Abschließen") bewusst nicht angegangen: der Bericht selbst nennt zwei
+gleichwertige Lösungsansätze (Bestätigungsdialog vs. Rückgängig-Hinweis)
+ohne Vorentscheidung — genau die Art von Interpretationsspielraum, die
+laut Sicherheitskriterien einem autonomen Lauf nicht zusteht. Vorschlag 3
+(Hilfe-Seite) bleibt aus denselben, bereits mehrfach dokumentierten
+Gründen offen (keine echte Kontaktadresse im Code, siehe 12.09.-Eintrag
+in `ZEITPLAN.md`). Vorschlag 1 erfüllt alle vier Kriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reiner lokaler Demo-State, nur
+clientseitige Darstellung), keine offene Architekturentscheidung (der
+Bericht schlägt zwei konkrete, mechanische Differenzierungsmerkmale vor;
+Kartenindex ist davon das eindeutig objektive, ohne Annahmen über echte
+Reisedaten), klar umrissen (eine Ergänzung an vier bereits bestehenden
+`aria-label`-Stellen), objektiv prüfbar (Regressionstest, Typecheck,
+Lint, Build).
+
+**Fix:** In `src/pages/Reiseentwuerfe.tsx` wird pro Karte jetzt geprüft,
+ob ihr `destination` mehrfach unter den aktuellen `drafts` vorkommt
+(`hasDuplicates`); bei mehreren gleichnamigen Einträgen wird ein
+`draftLabel` mit Zusatz "(Eintrag N)" gebildet, wobei N die 1-basierte
+Position unter den gleichnamigen Einträgen ist (Kartenindex, nicht
+Reisedatum — Duplikate übernehmen laut `duplicateDraft()` exakt dieselben
+`trip`-Daten, ein Datum wäre dort also ebenfalls nicht eindeutig). Ohne
+Duplikate bleibt `draftLabel` unverändert `draft.destination` — keine
+Verhaltensänderung für den bisherigen Normalfall. Alle vier
+`aria-label`-Stellen (Pausieren/Fortsetzen, Abschließen, Duplizieren,
+Löschen) nutzen jetzt `draftLabel` statt `draft.destination`. Neuer
+Regressionstest in `Reiseentwuerfe.test.tsx`: nach Klick auf "Lissabon
+duplizieren" tragen die beiden Lissabon-Karten die Labels
+"Lissabon (Eintrag 1) löschen"/"Lissabon (Eintrag 2) löschen" statt des
+alten, jetzt nicht mehr vorhandenen "Lissabon löschen"; der unveränderte
+Kyoto-Entwurf behält weiterhin "Kyoto löschen" ohne Zusatz.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (gezielt,
+10 Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (56
+Testdateien, 320 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden Warnungen in unveränderten Dateien),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (1 neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-17 (fünfter autonomer Tagesmodus-Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Zunächst geprüft: `reports/support-chef.md`
+(17.09.), Vorschlag 2 ("Abschließen" in `Reiseentwuerfe.tsx` ohne
+Bestätigung). Ein Fix wurde probeweise umgesetzt, dann aber wieder
+verworfen (siehe unten) — der tatsächlich umgesetzte Punkt ist Task 3.1
+(`AppShell.tsx`) aus `tasks/tasks-prd-travix-platform.md`: letzte
+verbliebene Testabdeckungslücke unter den nicht-`ui/`-Dateien, die im
+13.09.-Eintrag von `ZEITPLAN.md` noch als "bräuchte Router-Mocking,
+größerer Umfang" zurückgestellt war.
+
+**Verworfener erster Versuch:** Vorschlag 2 aus `reports/support-chef.md`
+(17.09.) probeweise mit einem Bestätigungsdialog umgesetzt (identisches
+Muster wie beim bestehenden Löschen-Dialog auf derselben Seite). Beim
+Aktualisieren von `ZEITPLAN.md` fiel auf, dass der direkt vorangegangene
+Lauf desselben Tages genau diesen Punkt bereits bewusst abgelehnt hatte:
+der Bericht selbst nennt zwei gleichwertige Lösungsansätze
+(Bestätigungsdialog vs. kurzer Rückgängig-Hinweis) ohne Vorentscheidung —
+die Wahl zwischen beiden ist Interpretation über das hinaus, was der
+Bericht tatsächlich festlegt, verletzt also Kriterium 3 der
+Sicherheitskriterien. Um diese bereits dokumentierte, weiterhin gültige
+Entscheidung nicht widersprüchlich zu überschreiben, wurden alle
+Änderungen an `Reiseentwuerfe.tsx`/`Reiseentwuerfe.test.tsx`/
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` per `git checkout --`
+verworfen, bevor irgendetwas committet wurde.
+
+**Warum AppShell.tsx sicher genug:** Reine Testabdeckungsergänzung für
+bestehendes, unverändertes Layout-Verhalten — kein Bezug zu Auth,
+Zahlungen, Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-
+oder Architekturentscheidung: `AppShell.tsx` ist fertig und stabil, nur
+ungetestet. Klar umrissen (ein einzelner Test, etabliertes Muster). Beim
+genaueren Hinsehen stellte sich heraus, dass der am 13.09. vermutete
+Router-Mocking-Aufwand nicht zutrifft: `Sidebar`/`MobileNav` rendern
+bereits eigenständig unter einem einfachen `MemoryRouter` (siehe deren
+bestehende Testdateien), `AppShell` setzt beide nur nebeneinander mit
+`children` — objektiv über einen Test prüfbar.
+
+**Umgesetzt:**
+- Neue `src/components/layout/AppShell.test.tsx` (1 Test, Muster analog
+  `Sidebar.test.tsx`/`MobileNav.test.tsx`): rendert `children` sowie je
+  einen erreichbaren Namen aus Sidebar ("Seitenleiste einklappen") und
+  MobileNav ("Menü öffnen") innerhalb eines `MemoryRouter`, um zu
+  bestätigen, dass beide tatsächlich eingebunden werden.
+- Checkbox 3.1 in `tasks/tasks-prd-travix-platform.md` sowie der
+  entsprechende Absatz in `ZEITPLAN.md` ergänzt.
+- `routes.tsx` bleibt bewusst weiterhin ohne eigene Testdatei: ein Test
+  dort würde jede eingebundene Seite mitrendern (deutlich größerer,
+  nicht mehr als "ein einzelner Punkt" einzustufender Umfang) — passend
+  zur bereits am 13.09. dokumentierten Einschätzung.
+
+**Geprüft:** `npx vitest run src/components/layout/AppShell.test.tsx`
+(gezielt, 1 Test grün), danach volle Suite `npx vitest run` (57
+Testdateien, 321 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, nur die drei vorbestehenden `react-refresh/only-export-components`-
+Warnungen in unveränderten Dateien), `npx tsc --noEmit` sowie `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/layout/AppShell.test.tsx` (neu),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `origin/it-chef/auto`
+(Stand vor diesem Lauf: `88d6e9f`) enthält `origin/main` (`cbb845d`)
+bereits vollständig (`git merge-base --is-ancestor` bestätigt), kein
+Merge nötig — der letzte Lauf vom 17.09. wurde noch nicht von
+Freigabe-Chef geprüft/gemergt. `npm ci` (frisch, keine `node_modules` im
+Container). Baseline vorab bestätigt: `npx vitest run` (57 Testdateien,
+321 Tests, alle grün), `npm run lint` (0 Fehler, nur die drei
+vorbestehenden `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — verbleibende offene
+Punkte hängen weiterhin an Backend-/Architekturentscheidungen
+(unverändert). `reports/support-chef.md` (17.09.) gelesen: Vorschlag 1
+(duplizierte aria-labels) ist bereits über den vierten Lauf vom 17.09.
+gefixt; Vorschlag 2 (Abschließen-Bestätigung) bleibt laut demselben
+Bericht bewusst offen (zwei gleichwertige Lösungsansätze ohne
+Vorentscheidung, verletzt Kriterium 3); Vorschlag 3 (Hilfe-Seite) bleibt
+offen (keine echte Kontaktadresse im Code). `reports/it-chef.md` (17.09.)
+gelesen: dort explizit "kein neuer Kandidat für Automatisierung heute"
+vermerkt, plus Liste bereits geprüfter, sauberer Dateien. Reine
+Test-Coverage-Lücken sind ausgeschöpft: alle verbleibenden Dateien ohne
+Testdatei sind entweder reine Typdefinitionen ohne Logik (`types/*.ts`),
+triviale Utility-Wrapper (`utils.ts`, `design-tokens.ts`) oder bereits
+mehrfach bewusst als "zu groß für einen Punkt" zurückgestellt
+(`routes.tsx`, `App.tsx`, `main.tsx`).
+
+Deshalb gezielt einen Explore-Agenten auf die Suche nach neuen
+Paritäts-Bugs angesetzt (bisher ergiebigste Fundmethode) — insbesondere
+in Dateien, die in den beiden letzten Berichten nicht als "gelesen,
+sauber" markiert waren. Fund: `src/components/search/TrainCard.tsx`
+hatte anders als die beiden strukturell identischen `FlightCard.tsx`
+(Zeilen 21-25, 65-79) und `HotelCard.tsx` (Zeilen 7-11, 39-54) keine
+`selected`-Prop — der "Auswählen"-Button blieb nach einer Auswahl
+unverändert aktiv klickbar, ohne "Ausgewählt"-Zustand mit Check-Icon,
+kein visuelles Feedback, mehrfaches `onSelect` möglich. Erfüllt alle
+vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine clientseitige Darstellungskomponente), keine offene
+Architekturentscheidung (Verhalten an zwei Stellen im Code bereits exakt
+festgelegt, mechanisch 1:1 übertragbar), klar umrissen (eine Prop, ein
+Button, vollständig identisches Muster), objektiv prüfbar
+(Regressionstest analog `FlightCard.test.tsx`, plus Typecheck/Lint/
+Build). Dass `TrainCard`/`TrainResults` noch in keiner Seite/keinem
+Chat-Flow eingebunden sind (5.7 weiterhin offen, siehe
+`reports/it-chef.md` Vorschlag 2), ändert daran nichts — der Fix betrifft
+ausschließlich die Komponente selbst, keine Einbindungsentscheidung.
+
+**Fix:** `src/components/search/TrainCard.tsx` bekommt eine neue
+`selected?: boolean`-Prop; der "Auswählen"-Button ist jetzt
+`disabled={selected}` und zeigt bei `selected` `<Check /> Ausgewählt`
+statt `'Auswählen'` — Import von `Check` aus `lucide-react` ergänzt,
+sonst identisch zum bereits bestehenden Muster in `FlightCard.tsx`/
+`HotelCard.tsx`. Neuer Regressionstest in `TrainCard.test.tsx`
+(1:1 nach dem bestehenden `FlightCard.test.tsx`-Test für denselben
+Zustand): Button zeigt "Ausgewählt", ist deaktiviert, ein Klick darauf
+löst `onSelect` nicht aus.
+
+**Geprüft:** `npx vitest run src/components/search/TrainCard.test.tsx`
+(gezielt, 3 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (57 Testdateien, 322 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden Warnungen in
+unveränderten Dateien), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/TrainCard.tsx` (Fix),
+`src/components/search/TrainCard.test.tsx` (1 neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Weiterer geplanter Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `origin/it-chef/auto` stand bei `577c4ef`
+(TrainCard-Fix aus dem ersten Lauf heute) und enthielt `origin/main`
+(`cbb845d`) bereits vollständig — kein Merge nötig, der Branch wartet
+weiterhin auf Prüfung/Merge durch Freigabe-Chef. `npm ci` (frisch),
+Baseline bestätigt: `npx vitest run` (57 Testdateien, 322 Tests, alle
+grün), `npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen — verbleibende
+offene Punkte hängen weiter an Backend-/Architekturentscheidungen
+(7.4, 7.12, 6.2, 6.6/6.7 u. a.), unverändert seit dem ersten Lauf heute.
+`reports/support-chef.md` (17.09.) und `reports/it-chef.md` (17.09.)
+erneut gelesen: beide dort offen gebliebenen Vorschläge (Reiseentwuerfe
+"Abschließen" ohne Rückfrage — zwei gleichwertige Lösungsansätze ohne
+Vorentscheidung; `/hilfe`-Seite ohne echte Kontaktadresse) verletzen
+weiterhin Kriterium 3 bzw. lassen sich nicht ohne erfundene Daten lösen,
+also unverändert nicht autonom umsetzbar.
+
+Zusätzlich gezielt einen Explore-Agenten unabhängig auf die Suche nach
+einem neuen Paritäts-/Logik-/Barrierefreiheits-Bug angesetzt, mit
+explizitem Ausschluss der schon bekannten, nicht geeigneten Kandidaten
+(Reiseentwuerfe-Abschließen, Hilfe-Seite, unverdrahtete TrainCard/
+TrainResults). Der Agent hat ca. 45 Dateien vollständig gelesen — alle
+Seiten unter `src/pages/`, die drei Such-Karten (`FlightCard`/
+`HotelCard`/`TrainCard`, jetzt nach dem heutigen ersten Lauf wieder
+untereinander konsistent) samt Results/Wizard-Geschwistern, die
+Trip-Komponenten (`ChecklistPanel`, `EditMode`), die Chat-Komponenten,
+`useChat.ts`/`useConcierge.ts`, die `src/lib/**`-Hilfsfunktionen
+(inkl. Fehlerbehandlung bei Duffel-Fetch, localStorage, fehlender
+SpeechRecognition, ungültigen Währungscodes, korrupten gespeicherten
+Trip-Daten), `routes.tsx`/`App.tsx` sowie die Layout-/UI-Primitive. Jede
+geprüfte Geschwister-Gruppe (die sechs Lösch-Bestätigungsseiten, die drei
+Such-Karten samt Wizards, Flugsuche/Hotelsuche-Auswahlzustand,
+nav-config vs. routes.tsx, Fortschritts-/Checklisten-Berechnungen) ist
+bereits intern konsistent — kein fehlendes Prop, kein asymmetrischer
+Bestätigungsdialog, kein kaputter Link, kein Off-by-one, kein
+ungeschütztes null/undefined, kein Tippfehler in nutzersichtbaren Texten
+gefunden. Deckt sich mit der unabhängigen Einschätzung in
+`reports/it-chef.md` vom 17.09. (dort ebenfalls "kein neuer Kandidat").
+
+**Ergebnis: heute nichts gefunden, das sicher genug für einen weiteren
+autonomen Fix ist.** Kein Code geändert. Als einzige, nicht triviale
+Randnotiz hat der Agent `Home.tsx`s nicht-klickbare Ziel-Karten erwähnt —
+bewusst nicht aufgegriffen, da unklar wäre, wohin ein Klick führen soll
+(Produktentscheidung, verletzt Kriterium 2).
+
+**Geprüft:** keine Codeänderung vorgenommen, daher kein erneuter
+Test-/Lint-/Build-Lauf nach der Prüfung nötig — die Baseline oben bleibt
+unverändert gültig.
+
+**Commit:** nur dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `c1095d4` (Ergebnis
+des ersten Laufs heute: "kein neuer sicherer Punkt gefunden", nach einer
+sehr gründlichen 45-Dateien-Suche) und enthielt `origin/main` (`cbb845d`)
+bereits vollständig — kein Merge nötig. `npm ci` (frisch), Baseline
+bestätigt: `npx vitest run` (57 Testdateien, 322 Tests, alle grün),
+`npm run lint` (0 Fehler, nur die drei vorbestehenden
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich) — identisch
+zur im letzten Eintrag dokumentierten Baseline.
+
+**Eigene, unabhängige Prüfung:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` durchgesehen — alle verbleibenden
+offenen Top-Level-Punkte (2.0 Auth/Backend, 4.1-4.3 Base44/Gemini-
+Credentials, 5.7/6.2/6.6/6.7/7.4/7.12 fehlendes Datenmodell oder
+Architekturentscheidung, 8.x größere Feature-Blöcke) sind unverändert
+blockiert oder zu groß für einen einzelnen autonomen Punkt.
+`reports/it-chef.md` und `reports/support-chef.md` (beide 17.09.) erneut
+gelesen: die dort gemeldeten offenen Punkte (Reiseentwuerfe "Abschließen"
+ohne Rückfrage — zwei gleichwertige Lösungen ohne Vorentscheidung;
+Hilfe-Seite ohne echte Kontaktadresse) sind unverändert nicht autonom
+umsetzbar (Kriterium 3 verletzt bzw. erfundene Daten nötig); der
+gemeldete Fund 1 (doppelte `aria-label`s bei Duplikaten) ist bereits
+seit `b07e3aa` behoben.
+
+Zusätzlich einen Explore-Agenten unabhängig auf die Suche nach einem
+neuen Parität-/Logik-/Barrierefreiheits-Bug angesetzt, mit explizitem
+Ausschluss der schon bekannten, nicht geeigneten Kandidaten, diesmal
+gezielt auf Bereiche, die die gestrige 45-Dateien-Suche vermutlich
+weniger abgedeckt hat (UI-Primitive in `src/components/ui/`, Test-
+Abdeckungslücken zwischen Geschwister-Komponenten, zuletzt oft
+geänderte Dateien, doppelte Formatierungslogik).
+
+**Fund:** `src/components/ui/dialog.tsx` bekam am 15.09.
+(`2d0f024`) einen `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback in
+`DialogContent`: Beim Öffnen wird das zuvor fokussierte Element
+gemerkt; beim Schließen bekommt es den Fokus zurück, falls es noch im
+DOM existiert, sonst wandert der Fokus stattdessen zur Seiten-`<h1>` —
+verhindert, dass der Fokus auf `<body>` strandet, wenn z. B. eine
+Löschbestätigung das Element entfernt, das den Dialog geöffnet hat.
+`src/components/ui/sheet.tsx`s `SheetContent` (genutzt von
+`MobileNav.tsx`, 3.3) wickelt exakt dieselbe Radix-Primitive
+(`Dialog as SheetPrimitive` aus `radix-ui`) in identischer Struktur
+(Portal → Overlay → Content → optionaler Close-Button), hatte diesen
+Fallback aber nie bekommen — dieselbe Fokus-Strandungs-Lücke, bisher
+unbemerkt, weil `MobileNav.tsx` sein Trigger-Element nie aus dem DOM
+entfernt. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine Fokus-Verwaltung in
+einer UI-Primitive), keine offene Architekturentscheidung (Verhalten
+durch `DialogContent` bereits exakt festgelegt, mechanisch 1:1
+übertragbar auf eine strukturell identische Schwester-Komponente),
+klar umrissen (derselbe Block Code, dieselbe Radix-Primitive), objektiv
+prüfbar (Regressionstest analog `dialog.test.tsx`s
+`RemovableListHarness`).
+
+**Fix:** `src/components/ui/sheet.tsx`s `SheetContent` bekommt denselben
+`openerRef` + `onOpenAutoFocus`/`onCloseAutoFocus`-Block wie
+`DialogContent`, wortgleich übernommen (inkl. Kommentar). Neue
+`src/components/ui/sheet.test.tsx` (2 Tests, 1:1 nach
+`dialog.test.tsx`s `RemovableListHarness`, aber mit `SheetContent
+side="left"` und dessen eingebautem Schließen-Button statt eines
+separaten Abbrechen-Buttons): Fokus landet auf der `<h1>`, wenn
+Bestätigen das öffnende Element entfernt; Fokus kehrt beim Schließen
+weiterhin zum Auslöser zurück, wenn der noch existiert.
+
+**Geprüft:** `npx vitest run src/components/ui/sheet.test.tsx` (gezielt,
+2 Tests grün, beide neu), danach volle Suite `npx vitest run`
+(58 Testdateien, 324 Tests, davon 2 neu — alle grün), `npm run lint`
+(0 Fehler, nur die drei vorbestehenden Warnungen in unveränderten
+Dateien), `npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/components/ui/sheet.tsx` (Fix), `src/components/ui/sheet.test.tsx`
+(neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, dritter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `03a1e6b`
+(sheet.tsx-Fokus-Fix aus dem vorigen Lauf) und war gegenüber
+`origin/main` (`8a15d00`) um zehn Commits zurück (Marketing-/Support-/
+IT-Chef-Berichte vom 18.09. sowie deren gemergte `/auto`-Branches) —
+`main` selbst enthielt umgekehrt keine neuen Programmierungs-Änderungen,
+nur Berichte/Log-Dateien. `origin/main` sauber in `it-chef/auto`
+gemergt (keine Konflikte). `npm ci` (diesmal ohne Registry-Ausfall),
+danach Baseline bestätigt: `npx vitest run` (58 Testdateien, 326 Tests,
+alle grün), `npm run lint` (0 Fehler, drei vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Eigene Prüfung:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+durchgesehen — die verbleibenden offenen Top-Level-Punkte sind
+unverändert blockiert oder zu groß für einen einzelnen autonomen Punkt.
+Den frisch gemergten `reports/support-chef.md` (18.09.) gelesen: dessen
+Vorschlag 1 ist ein direkter Anschlussfehler an den im vorigen Lauf
+gemergten `sheet.tsx`-Fokus-Fix und erfüllt alle vier
+Sicherheitskriterien — kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine Fokus-Verwaltung), keine offene Architektur-
+entscheidung (das gewünschte Verhalten ist im Bericht exakt
+beschrieben: nach echter Navigation zur neuen Seite springen, bei
+Schließen ohne Navigation weiterhin zum Auslöser zurückkehren), klar
+umrissen (zwei benannte Dateien, eine konkrete Ursache), objektiv
+prüfbar (Fokusziel per Regressionstest feststellbar). Die übrigen drei
+Vorschläge des Berichts unverändert nicht autonom umsetzbar: Vorschlag 2
+(doppelte aria-labels) ist bereits seit `b07e3aa` behoben, Vorschlag 3
+("Abschließen" ohne Rückfrage) verletzt weiterhin Kriterium 3 (zwei
+gleichwertige Lösungsansätze ohne Vorentscheidung), Vorschlag 4
+(Hilfe-Seite ohne Kontaktweg) bräuchte erfundene Kontaktdaten.
+
+**Fund/Fix:** `src/components/layout/MobileNav.tsx` schließt das Menü
+bei jedem Klick auf einen `NavLink` zusätzlich zur Navigation
+(`onClick={() => setOpen(false)}`). Weil der Hamburger-Knopf als
+`SheetTrigger` nach jedem Seitenwechsel im DOM bleibt, griff der im
+vorigen Lauf ergänzte Fokus-Fallback aus `sheet.tsx` und schickte den
+Fokus beim Schließen unbedingt zurück zum Knopf — die neu geladene
+Seite (und ihre `<h1>`) wurde nie erreicht. Fix: `sheet.tsx` exportiert
+die bisher rein interne Fokus-auf-`<h1>`-Hilfsfunktion jetzt zusätzlich
+als `focusPageHeading()` (keine Verhaltensänderung an `SheetContent`
+selbst, nur Extraktion). `MobileNav.tsx` merkt sich per `navigatedRef`
+(einem `useRef`), ob das aktuelle Schließen durch einen echten
+Navigationsklick ausgelöst wurde, und übergibt `SheetContent` ein
+eigenes `onCloseAutoFocus`: bei gesetztem `navigatedRef` wird der
+generische Trigger-Fallback per `event.preventDefault()` übersprungen
+und direkt `focusPageHeading()` aufgerufen; sonst (Escape,
+Overlay-Klick, X-Knopf) läuft `sheet.tsx`s bestehender Fallback
+unverändert weiter und kehrt zum Hamburger-Knopf zurück. Zwei neue
+Regressionstests in `MobileNav.test.tsx` (Muster analog
+`sheet.test.tsx`s `RemovableListHarness`, hier mit einer simulierten
+Seiten-`<h1>` neben `MobileNav`): Fokus landet nach einem Klick auf
+einen Navigationslink auf der `<h1>`; Fokus kehrt beim Schließen ohne
+Navigation (Klick auf den Schließen-Button) weiterhin zum
+Hamburger-Knopf zurück.
+
+**Geprüft:** `npx vitest run src/components/layout/MobileNav.test.tsx
+src/components/ui/sheet.test.tsx` (gezielt, 8 Tests grün, davon 2 neu —
+ein erster Testlauf ohne `menuButton.focus()` vor dem Öffnen schlug
+beim "Schließen ohne Navigation"-Test fehl, weil `openerRef` in diesem
+Fall nie den Knopf als `document.activeElement` erfasste; nach
+Ergänzung von `menuButton.focus()`, analog dem bereits etablierten
+Muster in `sheet.test.tsx`, grün), danach volle Suite `npx vitest run`
+(58 Testdateien, 326 Tests, davon 2 neu — alle grün), `npm run lint`
+(0 Fehler, jetzt vier statt drei vorbestehende
+`react-refresh/only-export-components`-Warnungen — dieselbe, bereits in
+`badge.tsx`/`button.tsx`/`tabs.tsx` tolerierte Warnungsklasse, ausgelöst
+durch den neuen `focusPageHeading`-Export neben den Sheet-Komponenten
+in derselben Datei, keine neue Fehlerklasse), `npm run build` (`tsc -b
+&& vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/ui/sheet.tsx` (Helper extrahiert und
+exportiert), `src/components/layout/MobileNav.tsx` (Fix),
+`src/components/layout/MobileNav.test.tsx` (zwei neue Tests),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-18 (weiterer autonomer Tagesmodus-Lauf, vierter Lauf desselben Tages)
+
+**Ausgangslage:** Erneuter geplanter Lauf desselben Tages, frischer,
+isolierter Checkout. `origin/it-chef/auto` stand bei `7b2cf09`
+(MobileNav.tsx-Fokus-Fix aus dem vorigen Lauf) und war identisch mit
+`origin/main` (`8a15d00`, `git merge origin/main` meldete "Already
+up to date") — die drei neuesten Commits auf `main` seit dem letzten
+Lauf sind ausschließlich Berichte (IT-Chef: gezielte 19-Dateien-Suche
+ohne neuen Fund; Marketing-Chef: keine neue Produkt-Codeänderung;
+Support-Chef: kein neuer Code, drei bereits bekannte Punkte
+unverändert). `npm ci` lief diesmal ohne Registry-Ausfall durch.
+Baseline bestätigt: `npx vitest run` (58 Testdateien, 326 Tests, alle
+grün), `npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Eigene Prüfung:** `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (alle 18.09.) gelesen — keiner enthält einen
+neuen, noch nicht behobenen oder bereits als nicht-autonom eingestuften
+Kandidaten (Support-Chef-Vorschlag 1 ist bereits seit dem vorigen Lauf
+behoben, Vorschlag 2 seit `b07e3aa`, Vorschlag 3 verletzt weiterhin
+Kriterium 3, Vorschlag 4 bräuchte erfundene Kontaktdaten). Zusätzlich
+einen Explore-Agenten unabhängig auf die Suche nach einem neuen
+Parität-/Validierungs-/Robustheits-Bug angesetzt, mit explizitem
+Ausschluss der bereits bekannten, nicht geeigneten Kandidaten und Fokus
+auf Bereiche, die frühere Läufe vermutlich weniger abgedeckt haben
+(Eingabevalidierung numerischer Felder, ungeschützter
+localStorage-/JSON-Zugriff, Aria-Label-Paritäten).
+
+**Fund:** `clampGuestCount()` (`src/components/search/HotelWizard.tsx:11-14`,
+Felder "Zimmer"/"Gäste") und `clampPassengerCount()`
+(`src/components/search/FlightWizard.tsx:23-26`, Feld "Passagiere") — am
+04.09. (einunddreißigster Lauf) eingeführt, um `NaN` bei
+nicht-numerischer Eingabe abzufangen — schützten seither nur gegen `NaN`
+und Werte außerhalb 1-9, nicht aber gegen Nachkommazahlen:
+`Number('1.5')` ist kein `NaN`, `Math.min(9, Math.max(1, 1.5))` liefert
+`1.5` unverändert zurück. Ein eingetipptes oder eingefügtes "1.5"/"2.9"
+blieb dadurch dauerhaft als Bruchzahl im jeweiligen Feld stehen, obwohl
+`min={1}`/`max={9}` auf den Feldern sowie der Funktionsname selbst
+("Count") eine ganze Zahl klar als beabsichtigtes Verhalten festlegen —
+kein neuer Interpretationsspielraum, rein mechanische Lücke im
+bestehenden Schutz. Erfüllt alle vier Sicherheitskriterien: kein Bezug
+zu Auth/Zahlungen/Nutzerdaten/Rechtstexten (reine Formularvalidierung in
+einem Demo-Such-Wizard), keine offene Architekturentscheidung
+(Verhalten bereits durch die bestehende Funktion/Attribute festgelegt),
+klar umrissen (zwei strukturell identische Hilfsfunktionen, eine
+mechanische Ergänzung), objektiv prüfbar (Regressionstest analog den
+bestehenden NaN-/Clamp-Tests).
+
+**Fix:** Beide Hilfsfunktionen runden den geparsten Wert jetzt vor dem
+Clamp zusätzlich mit `Math.round` — exakt dieselbe Stelle wie der
+bestehende `NaN`-Schutz, keine Verhaltensänderung für bereits gültige
+ganzzahlige Eingaben. Zwei neue Regressionstests
+(`HotelWizard.test.tsx`, `FlightWizard.test.tsx`): "1.5" wird zu 2
+gerundet, "2.4" wird zu 2 gerundet — vor dem Fix durch temporäres
+Zurücknehmen der Quelländerung (`git stash` nur der beiden `.tsx`-Dateien)
+reproduzierbar rot verifiziert (`toHaveValue(2)` erhielt `1.5`).
+
+**Geprüft:** `npx vitest run src/components/search/HotelWizard.test.tsx
+src/components/search/FlightWizard.test.tsx` (gezielt, 12 Tests grün,
+davon 2 neu), danach volle Suite `npx vitest run` (58 Testdateien, 328
+Tests, davon 2 neu — alle grün), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden Warnungen), `npm run build` (`tsc -b &&
+vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/HotelWizard.tsx`,
+`src/components/search/FlightWizard.tsx` (Fix), `HotelWizard.test.tsx`,
+`FlightWizard.test.tsx` (je ein neuer Test), `ZEITPLAN.md` (Eintrag
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-20 (autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout.
+`origin/it-chef/auto` stand bei `5e8b07e` (Rundungs-Fix vom 18.09.) und
+war identisch mit `origin/main` — kein Merge nötig, `main` blieb
+unberührt. `npm ci` lief ohne Probleme durch. Baseline bestätigt:
+`npx vitest run` (58 Testdateien, 329 Tests, alle grün), `npm run lint`
+(0 Fehler, vier vorbestehende `react-refresh/only-export-components`-
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Ausgewählter Punkt:** `reports/support-chef.md` (18.09., Vorschlag 3)
+gelesen: der "Abschließen"-Button in `src/pages/Reiseentwuerfe.tsx`
+setzte den Status einer Entwurfskarte bisher sofort und endgültig, ohne
+Rückfrage — anders als "Löschen" auf derselben Karte, das seit dem
+17.09.-Lauf bereits über den etablierten Bestätigungsdialog
+(`pendingRemoval`-State + `Dialog`) abgesichert ist. Beide Buttons
+stehen direkt nebeneinander und unterscheiden sich nur durchs Icon.
+Vorschlag 2 desselben Berichts (doppelte aria-labels nach dem
+Duplizieren) ist bereits seit dem 17.09.-Lauf behoben, Vorschlag 1
+(MobileNav-Fokus) seit `7b2cf09` — im aktuellen Code gegen die Datei
+verifiziert. Vorschlag 4 (Hilfe-Seite) bewusst nicht aufgegriffen: laut
+`ZEITPLAN.md` (12.09.-Eintrag) bräuchte ein echter Kontakthinweis eine
+tatsächlich existierende Support-Adresse, die es im Code noch nicht
+gibt — eine autonom erfundene Adresse wäre keine reine Korrektur,
+sondern eine Annahme über nicht vorhandene Fakten (Kriterium 3
+verletzt).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (rein lokaler Demo-Zustand in einer
+Formularkarte). Keine offene Architektur-/Produktentscheidung — das
+Bestätigungsdialog-Muster ist über Löschen auf sechs weiteren Seiten
+(Preisalarme, Favoriten, Angebote, Aktivitäten, Warenkorb, jetzt
+Reiseentwürfe) sowie "Neu starten" im Chat und die Aktivitäts-Entfernung
+in `EditMode.tsx` bereits fest etabliert. Klar umrissen (exakt derselbe
+Dialog wie beim Löschen daneben, eine mechanische Ergänzung ohne neue
+Interpretation). Objektiv prüfbar (Regressionstest analog den
+bestehenden Löschen-Tests).
+
+**Fix:** Neuer `pendingFinalize`-State in `Reiseentwuerfe.tsx`, exakt
+nach dem Muster von `pendingRemoval`. Der "Abschließen"-Button setzt
+jetzt `pendingFinalize` statt `finalizeDraft()` direkt aufzurufen; ein
+zweiter `Dialog` ("Entwurf abschließen?"/"Der Entwurf für {destination}
+wird abgeschlossen. Das lässt sich nicht rückgängig machen."/
+"Abbrechen"/"Ja, abschließen") neben dem bestehenden Löschen-Dialog,
+`variant="destructive"` auf dem Bestätigen-Button analog dem "Neu
+starten?"-Dialog in `KiChat.tsx` (ebenfalls eine irreversible, aber
+nicht datenlöschende Aktion). Zwei bestehende Tests in
+`Reiseentwuerfe.test.tsx`, die bisher direkt auf den Abschließen-Klick
+prüften, um den zusätzlichen Bestätigungsklick ergänzt; ein neuer Test
+prüft, dass der Dialog vor jeder Statusänderung erscheint und
+"Abbrechen" den Entwurf unverändert "In Bearbeitung" lässt.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx`
+(gezielt, 11 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (58 Testdateien, 330 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (zwei Tests angepasst, ein neuer
+Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge
+ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-20 (autonomer Tagesmodus-Lauf, weiterer Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `it-chef/auto` stand bereits bei `4123ccc`
+(Abschließen-Bestätigungsdialog vom ersten Lauf heute) und war identisch
+mit `origin/main` — kein Merge nötig, `main` blieb unberührt. `npm ci`
+lief ohne Probleme durch. Baseline bestätigt: `npx vitest run` (58
+Testdateien, 329 Tests, alle grün), `npm run lint` (0 Fehler, vier
+vorbestehende Warnungen), `npm run build` (kein Typfehler, Build
+erfolgreich).
+
+**Ausgewählter Punkt:** Da die vier support-chef-Vorschläge vom 18.09.
+bereits alle behandelt waren (drei behoben, einer — Hilfe-Seite —
+bewusst zurückgestellt, da eine echte Kontaktadresse fehlt), per
+Explore-Agent gezielt nach einem weiteren, strukturell ähnlichen Fund
+gesucht (Parität zwischen ähnlichen Komponenten, fehlende
+Testabdeckung, wiederkehrende Bug-Muster aus früheren Läufen). Fund:
+`src/components/trip/EditMode.tsx` (Zeilen 73-89) bildet das
+`aria-label` von Preis-Input und Entfernen-Button jeder Aktivität nur
+aus `activity.name` — `addActivity()` prüft nicht auf Eindeutigkeit,
+zwei gleichnamige Aktivitäten (z. B. zweimal "Spaziergang") sind für
+Screenreader-Nutzer:innen nicht mehr auseinanderzuhalten. Exakt derselbe
+Fund/dieselbe Ursache wie bei `Reiseentwuerfe.tsx` (17.09., support-chef
+Vorschlag 1) — dieselbe strukturelle Form (nach `id` geschlüsselte
+Liste, Label nur aus frei getipptem Namen, Aktions-Buttons pro Zeile),
+aber die dort bereits gebaute Lösung war für `EditMode.tsx` nie
+nachgezogen worden.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Beschriftung in
+einem Aktivitäten-Editor). Keine offene Architektur-/Produktentscheidung
+— mechanische Wiederverwendung eines bereits im selben Repo für exakt
+dasselbe Problem gebauten und verifizierten Musters
+(`hasDuplicates`/`occurrence`-Suffix). Klar umrissen (Namenskollision im
+Code objektiv sichtbar, keine eigene Interpretation nötig). Objektiv
+prüfbar (Regressionstest mit zwei gleichnamigen Aktivitäten, analog dem
+bestehenden Reiseentwürfe-Test).
+
+**Fix:** In `EditMode.tsx` denselben `hasDuplicates`/`occurrence`-Ansatz
+wie in `Reiseentwuerfe.tsx` übernommen, basierend auf `activity.name`
+statt `draft.destination`. Bei Namensduplikaten wird "(Eintrag N)" an
+beide Labels (`Preis für {label}`, `{label} entfernen`) angehängt,
+eindeutige Namen bleiben unverändert. Vor dem Fix reproduzierbar rot
+verifiziert (`git stash` nur der Quelländerung in `EditMode.tsx`, neuer
+Test schlug mit "Unable to find a label with the text of: ..." fehl).
+
+**Geprüft:** `npx vitest run src/components/trip/EditMode.test.tsx`
+(gezielt, 12 Tests grün, davon 1 neu), danach volle Suite
+`npx vitest run` (58 Testdateien, 330 Tests, davon 1 neu — alle grün),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden
+Warnungen), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Commit:** `src/components/trip/EditMode.tsx` (Fix),
+`src/components/trip/EditMode.test.tsx` (ein neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout.
+`origin/it-chef/auto` stand bei `6a12606` (aria-label-Fix in
+`EditMode.tsx` vom 20.09.) und war identisch mit `origin/main` — kein
+Merge nötig, `main` blieb unberührt. `npm ci` lief ohne Probleme durch.
+Baseline bestätigt: `npx vitest run` (58 Testdateien, 330 Tests, alle
+grün), `npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten keinen neuen, eindeutig umsetzbaren offenen Punkt mehr, der
+alle vier Sicherheitskriterien erfüllt (die meisten offenen Punkte sind
+entweder durch Base44/Gemini-Zugangsdaten blockiert oder erfordern eine
+Produkt-/Architekturentscheidung, die Ni treffen muss). Zwei
+Explore-Agenten haben deshalb gezielt nach einem weiteren,
+strukturell abgesicherten Fund gesucht (dasselbe Vorgehen wie beim
+"weiteren Lauf" am 20.09.): der erste prüfte, ob das
+Duplikat-aria-label-Muster (`Reiseentwuerfe.tsx`/`EditMode.tsx`) noch an
+anderer Stelle unbehoben ist — Ergebnis: nein, `Favoriten.tsx`,
+`Angebote.tsx`, `Preisalarme.tsx`, `Aktivitaeten.tsx` und
+`Warenkorb.tsx` sind alle reine Entfernen-Listen mit fest verdrahteten
+Demo-Daten ohne Erstellungspfad, Namenskollisionen sind dort im
+aktuellen Code gar nicht möglich. Der zweite Agent hat vier weitere
+Winkel geprüft (fehlende Bestätigungsdialoge, Rundungs-/Clamp-Paritäten
+bei Zahleneingaben, Prop-Paritäten zwischen Geschwister-Komponenten,
+Fokus-/aria-live-Lücken im Chat) und einen bestätigten Fund gemeldet.
+
+Fund: Der "Travix denkt nach …"-Ladehinweis in `KiChat.tsx`
+(`isThinking`-Block, Zeile 171-176) und der identische, duplizierte
+Block in `Urlaubsmodus.tsx` (Zeile 52-57) hatten kein `role="status"` —
+obwohl `KiChat.tsx`s eigener `storageWarning`-Hinweis nur zehn Zeilen
+darüber (Zeile 160-164) exakt dieses Muster für dieselbe Art von Inhalt
+(kurzlebiger, dynamisch erscheinender Statustext) bereits verwendet,
+ebenso `ChatInput.tsx`, `Buchung.tsx`, `Hotelsuche.tsx` und
+`Flugsuche.tsx`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Auszeichnung eines
+Ladehinweises). Keine offene Architektur-/Produktentscheidung —
+mechanische Wiederverwendung eines im selben Code (`KiChat.tsx`, Zeile
+161) bereits etablierten und verifizierten Musters (`role="status"` für
+transiente Statustexte), keine eigene Interpretation nötig. Klar
+umrissen (zwei strukturell identische Textblöcke, ein Attribut
+ergänzen). Objektiv prüfbar (Regressionstest mit `getByRole('status')`,
+analog den bestehenden `storageWarning`-Tests).
+
+**Fix:** `role="status"` auf den `isThinking`-Block in `KiChat.tsx`
+sowie den identischen Block in `Urlaubsmodus.tsx` ergänzt — reine
+Attribut-Ergänzung, keine Verhaltensänderung für sehende Nutzer:innen.
+Vor dem Fix reproduzierbar rot verifiziert (`git stash` nur der beiden
+`.tsx`-Quelländerungen, beide neuen/angepassten Tests schlugen danach
+mit "Unable to find an accessible element with the role of: status"
+fehl).
+
+**Geprüft:** `npx vitest run src/components/chat/KiChat.test.tsx
+src/pages/Urlaubsmodus.test.tsx` (gezielt, 17 Tests grün, davon 1 neu
+und 1 angepasst), danach volle Suite `npx vitest run` (58 Testdateien,
+332 Tests, davon 2 neu — alle grün), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/chat/KiChat.tsx`, `src/pages/Urlaubsmodus.tsx`
+(Fix), `src/components/chat/KiChat.test.tsx` (ein neuer Test),
+`src/pages/Urlaubsmodus.test.tsx` (ein Test angepasst), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, weiterer Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `origin/it-chef/auto` stand bei `67b9bdb`
+(`role="status"`-Fix für `KiChat.tsx`/`Urlaubsmodus.tsx` vom ersten
+Lauf heute) und war identisch mit `origin/main` — kein Merge nötig,
+`main` blieb unberührt. `npm ci` lief ohne Probleme durch. Baseline
+bestätigt: `npx vitest run` (58 Testdateien, 332 Tests, alle grün),
+`npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten weiterhin keinen neuen, eindeutig umsetzbaren offenen Punkt,
+der alle vier Sicherheitskriterien erfüllt. Zwei parallele
+Explore-Agenten haben deshalb erneut gezielt nach einem weiteren,
+strukturell abgesicherten Fund gesucht, mit klar getrennten Suchwinkeln:
+der eine prüfte fehlende Bestätigungsdialoge vor irreversiblen Aktionen,
+fehlende `role="status"`/`role="alert"`-Paritäten, kaputte interne Links
+und Datums-/Preis-Logikfehler; der andere prüfte Numerik-Input-Paritäten
+(Zimmer/Gäste/Passagiere), Geschwister-Komponenten-Paritäten über
+Favoriten/Preisalarme/Angebote/Aktivitaeten/Warenkorb sowie erneut das
+Duplikat-aria-label-Muster.
+
+Der zweite Agent bestätigte den bereits im ersten Lauf heute
+dokumentierten Befund erneut: `Preisalarme.tsx`, `Warenkorb.tsx`,
+`Angebote.tsx`, `Aktivitaeten.tsx` und `Favoriten.tsx` haben zwar
+technisch dasselbe unbehandelte Duplikat-aria-label-Muster wie
+`Reiseentwuerfe.tsx`/`EditMode.tsx`, aber alle fünf sind reine
+Entfernen-Listen mit fest verdrahteten Demo-Daten ohne
+Erstellungs-/Duplizierpfad — eine Namenskollision ist im aktuellen Code
+gar nicht erzeugbar (per Grep verifiziert: keines der fünf Files hat
+einen "Hinzufügen"/"Duplizieren"-Handler). Ein Fix dort wäre reine
+Vorsorge für ein Szenario, das mit dem heutigen Code nicht eintreten
+kann — anders als bei `Reiseentwuerfe.tsx` (aktiver
+"Duplizieren"-Button) und `EditMode.tsx` (freies Textfeld ohne
+Eindeutigkeitsprüfung), wo der Fund live reproduzierbar war. Deshalb
+nicht umgesetzt, um keinen erfundenen/nicht objektiv nötigen Fix
+einzubauen.
+
+Der erste Agent fand einen live reproduzierbaren, strukturell
+identischen Anschlussfund an den heute bereits gefixten
+`isThinking`-Block: `src/components/search/FlightResults.tsx`
+(Zeile 16-22), `src/components/search/HotelResults.tsx` (Zeile 17-23)
+und `src/components/search/TrainResults.tsx` (Zeile 14-20) zeigen beim
+Laden alle denselben Textblock ("Travix sucht echte Flüge …" /
+"… echte Unterkünfte …" / "… nach Zug-, Bus- und Fährverbindungen …")
+mit `TravixAvatar` — exakt dieselbe Art von kurzlebigem, dynamisch
+erscheinendem Statustext wie der `isThinking`-Block, dem der erste Lauf
+heute genau deswegen `role="status"` gegeben hat. `FlightResults` und
+`HotelResults` liegen in `KiChat.tsx` (Zeile 179/183) sogar unmittelbar
+unter diesem Block, ohne selbst `role="status"` zu haben.
+`TrainResults.tsx` ist strukturell identisch, aber noch nicht in eine
+Seite eingebunden (5.7 weiterhin offen) — aus Konsistenz mit den zwei
+anderen, live genutzten Komponenten trotzdem mitgefixt, da exakt
+dieselbe Codeform.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Auszeichnung von
+Ladehinweisen). Keine offene Architektur-/Produktentscheidung —
+mechanische Wiederverwendung des im selben Lauf bereits verifizierten
+`role="status"`-Musters, keine eigene Interpretation nötig. Klar
+umrissen (drei strukturell identische Textblöcke, ein Attribut
+ergänzen). Objektiv prüfbar (Regressionstest mit `getByRole('status')`,
+analog den heute bereits gebauten Tests für `KiChat.tsx`/
+`Urlaubsmodus.tsx`).
+
+**Fix:** `role="status"` auf den Ladehinweis-`div` in `FlightResults.tsx`,
+`HotelResults.tsx` und `TrainResults.tsx` ergänzt — reine
+Attribut-Ergänzung, keine Verhaltensänderung für sehende Nutzer:innen.
+Vor dem Fix reproduzierbar rot verifiziert (`git stash` nur der drei
+`.tsx`-Quelländerungen, alle drei neuen Tests schlugen danach mit
+"Unable to find an accessible element with the role of: status" fehl).
+
+**Geprüft:** `npx vitest run src/components/search/FlightResults.test.tsx
+src/components/search/HotelResults.test.tsx
+src/components/search/TrainResults.test.tsx` (gezielt, 17 Tests grün,
+davon 3 neu), danach volle Suite `npx vitest run` (58 Testdateien, 335
+Tests, davon 3 neu — alle grün), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/FlightResults.tsx`,
+`src/components/search/HotelResults.tsx`,
+`src/components/search/TrainResults.tsx` (Fix),
+`src/components/search/FlightResults.test.tsx`,
+`src/components/search/HotelResults.test.tsx`,
+`src/components/search/TrainResults.test.tsx` (je ein neuer Test),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, dritter Lauf)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `origin/it-chef/auto` stand bei `a21ae7c`
+(`role="status"`-Fix für `FlightResults.tsx`/`HotelResults.tsx`/
+`TrainResults.tsx` vom zweiten Lauf heute) und war identisch mit
+`origin/main` — kein Merge nötig, `main` blieb unberührt. `npm ci` lief
+ohne Probleme durch. Baseline bestätigt: `npx vitest run` (58
+Testdateien, 335 Tests, alle grün), `npm run lint` (0 Fehler, vier
+vorbestehende `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten weiterhin keinen neuen, eindeutig umsetzbaren offenen Punkt,
+der alle vier Sicherheitskriterien erfüllt. Zwei parallele
+Explore-Agenten haben deshalb erneut mit klar getrennten Suchwinkeln
+gesucht: der eine prüfte fehlende Bestätigungsdialoge, kaputte interne
+Links, Datums-/Preis-Logikfehler, Typos und fehlende
+`role="alert"`/`aria-live`-Paritäten bei Fehlermeldungen; der andere
+prüfte Prop-/Verhaltens-Paritäten zwischen Geschwister-Komponenten,
+fehlende `aria-label`s bei Icon-Buttons und numerische Edge Cases in
+`src/lib/`-Hilfsfunktionen.
+
+Beide Agenten meldeten je einen bestätigten, live reproduzierbaren
+Fund:
+1. Fehlendes `role="alert"` auf den Fehler-Blöcken in
+   `FlightResults.tsx` (Zeile 27) und `HotelResults.tsx` (Zeile 28) —
+   direkt neben dem im ersten Lauf heute ergänzten `role="status"` im
+   selben Zweig derselben Komponenten, für den Fehler- statt den
+   Lade-Zustand.
+2. `src/pages/Flugsuche.tsx` (Zeile 82) rief `<NoResultsMessage />`
+   ohne `title`-Prop auf und zeigte bei leeren Suchergebnissen deshalb
+   den generischen Default-Text "Keine Ergebnisse gefunden" —
+   `NoResultsMessage.tsx` (Zeile 9) hat genau dafür einen optionalen
+   `title`-Prop, den alle vier strukturell identischen
+   Geschwister-Aufrufstellen (`Hotelsuche.tsx`, `FlightResults.tsx`,
+   `HotelResults.tsx`, `TrainResults.tsx`) bereits explizit setzen.
+
+Fund 2 ausgewählt: einfachere, eindeutig auf eine einzige Datei
+begrenzte Textparität ohne jede Interpretation (der exakte Zieltext
+ergibt sich unmittelbar aus dem Pendant in `Hotelsuche.tsx`), und
+berührt anders als Fund 1 keine der beiden Dateien, die in diesem Lauf
+bereits zweimal heute geändert wurden — hält den Punkt damit sauber von
+den vorherigen zwei Läufen getrennt. Fund 1 (`role="alert"` in
+`FlightResults.tsx`/`HotelResults.tsx`) bleibt als möglicher nächster
+Punkt für einen künftigen Lauf vorgemerkt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Text-/Prop-Parität einer
+Leer-Zustands-Meldung). Keine offene Architektur-/Produktentscheidung —
+mechanische Übernahme eines im selben Code an vier Stellen bereits
+etablierten und verifizierten Musters, keine eigene Interpretation
+nötig. Klar umrissen (eine Zeile, ein Prop ergänzen). Objektiv prüfbar
+(Regressionstest mit `findByText('Keine Flüge gefunden')` plus
+`queryByText('Keine Ergebnisse gefunden')`-Negativprüfung).
+
+**Fix:** `title="Keine Flüge gefunden"` auf `<NoResultsMessage />` in
+`src/pages/Flugsuche.tsx` (Zeile 82) ergänzt — reine Prop-Ergänzung,
+keine sonstige Verhaltensänderung. Vor dem Fix reproduzierbar rot
+verifiziert (`git stash` nur `Flugsuche.tsx`, neuer Test schlug danach
+mit dem sichtbaren generischen Text statt "Keine Flüge gefunden" fehl).
+
+**Geprüft:** `npx vitest run src/pages/Flugsuche.test.tsx` (gezielt, 4
+Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (58
+Testdateien, 336 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, weiterhin dieselben vier vorbestehenden Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Flugsuche.tsx` (Fix), `src/pages/Flugsuche.test.tsx`
+(ein neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

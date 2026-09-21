@@ -105,7 +105,7 @@ describe('Urlaubsmodus – Chat-Interaktion', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Senden' }))
 
     expect(screen.getByText('Welche Währung brauche ich?')).toBeInTheDocument()
-    expect(screen.getByText('Travix denkt nach …')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Travix denkt nach …')
   })
 
   it('shows the fact-based reply after the delay for a curated destination', () => {

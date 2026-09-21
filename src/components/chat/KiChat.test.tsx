@@ -70,6 +70,20 @@ describe('KiChat storage warning', () => {
   })
 })
 
+describe('KiChat thinking indicator', () => {
+  it('announces the thinking state to assistive tech via role="status"', () => {
+    renderKiChat({ isThinking: true })
+
+    expect(screen.getByRole('status')).toHaveTextContent('Travix denkt nach …')
+  })
+
+  it('shows no status role while not thinking', () => {
+    renderKiChat({ isThinking: false })
+
+    expect(screen.queryByText('Travix denkt nach …')).not.toBeInTheDocument()
+  })
+})
+
 describe('KiChat speech synthesis stop', () => {
   it('stops speaking when turning speech output off', () => {
     vi.mocked(stopSpeaking).mockClear()

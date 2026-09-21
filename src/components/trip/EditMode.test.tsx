@@ -117,4 +117,20 @@ describe('EditMode', () => {
 
     expect(onChange).toHaveBeenCalledWith([{ id: '1', name: 'Museum', price: '12 €' }])
   })
+
+  it('gives same-named activities distinguishable labels', () => {
+    renderEditMode([
+      { id: '1', name: 'Spaziergang', price: null },
+      { id: '2', name: 'Spaziergang', price: null },
+      { id: '3', name: 'Museum', price: null },
+    ])
+
+    expect(screen.getByLabelText('Preis für Spaziergang (Eintrag 1)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Preis für Spaziergang (Eintrag 2)')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Spaziergang (Eintrag 1) entfernen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Spaziergang (Eintrag 2) entfernen' })).toBeInTheDocument()
+
+    expect(screen.getByLabelText('Preis für Museum')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Museum entfernen' })).toBeInTheDocument()
+  })
 })

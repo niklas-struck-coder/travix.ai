@@ -41,6 +41,12 @@ describe('FlightResults', () => {
     expect(screen.getByText('Travix sucht echte Flüge …')).toBeInTheDocument()
   })
 
+  it('announces the loading state to assistive tech via role="status"', () => {
+    render(<FlightResults offers={null} errors={[]} loading onSelect={() => {}} />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Travix sucht echte Flüge …')
+  })
+
   it('shows the error message instead of a no-results message when the search failed', () => {
     render(<FlightResults offers={null} errors={[error]} loading={false} onSelect={() => {}} />)
 

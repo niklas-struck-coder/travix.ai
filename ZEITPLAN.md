@@ -274,6 +274,40 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   lässt die Aktivität unverändert), bestehender Entfernen-Test und der
   zugehörige Test in `Buchung.test.tsx` auf den zusätzlichen
   Bestätigungsklick umgestellt.
+  Vom autonomen IT-Chef-Lauf am 21.09. eine Accessibility-Lücke
+  geschlossen: Der "Travix denkt nach …"-Ladehinweis in `KiChat.tsx`
+  (Zeile 171-176) und der identische, duplizierte Block in
+  `Urlaubsmodus.tsx` (Zeile 52-57) hatten kein `role="status"`, obwohl
+  `KiChat.tsx`s eigener `storageWarning`-Hinweis nur zehn Zeilen darüber
+  (Zeile 160-164) genau dieses Muster für exakt dieselbe Art von Inhalt
+  (kurzlebiger, sich dynamisch ändernder Statustext) bereits verwendet —
+  ebenso `ChatInput.tsx`, `Buchung.tsx`, `Hotelsuche.tsx` und
+  `Flugsuche.tsx`. Ohne `role="status"` (implizit `aria-live="polite"`)
+  bekommen Screenreader-Nutzer:innen nicht automatisch mitgeteilt, dass
+  Travix gerade eine Antwort vorbereitet. Fix: `role="status"` auf beide
+  `isThinking`-Blöcke ergänzt, mechanische Übernahme des bereits im
+  selben Code etablierten Musters, keine neue Design-Entscheidung. Zwei
+  neue Regressionstests (`KiChat.test.tsx`: `getByRole('status')` zeigt
+  den Ladehinweis, kein Status-Element ohne `isThinking`;
+  `Urlaubsmodus.test.tsx`: bestehender Test auf `getByRole('status')`
+  umgestellt) — vor dem Fix durch temporäres Zurücknehmen der beiden
+  Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
+  verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (dritter Lauf desselben Tages)
+  eine Textparität nachgezogen: `Flugsuche.tsx` (Zeile 82) rief
+  `<NoResultsMessage />` ohne `title`-Prop auf und zeigte bei leeren
+  Suchergebnissen (`offers.length === 0`, kein Fehler) deshalb den
+  generischen Default-Text "Keine Ergebnisse gefunden" — während das
+  strukturell identische `Hotelsuche.tsx` sowie `FlightResults.tsx`,
+  `HotelResults.tsx` und `TrainResults.tsx` alle explizit einen
+  produktbezogenen Titel setzen ("Keine Unterkünfte/Flüge/Verbindungen
+  gefunden"). Live reproduzierbar über eine Suche ohne Treffer, kein
+  Edge Case. Fix: `title="Keine Flüge gefunden"` ergänzt, mechanische
+  Übernahme des bereits an vier anderen Stellen etablierten Musters,
+  keine neue Design-Entscheidung. Neuer Regressionstest in
+  `Flugsuche.test.tsx` — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `Flugsuche.tsx`) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -563,6 +597,60 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   26h30min-Dauer (`P1DT2H30M`) auf `26h 30min` statt den rohen ISO-String
   prüfen. Der ursprüngliche Auto-Fix-PR #21 bleibt als überholt zurück
   (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 17.09. (weiterer Lauf) die zuletzt am
+  13.09. dokumentierte, verbliebene Testabdeckungslücke geschlossen:
+  `AppShell.tsx` (3.2, Sidebar/MobileNav-Wrapper um jede Route) war die
+  letzte Nicht-`ui/`-Datei ohne eigene Testdatei, die nicht aus einem der
+  beiden dokumentierten Gründe (Router-Mocking-Umfang bei `routes.tsx`,
+  bewusst ungetestete Einstiegspunkte `App.tsx`/`main.tsx`) zurückgestellt
+  war — anders als vermutet, brauchte sie kein zusätzliches
+  Router-Mocking: `Sidebar`/`MobileNav` rendern beide bereits eigenständig
+  unter einem einfachen `MemoryRouter`-Wrapper (siehe deren jeweils
+  bestehende Testdateien), `AppShell` selbst setzt beide nur nebeneinander.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer
+  Bug gefunden. Neue `AppShell.test.tsx` (1 Test, Muster analog
+  `Sidebar.test.tsx`/`MobileNav.test.tsx`): rendert `children` sowie je
+  einen erreichbaren Namen aus Sidebar ("Seitenleiste einklappen") und
+  MobileNav ("Menü öffnen"), um zu bestätigen, dass beide tatsächlich
+  eingebunden sind. `routes.tsx` bleibt aus dem am 13.09. genannten Grund
+  weiterhin offen (Test würde jede eingebundene Seite mitrendern — deutlich
+  größerer, nicht mehr als "ein einzelner, klar abgegrenzter Punkt"
+  einzustufender Umfang).
+  Vom autonomen IT-Chef-Lauf am 18.09. (vierter Lauf desselben Tages) eine
+  Lücke im am 04.09. eingeführten NaN-Schutz nachgezogen: `clampGuestCount()`
+  (`HotelWizard.tsx`, Felder "Zimmer"/"Gäste") und `clampPassengerCount()`
+  (`FlightWizard.tsx`, Feld "Passagiere") schützten bisher nur gegen
+  nicht-numerische Eingaben und Werte außerhalb 1-9, nicht aber gegen
+  Nachkommazahlen — `Number('1.5')` ist kein `NaN`, also gab
+  `Math.min(9, Math.max(1, parsed))` `1.5` unverändert zurück. Ein
+  eingetipptes oder eingefügtes "1.5"/"2.9" blieb dadurch dauerhaft als
+  Bruchzahl in Zimmer-/Gäste-/Passagierzahl stehen, obwohl `min`/`max` auf
+  den Feldern sowie der Name der Hilfsfunktionen eine ganze Zahl von 1-9
+  klar als beabsichtigtes Verhalten festlegen. Fix: beide Hilfsfunktionen
+  runden den geparsten Wert jetzt vor dem Clamp zusätzlich mit `Math.round`,
+  exakt dieselbe Stelle wie der bestehende NaN-Schutz. Zwei neue
+  Regressionstests (`HotelWizard.test.tsx`, `FlightWizard.test.tsx`), die
+  "1.5" auf 2 und "2.4" auf 2 gerundet prüfen — vor dem Fix reproduzierbar
+  rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (weiterer Lauf desselben Tages) das
+  `role="status"`-Muster vom ersten Lauf heute (siehe `KiChat.tsx`/
+  `Urlaubsmodus.tsx` oben) auf die direkt danebenliegenden Ladehinweise in
+  `FlightResults.tsx`, `HotelResults.tsx` und `TrainResults.tsx` erweitert:
+  Alle drei zeigen beim Laden exakt denselben "Travix sucht …"-Textblock
+  mit `TravixAvatar`, aber ohne `role="status"` — obwohl `FlightResults`
+  und `HotelResults` direkt in `KiChat.tsx` (Zeile 179/183) unmittelbar
+  unter dem soeben reparierten `isThinking`-Block liegen und exakt dieselbe
+  Art von kurzlebigem, dynamisch erscheinendem Statustext sind.
+  `TrainResults.tsx` ist zwar noch nicht in eine Seite eingebunden (5.7
+  weiterhin offen), aber strukturell identisch — aus Konsistenz mit
+  gefixt. Fix: `role="status"` auf alle drei Ladehinweis-`div`s ergänzt,
+  mechanische Übernahme desselben, im selben Lauf bereits verifizierten
+  Musters, keine neue Design-Entscheidung. Drei neue Regressionstests
+  (`FlightResults.test.tsx`, `HotelResults.test.tsx`,
+  `TrainResults.test.tsx`: `getByRole('status')` zeigt den jeweiligen
+  Ladehinweis) — vor dem Fix durch temporäres Zurücknehmen der drei
+  Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -1138,6 +1226,47 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `ChatInput.test.tsx` (zweiter Klick stoppt die laufende Instanz statt
   eine neue zu starten; Zustand kehrt nach `onend` zur Ausgangslage
   zurück).
+  Vom autonomen IT-Chef-Lauf am 18.09. (weiterer Lauf) eine
+  Fokus-Parität nachgezogen: `DialogContent` (`src/components/ui/dialog.tsx`)
+  bekam am 15.09. einen `onOpenAutoFocus`/`onCloseAutoFocus`-Fallback, der
+  Fokus nach dem Schließen entweder zum ursprünglichen Auslöser oder,
+  falls der inzwischen aus dem DOM entfernt wurde (z. B. eine
+  Löschbestätigung, deren Karte gerade verschwindet), zur Seiten-`<h1>`
+  bewegt — sonst würde der Fokus auf `<body>` landen. `SheetContent`
+  (`src/components/ui/sheet.tsx`, genutzt von `MobileNav.tsx`, 3.3) ist
+  strukturell identisch (dieselbe Radix-Primitive, Portal/Overlay/Content/
+  Close-Button) und hatte dieselbe Lücke, bisher unbemerkt, weil
+  `MobileNav.tsx` sein Trigger-Element nie entfernt. Jetzt exakt
+  denselben Fallback nach `SheetContent` übertragen. Neue
+  `sheet.test.tsx` (2 Tests, Muster analog `dialog.test.tsx`s
+  `RemovableListHarness`): Fokus landet auf der `<h1>`, wenn Bestätigen
+  das öffnende Element entfernt; Fokus kehrt bei Abbruch weiterhin zum
+  Auslöser zurück.
+  Vom autonomen IT-Chef-Lauf am 18.09. (weiterer Lauf) einen von
+  `reports/support-chef.md` (18.09., Vorschlag 1) gemeldeten
+  Anschlussfehler an genau diesem neuen Fokus-Fallback behoben: Jeder
+  Menüpunkt in `MobileNav.tsx` (3.3) schließt beim Klick zusätzlich zur
+  Navigation das Menü (`SheetContent`s Schließen-Vorgang) — weil der
+  Hamburger-Knopf als `SheetTrigger` nach jedem Seitenwechsel im DOM
+  bleibt, griff der eben ergänzte Fokus-Fallback aus `sheet.tsx` und
+  schickte den Fokus beim Schließen zurück zum Knopf statt zur `<h1>` der
+  neu geladenen Seite. Wer per Tastatur oder Screenreader z. B. von
+  "Aktivitäten" zu "Warenkorb" wechselt, musste sich nach jedem
+  Menüpunkt erneut durch Kopfzeile und Menü zur eigentlichen Seite
+  vorarbeiten. Fix: exakt der im Bericht vorgeschlagene Ansatz — beim
+  Klick auf einen `NavLink` wird jetzt zusätzlich ein `navigatedRef`
+  gesetzt; `MobileNav.tsx` übergibt `SheetContent` ein eigenes
+  `onCloseAutoFocus`, das bei gesetztem `navigatedRef` den generischen
+  Trigger-Fallback per `event.preventDefault()` überspringt und
+  stattdessen direkt zur Seiten-`<h1>` springt (dafür exportiert
+  `sheet.tsx` die bisher interne Fokus-Hilfsfunktion jetzt als
+  `focusPageHeading()`, damit sie nicht dupliziert werden muss). Reine
+  Schließen-ohne-Navigation-Fälle (Escape, Overlay-Klick, X-Knopf)
+  kehren unverändert zum Hamburger-Knopf zurück, da dort kein
+  `navigatedRef` gesetzt wird. Zwei neue Regressionstests in
+  `MobileNav.test.tsx`: Fokus landet nach einem Navigationslink auf der
+  `<h1>` der neuen Seite; Fokus kehrt beim Schließen ohne Navigation
+  weiterhin zum Menü-Button zurück.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
@@ -1147,7 +1276,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] 4.3 Echter `invokeLLM.ts`-Wrapper — ersetzt `mockAdvisor.ts`
 - [x] 5.4 `TrainCard.tsx` (Zug/Bus/Fähre-Verbindung) — Kartenkomponente steht,
   inkl. `src/types/trains.ts` (`TrainOffer`); noch nicht in KI-Chat
-  eingebunden (5.7 offen)
+  eingebunden (5.7 offen). Vom autonomen IT-Chef-Lauf am 18.09. einen
+  Paritäts-Fund behoben: Anders als `FlightCard`/`HotelCard` hatte
+  `TrainCard` keine `selected`-Prop — der "Auswählen"-Button blieb nach
+  einer Auswahl unverändert aktiv klickbar, ohne "Ausgewählt"-Zustand
+  oder Check-Icon. Fix 1:1 nach demselben, in beiden anderen Karten
+  bereits etablierten Muster: neue `selected?: boolean`-Prop,
+  `disabled={selected}` am Button, Inhalt schaltet bedingt auf
+  `<Check /> Ausgewählt` um. Betrifft aktuell noch keine echte Nutzerin
+  (5.7 weiterhin offen, `TrainCard` noch nirgends live eingebunden),
+  aber die Komponente selbst ist jetzt konsistent mit den anderen beiden
+  und bereit für die spätere Einbindung. Neuer Regressionstest in
+  `TrainCard.test.tsx` (analog zum bestehenden `FlightCard.test.tsx`-Test
+  für denselben Zustand).
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —
@@ -1359,6 +1500,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   beim Drücken von Enter `addActivity()` aus, mit derselben
   Leer-Namen-Schutzbedingung wie der bestehende Button. Drei neue
   Tests in `EditMode.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 20.09. (weiterer Lauf) einen
+  eigenständig gefundenen Barrierefreiheits-Fund behoben (per
+  Explore-Agent gezielt gesucht, gegen den Code verifiziert): Preis-Input
+  und Entfernen-Button jeder Aktivität bildeten ihr `aria-label` nur aus
+  `activity.name` — `addActivity()` prüft nicht auf Eindeutigkeit, zwei
+  gleichnamige Aktivitäten (z. B. zweimal "Spaziergang") waren für
+  Screenreader-Nutzer:innen nicht mehr auseinanderzuhalten. Derselbe
+  Fund/dieselbe Fix-Idee wie bei den Reiseentwürfen (17.09.). Fix: analog
+  `Reiseentwuerfe.tsx` bei Namensduplikaten "(Eintrag N)" an beide Labels
+  angehängt, eindeutige Namen bleiben unverändert. Vor dem Fix
+  reproduzierbar rot verifiziert (`git stash` nur der Quelländerung, neuer
+  Test schlug fehl). Neuer Regressionstest in `EditMode.test.tsx` (zwei
+  gleichnamige plus eine eindeutig benannte Aktivität, alle vier Labels
+  unterscheidbar).
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
@@ -1413,6 +1568,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zusätzlichen Bestätigungsklick umgestellt, neuer Test ergänzt (Klick auf
   "löschen" öffnet die Bestätigung; "Abbrechen" lässt den Entwurf
   unverändert).
+  Vom autonomen IT-Chef-Lauf am 17.09. (vierter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (17.09., Vorschlag 1) gemeldeten Fund
+  behoben: Nach "Duplizieren" (`duplicateDraft()`) trugen Original und
+  Kopie exakt dasselbe `aria-label` (bisher nur aus `draft.destination`
+  gebildet, z. B. zweimal "Lissabon löschen") — für Screenreader-Nutzer:innen
+  waren die beiden Karten an dieser Stelle nicht mehr auseinanderzuhalten.
+  Fix: alle vier Aktions-Buttons (Pausieren/Fortsetzen, Abschließen,
+  Duplizieren, Löschen) hängen jetzt bei mehreren gleichnamigen Entwürfen
+  zusätzlich "(Eintrag N)" an (N = Position unter den gleichnamigen
+  Einträgen), rein additiv — ohne Duplikate bleibt das Label unverändert.
+  Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (nach Duplizieren
+  tragen beide Lissabon-Karten unterscheidbare Labels, ein nicht
+  duplizierter Entwurf bleibt unverändert).
+  Vom autonomen IT-Chef-Lauf am 20.09. einen von `reports/support-chef.md`
+  (18.09., Vorschlag 3) gemeldeten Fund behoben: "Abschließen" setzte den
+  Status einer Karte bisher sofort und endgültig, ohne Rückfrage — anders
+  als "Löschen" auf derselben Karte, das seit dem 17.09.-Fix bereits über
+  denselben Bestätigungsdialog abgesichert ist; die beiden Buttons stehen
+  direkt nebeneinander und unterscheiden sich nur durchs Icon, ein
+  Fehlklick war damit leicht möglich und nicht rückgängig zu machen. Fix:
+  exakt dasselbe Muster übernommen — ein zweiter, per
+  `pendingFinalize`-State gesteuerter Dialog ("Entwurf abschließen?"/
+  "Ja, abschließen"/"Abbrechen"), kein neuer Entwurf. Zwei bestehende
+  Tests in `Reiseentwuerfe.test.tsx` auf den zusätzlichen
+  Bestätigungsklick umgestellt, ein neuer Test ergänzt (Klick auf
+  "abschließen" öffnet die Bestätigung ohne sofortige Statusänderung;
+  "Abbrechen" lässt den Entwurf unverändert "In Bearbeitung").
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

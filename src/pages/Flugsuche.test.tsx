@@ -105,6 +105,22 @@ describe('Flugsuche', () => {
     expect(screen.getAllByRole('button', { name: 'Auswählen' })[0]).not.toBeDisabled()
   })
 
+  it('shows a flight-specific no-results title instead of the generic default', async () => {
+    const searchFlightsMock = vi.mocked(searchFlights)
+    searchFlightsMock.mockResolvedValueOnce({ offers: [], errors: [] })
+
+    render(
+      <MemoryRouter>
+        <Flugsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Flüge suchen'))
+
+    expect(await screen.findByText('Keine Flüge gefunden')).toBeInTheDocument()
+    expect(screen.queryByText('Keine Ergebnisse gefunden')).not.toBeInTheDocument()
+  })
+
   describe('when localStorage is unavailable (e.g. quota exceeded)', () => {
     afterEach(() => {
       vi.restoreAllMocks()

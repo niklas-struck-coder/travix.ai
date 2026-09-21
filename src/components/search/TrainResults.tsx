@@ -13,7 +13,7 @@ interface TrainResultsProps {
 export function TrainResults({ offers, loading, onSelect }: TrainResultsProps) {
   if (loading) {
     return (
-      <div className="flex items-center gap-2 pl-1">
+      <div role="status" className="flex items-center gap-2 pl-1">
         <TravixAvatar state="searching" size="sm" />
         <span className="text-sm text-muted-foreground">Travix sucht nach Zug-, Bus- und Fährverbindungen …</span>
       </div>
