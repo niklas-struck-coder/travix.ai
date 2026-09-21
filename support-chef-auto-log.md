@@ -2829,3 +2829,91 @@ erkennbare neue Randfälle — für Letzteren war der ursprüngliche
 Reibungspunkt bereits Teil des Berichts vom 17.09. selbst, ein erneutes
 Draufschauen auf denselben, jetzt behobenen Punkt hätte nichts Neues
 ergeben.
+
+## 2026-09-21 — Reiseentwürfe abschließen (`Reiseentwuerfe.tsx`) und Fehleranzeigen bei Flug-/Hotelsuche (`FlightResults.tsx`, `HotelResults.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** `support-chef/auto` war zu Laufbeginn 23 Commits
+hinter `main` zurück (u. a. weil der letzte Lauf am 18.09. durch die
+damalige Freigabe-Chef-Session-Berechtigungssperre auf `main` blockiert
+war). Erst `main` in `support-chef/auto` gemergt (Fast-Forward, kein
+eigener Commit nötig), um auf dem tatsächlich aktuellen Stand zu prüfen.
+Laut `it-chef-auto-log.md` war der jüngste inhaltliche Zuwachs auf
+`main` der heutige Abschließen-Bestätigungsdialog in
+`Reiseentwuerfe.tsx` (20.09., seit heute Vormittag auf `main`) sowie die
+`role="status"`-Ergänzungen für Ladehinweise in `FlightResults.tsx`/
+`HotelResults.tsx`/`TrainResults.tsx` (heute, dritter IT-Chef-Lauf).
+Beide Bereiche heute aus Nutzersicht geprüft, nicht nur auf den neuen
+Code selbst, sondern auf das, was er für eine tatsächliche Nutzung
+bedeutet.
+
+### Reibungspunkte
+
+**1. Ein abgeschlossener Reiseentwurf lädt weiterhin genauso aktiv zum
+"Weiterplanen" ein wie ein aktiver**
+
+`Reiseentwuerfe.tsx:220-222`: Der Button "Planung fortsetzen" (teal
+hervorgehoben, `bg-teal text-navy`) wird für **jede** Karte gerendert,
+unabhängig vom Status — anders als "Pausieren" (223-234) und
+"Abschließen" (235-246), die beide korrekt mit
+`draft.status !== 'finalized'` ausgeblendet werden, sobald ein Entwurf
+abgeschlossen ist. Der neue Abschließen-Dialog (293-310) formuliert das
+bewusst hart: "Der Entwurf für {destination} wird abgeschlossen. Das
+lässt sich nicht rückgängig machen." Nach dem Klick auf "Ja,
+abschließen" sieht die Karte optisch aber fast identisch aus wie vorher
+— nur das Badge wechselt zu "Abgeschlossen" (Zeile 206-208, gleiche
+`secondary`-Variante wie "Pausiert", keine eigene Kennzeichnung) — und
+der auffälligste Button der Karte lädt weiterhin genau wie bei einem
+frischen, aktiven Entwurf zum Fortsetzen der Planung ein. Für eine
+Nutzerin, die gerade bewusst "Ja, abschließen" bestätigt hat, widerspricht
+das der eigenen Erwartung: Ein als endgültig erklärter Entwurf sollte
+sich nicht mehr wie einer anlässlich, der noch offen ist.
+
+*Vorschlag:* "Planung fortsetzen" bei `status === 'finalized'` entweder
+ausblenden (analog Pausieren/Abschließen) oder durch einen neutralen,
+nicht-CTA-Button ersetzen (z. B. "Details ansehen", ohne Teal-Hervorhebung).
+Zusätzlich könnte das "Abgeschlossen"-Badge eine eigene, von "Pausiert"
+unterscheidbare Variante bekommen, damit der Endzustand auch auf den
+ersten Blick anders wirkt als ein nur unterbrochener Entwurf.
+
+**2. Fehlermeldungen bei der Flug-/Hotelsuche werden Screenreader-Nutzer:innen
+nicht automatisch mitgeteilt**
+
+`FlightResults.tsx:26-33` und `HotelResults.tsx:27-34`: Wenn die
+Duffel-Suche Fehler zurückgibt (`errors.length > 0`), erscheint ein rot
+umrandeter Block mit der Fehlermeldung — aber ohne `role="alert"` (oder
+`aria-live`). Der Ladehinweis direkt darüber in denselben Dateien
+(`FlightResults.tsx:18`, `HotelResults.tsx:19`) hat seit dem heutigen
+IT-Chef-Lauf `role="status"`, genau damit ein Screenreader neu
+erscheinenden Text automatisch vorliest — der Fehlerblock direkt
+daneben, der inhaltlich mindestens genauso wichtig ist (die Suche ist
+fehlgeschlagen, nicht nur "läuft noch"), hat dieses Attribut nicht. Eine
+Suche im gesamten `src`-Ordner nach `role="alert"` ergibt keinen
+einzigen Treffer — das Muster existiert im Projekt bisher nirgends,
+obwohl `AlertTriangle`-Fehlerblöcke mit identischer Struktur schon
+mehrfach vorkommen. Für eine blinde oder sehbehinderte Nutzerin, die im
+KI-Chat nach Flügen sucht, bedeutet das: Wenn die Suche fehlschlägt (z. B.
+kein Angebot für die Route, Duffel-Timeout), hört sie nichts davon, bis
+sie zufällig mit dem Screenreader an die Stelle im Chat-Verlauf
+zurücknavigiert. `TrainResults.tsx:15-21` hat denselben Fehlerblock
+ohne `role="alert"`, ist aber laut `ZEITPLAN.md` (5.7) noch in keine
+Seite eingebunden, also aktuell nicht live erreichbar — nur der
+Vollständigkeit halber erwähnt, kein eigener Fund mit Nutzerauswirkung.
+
+*Vorschlag:* `role="alert"` auf die Fehler-`div`s in `FlightResults.tsx:27`
+und `HotelResults.tsx:28` ergänzen (und aus Konsistenz gleich in
+`TrainResults.tsx`, sobald die Seite eingebunden wird) — exakt das
+Gegenstück zum bereits etablierten `role="status"` für den Lade-Zustand
+in denselben Komponenten. War im `it-chef-auto-log.md` (21.09., dritter
+Lauf) bereits als möglicher nächster Punkt vorgemerkt; dieser Bericht
+bestätigt ihn unabhängig aus Nutzungssicht.
+
+### Nicht geprüft
+Die heute ebenfalls neu auf `main` gelandete `title`-Korrektur bei
+`NoResultsMessage` in `Flugsuche.tsx` (21.09., dritter IT-Chef-Lauf) nur
+überflogen — reine Textparität mit den vier bereits korrekten
+Geschwister-Aufrufstellen, kein eigenständiger Reibungspunkt erkennbar.
+Die Reiseentwürfe-Karten selbst (Duplizieren, Löschen, Pausieren)
+wurden nicht erneut im Detail geprüft, da sie seit dem 17.09.-Bericht
+unverändert und bereits abgedeckt sind.
