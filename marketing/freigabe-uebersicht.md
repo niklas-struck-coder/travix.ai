@@ -1,10 +1,127 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-18)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-21)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-21: ein neuer Tier-4-Kandidat (Reiseentwürfe-Abschließen-Bestätigung), zwei Accessibility-Fixes bewusst ausgeschlossen, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`63c255a` (18.09., reiner Übersichts-Lauf) hängengeblieben, dessen Inhalt
+laut `freigabe-chef-log.md` ("2026-09-21 früher Nacht-Check") bereits
+vollständig in `main` gemergt war — der Branch war also nur noch veraltet,
+nicht mehr in Arbeit. Neu von aktuellem `origin/main` (`b5078f8`) aus
+angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 18.09.), `ZEITPLAN.md`
+(6.2 weiterhin `[ ]`) oder diesem Dokument seit dem 18.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über fünf Wochen.
+
+**`git log a924d6f..origin/main` zeigt 28 neue Commits, neun davon mit
+echter Produkt-Codeänderung (allesamt vom autonomen IT-Chef-Lauf,
+18.-21.09.), per `git show` einzeln geprüft:**
+- `4123ccc` (21.09., früher IT-Chef-Lauf desselben Tages): Der
+  "Abschließen"-Button auf `/reiseentwuerfe` setzte den Status einer
+  Entwurfskarte bisher sofort und endgültig, ohne Rückfrage — anders als
+  "Löschen" auf derselben Karte, das bereits über den etablierten
+  Bestätigungsdialog abgesichert ist. Behebt exakt Vorschlag 3 aus
+  `reports/support-chef.md` (18.09.). **Achtzehnter Tier-4-Kandidat** —
+  dieselbe Fundgruppe wie die bisherigen Löschbestätigungs-Fixes
+  (Preisalarme/Favoriten/Angebote/Aktivitäten/Warenkorb/Reiseentwürfe-
+  Löschen/EditMode-Aktivität): ein irreversibler Klick bekommt eine
+  Rückfrage, die er vorher nicht hatte.
+- `6a12606` (21.09.): Behebt Vorschlag 2 aus demselben Support-Chef-
+  Bericht (18.09.) — unterscheidbare `aria-label`s für gleichnamige
+  Aktivitäten in `EditMode.tsx`. **Bewusst nicht** als Tier-4-Kandidat
+  aufgenommen: reiner Barrierefreiheits-Fix (Screenreader-
+  Unterscheidbarkeit), ohne die "Ehrlichkeit/Vertrauen"-Erzählung dieses
+  Formats — gleiche Begründung wie beim strukturell identischen
+  `b07e3aa` (18.09., dieselbe Art Fix für `Reiseentwuerfe.tsx`, damals
+  schon nicht gezählt) und den früher ausgeschlossenen `2d0f024`/
+  `2f110f7`/`538bb25`/`17b61f5`.
+- `a21ae7c`, `67b9bdb` (21.09.): `role="status"` auf die Lade-/Denk-
+  Hinweise in Flug-/Hotel-/Zugergebnissen, KI-Chat und Urlaubsmodus
+  ergänzt. **Bewusst nicht** aufgenommen — reine
+  Screenreader-Ankündigungs-Fixes, gleiche Begründung wie oben.
+- `7b2cf09` (18.09.): Fokus springt nach mobiler Menü-Navigation jetzt
+  zur `<h1>` der neuen Seite statt zum Hamburger-Knopf zurück — behebt
+  Vorschlag 1 aus demselben Support-Chef-Bericht. **Bewusst nicht**
+  aufgenommen — Fokus-Steuerung, dieselbe Ausschlussgruppe wie der
+  bereits ausgeschlossene `2d0f024` (15.09., Fokus-Rückgabe nach
+  Dialogen).
+- `03a1e6b` (18.09.): Fokus-Fallback-Parität `sheet.tsx`/`dialog.tsx`.
+  **Bewusst nicht** aufgenommen — gleiche Gruppe wie oben.
+- `5e8b07e` (18.09.): `clampGuestCount()`/`clampPassengerCount()` runden
+  jetzt vor dem Clamp, schützen also zusätzlich gegen Nachkommazahlen wie
+  "1.5". **Bewusst nicht** aufgenommen — reine Eingabevalidierung ohne
+  Ehrlichkeits-/Vertrauens-Aussage, gleiche Begründung wie frühere
+  Validierungs-Ausschlüsse.
+- `577c4ef` (18.09.): `TrainCard.tsx` bekommt eine `selected`-Prop analog
+  zu `FlightCard`/`HotelCard`. **Bewusst nicht** aufgenommen — `TrainCard`/
+  `TrainResults` sind laut `ZEITPLAN.md` (5.7) weiterhin in keine Seite
+  eingebunden, also kein echter Nutzerpfad, gleiche Begründung wie beim
+  am 09.09. ausgeschlossenen `b5fac18`.
+- `a70a9ce` (21.09.): `Flugsuche.tsx` zeigt bei leeren Suchergebnissen
+  jetzt "Keine Flüge gefunden" statt des generischen Titels, analog zu
+  `Hotelsuche.tsx`/`FlightResults.tsx`. **Bewusst nicht** aufgenommen —
+  reine Text-/Konsistenzkorrektur ohne falsche Aussage, die vorher
+  korrigiert werden musste (der generische Text war nicht falsch, nur
+  unspezifisch) — gleiche Begründung wie beim am 13./14.09.
+  ausgeschlossenen `538bb25` (Sprachkonsistenz).
+
+Die übrigen 19 Commits (mehrere Freigabe-Chef-Logs, zwei Merge-Commits,
+ein Support-Chef-Bericht vom 18.09. mit den oben verarbeiteten vier
+Vorschlägen, der eigene interaktive Marketing-Chef-Bericht vom 18.09.,
+ein IT-Chef-Bericht ohne neuen Bug, ein Daily-Status-Update, ein
+Support-Chef-Auto-Log samt Main-Merge sowie zwei IT-Chef-Auto-Log-
+Einträge ohne eigenen Codepunkt) enthalten keine weitere, für dieses
+Format relevante Codeänderung.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: der neue
+Kandidat stammt aus einem einzeln per `git show` verifizierten, bereits
+in `main` gemergten Commit; alle acht Ausschlüsse sind transparent
+begründet statt stillschweigend übergangen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf wendet nur die bereits
+etablierte "Ehrlichkeit/Vertrauen"-Abgrenzung an, trifft keine neue
+inhaltliche Entscheidung.
+
+**Warum (noch) keine fünfte Mini-Changelog-Ausgabe:** Der Kandidatentopf
+war seit Ausgabe 4 (17.09.) leer und steht jetzt bei **eins** — deutlich
+unter der Achter-Schwelle, die Ausgabe 2/3/4 ausgelöst hat, und auch unter
+der Menge (vier), die selbst am 06.09. noch als "nicht ausreichend"
+bewertet wurde.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neues eigenständiges Social-Content-Stück bzw. eine fünfte
+  Mini-Changelog-Ausgabe — Kandidatentopf steht erst bei eins, klar zu
+  wenig nach dem etablierten Maßstab.
+- Die beiden weiterhin offenen Support-Chef-Punkte vom 18.09. (mobiles
+  Menü, `/hilfe`-Seite) als Tier-4-Kandidaten zählen — der Menü-Fund
+  wurde zwar behoben (`7b2cf09`), gehört aber zur ausgeschlossenen
+  Fokus-Gruppe; die Hilfe-Seite ist weiterhin unverändert offen.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 21.09. (Prüfung
+  der vier Fragen, Einordnung von neun neuen Commits, davon einer als
+  achtzehnter Tier-4-Kandidat und acht bewusst ausgeschlossen), "Nächster
+  autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf 21.09.
+  gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-18: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
 
@@ -1988,5 +2105,18 @@ null. Zwei von Support-Chef am 17.09. gemeldete neue UX-Funde
 (doppelte aria-labels bei Reiseentwürfen, Abschließen ohne Rückfrage)
 werden erst zu Kandidaten, sobald IT-Chef sie tatsächlich behebt — nicht
 schon durch die Meldung selbst, gleiche Regel wie bei früheren
-Support-Chef-Funden. Der nächste Lauf sollte weiterhin zuerst die vier
-offenen Fragen gegenprüfen, bevor er neue Inhalte erstellt.
+Support-Chef-Funden. Stand 09.21 ist genau einer dieser beiden Funde
+umgesetzt und gezählt worden (`4123ccc`, Reiseentwürfe-Abschließen-
+Bestätigung, siehe Update 2026-09-21 oben) — der andere (doppelte
+aria-labels) wurde zwar ebenfalls behoben (`6a12606`), fällt aber wie
+schon der strukturell identische `b07e3aa` vom 18.09. in die
+ausgeschlossene reine Barrierefreiheits-Gruppe. Der Topf steht damit bei
+eins, deutlich unter der Achter-Schwelle und auch unter der Menge (vier),
+die selbst am 06.09. als "nicht ausreichend" galt — für eine fünfte
+Mini-Changelog-Ausgabe muss weiter gesammelt werden. Die verbleibenden
+zwei Support-Chef-Punkte vom 18.09. (mobiles Menü — inzwischen behoben,
+aber Fokus-Ausschlussgruppe; `/hilfe`-Seite — weiterhin unverändert)
+bleiben entsprechend außen vor. Der nächste Lauf sollte weiterhin zuerst
+die vier offenen Fragen gegenprüfen, bevor er neue Inhalte erstellt, und
+den Kandidatentopf (Stand 21.09: eins) gegen den etablierten
+06.09.-Maßstab (acht = genug, vier = eher nicht) weiterführen.

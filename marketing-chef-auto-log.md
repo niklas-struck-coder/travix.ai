@@ -4,6 +4,77 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-21
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`63c255a` (18.09., reiner Übersichts-Lauf) hängengeblieben, dessen Inhalt
+laut `freigabe-chef-log.md` ("2026-09-21 früher Nacht-Check") bereits
+vollständig in `main` gemergt war — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Neu von aktuellem `origin/main`
+(`b5078f8`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: nur `marketing/freigabe-uebersicht.md`
+um einen neuen Prüf-Durchlauf ergänzt (ein neuer Tier-4-Kandidat, acht
+Commits bewusst ausgeschlossen). Kein neues eigenständiges Content-Stück,
+keine fünfte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` ("Nächster autonomer Lauf") seit dem
+18.09. beantwortet wurde: keine Notiz in `status.md` (Stand weiterhin
+18.09.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument, keine
+neuen Kanal-Links im Repo, kein `changelog`-Treffer in `src/routes.tsx`.
+Alle vier Fragen bleiben offen — jetzt seit über fünf Wochen. Danach
+`git log a924d6f..origin/main` geprüft: 28 neue Commits, neun davon mit
+echter Produkt-Codeänderung (allesamt vom autonomen IT-Chef-Lauf,
+18.-21.09.), per `git show` einzeln verifiziert (Details in
+`marketing/freigabe-uebersicht.md`, Update 2026-09-21):
+- `4123ccc` (21.09.): "Abschließen" auf `/reiseentwuerfe` fragt jetzt
+  nach, bevor der Status endgültig gesetzt wird — behebt Vorschlag 3 aus
+  `reports/support-chef.md` (18.09.). **Achtzehnter Tier-4-Kandidat**,
+  dieselbe Fundgruppe wie die bisherigen Löschbestätigungs-Fixes.
+- Acht weitere Commits (`6a12606`, `a21ae7c`, `67b9bdb`, `7b2cf09`,
+  `03a1e6b`: reine Barrierefreiheits-/Fokus-Fixes; `5e8b07e`: reine
+  Eingabevalidierung; `577c4ef`: `TrainCard` weiterhin nicht eingebunden,
+  5.7 offen; `a70a9ce`: reine Text-/Konsistenzkorrektur ohne falsche
+  Aussage) bewusst **nicht** als Tier-4-Kandidaten gezählt — jeweils mit
+  Verweis auf strukturell identische, bereits früher ausgeschlossene
+  Funde begründet.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: der neue
+Kandidat stammt aus einem einzeln per `git show` verifizierten, bereits
+in `main` gemergten Commit; alle acht Ausschlüsse sind transparent
+begründet. Keine offene Positionierungs-Grundsatzfrage: dieser Lauf
+wendet nur die bereits etablierte "Ehrlichkeit/Vertrauen"-Abgrenzung an,
+trifft keine neue inhaltliche Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine fünfte Mini-Changelog-Ausgabe schon jetzt schreiben — Kandidatentopf
+  steht erst bei eins, klar unter der Achter-Schwelle, die Ausgabe 2/3/4
+  ausgelöst hat.
+- Ein neues eigenständiges Social-Content-Stück — bleibt weiterhin an die
+  vier seit über fünf Wochen unbeantworteten Fragen gebunden.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden;
+  keiner dieser Punkte ist ein reiner Entwurf, alle bräuchten entweder
+  echte Implementierung/Freigabe durch Ni bzw. IT-Chef oder einen
+  tatsächlichen Live-Vorgang.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 21.09. (Prüfung
+  der vier Fragen, Einordnung von neun neuen Commits, davon einer als
+  achtzehnter Tier-4-Kandidat und acht bewusst ausgeschlossen),
+  "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf
+  21.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-18
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
