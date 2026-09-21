@@ -293,6 +293,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   umgestellt) — vor dem Fix durch temporäres Zurücknehmen der beiden
   Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (dritter Lauf desselben Tages)
+  eine Textparität nachgezogen: `Flugsuche.tsx` (Zeile 82) rief
+  `<NoResultsMessage />` ohne `title`-Prop auf und zeigte bei leeren
+  Suchergebnissen (`offers.length === 0`, kein Fehler) deshalb den
+  generischen Default-Text "Keine Ergebnisse gefunden" — während das
+  strukturell identische `Hotelsuche.tsx` sowie `FlightResults.tsx`,
+  `HotelResults.tsx` und `TrainResults.tsx` alle explizit einen
+  produktbezogenen Titel setzen ("Keine Unterkünfte/Flüge/Verbindungen
+  gefunden"). Live reproduzierbar über eine Suche ohne Treffer, kein
+  Edge Case. Fix: `title="Keine Flüge gefunden"` ergänzt, mechanische
+  Übernahme des bereits an vier anderen Stellen etablierten Musters,
+  keine neue Design-Entscheidung. Neuer Regressionstest in
+  `Flugsuche.test.tsx` — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `Flugsuche.tsx`) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

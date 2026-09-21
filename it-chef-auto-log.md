@@ -11732,3 +11732,77 @@ dieselben vier vorbestehenden Warnungen), `npm run build`
 `src/components/search/TrainResults.test.tsx` (je ein neuer Test),
 `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
 dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, dritter Lauf)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `origin/it-chef/auto` stand bei `a21ae7c`
+(`role="status"`-Fix für `FlightResults.tsx`/`HotelResults.tsx`/
+`TrainResults.tsx` vom zweiten Lauf heute) und war identisch mit
+`origin/main` — kein Merge nötig, `main` blieb unberührt. `npm ci` lief
+ohne Probleme durch. Baseline bestätigt: `npx vitest run` (58
+Testdateien, 335 Tests, alle grün), `npm run lint` (0 Fehler, vier
+vorbestehende `react-refresh/only-export-components`-Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten weiterhin keinen neuen, eindeutig umsetzbaren offenen Punkt,
+der alle vier Sicherheitskriterien erfüllt. Zwei parallele
+Explore-Agenten haben deshalb erneut mit klar getrennten Suchwinkeln
+gesucht: der eine prüfte fehlende Bestätigungsdialoge, kaputte interne
+Links, Datums-/Preis-Logikfehler, Typos und fehlende
+`role="alert"`/`aria-live`-Paritäten bei Fehlermeldungen; der andere
+prüfte Prop-/Verhaltens-Paritäten zwischen Geschwister-Komponenten,
+fehlende `aria-label`s bei Icon-Buttons und numerische Edge Cases in
+`src/lib/`-Hilfsfunktionen.
+
+Beide Agenten meldeten je einen bestätigten, live reproduzierbaren
+Fund:
+1. Fehlendes `role="alert"` auf den Fehler-Blöcken in
+   `FlightResults.tsx` (Zeile 27) und `HotelResults.tsx` (Zeile 28) —
+   direkt neben dem im ersten Lauf heute ergänzten `role="status"` im
+   selben Zweig derselben Komponenten, für den Fehler- statt den
+   Lade-Zustand.
+2. `src/pages/Flugsuche.tsx` (Zeile 82) rief `<NoResultsMessage />`
+   ohne `title`-Prop auf und zeigte bei leeren Suchergebnissen deshalb
+   den generischen Default-Text "Keine Ergebnisse gefunden" —
+   `NoResultsMessage.tsx` (Zeile 9) hat genau dafür einen optionalen
+   `title`-Prop, den alle vier strukturell identischen
+   Geschwister-Aufrufstellen (`Hotelsuche.tsx`, `FlightResults.tsx`,
+   `HotelResults.tsx`, `TrainResults.tsx`) bereits explizit setzen.
+
+Fund 2 ausgewählt: einfachere, eindeutig auf eine einzige Datei
+begrenzte Textparität ohne jede Interpretation (der exakte Zieltext
+ergibt sich unmittelbar aus dem Pendant in `Hotelsuche.tsx`), und
+berührt anders als Fund 1 keine der beiden Dateien, die in diesem Lauf
+bereits zweimal heute geändert wurden — hält den Punkt damit sauber von
+den vorherigen zwei Läufen getrennt. Fund 1 (`role="alert"` in
+`FlightResults.tsx`/`HotelResults.tsx`) bleibt als möglicher nächster
+Punkt für einen künftigen Lauf vorgemerkt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Text-/Prop-Parität einer
+Leer-Zustands-Meldung). Keine offene Architektur-/Produktentscheidung —
+mechanische Übernahme eines im selben Code an vier Stellen bereits
+etablierten und verifizierten Musters, keine eigene Interpretation
+nötig. Klar umrissen (eine Zeile, ein Prop ergänzen). Objektiv prüfbar
+(Regressionstest mit `findByText('Keine Flüge gefunden')` plus
+`queryByText('Keine Ergebnisse gefunden')`-Negativprüfung).
+
+**Fix:** `title="Keine Flüge gefunden"` auf `<NoResultsMessage />` in
+`src/pages/Flugsuche.tsx` (Zeile 82) ergänzt — reine Prop-Ergänzung,
+keine sonstige Verhaltensänderung. Vor dem Fix reproduzierbar rot
+verifiziert (`git stash` nur `Flugsuche.tsx`, neuer Test schlug danach
+mit dem sichtbaren generischen Text statt "Keine Flüge gefunden" fehl).
+
+**Geprüft:** `npx vitest run src/pages/Flugsuche.test.tsx` (gezielt, 4
+Tests grün, davon 1 neu), danach volle Suite `npx vitest run` (58
+Testdateien, 336 Tests, davon 1 neu — alle grün), `npm run lint` (0
+Fehler, weiterhin dieselben vier vorbestehenden Warnungen),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich).
+
+**Commit:** `src/pages/Flugsuche.tsx` (Fix), `src/pages/Flugsuche.test.tsx`
+(ein neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.

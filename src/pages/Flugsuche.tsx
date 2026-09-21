@@ -79,7 +79,7 @@ export function Flugsuche() {
         </div>
       )}
 
-      {offers && offers.length === 0 && errors.length === 0 && <NoResultsMessage />}
+      {offers && offers.length === 0 && errors.length === 0 && <NoResultsMessage title="Keine Flüge gefunden" />}
 
       {offers && offers.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
