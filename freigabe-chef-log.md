@@ -4001,3 +4001,109 @@ erreichbar war.
 Folge nicht gemergt werden (gestern: Berechtigungssperre; heute:
 npm-Registry nicht erreichbar), obwohl der Branch inhaltlich seit
 gestern Nacht als sauber bestätigt ist. Ni per Notification informiert.
+
+## 2026-09-21, früher Nacht-Check (0-4-Uhr-Slot, autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 13 neue Commits vor `origin/main`
+  (`b07e3aa..a70a9ce`), davon 8 mit Codeänderung und 5 reine
+  Log-Einträge (u. a. "kein neuer sicherer Punkt gefunden",
+  Merge-main-in-Branch-Commit). Die letzten drei Läufe stammen von
+  heute Nacht selbst (00:11/01:14/02:11 Uhr), der Rest war seit dem
+  letzten Nacht-Check am 18.09. (npm-Registry-Ausfall, siehe damaliger
+  Eintrag) unverändert liegen geblieben und wurde jetzt erstmals wieder
+  geprüft.
+- `marketing-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr, dafür separater
+  späterer Lauf).
+- `support-chef/auto` — 0 neue Commits vor `main`. Planmäßig
+  übersprungen (läuft laut Ablauf erst um 6 Uhr, dafür separater
+  späterer Lauf).
+
+**Prüfung `it-chef/auto`:**
+- `it-chef-auto-log.md` gelesen (alle Einträge seit dem letzten Merge
+  am 17.09.):
+  - `b07e3aa`/`88d6e9f`/`577c4ef`/`c1095d4`/`03a1e6b`: bereits am
+    18.09. inhaltlich geprüft (siehe damaliger Log-Eintrag), diesmal
+    erneut mitverifiziert, da der Merge damals an einer
+    Session-Berechtigungssperre scheiterte, nicht an einem inhaltlichen
+    Problem.
+  - `ab87b33`: reiner Merge von `main` in den Branch, keine eigene
+    Änderung.
+  - `7b2cf09`: `MobileNav.tsx` — Fokus springt nach echtem
+    Navigations-Klick jetzt zur `<h1>` der neuen Seite statt (wegen des
+    `sheet.tsx`-Fokus-Fallbacks vom 18.09.) unbedingt zum
+    Hamburger-Knopf zurückzukehren; bei Schließen ohne Navigation
+    (Escape/Overlay/X) bleibt das bisherige Rückkehr-zum-Auslöser-
+    Verhalten unverändert.
+  - `5e8b07e`: `clampGuestCount()`/`clampPassengerCount()` in
+    `HotelWizard.tsx`/`FlightWizard.tsx` runden den geparsten Wert jetzt
+    zusätzlich mit `Math.round`, bevor geclampt wird — Nachkommazahlen
+    wie "1.5" blieben bisher unverändert stehen, obwohl Feld-Grenzen und
+    Funktionsname eindeutig eine ganze Zahl vorsehen.
+  - `4123ccc`: "Abschließen" in `Reiseentwuerfe.tsx` fragt jetzt über
+    einen Bestätigungsdialog nach (identisches Muster zum bestehenden
+    Löschen-Dialog derselben Seite), bevor der Entwurfsstatus endgültig
+    gesetzt wird.
+  - `6a12606`: `EditMode.tsx` bekommt dieselbe "(Eintrag N)"-Ergänzung
+    bei gleichnamigen Aktivitäten wie `Reiseentwuerfe.tsx` (17.09.) —
+    Namenskollision hier über das freie Textfeld ohne
+    Eindeutigkeitsprüfung live reproduzierbar.
+  - `67b9bdb`/`a21ae7c`: `role="status"` auf die "Travix denkt/sucht
+    …"-Ladehinweise in `KiChat.tsx`, `Urlaubsmodus.tsx`,
+    `FlightResults.tsx`, `HotelResults.tsx`, `TrainResults.tsx`
+    ergänzt — mechanische Übernahme des im selben Code bereits
+    etablierten `storageWarning`-Musters für kurzlebigen Statustext.
+  - `a70a9ce`: `Flugsuche.tsx` übergibt `<NoResultsMessage />` jetzt
+    `title="Keine Flüge gefunden"`, analog den drei strukturell
+    identischen Geschwister-Aufrufstellen.
+- Diffs aller Commits selbst gelesen (`git diff main..origin/it-chef/auto`
+  sowie Einzel-Diffs für `Reiseentwuerfe.tsx`/`EditMode.tsx`), nicht nur
+  den Log-Einträgen geglaubt: Scope jedes Commits deckt sich exakt mit
+  der jeweiligen Beschreibung, kein Scope-Creep über den beschriebenen
+  Punkt hinaus. Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+  Rechtstexten in irgendeinem Diff (nur `src/components`, `src/pages`,
+  zugehörige Tests, `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`,
+  `it-chef-auto-log.md`).
+- Design-Konsistenz: keine visuelle/gestalterische Änderung — alle
+  Fixes sind mechanische Attribut-/Prop-Ergänzungen oder Übernahmen
+  bereits etablierter Muster aus Schwester-Komponenten. `MARKENDESIGN.md`
+  nicht einschlägig.
+- **Unabhängig selbst ausgeführt** (frischer lokaler Checkout von
+  `origin/it-chef/auto`, nicht nur den Log-Einträgen geglaubt):
+  - `npm install` → sauber, 650 Pakete, 0 Vulnerabilities (kein
+    Registry-Problem heute, anders als am 18.09.).
+  - `npx tsc -b` → grün, keine Ausgabe.
+  - `npx eslint .` → 0 Fehler, dieselben 4 vorbestehenden Warnings in
+    `badge.tsx`/`button.tsx`/`sheet.tsx`/`tabs.tsx` (unverändert).
+  - `npx vitest run` → 58 Testdateien, **336 Tests, alle grün** — deckt
+    sich exakt mit der im Branch-eigenen Log zuletzt behaupteten
+    Baseline.
+- Merge-Check: `main` und `origin/it-chef/auto` hatten keinen
+  gemeinsamen Konflikt (`it-chef/auto` enthielt `main` bereits
+  vollständig) → sauberer Merge ohne Konflikte möglich.
+
+→ **Alles grün, Scope passt, kein Sicherheitsrisiko → gemergt.** Diesmal
+lief `git merge --no-ff` ohne die Berechtigungssperre vom 18.09.
+(scheint ein einmaliges Ereignis der damaligen Session gewesen zu sein).
+Nach dem Merge auf `main` erneut vollständig verifiziert (`tsc -b`,
+`eslint .`, `vitest run` — alle drei erneut grün auf dem gemergten
+Stand), dann nach `origin/main` gepusht (`8a15d00..e3e85ed`).
+`origin/it-chef/auto` anschließend auf den neuen `main`-Stand gebracht
+(reiner Fast-Forward-Push, keine neue Divergenz), damit der nächste
+IT-Chef-Lauf sauber aufsetzt.
+
+**Ergebnis:** Ein Branch geprüft und gemergt (`it-chef/auto`, 8
+Code-Fixes + 5 reine Log-/Merge-Commits). Zwei Branches planmäßig ohne
+neue Prüfung übersprungen (`marketing-chef/auto`, `support-chef/auto`
+— beide ohne neue Commits von heute, laufen erst um 6 Uhr, dafür
+separater späterer Freigabe-Chef-Lauf).
+
+**Info an Ni nötig:** Nein für den heutigen Merge selbst (regulärer,
+sauber bestandener Lauf). Kurzer Hinweis der Vollständigkeit halber:
+`it-chef/auto` war davor zwei Läufe in Folge nicht mergbar (18.09.:
+Session-Berechtigungssperre; danach: npm-Registry-Ausfall laut
+vorletztem Log-Eintrag) — das ist mit diesem Lauf jetzt aufgelöst, alle
+seitdem aufgelaufenen Fixes sind auf `main`. Keine Notification nötig,
+da es sich um eine positive Auflösung und keinen neuen offenen Befund
+handelt.
