@@ -25,7 +25,10 @@ export function HotelResults({ offers, errors, loading, onSelect }: HotelResults
 
   if (errors.length > 0) {
     return (
-      <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+      <div
+        role="alert"
+        className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+      >
         <AlertTriangle className="mt-0.5 size-4 shrink-0" />
         <div className="flex flex-col gap-1">
           {errors.map((error, index) => (
