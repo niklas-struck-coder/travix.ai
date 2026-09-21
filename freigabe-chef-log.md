@@ -4107,3 +4107,55 @@ vorletztem Log-Eintrag) — das ist mit diesem Lauf jetzt aufgelöst, alle
 seitdem aufgelaufenen Fixes sind auf `main`. Keine Notification nötig,
 da es sich um eine positive Auflösung und keinen neuen offenen Befund
 handelt.
+
+## 2026-09-21, weiterer Lauf (autonomer Cloud-Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `origin/main` (bereits im heutigen
+  "früher Nacht-Check" vollständig gemergt, `b5078f8`). Planmäßig
+  übersprungen, keine neue Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`dc451a8`).
+- `support-chef/auto` — 1 neuer Commit (`2f4ce36`).
+
+**`marketing-chef/auto` geprüft:**
+- Diff betrifft ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` (reine Markdown-Ergänzung, kein
+  Produkt-Code, kein Build/Lint/Test nötig).
+- Kein Hinweis auf tatsächliches Posten/Versenden/Veröffentlichen —
+  reine Übersichts-Ergänzung, die neun neue Commits seit dem letzten
+  Stand einordnet (einer als neuer Tier-4-Kandidat, acht bewusst und
+  nachvollziehbar begründet ausgeschlossen).
+- Keine erfundenen Kennzahlen/Nutzerzahlen: der als Kandidat gezählte
+  Commit (`4123ccc`, Reiseentwürfe-Abschließen-Bestätigung) ist ein
+  real bereits in `main` gemergter Commit, stichprobenartig
+  nachvollzogen.
+- Text vollständig und kohärent, keine bloße Stichpunkt-Skizze.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`).
+
+**`support-chef/auto` geprüft:**
+- Diff betrifft ausschließlich `support-chef-auto-log.md` (reiner
+  Analyse-Bericht, kein Code geändert).
+- Beide gemeldeten Reibungspunkte stichprobenartig im Code
+  nachvollzogen:
+  - Reiseentwürfe: "Planung fortsetzen"-Button (in
+    `src/pages/Reiseentwuerfe.tsx`) wird tatsächlich unbedingt für
+    jede Karte gerendert (kein `draft.status !== 'finalized'`-Guard
+    wie bei Pausieren/Abschließen), Badge nutzt für "Abgeschlossen"
+    dieselbe `secondary`-Variante wie "Pausiert" — Fund bestätigt.
+  - Fehleranzeigen: In `src/components/search/FlightResults.tsx` und
+    `HotelResults.tsx` trägt der Ladehinweis `role="status"`, der
+    Fehlerblock direkt daneben (`errors.length > 0`) hat kein
+    `role="alert"` — per `grep` verifiziert, Fund bestätigt.
+- Nichts wirkt erfunden, Datei-/Zeilenangaben stimmen im Kern (kleine
+  Zeilenverschiebungen durch spätere Commits, inhaltlich aber korrekt).
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`).
+
+**Ergebnis:** Zwei Branches geprüft und gemergt (`marketing-chef/auto`,
+`support-chef/auto`, je 1 Commit), `it-chef/auto` planmäßig ohne neue
+Prüfung übersprungen (keine neuen Commits). Keine Konflikte beim
+Mergen. Nach beiden Merges `origin/main` gepusht.
+
+**Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
+offene Befunde oder wiederholte Regelverstöße.
