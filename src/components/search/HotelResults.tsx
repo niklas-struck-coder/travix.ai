@@ -16,7 +16,7 @@ interface HotelResultsProps {
 export function HotelResults({ offers, errors, loading, onSelect }: HotelResultsProps) {
   if (loading) {
     return (
-      <div className="flex items-center gap-2 pl-1">
+      <div role="status" className="flex items-center gap-2 pl-1">
         <TravixAvatar state="searching" size="sm" />
         <span className="text-sm text-muted-foreground">Travix sucht echte Unterkünfte …</span>
       </div>

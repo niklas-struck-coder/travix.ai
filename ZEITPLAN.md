@@ -617,6 +617,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstests (`HotelWizard.test.tsx`, `FlightWizard.test.tsx`), die
   "1.5" auf 2 und "2.4" auf 2 gerundet prüfen — vor dem Fix reproduzierbar
   rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (weiterer Lauf desselben Tages) das
+  `role="status"`-Muster vom ersten Lauf heute (siehe `KiChat.tsx`/
+  `Urlaubsmodus.tsx` oben) auf die direkt danebenliegenden Ladehinweise in
+  `FlightResults.tsx`, `HotelResults.tsx` und `TrainResults.tsx` erweitert:
+  Alle drei zeigen beim Laden exakt denselben "Travix sucht …"-Textblock
+  mit `TravixAvatar`, aber ohne `role="status"` — obwohl `FlightResults`
+  und `HotelResults` direkt in `KiChat.tsx` (Zeile 179/183) unmittelbar
+  unter dem soeben reparierten `isThinking`-Block liegen und exakt dieselbe
+  Art von kurzlebigem, dynamisch erscheinendem Statustext sind.
+  `TrainResults.tsx` ist zwar noch nicht in eine Seite eingebunden (5.7
+  weiterhin offen), aber strukturell identisch — aus Konsistenz mit
+  gefixt. Fix: `role="status"` auf alle drei Ladehinweis-`div`s ergänzt,
+  mechanische Übernahme desselben, im selben Lauf bereits verifizierten
+  Musters, keine neue Design-Entscheidung. Drei neue Regressionstests
+  (`FlightResults.test.tsx`, `HotelResults.test.tsx`,
+  `TrainResults.test.tsx`: `getByRole('status')` zeigt den jeweiligen
+  Ladehinweis) — vor dem Fix durch temporäres Zurücknehmen der drei
+  Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

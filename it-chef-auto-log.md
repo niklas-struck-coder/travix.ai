@@ -11641,3 +11641,94 @@ weiterhin dieselben vier vorbestehenden Warnungen), `npm run build`
 `src/pages/Urlaubsmodus.test.tsx` (ein Test angepasst), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, weiterer Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf desselben Tages, wieder
+frischer, isolierter Checkout. `origin/it-chef/auto` stand bei `67b9bdb`
+(`role="status"`-Fix für `KiChat.tsx`/`Urlaubsmodus.tsx` vom ersten
+Lauf heute) und war identisch mit `origin/main` — kein Merge nötig,
+`main` blieb unberührt. `npm ci` lief ohne Probleme durch. Baseline
+bestätigt: `npx vitest run` (58 Testdateien, 332 Tests, alle grün),
+`npm run lint` (0 Fehler, vier vorbestehende
+`react-refresh/only-export-components`-Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+enthielten weiterhin keinen neuen, eindeutig umsetzbaren offenen Punkt,
+der alle vier Sicherheitskriterien erfüllt. Zwei parallele
+Explore-Agenten haben deshalb erneut gezielt nach einem weiteren,
+strukturell abgesicherten Fund gesucht, mit klar getrennten Suchwinkeln:
+der eine prüfte fehlende Bestätigungsdialoge vor irreversiblen Aktionen,
+fehlende `role="status"`/`role="alert"`-Paritäten, kaputte interne Links
+und Datums-/Preis-Logikfehler; der andere prüfte Numerik-Input-Paritäten
+(Zimmer/Gäste/Passagiere), Geschwister-Komponenten-Paritäten über
+Favoriten/Preisalarme/Angebote/Aktivitaeten/Warenkorb sowie erneut das
+Duplikat-aria-label-Muster.
+
+Der zweite Agent bestätigte den bereits im ersten Lauf heute
+dokumentierten Befund erneut: `Preisalarme.tsx`, `Warenkorb.tsx`,
+`Angebote.tsx`, `Aktivitaeten.tsx` und `Favoriten.tsx` haben zwar
+technisch dasselbe unbehandelte Duplikat-aria-label-Muster wie
+`Reiseentwuerfe.tsx`/`EditMode.tsx`, aber alle fünf sind reine
+Entfernen-Listen mit fest verdrahteten Demo-Daten ohne
+Erstellungs-/Duplizierpfad — eine Namenskollision ist im aktuellen Code
+gar nicht erzeugbar (per Grep verifiziert: keines der fünf Files hat
+einen "Hinzufügen"/"Duplizieren"-Handler). Ein Fix dort wäre reine
+Vorsorge für ein Szenario, das mit dem heutigen Code nicht eintreten
+kann — anders als bei `Reiseentwuerfe.tsx` (aktiver
+"Duplizieren"-Button) und `EditMode.tsx` (freies Textfeld ohne
+Eindeutigkeitsprüfung), wo der Fund live reproduzierbar war. Deshalb
+nicht umgesetzt, um keinen erfundenen/nicht objektiv nötigen Fix
+einzubauen.
+
+Der erste Agent fand einen live reproduzierbaren, strukturell
+identischen Anschlussfund an den heute bereits gefixten
+`isThinking`-Block: `src/components/search/FlightResults.tsx`
+(Zeile 16-22), `src/components/search/HotelResults.tsx` (Zeile 17-23)
+und `src/components/search/TrainResults.tsx` (Zeile 14-20) zeigen beim
+Laden alle denselben Textblock ("Travix sucht echte Flüge …" /
+"… echte Unterkünfte …" / "… nach Zug-, Bus- und Fährverbindungen …")
+mit `TravixAvatar` — exakt dieselbe Art von kurzlebigem, dynamisch
+erscheinendem Statustext wie der `isThinking`-Block, dem der erste Lauf
+heute genau deswegen `role="status"` gegeben hat. `FlightResults` und
+`HotelResults` liegen in `KiChat.tsx` (Zeile 179/183) sogar unmittelbar
+unter diesem Block, ohne selbst `role="status"` zu haben.
+`TrainResults.tsx` ist strukturell identisch, aber noch nicht in eine
+Seite eingebunden (5.7 weiterhin offen) — aus Konsistenz mit den zwei
+anderen, live genutzten Komponenten trotzdem mitgefixt, da exakt
+dieselbe Codeform.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine Accessibility-Auszeichnung von
+Ladehinweisen). Keine offene Architektur-/Produktentscheidung —
+mechanische Wiederverwendung des im selben Lauf bereits verifizierten
+`role="status"`-Musters, keine eigene Interpretation nötig. Klar
+umrissen (drei strukturell identische Textblöcke, ein Attribut
+ergänzen). Objektiv prüfbar (Regressionstest mit `getByRole('status')`,
+analog den heute bereits gebauten Tests für `KiChat.tsx`/
+`Urlaubsmodus.tsx`).
+
+**Fix:** `role="status"` auf den Ladehinweis-`div` in `FlightResults.tsx`,
+`HotelResults.tsx` und `TrainResults.tsx` ergänzt — reine
+Attribut-Ergänzung, keine Verhaltensänderung für sehende Nutzer:innen.
+Vor dem Fix reproduzierbar rot verifiziert (`git stash` nur der drei
+`.tsx`-Quelländerungen, alle drei neuen Tests schlugen danach mit
+"Unable to find an accessible element with the role of: status" fehl).
+
+**Geprüft:** `npx vitest run src/components/search/FlightResults.test.tsx
+src/components/search/HotelResults.test.tsx
+src/components/search/TrainResults.test.tsx` (gezielt, 17 Tests grün,
+davon 3 neu), danach volle Suite `npx vitest run` (58 Testdateien, 335
+Tests, davon 3 neu — alle grün), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden Warnungen), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/components/search/FlightResults.tsx`,
+`src/components/search/HotelResults.tsx`,
+`src/components/search/TrainResults.tsx` (Fix),
+`src/components/search/FlightResults.test.tsx`,
+`src/components/search/HotelResults.test.tsx`,
+`src/components/search/TrainResults.test.tsx` (je ein neuer Test),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.

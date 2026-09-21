@@ -27,6 +27,12 @@ describe('HotelResults', () => {
     expect(screen.getByText('Travix sucht echte Unterkünfte …')).toBeInTheDocument()
   })
 
+  it('announces the loading state to assistive tech via role="status"', () => {
+    render(<HotelResults offers={null} errors={[]} loading onSelect={() => {}} />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Travix sucht echte Unterkünfte …')
+  })
+
   it('shows the error message instead of a no-results message when the search failed', () => {
     render(<HotelResults offers={null} errors={[error]} loading={false} onSelect={() => {}} />)
 
