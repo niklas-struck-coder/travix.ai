@@ -11806,3 +11806,55 @@ erfolgreich).
 **Commit:** `src/pages/Flugsuche.tsx` (Fix), `src/pages/Flugsuche.test.tsx`
 (ein neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, vierter Lauf)
+
+**Branch-Stand:** `it-chef/auto` war zu Laufbeginn identisch mit `main`
+(letzter Merge durch Freigabe-Chef, keine offenen Änderungen aus einem
+vorherigen Lauf). Neu von `main` ausgecheckt.
+
+**Ausgewählter Punkt:** Der im vorherigen Lauf heute (dritter Lauf)
+bewusst zurückgestellte "Fund 1" nachgeholt, der bereits vollständig
+diagnostiziert war und zusätzlich mit dem in `reports/it-chef.md`
+(21.09., PR #22) unabhängig gemeldeten Fund übereinstimmt: Der
+Fehlerzustand (fehlgeschlagene Suche) in `FlightResults.tsx` (Zeile 27)
+und `HotelResults.tsx` (Zeile 28) hatte kein ARIA-Live-Region-Attribut,
+obwohl der Ladezustand direkt darüber in denselben Komponenten bereits
+`role="status"` nutzt — Screenreader-Nutzer:innen bekamen einen
+Suchfehler nicht automatisch angekündigt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine ARIA-Attribut-Ergänzung). Keine
+offene Architektur-/Produktentscheidung — mechanische Übernahme des im
+selben Code (`role="status"` für den Ladezustand) sowie im offenen
+Auto-Fix-PR #22 bereits etablierten und von zwei unabhängigen Quellen
+(Support-Chef-Bericht, PR #22) übereinstimmend bestätigten Musters.
+Klar umrissen (ein Attribut auf zwei bereits benannten Zeilen). Objektiv
+prüfbar (Regressionstest mit `getByRole('alert')`). Anders als im
+PR-#22-Kanal durfte hier zusätzlich ein echter Testlauf die Fixes
+verifizieren.
+
+**Fix:** `role="alert"` auf das Fehler-`<div>` in `FlightResults.tsx`
+und `HotelResults.tsx` ergänzt — reine Attribut-Ergänzung, keine
+sonstige Verhaltensänderung. Je ein neuer Regressionstest in
+`FlightResults.test.tsx`/`HotelResults.test.tsx`
+(`getByRole('alert')` zeigt die Fehlermeldung). Die strukturell
+identische Lücke im selben Fehler-Markup von `Flugsuche.tsx`/
+`Hotelsuche.tsx` bewusst nicht mitgefixt — nicht Teil des
+diagnostizierten Fundes, bleibt eigener Kandidat für einen künftigen,
+eigenständig neu bewerteten Lauf, um die Punkte sauber getrennt zu
+halten.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten Warnungen),
+gezielt `npx vitest run src/components/search/FlightResults.test.tsx
+src/components/search/HotelResults.test.tsx` (2 Testdateien, 14 Tests,
+davon 2 neu — alle grün), danach volle Suite `npm test` (58
+Testdateien, 338 Tests, davon 2 neu — alle grün).
+
+**Commit:** `src/components/search/FlightResults.tsx`,
+`src/components/search/HotelResults.tsx` (Fix),
+`src/components/search/FlightResults.test.tsx`,
+`src/components/search/HotelResults.test.tsx` (je ein neuer Test),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.

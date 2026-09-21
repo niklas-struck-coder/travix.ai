@@ -308,6 +308,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Flugsuche.test.tsx` — vor dem Fix durch temporäres Zurücknehmen der
   Quelländerung (`git stash` nur `Flugsuche.tsx`) reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (vierter Lauf desselben Tages)
+  den in `reports/it-chef.md` (21.09., PR #22) bereits vollständig
+  diagnostizierten Fund direkt auf `it-chef/auto` behoben, statt auf
+  den offenen Auto-Fix-PR zu warten: Der Fehlerzustand in
+  `FlightResults.tsx` und `HotelResults.tsx` (fehlgeschlagene Flug-/
+  Unterkunftssuche) hatte kein ARIA-Live-Region-Attribut, obwohl der
+  direkt darüberliegende Ladezustand in denselben Komponenten bereits
+  `role="status"` nutzt — Screenreader-Nutzer:innen bekamen einen
+  Suchfehler nicht automatisch angekündigt. Fix: `role="alert"` auf
+  beide Fehler-`<div>`s ergänzt, mechanische Attribut-Ergänzung ohne
+  Verhaltensänderung für sehende Nutzer:innen. Anders als PR #22 (dort
+  ausdrücklich als fehlend vermerkt, weil dieser Kanal keine Testläufe
+  erlaubt) mit begleitenden Regressionstests: je ein neuer Test in
+  `FlightResults.test.tsx`/`HotelResults.test.tsx`
+  (`getByRole('alert')` zeigt die Fehlermeldung). Der ursprüngliche
+  Auto-Fix-PR #22 bleibt als überholt zurück (kann bei nächster
+  PR-Hygiene-Aufräumung geschlossen werden). Die strukturell identische
+  Lücke im selben Fehler-Markup von `Flugsuche.tsx`/`Hotelsuche.tsx`
+  bleibt bewusst unangetastet — das war nicht Teil des diagnostizierten
+  Fundes, bleibt aber ein naheliegender Kandidat für einen künftigen,
+  eigenständig neu bewerteten Lauf.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
