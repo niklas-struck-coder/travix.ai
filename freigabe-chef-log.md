@@ -4159,3 +4159,53 @@ Mergen. Nach beiden Merges `origin/main` gepusht.
 
 **Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
 offene Befunde oder wiederholte Regelverstöße.
+
+## 2026-09-22 (früher Nacht-Check, 03:16 UTC)
+
+**Geprüft:** Nur `it-chef/auto` (Fokus dieses frühen Laufs).
+`marketing-chef/auto` und `support-chef/auto` haben gegenüber `main`
+keine neuen Commits (`git log origin/main..origin/<branch>` jeweils
+leer) — planmäßig übersprungen, wie für diesen frühen Lauf vorgesehen.
+
+**`it-chef/auto` unabhängig verifiziert:**
+- Diff zu `main`: sechs neue Commits (zwei reine "kein sicherer Punkt
+  gefunden"-Log-Einträge, ein harmloser Merge von `main` in den
+  Branch, drei tatsächliche Code-Änderungen).
+- Code-Änderungen decken sich 1:1 mit den drei zugehörigen
+  `it-chef-auto-log.md`-Einträgen (21.09. vierter/fünfter Lauf,
+  22.09. erster Lauf): `role="alert"` ergänzt in
+  `FlightResults.tsx`, `HotelResults.tsx`, `Flugsuche.tsx`,
+  `Hotelsuche.tsx`; "Planung fortsetzen"-Button in
+  `Reiseentwuerfe.tsx` hinter dasselbe `draft.status !==
+  'finalized'`-Muster gestellt wie die Pausieren-/Abschließen-Buttons
+  daneben. Kein Scope-Creep, keine Berührung von Auth/Zahlungen/
+  Rechtstexten, keine offene Architektur-/Produktentscheidung.
+  MARKENDESIGN.md enthält keine gegenteiligen Vorgaben zu diesen
+  beiden UI-Stellen.
+- Eigenständig in frischem `git worktree` nachvollzogen (nicht nur
+  Log geglaubt): `npm install` (frischer Checkout), danach `npx tsc
+  -b` → 0 Fehler, `npx eslint .` → 0 Fehler (dieselben vier
+  vorbestehenden `react-refresh`-Warnungen wie im Log behauptet),
+  `npx vitest run` → 58 Testdateien, 341 Tests, alle grün. Deckt sich
+  exakt mit den Angaben in `it-chef-auto-log.md`.
+
+**Ergebnis: NICHT gemergt**, trotz bestandener Prüfung. Der lokale
+`git merge --no-ff origin/it-chef/auto` nach `main` ließ sich
+sauber und ohne Konflikte durchführen; der anschließende
+Verifizierungslauf auf dem gemergten Stand (`tsc`/`eslint`/`vitest`)
+wurde jedoch vom Auto-Mode-Classifier dieser Sitzung mit der
+Begründung "Merge Without Review" blockiert. Das ist keine
+inhaltliche Beanstandung an `it-chef/auto` — die Prüfung selbst war
+vollständig grün — sondern eine Sitzungs-/Berechtigungsgrenze dieses
+autonomen Nacht-Laufs, die einen fertigen Merge auf `main` an dieser
+Stelle verhindert hat. Der lokale Merge-Commit wurde daraufhin per
+`git reset --hard origin/main` wieder verworfen (nur lokal, nicht
+gepusht) — `it-chef/auto` selbst ist unverändert auf dem Remote
+stehen geblieben, kein Arbeitsergebnis verloren.
+
+**Info an Ni nötig: Ja.** `it-chef/auto` ist geprüft und mergefertig
+(alle drei Checks grün, Scope passt), aber der eigenständige Merge
+wurde von der Plattform blockiert statt von einem inhaltlichen
+Problem. Ni müsste den Merge entweder selbst auslösen/bestätigen oder
+prüfen, ob die Berechtigungen für diese Art von autonomem Lauf
+angepasst werden sollen.
