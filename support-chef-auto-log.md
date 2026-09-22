@@ -2917,3 +2917,76 @@ Geschwister-Aufrufstellen, kein eigenständiger Reibungspunkt erkennbar.
 Die Reiseentwürfe-Karten selbst (Duplizieren, Löschen, Pausieren)
 wurden nicht erneut im Detail geprüft, da sie seit dem 17.09.-Bericht
 unverändert und bereits abgedeckt sind.
+
+## 2026-09-22 — Abgeschlossene Reiseentwürfe ohne jede Aktion (`Reiseentwuerfe.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+**Geprüfter Bereich:** `support-chef/auto` war zu Laufbeginn wieder auf
+dem Stand von `main` (Fast-Forward-Reset, keine eigenen Commits seit dem
+21.09.-Bericht verloren). Der jüngste inhaltliche Code-Stand liegt aber
+nicht auf `main`, sondern auf `it-chef/auto` — laut heutigem
+Freigabe-Chef-Log (`freigabe-chef-log.md`, "früher Nacht-Check")
+mergefertig, aber durch eine Session-Berechtigungssperre noch nicht nach
+`main` gemergt. Dort liegen die direkten Antworten auf die beiden
+Funde aus dem gestrigen Bericht dieser Datei:
+
+- Commits `e484e7b`/`ccebd3b`: `role="alert"` auf den Fehlerblöcken in
+  `FlightResults.tsx:28`, `HotelResults.tsx:29`, `Flugsuche.tsx:45` und
+  `Hotelsuche.tsx:46` ergänzt. Per Codelesen bestätigt: alle vier Blöcke
+  werden weiterhin nur bei `errors.length > 0` neu ins DOM gemountet
+  (kein reines Ein-/Ausblenden per CSS), `role="alert"` wird also bei
+  jedem echten Fehler frisch angekündigt — exakt der gestern
+  vorgeschlagene Fix, sauber umgesetzt, mit eigenen Regressionstests. Kein
+  neuer Fund an dieser Stelle.
+- Commit `5575e5b`: Der teal hervorgehobene "Planung fortsetzen"-Button
+  in `Reiseentwuerfe.tsx:220-224` steht jetzt hinter derselben
+  `draft.status !== 'finalized'`-Bedingung wie Pausieren/Abschließen
+  daneben — behebt den gestern gemeldeten Widerspruch (aktiver CTA nach
+  bewusstem Abschließen) tatsächlich.
+
+### Reibungspunkte
+
+**1. Ein abgeschlossener Reiseentwurf hat danach überhaupt keine
+sinnvolle Aktion mehr — nur noch Duplizieren oder Löschen**
+
+`src/pages/Reiseentwuerfe.tsx:217-268`: Für `draft.status === 'finalized'`
+blendet der gestrige Fix jetzt korrekt drei Buttons aus (Planung
+fortsetzen, Pausieren, Abschließen, alle `draft.status !== 'finalized'`
+in Zeile 220/225/237) — übrig bleiben ausschließlich Duplizieren (Zeile
+250-258) und Löschen (Zeile 260-268). Eine Codesuche nach `'finalized'`
+im gesamten `src`-Ordner zeigt: Der Status wird ausschließlich innerhalb
+dieser einen Datei gelesen — `MeineReisen.tsx` übernimmt abgeschlossene
+Entwürfe laut `ZEITPLAN.md` (Sprint 3, 7.3: „verschiebt den Entwurf
+bewusst noch nicht nach `MeineReisen.tsx`") weiterhin nicht, und es gibt
+auch sonst keine Detail- oder Übersichtsseite, die einen abgeschlossenen
+Entwurf zeigt. Für eine Nutzerin, die gerade bewusst im Dialog "Ja,
+abschließen" bestätigt hat (Zeile 292-309, Text: "Das lässt sich nicht
+rückgängig machen"), bleibt die Karte danach bestehen, aber ohne jede
+Möglichkeit, sich den abgeschlossenen Entwurf nochmal anzusehen oder
+irgendetwas Sinnvolles damit zu tun — nur "Duplizieren" (legt einen
+komplett neuen, wieder aktiven Entwurf an, stellt den Originalzustand
+nicht dar) oder "Löschen" bleiben klickbar. Der gestrige Fix behebt damit
+zwar den irreführenden CTA, ersetzt ihn aber durch eine Sackgasse statt
+durch eine passende Aktion — dieselbe Grundursache wie bei
+"Duplizierte Karte ist von der Originalkarte nicht unterscheidbar" aus
+dem Bericht vom 19.08., nur diesmal nicht optisch, sondern funktional.
+
+*Vorschlag:* Für `status === 'finalized'` mindestens einen neutralen,
+nicht-destruktiven Button anzeigen, der zumindest die vorhandenen
+Trip-Daten sichtbar macht (z. B. "Details ansehen" als reiner
+Text-/Outline-Button, der denselben Karteninhalt in einem Dialog
+aufklappt, ohne eine neue Seite zu brauchen) — solange es noch keine
+echte Detailseite pro Reise gibt. Eine reine Karte mit nur noch
+"Duplizieren"/"Löschen" wirkt sonst wie eine kaputte oder unvollständige
+Seite, gerade unmittelbar nach einer bewusst bestätigten, endgültigen
+Aktion.
+
+### Nicht geprüft
+Die beiden weiteren `it-chef/auto`-Läufe von heute (`4ff554b`, `8eb3dda`)
+haben laut eigenem Log keinen Code geändert (Kandidaten geprüft und
+verworfen) — dementsprechend gibt es dort nichts zusätzlich zu prüfen.
+Die bereits am 21.09. dokumentierte, weiterhin offene Anregung (eigene
+Badge-Variante für "Abgeschlossen" statt derselben `secondary`-Variante
+wie "Pausiert") wurde nicht erneut als eigener Punkt aufgeführt, da sie
+inhaltlich unverändert und schon gemeldet ist.
