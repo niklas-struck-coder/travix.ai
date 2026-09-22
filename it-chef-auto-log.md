@@ -11951,3 +11951,54 @@ Testdateien, 341 Tests, davon 1 neu — alle grün).
 `src/pages/Reiseentwuerfe.test.tsx` (neuer Test), `ZEITPLAN.md`,
 `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
 Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-22 (zweiter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand und den oben dokumentierten ersten Lauf von heute — kein
+Merge nötig, direkt auf dem bestehenden Branch-Kopf weitergearbeitet.
+
+**Ausgewählter Punkt:** Keiner. Nach vollständiger Durchsicht von
+`ZEITPLAN.md` (kompletter Verlauf), `tasks/tasks-prd-travix-platform.md`
+(alle `- [ ]`-Einträge) und der offenen Punkte aus `reports/it-chef.md`/
+`reports/support-chef.md` fand sich kein Punkt, der alle vier
+Sicherheitskriterien aus `.claude/skills/it-chef-eigen/SKILL.md`
+gleichzeitig erfüllt.
+
+**Geprüfte Kandidaten und warum verworfen:**
+- *Dauerhafter Dismiss-Mechanismus für den "Planung fortsetzen"-Hinweis*
+  (`Reiseentwuerfe.tsx`, in `ZEITPLAN.md` vom 13.09. bewusst offen
+  gelassen, "analog zur Prämienprogramm-Karte in `Dashboard.tsx`"):
+  gegengeprüft — die Prämienprogramm-Karte in `Dashboard.tsx:140-149` hat
+  selbst **keinen** Dismiss-Mechanismus, nur denselben "ehrlich statt
+  erfunden"-Kartenstil. Es gibt also kein etabliertes Muster zum
+  mechanischen Übernehmen; Button-Platzierung, Icon und
+  `localStorage`-Schlüsselschema müssten neu erfunden werden. Verletzt
+  Kriterium 3 ("keine Interpretation/Annahme über das hinaus, was in der
+  Aufgabenliste steht").
+- *Hilfe-Seite: Kontakthinweis statt Platzhaltertext*
+  (`reports/support-chef.md`, 21.09., Vorschlag 3): würde einen
+  Kontaktweg suggerieren, den es laut `ZEITPLAN.md` (Support-Sprint 1,
+  "Support-E-Mail live") noch gar nicht gibt — verletzt dieselbe
+  Ehrlichkeits-Regel, die im Code selbst schon mehrfach durchgesetzt
+  wurde (z. B. `Dashboard.tsx:137-138`). Verletzt Kriterium 3.
+- Alle übrigen offenen `- [ ]`-Punkte in
+  `tasks/tasks-prd-travix-platform.md` (2.0 Auth/Base44, 4.1-4.3
+  KI-Anbindung, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende
+  `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-Datenmodell, 8.2-8.7
+  Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11 Hilfe-FAQ, 8.12
+  Prämienprogramm): jeweils explizit als Produkt-/Architekturentscheidung
+  markiert (Kriterium 2) oder würde erfundene Inhalte brauchen
+  (Kriterium 3).
+- 8.13 (Unit-Tests für `calculateProgress`/`calculateCosts`/
+  `checklistRules`/Schema-Validierung): `calculateProgress.test.ts` und
+  `checklistRules.test.ts` existieren bereits; `calculateCosts.ts` und
+  die Schema-Validierung existieren im Code noch gar nicht (blockiert auf
+  6.7 bzw. 4.1) — Tests für nicht existierenden Code sind nicht
+  umsetzbar.
+- Testabdeckung allgemein: keine ungetestete Nicht-`ui/`-Datei unter
+  `src/` mehr übrig außer den seit Längerem dokumentierten bewussten
+  Ausnahmen (`App.tsx`, `main.tsx`, `routes.tsx`).
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
+Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
