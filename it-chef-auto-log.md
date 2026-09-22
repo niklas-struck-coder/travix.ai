@@ -12002,3 +12002,46 @@ gleichzeitig erfüllt.
 
 **Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
 Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (dritter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand sowie beide vorherigen Läufe von heute — kein Merge nötig,
+direkt auf dem bestehenden Branch-Kopf weitergearbeitet. Geprüft: seit
+dem zweiten Lauf heute (Commit `4ff554b`, 01:20 Uhr) gab es auf `main`
+keine neuen Commits und keine Änderungen an `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` oder `reports/` — der Ausgangsstand
+ist also identisch zu dem, den der zweite Lauf bereits vollständig
+durchsucht hat.
+
+**Ausgewählter Punkt:** Keiner. Da sich am Ausgangsstand seit dem
+zweiten Lauf nichts geändert hat, bleibt dessen Ergebnis gültig — zur
+Bestätigung trotzdem eigenständig nachvollzogen statt blind übernommen:
+alle verbleibenden `- [ ]`-Punkte in
+`tasks/tasks-prd-travix-platform.md` erneut einzeln durchgesehen
+(2.0 Auth/Base44, 4.1-4.3 KI-Anbindung, 5.7 Zug/Bus/Fähre-Suche, 6.2/6.6/
+6.7/7.12 fehlende `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-
+Datenmodell, 8.2-8.7 Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11
+Hilfe-FAQ, 8.12 Prämienprogramm) — jeder davon weiterhin entweder klar
+als Architektur-/Produktentscheidung markiert (Kriterium 2) oder würde
+erfundene Inhalte/Daten brauchen (Kriterium 3), keine Änderung zur
+Einschätzung des zweiten Laufs.
+
+Zusätzlich eigene Stichproben auf bisher unentdeckte Kandidaten:
+- `grep` nach `TODO`/`FIXME` in `src/` (außerhalb von Testdateien): keine
+  Treffer.
+- Alle Komponenten mit Lade-/Fehlerzuständen
+  (`isThinking`/`isLoading`/`isSearching` in `Urlaubsmodus.tsx`,
+  `HotelResults.tsx`, `FlightResults.tsx`, `TrainResults.tsx`,
+  `KiChat.tsx`) einzeln auf `role="status"`/`role="alert"` geprüft: alle
+  bereits aus den vorherigen Läufen dieser Woche vorhanden.
+  `TrainResults.tsx` hat bewusst keinen Fehlerzustand mit `role="alert"`,
+  weil die Komponente laut 5.7 noch keine echte Fehlerquelle hat (Zug/
+  Bus/Fähre-Suche ist weiterhin nur Mock/blockiert) — kein fehlender
+  Fix, sondern kein zutreffender Anwendungsfall.
+- Testabdeckung erneut gegengeprüft: keine ungetestete Nicht-`ui/`-Datei
+  unter `src/` außer den seit Längerem dokumentierten bewussten
+  Ausnahmen (`App.tsx`, `main.tsx`, `routes.tsx`).
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
+Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
