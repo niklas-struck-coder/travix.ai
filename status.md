@@ -13,17 +13,15 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-18):**
-- IT-Chef Auto hat 13 Accessibility-Fixes gemergt: Fokus nach Menü-Navigation,
-  eindeutige aria-labels, Ladehinweise mit role="status", Bestätigung vor
-  endgültigem Abschließen von Reiseentwürfen, gerundete Zimmer-/Gästezahlen
-- Marketing-Chef hat einen neuen UX-Kandidaten (Abschließen-Bestätigung)
-  vorgemerkt, acht Fixes bewusst ausgeschlossen; vier offene Fragen weiterhin
-  unbeantwortet
-- Support-Chef hat fehlendes role="alert" bei Flug-/Hotelsuche-Fehlern
-  gefunden; Freigabe-Chef hat alle drei Auto-Zweige unabhängig geprüft
-  und Marketing/Support gemergt
+**Seit letztem Update (2026-09-21):**
+- IT-Chef Auto hat role="alert" bei fehlgeschlagener Flug-/Hotelsuche ergänzt und
+  den "Planung fortsetzen"-Button bei abgeschlossenen Reiseentwürfen ausgeblendet;
+  weitere Läufe fanden keinen zusätzlichen sicheren Punkt
+- Support-Chef hat die beiden letzten Funde (role=alert, CTA-Sichtbarkeit) als
+  behoben bestätigt, neuer Fund: abgeschlossene Reiseentwürfe-Karte ohne jede Aktion
+- Marketing-Chef: reiner Übersichts-Lauf, keine neuen Tier-4-Kandidaten
+- Freigabe-Chef hat alle drei Auto-Branches unabhängig geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-21_
+_Letztes Update: 2026-09-22_
