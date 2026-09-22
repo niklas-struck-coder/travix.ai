@@ -12045,3 +12045,67 @@ Zusätzlich eigene Stichproben auf bisher unentdeckte Kandidaten:
 
 **Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
 Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (vierter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (lokal) war zu Laufbeginn noch identisch
+mit dem im dritten Lauf heute erzeugten Commit `8eb3dda`; `origin/main`
+war inzwischen um fünf weitere Merges vorangeschritten (Support-Chef-
+und Marketing-Chef-Berichte, ein Freigabe-Chef-Log sowie der
+`reports/it-chef.md`-Bericht eines separaten, plattform-verwalteten
+IT-Chef-Bug-Hunts, der 28 Dateien vollständig gegen Bugs durchsucht und
+ebenfalls nichts Neues gefunden hat). Per `git merge --ff-only
+origin/main` konfliktfrei nachgezogen (11 Commits, alle bereits reine
+Berichts-/Log-Änderungen ohne Codeänderung) und sofort auf
+`origin/it-chef/auto` gepusht, damit der Branch nicht hinter `main`
+zurückbleibt.
+
+**Ausgewählter Punkt:** Keiner. Alle `- [ ]`-Punkte in
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen (2.0 Auth/
+Base44, 4.1-4.3 KI-Anbindung, 5.7 Zug/Bus/Fähre-Suche, 6.2/6.6/6.7/7.12
+fehlende `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-Datenmodell,
+8.2-8.7 Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11 Hilfe-FAQ, 8.12
+Prämienprogramm) — unverändert gegenüber dem zweiten/dritten Lauf heute
+entweder als Architektur-/Produktentscheidung markiert (Kriterium 2)
+oder würde erfundene Inhalte/Daten brauchen (Kriterium 3).
+
+Zusätzlich eine eigenständige, von den bisherigen drei Läufen heute und
+dem separaten Bug-Hunt-Bericht bewusst unabhängige Stichprobe über einen
+Recherche-Agenten durchführen lassen, gezielt auf bisher nicht im
+Detail gelesenen Dateien: `useChat.ts`/`tripStorage.ts` (voll gelesen,
+bereits mit den bekannten Guards gegen fehlende/kaputte
+`localStorage`-Felder abgesichert), `nav-config.ts`/`utils.ts`/
+`design-tokens.ts`, `routes.tsx` (alle Navigationspfade haben eine
+echte Route oder fallen auf `PlaceholderPage` zurück, keine toten
+Links), alle `types/*.ts`, alle Such-Karten/-Wizards/-Ergebnislisten
+(`FlightCard`/`HotelCard`/`TrainCard`/`FlightResults`/`HotelResults`/
+`TrainResults`/`FlightWizard`/`HotelWizard`/`NoResultsMessage`), sowie
+`EditMode.tsx`, `ChatInput.tsx`, `TravixAvatar.tsx`, `KiChat.tsx`,
+`AppShell.tsx` und erneut mit frischem Blick `Warenkorb.tsx`/
+`Aktivitaeten.tsx`/`Preisalarme.tsx`/`Angebote.tsx`/`Favoriten.tsx`/
+`Reiseentwuerfe.tsx`/`Buchung.tsx`/`Flugsuche.tsx`/`Hotelsuche.tsx`/
+`Home.tsx`/`MeineReisen.tsx`/`PlaceholderPage.tsx`/`Urlaubsmodus.tsx`.
+Ergebnis: keine ungeschützten Array-/Objektzugriffe, alle Lade-/
+Fehlerzustände haben bereits `role="status"`/`role="alert"`, alle
+destruktiven Aktionen laufen bereits über das etablierte
+Bestätigungsdialog-Muster, Duplikat-Namen sind dort, wo sie überhaupt
+entstehen können, bereits per `aria-label`-Zusatz unterscheidbar. Erneut
+`grep` nach `TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+`@ts-expect-error` über ganz `src/`: keine Treffer außerhalb eines
+testbezogenen `@ts-expect-error` in `ChatInput.test.tsx`. Keine
+ungetestete Nicht-`ui/`-Datei mit echter Logik ohne Testdatei gefunden
+(reine Typdateien und die bewusst ausgenommenen Einstiegspunkte
+ausgenommen).
+
+Eine Beobachtung notiert, aber bewusst nicht als heutigen Punkt gewählt:
+`TrainResults.tsx`/`TrainCard.tsx`/`types/trains.ts` sind fertig gebaut
+und getestet, aber in keiner Seite/keinem Chat-Flow eingebunden (kein
+`TrainWizard`, keine `searchTrains`-Client-Funktion, keine Referenz
+außerhalb der eigenen Testdatei) — bereits mehrfach in `reports/it-chef.md`
+als toter Code dokumentiert; Fertigstellen oder Entfernen ist eine
+Produktentscheidung (5.7 setzt einen noch nicht ausgewählten
+Datenanbieter voraus), kein mechanischer Fix, verletzt Kriterium 2.
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag (inklusive des oben
+beschriebenen `main`-Nachzieh-Merges) ist der einzige Commit dieses
+Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
