@@ -4209,3 +4209,62 @@ wurde von der Plattform blockiert statt von einem inhaltlichen
 Problem. Ni müsste den Merge entweder selbst auslösen/bestätigen oder
 prüfen, ob die Berechtigungen für diese Art von autonomem Lauf
 angepasst werden sollen.
+
+## 2026-09-22, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** Alle drei hatten neue Commits vor `main`
+(`it-chef/auto` 6, `marketing-chef/auto` 1, `support-chef/auto` 1) — die
+sechs Commits auf `it-chef/auto` sind exakt dieselben, die schon im
+"früher Nacht-Check" (03:16 UTC) heute unabhängig verifiziert, aber wegen
+einer Session-Berechtigungssperre nicht gemergt werden konnten.
+
+**`it-chef/auto` erneut unabhängig verifiziert** (nicht nur den
+vorherigen Log-Eintrag geglaubt): Diff zu `main` geprüft (`role="alert"`
+in `FlightResults.tsx`, `HotelResults.tsx`, `Flugsuche.tsx`,
+`Hotelsuche.tsx`; "Planung fortsetzen"-Button in `Reiseentwuerfe.tsx`
+hinter `draft.status !== 'finalized'`) — kein Scope-Creep, keine
+Berührung von Auth/Zahlungen/Rechtstexten, kein Widerspruch zu
+`MARKENDESIGN.md`. In frischem `git worktree` (Merge von
+`origin/it-chef/auto` in `origin/main`, konfliktfrei) selbst ausgeführt:
+`npm install` → 650 Pakete, 0 Vulnerabilities; `npx tsc -b` → 0 Fehler;
+`npx eslint .` → 0 Fehler (dieselben 4 vorbestehenden
+`react-refresh`-Warnungen); `npx vitest run` → 58 Testdateien, 341 Tests,
+alle grün. Deckt sich exakt mit den Angaben in `it-chef-auto-log.md` und
+dem früheren Nacht-Check.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`, `561228a`). Diesmal
+lief der Merge ohne die Blockade vom früheren Nacht-Check durch — die
+Sperre scheint sitzungsspezifisch/kein Dauerzustand gewesen zu sein.
+
+**`marketing-chef/auto` geprüft:** Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`
+(reine Markdown-Ergänzung, kein Produkt-Code, kein Build/Lint/Test
+nötig). Reiner Übersichts-Lauf: keine neuen Tier-4-Kandidaten seit dem
+21.09., alle vier offenen Fragen weiterhin unbeantwortet, kein Hinweis
+auf tatsächliches Posten/Versenden/Veröffentlichen, keine erfundenen
+Kennzahlen, Text vollständig und kohärent.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`, `96492e5`).
+
+**`support-chef/auto` geprüft:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (reiner Analyse-Bericht, kein Code
+geändert). Bestätigt, dass beide gestrigen Funde (fehlendes
+`role="alert"`, aktiver "Planung fortsetzen"-CTA nach Abschluss) durch
+den soeben gemergten `it-chef/auto`-Stand tatsächlich behoben sind
+(stichprobenartig im Code nachvollzogen). Neuer Fund — abgeschlossene
+Reiseentwürfe haben danach nur noch "Duplizieren"/"Löschen", keine
+sinnvolle Aktion mehr — in `src/pages/Reiseentwuerfe.tsx` verifiziert:
+für `draft.status === 'finalized'` sind tatsächlich nur noch die beiden
+Icon-Buttons Duplizieren und Löschen sichtbar, alle anderen drei Buttons
+stehen hinter `draft.status !== 'finalized'`. Nichts wirkt erfunden.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`, `8c1db95`).
+
+**Ergebnis:** Alle drei Branches geprüft und gemergt, keine Konflikte,
+nach jedem Merge `origin/main` gepusht. `it-chef/auto` war dabei der
+vom früheren Nacht-Check bereits fertig geprüfte Stand, der jetzt ohne
+die zuvor erlebte Merge-Blockade durchging.
+
+**Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf. Die im
+früheren Nacht-Check gemeldete Merge-Blockade hat sich in diesem Lauf
+nicht wiederholt, braucht also aktuell keine weitere Rücksprache.
