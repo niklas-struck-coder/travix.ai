@@ -1631,6 +1631,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Bestätigungsklick umgestellt, ein neuer Test ergänzt (Klick auf
   "abschließen" öffnet die Bestätigung ohne sofortige Statusänderung;
   "Abbrechen" lässt den Entwurf unverändert "In Bearbeitung").
+  Vom autonomen IT-Chef-Lauf am 22.09. einen von `reports/support-chef.md`
+  (21.09., Vorschlag 2) gemeldeten Fund behoben: Der teal hervorgehobene
+  Button "Planung fortsetzen" wurde bisher für jede Karte gerendert,
+  unabhängig vom `status` — auch für einen gerade erst über den
+  Bestätigungsdialog ("das lässt sich nicht rückgängig machen")
+  abgeschlossenen Entwurf, der optisch fast unverändert weiter aktiv zum
+  Weiterplanen einlud. Von den beiden im Bericht vorgeschlagenen
+  Varianten (ausblenden oder durch einen neutralen "Details
+  ansehen"-Button ersetzen) die erste umgesetzt: ein neuer "Details
+  ansehen"-Button hätte eine bisher nicht existierende Detailansicht
+  vorausgesetzt, wäre also keine reine mechanische Korrektur, sondern
+  eine neue Design-/Funktionsentscheidung gewesen. Fix: `Button` jetzt
+  hinter dieselbe `draft.status !== 'finalized'`-Bedingung gestellt, die
+  im selben Card-Markup bereits für die Pausieren-/Abschließen-Buttons
+  etabliert ist (kein neues Muster). Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (Button ist für beide Demo-Entwürfe
+  vorhanden, verschwindet für den jeweiligen Entwurf nach dem
+  Abschließen).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

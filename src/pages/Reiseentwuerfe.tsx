@@ -217,9 +217,11 @@ export function Reiseentwuerfe() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button asChild size="sm" className="bg-teal text-navy hover:bg-teal/90">
-                    <Link to="/ki-chat">Planung fortsetzen</Link>
-                  </Button>
+                  {draft.status !== 'finalized' && (
+                    <Button asChild size="sm" className="bg-teal text-navy hover:bg-teal/90">
+                      <Link to="/ki-chat">Planung fortsetzen</Link>
+                    </Button>
+                  )}
                   {draft.status !== 'finalized' && (
                     <Button
                       size="icon"

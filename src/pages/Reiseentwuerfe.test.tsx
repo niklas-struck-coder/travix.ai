@@ -83,6 +83,21 @@ describe('Reiseentwuerfe', () => {
     expect(screen.queryByRole('button', { name: 'Lissabon abschließen' })).not.toBeInTheDocument()
   })
 
+  it('hides the "Planung fortsetzen" button once a draft is finalized', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getAllByRole('link', { name: 'Planung fortsetzen' })).toHaveLength(2)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+
+    expect(screen.getAllByRole('link', { name: 'Planung fortsetzen' })).toHaveLength(1)
+  })
+
   it('asks for confirmation before finalizing a draft, and keeps it in progress if cancelled', () => {
     render(
       <MemoryRouter>

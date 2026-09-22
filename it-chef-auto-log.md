@@ -11904,3 +11904,50 @@ davon 2 neu — alle grün), zusätzlich `npm run build`
 `src/pages/Flugsuche.test.tsx`, `src/pages/Hotelsuche.test.tsx` (je ein
 neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-22 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand (`git merge-base --is-ancestor origin/main it-chef/auto`
+bestätigt das) — kein Merge nötig, direkt auf dem bestehenden Branch-Kopf
+weitergearbeitet.
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md`
+(2026-09-21): Der teal hervorgehobene Button "Planung fortsetzen" in
+`Reiseentwuerfe.tsx` wurde bisher für jede Karte gerendert, unabhängig von
+`draft.status` — auch für einen Entwurf, der gerade eben über den
+"Ja, abschließen"-Dialog ("das lässt sich nicht rückgängig machen")
+abgeschlossen wurde. Die Karte lud damit optisch fast unverändert weiter
+aktiv zum Weiterplanen ein, nur das Badge wechselte auf "Abgeschlossen".
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder Rechtstexten. Keine offene Architektur-/Produktentscheidung: von den
+beiden im Bericht vorgeschlagenen Varianten (ausblenden vs. neuer
+"Details ansehen"-Button) wurde bewusst die ausblendende Variante gewählt,
+weil ein neuer Button eine bisher nicht existierende Detailansicht
+vorausgesetzt hätte — das wäre eine neue Design-/Funktionsentscheidung
+gewesen, kein mechanischer Fix. Das Ausblenden folgt stattdessen exakt dem
+bereits im selben Card-Markup etablierten Muster (`draft.status !==
+'finalized'`), das dort schon für die Pausieren-/Abschließen-Buttons
+verwendet wird. Klar umrissen (ein Button, eine Bedingung, eine Datei).
+Objektiv prüfbar (Regressionstest zählt die sichtbaren
+"Planung fortsetzen"-Links vor/nach dem Abschließen).
+
+**Fix:** `Button` für "Planung fortsetzen" in `Reiseentwuerfe.tsx` hinter
+dieselbe `draft.status !== 'finalized'`-Bedingung gestellt wie die
+Pausieren-/Abschließen-Buttons daneben — reine Sichtbarkeits-Korrektur,
+kein neues UI-Muster. Neuer Regressionstest in
+`Reiseentwuerfe.test.tsx` (Button für beide Demo-Entwürfe sichtbar,
+verschwindet für den jeweiligen Entwurf nach dem Abschließen).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), danach
+`npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden, unveränderten Warnungen), gezielt `npx
+vitest run src/pages/Reiseentwuerfe.test.tsx` (1 Testdatei, 12 Tests,
+davon 1 neu — alle grün), danach volle Suite `npx vitest run` (58
+Testdateien, 341 Tests, davon 1 neu — alle grün).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
