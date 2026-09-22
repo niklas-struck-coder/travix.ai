@@ -1,15 +1,25 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  BedDouble,
+  Bus,
   CalendarDays,
+  Car,
   Copy,
+  Eye,
   Info,
+  MapPin,
   PauseCircle,
   PiggyBank,
+  Plane,
   PlayCircle,
+  Ship,
   Sparkles,
+  Ticket,
+  Train,
   Trash2,
   CheckCircle2,
+  Wallet,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,7 +36,26 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { calculateProgress } from '@/lib/trip/calculateProgress'
-import type { TripDraft } from '@/types/chat'
+import type { TransportMode, TripDraft } from '@/types/chat'
+
+// Gleiche Icons/Labels wie TripSummaryCard.tsx und Buchung.tsx, damit ein
+// Transportmodus überall im Chat/Reiseplan/Reiseentwürfe-Kontext identisch
+// dargestellt wird.
+const transportIcons: Record<TransportMode, typeof Plane> = {
+  flight: Plane,
+  train: Train,
+  bus: Bus,
+  ferry: Ship,
+  car: Car,
+}
+
+const transportLabels: Record<TransportMode, string> = {
+  flight: 'Flug',
+  train: 'Zug',
+  bus: 'Bus',
+  ferry: 'Fähre',
+  car: 'Mietwagen',
+}
 
 interface Draft {
   id: string
@@ -81,6 +110,7 @@ export function Reiseentwuerfe() {
   const [drafts, setDrafts] = useState(initialDrafts)
   const [pendingRemoval, setPendingRemoval] = useState<Draft | null>(null)
   const [pendingFinalize, setPendingFinalize] = useState<Draft | null>(null)
+  const [detailsDraft, setDetailsDraft] = useState<Draft | null>(null)
 
   function togglePause(id: string) {
     setDrafts((current) =>
@@ -246,6 +276,18 @@ export function Reiseentwuerfe() {
                       <CheckCircle2 className="size-4" />
                     </Button>
                   )}
+                  {draft.status === 'finalized' && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-8 text-muted-foreground hover:text-foreground"
+                      aria-label={`${draftLabel} Details ansehen`}
+                      title="Details ansehen"
+                      onClick={() => setDetailsDraft(draft)}
+                    >
+                      <Eye className="size-4" />
+                    </Button>
+                  )}
                   <Button
                     size="icon"
                     variant="ghost"
@@ -308,6 +350,42 @@ export function Reiseentwuerfe() {
               Ja, abschließen
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={detailsDraft !== null} onOpenChange={(open) => !open && setDetailsDraft(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{detailsDraft?.destination}</DialogTitle>
+            <DialogDescription>Abgeschlossener Reiseentwurf — nur zum Ansehen.</DialogDescription>
+          </DialogHeader>
+          {detailsDraft && (
+            <div className="flex flex-col gap-3">
+              {[
+                { icon: MapPin, label: detailsDraft.destination },
+                detailsDraft.trip.transportMode && {
+                  icon: transportIcons[detailsDraft.trip.transportMode],
+                  label: transportLabels[detailsDraft.trip.transportMode],
+                },
+                detailsDraft.trip.dates && { icon: CalendarDays, label: detailsDraft.trip.dates },
+                detailsDraft.trip.budget && { icon: Wallet, label: detailsDraft.trip.budget },
+                detailsDraft.trip.accommodation && { icon: BedDouble, label: detailsDraft.trip.accommodation },
+              ]
+                .filter((row): row is { icon: typeof MapPin; label: string } => Boolean(row))
+                .map((row) => (
+                  <div key={row.label} className="flex items-center gap-2 text-sm text-foreground">
+                    <row.icon className="size-4 text-teal" />
+                    {row.label}
+                  </div>
+                ))}
+              <div className="flex items-center gap-2 text-sm text-foreground">
+                <Ticket className="size-4 text-teal" />
+                {detailsDraft.trip.activities.length > 0
+                  ? `${detailsDraft.trip.activities.length} ${detailsDraft.trip.activities.length === 1 ? 'Aktivität geplant' : 'Aktivitäten geplant'}`
+                  : 'Noch keine Aktivitäten geplant'}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

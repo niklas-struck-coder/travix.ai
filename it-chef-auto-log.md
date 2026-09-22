@@ -12109,3 +12109,86 @@ Datenanbieter voraus), kein mechanischer Fix, verletzt Kriterium 2.
 **Ergebnis:** Kein Code geändert. Dieser Log-Eintrag (inklusive des oben
 beschriebenen `main`-Nachzieh-Merges) ist der einzige Commit dieses
 Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (lokal) war zu Laufbeginn identisch mit
+dem im vierten Lauf heute erzeugten Commit `4da7308`; `origin/main` war
+seither unverändert (kein neuer Commit dort). Kein Nachzieh-Merge nötig.
+
+**Ausgewählter Punkt:** Neuer Fund aus `reports/support-chef.md` (22.09.,
+Vorschlag 1): Nachdem der vierte Lauf heute (siehe Eintrag oben) den
+Button "Planung fortsetzen" für `status === 'finalized'` ausgeblendet
+hatte, blieben auf einer abgeschlossenen Reiseentwürfe-Karte nur noch
+"Duplizieren" und "Löschen" übrig — keine Aktion, um den gerade bewusst
+abgeschlossenen Entwurf überhaupt noch anzusehen. Support-Chef schlug
+konkret einen neutralen "Details ansehen"-Button vor, der die
+vorhandenen Trip-Daten read-only in einem Dialog zeigt.
+
+**Wichtiger Hinweis zur Einordnung:** Genau diese Option wurde im
+selben Bericht bereits am 21.09. genannt und im *vierten* Lauf heute
+(oben) bewusst *nicht* gewählt, mit der Begründung, sie setze "eine
+bisher nicht existierende Detailansicht" voraus und wäre damit "keine
+reine mechanische Korrektur, sondern eine neue Design-/
+Funktionsentscheidung" — Kriterium 3 verletzt. Diese Einschätzung habe
+ich vor der Umsetzung bewusst gegengeprüft, statt sie zu ignorieren:
+
+- Der neue Support-Chef-Fund von heute (22.09., nach dem vierten Lauf
+  entstanden) ist ein eigenständiger *Folgefund* auf das Ausblenden —
+  nicht dieselbe Frage nochmal, sondern ein neues Problem, das der
+  vierte Lauf mit seiner Wahl selbst erzeugt hat (Karte ohne jede
+  sinnvolle Aktion).
+- Die vermutete Notwendigkeit, eine neue Detailansicht zu "erfinden",
+  trifft nicht zu: Genau diese Zeilen-Darstellung (Icon + Label je Feld:
+  Ziel, Transportmodus, Datum, Budget, Unterkunft) existiert bereits
+  identisch an zwei Stellen im Code — `TripSummaryCard.tsx` und den
+  `Section`-Karten in `Buchung.tsx`, beide mit denselben Icons/Labels.
+  Das eigentliche Risiko beim naheliegenden Weg (die vorhandene
+  `TripSummaryCard`-Komponente direkt importieren) ist ein anderes: sie
+  hat einen "Speichern & ansehen"-Link nach `/buchung`, der dort den
+  aktuell in `tripStorage.ts` gespeicherten Trip zeigt — bei den
+  hartkodierten Demo-Entwürfen hier wäre das der falsche bzw. gar kein
+  zugehöriger Trip. Deshalb keine Komponente importiert, sondern nur die
+  Zeilen-Logik (dieselben Icons/Labels/Wortlaut) direkt im
+  Read-only-Dialog in `Reiseentwuerfe.tsx` nachgebaut, ganz ohne
+  Bearbeiten-Aktionen oder Navigation.
+
+Damit ist es nach eigener Prüfung doch eine reine, mechanische
+Zusammensetzung bereits etablierter Bausteine und keine neu erfundene
+Design-Entscheidung — die konkrete Umsetzung ist unten unter "Details
+ansehen" beschrieben. Weil das eine Neubewertung einer im selben Tag
+bereits getroffenen Entscheidung ist, wird dieser Punkt hier bewusst
+ausführlich begründet, damit Freigabe-Chef (unabhängige Prüfung vor dem
+Merge nach `main`) und Ni das nachvollziehen und bei Bedarf zurückweisen
+können.
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — neuer "Details
+ansehen"-Button (Eye-Icon, gleicher Stil wie die anderen Icon-Buttons in
+der Karte), sichtbar nur bei `draft.status === 'finalized'`. Öffnet
+einen reinen Lese-Dialog (kein Bearbeiten, keine Navigation) mit
+Ziel/Transportmodus/Datum/Budget/Unterkunft als Icon+Label-Zeilen
+(identische Icons/Labels wie `TripSummaryCard.tsx`/`Buchung.tsx`) sowie
+einer Aktivitäten-Zeile mit derselben Zähl-Formulierung wie in
+`Buchung.tsx` ("{n} Aktivität(en) geplant" / "Noch keine Aktivitäten
+geplant"). Schließen läuft über den bereits vorhandenen Standard-Close
+(X-Button) des `Dialog`-Bausteins, kein zusätzlicher Footer-Button (der
+hätte denselben barrierefreien Namen "Schließen" doppelt vergeben).
+
+Die im selben Support-Chef-Fund zusätzlich genannte
+Badge-Unterscheidbarkeit ("Abgeschlossen" nutzt optisch dieselbe
+`secondary`-Variante wie "Pausiert") bewusst **nicht** angefasst:
+`MARKENDESIGN.md` enthält keine Vorgabe für Status-Badge-Farben, eine
+Variante auszuwählen wäre Raten statt Umsetzen einer klaren Vorgabe
+(siehe SKILL.md, Design-Abschnitt). Für Marketing-Chef/Ni als offener
+Punkt stehen gelassen.
+
+**Geprüft:** `npm ci`, `npm run build` (= `tsc -b && vite build`, keine
+Fehler), `npm run lint` (0 Fehler, nur die vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen in `ui/`-Dateien), `npm test` (alle
+58 Testdateien/343 Tests grün, inkl. zwei neuer Tests in
+`Reiseentwuerfe.test.tsx`).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` und
+`src/pages/Reiseentwuerfe.test.tsx` geändert, `ZEITPLAN.md` (Eintrag
+7.2) und dieser Log-Eintrag mit committet — auf `it-chef/auto` gepusht,
+`main` unberührt.
