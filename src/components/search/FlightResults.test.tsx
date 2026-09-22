@@ -54,6 +54,12 @@ describe('FlightResults', () => {
     expect(screen.queryByText('Keine Flüge gefunden')).not.toBeInTheDocument()
   })
 
+  it('announces a search error to assistive tech via role="alert"', () => {
+    render(<FlightResults offers={null} errors={[error]} loading={false} onSelect={() => {}} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent(error.message)
+  })
+
   it('renders nothing while not loading, no error, and no offers are set', () => {
     const { container } = render(<FlightResults offers={null} errors={[]} loading={false} onSelect={() => {}} />)
 

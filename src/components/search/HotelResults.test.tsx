@@ -40,6 +40,12 @@ describe('HotelResults', () => {
     expect(screen.queryByText('Keine Unterkünfte gefunden')).not.toBeInTheDocument()
   })
 
+  it('announces a search error to assistive tech via role="alert"', () => {
+    render(<HotelResults offers={null} errors={[error]} loading={false} onSelect={() => {}} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent(error.message)
+  })
+
   it('renders nothing while not loading, no error, and no offers are set', () => {
     const { container } = render(<HotelResults offers={null} errors={[]} loading={false} onSelect={() => {}} />)
 

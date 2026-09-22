@@ -308,6 +308,42 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Flugsuche.test.tsx` — vor dem Fix durch temporäres Zurücknehmen der
   Quelländerung (`git stash` nur `Flugsuche.tsx`) reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 21.09. (vierter Lauf desselben Tages)
+  den in `reports/it-chef.md` (21.09., PR #22) bereits vollständig
+  diagnostizierten Fund direkt auf `it-chef/auto` behoben, statt auf
+  den offenen Auto-Fix-PR zu warten: Der Fehlerzustand in
+  `FlightResults.tsx` und `HotelResults.tsx` (fehlgeschlagene Flug-/
+  Unterkunftssuche) hatte kein ARIA-Live-Region-Attribut, obwohl der
+  direkt darüberliegende Ladezustand in denselben Komponenten bereits
+  `role="status"` nutzt — Screenreader-Nutzer:innen bekamen einen
+  Suchfehler nicht automatisch angekündigt. Fix: `role="alert"` auf
+  beide Fehler-`<div>`s ergänzt, mechanische Attribut-Ergänzung ohne
+  Verhaltensänderung für sehende Nutzer:innen. Anders als PR #22 (dort
+  ausdrücklich als fehlend vermerkt, weil dieser Kanal keine Testläufe
+  erlaubt) mit begleitenden Regressionstests: je ein neuer Test in
+  `FlightResults.test.tsx`/`HotelResults.test.tsx`
+  (`getByRole('alert')` zeigt die Fehlermeldung). Der ursprüngliche
+  Auto-Fix-PR #22 bleibt als überholt zurück (kann bei nächster
+  PR-Hygiene-Aufräumung geschlossen werden). Die strukturell identische
+  Lücke im selben Fehler-Markup von `Flugsuche.tsx`/`Hotelsuche.tsx`
+  bleibt bewusst unangetastet — das war nicht Teil des diagnostizierten
+  Fundes, bleibt aber ein naheliegender Kandidat für einen künftigen,
+  eigenständig neu bewerteten Lauf.
+  Vom autonomen IT-Chef-Lauf am 21.09. (fünfter Lauf desselben Tages)
+  genau diesen im vierten Lauf zurückgestellten Kandidaten umgesetzt: Der
+  Fehlerzustand (fehlgeschlagene Suche) in den standalone Seiten
+  `Flugsuche.tsx` (Zeile 44) und `Hotelsuche.tsx` (Zeile 43) hatte
+  dasselbe fehlende ARIA-Live-Region-Attribut wie zuvor `FlightResults.tsx`/
+  `HotelResults.tsx` — strukturell identisches Fehler-`<div>` (dieselben
+  Klassen, derselbe `errors`-State), nur an einer anderen Stelle im Code
+  (die Seiten rendern ihre eigene Fehlerbox statt die Ergebnis-Komponenten
+  zu nutzen). Fix: `role="alert"` auf beide Fehler-`<div>`s ergänzt,
+  mechanische Attribut-Ergänzung ohne Verhaltensänderung für sehende
+  Nutzer:innen — 1:1 dasselbe Muster wie im vierten Lauf. Je ein neuer
+  Regressionstest in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
+  (`getByRole('alert')` zeigt die Fehlermeldung) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `Flugsuche.tsx`/`Hotelsuche.tsx`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -1595,6 +1631,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Bestätigungsklick umgestellt, ein neuer Test ergänzt (Klick auf
   "abschließen" öffnet die Bestätigung ohne sofortige Statusänderung;
   "Abbrechen" lässt den Entwurf unverändert "In Bearbeitung").
+  Vom autonomen IT-Chef-Lauf am 22.09. einen von `reports/support-chef.md`
+  (21.09., Vorschlag 2) gemeldeten Fund behoben: Der teal hervorgehobene
+  Button "Planung fortsetzen" wurde bisher für jede Karte gerendert,
+  unabhängig vom `status` — auch für einen gerade erst über den
+  Bestätigungsdialog ("das lässt sich nicht rückgängig machen")
+  abgeschlossenen Entwurf, der optisch fast unverändert weiter aktiv zum
+  Weiterplanen einlud. Von den beiden im Bericht vorgeschlagenen
+  Varianten (ausblenden oder durch einen neutralen "Details
+  ansehen"-Button ersetzen) die erste umgesetzt: ein neuer "Details
+  ansehen"-Button hätte eine bisher nicht existierende Detailansicht
+  vorausgesetzt, wäre also keine reine mechanische Korrektur, sondern
+  eine neue Design-/Funktionsentscheidung gewesen. Fix: `Button` jetzt
+  hinter dieselbe `draft.status !== 'finalized'`-Bedingung gestellt, die
+  im selben Card-Markup bereits für die Pausieren-/Abschließen-Buttons
+  etabliert ist (kein neues Muster). Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (Button ist für beide Demo-Entwürfe
+  vorhanden, verschwindet für den jeweiligen Entwurf nach dem
+  Abschließen).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

@@ -121,6 +121,21 @@ describe('Flugsuche', () => {
     expect(screen.queryByText('Keine Ergebnisse gefunden')).not.toBeInTheDocument()
   })
 
+  it('announces a search error to assistive tech via role="alert"', async () => {
+    const searchFlightsMock = vi.mocked(searchFlights)
+    searchFlightsMock.mockResolvedValueOnce({ offers: [], errors: [{ message: 'Duffel ist gerade nicht erreichbar.' }] })
+
+    render(
+      <MemoryRouter>
+        <Flugsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Flüge suchen'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Duffel ist gerade nicht erreichbar.')
+  })
+
   describe('when localStorage is unavailable (e.g. quota exceeded)', () => {
     afterEach(() => {
       vi.restoreAllMocks()

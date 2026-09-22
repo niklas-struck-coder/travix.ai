@@ -11806,3 +11806,242 @@ erfolgreich).
 **Commit:** `src/pages/Flugsuche.tsx` (Fix), `src/pages/Flugsuche.test.tsx`
 (ein neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
 (Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, vierter Lauf)
+
+**Branch-Stand:** `it-chef/auto` war zu Laufbeginn identisch mit `main`
+(letzter Merge durch Freigabe-Chef, keine offenen Änderungen aus einem
+vorherigen Lauf). Neu von `main` ausgecheckt.
+
+**Ausgewählter Punkt:** Der im vorherigen Lauf heute (dritter Lauf)
+bewusst zurückgestellte "Fund 1" nachgeholt, der bereits vollständig
+diagnostiziert war und zusätzlich mit dem in `reports/it-chef.md`
+(21.09., PR #22) unabhängig gemeldeten Fund übereinstimmt: Der
+Fehlerzustand (fehlgeschlagene Suche) in `FlightResults.tsx` (Zeile 27)
+und `HotelResults.tsx` (Zeile 28) hatte kein ARIA-Live-Region-Attribut,
+obwohl der Ladezustand direkt darüber in denselben Komponenten bereits
+`role="status"` nutzt — Screenreader-Nutzer:innen bekamen einen
+Suchfehler nicht automatisch angekündigt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine ARIA-Attribut-Ergänzung). Keine
+offene Architektur-/Produktentscheidung — mechanische Übernahme des im
+selben Code (`role="status"` für den Ladezustand) sowie im offenen
+Auto-Fix-PR #22 bereits etablierten und von zwei unabhängigen Quellen
+(Support-Chef-Bericht, PR #22) übereinstimmend bestätigten Musters.
+Klar umrissen (ein Attribut auf zwei bereits benannten Zeilen). Objektiv
+prüfbar (Regressionstest mit `getByRole('alert')`). Anders als im
+PR-#22-Kanal durfte hier zusätzlich ein echter Testlauf die Fixes
+verifizieren.
+
+**Fix:** `role="alert"` auf das Fehler-`<div>` in `FlightResults.tsx`
+und `HotelResults.tsx` ergänzt — reine Attribut-Ergänzung, keine
+sonstige Verhaltensänderung. Je ein neuer Regressionstest in
+`FlightResults.test.tsx`/`HotelResults.test.tsx`
+(`getByRole('alert')` zeigt die Fehlermeldung). Die strukturell
+identische Lücke im selben Fehler-Markup von `Flugsuche.tsx`/
+`Hotelsuche.tsx` bewusst nicht mitgefixt — nicht Teil des
+diagnostizierten Fundes, bleibt eigener Kandidat für einen künftigen,
+eigenständig neu bewerteten Lauf, um die Punkte sauber getrennt zu
+halten.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten Warnungen),
+gezielt `npx vitest run src/components/search/FlightResults.test.tsx
+src/components/search/HotelResults.test.tsx` (2 Testdateien, 14 Tests,
+davon 2 neu — alle grün), danach volle Suite `npm test` (58
+Testdateien, 338 Tests, davon 2 neu — alle grün).
+
+**Commit:** `src/components/search/FlightResults.tsx`,
+`src/components/search/HotelResults.tsx` (Fix),
+`src/components/search/FlightResults.test.tsx`,
+`src/components/search/HotelResults.test.tsx` (je ein neuer Test),
+`ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` (Einträge ergänzt),
+dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-21 (autonomer Tagesmodus-Lauf, fünfter Lauf)
+
+**Branch-Stand:** `it-chef/auto` hatte zu Laufbeginn einen offenen,
+noch nicht von Freigabe-Chef gemergten Commit aus dem vierten Lauf
+heute (`role="alert"` in `FlightResults.tsx`/`HotelResults.tsx`).
+Darauf weitergearbeitet, zusätzlich frischen Stand von `main` konfliktfrei
+reingemergt (nur Berichts-/Status-Dateien geändert, kein Codekonflikt).
+
+**Ausgewählter Punkt:** Der im vierten Lauf heute bewusst zurückgestellte
+Kandidat umgesetzt: Die standalone Seiten `Flugsuche.tsx` (Zeile 44) und
+`Hotelsuche.tsx` (Zeile 43) haben ihre eigene Fehler-Box für eine
+fehlgeschlagene Suche (unabhängig von `FlightResults.tsx`/
+`HotelResults.tsx`, die im vierten Lauf bereits repariert wurden) — auch
+diese hatte kein ARIA-Live-Region-Attribut.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten (reine ARIA-Attribut-Ergänzung). Keine
+offene Architektur-/Produktentscheidung — mechanische 1:1-Übernahme des
+im selben Lauf-Kontext bereits etablierten und verifizierten Musters
+(`role="alert"` auf strukturell identischem Fehler-Markup, dieselben
+CSS-Klassen, derselbe `errors`-State). Klar umrissen (ein Attribut auf
+je einer bereits benannten Zeile in zwei Dateien). Objektiv prüfbar
+(Regressionstest mit `getByRole('alert')`).
+
+**Fix:** `role="alert"` auf das Fehler-`<div>` in `Flugsuche.tsx` und
+`Hotelsuche.tsx` ergänzt — reine Attribut-Ergänzung, keine sonstige
+Verhaltensänderung. Je ein neuer Regressionstest in
+`Flugsuche.test.tsx`/`Hotelsuche.test.tsx` (`getByRole('alert')` zeigt
+die Fehlermeldung) — vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `Flugsuche.tsx`/`Hotelsuche.tsx`)
+reproduzierbar rot verifiziert.
+
+**Geprüft:** `npm install` (frischer Checkout, `node_modules` fehlte),
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten Warnungen),
+gezielt `npx vitest run src/pages/Flugsuche.test.tsx
+src/pages/Hotelsuche.test.tsx` (2 Testdateien, 10 Tests, davon 2 neu —
+alle grün), danach volle Suite `npm test` (58 Testdateien, 340 Tests,
+davon 2 neu — alle grün), zusätzlich `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Commit:** `src/pages/Flugsuche.tsx`, `src/pages/Hotelsuche.tsx` (Fix),
+`src/pages/Flugsuche.test.tsx`, `src/pages/Hotelsuche.test.tsx` (je ein
+neuer Test), `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`
+(Einträge ergänzt), dieser Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-22 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand (`git merge-base --is-ancestor origin/main it-chef/auto`
+bestätigt das) — kein Merge nötig, direkt auf dem bestehenden Branch-Kopf
+weitergearbeitet.
+
+**Ausgewählter Punkt:** Vorschlag 2 aus `reports/support-chef.md`
+(2026-09-21): Der teal hervorgehobene Button "Planung fortsetzen" in
+`Reiseentwuerfe.tsx` wurde bisher für jede Karte gerendert, unabhängig von
+`draft.status` — auch für einen Entwurf, der gerade eben über den
+"Ja, abschließen"-Dialog ("das lässt sich nicht rückgängig machen")
+abgeschlossen wurde. Die Karte lud damit optisch fast unverändert weiter
+aktiv zum Weiterplanen ein, nur das Badge wechselte auf "Abgeschlossen".
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder Rechtstexten. Keine offene Architektur-/Produktentscheidung: von den
+beiden im Bericht vorgeschlagenen Varianten (ausblenden vs. neuer
+"Details ansehen"-Button) wurde bewusst die ausblendende Variante gewählt,
+weil ein neuer Button eine bisher nicht existierende Detailansicht
+vorausgesetzt hätte — das wäre eine neue Design-/Funktionsentscheidung
+gewesen, kein mechanischer Fix. Das Ausblenden folgt stattdessen exakt dem
+bereits im selben Card-Markup etablierten Muster (`draft.status !==
+'finalized'`), das dort schon für die Pausieren-/Abschließen-Buttons
+verwendet wird. Klar umrissen (ein Button, eine Bedingung, eine Datei).
+Objektiv prüfbar (Regressionstest zählt die sichtbaren
+"Planung fortsetzen"-Links vor/nach dem Abschließen).
+
+**Fix:** `Button` für "Planung fortsetzen" in `Reiseentwuerfe.tsx` hinter
+dieselbe `draft.status !== 'finalized'`-Bedingung gestellt wie die
+Pausieren-/Abschließen-Buttons daneben — reine Sichtbarkeits-Korrektur,
+kein neues UI-Muster. Neuer Regressionstest in
+`Reiseentwuerfe.test.tsx` (Button für beide Demo-Entwürfe sichtbar,
+verschwindet für den jeweiligen Entwurf nach dem Abschließen).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), danach
+`npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, weiterhin
+dieselben vier vorbestehenden, unveränderten Warnungen), gezielt `npx
+vitest run src/pages/Reiseentwuerfe.test.tsx` (1 Testdatei, 12 Tests,
+davon 1 neu — alle grün), danach volle Suite `npx vitest run` (58
+Testdateien, 341 Tests, davon 1 neu — alle grün).
+
+**Commit:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Test), `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` (Einträge ergänzt), dieser
+Log-Eintrag — auf `it-chef/auto` gepusht.
+
+## 2026-09-22 (zweiter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand und den oben dokumentierten ersten Lauf von heute — kein
+Merge nötig, direkt auf dem bestehenden Branch-Kopf weitergearbeitet.
+
+**Ausgewählter Punkt:** Keiner. Nach vollständiger Durchsicht von
+`ZEITPLAN.md` (kompletter Verlauf), `tasks/tasks-prd-travix-platform.md`
+(alle `- [ ]`-Einträge) und der offenen Punkte aus `reports/it-chef.md`/
+`reports/support-chef.md` fand sich kein Punkt, der alle vier
+Sicherheitskriterien aus `.claude/skills/it-chef-eigen/SKILL.md`
+gleichzeitig erfüllt.
+
+**Geprüfte Kandidaten und warum verworfen:**
+- *Dauerhafter Dismiss-Mechanismus für den "Planung fortsetzen"-Hinweis*
+  (`Reiseentwuerfe.tsx`, in `ZEITPLAN.md` vom 13.09. bewusst offen
+  gelassen, "analog zur Prämienprogramm-Karte in `Dashboard.tsx`"):
+  gegengeprüft — die Prämienprogramm-Karte in `Dashboard.tsx:140-149` hat
+  selbst **keinen** Dismiss-Mechanismus, nur denselben "ehrlich statt
+  erfunden"-Kartenstil. Es gibt also kein etabliertes Muster zum
+  mechanischen Übernehmen; Button-Platzierung, Icon und
+  `localStorage`-Schlüsselschema müssten neu erfunden werden. Verletzt
+  Kriterium 3 ("keine Interpretation/Annahme über das hinaus, was in der
+  Aufgabenliste steht").
+- *Hilfe-Seite: Kontakthinweis statt Platzhaltertext*
+  (`reports/support-chef.md`, 21.09., Vorschlag 3): würde einen
+  Kontaktweg suggerieren, den es laut `ZEITPLAN.md` (Support-Sprint 1,
+  "Support-E-Mail live") noch gar nicht gibt — verletzt dieselbe
+  Ehrlichkeits-Regel, die im Code selbst schon mehrfach durchgesetzt
+  wurde (z. B. `Dashboard.tsx:137-138`). Verletzt Kriterium 3.
+- Alle übrigen offenen `- [ ]`-Punkte in
+  `tasks/tasks-prd-travix-platform.md` (2.0 Auth/Base44, 4.1-4.3
+  KI-Anbindung, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende
+  `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-Datenmodell, 8.2-8.7
+  Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11 Hilfe-FAQ, 8.12
+  Prämienprogramm): jeweils explizit als Produkt-/Architekturentscheidung
+  markiert (Kriterium 2) oder würde erfundene Inhalte brauchen
+  (Kriterium 3).
+- 8.13 (Unit-Tests für `calculateProgress`/`calculateCosts`/
+  `checklistRules`/Schema-Validierung): `calculateProgress.test.ts` und
+  `checklistRules.test.ts` existieren bereits; `calculateCosts.ts` und
+  die Schema-Validierung existieren im Code noch gar nicht (blockiert auf
+  6.7 bzw. 4.1) — Tests für nicht existierenden Code sind nicht
+  umsetzbar.
+- Testabdeckung allgemein: keine ungetestete Nicht-`ui/`-Datei unter
+  `src/` mehr übrig außer den seit Längerem dokumentierten bewussten
+  Ausnahmen (`App.tsx`, `main.tsx`, `routes.tsx`).
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
+Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (dritter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand sowie beide vorherigen Läufe von heute — kein Merge nötig,
+direkt auf dem bestehenden Branch-Kopf weitergearbeitet. Geprüft: seit
+dem zweiten Lauf heute (Commit `4ff554b`, 01:20 Uhr) gab es auf `main`
+keine neuen Commits und keine Änderungen an `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md` oder `reports/` — der Ausgangsstand
+ist also identisch zu dem, den der zweite Lauf bereits vollständig
+durchsucht hat.
+
+**Ausgewählter Punkt:** Keiner. Da sich am Ausgangsstand seit dem
+zweiten Lauf nichts geändert hat, bleibt dessen Ergebnis gültig — zur
+Bestätigung trotzdem eigenständig nachvollzogen statt blind übernommen:
+alle verbleibenden `- [ ]`-Punkte in
+`tasks/tasks-prd-travix-platform.md` erneut einzeln durchgesehen
+(2.0 Auth/Base44, 4.1-4.3 KI-Anbindung, 5.7 Zug/Bus/Fähre-Suche, 6.2/6.6/
+6.7/7.12 fehlende `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-
+Datenmodell, 8.2-8.7 Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11
+Hilfe-FAQ, 8.12 Prämienprogramm) — jeder davon weiterhin entweder klar
+als Architektur-/Produktentscheidung markiert (Kriterium 2) oder würde
+erfundene Inhalte/Daten brauchen (Kriterium 3), keine Änderung zur
+Einschätzung des zweiten Laufs.
+
+Zusätzlich eigene Stichproben auf bisher unentdeckte Kandidaten:
+- `grep` nach `TODO`/`FIXME` in `src/` (außerhalb von Testdateien): keine
+  Treffer.
+- Alle Komponenten mit Lade-/Fehlerzuständen
+  (`isThinking`/`isLoading`/`isSearching` in `Urlaubsmodus.tsx`,
+  `HotelResults.tsx`, `FlightResults.tsx`, `TrainResults.tsx`,
+  `KiChat.tsx`) einzeln auf `role="status"`/`role="alert"` geprüft: alle
+  bereits aus den vorherigen Läufen dieser Woche vorhanden.
+  `TrainResults.tsx` hat bewusst keinen Fehlerzustand mit `role="alert"`,
+  weil die Komponente laut 5.7 noch keine echte Fehlerquelle hat (Zug/
+  Bus/Fähre-Suche ist weiterhin nur Mock/blockiert) — kein fehlender
+  Fix, sondern kein zutreffender Anwendungsfall.
+- Testabdeckung erneut gegengeprüft: keine ungetestete Nicht-`ui/`-Datei
+  unter `src/` außer den seit Längerem dokumentierten bewussten
+  Ausnahmen (`App.tsx`, `main.tsx`, `routes.tsx`).
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
+Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
