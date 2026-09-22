@@ -1,10 +1,77 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-21)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-22)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-22: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`7fe3f0c` (21.09., weiterer Lauf) hängengeblieben, dessen Inhalt laut
+`freigabe-chef-log.md` ("2026-09-21 weiterer Lauf") bereits vollständig
+in `main` gemergt war — der Branch war also nur noch veraltet, nicht mehr
+in Arbeit. Neu von aktuellem `origin/main` (`6dae998`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 21.09.), `ZEITPLAN.md`
+(6.2 in Zeile 1426 weiterhin `[ ]`) oder diesem Dokument seit dem 21.09.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen
+Treffer), kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen
+bleiben offen — jetzt seit über fünf Wochen.
+
+**`git log dc451a8..origin/main` zeigt neun neue Commits, keiner davon
+content-relevant:** ein Support-Chef-Bericht (21.09., drei Fixes
+bestätigt, zwei neue UX-Funde ohne eigene Codeänderung), der eigene
+interaktive Marketing-Chef-Bericht vom 21.09., ein IT-Chef-Bericht
+(21.09., beschreibt PR #22 — laut `git log main..origin/it-chef/auto`
+weiterhin nicht in `main` gemergt, also für diesen Lauf nicht zählbar),
+ein Daily-Status-Update, ein weiteres Freigabe-Chef-Log sowie zwei
+Merge-Commits (Marketing-/Support-Chef-Auto-Log-Stände) und ein
+Support-Chef-Auto-Log-Eintrag ohne eigene Codeänderung. Jeder Commit per
+`git show --stat` geprüft: ausschließlich `reports/*.md`, `status.md`,
+`freigabe-chef-log.md`, `marketing-chef-auto-log.md` und
+`support-chef-auto-log.md` geändert, kein einziger Treffer unter `src/`.
+Keine einzige neue, per `git show` verifizierte Produkt-Codeänderung seit
+dem letzten Lauf (`dc451a8`, 21.09.), also kein neunzehnter
+Tier-4-Kandidat — der Kandidatentopf bleibt bei eins (seit dem
+21.09.-Update).
+
+**Randnotiz zu `it-chef/auto`:** Auf diesem noch nicht gemergten Branch
+liegen laut `git log main..origin/it-chef/auto` bereits zwei weitere,
+potenziell relevante Fixes (role="alert" bei fehlgeschlagener Flug-/
+Hotelsuche, "Planung fortsetzen" bei abgeschlossenen Entwürfen
+ausgeblendet) — wie bisher gilt die etablierte Regel, nur bereits in
+`main` gemergte Commits zu zählen (siehe frühere Updates, z. B. 21.09.
+zu PR #22). Werden für einen künftigen Lauf vorgemerkt, sobald
+Freigabe-Chef sie gemergt hat.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen nötig, da es
+keinen neuen Punkt gibt, der eine Zahl bräuchte. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/Mini-Changelog-Ausgabe — Kandidatentopf
+  steht weiterhin bei eins, klar zu wenig nach dem etablierten Maßstab
+  (acht).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 22.09. (Prüfung
+  der vier Fragen, neun neue Commits geprüft, keiner content-relevant),
+  Datum im Titel auf 22.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-21: ein neuer Tier-4-Kandidat (Reiseentwürfe-Abschließen-Bestätigung), zwei Accessibility-Fixes bewusst ausgeschlossen, alle vier Fragen weiterhin offen
 
