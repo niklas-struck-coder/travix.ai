@@ -12045,3 +12045,299 @@ Zusätzlich eigene Stichproben auf bisher unentdeckte Kandidaten:
 
 **Ergebnis:** Kein Code geändert. Dieser Log-Eintrag ist der einzige
 Commit dieses Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (vierter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (lokal) war zu Laufbeginn noch identisch
+mit dem im dritten Lauf heute erzeugten Commit `8eb3dda`; `origin/main`
+war inzwischen um fünf weitere Merges vorangeschritten (Support-Chef-
+und Marketing-Chef-Berichte, ein Freigabe-Chef-Log sowie der
+`reports/it-chef.md`-Bericht eines separaten, plattform-verwalteten
+IT-Chef-Bug-Hunts, der 28 Dateien vollständig gegen Bugs durchsucht und
+ebenfalls nichts Neues gefunden hat). Per `git merge --ff-only
+origin/main` konfliktfrei nachgezogen (11 Commits, alle bereits reine
+Berichts-/Log-Änderungen ohne Codeänderung) und sofort auf
+`origin/it-chef/auto` gepusht, damit der Branch nicht hinter `main`
+zurückbleibt.
+
+**Ausgewählter Punkt:** Keiner. Alle `- [ ]`-Punkte in
+`tasks/tasks-prd-travix-platform.md` erneut durchgesehen (2.0 Auth/
+Base44, 4.1-4.3 KI-Anbindung, 5.7 Zug/Bus/Fähre-Suche, 6.2/6.6/6.7/7.12
+fehlende `TripDraft`-Datenfelder, 7.4 Mehrfach-Entwurf-Datenmodell,
+8.2-8.7 Foto-/KI-Backend, 8.9 Premium-Tarifinhalte, 8.11 Hilfe-FAQ, 8.12
+Prämienprogramm) — unverändert gegenüber dem zweiten/dritten Lauf heute
+entweder als Architektur-/Produktentscheidung markiert (Kriterium 2)
+oder würde erfundene Inhalte/Daten brauchen (Kriterium 3).
+
+Zusätzlich eine eigenständige, von den bisherigen drei Läufen heute und
+dem separaten Bug-Hunt-Bericht bewusst unabhängige Stichprobe über einen
+Recherche-Agenten durchführen lassen, gezielt auf bisher nicht im
+Detail gelesenen Dateien: `useChat.ts`/`tripStorage.ts` (voll gelesen,
+bereits mit den bekannten Guards gegen fehlende/kaputte
+`localStorage`-Felder abgesichert), `nav-config.ts`/`utils.ts`/
+`design-tokens.ts`, `routes.tsx` (alle Navigationspfade haben eine
+echte Route oder fallen auf `PlaceholderPage` zurück, keine toten
+Links), alle `types/*.ts`, alle Such-Karten/-Wizards/-Ergebnislisten
+(`FlightCard`/`HotelCard`/`TrainCard`/`FlightResults`/`HotelResults`/
+`TrainResults`/`FlightWizard`/`HotelWizard`/`NoResultsMessage`), sowie
+`EditMode.tsx`, `ChatInput.tsx`, `TravixAvatar.tsx`, `KiChat.tsx`,
+`AppShell.tsx` und erneut mit frischem Blick `Warenkorb.tsx`/
+`Aktivitaeten.tsx`/`Preisalarme.tsx`/`Angebote.tsx`/`Favoriten.tsx`/
+`Reiseentwuerfe.tsx`/`Buchung.tsx`/`Flugsuche.tsx`/`Hotelsuche.tsx`/
+`Home.tsx`/`MeineReisen.tsx`/`PlaceholderPage.tsx`/`Urlaubsmodus.tsx`.
+Ergebnis: keine ungeschützten Array-/Objektzugriffe, alle Lade-/
+Fehlerzustände haben bereits `role="status"`/`role="alert"`, alle
+destruktiven Aktionen laufen bereits über das etablierte
+Bestätigungsdialog-Muster, Duplikat-Namen sind dort, wo sie überhaupt
+entstehen können, bereits per `aria-label`-Zusatz unterscheidbar. Erneut
+`grep` nach `TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+`@ts-expect-error` über ganz `src/`: keine Treffer außerhalb eines
+testbezogenen `@ts-expect-error` in `ChatInput.test.tsx`. Keine
+ungetestete Nicht-`ui/`-Datei mit echter Logik ohne Testdatei gefunden
+(reine Typdateien und die bewusst ausgenommenen Einstiegspunkte
+ausgenommen).
+
+Eine Beobachtung notiert, aber bewusst nicht als heutigen Punkt gewählt:
+`TrainResults.tsx`/`TrainCard.tsx`/`types/trains.ts` sind fertig gebaut
+und getestet, aber in keiner Seite/keinem Chat-Flow eingebunden (kein
+`TrainWizard`, keine `searchTrains`-Client-Funktion, keine Referenz
+außerhalb der eigenen Testdatei) — bereits mehrfach in `reports/it-chef.md`
+als toter Code dokumentiert; Fertigstellen oder Entfernen ist eine
+Produktentscheidung (5.7 setzt einen noch nicht ausgewählten
+Datenanbieter voraus), kein mechanischer Fix, verletzt Kriterium 2.
+
+**Ergebnis:** Kein Code geändert. Dieser Log-Eintrag (inklusive des oben
+beschriebenen `main`-Nachzieh-Merges) ist der einzige Commit dieses
+Laufs — auf `it-chef/auto` gepusht, `main` unberührt.
+
+## 2026-09-22 (fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (lokal) war zu Laufbeginn identisch mit
+dem im vierten Lauf heute erzeugten Commit `4da7308`; `origin/main` war
+seither unverändert (kein neuer Commit dort). Kein Nachzieh-Merge nötig.
+
+**Ausgewählter Punkt:** Neuer Fund aus `reports/support-chef.md` (22.09.,
+Vorschlag 1): Nachdem der vierte Lauf heute (siehe Eintrag oben) den
+Button "Planung fortsetzen" für `status === 'finalized'` ausgeblendet
+hatte, blieben auf einer abgeschlossenen Reiseentwürfe-Karte nur noch
+"Duplizieren" und "Löschen" übrig — keine Aktion, um den gerade bewusst
+abgeschlossenen Entwurf überhaupt noch anzusehen. Support-Chef schlug
+konkret einen neutralen "Details ansehen"-Button vor, der die
+vorhandenen Trip-Daten read-only in einem Dialog zeigt.
+
+**Wichtiger Hinweis zur Einordnung:** Genau diese Option wurde im
+selben Bericht bereits am 21.09. genannt und im *vierten* Lauf heute
+(oben) bewusst *nicht* gewählt, mit der Begründung, sie setze "eine
+bisher nicht existierende Detailansicht" voraus und wäre damit "keine
+reine mechanische Korrektur, sondern eine neue Design-/
+Funktionsentscheidung" — Kriterium 3 verletzt. Diese Einschätzung habe
+ich vor der Umsetzung bewusst gegengeprüft, statt sie zu ignorieren:
+
+- Der neue Support-Chef-Fund von heute (22.09., nach dem vierten Lauf
+  entstanden) ist ein eigenständiger *Folgefund* auf das Ausblenden —
+  nicht dieselbe Frage nochmal, sondern ein neues Problem, das der
+  vierte Lauf mit seiner Wahl selbst erzeugt hat (Karte ohne jede
+  sinnvolle Aktion).
+- Die vermutete Notwendigkeit, eine neue Detailansicht zu "erfinden",
+  trifft nicht zu: Genau diese Zeilen-Darstellung (Icon + Label je Feld:
+  Ziel, Transportmodus, Datum, Budget, Unterkunft) existiert bereits
+  identisch an zwei Stellen im Code — `TripSummaryCard.tsx` und den
+  `Section`-Karten in `Buchung.tsx`, beide mit denselben Icons/Labels.
+  Das eigentliche Risiko beim naheliegenden Weg (die vorhandene
+  `TripSummaryCard`-Komponente direkt importieren) ist ein anderes: sie
+  hat einen "Speichern & ansehen"-Link nach `/buchung`, der dort den
+  aktuell in `tripStorage.ts` gespeicherten Trip zeigt — bei den
+  hartkodierten Demo-Entwürfen hier wäre das der falsche bzw. gar kein
+  zugehöriger Trip. Deshalb keine Komponente importiert, sondern nur die
+  Zeilen-Logik (dieselben Icons/Labels/Wortlaut) direkt im
+  Read-only-Dialog in `Reiseentwuerfe.tsx` nachgebaut, ganz ohne
+  Bearbeiten-Aktionen oder Navigation.
+
+Damit ist es nach eigener Prüfung doch eine reine, mechanische
+Zusammensetzung bereits etablierter Bausteine und keine neu erfundene
+Design-Entscheidung — die konkrete Umsetzung ist unten unter "Details
+ansehen" beschrieben. Weil das eine Neubewertung einer im selben Tag
+bereits getroffenen Entscheidung ist, wird dieser Punkt hier bewusst
+ausführlich begründet, damit Freigabe-Chef (unabhängige Prüfung vor dem
+Merge nach `main`) und Ni das nachvollziehen und bei Bedarf zurückweisen
+können.
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — neuer "Details
+ansehen"-Button (Eye-Icon, gleicher Stil wie die anderen Icon-Buttons in
+der Karte), sichtbar nur bei `draft.status === 'finalized'`. Öffnet
+einen reinen Lese-Dialog (kein Bearbeiten, keine Navigation) mit
+Ziel/Transportmodus/Datum/Budget/Unterkunft als Icon+Label-Zeilen
+(identische Icons/Labels wie `TripSummaryCard.tsx`/`Buchung.tsx`) sowie
+einer Aktivitäten-Zeile mit derselben Zähl-Formulierung wie in
+`Buchung.tsx` ("{n} Aktivität(en) geplant" / "Noch keine Aktivitäten
+geplant"). Schließen läuft über den bereits vorhandenen Standard-Close
+(X-Button) des `Dialog`-Bausteins, kein zusätzlicher Footer-Button (der
+hätte denselben barrierefreien Namen "Schließen" doppelt vergeben).
+
+Die im selben Support-Chef-Fund zusätzlich genannte
+Badge-Unterscheidbarkeit ("Abgeschlossen" nutzt optisch dieselbe
+`secondary`-Variante wie "Pausiert") bewusst **nicht** angefasst:
+`MARKENDESIGN.md` enthält keine Vorgabe für Status-Badge-Farben, eine
+Variante auszuwählen wäre Raten statt Umsetzen einer klaren Vorgabe
+(siehe SKILL.md, Design-Abschnitt). Für Marketing-Chef/Ni als offener
+Punkt stehen gelassen.
+
+**Geprüft:** `npm ci`, `npm run build` (= `tsc -b && vite build`, keine
+Fehler), `npm run lint` (0 Fehler, nur die vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen in `ui/`-Dateien), `npm test` (alle
+58 Testdateien/343 Tests grün, inkl. zwei neuer Tests in
+`Reiseentwuerfe.test.tsx`).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` und
+`src/pages/Reiseentwuerfe.test.tsx` geändert, `ZEITPLAN.md` (Eintrag
+7.2) und dieser Log-Eintrag mit committet — auf `it-chef/auto` gepusht,
+`main` unberührt.
+
+## 2026-09-23 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand (`git merge-base --is-ancestor origin/main HEAD` bestätigt
+das, keine neuen Commits auf `main` seit dem fünften Lauf gestern) — kein
+Merge nötig, direkt auf dem bestehenden Branch-Kopf weitergearbeitet.
+
+**Ausgewählter Punkt:** Eigenständig gefundene Testabdeckungslücke:
+`src/lib/utils.ts` (die von shadcn/ui vorgegebene `cn()`-Hilfsfunktion,
+merged Tailwind-Klassennamen über `clsx`+`tailwind-merge`) hatte bisher
+keine eigene Testdatei, obwohl sie in über zehn Komponenten verwendet
+wird (`button.tsx`, `card.tsx`, `dialog.tsx`, `input.tsx`, `label.tsx`,
+`progress.tsx`, sowie mehreren Seiten). Vor der Auswahl geprüft, ob sich
+seit gestern etwas Neues ergeben hat: `origin/main` unverändert, keine
+neuen Einträge in `reports/it-chef.md`/`reports/support-chef.md`/
+`reports/marketing-chef.md`, `tasks/tasks-prd-travix-platform.md` weiterhin
+nur dieselben sechs als Architektur-/Produktentscheidung markierten
+Top-Level-Punkte offen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0). Zusätzlich erneut
+gezielt nach `TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+`@ts-expect-error` in `src/` gesucht (keine Treffer außerhalb bereits
+bekannter Testdateien) und alle Nicht-`ui/`-Dateien unter `src/` auf
+fehlende Testdateien abgeglichen — `utils.ts` war der einzige Fund mit
+echter Logik ohne Test (`design-tokens.ts` sind reine Konstanten ohne
+Logik, `vite-env.d.ts`/`test/setup.ts` sind keine Anwendungslogik).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder Rechtstexten. Keine offene Architektur-/Produktentscheidung: reine
+Testabdeckung für bestehendes, unverändertes Verhalten. Klar genug ohne
+Interpretation: Verhalten wurde vor dem Schreiben der Assertions direkt
+gegen die echten Bibliotheken (`clsx`, `tailwind-merge`) verifiziert
+statt angenommen. Objektiv prüfbar (Tests laufen durch oder nicht).
+
+**Umsetzung:** Neue `src/lib/utils.test.ts` (5 Tests, Muster analog
+`format.test.ts`): einfaches Zusammenführen von Klassennamen, Auflösen
+widersprüchlicher Tailwind-Klassen (letzte gewinnt, z. B. `px-2 py-1` +
+`px-4` → `py-1 px-4`), Wegfallen von falsy-Werten (`false`/`undefined`/
+`null`), Unterstützung von Arrays/Objekten mit Bool-Werten, leerer String
+ohne Eingabe. Kein Verhalten geändert, nur Testabdeckung ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), danach
+`npx tsc -b` (kein Typfehler). Erster `npm run lint`-Durchlauf zeigte
+einen eigenen Fehler (`no-constant-binary-expression` bei
+`false && 'hidden'` in der Test-Assertion) — behoben durch eine
+`const isHidden = false`-Variable statt des konstanten Literals, danach
+`npm run lint` sauber (0 Fehler, weiterhin dieselben vier
+vorbestehenden, unveränderten Fast-Refresh-Warnungen). Gezielt `npx
+vitest run src/lib/utils.test.ts` (5 Tests, alle grün), danach volle
+Suite `npm test` (59 Testdateien, 348 Tests, davon 5 neu — alle grün),
+zusätzlich `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Ergebnis:** `src/lib/utils.test.ts` (neu), `ZEITPLAN.md` (Phase-1-
+Scaffolding-Eintrag ergänzt) und dieser Log-Eintrag committet — auf
+`it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: es gibt dort keinen eigenen
+Checkbox-Punkt für `src/lib/utils.ts` (Teil der bereits als ✅ markierten
+Phase-1-Scaffolding-Zeile in `ZEITPLAN.md`).
+
+## 2026-09-23 (zweiter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand sowie den ersten heutigen Lauf (Commit `c56f725`,
+Testabdeckung für `src/lib/utils.ts`) — kein Merge nötig, direkt auf dem
+bestehenden Branch-Kopf weitergearbeitet.
+
+**Ausgewählter Punkt:** Keiner. Gezielte Suche nach einem neuen, für den
+autonomen Modus sicheren Punkt ergab keinen Fund:
+- Marker-Suche (`TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+  `@ts-expect-error`) in `src/` außerhalb von Testdateien: keine Treffer.
+- Testabdeckungs-Abgleich aller `src/**/*.{ts,tsx}` gegen bestehende
+  Testdateien (ohne `components/ui/*`, `App.tsx`, `main.tsx`,
+  `routes.tsx`, `AppShell.tsx`, siehe frühere Läufe): nur noch
+  `src/lib/design-tokens.ts`, `src/test/setup.ts` sowie die fünf
+  `src/types/*.ts`-Dateien ohne eigene Testdatei — alles reine
+  Typ-/Konstanten-Dateien ohne ausführbare Logik, kein sinnvoller
+  Testkandidat. Die in 8.13 (`tasks/tasks-prd-travix-platform.md`)
+  gewünschten Tests für `calculateProgress`/`cartTotals`/
+  `checklistRules`/`calendarUtils` existieren bereits — dieser Punkt ist
+  damit inhaltlich überholt.
+- Gezielt (nicht nur gegrept) gelesen: `tripStorage.ts`, `EditMode.tsx`,
+  `useChat.ts` (vollständig), `FlightCard.tsx`, `HotelCard.tsx`,
+  `ChatInput.tsx`, `NoResultsMessage.tsx` — keine ungesicherten Array-/
+  Objektzugriffe, keine unbehandelten Promise-Rejections, keine
+  Textfehler gefunden.
+- `reports/it-chef.md`/`support-chef.md`/`marketing-chef.md` (jeweils
+  22.09.) gegengeprüft: Support-Chefs Fund 1 (fehlende Aktion bei
+  abgeschlossenen Reiseentwürfen) ist bereits durch den fünften Lauf
+  vom 22.09. behoben (`Reiseentwuerfe.tsx:284-285`, "Details ansehen"
+  verifiziert im Code vorhanden). Fund 2 (Hilfe-Seite ohne echten
+  Kontaktweg) bleibt bewusst offen — keine echte Kontaktadresse im Code
+  vorhanden, eine erfundene Adresse wäre Raten statt Umsetzen (Kriterium
+  3). Die im selben Fund erwähnte Badge-Unterscheidbarkeit
+  (Abgeschlossen/Pausiert identische `secondary`-Variante) bleibt
+  ebenfalls offen — `MARKENDESIGN.md` gibt keine Farbvorgabe für
+  Status-Badges vor, eine Variante zu wählen wäre eine erfundene
+  Design-Entscheidung. IT-Chefs eigene Vorschläge (PR-Aufräumung,
+  Entfernen von `recharts`) fallen aus: Ersteres braucht Nis manuelles
+  Merge/Close, Letzteres ist Abhängigkeitsänderung und laut eigenem
+  Bericht ausdrücklich außerhalb der Sicherheitskriterien.
+
+Zusätzlich einen unabhängigen Recherche-Agenten dieselbe Suche parallel
+und ohne Vorgabe eines Ergebnisses wiederholen lassen — kam zum
+identischen Ergebnis (kein qualifizierender Fund).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
+
+## 2026-09-23 (dritter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) unverändert gegenüber dem
+zweiten Lauf von heute (`git merge-base --is-ancestor origin/main HEAD`
+bestätigt, `main` seither unverändert bei `6914c56`) — kein Merge nötig.
+
+**Ausgewählter Punkt:** Keiner. Da seit dem zweiten Lauf heute weder
+`main` noch `reports/*.md` sich verändert haben, keine komplett neue
+Suche wiederholt, sondern gezielt gegengeprüft, ob deren Ergebnis noch
+trägt:
+- Marker-Suche (`TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+  `@ts-expect-error`) in `src/` (ohne Testdateien, ohne `components/ui/`):
+  weiterhin keine Treffer.
+- Testabdeckungs-Abgleich selbst neu ausgeführt (alle `src/**/*.{ts,tsx}`
+  ohne `components/ui/*`, `App.tsx`, `main.tsx`, `routes.tsx`,
+  `AppShell.tsx`, `design-tokens.ts`, `test/setup.ts`, `vite-env.d.ts`,
+  `src/types/*.ts` gegen vorhandene `*.test.ts(x)`-Dateien): keine Datei
+  ohne Test gefunden — bestätigt das Ergebnis des zweiten Laufs.
+- Die in 8.13 (`tasks/tasks-prd-travix-platform.md`) genannten
+  Testkandidaten gezielt einzeln geprüft: `cartTotals.ts`,
+  `calculateProgress.ts`, `calendarUtils.ts`, `checklistRules.ts` haben
+  alle bereits eine eigene Testdatei; `calculateCosts.ts` (6.7) existiert
+  im Code noch nicht (Punkt weiterhin blockiert, siehe 6.6/6.7); die
+  ebenfalls in 8.13 genannte Schema-Validierung hängt an `FULL_TRIP_SCHEMA`
+  (4.1), das laut 4.1-4.3 an fehlenden Zugangsdaten blockiert ist. 8.13
+  bleibt damit inhaltlich überholt bzw. blockiert, kein neuer Punkt.
+- Offene Sub-Checkboxen in `tasks/tasks-prd-travix-platform.md` einzeln
+  durchgesehen (2.1-2.10, 4.1-4.3, 5.7, 6.2, 6.6, 6.7, 7.4, 7.12, 8.1-8.9,
+  8.11-8.13): jede hängt entweder an Auth/Backend (2.x), KI-Zugangsdaten
+  (4.x), einer noch fehlenden Produkt-/Datenmodell-Entscheidung (5.7
+  Verbindungs-Provider, 6.2/6.6/6.7 fehlende Item-/Kostenfelder in
+  `TripDraft`, 7.4 Mehrfach-Chatverlauf-Architektur) oder ist bereits als
+  Kurzfrist-Mitigation umgesetzt und für den vollen Umfang bewusst offen
+  gelassen (7.4, 8.1) — kein Punkt erfüllt alle vier Sicherheitskriterien.
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.

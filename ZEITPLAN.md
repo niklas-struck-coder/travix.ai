@@ -36,6 +36,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Push nach `main`) führt bei jedem PR `npm ci && npm run lint && npm run
   build && npm test` aus — bisher lief kein Auto-Fix-PR automatisch
   gegen Lint/Typecheck/Tests.
+  Vom autonomen IT-Chef-Lauf am 23.09. eine weitere Testabdeckungslücke
+  geschlossen: `src/lib/utils.ts` (die von shadcn/ui vorgegebene
+  `cn()`-Hilfsfunktion zum Zusammenführen von Tailwind-Klassennamen,
+  verwendet in über zehn Komponenten u. a. `button.tsx`, `card.tsx`,
+  `dialog.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `utils.test.ts` (5 Tests, Muster analog
+  `format.test.ts`): einfaches Zusammenführen von Klassennamen, Auflösen
+  widersprüchlicher Tailwind-Klassen (letzte gewinnt), Wegfallen von
+  falsy-Werten (`false`/`undefined`/`null`), Unterstützung von Arrays/
+  Objekten mit Bool-Werten, leerer String ohne Eingabe — jeweils gegen
+  das tatsächliche Verhalten von `clsx`/`tailwind-merge` verifiziert statt
+  angenommen.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
@@ -1649,6 +1662,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Reiseentwuerfe.test.tsx` (Button ist für beide Demo-Entwürfe
   vorhanden, verschwindet für den jeweiligen Entwurf nach dem
   Abschließen).
+  Vom autonomen IT-Chef-Lauf am 22.09. (fünfter Lauf) einen Folgefund aus
+  `reports/support-chef.md` (22.09., Vorschlag 1) behoben: Nach obigem
+  Fix blieben auf einer abgeschlossenen Karte nur noch "Duplizieren" und
+  "Löschen" übrig — keine Aktion, die den fertigen Entwurf überhaupt
+  ansehen lässt, wirkt wie eine Sackgasse direkt nach dem bewussten "Ja,
+  abschließen". Genau die zuvor (22.09., oben) verworfene zweite Option
+  jetzt doch umgesetzt, aber diesmal ohne eine neue Detailansicht zu
+  erfinden: die Zeilen-Darstellung (Icon+Label je Feld) existierte
+  bereits identisch an zwei Stellen (`TripSummaryCard.tsx`, die
+  `Section`-Karten in `Buchung.tsx`) — neuer "Details ansehen"-Button
+  (nur bei `finalized`) öffnet einen reinen Lese-Dialog mit denselben
+  Feldern/Icons/Labels (inkl. Aktivitäten-Zählung, Wortlaut identisch zu
+  `Buchung.tsx`), ohne Bearbeiten-Aktionen. Damit doch eine reine
+  mechanische Zusammensetzung bestehender Muster statt einer neuen
+  Design-Entscheidung — die zuvor genannte Sorge (unpassende
+  "Speichern & ansehen"-Verlinkung von `TripSummaryCard.tsx` nach
+  `/buchung`, die bei diesen Demo-Entwürfen auf den falschen/aktuell
+  aktiven Trip zeigen würde) umgangen, indem die Zeilen direkt in
+  `Reiseentwuerfe.tsx` nachgebaut statt die Komponente importiert wurde.
+  Die vom selben Support-Chef-Bericht zusätzlich genannte
+  Badge-Unterscheidbarkeit ("Abgeschlossen" nutzt optisch dieselbe
+  `secondary`-Variante wie "Pausiert") bewusst nicht mit angefasst — dafür
+  gibt es in `MARKENDESIGN.md` keine Statusfarb-Vorgabe, eine Variante zu
+  wählen wäre Raten. Zwei neue Regressionstests in
+  `Reiseentwuerfe.test.tsx` (kein Button für `in_progress`/`paused`; nach
+  Abschließen zeigt der Dialog Transport/Daten/Budget/den
+  "keine Aktivitäten"-Hinweis korrekt und lässt sich über den
+  Standard-Dialog-Close wieder schließen).
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

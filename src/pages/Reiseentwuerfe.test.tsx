@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { Reiseentwuerfe } from './Reiseentwuerfe'
@@ -157,6 +157,39 @@ describe('Reiseentwuerfe', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
     expect(screen.queryByText('Entwurf löschen?')).not.toBeInTheDocument()
     expect(screen.getByText('Lissabon')).toBeInTheDocument()
+  })
+
+  it('offers no "Details ansehen" action for a draft that is still in progress or paused', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Lissabon Details ansehen' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Kyoto Details ansehen' })).not.toBeInTheDocument()
+  })
+
+  it('shows a read-only details dialog with the trip data for a finalized draft', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon Details ansehen' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('Abgeschlossener Reiseentwurf — nur zum Ansehen.')).toBeInTheDocument()
+    expect(dialog.getByText('Flug')).toBeInTheDocument()
+    expect(dialog.getByText('15. – 22. September 2026')).toBeInTheDocument()
+    expect(dialog.getByText('bis 1.200 €')).toBeInTheDocument()
+    expect(dialog.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
+
+    fireEvent.click(dialog.getByRole('button', { name: 'Schließen' }))
+    expect(screen.queryByText('Abgeschlossener Reiseentwurf — nur zum Ansehen.')).not.toBeInTheDocument()
   })
 
   it('deletes a draft once its removal is confirmed, and shows the empty state once none are left', () => {
