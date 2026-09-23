@@ -1584,7 +1584,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bei Favoriten/Preisalarme/Angebote). "Abschließen" setzt nur einen
   lokalen Status ("Abgeschlossen"), verschiebt den Entwurf nicht nach
   `MeineReisen.tsx` — dafür fehlt noch echte, geteilte Trip-Speicherung
-  (hängt an der offenen Backend-Entscheidung)
+  (hängt an der offenen Backend-Entscheidung).
+  Vom autonomen IT-Chef-Lauf am 23.09. (fünfter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (23.09., Vorschlag 3) gemeldeten Fund
+  behoben: Das Status-Badge für "Abgeschlossen" nutzte dieselbe graue
+  `secondary`-Variante wie "Pausiert" — auf der Kartenübersicht war nicht
+  auf den ersten Blick erkennbar, welche Entwürfe schon fertig und welche
+  nur pausiert sind. Fix: "Abgeschlossen" bekommt jetzt einen eigenen,
+  ruhigen Teal-Akzent (`outline`-Variante mit `border-teal/30 bg-teal/5
+  text-teal`) statt der grauen `secondary`-Variante — derselbe gedämpfte
+  Teal-Stil, der bereits bei `TripSummaryCard.tsx`/`QuickReplies.tsx` für
+  ruhige (nicht knallige) Teal-Akzente verwendet wird, statt des kräftigen
+  `bg-teal text-navy`-Musters, das für aktive Aktionen reserviert bleibt
+  (Buttons, "Empfohlen"/"Ziel erreicht"-Badges). "Pausiert" bleibt
+  unverändert bei `secondary`. Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (Badge-Klassen von "Abgeschlossen" und
+  "Pausiert" unterscheiden sich, "Abgeschlossen" trägt `text-teal`).
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,

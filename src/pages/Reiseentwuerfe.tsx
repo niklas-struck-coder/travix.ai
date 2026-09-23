@@ -233,7 +233,16 @@ export function Reiseentwuerfe() {
                       </span>
                     )}
                   </div>
-                  <Badge variant={draft.status === 'in_progress' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={
+                      draft.status === 'in_progress'
+                        ? 'default'
+                        : draft.status === 'finalized'
+                          ? 'outline'
+                          : 'secondary'
+                    }
+                    className={draft.status === 'finalized' ? 'border-teal/30 bg-teal/5 text-teal' : undefined}
+                  >
                     {statusLabels[draft.status]}
                   </Badge>
                 </div>

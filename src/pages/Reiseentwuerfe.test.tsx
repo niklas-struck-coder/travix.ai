@@ -83,6 +83,24 @@ describe('Reiseentwuerfe', () => {
     expect(screen.queryByRole('button', { name: 'Lissabon abschließen' })).not.toBeInTheDocument()
   })
 
+  it('gives a finalized draft a visually distinct badge from a paused one', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    // Kyoto starts out 'paused', already rendered with the plain gray badge.
+    const pausedBadge = screen.getByText('Pausiert')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+    const finalizedBadge = screen.getByText('Abgeschlossen')
+
+    expect(finalizedBadge.className).not.toBe(pausedBadge.className)
+    expect(finalizedBadge.className).toMatch(/text-teal/)
+  })
+
   it('hides the "Planung fortsetzen" button once a draft is finalized', () => {
     render(
       <MemoryRouter>

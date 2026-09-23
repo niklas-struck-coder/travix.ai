@@ -12410,3 +12410,59 @@ nachgezogenen `main`-Stand). Keine Änderung an
 `tasks/tasks-prd-travix-platform.md`: 7.2 ist bereits als `[x]`
 markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
 Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-23 (fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git merge-base --is-ancestor origin/main
+origin/it-chef/auto` bestätigt), also kein Merge nötig — direkt auf dem
+Commit vom vierten Lauf heute weitergearbeitet.
+
+**Ausgewählter Punkt:** Vorschlag 3 aus `reports/support-chef.md`
+(23.09.): Das Status-Badge für einen abgeschlossenen Reiseentwurf
+(`src/pages/Reiseentwuerfe.tsx:236`) nutzte dieselbe graue `secondary`-
+Badge-Variante wie ein pausierter Entwurf — auf der Kartenübersicht war
+nicht auf den ersten Blick erkennbar, welche Karten schon fertig und
+welche nur pausiert sind.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reine visuelle Unterscheidung zweier
+Status-Badges auf Demo-Daten. Keine offene Architektur-/
+Produktentscheidung: der Bericht selbst schlägt einen "Teal-Akzent wie
+bei `in_progress`, nur ruhiger" vor, und genau dieser gedämpfte
+Teal-Stil (`border-teal/30 bg-teal/5 text-teal` bzw. `border-teal/40
+bg-teal/10`) existiert bereits wortgleich in `TripSummaryCard.tsx` und
+`QuickReplies.tsx` — keine erfundene Design-Entscheidung, reine
+Wiederverwendung eines bestehenden Tokens/Musters (`MARKENDESIGN.md`
+enthält keine eigene Vorgabe für Status-Badges, daher wie in der
+Skill-Datei vorgesehen am bereits etablierten Code-Muster orientiert,
+nicht neu erfunden). Klar genug ohne Interpretation: Datei, Zeile und
+Vergleichsmuster (`in_progress`) sind im Bericht benannt. Objektiv
+prüfbar über einen neuen Regressionstest (unterschiedliche Badge-Klassen
+für "Abgeschlossen" vs. "Pausiert").
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — die Badge-Variante für
+den `finalized`-Status ist jetzt `outline` mit zusätzlichem
+`className="border-teal/30 bg-teal/5 text-teal"` statt der bisherigen
+`secondary`-Variante; `paused` bleibt unverändert bei `secondary`,
+`in_progress` unverändert bei `default`. Kein neuer CSS-Token nötig
+(`twMerge` in `cn()` löst die Kollision der `outline`-Variante mit den
+zusätzlichen Klassen korrekt auf, exakt wie bereits bei anderen
+`className`-Overrides auf `Badge`/`Card` im Code).
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (16
+Tests, davon 1 neu — alle grün), danach `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen), volle Suite `npm test` (59
+Testdateien, 350 Tests, davon 1 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert und unabhängig von dieser
+Änderung).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Regressionstest),
+`ZEITPLAN.md` (7.3-Eintrag ergänzt) und dieser Log-Eintrag committet —
+auf `it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 7.3 ist bereits als `[x]`
+markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
+Aufgabe, kein eigener Checkbox-Punkt.
