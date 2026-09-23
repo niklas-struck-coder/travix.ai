@@ -36,6 +36,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Push nach `main`) führt bei jedem PR `npm ci && npm run lint && npm run
   build && npm test` aus — bisher lief kein Auto-Fix-PR automatisch
   gegen Lint/Typecheck/Tests.
+  Vom autonomen IT-Chef-Lauf am 23.09. eine weitere Testabdeckungslücke
+  geschlossen: `src/lib/utils.ts` (die von shadcn/ui vorgegebene
+  `cn()`-Hilfsfunktion zum Zusammenführen von Tailwind-Klassennamen,
+  verwendet in über zehn Komponenten u. a. `button.tsx`, `card.tsx`,
+  `dialog.tsx`) hatte bisher keine eigene Testdatei. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `utils.test.ts` (5 Tests, Muster analog
+  `format.test.ts`): einfaches Zusammenführen von Klassennamen, Auflösen
+  widersprüchlicher Tailwind-Klassen (letzte gewinnt), Wegfallen von
+  falsy-Werten (`false`/`undefined`/`null`), Unterstützung von Arrays/
+  Objekten mit Bool-Werten, leerer String ohne Eingabe — jeweils gegen
+  das tatsächliche Verhalten von `clsx`/`tailwind-merge` verifiziert statt
+  angenommen.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

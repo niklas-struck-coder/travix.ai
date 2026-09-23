@@ -12192,3 +12192,61 @@ unveränderten Fast-Refresh-Warnungen in `ui/`-Dateien), `npm test` (alle
 `src/pages/Reiseentwuerfe.test.tsx` geändert, `ZEITPLAN.md` (Eintrag
 7.2) und dieser Log-Eintrag mit committet — auf `it-chef/auto` gepusht,
 `main` unberührt.
+
+## 2026-09-23 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` (Remote) enthielt bereits den aktuellen
+`main`-Stand (`git merge-base --is-ancestor origin/main HEAD` bestätigt
+das, keine neuen Commits auf `main` seit dem fünften Lauf gestern) — kein
+Merge nötig, direkt auf dem bestehenden Branch-Kopf weitergearbeitet.
+
+**Ausgewählter Punkt:** Eigenständig gefundene Testabdeckungslücke:
+`src/lib/utils.ts` (die von shadcn/ui vorgegebene `cn()`-Hilfsfunktion,
+merged Tailwind-Klassennamen über `clsx`+`tailwind-merge`) hatte bisher
+keine eigene Testdatei, obwohl sie in über zehn Komponenten verwendet
+wird (`button.tsx`, `card.tsx`, `dialog.tsx`, `input.tsx`, `label.tsx`,
+`progress.tsx`, sowie mehreren Seiten). Vor der Auswahl geprüft, ob sich
+seit gestern etwas Neues ergeben hat: `origin/main` unverändert, keine
+neuen Einträge in `reports/it-chef.md`/`reports/support-chef.md`/
+`reports/marketing-chef.md`, `tasks/tasks-prd-travix-platform.md` weiterhin
+nur dieselben sechs als Architektur-/Produktentscheidung markierten
+Top-Level-Punkte offen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0). Zusätzlich erneut
+gezielt nach `TODO`/`FIXME`/`console.log(`/`as any`/`@ts-ignore`/
+`@ts-expect-error` in `src/` gesucht (keine Treffer außerhalb bereits
+bekannter Testdateien) und alle Nicht-`ui/`-Dateien unter `src/` auf
+fehlende Testdateien abgeglichen — `utils.ts` war der einzige Fund mit
+echter Logik ohne Test (`design-tokens.ts` sind reine Konstanten ohne
+Logik, `vite-env.d.ts`/`test/setup.ts` sind keine Anwendungslogik).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder Rechtstexten. Keine offene Architektur-/Produktentscheidung: reine
+Testabdeckung für bestehendes, unverändertes Verhalten. Klar genug ohne
+Interpretation: Verhalten wurde vor dem Schreiben der Assertions direkt
+gegen die echten Bibliotheken (`clsx`, `tailwind-merge`) verifiziert
+statt angenommen. Objektiv prüfbar (Tests laufen durch oder nicht).
+
+**Umsetzung:** Neue `src/lib/utils.test.ts` (5 Tests, Muster analog
+`format.test.ts`): einfaches Zusammenführen von Klassennamen, Auflösen
+widersprüchlicher Tailwind-Klassen (letzte gewinnt, z. B. `px-2 py-1` +
+`px-4` → `py-1 px-4`), Wegfallen von falsy-Werten (`false`/`undefined`/
+`null`), Unterstützung von Arrays/Objekten mit Bool-Werten, leerer String
+ohne Eingabe. Kein Verhalten geändert, nur Testabdeckung ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte), danach
+`npx tsc -b` (kein Typfehler). Erster `npm run lint`-Durchlauf zeigte
+einen eigenen Fehler (`no-constant-binary-expression` bei
+`false && 'hidden'` in der Test-Assertion) — behoben durch eine
+`const isHidden = false`-Variable statt des konstanten Literals, danach
+`npm run lint` sauber (0 Fehler, weiterhin dieselben vier
+vorbestehenden, unveränderten Fast-Refresh-Warnungen). Gezielt `npx
+vitest run src/lib/utils.test.ts` (5 Tests, alle grün), danach volle
+Suite `npm test` (59 Testdateien, 348 Tests, davon 5 neu — alle grün),
+zusätzlich `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich).
+
+**Ergebnis:** `src/lib/utils.test.ts` (neu), `ZEITPLAN.md` (Phase-1-
+Scaffolding-Eintrag ergänzt) und dieser Log-Eintrag committet — auf
+`it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: es gibt dort keinen eigenen
+Checkbox-Punkt für `src/lib/utils.ts` (Teil der bereits als ✅ markierten
+Phase-1-Scaffolding-Zeile in `ZEITPLAN.md`).
