@@ -4318,3 +4318,52 @@ Lauf).
 
 **Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
 Auffälligkeiten.
+
+
+## 2026-09-23, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `origin/main` (im früheren
+  Nacht-Check heute bereits geprüft und gemergt). Kurz gegengeprüft:
+  `git log origin/main..origin/it-chef/auto` leer.
+- `marketing-chef/auto` — 1 neuer Commit (`3263e8e`).
+- `support-chef/auto` — 1 neuer Commit (`4c4c152`).
+
+**`marketing-chef/auto` geprüft:** Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`
+(reine Markdown-Ergänzung, kein Produkt-Code, kein Build/Lint/Test
+nötig). Ordnet zwei bereits über den früheren Nacht-Check gemergte
+IT-Chef-Funde (`5575e5b` "Planung fortsetzen"-CTA nach Abschließen
+ausgeblendet, `65fb64d` "Details ansehen"-Dialog) als Tier-4-Kandidaten
+19/20 ein, schließt zwei `role="alert"`-Fixes bewusst mit der
+etablierten Accessibility-Begründung aus. Kandidatentopf steht bei drei,
+klar unter der Achter-Schwelle — konsequent keine neue
+Mini-Changelog-Ausgabe. Kein Hinweis auf tatsächliches
+Posten/Versenden/Veröffentlichen, keine erfundenen Kennzahlen (beide
+neuen Kandidaten aus real gemergten Commits abgeleitet), Text vollständig
+und kohärent.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`, `2bcf583`).
+
+**`support-chef/auto` geprüft:** Diff betrifft ausschließlich
+`support-chef-auto-log.md` (reiner Analyse-Bericht, kein Code geändert).
+Prüft genau den neuen "Details ansehen"-Dialog aus dem im früheren
+Nacht-Check gemergten `it-chef/auto`-Stand. Stichprobenartig im Code
+nachvollzogen: Button/Dialog-Struktur bei `src/pages/Reiseentwuerfe.tsx`
+Zeilen 278–289 (Details-Button hinter `status === 'finalized'`) und
+356–390 (Dialog) stimmen mit den im Bericht genannten Zeilenbereichen
+überein; der genannte Fund (`.filter(Boolean)` in Zeile 374 blendet
+fehlende Felder wie Budget/Unterkunft kommentarlos aus, nur die
+Aktivitäten-Zeile zeigt einen expliziten Leerzustand) im Code
+nachvollzogen und korrekt beschrieben. Referenz auf den Kyoto-Demo-Datensatz
+(fehlendes Budget/Unterkunft, über denselben Abschließen-Button wie
+Lissabon finalisierbar) im Code bestätigt. Nichts wirkt erfunden.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`, `417da47`).
+
+**Ergebnis:** Alle drei Branches geprüft (eine davon bereits im früheren
+Nacht-Check erledigt), zwei neue Merges ohne Konflikte, `origin/main`
+gepusht.
+
+**Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
+Auffälligkeiten.
