@@ -4268,3 +4268,53 @@ die zuvor erlebte Merge-Blockade durchging.
 **Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf. Die im
 früheren Nacht-Check gemeldete Merge-Blockade hat sich in diesem Lauf
 nicht wiederholt, braucht also aktuell keine weitere Rücksprache.
+
+
+## 2026-09-23, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (zwei Code-Commits:
+  Testabdeckung für `cn()` in `src/lib/utils.ts`, sowie der bereits am
+  22.09. entstandene "Details ansehen"-Dialog für abgeschlossene
+  Reiseentwürfe; drei reine Log-Commits ohne Code-Änderung — vierter Lauf
+  22.09., zweiter/dritter Lauf 23.09., jeweils "kein sicherer Punkt
+  gefunden").
+- `marketing-chef/auto` — 0 neue Commits vor `main` (letzter Commit
+  22.09., bereits im Tages-Check gemergt). Wie angewiesen für diesen
+  frühen Lauf übersprungen, kurz gegengeprüft: Diff zu `main` leer.
+- `support-chef/auto` — 0 neue Commits vor `main` (letzter Commit 22.09.,
+  bereits im Tages-Check gemergt). Ebenfalls übersprungen, Diff zu `main`
+  leer bestätigt.
+
+**Prüfung `it-chef/auto`:**
+- Diff zu `main` gelesen (nicht nur `it-chef-auto-log.md` geglaubt):
+  neue Datei `src/lib/utils.test.ts` (5 Tests für die `cn()`-Hilfsfunktion),
+  Erweiterung `src/pages/Reiseentwuerfe.tsx`/`.test.tsx` um einen
+  "Details ansehen"-Button + Read-only-Dialog für `draft.status ===
+  'finalized'`, `ZEITPLAN.md`-Einträge, `it-chef-auto-log.md`. Deckt sich
+  1:1 mit den Log-Einträgen "23.09. (autonomer Tagesmodus-Lauf)" und
+  "22.09. (fünfter Lauf)".
+- Scope passt: keine Berührung von Auth/Zahlungen/Rechtstexten, kein
+  Scope-Creep über die beiden beschriebenen Punkte hinaus. Der Dialog
+  baut nachvollziehbar auf bereits bestehenden Icon-/Label-Mustern aus
+  `TripSummaryCard.tsx`/`Buchung.tsx` auf statt neue Design-Entscheidungen
+  zu erfinden; `MARKENDESIGN.md` enthält keine Vorgabe zu Dialogen/
+  Badges, die dem widerspricht (gezielt gegengeprüft, keine Treffer).
+- **Unabhängig verifiziert** in frischem `git worktree` (Merge von
+  `origin/it-chef/auto` in `origin/main`, konfliktfrei): `npm install` →
+  650 Pakete, 0 Vulnerabilities; `npx tsc -b` → 0 Fehler; `npx eslint .`
+  → 0 Fehler (dieselben vier vorbestehenden `react-refresh`-Warnungen in
+  `ui/`-Dateien wie im Log behauptet); `npx vitest run` → 59 Testdateien,
+  348 Tests, alle grün. Deckt sich exakt mit den Angaben in
+  `it-chef-auto-log.md`.
+
+→ **Passt alles → gemergt** (`--no-ff` nach `main`), anschließend
+`origin/main` gepusht.
+
+**Ergebnis:** `it-chef/auto` geprüft und gemergt, keine Konflikte.
+`marketing-chef/auto`/`support-chef/auto` planmäßig übersprungen (keine
+neuen Commits seit dem letzten Merge, wie angewiesen für diesen frühen
+Lauf).
+
+**Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
+Auffälligkeiten.
