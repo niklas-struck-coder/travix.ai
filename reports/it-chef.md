@@ -1,45 +1,34 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-09-22
+**Datum:** 2026-09-23
 
-## Was ist seit dem letzten Eintrag (2026-09-21) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-22) passiert?
 
-Auf `main` sind seit dem letzten Bericht mehrere Merges aus den
-separaten Autonomiekanälen gelandet: `it-chef/auto` (role="alert" auf
-den Fehlermeldungen in `Flugsuche.tsx`/`Hotelsuche.tsx` sowie
-Ausblenden des "Planung fortsetzen"-Buttons bei bereits abgeschlossenen
-Reiseentwürfen in `Reiseentwuerfe.tsx`), dazu Berichte von
-Marketing-Chef und Support-Chef samt ihrer `/auto`-Branches. Der
-Freigabe-Chef hat alle drei unabhängig geprüft und gemergt. Details zu
-diesen Fixes stehen in `it-chef-auto-log.md`, nicht hier, da sie aus dem
-`it-chef-eigen`-Kanal stammen und nicht aus diesem.
+Auf `main` sind seit dem letzten Bericht mehrere Merges aus dem
+separaten Autonomiekanal `it-chef/auto` (`it-chef-eigen`) sowie von
+Marketing-Chef und Support-Chef gelandet: u. a. Testabdeckung für die
+`cn()`-Hilfsfunktion (`src/lib/utils.ts`) und die Freigabe-Übersicht.
+Details dazu stehen in `it-chef-auto-log.md`, nicht hier, da sie aus
+dem `it-chef-eigen`-Kanal stammen und nicht aus diesem separaten
+Bericht-Kanal.
 
-Eigene gezielte Bug-Suche in dieser Session: Ich habe einen
-Recherche-Agenten 28 bisher in keinem Bericht im Detail gelesene
-Dateien vollständig durchgehen lassen (u. a. `mockAdvisor.ts`,
-`mockConcierge.ts`, `speech.ts`, `duffel/client.ts`, `calendarUtils.ts`,
-`checklistRules.ts`, `cartTotals.ts`, `calculateProgress.ts`,
-`format.ts`, `useConcierge.ts`, `ChatMessage.tsx`, `QuickReplies.tsx`,
-`TripSummaryCard.tsx`, `ChecklistPanel.tsx`, sowie die
-Demo-Daten-Seiten Dashboard, Kalender, Kartenansicht, Warenkorb,
-Aktivitäten, Angebote, Favoriten, Preisalarme, Profil, Einstellungen,
-ReiseSuche, MeineReisen, Sidebar, PageHeader, PageTransition) und
-Aufrufstellen gegengeprüft, statt nur zu grep'en. Ergebnis: kein neuer,
-tatsächlich erreichbarer Bug — die zuvor bekannten Fehler in diesen
-Dateien (Sprachausgabe stoppen, Währungscode-Absturz, Wortgrenzen in
-den Regex-Erkennungen u. a.) sind bereits behoben bzw. liegen als PR
-vor. Zusätzlich selbst `dialog.tsx`, `sheet.tsx` und `MobileNav.tsx`
-gelesen (neuere UI-Bausteine mit Fokus-Management) — sauber
-implementiert, keine Auffälligkeiten.
-
-Eine vermutete Dateninkonsistenz kurz gegengeprüft: Der Kyoto-Eintrag in
-`Dashboard.tsx`/`Reiseentwuerfe.tsx` (Entwurf, "3.–10. März **2027**")
-und der Kyoto-Eintrag in `MeineReisen.tsx`/`Kalender.tsx` (gebucht,
-"3.–10. März **2026**", Status "vergangen") sehen auf den ersten Blick
-widersprüchlich aus, sind bei genauerem Lesen aber zwei unterschiedliche
-Reisen (eine bereits abgeschlossene gebuchte Reise vs. ein neuer
-Entwurf für eine zukünftige Reise) — kein Fehler, daher nicht als Bug
-gelistet.
+Eigene gezielte Bug-Suche in dieser Session: Ein Recherche-Agent hat 27
+Dateien vollständig gelesen (nicht nur gegrept) — u. a. `ChatInput.tsx`,
+`KiChat.tsx`, `TravixAvatar.tsx`, `AppShell.tsx`, `FlightCard.tsx`,
+`FlightResults.tsx`, `FlightWizard.tsx`, `HotelCard.tsx`,
+`HotelResults.tsx`, `HotelWizard.tsx`, `NoResultsMessage.tsx`,
+`EditMode.tsx`, `useChat.ts`, `tripStorage.ts`, `Buchung.tsx`,
+`Home.tsx`, `routes.tsx`, sowie die restlichen `ui/*`-Bausteine — und
+auf TODOs/FIXMEs, fehlende Fehlerbehandlung, unbehandelte
+Promise-Rejections, Edge Cases, kaputte Imports, Text-Typos und
+Logikfehler geprüft. Ergebnis: kein neuer, tatsächlich erreichbarer
+Bug. Die zuvor bekannten Probleme in diesen Dateien (z. B.
+`formatDuration()`-Rohstring bei Tagen, NaN-Schutz in `FlightWizard`)
+sind entweder bereits im Code behoben oder liegen weiterhin als offene
+PRs vor (siehe unten). Gegenprüfung per Grep gegen `it-chef-auto-log.md`
+bestätigt: derselbe Dateibestand wurde vom parallelen Kanal zuletzt am
+17./18./20./21./22.09. ebenfalls einzeln vollständig gelesen, mit
+identischem Ergebnis.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
@@ -58,17 +47,18 @@ Keine neuen. Weiterhin offen: 19 ältere Auto-Fix-PRs (#1, #4–#18, #20,
    [#4](https://github.com/niklas-struck-coder/travix.ai/pull/4)–[#18](https://github.com/niklas-struck-coder/travix.ai/pull/18),
    [#20](https://github.com/niklas-struck-coder/travix.ai/pull/20)–[#22](https://github.com/niklas-struck-coder/travix.ai/pull/22).
    Reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs mergen
-   oder schließen.
-2. **`recharts` ist eine ungenutzte Abhängigkeit.** In `package.json`
-   gelistet, aber `grep` findet keinen einzigen Import in `src/` — im
-   Gegensatz zu `leaflet`/`react-leaflet`, die in `Kartenansicht.tsx`
-   tatsächlich verwendet werden. Entfernen würde die Bundle-Größe
-   reduzieren; reine Aufräumarbeit, kein Bugfix, daher hier nur als
-   Vorschlag und nicht automatisch umgesetzt (Abhängigkeitsänderungen
-   sind für diesen Kanal ausgeschlossen).
+   oder schließen. Manche (z. B. #21, #22) könnten inzwischen durch
+   Fixes aus dem `it-chef-eigen`-Kanal redundant sein — lohnt sich vor
+   dem Merge kurz gegenzuprüfen.
+2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit.** In
+   `package.json` gelistet, aber kein Import in `src/` — im Gegensatz zu
+   `leaflet`/`react-leaflet`, die in `Kartenansicht.tsx` tatsächlich
+   verwendet werden. Entfernen würde die Bundle-Größe reduzieren; reine
+   Aufräumarbeit, kein Bugfix, daher hier nur als Vorschlag
+   (Abhängigkeitsänderungen sind für diesen Kanal ausgeschlossen).
 3. **`TrainCard`/`TrainResults` weiterhin unverdrahteter toter Code.**
    Unverändert seit mehreren Berichten: keine Zugsuche-Seite, kein
    Nav-Eintrag, keine echte Datenquelle — nur in der eigenen Testdatei
    referenziert. Entweder verdrahten oder entfernen, Produktentscheidung.
 
-_Letztes Update: 2026-09-22_
+_Letztes Update: 2026-09-23_
