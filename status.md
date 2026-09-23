@@ -13,15 +13,14 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-21):**
-- IT-Chef Auto hat role="alert" bei fehlgeschlagener Flug-/Hotelsuche ergänzt und
-  den "Planung fortsetzen"-Button bei abgeschlossenen Reiseentwürfen ausgeblendet;
-  weitere Läufe fanden keinen zusätzlichen sicheren Punkt
-- Support-Chef hat die beiden letzten Funde (role=alert, CTA-Sichtbarkeit) als
-  behoben bestätigt, neuer Fund: abgeschlossene Reiseentwürfe-Karte ohne jede Aktion
-- Marketing-Chef: reiner Übersichts-Lauf, keine neuen Tier-4-Kandidaten
-- Freigabe-Chef hat alle drei Auto-Branches unabhängig geprüft und nach main gemergt
+**Seit letztem Update (2026-09-22):**
+- IT-Chef Auto hat Testabdeckung für die cn()-Hilfsfunktion (src/lib/utils.ts)
+  ergänzt; weitere Läufe fanden keinen zusätzlichen sicheren Punkt
+- Support-Chef hat den "Details ansehen"-Dialog bei Reiseentwürfen geprüft
+- Marketing-Chef hat zwei neue Tier-4-Kandidaten zur Reiseentwürfe-Konsistenz-Story
+  notiert (reiner Übersichts-Lauf, nichts umgesetzt)
+- Freigabe-Chef hat alle Auto-Branches unabhängig geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-22_
+_Letztes Update: 2026-09-23_
