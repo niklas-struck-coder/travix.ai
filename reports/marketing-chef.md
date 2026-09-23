@@ -1,54 +1,57 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-22
+**Datum:** 2026-09-23
 
-## Was ist seit dem letzten Eintrag (2026-09-21) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-22) passiert?
 
-Zwei Dinge, die direkt an gestern anschließen. Erstens: PR #22 ist
-jetzt komplett gemergt – Fehler bei der Flug-/Hotelsuche werden per
-`role="alert"` angesagt, und zwar an allen vier Stellen (den
-Ergebnis-Komponenten UND den eigenständigen Flugsuche-/Hotelsuche-
-Seiten). Zweitens: der "Planung fortsetzen"-Button verschwindet jetzt
-korrekt, sobald ein Reiseentwurf abgeschlossen ist – genau der Fund,
-den Support-Chef gestern gemeldet hatte. Damit ist die Reiseentwürfe-
-Konsistenz-Geschichte, die ich gestern schon bündeln wollte, um ein
-drittes Puzzleteil reicher (Bestätigungsdialog + unterscheidbare
-Karten-Labels + kein toter Button mehr).
+Das vierte Puzzleteil der Reiseentwürfe-Konsistenz-Story ist gelandet:
+abgeschlossene Entwürfe hatten nach dem letzten Fix nur noch
+"Duplizieren" und "Löschen" – jetzt gibt's einen "Details ansehen"-Button,
+der die Trip-Daten read-only zeigt. Nutzt bewusst dieselben
+Icon/Label-Zeilen wie an anderen Stellen im Code, keine neu erfundene
+Detailansicht.
 
-Support-Chef hat außerdem heute einen neuen Fund gemeldet: abgeschlossene
-Reiseentwürfe-Karten ganz ohne Aktionsmöglichkeit. Noch nicht behoben,
-also noch kein Content-Material – nur vormerken.
+Nur: Support-Chef hat den neuen Dialog heute schon geprüft und gleich
+einen frischen Reibungspunkt gefunden – fehlende Angaben (z. B. Budget,
+Unterkunft) verschwinden dort kommentarlos, statt als "nicht angegeben"
+erkennbar zu sein. Bei Aktivitäten steht dagegen ein sauberer
+Leer-Zustand ("Noch keine Aktivitäten geplant"). Die Konsistenz-Story hat
+also gerade ein neues, noch offenes Detail bekommen, bevor das alte
+überhaupt nach draußen ging.
 
-Die vier offenen Grundsatzfragen (Kanal, Warenkorb-Content,
-wiederkehrendes Social-Format, Mini-Changelog-Start) sind weiterhin
-unbeantwortet. Keine neuen Nutzungs- oder Erfolgszahlen bekannt –
-bleibt ehrlich außen vor.
+IT-Chef hat außerdem 27 Dateien komplett gegengelesen (Bug-Suche) ohne
+neuen Fund – reine Qualitätssicherung im Hintergrund, kein neues
+Content-Material. Die vier offenen Grundsatzfragen (Kanal,
+Warenkorb-Content, Social-Format, Mini-Changelog-Start) sind laut
+Cross-Check im parallelen Kanal jetzt seit über fünf Wochen unbeantwortet.
+Keine neuen Nutzungs- oder Erfolgszahlen bekannt – bleibt ehrlich außen
+vor.
 
 ## Vorschläge
 
-1. **Reiseentwürfe-Konsistenz-Story ist jetzt reif für einen ersten
-   Entwurf, nicht erst für Ausgabe 5.** Drei zusammenhängende Fixes
-   (fragt nach vor "Abschließen", unterscheidbare Karten, kein
-   irreführender Button mehr) erzählen sauber eine Botschaft: "wir
-   räumen auf, bevor's stört". Das reicht für ein eigenständiges
-   kurzes Stück, sobald ein Kanal steht – muss nicht auf die
-   Achter-Schwelle für Sammel-Ausgaben warten.
-2. **Barrierefreiheit jetzt als eigene Erzählung ausformulieren,
-   nicht nur vormerken.** Mit PR #22 komplett durch ist die
-   a11y-Linie (Fokus, Ladehinweise, jetzt auch Fehler-Ansagen) an
-   allen relevanten Suchstellen konsistent umgesetzt. Ein kurzer,
-   sachlicher Post ("wir bauen das auch für Screenreader-Nutzer:innen
-   sauber, ganz ohne Ankündigung") ist inhaltlich fertig, sobald
-   jemand ihn schreiben soll.
-3. **Eine der vier Grundsatzfragen diese Woche einzeln entscheiden
-   lassen.** Der Vorschlag von gestern bleibt: nicht weiter alle vier
-   gemeinsam offenhalten, sondern z. B. nur den Kanal für die erste
-   Content-Ausgabe fix machen. Fünf Wochen Stillstand sind ein
-   Muster – eine kleine, konkrete Entscheidung reicht, um wieder
-   Bewegung reinzubringen.
-4. **Neuen Support-Chef-Fund (leere Reiseentwürfe-Karten ohne Aktion)
-   im Blick behalten, aber noch nicht verwenden.** Sobald behoben,
-   passt er thematisch genau in dieselbe Konsistenz-Story wie unter
-   1. – dann als viertes Puzzleteil ergänzen statt als eigenes Thema.
+1. **Reiseentwürfe-Konsistenz-Story: Veröffentlichung an den letzten
+   Wackler koppeln, nicht schon jetzt rausbringen.** Die Story ist
+   inhaltlich fast rund, aber "Details ansehen" zeigt bei unvollständigen
+   Entwürfen kommentarlos Lücken statt "nicht angegeben". Genau das
+   würde eine "wir räumen auf, bevor's stört"-Botschaft unterlaufen, wenn
+   ein:e Leser:in es direkt selbst so vorfindet. Sobald der
+   IT-Chef-Kanal das nachzieht (Muster ist im selben Dialog schon da,
+   sollte schnell gehen), ist der Vierteiler wirklich rund und reif für
+   den ersten Entwurf.
 
-_Letztes Update: 2026-09-22_
+2. **Die "wir prüfen laufend" -Geschichte als eigenes kleines
+   Vertrauens-Signal nutzen.** 27 Dateien gegengelesen, kein neuer Fund
+   – das ist unspektakulär, aber genau die Art Hintergrundarbeit, die
+   Nutzer:innen sonst nie sehen. Ein kurzer, sachlicher Satz irgendwo
+   sichtbar (z. B. Changelog- oder About-Kontext, sobald der existiert)
+   in der Art "wir testen laufend gegen, bevor was live geht" passt zur
+   Ehrlichkeits-Linie, ohne Zahlen zu erfinden.
+
+3. **Eine der vier Grundsatzfragen diese Woche wirklich entscheiden.**
+   Der Vorschlag steht jetzt seit Wochen unverändert im Raum – die
+   Fünf-Wochen-Marke ist gerade überschritten. Konkret reicht z. B. nur
+   der Kanal für die erste Content-Ausgabe. Ohne diese eine Entscheidung
+   bleibt jedes fertige Content-Stück (wie Punkt 1 und 2 oben) in der
+   Schublade, egal wie reif es ist.
+
+_Letztes Update: 2026-09-23_
