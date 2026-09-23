@@ -4,6 +4,68 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-23
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`) war auf `d672e8e` (22.09., reiner
+Übersichts-Lauf) hängengeblieben, dessen Inhalt laut `freigabe-chef-log.md`
+bereits vollständig in `main` gemergt war — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. `origin/main` (`5df2b99`) per
+Fast-Forward-Merge in diesen Branch eingebracht, bevor der eigentliche
+Lauf begann.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf ergänzt
+(zwei neue Tier-4-Kandidaten eingeordnet, zwei role="alert"-Fixes bewusst
+ausgeschlossen). Kein neues eigenständiges Content-Stück, keine fünfte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` seit dem 22.09. beantwortet wurde:
+keine Notiz in `status.md` (Stand weiterhin 22.09.), `ZEITPLAN.md` (6.2,
+Zeile 1475, weiterhin `[ ]`) oder diesem Dokument, keine neuen
+Kanal-Links im Repo, kein `changelog`-Treffer in `src/routes.tsx`. Alle
+vier Fragen bleiben offen — jetzt seit über fünf Wochen. Danach `git log
+dc451a8..origin/main` geprüft: der 22.09.-Lauf hatte für PR #22 explizit
+vermerkt, dass die zugehörigen Fixes auf `it-chef/auto` zu dem Zeitpunkt
+noch nicht in `main` gemergt waren — inzwischen sind sie es (Merge
+`561228a`/`8603f97`). Jeder seither neu in `main` angekommene Commit per
+`git show`/`git show --stat` einzeln geprüft: zwei echte, neue
+Produkt-Codeänderungen ohne bisherige Zählung gefunden —
+`5575e5b` (misleading "Planung fortsetzen"-CTA auf einer gerade
+abgeschlossenen Reiseentwurf-Karte ausgeblendet) als neunzehnter und
+`65fb64d` (daraus resultierende Sackgasse behoben: neuer "Details
+ansehen"-Button für abgeschlossene Entwürfe) als zwanzigster
+Tier-4-Kandidat — beide dieselbe, bereits mehrfach gezählte
+"Reiseentwürfe-Konsistenz"-Fundgruppe. Zwei weitere echte Codeänderungen
+(`e484e7b`/`ccebd3b`, `role="alert"` bei fehlgeschlagener Flug-/
+Hotelsuche) bewusst nicht gezählt — reine Screenreader-Ankündigungs-Fixes
+ohne die "Ehrlichkeit/Vertrauen für sehende Nutzer:innen"-Erzählung dieses
+Formats, gleiche Begründung wie bei allen früheren Accessibility-
+Ausschlüssen. Details siehe `marketing/freigabe-uebersicht.md`, Update
+2026-09-23.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen (beide neuen Kandidaten stammen aus
+einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commits). Keine offene Positionierungs-Grundsatzfrage: dieser Lauf wendet
+nur die bereits etablierte "Ehrlichkeit/Vertrauen"-Abgrenzung an, trifft
+keine neue inhaltliche Entscheidung. Mit einem Kandidatentopf von drei
+(weiterhin klar unter der Achter-Schwelle) ist eine fünfte
+Mini-Changelog-Ausgabe heute nicht angezeigt — genau wie in den Vortagen
+bleiben "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+aufbauen" (Sprint 4) sowie Testkampagnen/Launch-Kampagne (Sprint 6/7)
+bewusst unangetastet, da Live-Vorgänge bzw. an ungelöste Freigabe-Fragen
+gebunden.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-22
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
