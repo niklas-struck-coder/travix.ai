@@ -12341,3 +12341,72 @@ trägt:
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-23 (vierter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) lag hinter `main`
+(`git merge-base --is-ancestor origin/main origin/it-chef/auto`
+bestätigte das) — seit dem dritten Lauf heute waren auf `main` drei neue
+Commits dazugekommen: IT-Chef-Bericht (23.09., 27 neue Dateien ohne
+neuen Fund), Marketing-Chef-Bericht und ein neuer Support-Chef-Bericht
+(23.09.) mit einem frischen Fund. `origin/main` sauber per Fast-Forward
+in `it-chef/auto` gemergt (keine Konflikte, reine Bericht-/Log-Dateien).
+
+**Ausgewählter Punkt:** Vorschlag 1 aus `reports/support-chef.md`
+(23.09.): Der neue "Details ansehen"-Dialog für abgeschlossene
+Reiseentwürfe (`src/pages/Reiseentwuerfe.tsx:356-390`, vom fünften Lauf
+am 22.09. gebaut) blendete fehlende Angaben (Transportmittel, Datum,
+Budget, Unterkunft) über `.filter(Boolean)` komplett aus, statt sie wie
+die im selben Dialog bereits korrekt gemachte Aktivitäten-Zeile ("Noch
+keine Aktivitäten geplant") explizit als fehlend zu kennzeichnen. Für
+eine Nutzerin, die einen unvollständigen Entwurf bewusst abgeschlossen
+hat und sich danach die Details ansieht, wirkt das leicht so, als wären
+beim Abschließen Angaben verloren gegangen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reiner Anzeige-Fix in einem Lese-Dialog
+für Demo-Daten. Keine offene Architektur-/Produktentscheidung: der
+Bericht selbst nennt das bereits im selben Dialog etablierte Muster
+(Aktivitäten-Zeile) als Vorlage, und der genaue Wortlaut für die drei
+fehlenden Felder existiert bereits wortgleich in `Buchung.tsx`
+("Noch kein Transport ausgewählt", "Noch keine Daten gewählt", "Noch
+kein Budget angegeben", "Noch keine Unterkunft ausgewählt") — keine
+erfundene Design-Entscheidung, reine Wiederverwendung bestehender Copy.
+Klar genug ohne Interpretation: der Bericht benennt Datei, Zeilen und
+das nachzuahmende Muster exakt. Objektiv prüfbar über einen neuen
+Regressionstest (zeigt/versteckt die richtigen Texte).
+
+Vor der Umsetzung `MARKENDESIGN.md` gegengeprüft (Copy-Text, sichtbar für
+Nutzerinnen): keine eigene Vorgabe für Leerzustände in Detail-Dialogen,
+daher am bereits im Code etablierten Muster (`Buchung.tsx`) orientiert
+statt neu zu erfinden, wie in der Skill-Datei für diesen Fall
+vorgesehen.
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — die vier Zeilen für
+Transport/Datum/Budget/Unterkunft erscheinen jetzt immer (kein
+`.filter(Boolean)` mehr); fehlt der Wert, zeigen sie den oben genannten,
+aus `Buchung.tsx` übernommenen Text statt weggelassen zu werden. Für den
+fehlenden Transportmodus zusätzlich ein Fallback-Icon (`Plane`, exakt
+dasselbe Fallback wie in `Buchung.tsx:168` für denselben Fall). Kein
+Verhalten für bereits vollständige Entwürfe geändert (bei Lissabon, wo
+nur Unterkunft fehlt, ändert sich sichtbar nur diese eine Zeile).
+
+**Geprüft:** Vor dem Fix den neuen Test isoliert gegen den
+unveränderten Code laufen lassen (`git stash` nur der
+`Reiseentwuerfe.tsx`-Quelländerung) — schlägt wie erwartet fehl (die
+drei "Noch kein/keine ..."-Texte fehlen im DOM). Nach dem Fix: gezielt
+`npx vitest run src/pages/Reiseentwuerfe.test.tsx` (15 Tests, alle
+grün), danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 349
+Tests, davon 1 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Regressionstest),
+`ZEITPLAN.md` (7.2-Eintrag ergänzt) und dieser Log-Eintrag committet —
+auf `it-chef/auto` gepusht, `main` unberührt (samt dem zuvor
+nachgezogenen `main`-Stand). Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 7.2 ist bereits als `[x]`
+markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
+Aufgabe, kein eigener Checkbox-Punkt.

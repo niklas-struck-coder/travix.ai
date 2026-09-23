@@ -1690,6 +1690,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abschließen zeigt der Dialog Transport/Daten/Budget/den
   "keine Aktivitäten"-Hinweis korrekt und lässt sich über den
   Standard-Dialog-Close wieder schließen).
+  Vom autonomen IT-Chef-Lauf am 23.09. (vierter Lauf) Vorschlag 1 aus
+  `reports/support-chef.md` (23.09.) behoben: Der Details-Dialog blendete
+  fehlende Angaben (kein Transportmittel/Datum/Budget/Unterkunft) über
+  `.filter(Boolean)` komplett aus, statt sie wie die bereits richtig
+  gemachte Aktivitäten-Zeile ("Noch keine Aktivitäten geplant") explizit
+  als fehlend zu kennzeichnen — für eine Nutzerin, die einen
+  unvollständigen Entwurf bewusst abschließt, wirkte das wie verlorene
+  Angaben. Fix: alle vier Zeilen erscheinen jetzt immer; fehlt der Wert,
+  zeigen sie denselben Wortlaut, der für dieselben Felder bereits in
+  `Buchung.tsx` etabliert ist ("Noch kein Transport ausgewählt", "Noch
+  keine Daten gewählt", "Noch kein Budget angegeben", "Noch keine
+  Unterkunft ausgewählt") — keine neue Design-Entscheidung, reine
+  Wiederverwendung. Neuer Regressionstest in `Reiseentwuerfe.test.tsx`
+  (Kyoto-Demo-Entwurf, bei dem nur das Datum gesetzt ist, zeigt nach dem
+  Abschließen alle drei fehlenden Angaben statt sie wegzulassen) — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+  nur `Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe

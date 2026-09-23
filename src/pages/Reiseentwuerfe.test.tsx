@@ -192,6 +192,25 @@ describe('Reiseentwuerfe', () => {
     expect(screen.queryByText('Abgeschlossener Reiseentwurf — nur zum Ansehen.')).not.toBeInTheDocument()
   })
 
+  it('marks missing transport/budget/accommodation as such in the details dialog instead of hiding them', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    // Kyoto hat nur ein Reisedatum gesetzt, Transport/Budget/Unterkunft sind null.
+    fireEvent.click(screen.getByRole('button', { name: 'Kyoto abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Kyoto Details ansehen' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('3. – 10. März 2027')).toBeInTheDocument()
+    expect(dialog.getByText('Noch kein Transport ausgewählt')).toBeInTheDocument()
+    expect(dialog.getByText('Noch kein Budget angegeben')).toBeInTheDocument()
+    expect(dialog.getByText('Noch keine Unterkunft ausgewählt')).toBeInTheDocument()
+  })
+
   it('deletes a draft once its removal is confirmed, and shows the empty state once none are left', () => {
     render(
       <MemoryRouter>
