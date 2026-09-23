@@ -1,10 +1,116 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-22)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-23)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-23: zwei neue Tier-4-Kandidaten (misleading CTA nach Abschließen ausgeblendet, "Details ansehen" für abgeschlossene Reiseentwürfe), zwei role="alert"-Fixes bewusst ausgeschlossen, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` war auf
+`d672e8e` (22.09., reiner Übersichts-Lauf) hängengeblieben, dessen Inhalt
+laut `freigabe-chef-log.md` bereits vollständig in `main` gemergt war —
+der Branch war also nur noch veraltet, nicht mehr in Arbeit. `origin/main`
+(`5df2b99`) per Fast-Forward-Merge in diesen Branch eingebracht, bevor der
+eigentliche Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 22.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile
+1475, weiterhin `[ ]`) oder diesem Dokument seit dem 22.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über fünf Wochen.
+
+**`git log dc451a8..origin/main` zeigt (nach Abzug bereits als
+Berichte/Logs bekannter Commits) mehrere neue Produkt-Codeänderungen, die
+zum Zeitpunkt des 22.09.-Laufs auf `it-chef/auto` noch nicht in `main`
+gemergt waren (der damalige Lauf hatte das für PR #22 bereits explizit
+vermerkt) und erst mit dem Merge `561228a`/`8603f97` hier ankommen — jede
+einzeln per `git show` geprüft:**
+- `5575e5b` (IT-Chef Auto, Vorschlag 2 aus `reports/support-chef.md`,
+  21.09.): Der hervorgehobene "Planung fortsetzen"-Button auf
+  `/reiseentwuerfe` wurde bisher auf jeder Karte angezeigt — auch auf
+  einer gerade eben über den Bestätigungsdialog abgeschlossenen. Ein
+  Klick führte zurück in den Chat, obwohl es für einen abgeschlossenen
+  Entwurf nichts mehr "fortzusetzen" gab — ein aktiv wirkender CTA, der
+  ins Leere lief. Button steht jetzt hinter derselben
+  `draft.status !== 'finalized'`-Bedingung wie Pausieren/Abschließen im
+  selben Markup. **Neunzehnter Tier-4-Kandidat** — passt direkt in die
+  bereits mehrfach gezählte "Reiseentwürfe-Konsistenz"-Fundgruppe
+  (Löschbestätigung, Abschließen-Bestätigung): eine Karte soll nur
+  Aktionen anbieten, die für ihren Status auch wirklich etwas bewirken.
+- `65fb64d` (IT-Chef Auto, Support-Chef-Folgefund vom 22.09., Vorschlag 1):
+  Nachdem `5575e5b` den "Planung fortsetzen"-Button für abgeschlossene
+  Entwürfe ausgeblendet hatte, blieb einer finalized-Karte gar keine
+  sinnvolle Aktion mehr übrig außer Löschen. Neuer "Details
+  ansehen"-Button (nur bei `status=finalized`) öffnet einen read-only
+  Dialog mit den vorhandenen Trip-Daten, mechanisch aus denselben Icon-/
+  Label-Zeilen wie `TripSummaryCard.tsx`/`Buchung.tsx` zusammengesetzt.
+  **Zwanzigster Tier-4-Kandidat** — direkte Fortsetzung derselben
+  Konsistenz-Story wie `5575e5b`: aus einer Sackgasse (Karte ohne jede
+  Aktion) wird eine ehrliche, tatsächlich nutzbare Aktion.
+- `e484e7b` (21.09.) und `ccebd3b` (21.09., fünfter Lauf): `role="alert"`
+  auf die Fehlerzustände von `FlightResults.tsx`/`HotelResults.tsx` bzw.
+  `Flugsuche.tsx`/`Hotelsuche.tsx` ergänzt — Screenreader-Nutzer:innen
+  bekommen einen Suchfehler jetzt automatisch angekündigt. **Bewusst
+  nicht** als Tier-4-Kandidaten aufgenommen: reine
+  Screenreader-Ankündigungs-Fixes ohne die "Ehrlichkeit/Vertrauen für
+  sehende Nutzer:innen"-Erzählung dieses Formats — exakt dieselbe
+  Begründung wie bei den bereits ausgeschlossenen `a21ae7c`/`67b9bdb`
+  (`role="status"`, 21.09.) und den übrigen Accessibility-Ausschlüssen.
+- `4da7308` (22.09., vierter Lauf) und `c56f725` (23.09.,
+  Testabdeckung `utils.test.ts`): keine Produkt-Codeänderung — reine
+  Log-Einträge bzw. reine Testabdeckung für bereits bestehendes,
+  unverändertes Verhalten (per `git show --stat` verifiziert, kein
+  Verhaltensunterschied). Wie bei allen früheren reinen Testdatei-
+  Nachzügen nicht als Kandidat gezählt.
+- `6fe4ac3`, `08540af` (23.09., zweiter/dritter Lauf): laut
+  Commit-Beschreibung "kein sicherer Punkt gefunden" — per `git show
+  --stat` bestätigt, dass nur `it-chef-auto-log.md` geändert wurde.
+
+Die übrigen Commits im Bereich (mehrere Support-/Marketing-/IT-Chef-
+Berichte vom 21./22.09., zwei Daily-Status-Updates, mehrere
+Freigabe-Chef-Logs, Merge-Commits der drei Auto-Branches sowie der eigene
+vorherige Auto-Lauf-Commit `d672e8e`) enthalten keine weitere, für dieses
+Format relevante Codeänderung — jeweils per `git show --stat` geprüft
+(ausschließlich `reports/*.md`, `status.md`, `*-log.md` betroffen).
+
+**Damit wächst der Kandidatentopf von eins (Stand 22.09.) auf drei** —
+weiterhin klar unter der Achter-Schwelle, die Ausgabe 2/3/4 ausgelöst hat,
+und auch unter der Menge (vier), die selbst am 06.09. noch als "nicht
+ausreichend" bewertet wurde. Keine fünfte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen: beide neuen
+Kandidaten stammen aus einzeln per `git show` verifizierten, bereits in
+`main` gemergten Commits; die beiden Ausschlüsse (role="alert") sind
+transparent mit derselben, bereits etablierten Begründung wie frühere
+Accessibility-Ausschlüsse versehen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf wendet nur die bereits
+etablierte "Ehrlichkeit/Vertrauen"-Abgrenzung an, trifft keine neue
+inhaltliche Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/Mini-Changelog-Ausgabe — Kandidatentopf
+  steht bei drei, klar unter dem etablierten Maßstab (acht).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 23.09. (Prüfung der
+  vier Fragen, Einordnung zweier neuer Commits als Tier-4-Kandidaten 19/20,
+  zwei role="alert"-Fixes bewusst ausgeschlossen), "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert, Datum im Titel auf 23.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-22: keine neuen Tier-4-Kandidaten, alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
 
@@ -2186,4 +2292,16 @@ aber Fokus-Ausschlussgruppe; `/hilfe`-Seite — weiterhin unverändert)
 bleiben entsprechend außen vor. Der nächste Lauf sollte weiterhin zuerst
 die vier offenen Fragen gegenprüfen, bevor er neue Inhalte erstellt, und
 den Kandidatentopf (Stand 21.09: eins) gegen den etablierten
-06.09.-Maßstab (acht = genug, vier = eher nicht) weiterführen.
+06.09.-Maßstab (acht = genug, vier = eher nicht) weiterführen. Stand 23.09.
+sind zwei weitere Kandidaten dazugekommen (misleading CTA "Planung
+fortsetzen" nach Abschließen ausgeblendet, "Details ansehen" für
+abgeschlossene Reiseentwürfe — beide aus demselben, mit dem 22.09.-Merge
+erst nach `main` gelangten `it-chef/auto`-Fund, siehe Update 2026-09-23
+oben) — der Topf steht damit bei drei, weiterhin klar unter der
+Achter-Schwelle und auch unter der Menge (vier), die selbst am 06.09. als
+"nicht ausreichend" galt. Zwei am selben Tag geprüfte `role="alert"`-Fixes
+wurden bewusst nicht aufgenommen (reine Screenreader-Ankündigung, gleiche
+Ausschlussgruppe wie die bereits ausgeschlossenen `role="status"`-Fixes).
+Der nächste Lauf sollte weiterhin zuerst die vier offenen Fragen
+gegenprüfen und den Kandidatentopf (Stand 23.09: drei) gegen denselben
+06.09.-Maßstab weiterführen.
