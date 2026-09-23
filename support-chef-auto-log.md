@@ -2990,3 +2990,65 @@ Die bereits am 21.09. dokumentierte, weiterhin offene Anregung (eigene
 Badge-Variante für "Abgeschlossen" statt derselben `secondary`-Variante
 wie "Pausiert") wurde nicht erneut als eigener Punkt aufgeführt, da sie
 inhaltlich unverändert und schon gemeldet ist.
+
+## 2026-09-23 — Reiseentwürfe: "Details ansehen"-Dialog (`Reiseentwuerfe.tsx`)
+
+### Kontext
+Ausgewählt, weil dies laut `ZEITPLAN.md` (Programmierung, Ist-Stand) das
+zuletzt neu gebaute Stück UI ist: Der autonome IT-Chef-Lauf vom 22.09.
+(fünfter Lauf) hat genau den in diesem Log zuletzt gemeldeten Fund
+("Ein abgeschlossener Reiseentwurf hat danach überhaupt keine sinnvolle
+Aktion mehr") behoben und wurde in der Nacht zum 23.09. vom Freigabe-Chef
+nach `main` gemergt (`65fb64d`, gemergt über `8603f97`/`5df2b99`). Dieser
+Lauf prüft genau diesen neuen Dialog.
+
+### Zuerst bestätigt: alter Fund tatsächlich behoben
+`src/pages/Reiseentwuerfe.tsx:279-290`: Für `draft.status === 'finalized'`
+gibt es jetzt einen "Details ansehen"-Button (Eye-Icon, eigenes
+`aria-label`/`title`), der einen reinen Lese-Dialog öffnet
+(`Reiseentwuerfe.tsx:356-390`). Die vorherige Sackgasse (nur noch
+Duplizieren/Löschen nach bewusstem Abschließen) ist damit behoben — per
+Codelesen und per `Reiseentwuerfe.test.tsx:173-193` bestätigt.
+
+### Reibungspunkt
+
+**1. Fehlende Angaben verschwinden im Detail-Dialog kommentarlos, statt
+als "nicht angegeben" erkennbar zu sein**
+
+`src/pages/Reiseentwuerfe.tsx:362-388`: Der Dialog baut seine Zeilen aus
+`transportMode`, `dates`, `budget`, `accommodation` per
+`.filter(Boolean)` (Zeile 364-374) — ein `null`-Feld wird komplett
+weggelassen, nicht als leer angezeigt. Einzige Ausnahme ist die
+Aktivitäten-Zeile (Zeile 381-386), die immer sichtbar bleibt und bei
+keinen Aktivitäten explizit "Noch keine Aktivitäten geplant" zeigt.
+
+Das ist inkonsistent innerhalb desselben Dialogs: Fehlen z. B. Budget und
+Unterkunft (im Demo-Datensatz bei "Kyoto" der Fall, der genau wie
+Lissabon über den "Abschließen"-Button abschließbar ist, `Zeile 267-278`
+prüft nur `status !== 'finalized'`, nicht ob der Entwurf überhaupt
+vollständig ist), zeigt der abgeschlossene Detail-Dialog für Kyoto nur
+noch Ziel, Datum und "Noch keine Aktivitäten geplant" — Budget und
+Unterkunft fehlen dort ganz ohne Hinweis. Für eine Nutzerin, die den
+Entwurf bewusst über den "Das lässt sich nicht rückgängig machen"-Dialog
+abgeschlossen hat und sich die Details danach ansieht, wirkt das leicht
+so, als wären beim Abschließen Angaben verloren gegangen — dabei wurden
+sie im Chat vermutlich schlicht nie ausgefüllt. Zum Vergleich:
+`Buchung.tsx` behandelt genau diesen Fall bei der aktiven (nicht
+abgeschlossenen) Reise bereits bewusst mit eigenen Leerzuständen (z. B.
+Zeile 269 "Noch keine Aktivitäten geplant", vermutlich Analoges für
+Unterkunft) statt die Zeile einfach zu verstecken — nur beim neuen
+Read-Only-Dialog wurde dieses Muster nicht für alle Felder übernommen,
+sondern nur für Aktivitäten.
+
+*Vorschlag:* Für Transportmittel/Budget/Unterkunft im Detail-Dialog
+denselben Ansatz wie bei den Aktivitäten fahren — statt die Zeile bei
+`null` ganz wegzulassen, einen kurzen "nicht angegeben"-Text anzeigen
+(z. B. "Kein Transportmittel gewählt" analog zum bestehenden "Noch keine
+Aktivitäten geplant"-Text). Kleine, mechanische Änderung ohne neue
+Design-Entscheidung, da das Muster im selben Dialog schon existiert.
+
+### Nicht geprüft
+Die bereits mehrfach dokumentierte, weiterhin offene Anregung (eigene
+Badge-Variante für "Abgeschlossen" statt derselben `secondary`-Variante
+wie "Pausiert", `Zeile 236`) wurde nicht erneut als eigener Punkt
+aufgeführt, da sie inhaltlich unverändert und schon gemeldet ist.
