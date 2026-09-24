@@ -12534,3 +12534,64 @@ Kurzfrist-Mitigation umgesetzt.
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-24 (weiterer Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git log origin/main..origin/it-chef/auto` zeigt nur
+die drei IT-Chef-Auto-Commits vom heutigen Tag, `git log
+origin/it-chef/auto..origin/main` ist leer), kein Merge nötig —
+`main` seit dem letzten Lauf heute unverändert. `reports/it-chef.md` und
+`reports/support-chef.md` ebenfalls unverändert seit dem 23.09., keine
+neue externe Eingabe.
+
+**Ausgewählter Punkt:** Der im letzten Lauf heute als "unsicher"
+zurückgestellte Kandidat aus `src/pages/Kalender.tsx` (`goToPreviousMonth`/
+`goToNextMonth`) wurde erneut geprüft und diesmal so umgesetzt, dass er
+alle vier Kriterien erfüllt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reine Kalender-Navigationslogik auf
+Demo-Daten. Keine offene Architektur-/Produktentscheidung: statt des im
+letzten Lauf verworfenen Wegs (verschachtelte `setState`-Updater, die
+sich schwer objektiv testen lassen) diesmal der bereits im Code etablierte
+Stil aus `calendarUtils.ts` (reine, unit-getestete Hilfsfunktionen statt
+Komponentenlogik) konsequent weitergeführt — keine neu erfundene Lösung.
+Klar genug ohne Interpretation: die betroffenen Zeilen, das Race zwischen
+den beiden `setState`-Aufrufen und der betroffene Jahresübergang waren
+im letzten Log-Eintrag bereits exakt benannt. Objektiv prüfbar: die neuen
+reinen Funktionen lassen sich direkt und deterministisch per Unit-Test an
+den Jahresgrenzen (Dezember→Januar, Januar→Dezember) prüfen, ohne auf
+schwer reproduzierbare synchrone Doppel-Events angewiesen zu sein.
+
+**Umsetzung:** Zwei neue, pure Funktionen `getPreviousMonth(year, month)`
+und `getNextMonth(year, month)` in `src/lib/trip/calendarUtils.ts`, die
+Jahr und Monat atomar aus demselben Zustand berechnen (analog zu den
+bereits vorhandenen `getMonthGridDays`/`toIsoDate` dort). `Kalender.tsx`
+ruft in `goToPreviousMonth`/`goToNextMonth` jetzt diese Funktion einmal
+auf und setzt `year`/`month` direkt mit dem Ergebnis, statt über zwei
+getrennte `setState`-Updater, von denen einer (`setYear`) den
+Jahreswechsel aus dem Render-Closure-Wert von `month` statt aus dem
+tatsächlich vorherigen Wert las. Dadurch können Jahr und Monat nicht mehr
+aus zwei unabhängig ausgewerteten Bedingungen auseinanderlaufen. Kein
+Verhalten für die normale Einzelklick-Navigation geändert (unverändertes
+Verhalten in allen bestehenden `Kalender.test.tsx`-Tests bestätigt).
+
+**Geprüft:** Frisches `npm install` (Abhängigkeiten waren im
+Cloud-Checkout noch nicht installiert), dann gezielt
+`npx vitest run src/lib/trip/calendarUtils.test.ts src/pages/Kalender.test.tsx`
+(15 Tests, davon 4 neu — alle grün), danach `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen), volle Suite `npm test` (59
+Testdateien, 354 Tests, davon 4 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert und unabhängig von dieser
+Änderung).
+
+**Ergebnis:** `src/lib/trip/calendarUtils.ts` (neue Hilfsfunktionen),
+`src/lib/trip/calendarUtils.test.ts` (neue Unit-Tests),
+`src/pages/Kalender.tsx` (Fix), `ZEITPLAN.md` (7.11-Eintrag ergänzt) und
+dieser Log-Eintrag committet — auf `it-chef/auto` gepusht, `main`
+unberührt. Keine Änderung an `tasks/tasks-prd-travix-platform.md`: 7.11
+ist bereits als `[x]` markiert, dies ist eine Verfeinerung derselben
+bereits abgeschlossenen Aufgabe, kein eigener Checkbox-Punkt.

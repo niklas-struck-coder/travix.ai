@@ -1799,7 +1799,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zugänglich sind. Keine neue Abhängigkeit (kein Kalender-Package),
   ermutigender Leer-Zustand laut `MARKENDESIGN.md` als Fallback vorhanden,
   auch wenn er mit den festen Demo-Daten aktuell nicht greift. Rein
-  lokaler Demo-State, noch keine echte geteilte Reise-Speicherung
+  lokaler Demo-State, noch keine echte geteilte Reise-Speicherung.
+  Vom autonomen IT-Chef-Lauf am 24.09. (weiterer Lauf) nachgeschärft: die
+  Monatsnavigation (`goToPreviousMonth`/`goToNextMonth`) berechnete
+  Jahr und Monat über zwei getrennte `setState`-Updater, von denen einer
+  aus dem Render-Closure-Wert von `month` las statt aus dem tatsächlich
+  vorherigen Wert — bei zwei synchronen Aufrufen im selben Tick (Doppel-
+  klick vor dem Rerender) hätte das Jahr am Dezember/Januar-Übergang
+  falsch berechnet werden können. Jetzt zwei neue, reine Hilfsfunktionen
+  `getPreviousMonth`/`getNextMonth` in `calendarUtils.ts` (mit
+  Jahresübergang-Unit-Tests), die Jahr und Monat atomar aus demselben
+  Zustand berechnen; `Kalender.tsx` setzt beide States direkt aus dem
+  Ergebnis statt über getrennte Updater-Funktionen
 - [ ] 7.12 Reisebudget (Recharts) — weiterhin blockiert, `TripDraft` hat
   keine echten Preisfelder für Transport/Unterkunft (gleicher Grund wie
   bei 6.6/6.7, siehe oben)
