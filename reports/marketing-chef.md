@@ -1,57 +1,52 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-23
+**Datum:** 2026-09-24
 
-## Was ist seit dem letzten Eintrag (2026-09-22) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-23) passiert?
 
-Das vierte Puzzleteil der Reiseentwürfe-Konsistenz-Story ist gelandet:
-abgeschlossene Entwürfe hatten nach dem letzten Fix nur noch
-"Duplizieren" und "Löschen" – jetzt gibt's einen "Details ansehen"-Button,
-der die Trip-Daten read-only zeigt. Nutzt bewusst dieselben
-Icon/Label-Zeilen wie an anderen Stellen im Code, keine neu erfundene
-Detailansicht.
+Genau der Blocker von gestern ist weg: Im "Details ansehen"-Dialog für
+abgeschlossene Reiseentwürfe zeigen Transportmittel, Datum, Budget und
+Unterkunft jetzt bei fehlenden Werten denselben "nicht angegeben"-Text,
+den es schon bei Aktivitäten gab, statt kommentarlos zu verschwinden
+(ce62376). Zusätzlich ist die "Abgeschlossen"-Badge jetzt optisch klar
+von "Pausiert" unterscheidbar (eigene Teal-Variante, 647d57f) – war
+Support-Chefs dritter Fund vom 23.09.
 
-Nur: Support-Chef hat den neuen Dialog heute schon geprüft und gleich
-einen frischen Reibungspunkt gefunden – fehlende Angaben (z. B. Budget,
-Unterkunft) verschwinden dort kommentarlos, statt als "nicht angegeben"
-erkennbar zu sein. Bei Aktivitäten steht dagegen ein sauberer
-Leer-Zustand ("Noch keine Aktivitäten geplant"). Die Konsistenz-Story hat
-also gerade ein neues, noch offenes Detail bekommen, bevor das alte
-überhaupt nach draußen ging.
-
-IT-Chef hat außerdem 27 Dateien komplett gegengelesen (Bug-Suche) ohne
-neuen Fund – reine Qualitätssicherung im Hintergrund, kein neues
-Content-Material. Die vier offenen Grundsatzfragen (Kanal,
-Warenkorb-Content, Social-Format, Mini-Changelog-Start) sind laut
-Cross-Check im parallelen Kanal jetzt seit über fünf Wochen unbeantwortet.
-Keine neuen Nutzungs- oder Erfolgszahlen bekannt – bleibt ehrlich außen
-vor.
+Nur: kaum gebaut, hat Support-Chef bei genau dieser neuen Teal-Badge
+schon den nächsten Punkt gefunden – der Textkontrast liegt im hellen
+Farbschema bei ca. 2,3:1 statt der WCAG-AA-Vorgabe von 4,5:1 (dasselbe,
+bisher ungemeldete Problem steckt wohl schon länger in
+TripSummaryCard.tsx, ist jetzt aber auf einer dauerhaft sichtbaren
+Status-Beschriftung). Bislang nur analysiert, noch nicht gefixt. Die
+Reiseentwürfe-Konsistenz-Story ist inhaltlich jetzt tatsächlich rund –
+aber wieder ein frischer, noch offener Punkt bremst die Veröffentlichung.
+IT-Chef hat außerdem eine Kalender-Monatsnavigation gegen einen
+Race-Condition-Bug abgesichert – reine Robustheit, kein Content-Material.
+Keine neuen Nutzungs- oder Erfolgszahlen bekannt.
 
 ## Vorschläge
 
-1. **Reiseentwürfe-Konsistenz-Story: Veröffentlichung an den letzten
-   Wackler koppeln, nicht schon jetzt rausbringen.** Die Story ist
-   inhaltlich fast rund, aber "Details ansehen" zeigt bei unvollständigen
-   Entwürfen kommentarlos Lücken statt "nicht angegeben". Genau das
-   würde eine "wir räumen auf, bevor's stört"-Botschaft unterlaufen, wenn
-   ein:e Leser:in es direkt selbst so vorfindet. Sobald der
-   IT-Chef-Kanal das nachzieht (Muster ist im selben Dialog schon da,
-   sollte schnell gehen), ist der Vierteiler wirklich rund und reif für
-   den ersten Entwurf.
+1. **Warten auf den Kontrast-Fix, dann sofort raus – nicht nochmal
+   liegen lassen.** Der Vierteiler ist inhaltlich fertig, der einzige
+   Rest ist der Teal-Kontrast auf der Badge. Sobald das behoben ist
+   (Muster ist wortwörtlich dasselbe Problem wie in TripSummaryCard.tsx,
+   also vermutlich schnell erledigt), soll der erste Content-Entwurf
+   noch am selben Tag raus – kein weiteres Zuwarten auf den nächsten
+   möglichen Fund.
 
-2. **Die "wir prüfen laufend" -Geschichte als eigenes kleines
-   Vertrauens-Signal nutzen.** 27 Dateien gegengelesen, kein neuer Fund
-   – das ist unspektakulär, aber genau die Art Hintergrundarbeit, die
-   Nutzer:innen sonst nie sehen. Ein kurzer, sachlicher Satz irgendwo
-   sichtbar (z. B. Changelog- oder About-Kontext, sobald der existiert)
-   in der Art "wir testen laufend gegen, bevor was live geht" passt zur
-   Ehrlichkeits-Linie, ohne Zahlen zu erfinden.
+2. **"Wir prüfen auch auf Barrierefreiheit" als eigenes, kleines
+   Ehrlichkeits-Signal.** Dass ein frischer Kontrast-Fund sofort nach dem
+   Bauen auffällt und offen benannt wird, ist genau die Art
+   Qualitätsarbeit, die sonst unsichtbar bleibt. Ein kurzer, sachlicher
+   Satz dazu (z. B. im Changelog- oder About-Kontext, sobald der
+   existiert) passt zur bestehenden Ehrlichkeits-Linie und ist ein
+   glaubwürdiges Detail, kein Marketing-Sprech.
 
-3. **Eine der vier Grundsatzfragen diese Woche wirklich entscheiden.**
-   Der Vorschlag steht jetzt seit Wochen unverändert im Raum – die
-   Fünf-Wochen-Marke ist gerade überschritten. Konkret reicht z. B. nur
-   der Kanal für die erste Content-Ausgabe. Ohne diese eine Entscheidung
-   bleibt jedes fertige Content-Stück (wie Punkt 1 und 2 oben) in der
-   Schublade, egal wie reif es ist.
+3. **Eine der vier Grundsatzfragen jetzt wirklich entscheiden.** Kanal,
+   Warenkorb-Content, Social-Format, Mini-Changelog-Start stehen
+   weiterhin unverändert im Raum. Reicht als erster Schritt: nur der
+   Kanal für die erste Content-Ausgabe. Ohne diese eine Entscheidung
+   bleibt jedes fertige Stück (wie Punkt 1) in der Schublade, egal wie
+   rund es ist.
 
-_Letztes Update: 2026-09-23_
+_Letztes Update: 2026-09-24_
