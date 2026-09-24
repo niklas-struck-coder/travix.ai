@@ -4431,3 +4431,105 @@ neuen Commits, wie für diesen frühen Lauf angewiesen).
 ausgeführt werden (Environment-Restriktion, keine Freigabe-Ablehnung).
 `it-chef/auto` wartet geprüft und grün auf einen manuellen Merge durch
 Ni oder eine Session mit den nötigen Rechten.
+
+## 2026-09-24, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** Alle drei vorhanden, alle drei mit neuen Commits
+vor `origin/main`:
+- `it-chef/auto` — 5 Commits vor `main` (derselbe Stand, der im
+  früheren Nacht-Check heute schon inhaltlich/technisch geprüft, aber
+  wegen einer Umgebungsrestriktion nicht gemergt werden konnte).
+- `marketing-chef/auto` — 1 neuer Commit (`a11f3e1`).
+- `support-chef/auto` — 1 neuer Commit (`9a9b28c`).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` erneut selbst gelesen, nicht
+nur den früheren Lauf oder `it-chef-auto-log.md` geglaubt): drei
+inhaltliche Änderungen — Kalender-Monatsnavigation
+(`getPreviousMonth`/`getNextMonth` als neue, unit-getestete
+Hilfsfunktionen gegen das Jahr/Monat-Race abgesichert), Details-Dialog in
+`Reiseentwuerfe.tsx` (fehlende Angaben bei Transport/Datum/Budget/
+Unterkunft jetzt wie die Aktivitäten-Zeile explizit als fehlend
+angezeigt statt per `.filter(Boolean)` stillschweigend weggelassen), und
+Status-Badge für `finalized` auf den gedämpften Teal-Akzent
+`border-teal/30 bg-teal/5 text-teal` umgestellt. Diff deckt sich exakt
+mit den drei `it-chef-auto-log.md`-Einträgen vom 23./24.09., kein
+Scope-Creep. Grep über den vollen Diff nach
+auth/login/token/payment/zahlung/kreditkarte/agb/datenschutz ergab
+keinen Treffer. Die Teal-Badge-Klasse `border-teal/30 bg-teal/5
+text-teal` selbst per `git grep` gegengeprüft: dasselbe Muster existiert
+bereits unverändert in `TripSummaryCard.tsx`, `Buchung.tsx`,
+`Flugsuche.tsx`, `Hotelsuche.tsx`, `Warenkorb.tsx` — kein neu erfundener
+Stil, deckt sich mit `MARKENDESIGN.md`.
+- **Unabhängig selbst verifiziert** (eigener `git worktree` auf
+  `origin/it-chef/auto`, frisches `npm install`, danach selbst
+  ausgeführt statt nur dem Log zu glauben): `npm install` sauber (650
+  Pakete, 0 vulnerabilities), `npx tsc -b` → 0 Fehler, `npx eslint .` →
+  0 Fehler (dieselben 4 vorbestehenden Fast-Refresh-Warnings wie in
+  jedem früheren Lauf), `npx vitest run` → 59 Testdateien/354 Tests,
+  alle grün — deckt sich exakt mit `it-chef-auto-log.md`.
+→ **Alles grün + passt, diesmal erfolgreich nach `main` gemergt**
+(`--no-ff`, `4f3f50f`, gepusht `55a36b8..4f3f50f`). Die
+Umgebungsrestriktion vom früheren Nacht-Check heute trat bei diesem Lauf
+nicht erneut auf — regulärer `git merge --no-ff` lief ohne
+Permission-Fehler durch.
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+  Produkt-Code, kein Build/Lint/Test nötig.
+- Prüft die acht seit dem letzten Merge (`2bcf583`) neuen Commits
+  einzeln und stellt korrekt fest, dass keiner davon eine echte
+  Produkt-Codeänderung enthält (nur Berichte/Logs/Status-Update) — der
+  neue Support-Chef-Fund zum Details-Dialog wird bewusst noch nicht als
+  Tier-4-Kandidat gezählt, da er zu diesem Zeitpunkt noch nicht
+  behoben war (Regel: erst die tatsächliche Behebung zählt, nicht die
+  Meldung). Kandidatentopf bleibt bei drei, klar unter der
+  Achter-Schwelle.
+- Keine erfundenen Kennzahlen, kein Hinweis auf tatsächliches
+  Posten/Versenden/Veröffentlichen, keine neue Positionierungs-
+  Entscheidung. Vollständiger, kohärenter Text.
+→ **Passt, nach `main` gemergt** (`--no-ff`, `652184e`, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` zunächst mit großem,
+aber irreführendem Diffstat wegen veraltetem Branch-Stand — wie schon am
+16.09. beobachtet, per `git log --stat main..origin/support-chef/auto`
+aufgelöst: der einzige eigene Commit `9a9b28c` ändert ausschließlich
+`support-chef-auto-log.md`, +79 Zeilen):
+- Bestätigt die beiden im heutigen früheren Nacht-Check gemergten
+  IT-Chef-Fixes (Details-Dialog fehlende Angaben, Status-Badge
+  Abgeschlossen) als tatsächlich behoben.
+- Neuer Fund: Teal-Badge-Textfarbe (`text-teal` auf `bg-teal/5`) hat im
+  hellen Farbschema nur ca. 2,3:1 Kontrast statt der WCAG-AA-Vorgabe
+  4,5:1 — als dasselbe, bisher ungemeldete Problem in
+  `TripSummaryCard.tsx` beschrieben, jetzt aber auf einer dauerhaft
+  sichtbaren Statusbeschriftung. Selbst gegengeprüft: `git show
+  origin/it-chef/auto:src/components/chat/TripSummaryCard.tsx` bestätigt
+  exakt dieselbe Klassenkombination `text-teal`/`bg-teal/5` in Zeile 41
+  — Fund plausibel, nicht erfunden.
+- Reine Analyse, kein Code geändert → niedrigstes Risiko der drei.
+→ **Passt, nach `main` gemergt** (`--no-ff`, `76b89b0`, gepusht).
+
+**Branch-Stand nicht synchronisiert:** Der Versuch, `it-chef/auto`,
+`marketing-chef/auto` und `support-chef/auto` per `git push origin
+main:refs/heads/<branch>` auf den neuen `main`-Stand zu bringen (damit
+sie beim nächsten Lauf nicht wieder als "veraltet" mit irreführend
+großem Diffstat erscheinen), wurde von der Auto-Mode-Sicherheits-
+klassifizierung dieser Umgebung mit "Modify Shared Resources" blockiert
+— kein Workaround versucht. Kein inhaltliches Problem, nur kosmetisch:
+der nächste Lauf muss (wie in diesem und im 16.09.-Lauf demonstriert)
+den irreführenden Diffstat wieder über `git log --stat main..<branch>`
+auflösen, um den tatsächlichen eigenen Commit-Inhalt zu sehen.
+
+**Ergebnis:** Alle drei Branches unabhängig geprüft und gemergt
+(`it-chef/auto`, `marketing-chef/auto`, `support-chef/auto`), keine
+Auffälligkeiten außer dem neuen, plausiblen Kontrast-Fund von
+Support-Chef (reine Beobachtung, kein Blocker für diesen Merge).
+
+**Info an Ni nötig:** Ja, kurz — der von der Umgebungsrestriktion im
+früheren Nacht-Check heute blockierte `it-chef/auto`-Merge ist jetzt
+regulär durchgelaufen (die Restriktion trat bei diesem Lauf nicht erneut
+auf), alle drei Branches sind auf `main`. Neuer, aber nicht blockierender
+Fund von Support-Chef: die neue Teal-Status-Badge-Textfarbe hat laut
+Analyse zu wenig Kontrast (WCAG AA) — dürfte IT-Chef als nächsten
+sicheren Punkt interessieren.
