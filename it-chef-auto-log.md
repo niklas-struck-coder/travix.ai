@@ -12718,3 +12718,66 @@ auf `it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
 `tasks/tasks-prd-travix-platform.md`: 7.3 ist bereits als `[x]` markiert,
 dies ist eine Verfeinerung derselben bereits abgeschlossenen Aufgabe,
 kein eigener Checkbox-Punkt.
+
+## 2026-09-24 (fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` = `origin/main` + genau dem einen
+Commit des vierten Laufs von heute (Teal-Kontrast-Fix); `git log
+origin/main..origin/it-chef/auto` zeigt nur diesen einen Commit, `git log
+origin/it-chef/auto..origin/main` ist leer — kein Merge nötig, Freigabe-
+Chef hat diesen Commit zum Zeitpunkt dieses Laufs noch nicht gemergt.
+`reports/it-chef.md`, `reports/support-chef.md` und
+`reports/marketing-chef.md` unverändert seit ihren letzten Commits heute
+(12:49 / 13:44 / 13:15 Uhr) — keine neuen Berichte seither.
+
+**Ausgewählter Punkt:** Keiner. Alle drei Vorschläge aus
+`reports/support-chef.md` (24.09.) sind bereits abgedeckt: Vorschlag 1
+(Teal-Kontrast bei "Abgeschlossen"-Badge/`TripSummaryCard`) wurde exakt
+im vierten Lauf heute behoben — im Code (`Reiseentwuerfe.tsx:244`,
+`TripSummaryCard.tsx:41`/`:50`) verifiziert, jeweils `text-navy` statt
+`text-teal`. Vorschlag 2 (Hilfe-Seite ohne Kontaktweg) bleibt aus
+denselben bereits mehrfach dokumentierten Gründen zurückgestellt: die
+Support-E-Mail ist laut `ZEITPLAN.md` noch nicht live, ein erfundener
+Kontaktweg verstieße gegen die "nichts erfinden"-Regel. Vorschlag 3
+(rohe englische Duffel-Fehlermeldungen im UI) ist entgegen dem
+Berichtstext bereits umgesetzt: `src/lib/duffel/client.ts` (Zeilen
+23-51) zeigt für beide Fehlerpfade (`!response.ok` und
+`catch`) bereits eine feste, ehrliche deutsche Fallback-Meldung statt
+`error.message` roh durchzureichen — der Bericht scheint hier einen
+älteren Code-Stand zu beschreiben oder sich auf einen anderen,
+inzwischen behobenen Fall zu beziehen; keine Änderung nötig.
+
+Eigene ergänzende Bug-Suche über bisher nicht explizit erwähnte Dateien:
+`src/lib/nav-config.ts` und `src/routes.tsx` (Navigationsstruktur/Routing
+— vollständig gelesen, keine Inkonsistenz zwischen Sidebar-Einträgen,
+`builtRoutes`-Set und tatsächlich registrierten `<Route>`-Elementen
+gefunden), sowie die restlichen bisher nicht einzeln geprüften
+shadcn/ui-Primitives (`select.tsx`, `tabs.tsx`, `label.tsx`, `input.tsx`,
+`progress.tsx`, `card.tsx`, `badge.tsx`, `button.tsx`) auf denselben
+fest verdrahteten "Close"-Text-Fund vom 13.09. hin durchsucht (`grep`
+nach `aria-`/`sr-only`/`role=`) — kein weiteres Vorkommen, die einzigen
+zwei Treffer (`dialog.tsx`, `sheet.tsx`) sind bereits auf "Schließen"
+korrigiert. Die in `tasks/tasks-prd-travix-platform.md` unter 2.0
+gelisteten Hook-Dateien (`useTrip.ts`, `useDrafts.ts`, `useCart.ts`,
+`useFavorites.ts`, `usePriceAlerts.ts`) existieren im Code noch gar
+nicht — 2.0 ist komplett blockiert auf die offene Base44-Entscheidung,
+kein Suchraum.
+
+Ergebnis: kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** frisches
+`npm install` (Abhängigkeiten waren im Cloud-Checkout wie an den
+Vortagen nicht vorinstalliert), danach `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen), volle Suite `npm test` (59
+Testdateien, 354 Tests, alle grün — unverändert gegenüber dem vierten
+Lauf, da keine Tests hinzugefügt wurden), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
