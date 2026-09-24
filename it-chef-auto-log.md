@@ -12595,3 +12595,70 @@ dieser Log-Eintrag committet — auf `it-chef/auto` gepusht, `main`
 unberührt. Keine Änderung an `tasks/tasks-prd-travix-platform.md`: 7.11
 ist bereits als `[x]` markiert, dies ist eine Verfeinerung derselben
 bereits abgeschlossenen Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-24 (dritter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` plus die vier eigenen Commits von heute (`git log
+main..it-chef/auto` zeigt ausschließlich diese vier IT-Chef-Auto-Commits,
+`git log it-chef/auto..main` ist leer) — kein Merge nötig, `main` seit dem
+letzten Lauf heute unverändert. `reports/it-chef.md` und
+`reports/support-chef.md` ebenfalls unverändert seit dem 23.09. (Datum
+im Dateiinhalt, `git log` auf `reports/` bestätigt keinen neuen Commit).
+
+**Ausgewählter Punkt:** Keiner. Alle drei Vorschläge aus
+`reports/support-chef.md` (23.09.) sind bereits umgesetzt (Vorschlag 1 im
+zweiten Lauf heute, Vorschlag 3 im fünften Lauf am 23.09. — Vorschlag 2,
+die Hilfe-Seite, bleibt unten begründet zurückgestellt). `reports/it-chef.md`
+meldet keinen neuen Bug, nur bereits bekannte, blockierte Punkte (offene
+PRs, ungenutztes `recharts`, unverdrahtetes `TrainCard`/`TrainResults` —
+alle drei sind Aufräum- bzw. Produktentscheidungen, keine Bugfixes).
+
+Eigene gezielte Bug-Suche zusätzlich über bisher seltener vollständig
+gelesene, reine Logik-/Utility-Dateien: `src/lib/trip/cartTotals.ts`,
+`src/lib/format.ts`, `src/lib/trip/checklistRules.ts`,
+`src/lib/trip/calculateProgress.ts`, `src/lib/design-tokens.ts`,
+`src/hooks/useConcierge.ts`, `src/lib/duffel/client.ts`,
+`src/pages/Kartenansicht.tsx`, `src/components/trip/EditMode.tsx` sowie
+die fünf Listen-Seiten mit Lösch-Bestätigung (`Favoriten.tsx`,
+`Angebote.tsx`, `Preisalarme.tsx`, `Aktivitaeten.tsx`, `Warenkorb.tsx`).
+Gezielt geprüft, ob die in `EditMode.tsx`/`Reiseentwuerfe.tsx` bereits
+etablierte "(Eintrag N)"-Disambiguierung für doppelte Namen in
+aria-labels auch auf diesen fünf Seiten fehlt — trifft nicht zu: anders
+als bei Reiseentwuerfe (Duplizieren-Aktion) und EditMode (freies
+Hinzufügen neuer Aktivitäten) haben diese fünf Seiten keine
+Hinzufügen-/Duplizieren-Funktion, ihre Demo-Listen können also gar nicht
+mit doppelten Namen befüllt werden — kein echter, erreichbarer Bug,
+sondern ein rein theoretisches Szenario ohne Auslöser im Code.
+
+Ergebnis: kein Bug gefunden, der alle vier Sicherheitskriterien
+eindeutig erfüllt. Die geprüften Dateien sind durchgängig defensiv
+geschrieben (try/catch um `Intl.NumberFormat`/Duffel-Fetch, optionale
+Verkettung bei rohen Duffel-Feldern, Guard-Klauseln, konsistente
+Demo-Daten). `Kartenansicht.tsx` zeigt bewusst nur das eine aktive
+Trip-Ziel aus `tripStorage.ts` statt aller Reisen aus
+`MeineReisen.tsx` — das ist kein Bug, sondern folgt demselben
+Datenmodell-Stand wie der Rest der App (`tripStorage.ts` verwaltet nur
+einen aktiven Trip, siehe 7.4-Notiz zur fehlenden Mehrfach-Trip-Historie),
+also eine bereits bekannte, an eine offene Architekturentscheidung
+gebundene Einschränkung, kein eigenständig fixbarer Punkt.
+
+Vorschlag 2 aus `reports/support-chef.md` (Hilfe-Seite) erneut geprüft
+und weiterhin nicht autonom sicher genug: der Vorschlag selbst
+("vorerst ein Satz mit Kontakthinweis") lässt offen, welcher Kontaktweg
+gemeint ist, und laut `ZEITPLAN.md` (Sprint 1, Support-Track) ist die
+Support-E-Mail noch nicht live — ein Kontakthinweis bräuchte entweder
+eine erfundene Adresse (verstößt gegen die "nichts erfinden"-Regel) oder
+wäre ohne echten Kanal irreführend. Erfüllt Kriterium 3 (klar genug ohne
+Interpretation) nicht.
+
+Die offenen Sub-Checkboxen aus `tasks/tasks-prd-travix-platform.md`
+(2.1-2.10, 4.1-4.3, 5.7, 6.2, 6.6, 6.7, 7.4, 7.12, 8.1-8.9, 8.11-8.13)
+sind gegenüber dem 23./24.09.-Stand unverändert: jede hängt weiterhin an
+Auth/Backend, KI-Zugangsdaten, einer offenen Produkt-/Datenmodell-
+Entscheidung oder ist bereits als Kurzfrist-Mitigation umgesetzt.
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
