@@ -12341,3 +12341,324 @@ trägt:
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-23 (vierter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` (Remote) lag hinter `main`
+(`git merge-base --is-ancestor origin/main origin/it-chef/auto`
+bestätigte das) — seit dem dritten Lauf heute waren auf `main` drei neue
+Commits dazugekommen: IT-Chef-Bericht (23.09., 27 neue Dateien ohne
+neuen Fund), Marketing-Chef-Bericht und ein neuer Support-Chef-Bericht
+(23.09.) mit einem frischen Fund. `origin/main` sauber per Fast-Forward
+in `it-chef/auto` gemergt (keine Konflikte, reine Bericht-/Log-Dateien).
+
+**Ausgewählter Punkt:** Vorschlag 1 aus `reports/support-chef.md`
+(23.09.): Der neue "Details ansehen"-Dialog für abgeschlossene
+Reiseentwürfe (`src/pages/Reiseentwuerfe.tsx:356-390`, vom fünften Lauf
+am 22.09. gebaut) blendete fehlende Angaben (Transportmittel, Datum,
+Budget, Unterkunft) über `.filter(Boolean)` komplett aus, statt sie wie
+die im selben Dialog bereits korrekt gemachte Aktivitäten-Zeile ("Noch
+keine Aktivitäten geplant") explizit als fehlend zu kennzeichnen. Für
+eine Nutzerin, die einen unvollständigen Entwurf bewusst abgeschlossen
+hat und sich danach die Details ansieht, wirkt das leicht so, als wären
+beim Abschließen Angaben verloren gegangen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reiner Anzeige-Fix in einem Lese-Dialog
+für Demo-Daten. Keine offene Architektur-/Produktentscheidung: der
+Bericht selbst nennt das bereits im selben Dialog etablierte Muster
+(Aktivitäten-Zeile) als Vorlage, und der genaue Wortlaut für die drei
+fehlenden Felder existiert bereits wortgleich in `Buchung.tsx`
+("Noch kein Transport ausgewählt", "Noch keine Daten gewählt", "Noch
+kein Budget angegeben", "Noch keine Unterkunft ausgewählt") — keine
+erfundene Design-Entscheidung, reine Wiederverwendung bestehender Copy.
+Klar genug ohne Interpretation: der Bericht benennt Datei, Zeilen und
+das nachzuahmende Muster exakt. Objektiv prüfbar über einen neuen
+Regressionstest (zeigt/versteckt die richtigen Texte).
+
+Vor der Umsetzung `MARKENDESIGN.md` gegengeprüft (Copy-Text, sichtbar für
+Nutzerinnen): keine eigene Vorgabe für Leerzustände in Detail-Dialogen,
+daher am bereits im Code etablierten Muster (`Buchung.tsx`) orientiert
+statt neu zu erfinden, wie in der Skill-Datei für diesen Fall
+vorgesehen.
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — die vier Zeilen für
+Transport/Datum/Budget/Unterkunft erscheinen jetzt immer (kein
+`.filter(Boolean)` mehr); fehlt der Wert, zeigen sie den oben genannten,
+aus `Buchung.tsx` übernommenen Text statt weggelassen zu werden. Für den
+fehlenden Transportmodus zusätzlich ein Fallback-Icon (`Plane`, exakt
+dasselbe Fallback wie in `Buchung.tsx:168` für denselben Fall). Kein
+Verhalten für bereits vollständige Entwürfe geändert (bei Lissabon, wo
+nur Unterkunft fehlt, ändert sich sichtbar nur diese eine Zeile).
+
+**Geprüft:** Vor dem Fix den neuen Test isoliert gegen den
+unveränderten Code laufen lassen (`git stash` nur der
+`Reiseentwuerfe.tsx`-Quelländerung) — schlägt wie erwartet fehl (die
+drei "Noch kein/keine ..."-Texte fehlen im DOM). Nach dem Fix: gezielt
+`npx vitest run src/pages/Reiseentwuerfe.test.tsx` (15 Tests, alle
+grün), danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+weiterhin dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 349
+Tests, davon 1 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Regressionstest),
+`ZEITPLAN.md` (7.2-Eintrag ergänzt) und dieser Log-Eintrag committet —
+auf `it-chef/auto` gepusht, `main` unberührt (samt dem zuvor
+nachgezogenen `main`-Stand). Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 7.2 ist bereits als `[x]`
+markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
+Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-23 (fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git merge-base --is-ancestor origin/main
+origin/it-chef/auto` bestätigt), also kein Merge nötig — direkt auf dem
+Commit vom vierten Lauf heute weitergearbeitet.
+
+**Ausgewählter Punkt:** Vorschlag 3 aus `reports/support-chef.md`
+(23.09.): Das Status-Badge für einen abgeschlossenen Reiseentwurf
+(`src/pages/Reiseentwuerfe.tsx:236`) nutzte dieselbe graue `secondary`-
+Badge-Variante wie ein pausierter Entwurf — auf der Kartenübersicht war
+nicht auf den ersten Blick erkennbar, welche Karten schon fertig und
+welche nur pausiert sind.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reine visuelle Unterscheidung zweier
+Status-Badges auf Demo-Daten. Keine offene Architektur-/
+Produktentscheidung: der Bericht selbst schlägt einen "Teal-Akzent wie
+bei `in_progress`, nur ruhiger" vor, und genau dieser gedämpfte
+Teal-Stil (`border-teal/30 bg-teal/5 text-teal` bzw. `border-teal/40
+bg-teal/10`) existiert bereits wortgleich in `TripSummaryCard.tsx` und
+`QuickReplies.tsx` — keine erfundene Design-Entscheidung, reine
+Wiederverwendung eines bestehenden Tokens/Musters (`MARKENDESIGN.md`
+enthält keine eigene Vorgabe für Status-Badges, daher wie in der
+Skill-Datei vorgesehen am bereits etablierten Code-Muster orientiert,
+nicht neu erfunden). Klar genug ohne Interpretation: Datei, Zeile und
+Vergleichsmuster (`in_progress`) sind im Bericht benannt. Objektiv
+prüfbar über einen neuen Regressionstest (unterschiedliche Badge-Klassen
+für "Abgeschlossen" vs. "Pausiert").
+
+**Umsetzung:** `src/pages/Reiseentwuerfe.tsx` — die Badge-Variante für
+den `finalized`-Status ist jetzt `outline` mit zusätzlichem
+`className="border-teal/30 bg-teal/5 text-teal"` statt der bisherigen
+`secondary`-Variante; `paused` bleibt unverändert bei `secondary`,
+`in_progress` unverändert bei `default`. Kein neuer CSS-Token nötig
+(`twMerge` in `cn()` löst die Kollision der `outline`-Variante mit den
+zusätzlichen Klassen korrekt auf, exakt wie bereits bei anderen
+`className`-Overrides auf `Badge`/`Card` im Code).
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (16
+Tests, davon 1 neu — alle grün), danach `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen), volle Suite `npm test` (59
+Testdateien, 350 Tests, davon 1 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert und unabhängig von dieser
+Änderung).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (neuer Regressionstest),
+`ZEITPLAN.md` (7.3-Eintrag ergänzt) und dieser Log-Eintrag committet —
+auf `it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 7.3 ist bereits als `[x]`
+markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
+Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-24 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git merge-base --is-ancestor origin/main HEAD`
+bestätigt), kein Merge nötig — `main` seit dem letzten Lauf (23.09.,
+fünfter Lauf) unverändert.
+
+**Ausgewählter Punkt:** Keiner. Da seit dem letzten Lauf weder `main`
+noch `reports/*.md` sich verändert haben (`reports/it-chef.md` und
+`reports/support-chef.md` weiterhin auf Stand 23.09., beide melden
+keine neuen, sicher fixbaren Funde), stattdessen eine eigene, gezielte
+Bug-Suche über bisher seltener vollständig gelesene Dateien angestoßen
+(26 Dateien, u. a. `useConcierge.ts`, `mockConcierge.ts`, `speech.ts`,
+`duffel/client.ts`, `format.ts`, `nav-config.ts`, `calendarUtils.ts`,
+`cartTotals.ts`, `ChecklistPanel.tsx`, `TripSummaryCard.tsx`,
+`QuickReplies.tsx`, `ChatMessage.tsx` sowie die bisher weniger geprüften
+`pages/*` wie `Aktivitaeten.tsx`, `Angebote.tsx`, `Dashboard.tsx`,
+`Einstellungen.tsx`, `Favoriten.tsx`, `Flugsuche.tsx`, `Hotelsuche.tsx`,
+`Kalender.tsx`, `Kartenansicht.tsx`, `MeineReisen.tsx`,
+`Preisalarme.tsx`, `Profil.tsx`, `ReiseSuche.tsx`, `Urlaubsmodus.tsx`,
+`Warenkorb.tsx`) — bewusst nicht die bereits mehrfach geprüften
+Hauptdateien (ChatInput.tsx, KiChat.tsx, AppShell.tsx, Flight-/Hotel-
+Komponenten, useChat.ts, tripStorage.ts, Buchung.tsx, Home.tsx,
+routes.tsx, `ui/*`) erneut, um keine Zeit auf bereits abgedeckten
+Boden zu verschwenden.
+
+Ergebnis: kein Bug mit hoher Sicherheit gefunden, der alle vier
+Sicherheitskriterien eindeutig erfüllt. Die Dateien sind durchgängig
+defensiv geschrieben (try/catch um localStorage/fetch/Intl, optionale
+Verkettung bei Duffel-Rohdaten, Guard-Klauseln bei leeren Arrays,
+konsistente Demo-Daten zwischen den Seiten). Ein zunächst verdächtiger
+Datums-Unterschied (`Dashboard.tsx:29` "Kyoto … März 2027" vs. März
+2026 in `MeineReisen.tsx`/`Kalender.tsx`) erwies sich bei Verifikation
+als korrekt: `Dashboard.tsx` spiegelt den Kyoto-*Entwurf* (2027) aus
+`Reiseentwuerfe.tsx`, nicht die bereits abgeschlossene Kyoto-*Reise*
+(2026) aus `MeineReisen.tsx` — zwei unterschiedliche Demo-Datensätze,
+kein Fehler.
+
+Ein Kandidat bleibt als "unsicher" offen, erfüllt Kriterium 4
+(objektiv prüfbar) nicht zuverlässig genug für einen autonomen Fix:
+`src/pages/Kalender.tsx:33-40` (`goToPreviousMonth`/`goToNextMonth`) —
+`setYear` liest die Jahreswechsel-Bedingung (`month === 0`/`month ===
+11`) aus dem Render-Closure-Wert von `month`, während `setMonth` per
+Updater-Funktion mit dem tatsächlich vorherigen Wert rechnet. Nur wenn
+beide Funktionen zweimal im selben synchronen Tick liefen (z. B. durch
+programmatischen Doppelaufruf), bevor React neu rendert, würde der
+Jahreswechsel an der Dezember/Januar-Grenze falsch berechnet. Über
+echte Klicks bzw. React Testing Library (`fireEvent`) ließ sich das
+nicht reproduzieren, da React zwischen zwei Events neu rendert — daher
+kein bestätigter, sondern nur ein theoretischer Bug. Robusterer Umbau
+(z. B. Navigation über ein einzelnes `Date`-State statt getrennter
+`year`/`month`-States) wäre eher vorsorgliche Robustheit als ein
+Bugfix und damit über die "klar genug ohne Interpretation"-Schwelle
+hinaus — für einen künftigen Lauf vorgemerkt, falls sich mal ein
+echtes Fehlverhalten dazu zeigt.
+
+Zusätzlich die offenen Sub-Checkboxen aus
+`tasks/tasks-prd-travix-platform.md` (2.1-2.10, 4.1-4.3, 5.7, 6.2, 6.6,
+6.7, 7.4, 7.12, 8.1-8.9, 8.11-8.13) gegengeprüft: unverändert gegenüber
+dem 23.09.-Stand, jede hängt weiterhin an Auth/Backend, KI-Zugangsdaten,
+einer offenen Produkt-/Datenmodell-Entscheidung oder ist bereits als
+Kurzfrist-Mitigation umgesetzt.
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
+
+## 2026-09-24 (weiterer Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git log origin/main..origin/it-chef/auto` zeigt nur
+die drei IT-Chef-Auto-Commits vom heutigen Tag, `git log
+origin/it-chef/auto..origin/main` ist leer), kein Merge nötig —
+`main` seit dem letzten Lauf heute unverändert. `reports/it-chef.md` und
+`reports/support-chef.md` ebenfalls unverändert seit dem 23.09., keine
+neue externe Eingabe.
+
+**Ausgewählter Punkt:** Der im letzten Lauf heute als "unsicher"
+zurückgestellte Kandidat aus `src/pages/Kalender.tsx` (`goToPreviousMonth`/
+`goToNextMonth`) wurde erneut geprüft und diesmal so umgesetzt, dass er
+alle vier Kriterien erfüllt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder Rechtstexten — reine Kalender-Navigationslogik auf
+Demo-Daten. Keine offene Architektur-/Produktentscheidung: statt des im
+letzten Lauf verworfenen Wegs (verschachtelte `setState`-Updater, die
+sich schwer objektiv testen lassen) diesmal der bereits im Code etablierte
+Stil aus `calendarUtils.ts` (reine, unit-getestete Hilfsfunktionen statt
+Komponentenlogik) konsequent weitergeführt — keine neu erfundene Lösung.
+Klar genug ohne Interpretation: die betroffenen Zeilen, das Race zwischen
+den beiden `setState`-Aufrufen und der betroffene Jahresübergang waren
+im letzten Log-Eintrag bereits exakt benannt. Objektiv prüfbar: die neuen
+reinen Funktionen lassen sich direkt und deterministisch per Unit-Test an
+den Jahresgrenzen (Dezember→Januar, Januar→Dezember) prüfen, ohne auf
+schwer reproduzierbare synchrone Doppel-Events angewiesen zu sein.
+
+**Umsetzung:** Zwei neue, pure Funktionen `getPreviousMonth(year, month)`
+und `getNextMonth(year, month)` in `src/lib/trip/calendarUtils.ts`, die
+Jahr und Monat atomar aus demselben Zustand berechnen (analog zu den
+bereits vorhandenen `getMonthGridDays`/`toIsoDate` dort). `Kalender.tsx`
+ruft in `goToPreviousMonth`/`goToNextMonth` jetzt diese Funktion einmal
+auf und setzt `year`/`month` direkt mit dem Ergebnis, statt über zwei
+getrennte `setState`-Updater, von denen einer (`setYear`) den
+Jahreswechsel aus dem Render-Closure-Wert von `month` statt aus dem
+tatsächlich vorherigen Wert las. Dadurch können Jahr und Monat nicht mehr
+aus zwei unabhängig ausgewerteten Bedingungen auseinanderlaufen. Kein
+Verhalten für die normale Einzelklick-Navigation geändert (unverändertes
+Verhalten in allen bestehenden `Kalender.test.tsx`-Tests bestätigt).
+
+**Geprüft:** Frisches `npm install` (Abhängigkeiten waren im
+Cloud-Checkout noch nicht installiert), dann gezielt
+`npx vitest run src/lib/trip/calendarUtils.test.ts src/pages/Kalender.test.tsx`
+(15 Tests, davon 4 neu — alle grün), danach `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, weiterhin dieselben vier vorbestehenden,
+unveränderten Fast-Refresh-Warnungen), volle Suite `npm test` (59
+Testdateien, 354 Tests, davon 4 neu — alle grün), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert und unabhängig von dieser
+Änderung).
+
+**Ergebnis:** `src/lib/trip/calendarUtils.ts` (neue Hilfsfunktionen),
+`src/lib/trip/calendarUtils.test.ts` (neue Unit-Tests),
+`src/pages/Kalender.tsx` (Fix), `ZEITPLAN.md` (7.11-Eintrag ergänzt) und
+dieser Log-Eintrag committet — auf `it-chef/auto` gepusht, `main`
+unberührt. Keine Änderung an `tasks/tasks-prd-travix-platform.md`: 7.11
+ist bereits als `[x]` markiert, dies ist eine Verfeinerung derselben
+bereits abgeschlossenen Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-24 (dritter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` plus die vier eigenen Commits von heute (`git log
+main..it-chef/auto` zeigt ausschließlich diese vier IT-Chef-Auto-Commits,
+`git log it-chef/auto..main` ist leer) — kein Merge nötig, `main` seit dem
+letzten Lauf heute unverändert. `reports/it-chef.md` und
+`reports/support-chef.md` ebenfalls unverändert seit dem 23.09. (Datum
+im Dateiinhalt, `git log` auf `reports/` bestätigt keinen neuen Commit).
+
+**Ausgewählter Punkt:** Keiner. Alle drei Vorschläge aus
+`reports/support-chef.md` (23.09.) sind bereits umgesetzt (Vorschlag 1 im
+zweiten Lauf heute, Vorschlag 3 im fünften Lauf am 23.09. — Vorschlag 2,
+die Hilfe-Seite, bleibt unten begründet zurückgestellt). `reports/it-chef.md`
+meldet keinen neuen Bug, nur bereits bekannte, blockierte Punkte (offene
+PRs, ungenutztes `recharts`, unverdrahtetes `TrainCard`/`TrainResults` —
+alle drei sind Aufräum- bzw. Produktentscheidungen, keine Bugfixes).
+
+Eigene gezielte Bug-Suche zusätzlich über bisher seltener vollständig
+gelesene, reine Logik-/Utility-Dateien: `src/lib/trip/cartTotals.ts`,
+`src/lib/format.ts`, `src/lib/trip/checklistRules.ts`,
+`src/lib/trip/calculateProgress.ts`, `src/lib/design-tokens.ts`,
+`src/hooks/useConcierge.ts`, `src/lib/duffel/client.ts`,
+`src/pages/Kartenansicht.tsx`, `src/components/trip/EditMode.tsx` sowie
+die fünf Listen-Seiten mit Lösch-Bestätigung (`Favoriten.tsx`,
+`Angebote.tsx`, `Preisalarme.tsx`, `Aktivitaeten.tsx`, `Warenkorb.tsx`).
+Gezielt geprüft, ob die in `EditMode.tsx`/`Reiseentwuerfe.tsx` bereits
+etablierte "(Eintrag N)"-Disambiguierung für doppelte Namen in
+aria-labels auch auf diesen fünf Seiten fehlt — trifft nicht zu: anders
+als bei Reiseentwuerfe (Duplizieren-Aktion) und EditMode (freies
+Hinzufügen neuer Aktivitäten) haben diese fünf Seiten keine
+Hinzufügen-/Duplizieren-Funktion, ihre Demo-Listen können also gar nicht
+mit doppelten Namen befüllt werden — kein echter, erreichbarer Bug,
+sondern ein rein theoretisches Szenario ohne Auslöser im Code.
+
+Ergebnis: kein Bug gefunden, der alle vier Sicherheitskriterien
+eindeutig erfüllt. Die geprüften Dateien sind durchgängig defensiv
+geschrieben (try/catch um `Intl.NumberFormat`/Duffel-Fetch, optionale
+Verkettung bei rohen Duffel-Feldern, Guard-Klauseln, konsistente
+Demo-Daten). `Kartenansicht.tsx` zeigt bewusst nur das eine aktive
+Trip-Ziel aus `tripStorage.ts` statt aller Reisen aus
+`MeineReisen.tsx` — das ist kein Bug, sondern folgt demselben
+Datenmodell-Stand wie der Rest der App (`tripStorage.ts` verwaltet nur
+einen aktiven Trip, siehe 7.4-Notiz zur fehlenden Mehrfach-Trip-Historie),
+also eine bereits bekannte, an eine offene Architekturentscheidung
+gebundene Einschränkung, kein eigenständig fixbarer Punkt.
+
+Vorschlag 2 aus `reports/support-chef.md` (Hilfe-Seite) erneut geprüft
+und weiterhin nicht autonom sicher genug: der Vorschlag selbst
+("vorerst ein Satz mit Kontakthinweis") lässt offen, welcher Kontaktweg
+gemeint ist, und laut `ZEITPLAN.md` (Sprint 1, Support-Track) ist die
+Support-E-Mail noch nicht live — ein Kontakthinweis bräuchte entweder
+eine erfundene Adresse (verstößt gegen die "nichts erfinden"-Regel) oder
+wäre ohne echten Kanal irreführend. Erfüllt Kriterium 3 (klar genug ohne
+Interpretation) nicht.
+
+Die offenen Sub-Checkboxen aus `tasks/tasks-prd-travix-platform.md`
+(2.1-2.10, 4.1-4.3, 5.7, 6.2, 6.6, 6.7, 7.4, 7.12, 8.1-8.9, 8.11-8.13)
+sind gegenüber dem 23./24.09.-Stand unverändert: jede hängt weiterhin an
+Auth/Backend, KI-Zugangsdaten, einer offenen Produkt-/Datenmodell-
+Entscheidung oder ist bereits als Kurzfrist-Mitigation umgesetzt.
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.

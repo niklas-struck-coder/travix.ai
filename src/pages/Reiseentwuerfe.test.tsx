@@ -83,6 +83,24 @@ describe('Reiseentwuerfe', () => {
     expect(screen.queryByRole('button', { name: 'Lissabon abschließen' })).not.toBeInTheDocument()
   })
 
+  it('gives a finalized draft a visually distinct badge from a paused one', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    // Kyoto starts out 'paused', already rendered with the plain gray badge.
+    const pausedBadge = screen.getByText('Pausiert')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+    const finalizedBadge = screen.getByText('Abgeschlossen')
+
+    expect(finalizedBadge.className).not.toBe(pausedBadge.className)
+    expect(finalizedBadge.className).toMatch(/text-teal/)
+  })
+
   it('hides the "Planung fortsetzen" button once a draft is finalized', () => {
     render(
       <MemoryRouter>
@@ -190,6 +208,25 @@ describe('Reiseentwuerfe', () => {
 
     fireEvent.click(dialog.getByRole('button', { name: 'Schließen' }))
     expect(screen.queryByText('Abgeschlossener Reiseentwurf — nur zum Ansehen.')).not.toBeInTheDocument()
+  })
+
+  it('marks missing transport/budget/accommodation as such in the details dialog instead of hiding them', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    // Kyoto hat nur ein Reisedatum gesetzt, Transport/Budget/Unterkunft sind null.
+    fireEvent.click(screen.getByRole('button', { name: 'Kyoto abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Kyoto Details ansehen' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('3. – 10. März 2027')).toBeInTheDocument()
+    expect(dialog.getByText('Noch kein Transport ausgewählt')).toBeInTheDocument()
+    expect(dialog.getByText('Noch kein Budget angegeben')).toBeInTheDocument()
+    expect(dialog.getByText('Noch keine Unterkunft ausgewählt')).toBeInTheDocument()
   })
 
   it('deletes a draft once its removal is confirmed, and shows the empty state once none are left', () => {

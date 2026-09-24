@@ -73,3 +73,18 @@ export function getTripsForDay(trips: CalendarTripRange[], date: string): Calend
 export function formatMonthLabel(year: number, month: number): string {
   return `${MONTH_NAMES_DE[month]} ${year}`
 }
+
+export interface YearMonth {
+  year: number
+  month: number
+}
+
+/** Year/month one step before the given month (0-indexed), rolling over at January. */
+export function getPreviousMonth(year: number, month: number): YearMonth {
+  return month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 }
+}
+
+/** Year/month one step after the given month (0-indexed), rolling over at December. */
+export function getNextMonth(year: number, month: number): YearMonth {
+  return month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 }
+}

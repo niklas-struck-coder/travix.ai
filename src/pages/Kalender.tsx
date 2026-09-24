@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils'
 import {
   formatMonthLabel,
   getMonthGridDays,
+  getNextMonth,
+  getPreviousMonth,
   getTripsForDay,
   toIsoDate,
   WEEKDAY_LABELS_DE,
@@ -31,13 +33,15 @@ export function Kalender() {
   const todayIso = useMemo(() => toIsoDate(today.getFullYear(), today.getMonth(), today.getDate()), [today])
 
   function goToPreviousMonth() {
-    setYear((currentYear) => (month === 0 ? currentYear - 1 : currentYear))
-    setMonth((currentMonth) => (currentMonth === 0 ? 11 : currentMonth - 1))
+    const previous = getPreviousMonth(year, month)
+    setYear(previous.year)
+    setMonth(previous.month)
   }
 
   function goToNextMonth() {
-    setYear((currentYear) => (month === 11 ? currentYear + 1 : currentYear))
-    setMonth((currentMonth) => (currentMonth === 11 ? 0 : currentMonth + 1))
+    const next = getNextMonth(year, month)
+    setYear(next.year)
+    setMonth(next.month)
   }
 
   function goToToday() {

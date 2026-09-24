@@ -1584,7 +1584,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bei Favoriten/Preisalarme/Angebote). "Abschließen" setzt nur einen
   lokalen Status ("Abgeschlossen"), verschiebt den Entwurf nicht nach
   `MeineReisen.tsx` — dafür fehlt noch echte, geteilte Trip-Speicherung
-  (hängt an der offenen Backend-Entscheidung)
+  (hängt an der offenen Backend-Entscheidung).
+  Vom autonomen IT-Chef-Lauf am 23.09. (fünfter Lauf desselben Tages) einen
+  von `reports/support-chef.md` (23.09., Vorschlag 3) gemeldeten Fund
+  behoben: Das Status-Badge für "Abgeschlossen" nutzte dieselbe graue
+  `secondary`-Variante wie "Pausiert" — auf der Kartenübersicht war nicht
+  auf den ersten Blick erkennbar, welche Entwürfe schon fertig und welche
+  nur pausiert sind. Fix: "Abgeschlossen" bekommt jetzt einen eigenen,
+  ruhigen Teal-Akzent (`outline`-Variante mit `border-teal/30 bg-teal/5
+  text-teal`) statt der grauen `secondary`-Variante — derselbe gedämpfte
+  Teal-Stil, der bereits bei `TripSummaryCard.tsx`/`QuickReplies.tsx` für
+  ruhige (nicht knallige) Teal-Akzente verwendet wird, statt des kräftigen
+  `bg-teal text-navy`-Musters, das für aktive Aktionen reserviert bleibt
+  (Buttons, "Empfohlen"/"Ziel erreicht"-Badges). "Pausiert" bleibt
+  unverändert bei `secondary`. Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (Badge-Klassen von "Abgeschlossen" und
+  "Pausiert" unterscheiden sich, "Abgeschlossen" trägt `text-teal`).
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,
@@ -1690,6 +1705,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abschließen zeigt der Dialog Transport/Daten/Budget/den
   "keine Aktivitäten"-Hinweis korrekt und lässt sich über den
   Standard-Dialog-Close wieder schließen).
+  Vom autonomen IT-Chef-Lauf am 23.09. (vierter Lauf) Vorschlag 1 aus
+  `reports/support-chef.md` (23.09.) behoben: Der Details-Dialog blendete
+  fehlende Angaben (kein Transportmittel/Datum/Budget/Unterkunft) über
+  `.filter(Boolean)` komplett aus, statt sie wie die bereits richtig
+  gemachte Aktivitäten-Zeile ("Noch keine Aktivitäten geplant") explizit
+  als fehlend zu kennzeichnen — für eine Nutzerin, die einen
+  unvollständigen Entwurf bewusst abschließt, wirkte das wie verlorene
+  Angaben. Fix: alle vier Zeilen erscheinen jetzt immer; fehlt der Wert,
+  zeigen sie denselben Wortlaut, der für dieselben Felder bereits in
+  `Buchung.tsx` etabliert ist ("Noch kein Transport ausgewählt", "Noch
+  keine Daten gewählt", "Noch kein Budget angegeben", "Noch keine
+  Unterkunft ausgewählt") — keine neue Design-Entscheidung, reine
+  Wiederverwendung. Neuer Regressionstest in `Reiseentwuerfe.test.tsx`
+  (Kyoto-Demo-Entwurf, bei dem nur das Datum gesetzt ist, zeigt nach dem
+  Abschließen alle drei fehlenden Angaben statt sie wegzulassen) — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+  nur `Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
@@ -1767,7 +1799,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zugänglich sind. Keine neue Abhängigkeit (kein Kalender-Package),
   ermutigender Leer-Zustand laut `MARKENDESIGN.md` als Fallback vorhanden,
   auch wenn er mit den festen Demo-Daten aktuell nicht greift. Rein
-  lokaler Demo-State, noch keine echte geteilte Reise-Speicherung
+  lokaler Demo-State, noch keine echte geteilte Reise-Speicherung.
+  Vom autonomen IT-Chef-Lauf am 24.09. (weiterer Lauf) nachgeschärft: die
+  Monatsnavigation (`goToPreviousMonth`/`goToNextMonth`) berechnete
+  Jahr und Monat über zwei getrennte `setState`-Updater, von denen einer
+  aus dem Render-Closure-Wert von `month` las statt aus dem tatsächlich
+  vorherigen Wert — bei zwei synchronen Aufrufen im selben Tick (Doppel-
+  klick vor dem Rerender) hätte das Jahr am Dezember/Januar-Übergang
+  falsch berechnet werden können. Jetzt zwei neue, reine Hilfsfunktionen
+  `getPreviousMonth`/`getNextMonth` in `calendarUtils.ts` (mit
+  Jahresübergang-Unit-Tests), die Jahr und Monat atomar aus demselben
+  Zustand berechnen; `Kalender.tsx` setzt beide States direkt aus dem
+  Ergebnis statt über getrennte Updater-Funktionen
 - [ ] 7.12 Reisebudget (Recharts) — weiterhin blockiert, `TripDraft` hat
   keine echten Preisfelder für Transport/Unterkunft (gleicher Grund wie
   bei 6.6/6.7, siehe oben)

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { formatMonthLabel, getMonthGridDays, getTripsForDay } from '@/lib/trip/calendarUtils'
+import {
+  formatMonthLabel,
+  getMonthGridDays,
+  getNextMonth,
+  getPreviousMonth,
+  getTripsForDay,
+} from '@/lib/trip/calendarUtils'
 
 describe('getMonthGridDays', () => {
   it('returns a full 42-day grid', () => {
@@ -41,5 +47,25 @@ describe('formatMonthLabel', () => {
   it('formats German month names with the year', () => {
     expect(formatMonthLabel(2026, 8)).toBe('September 2026')
     expect(formatMonthLabel(2026, 2)).toBe('März 2026')
+  })
+})
+
+describe('getPreviousMonth', () => {
+  it('steps back within the same year', () => {
+    expect(getPreviousMonth(2026, 8)).toEqual({ year: 2026, month: 7 })
+  })
+
+  it('rolls over to December of the previous year from January', () => {
+    expect(getPreviousMonth(2026, 0)).toEqual({ year: 2025, month: 11 })
+  })
+})
+
+describe('getNextMonth', () => {
+  it('steps forward within the same year', () => {
+    expect(getNextMonth(2026, 8)).toEqual({ year: 2026, month: 9 })
+  })
+
+  it('rolls over to January of the next year from December', () => {
+    expect(getNextMonth(2026, 11)).toEqual({ year: 2027, month: 0 })
   })
 })
