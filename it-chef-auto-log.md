@@ -12466,3 +12466,71 @@ auf `it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
 `tasks/tasks-prd-travix-platform.md`: 7.3 ist bereits als `[x]`
 markiert, dies ist eine Verfeinerung derselben bereits abgeschlossenen
 Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-24 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `origin/it-chef/auto` lag bereits auf demselben Stand
+wie `origin/main` (`git merge-base --is-ancestor origin/main HEAD`
+bestätigt), kein Merge nötig — `main` seit dem letzten Lauf (23.09.,
+fünfter Lauf) unverändert.
+
+**Ausgewählter Punkt:** Keiner. Da seit dem letzten Lauf weder `main`
+noch `reports/*.md` sich verändert haben (`reports/it-chef.md` und
+`reports/support-chef.md` weiterhin auf Stand 23.09., beide melden
+keine neuen, sicher fixbaren Funde), stattdessen eine eigene, gezielte
+Bug-Suche über bisher seltener vollständig gelesene Dateien angestoßen
+(26 Dateien, u. a. `useConcierge.ts`, `mockConcierge.ts`, `speech.ts`,
+`duffel/client.ts`, `format.ts`, `nav-config.ts`, `calendarUtils.ts`,
+`cartTotals.ts`, `ChecklistPanel.tsx`, `TripSummaryCard.tsx`,
+`QuickReplies.tsx`, `ChatMessage.tsx` sowie die bisher weniger geprüften
+`pages/*` wie `Aktivitaeten.tsx`, `Angebote.tsx`, `Dashboard.tsx`,
+`Einstellungen.tsx`, `Favoriten.tsx`, `Flugsuche.tsx`, `Hotelsuche.tsx`,
+`Kalender.tsx`, `Kartenansicht.tsx`, `MeineReisen.tsx`,
+`Preisalarme.tsx`, `Profil.tsx`, `ReiseSuche.tsx`, `Urlaubsmodus.tsx`,
+`Warenkorb.tsx`) — bewusst nicht die bereits mehrfach geprüften
+Hauptdateien (ChatInput.tsx, KiChat.tsx, AppShell.tsx, Flight-/Hotel-
+Komponenten, useChat.ts, tripStorage.ts, Buchung.tsx, Home.tsx,
+routes.tsx, `ui/*`) erneut, um keine Zeit auf bereits abgedeckten
+Boden zu verschwenden.
+
+Ergebnis: kein Bug mit hoher Sicherheit gefunden, der alle vier
+Sicherheitskriterien eindeutig erfüllt. Die Dateien sind durchgängig
+defensiv geschrieben (try/catch um localStorage/fetch/Intl, optionale
+Verkettung bei Duffel-Rohdaten, Guard-Klauseln bei leeren Arrays,
+konsistente Demo-Daten zwischen den Seiten). Ein zunächst verdächtiger
+Datums-Unterschied (`Dashboard.tsx:29` "Kyoto … März 2027" vs. März
+2026 in `MeineReisen.tsx`/`Kalender.tsx`) erwies sich bei Verifikation
+als korrekt: `Dashboard.tsx` spiegelt den Kyoto-*Entwurf* (2027) aus
+`Reiseentwuerfe.tsx`, nicht die bereits abgeschlossene Kyoto-*Reise*
+(2026) aus `MeineReisen.tsx` — zwei unterschiedliche Demo-Datensätze,
+kein Fehler.
+
+Ein Kandidat bleibt als "unsicher" offen, erfüllt Kriterium 4
+(objektiv prüfbar) nicht zuverlässig genug für einen autonomen Fix:
+`src/pages/Kalender.tsx:33-40` (`goToPreviousMonth`/`goToNextMonth`) —
+`setYear` liest die Jahreswechsel-Bedingung (`month === 0`/`month ===
+11`) aus dem Render-Closure-Wert von `month`, während `setMonth` per
+Updater-Funktion mit dem tatsächlich vorherigen Wert rechnet. Nur wenn
+beide Funktionen zweimal im selben synchronen Tick liefen (z. B. durch
+programmatischen Doppelaufruf), bevor React neu rendert, würde der
+Jahreswechsel an der Dezember/Januar-Grenze falsch berechnet. Über
+echte Klicks bzw. React Testing Library (`fireEvent`) ließ sich das
+nicht reproduzieren, da React zwischen zwei Events neu rendert — daher
+kein bestätigter, sondern nur ein theoretischer Bug. Robusterer Umbau
+(z. B. Navigation über ein einzelnes `Date`-State statt getrennter
+`year`/`month`-States) wäre eher vorsorgliche Robustheit als ein
+Bugfix und damit über die "klar genug ohne Interpretation"-Schwelle
+hinaus — für einen künftigen Lauf vorgemerkt, falls sich mal ein
+echtes Fehlverhalten dazu zeigt.
+
+Zusätzlich die offenen Sub-Checkboxen aus
+`tasks/tasks-prd-travix-platform.md` (2.1-2.10, 4.1-4.3, 5.7, 6.2, 6.6,
+6.7, 7.4, 7.12, 8.1-8.9, 8.11-8.13) gegengeprüft: unverändert gegenüber
+dem 23.09.-Stand, jede hängt weiterhin an Auth/Backend, KI-Zugangsdaten,
+einer offenen Produkt-/Datenmodell-Entscheidung oder ist bereits als
+Kurzfrist-Mitigation umgesetzt.
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
