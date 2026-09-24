@@ -3052,3 +3052,82 @@ Die bereits mehrfach dokumentierte, weiterhin offene Anregung (eigene
 Badge-Variante für "Abgeschlossen" statt derselben `secondary`-Variante
 wie "Pausiert", `Zeile 236`) wurde nicht erneut als eigener Punkt
 aufgeführt, da sie inhaltlich unverändert und schon gemeldet ist.
+
+## 2026-09-24 — Reiseentwürfe: beide gestrigen Funde geprüft, neuer Kontrast-Fund bei der "Abgeschlossen"-Badge
+
+### Kontext
+Ausgewählt, weil dies laut `ZEITPLAN.md`/`it-chef-auto-log.md` die
+zuletzt bearbeitete UI ist: Auf `it-chef/auto` (noch nicht nach `main`
+gemergt) wurden gestern Abend zwei der beiden Funde aus diesem Log
+(23.09.) behoben — `ce62376` ("fehlende Angaben im Details-Dialog
+kenntlich gemacht") und `647d57f` ("Status-Badge für abgeschlossene
+Entwürfe optisch von 'Pausiert' unterschieden"). Der dritte Commit von
+heute Nacht (`ead06ad`, Kalender-Monatsnavigation) ist ein reiner
+internen Bugfix ohne sichtbare Textänderung und wurde deshalb nicht
+gesondert geprüft.
+
+### Zuerst bestätigt: beide gemeldeten Funde tatsächlich behoben
+- `src/pages/Reiseentwuerfe.tsx:373-393`: Transportmittel/Datum/Budget/
+  Unterkunft zeigen im "Details ansehen"-Dialog jetzt bei fehlendem Wert
+  denselben Fallback-Text wie das etablierte Muster in `Buchung.tsx`
+  ("Noch kein Transport ausgewählt" usw., wortgleich mit
+  `Buchung.tsx:218-240`) statt die Zeile stillschweigend wegzulassen.
+  Für Kyoto (Demo-Datensatz ohne Transport/Budget/Unterkunft) sind damit
+  alle fünf Zeilen im Dialog sichtbar, keine mehr verschwindet
+  kommentarlos.
+- `src/pages/Reiseentwuerfe.tsx:236-247`: "Abgeschlossen" nutzt jetzt
+  `variant="outline"` mit eigener Teal-Einfärbung statt derselben
+  `secondary`-Variante wie "Pausiert" — optisch klar unterscheidbar von
+  "Pausiert" und "In Bearbeitung".
+
+Beide Fixes mechanisch korrekt und wortgleich mit bereits etablierten
+Mustern übernommen — kein Regressionsrisiko erkennbar.
+
+### Reibungspunkt (neuer Fund)
+
+**1. Text der neuen "Abgeschlossen"-Badge hat im hellen Farbschema zu
+wenig Kontrast**
+
+`src/pages/Reiseentwuerfe.tsx:244`: `className={draft.status ===
+'finalized' ? 'border-teal/30 bg-teal/5 text-teal' : undefined}` färbt
+den Badge-Text selbst Teal (`text-teal`, überschreibt das
+`text-foreground` der `outline`-Variante aus `badge.tsx`) auf einem
+fast weißen Hintergrund (`bg-teal/5` über `--card: oklch(1 0 0)` im
+hellen Schema, `src/styles/globals.css:60`). Teal ist als Farbwert
+`#00c2a8` definiert (`src/styles/globals.css:10`) — gegen Weiß ergibt
+das rechnerisch ein Kontrastverhältnis von grob **2,3:1**, deutlich
+unter den von WCAG 2.1 AA für normalen Text (12px, `text-xs`)
+geforderten 4,5:1. Im dunklen Farbschema (`--card: #0a2342`) ist
+derselbe Text dagegen mit rund 7:1 gut lesbar — das Problem betrifft
+also gezielt den (vermutlich meistgenutzten) hellen Modus.
+
+Der Fix wiederverwendet laut eigener Commit-Nachricht bewusst ein
+bereits bestehendes Muster (`TripSummaryCard.tsx:41` — derselbe
+`text-teal`-Text auf `bg-teal/5`; `TripSummaryCard.tsx:50` — ein
+"Bearbeiten"-Button ebenfalls mit `text-teal` auf hellem Grund) — dort
+besteht dasselbe Kontrastproblem also schon länger, nur bisher nicht
+gemeldet. Neu ist, dass es jetzt zusätzlich auf einer Statusbeschriftung
+liegt, die auf jeder abgeschlossenen Reiseentwurfs-Karte dauerhaft
+sichtbar ist (nicht nur in einem einzelnen Chat-Zustand wie
+`TripSummaryCard`), und damit im Alltag deutlich öfter auftaucht.
+
+*Vorschlag:* Für Text auf hellem Grund nicht `text-teal` direkt nutzen,
+sondern einen dunkleren, WCAG-AA-konformen Teal-Ton (oder ersatzweise
+`text-foreground`/`text-navy` mit einem Teal-Akzent nur auf Rand/
+Hintergrund) — analog dazu, wie `QuickReplies.tsx:20` bereits
+`border-teal/40 bg-teal/10 text-navy` kombiniert: Teal nur als Rahmen/
+Füllfarbe, der eigentliche Text in einer kontrastreichen Farbe. Da
+`TripSummaryCard.tsx` denselben Fehlton bereits enthält, wäre ein
+gemeinsamer, dunkler Teal-Textfarbwert (z. B. als neue Design-Token in
+`MARKENDESIGN.md`/`globals.css`) sinnvoller als ein Einzel-Fix nur in
+`Reiseentwuerfe.tsx`.
+
+### Nicht geprüft
+Der optionale, im letzten Eintrag (23.09.) bereits diskutierte
+Detail-Punkt "Zielort erscheint im Dialog doppelt" (`DialogTitle` und
+die erste Zeile mit `MapPin`-Icon, `Reiseentwuerfe.tsx:374`) wurde nicht
+als eigener Fund aufgeführt — rein kosmetisch, kein echter
+Verständnisverlust, und `Buchung.tsx` löst dieselbe Information mit
+einer eigenen Badge ohnehin anders. Der reine Bugfix zur
+Kalender-Monatsnavigation (`ead06ad`) wurde mangels sichtbarer
+UI-Änderung nicht geprüft.
