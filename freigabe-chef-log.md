@@ -4367,3 +4367,67 @@ gepusht.
 
 **Info an Ni nötig:** Nein — regulärer, sauber bestandener Lauf ohne
 Auffälligkeiten.
+
+## 2026-09-24, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (`ce62376`,
+  `647d57f`, `8f7894c`, `ead06ad`, `706fd97`).
+- `marketing-chef/auto` — 0 neue Commits vor `origin/main`, planmäßig
+  übersprungen (wie für diesen frühen Lauf angewiesen, dafür gibt es den
+  späteren 6-Uhr-Lauf).
+- `support-chef/auto` — 0 neue Commits vor `origin/main`, ebenfalls
+  planmäßig übersprungen.
+
+**`it-chef/auto` geprüft:** Diff zu `main` umfasst `ZEITPLAN.md`,
+`it-chef-auto-log.md`, `src/lib/trip/calendarUtils.ts` (+Tests),
+`src/pages/Kalender.tsx`, `src/pages/Reiseentwuerfe.tsx` (+Tests) — drei
+inhaltliche Änderungen:
+1. Kalender-Monatsnavigation (`getPreviousMonth`/`getNextMonth`) gegen
+   das im 23.09.-Log bereits benannte Jahr/Monat-Race abgesichert, als
+   reine, unit-getestete Hilfsfunktionen nach dem etablierten Muster von
+   `calendarUtils.ts`.
+2. Details-Dialog in `Reiseentwuerfe.tsx`: fehlende Angaben
+   (Transport/Datum/Budget/Unterkunft) werden jetzt wie die
+   Aktivitäten-Zeile explizit als fehlend angezeigt statt per
+   `.filter(Boolean)` weggelassen — Wortlaut 1:1 aus `Buchung.tsx`
+   übernommen, keine neue Copy erfunden.
+3. Status-Badge für `finalized` auf den gedämpften Teal-Akzent
+   (`border-teal/30 bg-teal/5 text-teal`) umgestellt, der bereits in
+   `TripSummaryCard.tsx`/`QuickReplies.tsx` existiert, statt der
+   bisherigen grauen `secondary`-Variante wie bei `paused`.
+
+Jede der drei Änderungen deckt sich genau mit ihrem eigenen
+`it-chef-auto-log.md`-Eintrag (kein Scope-Creep), keine Berührung von
+Auth/Zahlungen/Rechtstexten, UI-Änderungen an bereits im Code etablierten
+Design-Tokens orientiert statt neu erfunden — passt zu
+`MARKENDESIGN.md`.
+
+**Unabhängig selbst verifiziert** (nicht nur den Log-Eintrag geglaubt):
+frischer Checkout von `origin/it-chef/auto`, `npm install`, danach
+`npx tsc -b` (0 Fehler), `npx eslint .` (0 Fehler, dieselben 4
+vorbestehenden Fast-Refresh-Warnungen wie in jedem früheren Lauf), volle
+Suite `npx vitest run` (59 Testdateien, 354 Tests, alle grün) — deckt
+sich exakt mit den Werten aus `it-chef-auto-log.md`.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** Der `git merge --no-ff origin/it-chef/auto`
+-Befehl wurde von der eigenen Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert (Permission
+denied) — kein inhaltliches Problem am Branch selbst, sondern eine
+harte Umgebungs-Restriktion für Merges im autonomen Modus, die dieser
+Skill-Datei übergeordnet ist. Kein Workaround versucht. `main` und
+`it-chef/auto` sind dadurch unverändert; der temporäre lokale Prüf-Branch
+wurde wieder gelöscht.
+
+**Ergebnis:** `it-chef/auto` inhaltlich und technisch vollständig
+geprüft und für gut befunden, aber **nicht gemergt** — blockiert durch
+die Umgebungs-eigene Merge-Restriktion, nicht durch einen Fund.
+`marketing-chef/auto`/`support-chef/auto` planmäßig übersprungen (keine
+neuen Commits, wie für diesen frühen Lauf angewiesen).
+
+**Info an Ni nötig:** Ja — der Merge selbst konnte technisch nicht
+ausgeführt werden (Environment-Restriktion, keine Freigabe-Ablehnung).
+`it-chef/auto` wartet geprüft und grün auf einen manuellen Merge durch
+Ni oder eine Session mit den nötigen Rechten.
