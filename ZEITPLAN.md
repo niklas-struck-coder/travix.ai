@@ -1600,6 +1600,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   unverändert bei `secondary`. Neuer Regressionstest in
   `Reiseentwuerfe.test.tsx` (Badge-Klassen von "Abgeschlossen" und
   "Pausiert" unterscheiden sich, "Abgeschlossen" trägt `text-teal`).
+  Vom autonomen IT-Chef-Lauf am 24.09. einen von `reports/support-chef.md`
+  (24.09., Vorschlag 1) gemeldeten Kontrast-Fund an genau diesem Fix
+  behoben: `text-teal` auf `bg-teal/5` ergibt im hellen Farbschema nur rund
+  2,3:1 Kontrast — unter dem WCAG-AA-Mindestwert von 4,5:1 für normalen
+  Text (im dunklen Schema mit rund 7:1 unproblematisch). Fix: Badge nutzt
+  jetzt `border-teal bg-teal/10 text-navy` statt `border-teal/30 bg-teal/5
+  text-teal` — dasselbe etablierte Muster wie in `Einstellungen.tsx`,
+  `Profil.tsx` und `QuickReplies.tsx` (Teal nur als Rahmen/Hintergrund,
+  Navy für den eigentlichen Text). Denselben, vom Support-Chef als "schon
+  länger bestehend" gemeldeten Fehlton in `TripSummaryCard.tsx` (Zeilen 41
+  und 50, Karten-Label und "Speichern & ansehen"-Button) gleich mit auf
+  `text-navy` umgestellt, da identischer Fehler und identischer Fix.
+  Regressionstest in `Reiseentwuerfe.test.tsx` entsprechend angepasst
+  (prüft jetzt `text-navy` statt `text-teal`).
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,

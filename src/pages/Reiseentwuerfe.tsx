@@ -241,7 +241,7 @@ export function Reiseentwuerfe() {
                           ? 'outline'
                           : 'secondary'
                     }
-                    className={draft.status === 'finalized' ? 'border-teal/30 bg-teal/5 text-teal' : undefined}
+                    className={draft.status === 'finalized' ? 'border-teal bg-teal/10 text-navy' : undefined}
                   >
                     {statusLabels[draft.status]}
                   </Badge>

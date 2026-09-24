@@ -12662,3 +12662,59 @@ Entscheidung oder ist bereits als Kurzfrist-Mitigation umgesetzt.
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-24 (vierter Lauf desselben Tages)
+
+**Branch-Stand:** `origin/it-chef/auto` war bereits vollständig in `main`
+gemerged (`git log origin/main..origin/it-chef/auto` leer) — laut
+Freigabe-Chef-Log am 24.09. bereits erledigt. Deshalb `it-chef/auto`
+gemäß Anleitung frisch von `origin/main` neu aufgesetzt
+(`git checkout -B it-chef/auto origin/main`), keine offene Vorarbeit
+verloren, da nichts Unmergiertes vorlag.
+
+**Ausgewählter Punkt:** Vorschlag 1 aus `reports/support-chef.md`
+(24.09.): Der Text der "Abgeschlossen"-Badge (`Reiseentwuerfe.tsx:244`,
+eingeführt vom eigenen Lauf am 23.09.) nutzte `text-teal` auf
+`bg-teal/5` — im hellen Farbschema nur rund 2,3:1 Kontrast, deutlich
+unter dem WCAG-AA-Mindestwert 4,5:1 für normalen Text (im dunklen Schema
+mit ca. 7:1 unproblematisch). Erfüllt alle vier Sicherheitskriterien:
+kein Bezug zu Auth/Zahlungen/Nutzerdaten/Rechtstexten, keine offene
+Produkt-/Architekturentscheidung, klar genug beschrieben (Datei, Zeile,
+konkreter Kontrastwert und Lösungsvorschlag im Support-Chef-Bericht), und
+objektiv prüfbar (Kontrastformel nachrechenbar, Regressionstest passt
+Klassen-Erwartung an). Laut Marketing-Chef-Bericht (24.09.) bremst dieser
+Fund zusätzlich die Veröffentlichung des Details-Dialog-Fixes.
+
+**Umsetzung:** `Reiseentwuerfe.tsx:244` von `border-teal/30 bg-teal/5
+text-teal` auf `border-teal bg-teal/10 text-navy` umgestellt — exakt das
+etablierte Muster für Teal-Akzente mit lesbarem Text, das bereits in
+`Einstellungen.tsx`, `Profil.tsx` und `QuickReplies.tsx` verwendet wird
+(Teal nur als Rahmen/Hintergrund, Navy für den eigentlichen Text). Der
+Support-Chef-Bericht nennt denselben Fehlton explizit auch für
+`TripSummaryCard.tsx:41` (Karten-Label) und `:50` (Button "Speichern &
+ansehen") als "schon länger" bestehend — da identischer Fehler mit
+identischem Fix, gleich mit auf `text-navy` umgestellt (Karten-Rahmen/
+-Hintergrund `border-teal/30 bg-teal/5` unverändert, betrifft nur den
+Text). Regressionstest in `Reiseentwuerfe.test.tsx` (Zeile 101) von
+`toMatch(/text-teal/)` auf `toMatch(/text-navy/)` angepasst, da die
+Badge-Unterscheidbarkeit von "Pausiert" weiterhin über eine eigene
+Klasse geprüft wird, nur die konkrete Farbklasse sich geändert hat.
+
+**Geprüft:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx
+src/components/chat/TripSummaryCard.test.tsx` (20 Tests, alle grün),
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite
+`npm test` (59 Testdateien, 354 Tests, alle grün, keine neuen Tests nötig
+— bestehender Test angepasst statt ergänzt), sowie `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich; die
+bestehende Chunk-Size-Warnung ist unverändert und unabhängig von dieser
+Änderung).
+
+**Ergebnis:** `src/pages/Reiseentwuerfe.tsx` (Fix),
+`src/pages/Reiseentwuerfe.test.tsx` (angepasster Regressionstest),
+`src/components/chat/TripSummaryCard.tsx` (Fix derselben Fehlton-Stelle),
+`ZEITPLAN.md` (7.3-Eintrag ergänzt) und dieser Log-Eintrag committet —
+auf `it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 7.3 ist bereits als `[x]` markiert,
+dies ist eine Verfeinerung derselben bereits abgeschlossenen Aufgabe,
+kein eigener Checkbox-Punkt.
