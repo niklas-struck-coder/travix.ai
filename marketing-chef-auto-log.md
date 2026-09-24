@@ -4,6 +4,56 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-24
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3263e8e`, 23.09.) war laut
+`freigabe-chef-log.md` bereits vollständig in `main` gemergt
+(Merge-Commit `2bcf583`) — der Branch war also nur noch veraltet, nicht
+mehr in Arbeit. Neu von aktuellem `origin/main` (`55a36b8`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret: nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf ergänzt.
+Kein neues eigenständiges Content-Stück, keine fünfte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` seit dem 23.09. beantwortet wurde:
+keine Notiz in `status.md` (Stand weiterhin 23.09.), `ZEITPLAN.md` (6.2
+weiterhin `[ ]`) oder diesem Dokument, keine neuen Kanal-Links im Repo,
+kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben
+offen — jetzt seit über fünf Wochen. Danach `git log 2bcf583..origin/main`
+geprüft: acht neue Commits, jeder einzeln per `git show --stat`
+verifiziert — keine einzige echte Produkt-Codeänderung, nur Berichte
+(IT-Chef, Support-Chef, ein Live-Marketing-Chef-Bericht), Logs und ein
+Daily-Status-Update. Der Support-Chef-Bericht vom 23.09. meldet zwar
+einen frischen Reibungspunkt im neuen "Details ansehen"-Dialog (fehlende
+Angaben verschwinden kommentarlos statt als "nicht angegeben" erkennbar
+zu sein), das ist aber laut der etablierten Regel erst dann ein
+Tier-4-Kandidat, wenn IT-Chef es tatsächlich behebt — nicht schon durch
+die Meldung selbst. Der Kandidatentopf bleibt damit unverändert bei drei
+(Stand 23.09.), weiterhin klar unter der Achter-Schwelle für eine fünfte
+Mini-Changelog-Ausgabe. Details siehe `marketing/freigabe-uebersicht.md`,
+Update 2026-09-24.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen (es gibt schlicht keinen neuen
+Punkt, der eine Zahl bräuchte). Keine offene Positionierungs-
+Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche Entscheidung,
+sondern dokumentiert nur den unveränderten Stand. "Landingpage/Warteliste
+live" (Sprint 2), "Community/Warteliste aufbauen" (Sprint 4) sowie
+Testkampagnen/Launch-Kampagne (Sprint 6/7) bleiben bewusst unangetastet —
+das sind Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden, nicht
+sicher genug für den autonomen Modus.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-23
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
