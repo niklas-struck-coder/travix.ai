@@ -1,10 +1,88 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-23)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-24)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-24: keine neuen Tier-4-Kandidaten, ein neuer aber noch unfertiger Support-Chef-Fund (fehlende Angaben im "Details ansehen"-Dialog), alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3263e8e`, 23.09.) war laut
+`freigabe-chef-log.md` ("2026-09-23 Tages-Check") bereits vollständig in
+`main` gemergt (Merge-Commit `2bcf583`) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Neu von aktuellem `origin/main`
+(`55a36b8`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 23.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, weiterhin
+`[ ]`) oder diesem Dokument seit dem 23.09. Keine neuen Kanal-Links
+(`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und
+`index.html` liefert weiterhin keinen Treffer), kein `changelog`-Treffer
+in `src/routes.tsx`. Alle vier Fragen bleiben offen — jetzt seit über
+fünf Wochen.
+
+**`git log 2bcf583..origin/main` zeigt acht neue Commits, jeder einzeln
+per `git show --stat` geprüft — keiner davon mit echter
+Produkt-Codeänderung:**
+- `4c4c152`/`417da47`: Support-Chef Auto (23.09.) prüft den neuen
+  "Details ansehen"-Dialog aus `65fb64d` (gestriger Tier-4-Kandidat 20)
+  und findet einen frischen Reibungspunkt — fehlende Angaben (z. B.
+  Budget, Unterkunft) verschwinden dort kommentarlos statt als "nicht
+  angegeben" erkennbar zu sein. Nur `support-chef-auto-log.md` geändert,
+  keine Code-Datei — **kein neuer Tier-4-Kandidat**, da noch nicht
+  behoben (gleiche Regel wie bei allen früheren Support-Chef-Funden: erst
+  IT-Chefs tatsächliche Umsetzung zählt, nicht die Meldung selbst).
+- `d7028eb`: IT-Chef-Bericht, 27 Dateien gegengelesen, kein neuer Fund —
+  reiner Berichtstext, keine Code-Datei.
+- `9af97be`: Marketing-Chef-Bericht (Live-Kanal, nicht dieser Auto-Lauf)
+  bestätigt dieselbe Einordnung — rät explizit, die
+  Reiseentwürfe-Konsistenz-Story erst zu veröffentlichen, sobald IT-Chef
+  den neuen Lücken-Fund nachzieht, und eine der vier Grundsatzfragen
+  diese Woche zu entscheiden. Reiner Berichtstext.
+- `f9675c5`: Support-Chef-Bericht, gleicher Fund wie oben, reiner
+  Berichtstext.
+- `dd6efb6`: Daily-Status-Update — bestätigt nur den bereits bekannten
+  Stand vom 23.09., keine neue Antwort auf eine der vier Fragen.
+- `8bc7ae1`, `55a36b8`: Freigabe-Chef-Logs — laut `55a36b8` ist der
+  `it-chef/auto`-Merge heute durch eine Umgebungsrestriktion blockiert,
+  betrifft diesen Marketing-Lauf aber nicht direkt (keine
+  Produkt-Codeänderung in diesem Commit-Bereich, nur Log-Text).
+
+**Der Kandidatentopf bleibt unverändert bei drei** (Stand 23.09.) —
+weiterhin klar unter der Achter-Schwelle und auch unter der Menge (vier),
+die selbst am 06.09. als "nicht ausreichend" galt. Keine fünfte
+Mini-Changelog-Ausgabe heute. Der neue Support-Chef-Fund (fehlende
+Angaben im Detail-Dialog) ist als vierter, noch offener Baustein der
+Reiseentwürfe-Konsistenz-Story vorgemerkt — wird erst zum Kandidaten,
+sobald IT-Chef ihn tatsächlich behebt.
+
+**Warum sicher genug:** Reine Übersichts-Ergänzung, kein Live-Vorgang —
+nichts gepostet oder verändert. Keine erfundenen Kennzahlen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/Mini-Changelog-Ausgabe — Kandidatentopf
+  steht weiterhin bei drei, klar unter dem etablierten Maßstab (acht).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 24.09. (Prüfung der
+  vier Fragen, acht neue Commits einzeln geprüft ohne neuen
+  Tier-4-Kandidaten, neuer aber noch unfertiger Support-Chef-Fund
+  vorgemerkt), "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im
+  Titel auf 24.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-23: zwei neue Tier-4-Kandidaten (misleading CTA nach Abschließen ausgeblendet, "Details ansehen" für abgeschlossene Reiseentwürfe), zwei role="alert"-Fixes bewusst ausgeschlossen, alle vier Fragen weiterhin offen
 
@@ -2304,4 +2382,18 @@ wurden bewusst nicht aufgenommen (reine Screenreader-Ankündigung, gleiche
 Ausschlussgruppe wie die bereits ausgeschlossenen `role="status"`-Fixes).
 Der nächste Lauf sollte weiterhin zuerst die vier offenen Fragen
 gegenprüfen und den Kandidatentopf (Stand 23.09: drei) gegen denselben
-06.09.-Maßstab weiterführen.
+06.09.-Maßstab weiterführen. Stand 24.09. ist kein neuer Kandidat
+dazugekommen — seit dem letzten Merge (`2bcf583`) gab es keine einzige
+neue, per `git show` verifizierte Produkt-Codeänderung, nur Berichte,
+Logs und ein Daily-Status-Update (siehe Update 2026-09-24 oben). Der
+Topf bleibt bei drei. Ein neuer Support-Chef-Fund vom 23.09. (fehlende
+Angaben verschwinden kommentarlos im "Details ansehen"-Dialog statt als
+"nicht angegeben" erkennbar zu sein) ist als vierter, noch offener
+Baustein der Reiseentwürfe-Konsistenz-Story vorgemerkt — wird erst zum
+Kandidaten, sobald IT-Chef ihn behebt; laut dem Live-Marketing-Chef-
+Bericht vom 23.09. sollte diese Story ohnehin erst veröffentlicht werden,
+sobald genau dieser Wackler beseitigt ist, auch wenn der Kandidatentopf
+irgendwann die Achter-Schwelle erreicht. Der nächste Lauf sollte
+weiterhin zuerst die vier offenen Fragen gegenprüfen, prüfen ob der neue
+Support-Chef-Fund inzwischen behoben wurde, und den Kandidatentopf
+(Stand 24.09: drei) gegen denselben 06.09.-Maßstab weiterführen.
