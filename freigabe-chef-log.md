@@ -4533,3 +4533,77 @@ auf), alle drei Branches sind auf `main`. Neuer, aber nicht blockierender
 Fund von Support-Chef: die neue Teal-Status-Badge-Textfarbe hat laut
 Analyse zu wenig Kontrast (WCAG AA) — dürfte IT-Chef als nächsten
 sicheren Punkt interessieren.
+
+## 2026-09-25, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (`34a3c45`,
+  `fc81aa1`, `e96c200`, `b183cd6`, `fa2a0b5`).
+- `marketing-chef/auto` — 0 neue Commits vor `origin/main`, planmäßig
+  übersprungen (wie für diesen frühen Lauf angewiesen, dafür gibt es den
+  späteren 6-Uhr-Lauf).
+- `support-chef/auto` — 0 neue Commits vor `origin/main`, ebenfalls
+  planmäßig übersprungen.
+
+**`it-chef/auto` geprüft:** Diff zu `main` umfasst `ZEITPLAN.md`,
+`it-chef-auto-log.md`, `src/components/chat/TripSummaryCard.tsx`,
+`src/components/search/FlightCard.tsx` (+Test),
+`src/components/search/TrainCard.tsx` (+Test),
+`src/pages/Reiseentwuerfe.tsx` (+Test) — zwei inhaltliche Änderungen,
+drei der fünf Commits sind reine "kein neuer sicherer Punkt
+gefunden"-Läufe ohne Code-Änderung:
+1. `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx` gab bei leerem
+   `isoDuration`-String eine leere Zeichenkette statt eines Platzhalters
+   aus (Regex matcht dann nicht, Fallback war bisher der leere String
+   selbst) — jetzt `if (!isoDuration) return '—'` am Funktionsanfang,
+   identisch in beiden Karten, mit je einem neuen Regressionstest belegt.
+2. Teal-Kontrast-Nachbesserung: `TripSummaryCard.tsx` nutzt jetzt
+   `text-navy` statt `text-teal` für Label und Button (Card-Rahmen
+   `border-teal/30 bg-teal/5` unverändert), `Reiseentwuerfe.tsx`-Status-
+   Badge für `finalized` wechselt von `border-teal/30 bg-teal/5
+   text-teal` zu `border-teal bg-teal/10 text-navy` — deckt sich mit dem
+   von Support-Chef im Tages-Check vom 24.09. gemeldeten
+   WCAG-AA-Kontrastfund (Teal-Text auf hellem Teal-Hintergrund).
+
+Beide Änderungen decken sich mit den zugehörigen
+`it-chef-auto-log.md`-Einträgen (kein Scope-Creep), keine Berührung von
+Auth/Zahlungen/Rechtstexten. Die neuen `text-navy`-Töne sind bereits an
+anderer Stelle im Code etabliert (laut Log u. a. konsistent mit
+`QuickReplies.tsx`) und stehen nicht im Widerspruch zu
+`MARKENDESIGN.md` (Navy/Teal/Gold als Markenpalette, Teal explizit nur
+für "positive/normale" Zustände — ein reiner Textfarbwechsel auf Navy
+für bessere Lesbarkeit ändert daran nichts).
+
+**Unabhängig selbst verifiziert** (frischer `git worktree` von
+`origin/it-chef/auto`, nicht nur den Log-Eintrag geglaubt): `npm ci`,
+danach `npx tsc -b` (0 Fehler), `npx eslint .` (0 Fehler, dieselben 4
+vorbestehenden Fast-Refresh-Warnungen wie in jedem früheren Lauf), volle
+Suite `npx vitest run` (59 Testdateien, 356 Tests, alle grün) — deckt
+sich exakt mit den Werten aus `it-chef-auto-log.md`.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --no-ff origin/it-chef/auto`
+wurde erneut von der Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert (Permission
+denied) — wie schon am 24.09., 22.09. und 18.09. bei diesem frühen
+Nacht-Check-Zeitfenster, kein inhaltliches Problem am Branch selbst.
+Kein Workaround versucht. `main` und `it-chef/auto` sind dadurch
+unverändert; der temporäre lokale Prüf-Worktree wurde wieder entfernt.
+
+**Ergebnis:** `it-chef/auto` inhaltlich und technisch vollständig
+geprüft und für gut befunden, aber **nicht gemergt** — blockiert durch
+die Umgebungs-eigene Merge-Restriktion, nicht durch einen Fund.
+`marketing-chef/auto`/`support-chef/auto` planmäßig übersprungen (keine
+neuen Commits, wie für diesen frühen Lauf angewiesen).
+
+**Info an Ni nötig:** Ja — der Merge selbst konnte technisch nicht
+ausgeführt werden (Environment-Restriktion, keine Freigabe-Ablehnung).
+`it-chef/auto` wartet geprüft und grün (formatDuration-Platzhalter-Fix,
+Teal-Kontrast-Nachbesserung) auf einen manuellen Merge durch Ni oder eine
+Session mit den nötigen Rechten. Das ist inzwischen das vierte Mal
+(18.09., 22.09., 24.09., heute), dass genau dieser frühe Nacht-Check-
+Zeitfenster an derselben Restriktion scheitert, obwohl der Tages-Check
+denselben Merge an anderen Tagen anstandslos durchführen konnte — evtl.
+lohnt sich eine Anpassung, wann/wie dieser Skill läuft, falls das
+Muster so bleibt.
