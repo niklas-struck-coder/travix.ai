@@ -12916,3 +12916,71 @@ Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-25 (autonomer Tagesmodus-Lauf, dritter Lauf)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` + vier bereits gepushte,
+noch nicht von Freigabe-Chef gemergte Commits (Teal-Kontrast-Fix vom
+24.09., Lauf ohne Code-Änderung vom 24.09., `formatDuration()`-Fix vom
+heutigen ersten Lauf, Lauf ohne Code-Änderung vom heutigen zweiten Lauf).
+`git log origin/main..HEAD` zeigt genau diese vier Commits, `git log
+HEAD..origin/main` ist leer — kein Merge von `main` nötig.
+
+**Vorprüfung bestehender Vorschläge:** `reports/it-chef.md` (24.09.)
+enthält keinen neuen, ungedeckten Punkt (unverändert seit dem zweiten
+Lauf heute). `reports/support-chef.md` (24.09.) erneut gegengeprüft:
+Vorschlag 1 (Teal-Kontrast der "Abgeschlossen"-Badge) ist bereits
+behoben (`text-navy` statt `text-teal`, 24.09.-Fix). Vorschlag 2
+(Hilfe-Seite ohne echten Inhalt) bleibt blockiert — echter Kontaktweg
+existiert im Code noch nicht, eine erfundene Adresse wäre keine reine
+Bugfix-Korrektur (Kriterium 3). Vorschlag 3 (rohe englische
+Duffel-Fehlermeldungen) ist bereits behoben: `callDuffelProxy()`
+(`src/lib/duffel/client.ts:23-52`) übersetzt sowohl den
+`!response.ok`-Zweig als auch den `catch`-Zweig (Netzwerk-/Parse-Fehler)
+bereits vollständig in freundlichen deutschen Text — der Bericht war zum
+Zeitpunkt des Schreibens schon überholt (Fix stammt vom 03.09.).
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat gezielt Dateien gelesen, die
+in den bisherigen Läufen (inkl. der beiden heutigen) noch nicht einzeln
+geprüft wurden: `src/lib/trip/cartTotals.ts`, `src/pages/Warenkorb.tsx`,
+`src/pages/Profil.tsx`, `src/pages/Einstellungen.tsx`,
+`src/pages/Kartenansicht.tsx`, `src/pages/Home.tsx`,
+`vite-plugins/duffel-proxy.ts`, `src/lib/nav-config.ts`,
+`src/pages/Favoriten.tsx`, `src/pages/Preisalarme.tsx`,
+`src/lib/trip/tripStorage.ts`, `src/types/profile.ts`,
+`src/types/settings.ts`, `src/types/stays.ts`. Dabei aufgefallen: die
+"Relevant Files"-Liste in `tasks/tasks-prd-travix-platform.md` (Zeilen
+99-103) nennt mehrere Hook-/Lib-Dateien (`useCart.ts`, `useFavorites.ts`,
+`usePriceAlerts.ts`, `useTrip.ts`, `useDrafts.ts`, `calculateCosts.ts`)
+sowie Seiten (`DealFinderChat.tsx`, `Premium.tsx`, `Reisebudget.tsx`,
+`src/lib/base44/*`), die nie angelegt wurden — die zugehörige
+Funktionalität steckt stattdessen direkt in den jeweiligen Seiten
+(lokaler `useState`) bzw. läuft über die gemeinsame `PlaceholderPage.tsx`
+(`nav-config.ts`s `extraRoutes`). Reine Dokumentationsabweichung ohne
+Code-Bezug, kein Bugfix-Kandidat (keine objektiv prüfbare
+Verhaltensänderung, Kriterium 4) — als Hinweis hier vermerkt statt
+angefasst. Zusätzlich selbst die bisher ungetesteten shadcn-Grundbausteine
+`progress.tsx`, `input.tsx`, `label.tsx`, `badge.tsx` gelesen: alle
+unverändertes shadcn-Vorlagen-Markup ohne eigene Logik, sowie
+`useConcierge.ts`: nutzt `window.setTimeout` ohne Cleanup beim Unmount,
+exakt dasselbe seit Langem etablierte Muster wie in `useChat.ts`
+(drei Stellen) — in React 18 keine Fehlfunktion (State-Update auf
+unmounteter Komponente ist ein stiller No-op), daher kein eigenständiger,
+isolierter Fund, sondern ein app-weites Muster, dessen Änderung an nur
+einer Stelle inkonsistent wäre.
+
+**Ergebnis:** Kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite
+`npm test` (59 Testdateien, 356 Tests, alle grün — unverändert), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
