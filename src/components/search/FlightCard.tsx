@@ -11,6 +11,7 @@ function formatTime(isoString: string) {
 }
 
 function formatDuration(isoDuration: string) {
+  if (!isoDuration) return '—'
   const match = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
   if (!match) return isoDuration
   const [, days, hours, minutes] = match

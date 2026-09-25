@@ -1338,6 +1338,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   und bereit für die spätere Einbindung. Neuer Regressionstest in
   `TrainCard.test.tsx` (analog zum bestehenden `FlightCard.test.tsx`-Test
   für denselben Zustand).
+  Vom autonomen IT-Chef-Lauf am 25.09. eine per Explore-Agent gefundene und
+  selbst gegen den Code verifizierte Lücke in der (wortgleich duplizierten)
+  `formatDuration()`-Funktion behoben: Anders als die daneben stehende
+  `formatTime()` hatte `formatDuration()` keinen Guard für eine leere/
+  fehlende Dauer — bei `duration: ''` liefert der Regex-`.exec()` `null`,
+  wodurch die Funktion auf `return isoDuration` zurückfiel und schlicht den
+  leeren String zurückgab. Ergebnis: statt des sonst überall verwendeten
+  `—`-Platzhalters stand neben dem Uhr-Icon nichts. Real erreichbar, weil
+  `src/lib/duffel/client.ts:100` bei einer echten Duffel-Antwort ohne
+  `slice.duration` genau `duration: slice.duration ?? ''` liefert. Fix in
+  `FlightCard.tsx` und `TrainCard.tsx` identisch: `if (!isoDuration) return
+  '—'` als erste Zeile von `formatDuration()`, exakt das bereits etablierte
+  Muster aus `formatTime()`. Je ein neuer Regressionstest in
+  `FlightCard.test.tsx`/`TrainCard.test.tsx` (vor dem Fix per `git stash`
+  auf nur diese beiden Quelldateien reproduzierbar rot verifiziert).
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —

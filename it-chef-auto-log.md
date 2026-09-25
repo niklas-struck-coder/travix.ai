@@ -12781,3 +12781,69 @@ bestehende Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-25 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` + zwei bereits gepushte,
+noch nicht von Freigabe-Chef gemergte Commits vom 24.09. (Teal-Kontrast-
+Fix vierter Lauf, sowie fünfter Lauf ohne Code-Änderung). `git log
+origin/main..HEAD` zeigt genau diese zwei Commits, `git log
+HEAD..origin/main` ist leer — kein Merge von `main` nötig.
+
+**Vorprüfung bestehender Vorschläge:** `reports/support-chef.md` und
+`reports/it-chef.md` (beide zuletzt 24.09.) enthalten keinen neuen,
+ungedeckten Punkt: der Teal-Kontrast-Fund (Vorschlag 1) ist bereits im
+vierten Lauf vom 24.09. behoben, die Hilfe-Seite (Vorschlag 2) bleibt
+mangels echtem Kontaktweg zurückgestellt ("nichts erfinden"), die rohen
+Duffel-Fehlermeldungen (Vorschlag 3) sind laut Code bereits vor dem
+Bericht behoben. `ZEITPLAN.md`/`tasks-prd-travix-platform.md`: alle
+verbleibenden offenen Punkte in Sprint 3/4/5 (7.4, 7.12, 8.x, 2.0, 4.x)
+sind auf die offene Backend-/Produktentscheidung blockiert, kein neuer
+autonom umsetzbarer Punkt.
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat gezielt Dateien gelesen, die
+in den bisherigen Läufen noch nicht einzeln geprüft wurden (u. a.
+`FlightCard.tsx`, `TrainCard.tsx`, `FlightWizard.tsx`, `Kartenansicht.tsx`,
+`PlaceholderPage.tsx`, `Home.tsx`), mit der ausdrücklichen Vorgabe, die
+vier Sicherheitskriterien einzuhalten.
+
+**Ausgewählter Punkt:** `formatDuration()` in `FlightCard.tsx` und
+(wortgleich dupliziert) `TrainCard.tsx` hatte — anders als die daneben
+stehende `formatTime()` — keinen Guard für eine leere/fehlende Dauer.
+Bei `duration: ''` liefert `/P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec('')`
+`null`, wodurch die Funktion auf `return isoDuration` zurückfiel und den
+leeren String direkt zurückgab — statt des sonst überall verwendeten
+`—`-Platzhalters stand neben dem Uhr-Icon nichts. Real erreichbar: eine
+echte Duffel-API-Antwort ohne `slice.duration` liefert über
+`src/lib/duffel/client.ts:100` (`duration: slice.duration ?? ''`) exakt
+diesen leeren String, der über `Flugsuche.tsx`/`FlightResults.tsx`/
+`KiChat.tsx` direkt in `FlightCard` landet. Erfüllt alle vier Kriterien:
+kein Bezug zu Auth/Zahlung/Nutzerdaten/Recht, keine offene Produkt-
+/Architekturentscheidung, klar beschrieben (reiner Logikfehler in einer
+reinen Funktion), objektiv prüfbar (Regressionstest).
+
+**Umsetzung:** In beiden Dateien `formatDuration()` um `if (!isoDuration)
+return '—'` als erste Zeile ergänzt — exakt das bereits etablierte Muster
+aus der direkt daneben stehenden `formatTime()`. Kein neuer Design-Token,
+keine neue Abhängigkeit.
+
+**Geprüft:** Vor dem Fix per `git stash` auf nur `FlightCard.tsx`/
+`TrainCard.tsx` reproduzierbar rot verifiziert (neue Tests schlagen ohne
+den Guard fehl, weil kein Element mit Text `—` gefunden wird). Danach
+`npx vitest run src/components/search/FlightCard.test.tsx
+src/components/search/TrainCard.test.tsx` (14 Tests, alle grün), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite `npm
+test` (59 Testdateien, 356 Tests — 354 + 2 neue, alle grün), sowie `npm
+run build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich;
+dieselbe vorbestehende, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** `src/components/search/FlightCard.tsx`,
+`src/components/search/TrainCard.tsx` (Fix),
+`src/components/search/FlightCard.test.tsx`,
+`src/components/search/TrainCard.test.tsx` (je ein neuer Regressionstest),
+`ZEITPLAN.md` (5.4-Eintrag ergänzt) und dieser Log-Eintrag committet — auf
+`it-chef/auto` gepusht, `main` unberührt. Keine Änderung an
+`tasks/tasks-prd-travix-platform.md`: 5.4 ist bereits als `[x]` markiert,
+dies ist eine Verfeinerung derselben bereits abgeschlossenen Aufgabe,
+kein eigener Checkbox-Punkt.
