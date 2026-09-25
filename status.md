@@ -13,15 +13,15 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-23):**
-- IT-Chef Auto hat die Kalender-Monatsnavigation gegen eine Jahr/Monat-Race-Bedingung
-  abgesichert und den Status-Badge für abgeschlossene Reiseentwürfe optisch von
-  "Pausiert" unterschieden; weitere gezielte Bug-Suchen ohne neuen sicheren Fund
-- Support-Chef hat die beiden Reiseentwürfe-Funde vom Vortag als behoben bestätigt
-  und einen neuen Kontrast-Fund beim "Abgeschlossen"-Badge notiert
-- Marketing-Chef: reiner Übersichts-Lauf, keine neuen Tier-4-Kandidaten
+**Seit letztem Update (2026-09-24):**
+- IT-Chef Auto hat einen Anzeigefehler in formatDuration() behoben (leere Dauer
+  statt "—"); weitere Läufe ohne neuen sicheren Fund
+- Marketing-Chef hat den "Details ansehen"-Fund behoben (21. Tier-4-Kandidat);
+  ein Badge-Kontrastfund und ein Kalender-Race wurden bewusst zurückgestellt
+- Support-Chef hat die beiden jüngsten Funde als behoben bestätigt und einen
+  neuen Fund notiert: FlightCard zeigt IATA-Code statt vorhandenem Klarnamen
 - Freigabe-Chef hat alle drei Auto-Branches unabhängig geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-24_
+_Letztes Update: 2026-09-25_
