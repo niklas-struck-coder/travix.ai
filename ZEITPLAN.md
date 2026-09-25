@@ -1338,6 +1338,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   und bereit für die spätere Einbindung. Neuer Regressionstest in
   `TrainCard.test.tsx` (analog zum bestehenden `FlightCard.test.tsx`-Test
   für denselben Zustand).
+  Vom autonomen IT-Chef-Lauf am 25.09. eine per Explore-Agent gefundene und
+  selbst gegen den Code verifizierte Lücke in der (wortgleich duplizierten)
+  `formatDuration()`-Funktion behoben: Anders als die daneben stehende
+  `formatTime()` hatte `formatDuration()` keinen Guard für eine leere/
+  fehlende Dauer — bei `duration: ''` liefert der Regex-`.exec()` `null`,
+  wodurch die Funktion auf `return isoDuration` zurückfiel und schlicht den
+  leeren String zurückgab. Ergebnis: statt des sonst überall verwendeten
+  `—`-Platzhalters stand neben dem Uhr-Icon nichts. Real erreichbar, weil
+  `src/lib/duffel/client.ts:100` bei einer echten Duffel-Antwort ohne
+  `slice.duration` genau `duration: slice.duration ?? ''` liefert. Fix in
+  `FlightCard.tsx` und `TrainCard.tsx` identisch: `if (!isoDuration) return
+  '—'` als erste Zeile von `formatDuration()`, exakt das bereits etablierte
+  Muster aus `formatTime()`. Je ein neuer Regressionstest in
+  `FlightCard.test.tsx`/`TrainCard.test.tsx` (vor dem Fix per `git stash`
+  auf nur diese beiden Quelldateien reproduzierbar rot verifiziert).
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —
@@ -1600,6 +1615,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   unverändert bei `secondary`. Neuer Regressionstest in
   `Reiseentwuerfe.test.tsx` (Badge-Klassen von "Abgeschlossen" und
   "Pausiert" unterscheiden sich, "Abgeschlossen" trägt `text-teal`).
+  Vom autonomen IT-Chef-Lauf am 24.09. einen von `reports/support-chef.md`
+  (24.09., Vorschlag 1) gemeldeten Kontrast-Fund an genau diesem Fix
+  behoben: `text-teal` auf `bg-teal/5` ergibt im hellen Farbschema nur rund
+  2,3:1 Kontrast — unter dem WCAG-AA-Mindestwert von 4,5:1 für normalen
+  Text (im dunklen Schema mit rund 7:1 unproblematisch). Fix: Badge nutzt
+  jetzt `border-teal bg-teal/10 text-navy` statt `border-teal/30 bg-teal/5
+  text-teal` — dasselbe etablierte Muster wie in `Einstellungen.tsx`,
+  `Profil.tsx` und `QuickReplies.tsx` (Teal nur als Rahmen/Hintergrund,
+  Navy für den eigentlichen Text). Denselben, vom Support-Chef als "schon
+  länger bestehend" gemeldeten Fehlton in `TripSummaryCard.tsx` (Zeilen 41
+  und 50, Karten-Label und "Speichern & ansehen"-Button) gleich mit auf
+  `text-navy` umgestellt, da identischer Fehler und identischer Fix.
+  Regressionstest in `Reiseentwuerfe.test.tsx` entsprechend angepasst
+  (prüft jetzt `text-navy` statt `text-teal`).
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,

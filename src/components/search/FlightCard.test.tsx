@@ -60,6 +60,16 @@ describe('FlightCard', () => {
     expect(screen.queryByText('P1DT2H30M')).not.toBeInTheDocument()
   })
 
+  it('shows a placeholder dash instead of a blank duration when it is missing', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, duration: '' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
   it('does not show a stops badge for a direct flight', () => {
     render(<FlightCard offer={baseOffer} />)
 

@@ -38,7 +38,7 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
       <Card className="border-teal/30 bg-teal/5">
         <CardContent className="flex flex-col gap-3 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">Deine Reise bisher</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-navy">Deine Reise bisher</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {rows.map((row) => (
               <div key={row.label} className="flex items-center gap-1.5 text-sm text-foreground">
@@ -47,7 +47,7 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
               </div>
             ))}
           </div>
-          <Button asChild size="sm" variant="ghost" className="w-fit self-end text-teal hover:text-teal">
+          <Button asChild size="sm" variant="ghost" className="w-fit self-end text-navy hover:text-navy">
             <Link to="/buchung">
               Speichern &amp; ansehen
               <ArrowRight className="size-3.5" />

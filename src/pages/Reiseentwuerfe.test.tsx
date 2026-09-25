@@ -98,7 +98,10 @@ describe('Reiseentwuerfe', () => {
     const finalizedBadge = screen.getByText('Abgeschlossen')
 
     expect(finalizedBadge.className).not.toBe(pausedBadge.className)
-    expect(finalizedBadge.className).toMatch(/text-teal/)
+    // text-navy statt text-teal: Teal-Text auf hellem Hintergrund hat nur
+    // ~2,3:1 Kontrast (unter WCAG-AA 4,5:1), Navy auf demselben Teal-Tint ist
+    // gut lesbar (siehe support-chef-Bericht 2026-09-24).
+    expect(finalizedBadge.className).toMatch(/text-navy/)
   })
 
   it('hides the "Planung fortsetzen" button once a draft is finalized', () => {
