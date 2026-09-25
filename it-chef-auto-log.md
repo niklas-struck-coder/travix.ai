@@ -13038,3 +13038,85 @@ Log-Eintrag committet — auf `it-chef/auto` gepusht, `main` unberührt.
 Keine Änderung an `tasks/tasks-prd-travix-platform.md`: 5.4 ist bereits
 als `[x]` markiert, dies ist eine Verfeinerung derselben bereits
 abgeschlossenen Aufgabe, kein eigener Checkbox-Punkt.
+
+## 2026-09-25 (autonomer Tagesmodus-Lauf, fünfter Lauf)
+
+**Branch-Stand:** `it-chef/auto` war exakt `origin/main` (99f0c35) plus
+den eigenen Commit vom vierten Lauf heute (`efda747`) — kein Rückstand,
+kein Konflikt, direkt weitergearbeitet.
+
+**Geprüfte Quellen:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`,
+sowie `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (alle Stand 25.09.) auf neue, noch nicht
+umgesetzte Funde durchsucht. Bereits bekannte, absichtlich offen
+gelassene Punkte (IATA-Code statt Klarname in `FlightCard.tsx` —
+Formatentscheidung + bestehender Test verankert aktuelles Verhalten;
+`formatDuration()`-Edge-Cases — quasi nie erreichbar; `TrainCard`/
+`TrainResults` unverdrahtet — Produktentscheidung; Hilfe-Seite — blockiert
+auf 8.11; `recharts` ungenutzt — Dependency-Änderung ausgeschlossen)
+erneut geprüft, keiner davon hat sich seit dem vierten Lauf heute
+verändert oder ist neu sicher genug geworden.
+
+Den von Marketing-Chef im heutigen Bericht als weiterhin offen
+gemeldeten Kontrast-Punkt ("Abgeschlossen"-Badge, Teal-Text auf hellem
+Grund) im aktuellen Code direkt nachgeprüft:
+`src/pages/Reiseentwuerfe.tsx:244` nutzt bereits `border-teal bg-teal/10
+text-navy`, nicht mehr `text-teal` — der Fix vom Vortag ist vorhanden,
+Support-Chefs heutige Bestätigung ("Kontrast-Punkt ist behoben") stimmt
+mit dem Code überein. Marketing-Chefs Bericht war an dieser Stelle
+veraltet, keine Codeänderung nötig.
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat gezielt alle bisher in
+keinem Bericht namentlich als "gelesen" markierten Seiten und Module
+vollständig gelesen (nicht nur gegrept): u. a. `Buchung.tsx`,
+`Einstellungen.tsx`, `MeineReisen.tsx`, `Home.tsx`, `Profil.tsx`,
+`Urlaubsmodus.tsx`, `Flugsuche.tsx`, `Hotelsuche.tsx`, `EditMode.tsx`,
+`ChecklistPanel.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+`FlightResults.tsx`, `HotelResults.tsx`, `HotelCard.tsx`,
+`NoResultsMessage.tsx`, `checklistRules.ts`, `format.ts`,
+`duffel/client.ts`, `mockConcierge.ts`, `mockAdvisor.ts`, `speech.ts`,
+`useConcierge.ts`, das komplette `useChat.ts` (416 Zeilen),
+`KiChat.tsx`/`QuickReplies.tsx`/`ChatInput.tsx`/`ChatMessage.tsx`/
+`TravixAvatar.tsx`, sowie `App.tsx`/`routes.tsx`/`nav-config.ts` auf
+Konsistenz zwischen Routen und Navigation. Ergebnis: kein isolierter,
+sicherer Bug — keine fehlerhafte Fehlerbehandlung, keine ungeschützten
+undefined/null-Zugriffe, keine Off-by-one-Fehler, keine vertauschten
+Vergleiche, keine Tippfehler in deutschen UI-Texten, keine kaputten
+Links/Imports gefunden. Einzige Beobachtung (kein Fund): `useChat.ts`
+dokumentiert per Kommentar bewusst, dass der Haupt-Chat-Flow für Flüge
+keine echte Suche auslöst (nur der Bearbeiten-Pfad tut das) — eine
+bereits bewusst getroffene, dokumentierte Design-Entscheidung, kein
+Interpretationsspielraum, aber auch kein Bug.
+
+Zusätzlich selbst geprüft: Testabdeckung ist für alle bisher als
+ungetestet aufgefallenen Kandidaten inzwischen vorhanden — `AppShell.tsx`,
+`PageTransition.tsx`, `MobileNav.tsx`, `Sidebar.tsx`, `PageHeader.tsx`
+(alle in `src/components/layout/`) sowie alle Module in `src/lib/trip/`,
+`src/lib/ai/`, `src/lib/duffel/` und `format.ts` haben je eine eigene
+Testdatei. Die verbleibenden ungetesteten Dateien sind reine
+Typdefinitionen (`src/types/*.ts`), unveränderte shadcn-Basiskomponenten
+ohne eigene Logik (`button.tsx`, `card.tsx`, `badge.tsx`, `input.tsx`,
+`label.tsx`, `progress.tsx`, `tabs.tsx`, `select.tsx` — bereits in
+früheren Läufen als solche bestätigt) sowie die trivialen
+Einstiegspunkte `App.tsx`/`main.tsx`/`design-tokens.ts` — kein sinnvoller
+Testabdeckungs-Kandidat mehr übrig.
+
+**Ergebnis:** Kein Bug und keine offene, noch nicht umgesetzte
+Support-/Marketing-Chef-Meldung gefunden, die alle vier
+Sicherheitskriterien erfüllt. Nach fünf Läufen allein heute ist der
+Bestand an eigenständig auffindbaren, sicheren Punkten im aktuellen
+Code-Stand erkennbar ausgeschöpft — die verbleibenden bekannten Funde
+sind bewusst blockiert (Formatentscheidung, Produktentscheidung oder
+Abhängigkeit fehlender Inhalte), nicht vergessen.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite
+`npm test` (59 Testdateien, 358 Tests, alle grün — unverändert), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
