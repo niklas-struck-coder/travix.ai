@@ -1,10 +1,119 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-24)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-25)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-25: ein neuer Tier-4-Kandidat (fehlende Angaben im "Details ansehen"-Dialog jetzt tatsächlich behoben), zwei Commits bewusst ausgeschlossen (Badge-Kontrastfix noch offen, Kalender-Race ohne Ehrlichkeits-Erzählung), Kandidatentopf bei vier, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a11f3e1`, 24.09.) war laut
+`freigabe-chef-log.md` ("2026-09-24 Tages-Check") bereits vollständig in
+`main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`b92d00e`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 24.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile
+1475, weiterhin `[ ]`) oder diesem Dokument seit dem 24.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über fünf Wochen.
+
+**`git log 55a36b8..origin/main` zeigt die seit dem letzten Lauf neu
+hinzugekommenen Commits** (Basislinie bewusst `55a36b8`, der `origin/main`-
+Stand, auf dem der 24.09.-Lauf seine Prüfung bereits abgeschlossen hatte —
+so wird der eigene vorherige Auto-Lauf-Commit `a11f3e1` nicht doppelt
+gezählt). Fünf davon mit echter Produkt-Codeänderung, jeder einzeln per
+`git show`/`git show --stat` geprüft:
+- `ce62376` (23.09., vierter IT-Chef-Lauf, damals noch nicht in `main`
+  gemergt, jetzt über `4f3f50f` angekommen): genau der am 24.09. hier
+  bereits vorgemerkte, aber noch offene Support-Chef-Fund ist jetzt
+  behoben — der "Details ansehen"-Dialog für abgeschlossene Reiseentwürfe
+  blendete fehlendes Transportmittel/Datum/Budget/Unterkunft bisher
+  komplett aus (`.filter(Boolean)`), statt sie wie die Aktivitäten-Zeile
+  im selben Dialog explizit als "nicht angegeben" zu zeigen. Fix
+  übernimmt denselben, bereits in `Buchung.tsx` etablierten Wortlaut.
+  **Einundzwanzigster Tier-4-Kandidat** — exakt dieselbe Fundgruppe wie
+  die bisherigen "echte statt verschwiegene Lücke"-Fixes (Speicherfehler-
+  Hinweis, Suchfehler-Anzeige, Aktivitäten-Leerzustand): eine fehlende
+  Angabe wird ehrlich als fehlend markiert statt kommentarlos zu
+  verschwinden.
+- `647d57f` (23.09., fünfter IT-Chef-Lauf): "Abgeschlossen" bekommt einen
+  eigenen Teal-Akzent statt derselben grauen Badge-Variante wie
+  "Pausiert". **Bewusst nicht** als eigener Tier-4-Kandidat aufgenommen —
+  und zwar aus einem anderen Grund als die sonst übliche
+  Barrierefreiheits-Abgrenzung: `reports/support-chef.md` (24.09.) hat an
+  genau dieser neuen Badge-Farbe bereits einen offenen WCAG-Kontrastfund
+  (~2,3:1 im hellen Modus statt der geforderten 4,5:1) gemeldet, den
+  IT-Chef noch nicht behoben hat. Ein Fix, der selbst noch einen
+  ungelösten Lesbarkeitsmangel trägt, ist kein sauberer Baustein für ein
+  Format, das gerade Sorgfalt/Ehrlichkeit erzählt — wird erst zum
+  Kandidaten, sobald der Kontrast nachgezogen ist (gleiche Selbst-
+  beschränkung wie beim "Details ansehen"-Fund gestern).
+- `ead06ad` (24.09., weiterer IT-Chef-Lauf): Die Kalender-
+  Monatsnavigation berechnete Jahr/Monat bisher über zwei getrennte
+  `setState`-Updater, von denen einer bei zwei synchronen Klicks im
+  selben Tick am Dezember/Januar-Übergang ein falsches Jahr hätte liefern
+  können — jetzt atomar über eine gemeinsame Hilfsfunktion. **Bewusst
+  nicht** aufgenommen: ein seltener Doppelklick-Randfall ohne falsche
+  Aussage gegenüber der Nutzerin, dieselbe Ausschlussgruppe wie die
+  früher ausgeschlossenen reinen Eingabevalidierungs-/Race-Fixes
+  (`clampGuestCount`/`clampPassengerCount`, 18.09.).
+- `8f7894c`, `706fd97` (24.09., zwei weitere IT-Chef-Läufe): laut
+  Commit-Beschreibung "ohne sicher fixbaren Fund" — per `git show --stat`
+  bestätigt, dass nur `it-chef-auto-log.md` geändert wurde.
+
+Die übrigen Commits im Bereich (zwei Freigabe-Chef-Logs, ein IT-Chef-
+Bericht ohne neuen Fund, ein Daily-Status-Update, der interaktive
+Marketing-Chef-Bericht sowie der Support-Chef-Bericht vom 24.09. — beide
+bereits oben inhaltlich verarbeitet —, ein Support-Chef-Auto-Log-Eintrag
+und mehrere Merge-Commits der drei Auto-Branches sowie der eigene
+vorherige Auto-Lauf-Commit `a11f3e1`) enthalten keine weitere, für dieses
+Format relevante Codeänderung — jeweils per `git show --stat` geprüft
+(ausschließlich `reports/*.md`, `status.md`, `*-log.md`, `ZEITPLAN.md`
+betroffen).
+
+**Damit wächst der Kandidatentopf von drei (Stand 24.09.) auf vier** —
+weiterhin klar unter der Achter-Schwelle, die Ausgabe 2/3/4 ausgelöst hat,
+und weiterhin unter der Menge (vier war selbst am 06.09. noch "nicht
+ausreichend", hier gerade erst erreicht). Keine fünfte Mini-Changelog-
+Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung, kein
+Live-Vorgang — nichts gepostet, versendet oder verändert. Keine
+erfundenen Kennzahlen: der neue Kandidat stammt aus einem einzeln per
+`git show` verifizierten, bereits in `main` gemergten Commit; beide
+Ausschlüsse sind transparent mit eigener, nachvollziehbarer Begründung
+versehen statt stillschweigend übergangen. Keine offene Positionierungs-
+Grundsatzfrage: dieser Lauf wendet nur die bereits etablierte "echte
+statt verschwiegene Lücke"-Abgrenzung an, trifft keine neue inhaltliche
+Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/fünfte Mini-Changelog-Ausgabe —
+  Kandidatentopf steht bei vier, klar unter dem etablierten Maßstab
+  (acht).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 25.09. (Prüfung
+  der vier Fragen, Einordnung eines neuen Commits als einundzwanzigster
+  Tier-4-Kandidat, zwei Commits bewusst mit eigener Begründung
+  ausgeschlossen, Tier-4-Abschnitt und Kandidatentopf-Stand aktualisiert),
+  "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf
+  25.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-24: keine neuen Tier-4-Kandidaten, ein neuer aber noch unfertiger Support-Chef-Fund (fehlende Angaben im "Details ansehen"-Dialog), alle vier Fragen weiterhin offen, reiner Übersichts-Lauf
 
@@ -2220,7 +2329,25 @@ Anfang-bis-Ende-Weg im Code.
    `2f110f7` und `538bb25`). **Kandidatentopf damit bei neun (Kandidaten
    9-17, davon einer mit Vorbehalt) — exakt über der Achter-Schwelle von
    Ausgabe 2/3, alle neun seit dem 17.09. in Ausgabe 4 verarbeitet.** Der
-   Kandidatentopf ist damit wieder leer.
+   Kandidatentopf ist damit wieder leer. Seit dem 20./21.09. ein weiterer
+   Kandidat (siehe Update 2026-09-21 oben): der "Abschließen"-Button auf
+   `/reiseentwuerfe` bekommt jetzt dieselbe Bestätigung wie "Löschen"
+   (**achtzehnter Kandidat**). Seit dem 22./23.09. zwei weitere
+   Kandidaten (siehe Update 2026-09-23 oben): der "Planung
+   fortsetzen"-Button verschwindet jetzt korrekt bei abgeschlossenen
+   Entwürfen (**neunzehnter Kandidat**), und ein neuer "Details
+   ansehen"-Button macht eine sonst aktionslose, abgeschlossene Karte
+   wieder sinnvoll nutzbar (**zwanzigster Kandidat**). Seit dem 23./24.09.
+   ein weiterer Kandidat (siehe Update 2026-09-25 oben): genau der bei
+   Kandidat 20 neu entstandene Reibungspunkt ist jetzt behoben — fehlende
+   Angaben im "Details ansehen"-Dialog erscheinen als "nicht angegeben"
+   statt kommentarlos zu verschwinden (**einundzwanzigster Kandidat**).
+   Mehrere im selben Zeitraum geprüfte, bewusst ausgeschlossene Commits
+   (jeweils role="alert"/role="status"-Ergänzungen, ein Kalender-Race-Fix
+   und — noch offen, weil der Kontrastfund selbst ungefixt ist — die neue
+   Teal-Badge-Farbe für "Abgeschlossen") siehe die jeweiligen
+   Update-Einträge oben. **Kandidatentopf damit bei vier** (Kandidaten
+   18-21) — weiterhin unter der Achter-Schwelle von Ausgabe 2/3/4.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -2396,4 +2523,18 @@ sobald genau dieser Wackler beseitigt ist, auch wenn der Kandidatentopf
 irgendwann die Achter-Schwelle erreicht. Der nächste Lauf sollte
 weiterhin zuerst die vier offenen Fragen gegenprüfen, prüfen ob der neue
 Support-Chef-Fund inzwischen behoben wurde, und den Kandidatentopf
-(Stand 24.09: drei) gegen denselben 06.09.-Maßstab weiterführen.
+(Stand 24.09: drei) gegen denselben 06.09.-Maßstab weiterführen. Stand
+25.09. ist genau dieser vorgemerkte Fund umgesetzt worden (`ce62376`,
+"Details ansehen" zeigt fehlende Angaben jetzt als "nicht angegeben",
+siehe Update 2026-09-25 oben) — der Topf steht damit bei vier, weiterhin
+klar unter der Achter-Schwelle und auch unter der Menge (vier ist hier
+gerade erst erreicht, keine "Übererfüllung" wie am 06.09.). Am selben Tag
+kam allerdings ein neuer, noch offener Wackler dazu: Support-Chef hat bei
+der parallel gelandeten Teal-Badge-Unterscheidung (`647d57f`) einen WCAG-
+Kontrastfund gemeldet, den IT-Chef noch nicht behoben hat — laut dem
+Live-Marketing-Chef-Bericht vom 24.09. soll die gesamte Reiseentwürfe-
+Konsistenz-Story erst raus, sobald dieser Kontrast behoben ist. Der
+nächste Lauf sollte weiterhin zuerst die vier offenen Fragen gegenprüfen,
+prüfen ob der Kontrastfund inzwischen behoben wurde (dann würde `647d57f`
+nachträglich zum Kandidaten), und den Kandidatentopf (Stand 25.09.: vier)
+gegen denselben 06.09.-Maßstab weiterführen.

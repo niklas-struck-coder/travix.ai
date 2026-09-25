@@ -4,6 +4,59 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-25
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a11f3e1`, 24.09.) war laut
+`freigabe-chef-log.md` ("2026-09-24 Tages-Check") bereits vollständig in
+`main` gemergt (Merge-Commit `652184e`) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Neu von aktuellem `origin/main`
+(`b92d00e`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret wieder nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf ergänzt.
+Kein neues eigenständiges Content-Stück, keine fünfte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` seit dem 24.09. beantwortet wurde:
+keine Notiz in `status.md` (Stand weiterhin 24.09.), `ZEITPLAN.md` (6.2
+weiterhin `[ ]`) oder diesem Dokument, keine neuen Kanal-Links im Repo,
+kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben
+offen — jetzt seit über fünf Wochen. Danach `git log 55a36b8..origin/main`
+geprüft (Basislinie: der `origin/main`-Stand, auf dem der 24.09.-Lauf
+seine eigene Prüfung bereits abgeschlossen hatte): fünf Commits mit
+echter Produkt-Codeänderung, jeder einzeln per `git show` verifiziert.
+Einer davon behebt genau den am 24.09. hier bereits vorgemerkten, aber
+noch offenen Support-Chef-Fund — der "Details ansehen"-Dialog für
+abgeschlossene Reiseentwürfe zeigt fehlende Angaben (Transportmittel,
+Datum, Budget, Unterkunft) jetzt als "nicht angegeben" statt sie
+kommentarlos auszublenden (`ce62376`). Das ist der 21. Tier-4-Kandidat für
+den Mini-Changelog, Kandidatentopf wächst damit von drei auf vier —
+weiterhin klar unter der Achter-Schwelle, die frühere Ausgaben ausgelöst
+hat. Zwei weitere Commits bewusst nicht aufgenommen: die neue, optisch
+von "Pausiert" unterscheidbare Teal-Badge für "Abgeschlossen" (`647d57f`)
+trägt laut Support-Chef-Bericht vom 24.09. selbst noch einen offenen
+WCAG-Kontrastmangel (~2,3:1 statt 4,5:1 im hellen Modus) — wird erst zum
+Kandidaten, sobald das behoben ist; eine Kalender-Monatsnavigations-
+Absicherung gegen einen seltenen Doppelklick-Race (`ead06ad`) fällt in
+die bereits etablierte Ausschlussgruppe reiner Robustheits-/
+Validierungs-Fixes ohne Ehrlichkeits-/Vertrauens-Erzählung. Details siehe
+`marketing/freigabe-uebersicht.md`, Update 2026-09-25.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen (der neue Kandidat stammt aus
+einem einzeln per `git show` verifizierten, bereits gemergten Commit).
+Keine offene Positionierungs-Grundsatzfrage: dieser Lauf trifft keine
+neue inhaltliche Entscheidung, sondern wendet nur die bereits etablierte
+"echte statt verschwiegene Lücke"-Abgrenzung an. "Landingpage/Warteliste
+live" (Sprint 2), "Community/Warteliste aufbauen" (Sprint 4) sowie
+Testkampagnen/Launch-Kampagne (Sprint 6/7) bleiben bewusst unangetastet —
+das sind Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden, nicht
+sicher genug für den autonomen Modus.
+
 ## 2026-09-24
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
