@@ -3131,3 +3131,109 @@ Verständnisverlust, und `Buchung.tsx` löst dieselbe Information mit
 einer eigenen Badge ohnehin anders. Der reine Bugfix zur
 Kalender-Monatsnavigation (`ead06ad`) wurde mangels sichtbarer
 UI-Änderung nicht geprüft.
+
+---
+
+## 2026-09-25 — Flug-Ergebniskarte (`FlightCard.tsx`)
+
+### Kontext
+Ausgewählt, weil dies laut `it-chef-auto-log.md` der zuletzt bearbeitete
+Bereich ist: Auf `it-chef/auto` (noch nicht nach `main` gemergt) wurde
+heute Nacht `e96c200` ("formatDuration() zeigte leere Dauer statt '—'
+an") in `FlightCard.tsx`/`TrainCard.tsx` gebaut, direkt im Anschluss an
+den gestern (24.09.) hier gemeldeten und über `34a3c45` behobenen
+Teal-Kontrast-Fund. Zwei weitere IT-Chef-Läufe danach (`b183cd6`,
+`fa2a0b5`) fanden keinen neuen sicheren Punkt mehr — dieser Lauf geht
+deshalb dieselbe, heute zuletzt angefasste Komponente durch, statt
+wahllos eine alte Seite erneut zu prüfen.
+
+Geprüft:
+- `src/components/search/FlightCard.tsx`
+- `src/components/search/TrainCard.tsx` (zum Musterabgleich)
+- `src/types/duffel.ts`, `src/lib/duffel/client.ts` (zum Abgleich, ob
+  die verglichenen Felder wirklich mit echten Duffel-Daten befüllt sind)
+- `src/pages/Reiseentwuerfe.tsx:236-247`,
+  `src/components/chat/TripSummaryCard.tsx:38-50` (zur Bestätigung des
+  gestrigen Kontrast-Funds)
+
+### Zuerst bestätigt: beide jüngsten Funde tatsächlich behoben
+- `src/components/search/FlightCard.tsx:13`/`TrainCard.tsx:13`: Beide
+  `formatDuration()`-Funktionen haben jetzt denselben Leer-Guard
+  (`if (!isoDuration) return '—'`) wie das daneben stehende
+  `formatTime()` — eine Duffel-Antwort ohne `slice.duration` zeigt jetzt
+  "—" statt einer leeren Textstelle neben dem Uhr-Icon.
+- `src/pages/Reiseentwuerfe.tsx:244`/`TripSummaryCard.tsx:38,47`: Beide
+  Stellen nutzen jetzt `border-teal bg-teal/10 text-navy` statt
+  `text-teal` auf hellem Grund — der gestern gemessene ~2,3:1-Kontrast
+  ist damit behoben, Text liegt jetzt auf `text-navy`
+  (dunkel/kontrastreich) statt auf reinem Teal.
+
+Beide Fixes mechanisch korrekt und wortgleich mit den vorgeschlagenen
+Mustern übernommen — kein Regressionsrisiko erkennbar.
+
+### Reibungspunkte
+
+**1. Flugkarte zeigt nur den 3-Buchstaben-Flughafencode, obwohl der
+Klarname bereits in den Daten steckt**
+
+`src/components/search/FlightCard.tsx:43,47`: Ab-/Anflug werden als
+`{formatTime(...)} {slice.originIata}` bzw. `{slice.destinationIata}`
+angezeigt — also z. B. "08:00 BER" statt "08:00 Berlin". Dabei liefert
+`src/lib/duffel/client.ts:96-99` (`mapSlice`) bei jeder echten
+Duffel-Antwort bereits `originName`/`destinationName` mit (aus
+`slice.origin?.name`/`slice.destination?.name`), und
+`src/types/duffel.ts:21-28` (`FlightSlice`) führt diese Felder explizit
+— sie werden im Code schlicht nie gelesen. Das eigene
+`FlightCard.test.tsx:11-14` bestätigt das: Die Testdaten setzen bewusst
+`originName: 'Berlin'`/`destinationName: 'Lissabon'`, geprüft wird aber
+nur auf den IATA-Code. Die strukturell identische
+`TrainCard.tsx:43,47` macht es bereits richtig — sie zeigt
+`offer.originName`/`offer.destinationName` (Klarnamen) an, nicht den
+Code. Wer den IATA-Code seines Ziels nicht auswendig kennt (derselbe
+Nutzer:innen-Typ, der schon beim Eingabefeld in `FlightWizard.tsx`
+Hilfe braucht, siehe Eintrag vom 10.08.), muss auf der Ergebniskarte
+selbst raten, ob "LIS" wirklich Lissabon ist.
+
+*Vorschlag:* `slice.originName`/`slice.destinationName` zusätzlich oder
+statt des reinen IATA-Codes anzeigen, analog zum bereits etablierten
+Muster in `TrainCard.tsx` — z. B. "08:00 Berlin (BER)" oder Klarname
+groß mit IATA-Code klein daneben. Keine neue Design-Entscheidung, nur
+Übernahme des im Nachbar-Bauteil bereits vorhandenen Musters auf bereits
+vorhandene, aber ungenutzte Daten.
+
+**2. Bei einer Hin- und Rückflug-Suche (Standard-Trip-Typ) sind beide
+Flugabschnitte auf der Karte weder beschriftet noch mit Datum versehen**
+
+`src/components/search/FlightCard.tsx:32-56`: `offer.slices.map(...)`
+rendert für jeden Abschnitt nur `{formatTime(...)}` — reine Uhrzeit
+(`toLocaleTimeString`), das Datum aus dem ISO-Zeitstempel
+(`departingAt`/`arrivingAt`) wird dabei verworfen. `FlightWizard.tsx:37`
+setzt `roundtrip` als Standard-Reiseart, ein Angebot hat dann laut
+`mapOffer()` (`client.ts:102-109`) zwei Slices in der von Duffel
+gelieferten Reihenfolge (Hin-, dann Rückflug) — auf der Karte
+erscheinen beide Abschnitte untereinander als zwei optisch identische
+Zeilen ("08:00 BER → 11:15 LIS" / "18:00 LIS → 21:00 BER"), nur durch
+eine dünne Trennlinie (`border-b`, Zeile 35) getrennt, ohne jede
+Beschriftung wie "Hinflug"/"Rückflug" und ohne sichtbares Datum. Anders
+als beim Ausfüllen des Formulars (wo Hin- und Rückflugdatum in
+getrennten, beschrifteten Feldern stehen) muss man auf der
+Ergebniskarte selbst aus der Reihenfolge schließen, welcher Abschnitt
+der Hin- und welcher der Rückflug ist — und weiß dabei nicht, an
+welchem der beiden gebuchten Tage welcher Flug tatsächlich stattfindet.
+
+*Vorschlag:* Pro Slice ein kurzes Label ("Hinflug"/"Rückflug" bei
+mehreren Slices) sowie das Datum (z. B. `toLocaleDateString('de-DE')`
+zusätzlich zur Uhrzeit) ergänzen — die Information steckt bereits in
+`departingAt`/`arrivingAt`, es wird nur die Zeitkomponente daraus
+verwendet.
+
+### Nicht geprüft
+`TrainCard.tsx`/`TrainResults.tsx` sind laut Grep über `src/` weiterhin
+in keine Seite eingebunden (5.7 unverändert offen, wie zuletzt am 08.09.
+festgestellt) — sie dienten hier nur als Musterabgleich für Fund 1,
+keine eigenständige Neuprüfung. Ob unterschiedliche Segmente derselben
+Slice (Codeshare/Umsteigeverbindung) unterschiedliche Fluggesellschaften
+zeigen könnten, obwohl `FlightCard.tsx:38` nur `firstSegment?.carrierName`
+anzeigt, wurde nicht vertieft untersucht — dafür gibt es in den
+aktuellen Test-/Demodaten keinen mehrsegmentigen Fall mit
+unterschiedlichen Carriern, um das am echten Verhalten zu verifizieren.
