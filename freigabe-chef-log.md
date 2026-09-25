@@ -4607,3 +4607,60 @@ Zeitfenster an derselben Restriktion scheitert, obwohl der Tages-Check
 denselben Merge an anderen Tagen anstandslos durchführen konnte — evtl.
 lohnt sich eine Anpassung, wann/wie dieser Skill läuft, falls das
 Muster so bleibt.
+
+## 2026-09-25 Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** `it-chef/auto`, `marketing-chef/auto`,
+`support-chef/auto` — alle drei hatten neue Commits gegenüber `main`.
+
+### `it-chef/auto`
+Fünf Commits seit `main` (zwei mit echter Code-Änderung, drei
+"kein neuer sicherer Punkt gefunden"): Teal/Navy-Kontrast-Nachbesserung
+bei "Abgeschlossen"-Badge (`TripSummaryCard.tsx`, `Reiseentwuerfe.tsx`)
+sowie `formatDuration()`-Fix (`FlightCard.tsx`, `TrainCard.tsx` — leere
+Dauer zeigt jetzt "—" statt nichts). Beide Fixes decken sich mit
+gemeldeten Support-Chef-Funden vom 24.09., keine Auth-/Zahlungs-/
+Rechtstexte betroffen, UI-Fix folgt dem in `Einstellungen.tsx`/
+`Profil.tsx`/`QuickReplies.tsx` bereits etablierten Muster (Teal nur als
+Rahmen/Hintergrund, Navy für Text).
+
+**Unabhängig selbst verifiziert** (nicht nur das Log geglaubt): in
+frischem Worktree `npm install`, dann `npx tsc -b` (0 Fehler),
+`npx eslint .` (0 Fehler, nur die vier vorbestehenden
+Fast-Refresh-Warnungen), `npx vitest run` (59 Testdateien, 356 Tests,
+alle grün). Scope passt exakt zum `it-chef-auto-log.md`-Eintrag, kein
+Scope-Creep.
+
+→ **Gemergt nach `main`** (Merge-Commit, kein Konflikt bei
+`freigabe-chef-log.md` trotz divergierendem Stand).
+
+### `marketing-chef/auto`
+Ein Commit: Update in `marketing/freigabe-uebersicht.md` +
+`marketing-chef-auto-log.md` — neuer (21.) Tier-4-Kandidat aus einem
+einzeln per `git show` verifizierten, bereits gemergten Commit
+("Details ansehen"-Dialog zeigt fehlende Angaben jetzt als "nicht
+angegeben"), zwei andere Commits bewusst mit eigener Begründung
+ausgeschlossen (Badge-Kontrast damals noch offen, Kalender-Race ohne
+Ehrlichkeits-Erzählung). Reine Markdown-Ergänzung, keine erfundenen
+Kennzahlen, kein Hinweis auf tatsächliches Posten/Versenden, Text
+vollständig und kohärent.
+
+→ **Gemergt nach `main`**.
+
+### `support-chef/auto`
+Ein Commit: neuer Eintrag in `support-chef-auto-log.md` zur
+Flug-Ergebniskarte. Stichprobenartig gegen den Code geprüft: Fund 1
+(`FlightCard.tsx` zeigt nur `originIata`/`destinationIata` statt der
+bereits vorhandenen `originName`/`destinationName`, obwohl
+`TrainCard.tsx` denselben Klarnamen bereits anzeigt) stimmt exakt mit
+dem aktuellen Code überein (Datei/Zeilen nachvollzogen). Die im Eintrag
+behauptete "beide jüngsten Funde bereits behoben" (Duration-Platzhalter,
+Teal-Kontrast) stimmt ebenfalls — das ist derselbe `it-chef/auto`-Fix,
+der in diesem Lauf gerade gemergt wurde. Reine Analyse ohne
+Code-Änderung, kein erfundener Punkt erkennbar.
+
+→ **Gemergt nach `main`** (niedrigstes Risiko der drei).
+
+**Ergebnis:** Alle drei Branches bestanden die Prüfung und wurden
+gemergt (`main`: `b92d00e` → `d2b1936`). Keine offenen Probleme, keine
+Info an Ni nötig.
