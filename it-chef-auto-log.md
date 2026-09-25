@@ -12847,3 +12847,72 @@ dieselbe vorbestehende, unveränderte Chunk-Size-Warnung).
 `tasks/tasks-prd-travix-platform.md`: 5.4 ist bereits als `[x]` markiert,
 dies ist eine Verfeinerung derselben bereits abgeschlossenen Aufgabe,
 kein eigener Checkbox-Punkt.
+
+## 2026-09-25 (autonomer Tagesmodus-Lauf, weiterer Lauf)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` + drei bereits gepushte,
+noch nicht von Freigabe-Chef gemergte Commits (Teal-Kontrast-Fix vom
+24.09., Lauf ohne Code-Änderung vom 24.09., sowie der `formatDuration()`-
+Fix vom heutigen ersten Lauf). `git log origin/main..HEAD` zeigt genau
+diese drei Commits, `git log HEAD..origin/main` ist leer — kein Merge von
+`main` nötig.
+
+**Vorprüfung bestehender Vorschläge:** `reports/it-chef.md` und
+`reports/support-chef.md` (beide zuletzt 24.09.) enthalten keinen neuen,
+ungedeckten Punkt — Gegenprobe im Code bestätigt: `src/lib/duffel/
+client.ts` übersetzt Duffel-Fehler bereits in freundlichen deutschen
+Text, das "Abgeschlossen"-Badge nutzt bereits `text-navy` statt
+`text-teal`. `tasks/tasks-prd-travix-platform.md`: alle verbleibenden
+offenen Checkbox-Punkte sind explizit auf die offene Base44-/Backend-
+Entscheidung, fehlende KI-Zugangsdaten, eine offene Produktentscheidung
+(Zahlungsfluss, Loyalty-Regeln) oder fehlenden, von Ni noch nicht
+gelieferten FAQ-Inhalt blockiert — kein neuer autonom sicherer Punkt.
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat gezielt Dateien gelesen, die
+in den bisherigen Läufen (inkl. dem heutigen ersten) noch nicht einzeln
+geprüft wurden: `HotelCard.tsx`, `HotelResults.tsx`, `TrainResults.tsx`,
+`FlightResults.tsx`, `NoResultsMessage.tsx`, `HotelWizard.tsx` (+ Test),
+`Hotelsuche.tsx`, `types/stays.ts`, `types/duffel.ts`, `types/trains.ts`,
+`format.ts`, `duffel/client.ts`, `ChatInput.tsx`, `select.tsx`,
+`MeineReisen.tsx`, `FlightWizard.tsx`. Alle defensiv geschrieben (Guards,
+Optional Chaining, konsistente selected/disabled-Muster zwischen Flight-/
+Train-/HotelCard).
+
+Zwei Beobachtungen bewusst **nicht** umgesetzt:
+1. `HotelWizard.tsx`: Check-out-Datum erlaubt im nativen `min` zwar
+   denselben Tag wie Check-in, die JS-Validierung verlangt aber strikt
+   danach liegend, ohne Inline-Fehlermeldung (anders als FlightWizards
+   "Start und Ziel dürfen nicht gleich sein" für den analogen Fall) — real
+   ein UX-Fund, aber weder genauer Wortlaut noch ob stattdessen `min` per
+   Datumsrechnung angepasst werden soll ist irgendwo festgelegt. Verstößt
+   gegen Kriterium 3 (keine Interpretation ohne Vorgabe). Punkt für einen
+   künftigen Lauf mit Ni-Vorgabe oder für `reports/it-chef.md`.
+2. `MeineReisen.tsx:20`: Die Demo-Reise "Lissabon" (Datum "15.–22.
+   September 2026") ist fest auf `status: 'upcoming'` gesetzt, liegt aber
+   nach heutigem Datum (25.09.2026) bereits in der Vergangenheit. Gleiches
+   Muster wie der in einem früheren Lauf bereits ausdrücklich als kein Bug
+   eingestufte Kyoto-2027-vs-2026-Fall in `Dashboard.tsx` (bewusst
+   getrennte Demo-Datensätze). Ein echter Fix würde entweder neue Daten
+   wählen oder Status-aus-Datum-Logik über mehrere duplizierte
+   Demo-Datensätze (`Kalender.tsx`, `Dashboard.tsx` nutzen denselben
+   String) hinweg einführen — eine redaktionelle/architektonische
+   Entscheidung, kein sauber abgegrenzter Fix. Verstößt gegen Kriterium 3.
+
+**Ergebnis:** Kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`
+(Abhängigkeiten waren im Cloud-Checkout wie an den Vortagen nicht
+vorinstalliert), danach `npx tsc -b` (kein Typfehler), `npm run lint` (0
+Fehler, dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 356
+Tests, alle grün — unverändert gegenüber dem heutigen ersten Lauf, da
+keine Tests hinzugefügt wurden), sowie `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich; die bestehende
+Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
