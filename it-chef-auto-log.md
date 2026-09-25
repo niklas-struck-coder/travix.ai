@@ -12984,3 +12984,57 @@ erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-25 (autonomer Tagesmodus-Lauf, vierter Lauf)
+
+**Branch-Stand:** `it-chef/auto` lag hinter `origin/main` zurück (die
+drei vorherigen `it-chef/auto`-Commits waren bereits von Freigabe-Chef
+nach `main` gemergt, plus neue Marketing-/Support-Chef-Commits dort).
+`git merge-base origin/it-chef/auto origin/main` bestätigte, dass
+`it-chef/auto` ein reiner Vorfahre von `main` ist — Fast-Forward auf
+`origin/main` (99f0c35), kein Konflikt, kein Merge-Commit nötig.
+
+**Ausgewählter Punkt:** Fund 2 aus `reports/support-chef.md` (25.09.):
+Bei einer Hin- und Rückflug-Suche zeigte `FlightCard.tsx` beide
+Flugabschnitte optisch identisch — kein Label ("Hinflug"/"Rückflug"),
+kein Datum, nur die Reihenfolge und eine dünne Trennlinie unterschieden
+sie.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung: das
+Label übernimmt wortgleich den in `FlightWizard.tsx` (Zeilen 74-122,
+Tabs "Hin- und Rückflug"/"Nur Hinflug", Feldbeschriftungen
+"Hinflug"/"Rückflug") bereits etablierten Wortlaut für exakt dieselben
+beiden Richtungen — keine neue Formatentscheidung nötig, anders als der
+im selben Bericht gemeldete erste Fund (IATA-Code vs. Klarname), der
+mangels etablierter Vorgabe und wegen eines das aktuelle Verhalten
+verankernden Tests bewusst nicht angefasst wurde. Klar beschrieben (der
+Bericht nennt Ursache, betroffene Datei/Zeilen und konkreten
+Lösungsvorschlag). Objektiv prüfbar über neue Regressionstests.
+
+**Umsetzung:** `FlightCard.tsx`: neue `formatDate()`-Hilfsfunktion
+(analog zur direkt daneben stehenden `formatTime()`, gleiches
+`de-DE`-Locale-Muster, gleicher `—`-Fallback bei leerem String). Jeder
+Flugabschnitt zeigt jetzt sein Abflugdatum rechtsbündig in der
+Carrier-Zeile. Zusätzlich, nur wenn `offer.slices.length > 1` (Hin- und
+Rückflug), ein Label vor dem Fluggesellschaftsnamen: `index === 0 ?
+'Hinflug' : 'Rückflug'` — bei einer einfachen Flugsuche (ein Abschnitt)
+bleibt die Zeile wie bisher ohne Label, da "Hinflug" dort nichts zu
+unterscheiden gäbe. Keine Änderung an `formatTime()`/`formatDuration()`
+oder am bereits verankerten IATA-Code-Verhalten (Fund 1 bleibt offen,
+siehe oben).
+
+**Geprüft:** `npm ci`, danach `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 358
+Tests — 356 + 2 neue, alle grün), sowie `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich; dieselbe vorbestehende,
+unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** `src/components/search/FlightCard.tsx` (Fix),
+`src/components/search/FlightCard.test.tsx` (zwei neue
+Regressionstests), `ZEITPLAN.md` (5.4-Eintrag ergänzt) und dieser
+Log-Eintrag committet — auf `it-chef/auto` gepusht, `main` unberührt.
+Keine Änderung an `tasks/tasks-prd-travix-platform.md`: 5.4 ist bereits
+als `[x]` markiert, dies ist eine Verfeinerung derselben bereits
+abgeschlossenen Aufgabe, kein eigener Checkbox-Punkt.

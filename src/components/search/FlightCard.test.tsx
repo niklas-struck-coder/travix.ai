@@ -109,6 +109,38 @@ describe('FlightCard', () => {
     expect(screen.getByText('2 Zwischenstopps')).toBeInTheDocument()
   })
 
+  it('shows the departure date but no Hinflug/Rückflug label for a one-way flight', () => {
+    render(<FlightCard offer={baseOffer} />)
+
+    expect(screen.getByText('10.09.')).toBeInTheDocument()
+    expect(screen.queryByText('Hinflug')).not.toBeInTheDocument()
+    expect(screen.queryByText('Rückflug')).not.toBeInTheDocument()
+  })
+
+  it('labels outbound and return slices and shows each date for a round trip', () => {
+    const returnSlice = {
+      ...directSlice,
+      originIata: 'LIS',
+      originName: 'Lissabon',
+      destinationIata: 'BER',
+      destinationName: 'Berlin',
+      segments: [
+        {
+          ...directSlice.segments[0],
+          departingAt: '2026-09-17T14:00:00Z',
+          arrivingAt: '2026-09-17T17:15:00Z',
+        },
+      ],
+    }
+    const offer: FlightOffer = { ...baseOffer, slices: [directSlice, returnSlice] }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('Hinflug')).toBeInTheDocument()
+    expect(screen.getByText('Rückflug')).toBeInTheDocument()
+    expect(screen.getByText('10.09.')).toBeInTheDocument()
+    expect(screen.getByText('17.09.')).toBeInTheDocument()
+  })
+
   it('does not render a select button when onSelect is not provided', () => {
     render(<FlightCard offer={baseOffer} />)
 

@@ -10,6 +10,11 @@ function formatTime(isoString: string) {
   return new Date(isoString).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 }
 
+function formatDate(isoString: string) {
+  if (!isoString) return '—'
+  return new Date(isoString).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+}
+
 function formatDuration(isoDuration: string) {
   if (!isoDuration) return '—'
   const match = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
@@ -36,8 +41,12 @@ export function FlightCard({ offer, onSelect, selected }: FlightCardProps) {
             <div key={index} className="flex flex-col gap-1 border-b border-border pb-3 last:border-0 last:pb-0">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Plane className="size-3.5" />
+                {offer.slices.length > 1 && (
+                  <span className="font-medium text-foreground">{index === 0 ? 'Hinflug' : 'Rückflug'}</span>
+                )}
                 {firstSegment?.carrierName ?? 'Fluggesellschaft unbekannt'}
                 {stops > 0 && <Badge variant="secondary">{stops} Zwischenstopp{stops > 1 ? 's' : ''}</Badge>}
+                <span className="ml-auto">{formatDate(firstSegment?.departingAt ?? '')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-lg font-semibold text-foreground">

@@ -1353,6 +1353,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Muster aus `formatTime()`. Je ein neuer Regressionstest in
   `FlightCard.test.tsx`/`TrainCard.test.tsx` (vor dem Fix per `git stash`
   auf nur diese beiden Quelldateien reproduzierbar rot verifiziert).
+  Vom autonomen IT-Chef-Lauf am 25.09. (weiterer Lauf) den zweiten der
+  beiden neuen Funde aus `reports/support-chef.md` (25.09.) behoben: bei
+  einer Hin- und Rückflug-Suche zeigte `FlightCard.tsx` beide
+  Flugabschnitte optisch identisch, nur durch die Reihenfolge und eine
+  dünne Trennlinie unterschieden — kein Label, kein Datum, sodass man
+  raten musste, welcher Abschnitt der Hin- und welcher der Rückflug ist
+  und an welchem Tag welcher Flug stattfindet. Fix: Jeder Abschnitt zeigt
+  jetzt sein Abflugdatum (neue `formatDate()`, analog zur bestehenden
+  `formatTime()` daneben); bei mehr als einem Abschnitt (Hin- und
+  Rückflug) zusätzlich ein Label "Hinflug"/"Rückflug" nach genau dem in
+  `FlightWizard.tsx` bereits etablierten Wortlaut für dieselben beiden
+  Richtungen — kein neuer Begriff erfunden. Der im selben Bericht
+  gemeldete erste Fund (IATA-Code statt Klarname) bleibt bewusst offen:
+  anders als hier gibt es dafür keine bereits etablierte Formatvorgabe im
+  Code und ein bestehender Test verankert aktuell explizit die
+  Code-Anzeige — das wäre eine eigene Formatentscheidung, kein reiner
+  Bugfix (Kriterium 3), zur Entscheidung an Ni. Zwei neue
+  Regressionstests in `FlightCard.test.tsx` (Datum ohne Label bei
+  einfacher Flugsuche; beide Labels plus je eigenes Datum bei Hin- und
+  Rückflug).
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —
