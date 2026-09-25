@@ -1,54 +1,66 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-24
+**Datum:** 2026-09-25
 
-## Was ist seit dem letzten Eintrag (2026-09-23) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-24) passiert?
 
-Zwei der drei damals gemeldeten Punkte sind behoben — hab's im
-aktuellen Code nachgeprüft:
+Der gemeldete Kontrast-Punkt ist behoben — hab's im aktuellen Code
+nachgeprüft:
 
-- **Fehlende Angaben im "Details ansehen"-Dialog:** Transportmittel,
-  Datum, Budget und Unterkunft zeigen jetzt bei fehlendem Wert einen
-  Fallback-Text (z. B. "Noch kein Transport ausgewählt",
-  `src/pages/Reiseentwuerfe.tsx:373-393`) statt die Zeile stillschweigend
-  wegzulassen. Wortgleich mit dem etablierten Muster aus `Buchung.tsx`.
-- **Badge "Abgeschlossen" vs. "Pausiert":** nutzt jetzt eine eigene
-  `outline`-Variante mit Teal-Einfärbung statt derselben `secondary`-
-  Variante wie "Pausiert" (`Reiseentwuerfe.tsx:236-247`) — auf der
-  Übersicht klar unterscheidbar.
+- **Text der "Abgeschlossen"-Badge:** `src/pages/Reiseentwuerfe.tsx:244`
+  nutzt jetzt `border-teal bg-teal/10 text-navy` statt reinem
+  `text-teal` auf hellem Grund. Derselbe Fix wurde auch in
+  `src/components/chat/TripSummaryCard.tsx:41,50` übernommen. Beide
+  Stellen sind damit im hellen Modus wieder gut lesbar.
 
-Der Badge-Fix bringt aber selbst einen neuen Punkt mit, dazu unten mehr.
-Der dritte alte Punkt (Hilfe-Seite) ist weiterhin offen.
+Beim genaueren Blick musste ich außerdem einen Punkt aus dem letzten
+Bericht zurücknehmen: **die "rohen englischen Duffel-Fehlermeldungen"
+(Punkt 3) sind so aktuell nicht mehr korrekt** — `src/lib/duffel/client.ts:31-37`
+zeigt bereits ausschließlich einen freundlichen deutschen Fallback-Text
+an, keine rohen API-Meldungen mehr. Tut mir leid für die falsche
+Angabe im letzten Bericht.
+
+Der dritte alte Punkt (Hilfe-Seite) ist weiterhin offen, dazu unten
+mehr. Neu geprüft habe ich außerdem die Flugsuche-Ergebniskarte
+(`FlightCard.tsx`), da sie zuletzt vom IT-Chef angefasst wurde
+(kleiner Fix für leere Flugdauer).
 
 ## Meine Vorschläge
 
-1. **Text der neuen "Abgeschlossen"-Badge hat im hellen Farbschema zu
-   wenig Kontrast.** `src/pages/Reiseentwuerfe.tsx:244` färbt den
-   Badge-Text mit `text-teal` auf fast weißem Hintergrund (`bg-teal/5`).
-   Teal (`#00c2a8`, `src/styles/globals.css:10`) gegen Weiß ergibt nur
-   rund 2,3:1 Kontrast — deutlich unter den WCAG-AA-Mindestwert von 4,5:1
-   für normalen Text. Im dunklen Farbschema ist es mit rund 7:1 dagegen
-   gut lesbar, das Problem betrifft also gezielt den vermutlich meist-
-   genutzten hellen Modus. Derselbe Fehlton steckt übrigens schon länger
-   in `TripSummaryCard.tsx:41` und `:50`. *Vorschlag:* für Text auf
-   hellem Grund einen dunkleren, kontrastreicheren Teal-Ton verwenden
-   (Teal nur als Rahmen/Hintergrund, wie es `QuickReplies.tsx:20` mit
-   `border-teal/40 bg-teal/10 text-navy` bereits vormacht) — am besten
-   als gemeinsamer Design-Token, damit `TripSummaryCard.tsx` gleich
-   mitprofitiert.
+1. **Flugkarte zeigt nur den IATA-Code statt des bereits vorhandenen
+   Klarnamens.** `src/components/search/FlightCard.tsx:45,50` zeigt
+   z. B. "08:00 BER" statt "08:00 Berlin" — dabei liefert
+   `src/lib/duffel/client.ts:96-99` bei jeder echten Duffel-Antwort
+   bereits `originName`/`destinationName` mit, und
+   `src/types/duffel.ts:21-28` führt diese Felder auch. Sie werden im
+   Code einfach nie gelesen. Die strukturell fast identische
+   `TrainCard.tsx:43,47` macht es schon richtig und zeigt den
+   Klarnamen an. Wer den IATA-Code seines Ziels nicht auswendig kennt,
+   muss auf der Ergebniskarte selbst raten, ob "LIS" wirklich Lissabon
+   ist. *Vorschlag:* Klarname zusätzlich oder statt Code anzeigen
+   (z. B. "08:00 Berlin (BER)"), analog zu `TrainCard.tsx` — reine
+   Übernahme eines im Nachbar-Bauteil schon vorhandenen Musters.
 
-2. **Die Hilfe-Seite (`/hilfe`) hilft weiterhin nicht wirklich.**
+2. **Hin- und Rückflug sehen auf der Ergebniskarte identisch aus, ohne
+   Label oder Datum.** `src/components/search/FlightCard.tsx:32-56`
+   zeigt pro Flugabschnitt nur die Uhrzeit — kein "Hinflug"/
+   "Rückflug"-Label, kein Datum. Bei der Standard-Reiseart (Hin- und
+   Rückflug, siehe `FlightWizard.tsx:37`) stehen zwei optisch fast
+   identische Zeilen übereinander, nur durch eine dünne Trennlinie
+   getrennt. Man muss aus der Reihenfolge schließen, welcher Abschnitt
+   Hin- und welcher Rückflug ist, und weiß nicht, an welchem Tag welcher
+   Flug stattfindet. *Vorschlag:* kurzes Label pro Abschnitt
+   ("Hinflug"/"Rückflug") sowie das Datum ergänzen — die Information
+   steckt bereits in `departingAt`/`arrivingAt`, aktuell wird nur die
+   Uhrzeit daraus verwendet.
+
+3. **Hilfe-Seite (`/hilfe`) bleibt eine Sackgasse.**
    `src/pages/PlaceholderPage.tsx:16` zeigt nach wie vor nur "Hilfe wird
-   als Nächstes gebaut" — kein FAQ, kein Kontaktweg. Wer mit einem
-   Problem dorthin klickt, geht leer aus. *Vorschlag:* bis der echte
-   Inhalt kommt, reicht vorerst ein Satz mit Kontakthinweis.
-
-3. **Rohe, englische Fehlermeldungen der Flugsuche landen unverändert im
-   UI.** `src/lib/duffel/client.ts:15-33` reicht `json?.errors` von der
-   Duffel-API größtenteils unverändert durch, `src/pages/Flugsuche.tsx`
-   zeigt `error.message` dann 1:1 an. Für eine deutschsprachige Nutzerin
-   ohne technischen Hintergrund wirkt das verwirrend, gerade weil der
-   Rest der App durchgängig freundliche deutsche Texte verwendet (z. B.
-   `NoResultsMessage`). *Vorschlag:* häufige Duffel-Fehlercodes auf
-   verständliche deutsche Meldungen abbilden, rohen Text nur als
-   Fallback für unbekannte Fälle.
+   als Nächstes gebaut" — kein FAQ, kein Kontaktweg. Das ist laut
+   `ZEITPLAN.md` als eigene Aufgabe (8.11) erfasst und bewusst auf die
+   noch fehlenden FAQ-Inhalte blockiert, also kein Versehen — aber bis
+   dahin geht jede Nutzerin, die mit einem echten Problem dort landet,
+   leer aus. *Vorschlag:* bis zum vollständigen Inhalt reicht vorerst
+   ein Satz mit einem konkreten nächsten Schritt (z. B. sobald die laut
+   `ZEITPLAN.md` noch offene Support-E-Mail live ist, ein Verweis
+   darauf).
