@@ -1,10 +1,108 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-25)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-26)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-26: Kontrastfund jetzt behoben — Teal-Badge-Unterscheidung wird nachträglich 22. Tier-4-Kandidat, plus ein neuer 23. Kandidat (formatDuration()-Platzhalter), Kandidatentopf steigt von vier auf sechs, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `489489d`, 25.09.) war laut
+`freigabe-chef-log.md` ("2026-09-26 früher Nacht-Check" bzw. dem
+vorangegangenen Tages-Check) bereits vollständig in `main` gemergt
+(Merge-Commit `a4d8ffd`) — der Branch war also nur noch veraltet, nicht
+mehr in Arbeit. Neu von aktuellem `origin/main` (`b834b83`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 25.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile
+1490, weiterhin `[ ]`) oder diesem Dokument seit dem 25.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über fünf Wochen (Kanal/6.2/Format-Frage seit 21.08., die
+Mini-Changelog-Frage seit 05.09.).
+
+**`git log b92d00e..origin/main` zeigt vierzehn neue Commits** (Basislinie
+bewusst `b92d00e`, der `origin/main`-Stand, auf dem der 25.09.-Lauf seine
+eigene Prüfung bereits abgeschlossen hatte). Zwei davon mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` geprüft:
+- `34a3c45` (24.09., vierter IT-Chef-Lauf, damals noch nicht in `main`
+  gemergt, jetzt über den heutigen `it-chef/auto`-Merge angekommen):
+  genau der Kontrastfund, der `647d57f` (23.09., die eigene Teal-Farbe
+  für den "Abgeschlossen"-Badge statt derselben grauen Variante wie
+  "Pausiert") bisher blockiert hat, ist jetzt behoben — `text-teal` auf
+  `bg-teal/5` (~2,3:1 Kontrast) ist an beiden betroffenen Stellen
+  (`TripSummaryCard.tsx`, `Reiseentwuerfe.tsx`) durch das bereits
+  etablierte `border-teal bg-teal/10 text-navy`-Muster ersetzt (WCAG-AA
+  4,5:1). Von Support-Chef bereits bestätigt (`reports/support-chef.md`,
+  25.09.: "Kontrast-Fix bestätigt"). Damit fällt die einzige Bedingung
+  weg, unter der `647d57f` am 25.09. hier ausdrücklich zurückgestellt
+  wurde — **`647d57f` wird rückwirkend zum zweiundzwanzigsten
+  Tier-4-Kandidaten**: eine abgeschlossene Reise ist jetzt optisch
+  eindeutig von einer pausierten unterscheidbar, statt beide hinter
+  derselben grauen Badge zu verstecken — dieselbe "echte statt
+  verschwiegene Unterscheidung"-Erzählung wie bei den bisherigen
+  Kandidaten dieser Gruppe, nur diesmal war der Fix selbst erst die
+  Voraussetzung.
+- `e96c200` (25.09., IT-Chef Auto): `formatDuration()` in `FlightCard.tsx`
+  und `TrainCard.tsx` zeigte eine fehlende/leere Duffel-Dauer bisher als
+  leere Textstelle neben dem Uhr-Icon, statt des sonst überall
+  verwendeten "—"-Platzhalters — anders als die daneben stehende
+  `formatTime()`, die diesen Fall bereits abfängt. **Dreiundzwanzigster
+  Tier-4-Kandidat** — dieselbe Fundgruppe wie der bereits als
+  vierzehnter Kandidat gezählte `formatDuration()`-Fix vom 16./17.09.
+  (Tages-Komponente erschien als roher ISO-Code): eine fehlende Angabe
+  wird ehrlich als fehlend markiert statt als leere/verwirrende Stelle zu
+  erscheinen.
+
+Die übrigen zwölf Commits im Bereich (Support-/Marketing-/IT-Chef-
+Berichte vom 25.09., ein Daily-Status-Update, zwei Freigabe-Chef-Logs,
+drei Merge-Commits der Auto-Branches sowie zwei IT-Chef-Auto-Log-
+Einträge ohne eigenen Codepunkt) enthalten keine weitere, für dieses
+Format relevante Codeänderung — jeweils per `git show --stat` geprüft
+(ausschließlich `reports/*.md`, `status.md`, `*-log.md` betroffen). Der
+neue Support-Chef-Fund vom 25.09. (FlightCard zeigt IATA-Code statt
+vorhandenem Klarnamen, fehlende Hin-/Rückflug-Labels) ist noch nicht von
+IT-Chef behoben — wird wie üblich erst zum Kandidaten, sobald das
+tatsächlich passiert ist, nicht schon durch die Meldung selbst.
+
+**Damit wächst der Kandidatentopf von vier (Stand 25.09.) auf sechs** —
+weiterhin klar unter der Achter-Schwelle, die Ausgabe 2/3/4 ausgelöst hat.
+Keine fünfte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung, kein
+Live-Vorgang — nichts gepostet, versendet oder verändert. Keine
+erfundenen Kennzahlen: beide neuen Kandidaten stammen aus einzeln per
+`git show` verifizierten, bereits in `main` gemergten Commits, der
+Kontrast-Fix zusätzlich durch den Support-Chef-Bericht vom 25.09.
+bestätigt. Keine offene Positionierungs-Grundsatzfrage: dieser Lauf
+wendet nur die bereits etablierte "echte statt verschwiegene Lücke"-
+Abgrenzung an, trifft keine neue inhaltliche Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/fünfte Mini-Changelog-Ausgabe —
+  Kandidatentopf steht bei sechs, weiterhin klar unter dem etablierten
+  Maßstab (acht).
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 26.09. (Prüfung
+  der vier Fragen, Kontrastfund-Behebung nachverfolgt und `647d57f`
+  rückwirkend als 22. Kandidat eingeordnet, `e96c200` als 23. Kandidat
+  eingeordnet, Tier-4-Abschnitt und Kandidatentopf-Stand aktualisiert),
+  "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf
+  26.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-25: ein neuer Tier-4-Kandidat (fehlende Angaben im "Details ansehen"-Dialog jetzt tatsächlich behoben), zwei Commits bewusst ausgeschlossen (Badge-Kontrastfix noch offen, Kalender-Race ohne Ehrlichkeits-Erzählung), Kandidatentopf bei vier, alle vier Fragen weiterhin offen
 
@@ -2343,11 +2441,20 @@ Anfang-bis-Ende-Weg im Code.
    Angaben im "Details ansehen"-Dialog erscheinen als "nicht angegeben"
    statt kommentarlos zu verschwinden (**einundzwanzigster Kandidat**).
    Mehrere im selben Zeitraum geprüfte, bewusst ausgeschlossene Commits
-   (jeweils role="alert"/role="status"-Ergänzungen, ein Kalender-Race-Fix
-   und — noch offen, weil der Kontrastfund selbst ungefixt ist — die neue
-   Teal-Badge-Farbe für "Abgeschlossen") siehe die jeweiligen
-   Update-Einträge oben. **Kandidatentopf damit bei vier** (Kandidaten
-   18-21) — weiterhin unter der Achter-Schwelle von Ausgabe 2/3/4.
+   (jeweils role="alert"/role="status"-Ergänzungen sowie ein
+   Kalender-Race-Fix) siehe die jeweiligen Update-Einträge oben. Seit dem
+   24./25.09. ein weiterer Kandidat (siehe Update 2026-09-26 oben): der
+   damals noch offene Kontrastfund bei der Teal-Badge-Farbe für
+   "Abgeschlossen" ist jetzt behoben (`34a3c45`) — damit wird `647d57f`
+   selbst rückwirkend zum **zweiundzwanzigsten Kandidaten** (eine
+   abgeschlossene Reise ist jetzt optisch eindeutig von einer pausierten
+   unterscheidbar). Sowie ein weiterer, unabhängiger Kandidat (ebenfalls
+   Update 2026-09-26): `formatDuration()` zeigt eine fehlende Duffel-Dauer
+   in `FlightCard`/`TrainCard` jetzt als "—" statt als leere Textstelle
+   (**dreiundzwanzigster Kandidat**, dieselbe Fundgruppe wie der bereits
+   gezählte vierzehnte Kandidat). **Kandidatentopf damit bei sechs**
+   (Kandidaten 18-23) — weiterhin unter der Achter-Schwelle von
+   Ausgabe 2/3/4.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
@@ -2533,8 +2640,16 @@ kam allerdings ein neuer, noch offener Wackler dazu: Support-Chef hat bei
 der parallel gelandeten Teal-Badge-Unterscheidung (`647d57f`) einen WCAG-
 Kontrastfund gemeldet, den IT-Chef noch nicht behoben hat — laut dem
 Live-Marketing-Chef-Bericht vom 24.09. soll die gesamte Reiseentwürfe-
-Konsistenz-Story erst raus, sobald dieser Kontrast behoben ist. Der
-nächste Lauf sollte weiterhin zuerst die vier offenen Fragen gegenprüfen,
-prüfen ob der Kontrastfund inzwischen behoben wurde (dann würde `647d57f`
-nachträglich zum Kandidaten), und den Kandidatentopf (Stand 25.09.: vier)
-gegen denselben 06.09.-Maßstab weiterführen.
+Konsistenz-Story erst raus, sobald dieser Kontrast behoben ist. Stand
+26.09. ist genau dieser Kontrastfund behoben worden (`34a3c45`, von
+Support-Chef bereits bestätigt) — `647d57f` wird damit rückwirkend zum
+zweiundzwanzigsten Kandidaten, plus ein unabhängiger dreiundzwanzigster
+Kandidat (`e96c200`, `formatDuration()`-Platzhalter "—" statt leerer
+Textstelle, siehe Update 2026-09-26 oben). Der Topf steht damit bei
+sechs, weiterhin klar unter der Achter-Schwelle. Der neue Support-Chef-
+Fund vom 25.09. (FlightCard zeigt IATA-Code statt Klarname, fehlende
+Hin-/Rückflug-Labels) ist noch nicht behoben und damit noch kein
+Kandidat. Der nächste Lauf sollte weiterhin zuerst die vier offenen
+Fragen gegenprüfen, prüfen ob der IATA-/Klarname-Fund inzwischen behoben
+wurde, und den Kandidatentopf (Stand 26.09.: sechs) gegen denselben
+06.09.-Maßstab weiterführen.

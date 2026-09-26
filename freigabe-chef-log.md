@@ -4664,3 +4664,177 @@ Code-Änderung, kein erfundener Punkt erkennbar.
 **Ergebnis:** Alle drei Branches bestanden die Prüfung und wurden
 gemergt (`main`: `b92d00e` → `d2b1936`). Keine offenen Probleme, keine
 Info an Ni nötig.
+
+## 2026-09-26, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 6 neue Commits vor `origin/main` (`efda747`,
+  `2824c73`, `2d13822`, `5e778f7`, `6096867`, `7afddc0`).
+- `marketing-chef/auto` — 0 neue Commits vor `origin/main`, planmäßig
+  übersprungen (wie für diesen frühen Lauf angewiesen).
+- `support-chef/auto` — 0 neue Commits vor `origin/main`, ebenfalls
+  planmäßig übersprungen.
+
+**`it-chef/auto` geprüft:** Diff zu `main` umfasst `ZEITPLAN.md`,
+`it-chef-auto-log.md`, `src/components/search/FlightCard.tsx` (+Test),
+`src/components/search/HotelWizard.tsx` (+Test),
+`src/components/search/TrainCard.tsx` (+Test) — drei inhaltliche
+Änderungen (Hin-/Rückflug-Label + Datum je Flugabschnitt in
+`FlightCard.tsx`; `HotelWizard.tsx` Check-out-Datepicker `min` jetzt
+Folgetag statt Check-in-Tag, verhindert ein durch die Validierung
+stillschweigend abgelehntes, aber im Picker wählbares Datum;
+`formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx` zeigte bei jeder
+vollen Stunde fälschlich "0min" mit, da die Minuten-Gruppe nur auf
+String-Wahrheitsgehalt statt Zahlenwert geprüft wurde), Rest reine
+"kein neuer sicherer Punkt gefunden"-Läufe ohne Code-Änderung. Jede
+Änderung deckt sich exakt mit ihrem eigenen `it-chef-auto-log.md`-
+Eintrag (kein Scope-Creep, jeder Commit genau ein Punkt), keine
+Berührung von Auth/Zahlungen/Rechtstexten. Kein Design-/Farb-/
+Layout-Eingriff, der gegen `MARKENDESIGN.md` liefe — nur Text-/
+Datums-Ergänzung mit bereits im selben File etablierten Klassen
+(`text-foreground`, `text-muted-foreground`) und Wortlaut
+("Hinflug"/"Rückflug" wortgleich aus `FlightWizard.tsx` übernommen).
+
+**Unabhängig selbst verifiziert** (`npm install`, dann `npx tsc -b`,
+`npx eslint .`, `npx vitest run` sowie `npm run build` tatsächlich
+selbst ausgeführt, nicht nur den Log-Eintrag geglaubt): `tsc -b` 0
+Fehler; `eslint .` 0 Fehler, dieselben 4 vorbestehenden
+Fast-Refresh-Warnungen wie in jedem früheren Lauf; volle Suite
+`vitest run` 59 Testdateien, **361 Tests, alle grün** (deckt sich exakt
+mit den im Log behaupteten 358 + 3 neuen Tests aus diesem Lauf); `npm
+run build` erfolgreich, dieselbe vorbestehende Chunk-Size-Warnung.
+Alles deckt sich exakt mit den Werten aus `it-chef-auto-log.md`.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+wurde erneut von der Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert
+(Permission denied) — wie schon am 18.09., 22.09., 24.09. und 25.09.
+bei genau diesem frühen Nacht-Check-Zeitfenster (0-4 Uhr). Kein
+Workaround versucht (kein Push, kein Umgehen über andere Tools). `main`
+und `it-chef/auto` sind dadurch unverändert; der lokale Prüf-Branch
+wurde wieder gelöscht, Arbeitsverzeichnis auf `origin/main` zurückgesetzt.
+
+**Ergebnis:** `it-chef/auto` inhaltlich und technisch vollständig
+geprüft und für gut befunden, aber **nicht gemergt** — blockiert durch
+die Umgebungs-eigene Merge-Restriktion, nicht durch einen Fund.
+`marketing-chef/auto`/`support-chef/auto` planmäßig übersprungen (keine
+neuen Commits).
+
+**Info an Ni nötig: Ja, jetzt dringlicher.** Das ist bereits das
+**fünfte Mal** (18.09., 22.09., 24.09., 25.09., jetzt 26.09.), dass
+genau der frühe Nacht-Check-Lauf an derselben Environment-Restriktion
+scheitert, während der spätere Tages-Check denselben Merge anstandslos
+durchführen kann. Da IT-Chef weiterhin brauchbare, geprüfte Fixes auf
+`it-chef/auto` produziert, stauen sich diese im frühen Fenster liegen,
+bis der Tages-Check nachmergt — funktioniert bisher, ist aber
+unzuverlässig. Empfehlung: entweder den frühen Nacht-Check auf reine
+Prüfung ohne Merge-Versuch umstellen (Merge dann nur im Tages-Check),
+oder die Auto-Mode-Berechtigung für diesen geplanten Lauf so anpassen,
+dass Merges erlaubt sind.
+
+## 2026-09-26, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** `it-chef/auto`, `marketing-chef/auto`,
+`support-chef/auto` — alle drei mit neuen Commits gegenüber `main`.
+`it-chef/auto` unverändert gegenüber dem heutigen früheren
+Nacht-Check-Lauf (dieselben sechs Commits `efda747`…`7afddc0`, kein
+weiterer Lauf von IT-Chef seither).
+
+### `it-chef/auto`
+Diff erneut komplett selbst gelesen (nicht auf den früheren Lauf
+verlassen): drei inhaltliche Änderungen (Hin-/Rückflug-Label + Datum je
+Abschnitt in `FlightCard.tsx`; `HotelWizard.tsx`-Check-out-Datepicker
+`min` jetzt Folgetag statt Check-in-Tag; `formatDuration()`-Fix in
+`FlightCard.tsx`/`TrainCard.tsx` gegen fälschliches "0min" bei voller
+Stunde), Rest reine "kein neuer sicherer Punkt"-Läufe ohne
+Code-Änderung. Scope deckt sich exakt mit den vier
+`it-chef-auto-log.md`-Einträgen von heute, kein Scope-Creep, keine
+Berührung von Auth/Zahlungen/Rechtstexten, UI-Änderungen (Hinflug/
+Rückflug-Label, Datumsanzeige) nutzen bereits etablierte Klassen und
+Wortlaut aus `FlightWizard.tsx` — passt zu `MARKENDESIGN.md`.
+
+**Unabhängig selbst verifiziert** (eigener `git worktree` auf
+`origin/it-chef/auto`, frisches `npm install`, danach selbst ausgeführt,
+nicht nur den Log-Eintrag oder den früheren Lauf von heute geglaubt):
+`npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben 4
+vorbestehenden Fast-Refresh-Warnungen. `npx vitest run` → 59
+Testdateien, **361 Tests, alle grün** — deckt sich exakt mit den
+Angaben in `it-chef-auto-log.md` und dem früheren Lauf von heute.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+wurde erneut von der Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert (Permission
+denied) — diesmal jedoch **nicht** beim frühen Nacht-Check, sondern bei
+diesem späteren Tages-Check, der den Merge an früheren Tagen (10.08.,
+17.08., 18.08. u.a.) anstandslos durchführen konnte. Kein Workaround
+versucht (kein Push, kein Umgehen über andere Tools, wie von der
+Blockierungs-Meldung selbst gefordert). `main` und `it-chef/auto` sind
+dadurch unverändert; der lokale Prüf-Worktree wurde wieder entfernt.
+
+Auffällig zur Einordnung: `git merge --ff-only origin/marketing-chef/auto`
+und `git merge --no-ff origin/support-chef/auto` liefen im selben Lauf
+direkt danach **ohne jede Blockierung** durch (siehe unten) — beide
+ändern ausschließlich Markdown-Dateien. Die Restriktion scheint sich
+also nicht (nur) am Tageszeitfenster festzumachen, sondern eher daran,
+dass der `it-chef/auto`-Merge tatsächlichen Produktcode verändert.
+
+### `marketing-chef/auto`
+Ein Commit: `marketing/freigabe-uebersicht.md` +
+`marketing-chef-auto-log.md` um zwei neue Tier-4-Kandidaten ergänzt.
+Beide referenzierten Commits (`34a3c45` Teal-Kontrast-Fix, `e96c200`
+formatDuration-Platzhalter-Fix) per `git merge-base --is-ancestor` selbst
+bestätigt: beide bereits Teil von `main`. `34a3c45` zusätzlich per
+`git show` gegengelesen — Kontrast-Fix (`text-teal` → `text-navy` auf
+`bg-teal/5`/`bg-teal/10`) stimmt exakt mit der Beschreibung überein.
+Reine Markdown-Ergänzung, keine erfundenen Kennzahlen, kein Hinweis auf
+tatsächliches Posten/Versenden, vollständiger kohärenter Text.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `b834b83..f29b5c9`,
+gepusht). Anschließend `marketing-chef/auto` per
+`git push origin HEAD:refs/heads/marketing-chef/auto` auf den neuen
+`main`-Stand gebracht.
+
+### `support-chef/auto`
+Ein Commit: 81 neue Zeilen in `support-chef-auto-log.md`, UX-Analyse zu
+`HotelWizard.tsx`/`FlightWizard.tsx` (Bericht prüft ausdrücklich den
+Code-Stand von `origin/it-chef/auto`, nicht den älteren Stand auf diesem
+Branch selbst). Zwei zentrale Code-Behauptungen selbst per `git show
+origin/it-chef/auto:...` nachvollzogen: FlightCard zeigt weiterhin
+`slice.originIata`/`slice.destinationIata` (IATA-Code statt Klarname,
+durch `FlightCard.test.tsx:47-48` als gewolltes Verhalten verankert) —
+stimmt; Hinflug/Rückflug-Label aus `efda747` tatsächlich vorhanden
+(`FlightCard.tsx:45-47`) — stimmt. Reine Analyse ohne Code-Änderung,
+nichts erfunden.
+
+→ **Passt, nach `main` gemergt** (regulärer 3-Wege-Merge, da Branch
+divergiert war und kein Fast-Forward möglich, konfliktfrei, gepusht
+`966f025`). Anschließend `support-chef/auto` ebenfalls auf den neuen
+`main`-Stand gebracht.
+
+**Ergebnis:** Zwei Branches inhaltlich geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), ein Branch vollständig
+geprüft und für gut befunden, aber technisch nicht mergbar
+(`it-chef/auto`, Environment-Restriktion).
+
+**Info an Ni nötig: Ja, dringend.** `it-chef/auto` ist jetzt zum
+**sechsten Mal in Folge** (18.09., 22.09., 24.09., 25.09., früher
+Nacht-Check 26.09., jetzt auch dieser Tages-Check 26.09.) an der
+Merge-Restriktion gescheitert — und zum ersten Mal traf es auch den
+späteren Tages-Check, der das bisher zuverlässig aufgefangen hat. Das
+bisherige Muster "früher Check blockiert, Tages-Check merged nach"
+scheint zu kippen: heute ist gar kein Merge von Code-Änderungen mehr
+durchgekommen, obwohl zwei reine Markdown-Merges im selben Lauf
+anstandslos funktionierten. Das deutet darauf hin, dass die Restriktion
+generell Merges mit echter Code-Änderung betrifft, nicht nur ein
+Zeitfenster. Drei geprüfte, grüne IT-Chef-Fixes (Hin-/Rückflug-Label,
+HotelWizard-Datepicker, formatDuration-Nullstunden-Fix) stauen sich
+dadurch weiter auf `it-chef/auto`, ohne dass absehbar ist, wann/ob ein
+künftiger Lauf sie noch durchbekommt. Empfehlung an Ni: Auto-Mode-
+Berechtigung für den Freigabe-Chef so anpassen, dass Merges nach
+erfolgreicher eigener Prüfung erlaubt sind — sonst bleibt die
+Kernaufgabe dieses Skills (Code-Änderungen autonom freigeben) dauerhaft
+blockiert.

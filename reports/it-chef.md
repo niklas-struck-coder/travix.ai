@@ -1,72 +1,61 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-09-25
+**Datum:** 2026-09-26
 
-## Was ist seit dem letzten Eintrag (2026-09-24) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-25) passiert?
 
-Auf `main` sind seit dem letzten Bericht mehrere Merges gelandet: Der
-separate Autonomiekanal `it-chef/auto` hat einen echten Anzeigefehler
-behoben (`formatDuration()` zeigte bei fehlender Dauer eine leere Stelle
-statt "—"), danach mehrere Läufe ohne neuen sicheren Fund. Marketing-Chef
-hat den "Details ansehen"-Fund (fehlende Angaben im Dialog) behoben,
-Support-Chef hat beide jüngsten Funde als korrekt umgesetzt bestätigt und
-einen neuen Reibungspunkt gemeldet (siehe unten). Freigabe-Chef hat alle
-Auto-Branches geprüft und nach main gemergt. Details zum `it-chef/auto`-
-Kanal stehen in `it-chef-auto-log.md`, nicht hier.
+Seit dem letzten Bericht gab es keine neuen Code-Änderungen auf `main` (die
+Commits dazwischen waren Marketing-/Support-Chef-Berichte und
+Freigabe-Chef-Checks). Der separate Autonomiekanal `it-chef/auto` hat
+mehrere weitere Läufe ohne neuen sicheren Fund gemacht; sein Merge nach
+`main` bleibt weiterhin durch eine Umgebungsrestriktion blockiert (laut
+Freigabe-Chef-Log inzwischen zum sechsten Mal). Details dazu stehen in
+`it-chef-auto-log.md`, nicht hier.
 
 **Eigene gezielte Bug-Suche in dieser Session:** Ein Recherche-Agent hat
-20 bisher noch nicht (oder lange nicht mehr) einzeln geprüfte Dateien
-vollständig gelesen — u. a. `Urlaubsmodus.tsx`, `Flugsuche.tsx`,
-`App.tsx`, `routes.tsx`, `AppShell.tsx`, `design-tokens.ts`, `utils.ts`,
-`PlaceholderPage.tsx`, `TravixAvatar.tsx`, die shadcn-Basiskomponenten
-(`button.tsx`, `card.tsx`, `dialog.tsx`, `sheet.tsx`, `tabs.tsx`) sowie
-die zuletzt frisch geänderten Dateien `TripSummaryCard.tsx`,
-`FlightCard.tsx`, `TrainCard.tsx`, `calendarUtils.ts`, `Kalender.tsx`,
-`Reiseentwuerfe.tsx` auf durch die jüngsten Merges neu eingeführte Fehler.
-Zusätzlich habe ich selbst den offenen Support-Chef-Fund zu `FlightCard.tsx`
-(siehe unten) im Detail nachgeprüft.
+25 Dateien vollständig gelesen, die bisher weder in diesem Bericht noch im
+`it-chef/auto`-Log einzeln geprüft wurden — u. a. `ChatInput.tsx`,
+`ChatMessage.tsx`, `QuickReplies.tsx`, `MobileNav.tsx`, `PageHeader.tsx`,
+`Sidebar.tsx`, `FlightResults.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+`TrainResults.tsx`, `ChecklistPanel.tsx`, `EditMode.tsx`,
+`mockAdvisor.ts`, `mockConcierge.ts`, `calculateProgress.ts`,
+`checklistRules.ts` sowie die Seiten `Aktivitaeten.tsx`, `Angebote.tsx`,
+`Buchung.tsx`, `Dashboard.tsx`, `ReiseSuche.tsx`.
 
-**Ergebnis:** Kein neuer Bug, der die Sicherheitskriterien (eindeutig,
-klein, isoliert, risikoarm) erfüllt.
+**Ergebnis:** Ein echter, sicherer Bug gefunden und automatisch gefixt
+(siehe unten).
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine. In dieser Session wurde kein Bug gefunden, der alle vier
-Sicherheitskriterien erfüllt.
+1. **[PR #23](https://github.com/niklas-struck-coder/travix.ai/pull/23)
+   — Fehlende "Mietwagen"-Quick-Reply beim ersten Transportmittel-Schritt.**
+   `src/lib/ai/mockAdvisor.ts:76-78`: Der Begrüßungstext fragt explizit
+   nach "Zug, Flug, Bus, Fähre oder Mietwagen", das `quickReplies`-Array
+   enthielt aber nur die ersten vier Optionen — "Mietwagen" fehlte als
+   klickbarer Button, Nutzer:innen hätten es freihändig eintippen müssen.
+   Der Fallback-Zweig direkt darunter (wenn die Nutzereingabe nicht
+   erkannt wird) listet bereits korrekt alle fünf Optionen auf und diente
+   als Vorlage. Fix: eine Zeile, `'Mietwagen'` ergänzt. Bestehende Tests
+   prüfen für diesen Fall nur `quickReplies.length > 0`, kein Test bricht.
+   Branch: `it-chef-autofix/mockadvisor-transportmode-mietwagen-2026-09-26`.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-1. **`FlightCard.tsx` zeigt nur den IATA-Code, nicht den vorhandenen
-   Klarnamen.** `src/components/search/FlightCard.tsx:45,50` zeigt
-   `slice.originIata`/`destinationIata` (z. B. "BER") an, obwohl
-   `FlightSlice` (`src/types/duffel.ts`) bereits `originName`/
-   `destinationName` (z. B. "Berlin") mitliefert — diese Felder werden nie
-   gelesen. `TrainCard.tsx` macht es bereits richtig und zeigt nur den
-   Klarnamen. Real, aber kein sicherer Auto-Fix: das genaue Zielformat
-   (Name statt Code? Name plus Code?) ist nicht festgelegt, und
-   `FlightCard.test.tsx:47-48` verankert aktuell explizit die
-   Code-Anzeige — eine Änderung würde eine Formatentscheidung treffen und
-   einen bestehenden Test anfassen. Zur Entscheidung an Ni oder für einen
-   künftigen Lauf mit klarer Formatvorgabe.
-2. **`formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx`: zwei
-   theoretische Randfälle, sehr niedrige Konfidenz.** Bei einer Dauer von
-   exakt "PT0H0M" zeigt die Funktion "0min" statt "—" (die
-   Minuten-Capture-Group "0" ist als String truthy). Außerdem verlangt die
-   Regex zwingend ein literales "T", ein ISO-8601-Wert ganz ohne Zeitanteil
-   (z. B. "P1D") würde nicht matchen. Beide Fälle kommen bei echten
-   Duffel-Flug-/Zugdauern praktisch nicht vor — daher nicht als
-   eigenständiger, sicherer Fix umgesetzt, nur der Vollständigkeit halber
-   notiert.
+Keine neuen. Die beiden aus dem letzten Bericht offenen Punkte
+(`FlightCard.tsx` zeigt IATA-Code statt Klarname; theoretische
+`formatDuration()`-Randfälle bei "PT0H0M"/fehlendem "T") bestehen
+unverändert fort — siehe vorherige Berichtsversion bzw. das
+`it-chef/auto`-Log für Details.
 
-Weiterhin offen: 19 ältere Auto-Fix-PRs (#1, #4–#18, #20–#22) warten auf
-Ni's manuelle Entscheidung.
+Weiterhin offen: 19 ältere Auto-Fix-PRs (#1, #4–#18, #20–#22) plus der
+neue #23 warten auf Ni's manuelle Entscheidung.
 
 ## Weitere Vorschläge
 
-1. **PR-Aufräumung, weiterhin 19 offene Auto-Fix-PRs.**
+1. **PR-Aufräumung, jetzt 19 offene ältere Auto-Fix-PRs plus #23.**
    [#1](https://github.com/niklas-struck-coder/travix.ai/pull/1),
    [#4](https://github.com/niklas-struck-coder/travix.ai/pull/4)–[#18](https://github.com/niklas-struck-coder/travix.ai/pull/18),
-   [#20](https://github.com/niklas-struck-coder/travix.ai/pull/20)–[#22](https://github.com/niklas-struck-coder/travix.ai/pull/22).
+   [#20](https://github.com/niklas-struck-coder/travix.ai/pull/20)–[#23](https://github.com/niklas-struck-coder/travix.ai/pull/23).
    Reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs mergen oder
    schließen. Manche könnten inzwischen durch Fixes aus dem
    `it-chef-eigen`-Kanal redundant sein — lohnt sich vor dem Merge kurz
@@ -81,4 +70,4 @@ Ni's manuelle Entscheidung.
    Nav-Eintrag, keine echte Datenquelle — nur in der eigenen Testdatei
    referenziert. Entweder verdrahten oder entfernen, Produktentscheidung.
 
-_Letztes Update: 2026-09-25_
+_Letztes Update: 2026-09-26_
