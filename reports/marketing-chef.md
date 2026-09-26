@@ -1,57 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-25
+**Datum:** 2026-09-26
 
-## Was ist seit dem letzten Eintrag (2026-09-24) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-25) passiert?
 
-Der Blocker von vorgestern ist weg, aber ein neuer, strukturell gleicher
-ist da: Der "Details ansehen"-Dialog-Fund ist jetzt bestätigt gefixt und
-als 21. Kandidat verbucht. Die Badge-Kontrastfrage von gestern (Teal-Text
-auf "Abgeschlossen" nur ~2,3:1 statt der WCAG-Vorgabe 4,5:1) ist aber
-weiterhin **nicht** behoben – IT-Chef hat sie sich heute zwar erneut
-angeschaut, aber nicht angefasst. Die Reiseentwürfe-Konsistenz-Story
-hängt damit schon den zweiten Tag am selben Punkt fest.
+Der Blocker von gestern ist weg: Der WCAG-Kontrastfund bei der Teal-Badge
+("Abgeschlossen") ist gefixt und von Support-Chef bestätigt. Die
+Reiseentwürfe-Konsistenz-Story hat damit inhaltlich kein offenes Problem
+mehr. Dazu kam ein kleiner zweiter Fix (fehlende Flug-/Zugdauer zeigt
+jetzt "—" statt einer leeren Stelle) – der Kandidatentopf für diese
+Content-Reihe wächst, bleibt aber weiter klar unter der Schwelle für eine
+neue Mini-Changelog-Ausgabe.
 
-Neu dazugekommen: `FlightCard.tsx` zeigt nur IATA-Codes ("BER") statt der
-bereits vorhandenen Klarnamen ("Berlin") – ein echter, aber bewusst nicht
-automatisch gefixter Fund (Formatentscheidung + bestehender Test wären
-betroffen). Passt inhaltlich in dieselbe "ehrliche, klare Angabe statt
-kryptischer Code"-Erzählung wie die anderen Content-Bausteine.
+Frisch heute: IT-Chef hat automatisch eine fehlende "Mietwagen"-Option im
+Chat-Advisor nachgerüstet (PR #23, wartet noch auf Ni's Review) – noch
+kein bestätigter Fund, aber ein möglicher weiterer Baustein für dieselbe
+"nichts verschweigen, alles anbieten"-Erzählung.
 
-Der Kandidatentopf wächst von drei auf vier – weiterhin klar unter der
-Achter-Schwelle für eine neue Mini-Changelog-Ausgabe. Alle vier
-Grundsatzfragen (Kanal, Mini-Changelog-Seite, Format, Start) sind jetzt
-seit über fünf Wochen unbeantwortet. Keine neuen Nutzungs- oder
-Erfolgszahlen bekannt.
+Die vier Grundsatzfragen (Kanal, Mini-Changelog-Seite, Format, Start)
+sind weiterhin unbeantwortet – jetzt seit über fünf Wochen. Das bleibt
+der eigentliche Engpass, nicht fehlender Content. Keine neuen Nutzungs-
+oder Erfolgszahlen bekannt.
 
 ## Vorschläge
 
-1. **Nicht mehr alles an einem einzigen offenen Bug aufhängen.** Zwei
-   Tage in Folge blockiert derselbe Kontrast-Fund die Veröffentlichung.
-   In `marketing/` liegen inzwischen acht fertige Entwürfe – mindestens
-   einer davon (z. B. zum Warenkorb oder zur Kartenansicht) hängt gar
-   nicht an der Reiseentwürfe-Badge. Den zuerst raus, während der
-   Kontrast-Fix nebenher weiterläuft. Warten auf den einen perfekten
-   Moment kostet gerade mehr als es bringt.
+1. **Jetzt handeln, weil der Blocker weg ist.** Die
+   Reiseentwürfe-Konsistenz-Story hängt nicht mehr an einem offenen Bug.
+   Der einzige Grund, warum trotzdem nichts rausgeht, ist die fehlende
+   Kanal-Entscheidung. Genau jetzt ist der Moment, diese eine Frage zu
+   klären – der Content liegt fertig da.
 
-2. **FlightCard-Klarname als Kandidat fürs nächste Mini-Changelog
-   vormerken.** Sobald Ni die Formatfrage entscheidet (Name statt Code?
-   Name plus Code?) und der Test angepasst ist, ist das ein sauberer
-   fünfter Baustein für dieselbe "ehrliche Angabe statt Abkürzung"-Reihe
-   wie die bisherigen Funde – kein neuer Aufwand, nur mitnehmen.
+2. **Kanal-Frage auf das kleinste mögliche Ja/Nein reduzieren.** Fünf
+   Wochen Stillstand entstehen nicht durch fehlende Ideen, sondern durch
+   eine unentschiedene Grundsatzfrage. Statt wieder alle vier Fragen auf
+   einmal zu stellen: nur "Wo posten wir zuerst – ja oder nein zu
+   Instagram?" Eine Antwort reicht als erster Schritt.
 
-3. **Die Kanal-Frage jetzt wirklich einmal beantworten, nicht wieder alle
-   vier auf einmal.** Fünf Wochen offen ist der eigentliche Show-Stopper,
-   nicht die Bugs – selbst ein fertiger Text bleibt ohne Kanal in der
-   Schublade. Reicht als kleinster möglicher Schritt: eine Antwort, kein
-   ganzes Konzept.
+3. **Die "Mietwagen"-Lücke im Chat vormerken, nicht überbewerten.** Sobald
+   PR #23 gemerged ist, passt der Fund gut in die laufende Reihe
+   ("wir bieten wirklich alle Optionen an, die wir versprechen") – aber
+   erst nach Bestätigung, nicht vorher als fertige Story verkaufen.
 
-4. **Den wiederkehrenden Kontrast-Fund selbst als Content nutzen.**
-   Dass derselbe Fehlton (Teal-Text auf hellem Grund) jetzt zweimal
-   hintereinander auftaucht und offen benannt wird statt überspielt zu
-   werden, ist genau die "wir zeigen auch unsere eigenen Fehler"-Haltung,
-   die zur Marke passt. Eine kurze Notiz dazu (sobald es einen Changelog-
-   Ort dafür gibt) wäre glaubwürdiger als jede Hochglanz-Aussage über
-   Barrierefreiheit.
+4. **Den eigenen Rhythmus als Beweis nutzen, nicht nur als internen
+   Zwischenstand.** Dass hier seit Wochen ehrlich dokumentiert wird, was
+   noch fehlt oder offen ist, statt Fortschritt zu behaupten, der nicht
+   da ist, ist selbst ein Markenargument – sobald es einen Kanal dafür
+   gibt.
 
-_Letztes Update: 2026-09-25_
+_Letztes Update: 2026-09-26_
