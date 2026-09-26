@@ -4,6 +4,70 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-26
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `489489d`, 25.09.) war laut
+`freigabe-chef-log.md` bereits vollständig in `main` gemergt
+(Merge-Commit `a4d8ffd`) — der Branch war also nur noch veraltet, nicht
+mehr in Arbeit. Neu von aktuellem `origin/main` (`b834b83`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret wieder nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf ergänzt.
+Kein neues eigenständiges Content-Stück, keine fünfte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen aus
+`marketing/freigabe-uebersicht.md` seit dem 25.09. beantwortet wurde:
+keine Notiz in `status.md` (Stand weiterhin 25.09.), `ZEITPLAN.md` (6.2
+weiterhin `[ ]`) oder diesem Dokument, keine neuen Kanal-Links im Repo,
+kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben
+offen — jetzt seit über fünf Wochen. Danach `git log b92d00e..origin/main`
+geprüft (Basislinie: der `origin/main`-Stand, auf dem der 25.09.-Lauf
+seine eigene Prüfung bereits abgeschlossen hatte): 14 Commits, zwei davon
+mit echter Produkt-Codeänderung, jeder einzeln per `git show` verifiziert.
+
+Der wichtigere Fund: `34a3c45` (IT-Chef Auto, 24.09.) behebt genau den
+WCAG-Kontrastfund, der die neue Teal-Badge-Unterscheidung für
+"Abgeschlossen" (`647d57f`, 23.09.) am 24./25.09. hier ausdrücklich als
+Tier-4-Kandidat zurückgestellt hatte (`text-teal` auf `bg-teal/5`, nur
+~2,3:1 Kontrast, jetzt auf das etablierte `border-teal bg-teal/10
+text-navy`-Muster umgestellt, WCAG-AA 4,5:1 erreicht) — von Support-Chef
+bereits am 25.09. bestätigt. Damit entfällt die einzige Bedingung, unter
+der `647d57f` zurückgehalten wurde: der Fund wird rückwirkend zum
+**22. Tier-4-Kandidaten**. Zweiter, unabhängiger Fund: `e96c200` (IT-Chef
+Auto, 25.09.) lässt `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx`
+eine fehlende Duffel-Dauer jetzt als "—" statt als leere Textstelle
+anzeigen — **23. Tier-4-Kandidat**, dieselbe Fundgruppe wie der bereits
+gezählte 14. Kandidat (derselbe Bug-Typ, andere Stelle in derselben
+Funktion). Ein neuer Support-Chef-Fund vom 25.09. (FlightCard zeigt
+IATA-Code statt vorhandenem Klarnamen, fehlende Hin-/Rückflug-Labels) ist
+noch nicht von IT-Chef behoben und damit noch kein Kandidat. Details
+siehe `marketing/freigabe-uebersicht.md`, Update 2026-09-26.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: beide neuen Kandidaten stammen
+aus einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commits, der Kontrast-Fix zusätzlich durch den Support-Chef-Bericht vom
+25.09. bestätigt. Keine offene Positionierungs-Grundsatzfrage: dieser
+Lauf trifft keine neue inhaltliche Entscheidung, sondern wendet nur die
+bereits etablierte "echte statt verschwiegene Lücke"-Abgrenzung an.
+"Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste aufbauen"
+(Sprint 4) sowie Testkampagnen/Launch-Kampagne (Sprint 6/7) bleiben
+bewusst unangetastet — das sind Live-Vorgänge bzw. an ungelöste
+Freigabe-Fragen gebunden, nicht sicher genug für den autonomen Modus. Der
+Kandidatentopf steht mit sechs weiterhin klar unter der Achter-Schwelle,
+die frühere Mini-Changelog-Ausgaben ausgelöst hat — keine fünfte Ausgabe
+heute.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-25
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
