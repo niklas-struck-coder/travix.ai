@@ -44,6 +44,13 @@ describe('TrainCard', () => {
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 
+  it('omits the minutes part for a whole-hour duration instead of showing "0min"', () => {
+    render(<TrainCard offer={baseOffer} />)
+
+    expect(screen.getByText('4h')).toBeInTheDocument()
+    expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
+  })
+
   it('shows a disabled "Ausgewählt" state instead of the select button when selected', () => {
     const onSelect = vi.fn()
     render(<TrainCard offer={baseOffer} onSelect={onSelect} selected />)

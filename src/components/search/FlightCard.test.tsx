@@ -70,6 +70,17 @@ describe('FlightCard', () => {
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 
+  it('omits the minutes part for a whole-hour duration instead of showing "0min"', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, duration: 'PT4H0M' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('4h')).toBeInTheDocument()
+    expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
+  })
+
   it('does not show a stops badge for a direct flight', () => {
     render(<FlightCard offer={baseOffer} />)
 

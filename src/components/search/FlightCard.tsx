@@ -21,7 +21,8 @@ function formatDuration(isoDuration: string) {
   if (!match) return isoDuration
   const [, days, hours, minutes] = match
   const totalHours = Number(days || 0) * 24 + Number(hours || 0)
-  return [totalHours && `${totalHours}h`, minutes && `${minutes}min`].filter(Boolean).join(' ') || '—'
+  const totalMinutes = Number(minutes || 0)
+  return [totalHours && `${totalHours}h`, totalMinutes > 0 && `${totalMinutes}min`].filter(Boolean).join(' ') || '—'
 }
 
 interface FlightCardProps {

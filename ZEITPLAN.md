@@ -720,6 +720,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Folgetag nach einem gesetzten Check-in) — vor dem Fix durch
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `HotelWizard.tsx`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 26.09. (dritter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug in `formatDuration()` behoben —
+  identisch dupliziert in `TrainCard.tsx` und `FlightCard.tsx`: die
+  Minuten-Capture-Group der Regex wurde nur auf String-Wahrheitsgehalt
+  geprüft (`minutes && ...`), nicht auf ihren Zahlenwert. Bei jeder
+  vollen Stunde (z. B. "PT4H0M", ein plausibler echter Wert für eine
+  Bahn- oder Flugverbindung) ist die Minuten-Gruppe der String `"0"` —
+  in JavaScript wahr, außer bei leerem String — wodurch zusätzlich
+  "0min" angehängt wurde ("4h 0min" statt "4h"). `reports/it-chef.md`
+  hatte denselben Codeabschnitt am 03.09. bereits als "theoretischen
+  Randfall mit sehr niedriger Konfidenz" nur für den entarteten
+  Sonderfall "PT0H0M" (Gesamtdauer null) notiert und als praktisch nicht
+  vorkommend eingestuft — das war zu eng gefasst: der Fehler tritt bei
+  jeder ganzstündigen Dauer auf, nicht nur bei einer Dauer von null.
+  Fix: neue `totalMinutes`-Zahl statt der rohen String-Gruppe, Anzeige
+  nur bei `totalMinutes > 0`, mechanisch identisch in beiden Dateien
+  angewendet. Als Nebeneffekt zeigt eine Dauer von "PT0H0M" jetzt auch
+  korrekt "—" statt "0min" — behebt damit den ursprünglich gemeldeten
+  Randfall gleich mit. Je ein neuer Regressionstest in
+  `TrainCard.test.tsx`/`FlightCard.test.tsx` (volle Stunde zeigt "4h"
+  ohne "0min") — vor dem Fix durch temporäres Zurücknehmen beider
+  Quelländerungen (`git stash` nur der beiden `.tsx`-Dateien)
+  reproduzierbar rot verifiziert (beide Karten zeigten "4h 0min").
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

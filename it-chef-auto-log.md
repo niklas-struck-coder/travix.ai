@@ -13246,3 +13246,80 @@ und auf `it-chef/auto` gepusht, `main` unberührt.
 betroffenen Checkbox-Beschreibungen (5.1-5.3, 5.6, bereits als fertig
 markiert) durch diesen reinen Bugfix an bestehendem Verhalten berührt
 wird.
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf, dritter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git log origin/main..HEAD`/`git log HEAD..origin/main` beide leer) plus
+die sieben bereits gepushten, von Freigabe-Chef noch nicht gemergten
+Läufe (inkl. der beiden vorherigen heutigen Läufe). Keine neuen Commits
+auf `main`, keine neuen Einträge in `reports/it-chef.md`,
+`reports/support-chef.md` oder `reports/marketing-chef.md` seit dem
+25.09.
+
+**Vorprüfung bestehender Vorschläge:** Dieselben drei offenen
+Support-/Marketing-Chef-Funde vom 25.09. wie in den beiden vorherigen
+heutigen Läufen bleiben ausgeschlossen (FlightCard-Klarname:
+Formatentscheidung + bestehender Test; Hin-/Rückflug-Label: bereits
+behoben; Hilfe-Seite: blockiert auf fehlende FAQ-Inhalte).
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat einen weiteren, bisher
+seltener geprüften Bereich durchsucht (Chat-Komponenten, `mockAdvisor.ts`,
+`duffel/client.ts`, mehrere Seiten, Layout/Routing, `format.ts`,
+`design-tokens.ts`, `TrainCard`/`TrainResults`, `types/*.ts`). Fund: die
+in `TrainCard.tsx` und `FlightCard.tsx` identisch duplizierte
+`formatDuration()`-Funktion prüfte die Minuten-Capture-Group der Regex
+nur auf String-Wahrheitsgehalt (`minutes && ...`), nicht auf ihren
+Zahlenwert. Bei jeder Dauer mit voller Stunde (z. B. "PT4H0M") ist die
+Minuten-Gruppe der String `"0"` — in JavaScript truthy, da nur der leere
+String falsy ist — wodurch fälschlich "0min" mit angezeigt wurde ("4h
+0min" statt "4h"). Selbst mit `node -e` verifiziert:
+`formatDuration('PT4H0M')` lieferte `"4h 0min"`, `formatDuration('PT1H')`
+(keine Minuten-Gruppe im Match) korrekt `"1h"`.
+
+`reports/it-chef.md` (03.09.) hatte denselben Codeabschnitt bereits als
+"theoretischen Randfall, sehr niedrige Konfidenz" notiert, aber nur für
+den entarteten Sonderfall einer Gesamtdauer von exakt "PT0H0M" (dort
+wurde angenommen, das käme bei echten Duffel-Daten praktisch nicht vor)
+— das griff zu kurz: der Fehler tritt bei jeder ganzstündigen,
+nicht-degenerierten Dauer auf (z. B. eine reguläre 2- oder 4-Stunden-
+Zugverbindung), ein durchaus realistischer Wert, kein Sonderfall mehr.
+Damit ist dies kein bereits bewusst zurückgestellter Fund, sondern eine
+neu erkannte, breitere Ausprägung desselben Bugs. Erfüllt alle vier
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht,
+keine offene Produktentscheidung (reine String-vs-Zahl-Logik, kein neues
+Anzeigeformat), klar durch den Code selbst beschrieben, objektiv prüfbar
+(Test). `TrainCard.test.tsx`/`FlightCard.test.tsx` verankerten die
+fehlerhafte Anzeige nirgends explizit (Basis-Angebot in
+`TrainCard.test.tsx` nutzt zwar bereits "PT4H0M", aber kein Test prüfte
+bisher den gerenderten Dauer-Text dafür) — sicher änderbar ohne
+bestehenden Test anzupassen.
+
+**Fix:** In beiden Dateien `minutes && `${minutes}min`` durch
+`const totalMinutes = Number(minutes || 0)` plus
+`totalMinutes > 0 && `${totalMinutes}min`` ersetzt — mechanisch
+identische Änderung an derselben, unabhängig duplizierten Funktion.
+Nebeneffekt: eine Dauer von "PT0H0M" zeigt jetzt ebenfalls korrekt "—"
+statt "0min" — behebt damit den ursprünglich in `reports/it-chef.md`
+gemeldeten engeren Sonderfall gleich mit. Je ein neuer Regressionstest
+in `TrainCard.test.tsx`/`FlightCard.test.tsx` ("PT4H0M" zeigt "4h" ohne
+"0min") — vor dem Fix durch temporäres Zurücknehmen beider
+Quelländerungen (`git stash` nur der beiden `.tsx`-Dateien)
+reproduzierbar rot verifiziert (beide Karten zeigten "4h 0min").
+
+**Geprüft:** `npm ci`, danach `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 361
+Tests, alle grün — zwei neue Tests gegenüber dem letzten Lauf), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** `TrainCard.tsx`, `TrainCard.test.tsx`, `FlightCard.tsx`
+und `FlightCard.test.tsx` geändert, `ZEITPLAN.md` (Phase-5-Eintrag)
+ergänzt, dieser Log-Eintrag committet und auf `it-chef/auto` gepusht,
+`main` unberührt. `tasks/tasks-prd-travix-platform.md` unverändert, da
+keine betroffene Checkbox-Beschreibung (5.1-5.3, 5.6, 5.8, 5.9, 5.11,
+bereits als fertig markiert) durch diesen reinen Bugfix an bestehendem
+Verhalten berührt wird. `reports/it-chef.md` bewusst nicht angefasst —
+dieser Bericht wird laut Skill-Vorgabe nur gelesen, nicht vom
+autonomen Lauf geschrieben.
