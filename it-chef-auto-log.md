@@ -13449,3 +13449,68 @@ Bericht wird laut Skill-Vorgabe nur gelesen, nicht vom autonomen Lauf
 geschrieben. Der ursprüngliche Auto-Fix-PR #23 bleibt als überholt zurück
 (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden, analog zu
 PR #18 am 06.09.).
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf, sechster Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` lag zu Laufbeginn zehn Commits hinter
+`origin/main` zurück (`main` hatte seit dem letzten Merge neue
+Marketing-/Support-/IT-Chef-Berichte sowie einen Freigabe-Chef-Log-Eintrag
+bekommen — laut diesem der Merge von `it-chef/auto` nach `main` erneut
+durch eine Umgebungsrestriktion blockiert, zum sechsten Mal). `origin/main`
+sauber per `git merge` in `it-chef/auto` eingeholt (kein Konflikt, nur
+Berichts-/Log-Dateien betroffen: `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md`, `status.md`,
+`marketing-chef-auto-log.md`, `support-chef-auto-log.md`,
+`freigabe-chef-log.md`, `marketing/freigabe-uebersicht.md` — keine
+`src/`-Datei betroffen) und sofort gepusht, damit der Branch aktuell
+bleibt. `main` dabei unberührt.
+
+**Vorprüfung bestehender Vorschläge:** `reports/support-chef.md` (26.09.)
+und `reports/it-chef.md` (26.09.) neu gelesen — beide bestätigen exakt die
+schon aus den vorherigen Läufen heute bekannten drei Punkte, keiner davon
+neu oder noch nicht behandelt: Mietwagen-Quick-Reply bereits im fünften
+Lauf heute unabhängig auf diesem Branch gefixt (Auto-Fix-PR #23 damit
+überholt); IATA-Code-vs-Klarname weiterhin eine bewusste Formatfrage
+(durch `FlightCard.test.tsx:47-48` als Ist-Verhalten verankert, Kriterium
+3 verletzt, Entscheidung liegt bei Ni); Hilfe-Seite weiterhin blockiert auf
+fehlende FAQ-Inhalte/Support-Adresse (8.11).
+
+**Eigene Bug-Suche:** Da die fünf vorherigen Läufe heute bereits praktisch
+den gesamten `src/`-Baum gezielt durchsucht hatten, ein Explore-Agent
+gezielt auf die verbliebene, heute noch nicht einzeln gelesene Restfläche
+angesetzt: alle zehn shadcn/ui-Primitives (`badge`, `button`, `card`,
+`dialog`, `input`, `label`, `progress`, `select`, `sheet`, `tabs.tsx`),
+`App.tsx`/`main.tsx`/`routes.tsx`, `PageHeader.tsx`/`PageTransition.tsx`/
+`Sidebar.tsx`/`MobileNav.tsx`/`AppShell.tsx`, `NoResultsMessage.tsx`,
+`TravixAvatar.tsx`, `Home.tsx`/`MeineReisen.tsx`/`Urlaubsmodus.tsx`/
+`PlaceholderPage.tsx`, `design-tokens.ts`/`utils.ts`, alle sechs
+`src/types/*.ts`-Dateien sowie erneut `speech.ts`, jeweils gegen die
+zugehörigen Tests abgeglichen. Ergebnis: kein echter mechanischer Bug.
+Einzige Auffälligkeit — ein toter `position === "popper" && ""`-Zweig in
+`select.tsx:79-81`, der zu einem No-op auswertet — ist praktisch
+unerreichbar (kein Aufrufer im Code übergibt `position="popper"`) und
+damit kein Verhaltensfehler, sondern bestenfalls Vorlagen-Restcode; nicht
+als Fund gewertet, um keinen Stil-Nitpick als Bug auszugeben. Deckt sich
+mit der bereits im 12./17./24. Lauf früherer Tage getroffenen Einschätzung,
+dass die shadcn-Grundbausteine unverändertes Vorlagen-Markup ohne eigene
+Logik sind.
+
+**Ergebnis:** Kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen in
+`badge.tsx`/`button.tsx`/`sheet.tsx`/`tabs.tsx`), volle Suite `npm test`
+(59 Testdateien, 362 Tests, alle grün — unverändert gegenüber dem fünften
+Lauf heute), sowie `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich; die bestehende Chunk-Size-Warnung ist
+unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Der Merge von `origin/main` (reine
+Berichts-/Log-Dateien) wurde separat bereits gepusht (Commit
+`74fdaee`), dieser Log-Eintrag wird als eigener Commit ergänzt und auf
+`it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
