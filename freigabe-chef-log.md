@@ -4664,3 +4664,72 @@ Code-Änderung, kein erfundener Punkt erkennbar.
 **Ergebnis:** Alle drei Branches bestanden die Prüfung und wurden
 gemergt (`main`: `b92d00e` → `d2b1936`). Keine offenen Probleme, keine
 Info an Ni nötig.
+
+## 2026-09-26, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 6 neue Commits vor `origin/main` (`efda747`,
+  `2824c73`, `2d13822`, `5e778f7`, `6096867`, `7afddc0`).
+- `marketing-chef/auto` — 0 neue Commits vor `origin/main`, planmäßig
+  übersprungen (wie für diesen frühen Lauf angewiesen).
+- `support-chef/auto` — 0 neue Commits vor `origin/main`, ebenfalls
+  planmäßig übersprungen.
+
+**`it-chef/auto` geprüft:** Diff zu `main` umfasst `ZEITPLAN.md`,
+`it-chef-auto-log.md`, `src/components/search/FlightCard.tsx` (+Test),
+`src/components/search/HotelWizard.tsx` (+Test),
+`src/components/search/TrainCard.tsx` (+Test) — drei inhaltliche
+Änderungen (Hin-/Rückflug-Label + Datum je Flugabschnitt in
+`FlightCard.tsx`; `HotelWizard.tsx` Check-out-Datepicker `min` jetzt
+Folgetag statt Check-in-Tag, verhindert ein durch die Validierung
+stillschweigend abgelehntes, aber im Picker wählbares Datum;
+`formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx` zeigte bei jeder
+vollen Stunde fälschlich "0min" mit, da die Minuten-Gruppe nur auf
+String-Wahrheitsgehalt statt Zahlenwert geprüft wurde), Rest reine
+"kein neuer sicherer Punkt gefunden"-Läufe ohne Code-Änderung. Jede
+Änderung deckt sich exakt mit ihrem eigenen `it-chef-auto-log.md`-
+Eintrag (kein Scope-Creep, jeder Commit genau ein Punkt), keine
+Berührung von Auth/Zahlungen/Rechtstexten. Kein Design-/Farb-/
+Layout-Eingriff, der gegen `MARKENDESIGN.md` liefe — nur Text-/
+Datums-Ergänzung mit bereits im selben File etablierten Klassen
+(`text-foreground`, `text-muted-foreground`) und Wortlaut
+("Hinflug"/"Rückflug" wortgleich aus `FlightWizard.tsx` übernommen).
+
+**Unabhängig selbst verifiziert** (`npm install`, dann `npx tsc -b`,
+`npx eslint .`, `npx vitest run` sowie `npm run build` tatsächlich
+selbst ausgeführt, nicht nur den Log-Eintrag geglaubt): `tsc -b` 0
+Fehler; `eslint .` 0 Fehler, dieselben 4 vorbestehenden
+Fast-Refresh-Warnungen wie in jedem früheren Lauf; volle Suite
+`vitest run` 59 Testdateien, **361 Tests, alle grün** (deckt sich exakt
+mit den im Log behaupteten 358 + 3 neuen Tests aus diesem Lauf); `npm
+run build` erfolgreich, dieselbe vorbestehende Chunk-Size-Warnung.
+Alles deckt sich exakt mit den Werten aus `it-chef-auto-log.md`.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+wurde erneut von der Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert
+(Permission denied) — wie schon am 18.09., 22.09., 24.09. und 25.09.
+bei genau diesem frühen Nacht-Check-Zeitfenster (0-4 Uhr). Kein
+Workaround versucht (kein Push, kein Umgehen über andere Tools). `main`
+und `it-chef/auto` sind dadurch unverändert; der lokale Prüf-Branch
+wurde wieder gelöscht, Arbeitsverzeichnis auf `origin/main` zurückgesetzt.
+
+**Ergebnis:** `it-chef/auto` inhaltlich und technisch vollständig
+geprüft und für gut befunden, aber **nicht gemergt** — blockiert durch
+die Umgebungs-eigene Merge-Restriktion, nicht durch einen Fund.
+`marketing-chef/auto`/`support-chef/auto` planmäßig übersprungen (keine
+neuen Commits).
+
+**Info an Ni nötig: Ja, jetzt dringlicher.** Das ist bereits das
+**fünfte Mal** (18.09., 22.09., 24.09., 25.09., jetzt 26.09.), dass
+genau der frühe Nacht-Check-Lauf an derselben Environment-Restriktion
+scheitert, während der spätere Tages-Check denselben Merge anstandslos
+durchführen kann. Da IT-Chef weiterhin brauchbare, geprüfte Fixes auf
+`it-chef/auto` produziert, stauen sich diese im frühen Fenster liegen,
+bis der Tages-Check nachmergt — funktioniert bisher, ist aber
+unzuverlässig. Empfehlung: entweder den frühen Nacht-Check auf reine
+Prüfung ohne Merge-Versuch umstellen (Merge dann nur im Tages-Check),
+oder die Auto-Mode-Berechtigung für diesen geplanten Lauf so anpassen,
+dass Merges erlaubt sind.
