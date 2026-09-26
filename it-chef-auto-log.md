@@ -13386,3 +13386,66 @@ Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf, fünfter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git log origin/main..HEAD`/`git log HEAD..origin/main` beide leer) plus
+die neun bereits gepushten, von Freigabe-Chef noch nicht gemergten Läufe
+(inkl. der vier vorherigen heutigen Läufe: kein Fund, HotelWizard-Fix,
+formatDuration-Fix, erneut kein Fund). Auf `main` sind seit dem letzten
+Lauf keine neuen Commits gelandet (laut Freigabe-Chef-Log zum sechsten
+Mal durch eine Umgebungsrestriktion am Merge von `it-chef/auto`
+gehindert — das betrifft nur den Merge, nicht diesen Lauf selbst).
+
+**Vorprüfung bestehender Vorschläge:** `reports/it-chef.md` hat seit dem
+25.09. einen neuen Eintrag: Der separate Auto-Fix-Kanal (eigenständiges
+System, das isolierte Ein-Datei-Fixes als PR vorschlägt, getrennt von
+diesem `it-chef/auto`-Kanal) hat heute
+[PR #23](https://github.com/niklas-struck-coder/travix.ai/pull/23) auf
+Branch `it-chef-autofix/mockadvisor-transportmode-mietwagen-2026-09-26`
+erstellt und vollständig diagnostiziert: Der Begrüßungstext in
+`mockAdvisor.ts:76` fragt "Zug, Flug, Bus, Fähre oder Mietwagen?", die
+`quickReplies` in Zeile 78 enthielten aber nur die ersten vier Optionen.
+Auf `it-chef/auto` geprüft und bestätigt: Der Bug steht unverändert im
+aktuellen Code dieses Branches (PR #23 wurde noch nicht gemergt). Wie
+bereits am 06.09. bei einem analogen Fall (Auto-Fix-PR #18) entschieden:
+ein bereits fremd diagnostizierter, aber noch nicht gemergter Auto-Fix-
+Fund darf von diesem autonomen Lauf direkt auf `it-chef/auto` übernommen
+werden, statt auf Ni's separate PR-Review zu warten, wenn er selbst alle
+vier Sicherheitskriterien erfüllt. Prüfung: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Recht; keine offene Produkt- oder
+Architekturentscheidung (der Fallback-Zweig bei nicht erkannter Eingabe,
+Zeile 90, listet bereits alle fünf Optionen — das Zielverhalten ist damit
+durch bestehenden Code im selben Fluss eindeutig vorgegeben, keine neue
+Annahme nötig); klar beschrieben (eine fehlende Optionen in einem Array);
+objektiv prüfbar (Test). Erfüllt alle vier Kriterien.
+
+**Fix:** In `mockAdvisor.ts:78` `quickReplies: ['Zug', 'Flug', 'Bus',
+'Fähre']` um `'Mietwagen'` ergänzt (mechanische Eine-Zeile-Änderung,
+identisch zur bereits im PR #23 vorgeschlagenen Korrektur, hier
+unabhängig nachvollzogen statt den fremden Branch zu mergen). Neuer
+Regressionstest in `mockAdvisor.test.ts` ("offers all five transport
+modes named in the question text as quick replies, including
+Mietwagen") — prüft, dass `getNextAdvisorStep(emptyTrip, 'Lissabon')`
+alle fünf Optionen inkl. "Mietwagen" liefert. Bestehender Test in
+derselben Datei ("sets the destination from the first user message …")
+prüft `quickReplies` nicht inhaltlich und bricht dadurch nicht.
+
+**Geprüft:** `npm ci`, danach `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 362
+Tests, alle grün — ein neuer Test gegenüber dem letzten Lauf), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** `mockAdvisor.ts` und `mockAdvisor.test.ts` geändert,
+`ZEITPLAN.md` (Phase-4-Eintrag) ergänzt, dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `tasks/tasks-prd-travix-platform.md`
+unverändert, da Punkt 4.7 (`QuickReplies.tsx`) bereits als fertig markiert
+ist und durch diesen reinen Inhalts-Bugfix an bestehendem Verhalten nicht
+berührt wird. `reports/it-chef.md` bewusst nicht angefasst — dieser
+Bericht wird laut Skill-Vorgabe nur gelesen, nicht vom autonomen Lauf
+geschrieben. Der ursprüngliche Auto-Fix-PR #23 bleibt als überholt zurück
+(kann bei nächster PR-Hygiene-Aufräumung geschlossen werden, analog zu
+PR #18 am 06.09.).

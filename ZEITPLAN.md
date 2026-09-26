@@ -357,6 +357,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (`getByRole('alert')` zeigt die Fehlermeldung) — vor dem Fix durch
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `Flugsuche.tsx`/`Hotelsuche.tsx`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 26.09. (fünfter Lauf desselben Tages)
+  einen bereits über den separaten Auto-Fix-Kanal vollständig
+  diagnostizierten Fund (Auto-Fix-PR #23,
+  `it-chef-autofix/mockadvisor-transportmode-mietwagen-2026-09-26`)
+  direkt auf `it-chef/auto` übernommen, statt auf Ni's Review des PRs zu
+  warten: Die Begrüßungstext-Frage in `mockAdvisor.ts:76` fragt explizit
+  "Zug, Flug, Bus, Fähre oder Mietwagen?", das zugehörige
+  `quickReplies`-Array (Zeile 78) enthielt aber nur die ersten vier
+  Optionen — der Fallback-Zweig bei nicht erkannter Eingabe (Zeile 90)
+  listet bereits korrekt alle fünf Optionen und diente als Vorlage. Fix:
+  `'Mietwagen'` als fünfte Option ergänzt, mechanische Eine-Zeile-
+  Korrektur ohne sonstige Verhaltensänderung. Neuer Regressionstest in
+  `mockAdvisor.test.ts` (alle fünf Quick-Replies inkl. "Mietwagen" nach
+  der Zieleingabe).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -45,6 +45,14 @@ describe('getNextAdvisorStep', () => {
     expect(reply.nextField).toBe('transportMode')
   })
 
+  it('offers all five transport modes named in the question text as quick replies, including Mietwagen', () => {
+    // Der Begrüßungstext fragt explizit nach "Zug, Flug, Bus, Fähre oder
+    // Mietwagen" — die Quick-Replies enthielten "Mietwagen" bisher nicht,
+    // Nutzer:innen hätten es freihändig eintippen müssen.
+    const reply = getNextAdvisorStep(emptyTrip, 'Lissabon')
+    expect(reply.quickReplies).toEqual(['Zug', 'Flug', 'Bus', 'Fähre', 'Mietwagen'])
+  })
+
   it('picks a curated destination instead of taking the "Überrasch mich" quick reply literally', () => {
     const reply = getNextAdvisorStep(emptyTrip, 'Überrasch mich')
     expect(reply.trip.destination).not.toBe('Überrasch mich')
