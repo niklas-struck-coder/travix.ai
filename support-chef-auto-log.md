@@ -3237,3 +3237,84 @@ zeigen könnten, obwohl `FlightCard.tsx:38` nur `firstSegment?.carrierName`
 anzeigt, wurde nicht vertieft untersucht — dafür gibt es in den
 aktuellen Test-/Demodaten keinen mehrsegmentigen Fall mit
 unterschiedlichen Carriern, um das am echten Verhalten zu verifizieren.
+
+---
+
+## 2026-09-26 — Hotel-/Flugsuche-Formulare (`HotelWizard.tsx`/`FlightWizard.tsx`)
+
+### Kontext
+Ausgewählt, weil dies laut `it-chef-auto-log.md` der heute meistbearbeitete
+Bereich ist: Auf `it-chef/auto` (noch nicht nach `main` gemergt, dieser
+Bericht prüft daher den Code-Stand von `origin/it-chef/auto`, nicht den
+älteren Stand auf diesem `support-chef/auto`-Branch selbst) liefen heute
+vier Läufe — zweiter Lauf (`2d13822`) behob eine Check-out-Datepicker-
+Lücke in `HotelWizard.tsx`, dritter Lauf (`5e778f7`) einen
+`formatDuration()`-Anzeigefehler in `FlightCard.tsx`/`TrainCard.tsx`,
+erster und vierter Lauf fanden nach eigener, breiter Bug-Suche (inkl.
+expliziter erneuter Prüfung von `FlightWizard.tsx`/`HotelWizard.tsx` im
+vierten Lauf) keinen weiteren Punkt.
+
+Geprüft:
+- `src/components/search/HotelWizard.tsx` (heute zweimal geändert)
+- `src/components/search/FlightWizard.tsx` (Vergleich, strukturell
+  identisches Formular)
+- `src/components/search/FlightCard.tsx`, `TrainCard.tsx`
+  (`formatDuration`-Fix von heute)
+- `it-chef-auto-log.md` (alle vier heutigen Einträge), um keinen bereits
+  von IT-Chef geprüften und bewusst verworfenen Kandidaten als neuen Fund
+  auszugeben
+
+### Zuerst bestätigt: heutige Fixes tatsächlich im Code
+- `HotelWizard.tsx:91`: Check-out-Feld hat jetzt
+  `min={checkInDate ? getNextDayIso(checkInDate) : undefined}` statt
+  `min={checkInDate || undefined}` — ein Check-out-Datum gleich dem
+  Check-in (0 Nächte) lässt sich im nativen Datepicker nicht mehr
+  auswählen, passend zur strikten Validierung `checkOutDate >
+  checkInDate`.
+- `FlightCard.tsx`/`TrainCard.tsx` (`formatDuration()`): prüft jetzt
+  `totalMinutes > 0` statt den rohen String — eine volle Stunde wie
+  "PT4H0M" zeigt korrekt "4h" statt fälschlich "4h 0min".
+
+### Reibungspunkte
+Keine neuen gefunden. Der naheliegendste Kandidat — der "Suchen"-Button
+deaktiviert sich stumm, ohne jede Erklärung, wenn man nach einer bereits
+gültigen Datumsauswahl das *frühere* Datum nachträglich hinter das
+spätere verschiebt (z. B. Check-in nach Check-out, oder Hinflug nach
+Rückflug) — trifft strukturell identisch auf beide Formulare zu, ist
+aber laut `it-chef-auto-log.md` (03.09., 26. Lauf, sowie heute im
+vierten Lauf erneut bestätigt) für den Flug-Fall eine bereits bewusst so
+getestete, akzeptierte Entscheidung (das `min`-Attribut schützt nur die
+Direktauswahl im Datepicker, ein deaktivierter Button ohne Zusatztext
+ist das gewollte Verhalten für die Rückwärts-Änderung). Der
+Check-out-Fix von heute überträgt exakt dieses bereits akzeptierte
+Verhalten strukturell auf `HotelWizard.tsx` — kein neuer, abweichender
+Fund, sondern derselbe bestehende Kompromiss.
+
+Die drei am 25.09. gemeldeten offenen Punkte, erneut selbst am Code
+gegengeprüft:
+1. **FlightCard zeigt IATA-Code statt Klarname** — unverändert im Code
+   (`FlightCard.tsx:52,56`: weiterhin `slice.originIata`/
+   `slice.destinationIata`, keine Verwendung von `originName`/
+   `destinationName`). Von IT-Chef heute erneut geprüft und bewusst
+   nicht automatisch behoben: `FlightCard.test.tsx:47-48` verankert die
+   IATA-Anzeige explizit als erwartetes Verhalten — eine Änderung wäre
+   eine Formatentscheidung, kein reiner Bugfix. Bleibt offener Vorschlag,
+   der eine bewusste Design-Entscheidung braucht.
+2. **Hin-/Rückflug-Label und Datum pro Abschnitt** — bestätigt behoben
+   (`efda747`, 25.09. vierter Lauf): `FlightCard.tsx:43-47` zeigt jetzt
+   `Hinflug`/`Rückflug` als Label sowie das Datum je Abschnitt.
+3. **Hilfe-Seite Kontakthinweis** — weiterhin blockiert, unverändert
+   seit 12.09. (siehe `ZEITPLAN.md`, Sprint 1 "Support-E-Mail live"
+   weiterhin offen, keine echte Kontaktadresse im Code vorhanden).
+
+### Nicht geprüft
+Ob dieselbe stumme Rückwärts-Deaktivierung auch für `Rooms`/`Guests`-
+bzw. `Passengers`-Felder eine Rolle spielt, wurde nicht vertieft
+untersucht — diese Felder klammern über `clampGuestCount()`/
+`clampPassengerCount()` immer auf einen gültigen Zahlenwert, es gibt
+dort keine Datums-Reihenfolge, die nachträglich brechen könnte. Die
+übrigen, heute von IT-Chef bereits mehrfach durchsuchten Bereiche
+(Chat-Komponenten, Listen-Seiten, `tripStorage.ts` u. a., siehe die vier
+heutigen `it-chef-auto-log.md`-Einträge) wurden hier nicht erneut
+einzeln nachvollzogen, da IT-Chef sie heute bereits mit einem
+Explore-Agenten breit abgedeckt hat.
