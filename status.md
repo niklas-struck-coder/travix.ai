@@ -13,15 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-24):**
-- IT-Chef Auto hat einen Anzeigefehler in formatDuration() behoben (leere Dauer
-  statt "—"); weitere Läufe ohne neuen sicheren Fund
-- Marketing-Chef hat den "Details ansehen"-Fund behoben (21. Tier-4-Kandidat);
-  ein Badge-Kontrastfund und ein Kalender-Race wurden bewusst zurückgestellt
-- Support-Chef hat die beiden jüngsten Funde als behoben bestätigt und einen
-  neuen Fund notiert: FlightCard zeigt IATA-Code statt vorhandenem Klarnamen
-- Freigabe-Chef hat alle drei Auto-Branches unabhängig geprüft und nach main gemergt
+**Seit letztem Update (2026-09-25):**
+- Marketing-Chef hat den Kontrastfund beim "Abgeschlossen"-Badge behoben; neue
+  kleinere Kandidaten (Teal-Badge, formatDuration()-Platzhalter) gesammelt
+- Support-Chef hat FlightCard, HotelWizard und FlightWizard geprüft, IT-Chef-Fixes
+  bestätigt; kleinere neue Funde (IATA-Code statt Klarname, fehlende Labels),
+  keine neuen kritischen Reibungspunkte
+- IT-Chef Bericht: gezielte Bug-Suche über weitere Dateien ohne neuen sicheren Fund
+- Freigabe-Chef hat marketing-chef/auto und support-chef/auto nach main gemergt;
+  it-chef/auto bleibt trotz grüner Prüfung durch eine Merge-Restriktion blockiert
+  (mittlerweile zum sechsten Mal)
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-25_
+_Letztes Update: 2026-09-26_
