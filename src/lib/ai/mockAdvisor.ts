@@ -75,7 +75,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
     return {
       content: `${destination} klingt nach einer großartigen Idee! Wie möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?`,
       avatarState: 'happy',
-      quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre'],
+      quickReplies: ['Zug', 'Flug', 'Bus', 'Fähre', 'Mietwagen'],
       trip: next,
       nextField: 'transportMode',
     }
