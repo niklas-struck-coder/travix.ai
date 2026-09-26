@@ -13120,3 +13120,57 @@ erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git log origin/main..HEAD` und `git log HEAD..origin/main` beide leer)
+plus die fünf bereits gestern gepushten Läufe, die Freigabe-Chef noch
+nicht gemergt hat. Keine neuen Commits auf `main` seit gestern, keine
+neuen Einträge in `reports/it-chef.md`, `reports/support-chef.md` oder
+`reports/marketing-chef.md` seit dem 25.09. — nichts Neues zum
+Gegenprüfen.
+
+**Vorprüfung bestehender Vorschläge:** Alle drei offenen
+Support-/Marketing-Chef-Funde vom 25.09. bleiben unverändert
+ausgeschlossen: FlightCard-Klarname statt IATA-Code (Formatentscheidung
++ bestehender Test, `FlightCard.test.tsx:47-48` verankert explizit die
+Code-Anzeige — Kriterium 3 verletzt), Hin-/Rückflug-Label und Datum pro
+Abschnitt (bereits im vierten Lauf vom 25.09. behoben, `efda747`, vor
+diesem Lauf verifiziert: `FlightCard.tsx` zeigt jetzt tatsächlich
+"Hinflug"/"Rückflug" samt Datum je Abschnitt), Hilfe-Seite (weiterhin
+blockiert auf fehlende FAQ-Inhalte, Aufgabe 8.11, Kriterium 3).
+
+**Eigene gezielte Bug-Suche:** Ein Explore-Agent hat einen frischen
+Batch bisher nicht einzeln gelesener Dateien geprüft:
+`src/lib/trip/cartTotals.ts`, `tripStorage.ts`, `calculateProgress.ts`
+(+ zugehörige Testdateien), sowie die Seiten `Aktivitaeten.tsx`,
+`Angebote.tsx`, `Dashboard.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`,
+`Kartenansicht.tsx`, `Warenkorb.tsx`, `ReiseSuche.tsx`, zusätzlich
+`findKnownDestination` in `src/types/stays.ts` (echte Funktion, nicht
+nur Typen). Ergebnis: keine Logikfehler — `calculateProgress.ts` passt
+zu beiden Aufrufstellen, `cartTotals.ts` hat keine Off-by-one-Fehler,
+`tripStorage.ts` hat durchgängig bewusste Null-/Array-Schutzbedingungen
+für Alt-Daten, die fünf Demo-Listenseiten (Aktivitaeten/Angebote/
+Favoriten/Preisalarme/Warenkorb) folgen konsistent demselben Muster ohne
+Abweichung, `Dashboard.tsx`s Fortschritts-/Summen-Berechnungen sind
+korrekt, `findKnownDestination` grenzt Wortgrenzen korrekt ab (z. B.
+"Romania" matcht nicht fälschlich "Rom", durch Testdatei verifiziert).
+Damit ist die zuvor noch ungelesene Restfläche in den Verzeichnissen, auf
+die dieser Lauf gezielt hat, jetzt ausgeschöpft.
+
+**Ergebnis:** Kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite
+`npm test` (59 Testdateien, 358 Tests, alle grün — unverändert), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
