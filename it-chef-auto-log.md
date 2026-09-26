@@ -13323,3 +13323,66 @@ bereits als fertig markiert) durch diesen reinen Bugfix an bestehendem
 Verhalten berührt wird. `reports/it-chef.md` bewusst nicht angefasst —
 dieser Bericht wird laut Skill-Vorgabe nur gelesen, nicht vom
 autonomen Lauf geschrieben.
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf, vierter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git log origin/main..HEAD`/`git log HEAD..origin/main` beide leer) plus
+die acht bereits gepushten, von Freigabe-Chef noch nicht gemergten Läufe
+(inkl. der drei vorherigen heutigen Läufe: kein Fund, HotelWizard-Fix,
+formatDuration-Fix). Keine neuen Commits auf `main`, keine neuen
+Einträge in `reports/it-chef.md`, `reports/support-chef.md` oder
+`reports/marketing-chef.md` seit dem 25.09. — dieselben drei offenen
+Support-/Marketing-Chef-Funde vom 25.09. bleiben aus denselben bereits in
+den vorherigen heutigen Läufen dokumentierten Gründen ausgeschlossen
+(FlightCard-Klarname: Formatentscheidung + bestehender Test;
+Hin-/Rückflug-Label: bereits behoben; Hilfe-Seite: blockiert auf
+fehlende FAQ-Inhalte).
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat einen weiteren, gezielt auf
+noch nicht heute einzeln gelesene Dateien fokussierten Durchgang
+gemacht: `Buchung.tsx`, `Reiseentwuerfe.tsx`, `Kalender.tsx`,
+`MeineReisen.tsx`, `Urlaubsmodus.tsx`, `Flugsuche.tsx`, `Hotelsuche.tsx`,
+`Home.tsx`, `KiChat.tsx`, `calendarUtils.ts`, `checklistRules.ts`,
+`calculateProgress.ts`, `tripStorage.ts`, `cartTotals.ts`,
+`ChecklistPanel.tsx`, `EditMode.tsx`, `FlightResults.tsx`,
+`HotelResults.tsx`, `TrainResults.tsx`, `FlightCard.tsx`, `HotelCard.tsx`,
+`TrainCard.tsx` (inkl. Gegenprüfung, dass die Fixes aus Lauf 2 und 3
+heute tatsächlich im Code stehen), `FlightWizard.tsx`, `HotelWizard.tsx`,
+`TripSummaryCard.tsx`, `QuickReplies.tsx`, `ChatMessage.tsx`,
+`ChatInput.tsx`, `useChat.ts`, `useConcierge.ts`, `format.ts`,
+`mockAdvisor.ts`, `mockConcierge.ts`, `duffel/client.ts`,
+`nav-config.ts`, sowie `routes.tsx` gegen `nav-config.ts` auf verwaiste/
+fehlende Routen abgeglichen (vollständig konsistent). Zusätzlich gegen
+`it-chef-auto-log.md` (13000+ Zeilen, über 30 frühere Läufe) abgeglichen,
+um keine bereits bewusst zurückgewiesenen Funde erneut aufzugreifen.
+
+Explizit als kein Bug bestätigt: das unterschiedliche Jahr beim
+Kyoto-Eintrag (`Reiseentwuerfe.tsx` "2027" als noch offener Entwurf vs.
+`Kalender.tsx`/`MeineReisen.tsx` "2026" als bereits abgeschlossene
+Reise) ist laut 25.09.-Log-Eintrag bewusst so; `FlightWizard.tsx` erlaubt
+absichtlich Hin- = Rückflugdatum (echter, gültiger Sonderfall, anders als
+der jetzt behobene Hotel-Fall mit einem ungültigen 0-Nächte-Aufenthalt);
+`calendarUtils.ts`s Monatsraster-Berechnung wurde manuell durchgerechnet
+und ist korrekt; die geteilten Icon-/Label-Zuordnungen
+(`Buchung.tsx`/`Reiseentwuerfe.tsx`/`TripSummaryCard.tsx`) sowie
+`formatTime`/`formatDuration` (`FlightCard.tsx`/`TrainCard.tsx`) sind
+aktuell konsistent, keine neue Divergenz wie beim heute bereits
+behobenen `formatDuration`-Fund.
+
+**Ergebnis:** Kein Bug und keine offene Support-/Marketing-Chef-Meldung
+gefunden, die alle vier Sicherheitskriterien erfüllt und noch nicht
+bereits umgesetzt ist.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen), volle Suite
+`npm test` (59 Testdateien, 361 Tests, alle grün — unverändert
+gegenüber dem dritten Lauf heute), sowie `npm run build` (`tsc -b &&
+vite build`, kein Typfehler, Build erfolgreich; die bestehende
+Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
