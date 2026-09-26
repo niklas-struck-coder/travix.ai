@@ -4733,3 +4733,108 @@ unzuverlässig. Empfehlung: entweder den frühen Nacht-Check auf reine
 Prüfung ohne Merge-Versuch umstellen (Merge dann nur im Tages-Check),
 oder die Auto-Mode-Berechtigung für diesen geplanten Lauf so anpassen,
 dass Merges erlaubt sind.
+
+## 2026-09-26, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:** `it-chef/auto`, `marketing-chef/auto`,
+`support-chef/auto` — alle drei mit neuen Commits gegenüber `main`.
+`it-chef/auto` unverändert gegenüber dem heutigen früheren
+Nacht-Check-Lauf (dieselben sechs Commits `efda747`…`7afddc0`, kein
+weiterer Lauf von IT-Chef seither).
+
+### `it-chef/auto`
+Diff erneut komplett selbst gelesen (nicht auf den früheren Lauf
+verlassen): drei inhaltliche Änderungen (Hin-/Rückflug-Label + Datum je
+Abschnitt in `FlightCard.tsx`; `HotelWizard.tsx`-Check-out-Datepicker
+`min` jetzt Folgetag statt Check-in-Tag; `formatDuration()`-Fix in
+`FlightCard.tsx`/`TrainCard.tsx` gegen fälschliches "0min" bei voller
+Stunde), Rest reine "kein neuer sicherer Punkt"-Läufe ohne
+Code-Änderung. Scope deckt sich exakt mit den vier
+`it-chef-auto-log.md`-Einträgen von heute, kein Scope-Creep, keine
+Berührung von Auth/Zahlungen/Rechtstexten, UI-Änderungen (Hinflug/
+Rückflug-Label, Datumsanzeige) nutzen bereits etablierte Klassen und
+Wortlaut aus `FlightWizard.tsx` — passt zu `MARKENDESIGN.md`.
+
+**Unabhängig selbst verifiziert** (eigener `git worktree` auf
+`origin/it-chef/auto`, frisches `npm install`, danach selbst ausgeführt,
+nicht nur den Log-Eintrag oder den früheren Lauf von heute geglaubt):
+`npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben 4
+vorbestehenden Fast-Refresh-Warnungen. `npx vitest run` → 59
+Testdateien, **361 Tests, alle grün** — deckt sich exakt mit den
+Angaben in `it-chef-auto-log.md` und dem früheren Lauf von heute.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+wurde erneut von der Auto-Mode-Sicherheitsklassifizierung dieser
+Umgebung mit der Begründung "Merge Without Review" blockiert (Permission
+denied) — diesmal jedoch **nicht** beim frühen Nacht-Check, sondern bei
+diesem späteren Tages-Check, der den Merge an früheren Tagen (10.08.,
+17.08., 18.08. u.a.) anstandslos durchführen konnte. Kein Workaround
+versucht (kein Push, kein Umgehen über andere Tools, wie von der
+Blockierungs-Meldung selbst gefordert). `main` und `it-chef/auto` sind
+dadurch unverändert; der lokale Prüf-Worktree wurde wieder entfernt.
+
+Auffällig zur Einordnung: `git merge --ff-only origin/marketing-chef/auto`
+und `git merge --no-ff origin/support-chef/auto` liefen im selben Lauf
+direkt danach **ohne jede Blockierung** durch (siehe unten) — beide
+ändern ausschließlich Markdown-Dateien. Die Restriktion scheint sich
+also nicht (nur) am Tageszeitfenster festzumachen, sondern eher daran,
+dass der `it-chef/auto`-Merge tatsächlichen Produktcode verändert.
+
+### `marketing-chef/auto`
+Ein Commit: `marketing/freigabe-uebersicht.md` +
+`marketing-chef-auto-log.md` um zwei neue Tier-4-Kandidaten ergänzt.
+Beide referenzierten Commits (`34a3c45` Teal-Kontrast-Fix, `e96c200`
+formatDuration-Platzhalter-Fix) per `git merge-base --is-ancestor` selbst
+bestätigt: beide bereits Teil von `main`. `34a3c45` zusätzlich per
+`git show` gegengelesen — Kontrast-Fix (`text-teal` → `text-navy` auf
+`bg-teal/5`/`bg-teal/10`) stimmt exakt mit der Beschreibung überein.
+Reine Markdown-Ergänzung, keine erfundenen Kennzahlen, kein Hinweis auf
+tatsächliches Posten/Versenden, vollständiger kohärenter Text.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `b834b83..f29b5c9`,
+gepusht). Anschließend `marketing-chef/auto` per
+`git push origin HEAD:refs/heads/marketing-chef/auto` auf den neuen
+`main`-Stand gebracht.
+
+### `support-chef/auto`
+Ein Commit: 81 neue Zeilen in `support-chef-auto-log.md`, UX-Analyse zu
+`HotelWizard.tsx`/`FlightWizard.tsx` (Bericht prüft ausdrücklich den
+Code-Stand von `origin/it-chef/auto`, nicht den älteren Stand auf diesem
+Branch selbst). Zwei zentrale Code-Behauptungen selbst per `git show
+origin/it-chef/auto:...` nachvollzogen: FlightCard zeigt weiterhin
+`slice.originIata`/`slice.destinationIata` (IATA-Code statt Klarname,
+durch `FlightCard.test.tsx:47-48` als gewolltes Verhalten verankert) —
+stimmt; Hinflug/Rückflug-Label aus `efda747` tatsächlich vorhanden
+(`FlightCard.tsx:45-47`) — stimmt. Reine Analyse ohne Code-Änderung,
+nichts erfunden.
+
+→ **Passt, nach `main` gemergt** (regulärer 3-Wege-Merge, da Branch
+divergiert war und kein Fast-Forward möglich, konfliktfrei, gepusht
+`966f025`). Anschließend `support-chef/auto` ebenfalls auf den neuen
+`main`-Stand gebracht.
+
+**Ergebnis:** Zwei Branches inhaltlich geprüft und gemergt
+(`marketing-chef/auto`, `support-chef/auto`), ein Branch vollständig
+geprüft und für gut befunden, aber technisch nicht mergbar
+(`it-chef/auto`, Environment-Restriktion).
+
+**Info an Ni nötig: Ja, dringend.** `it-chef/auto` ist jetzt zum
+**sechsten Mal in Folge** (18.09., 22.09., 24.09., 25.09., früher
+Nacht-Check 26.09., jetzt auch dieser Tages-Check 26.09.) an der
+Merge-Restriktion gescheitert — und zum ersten Mal traf es auch den
+späteren Tages-Check, der das bisher zuverlässig aufgefangen hat. Das
+bisherige Muster "früher Check blockiert, Tages-Check merged nach"
+scheint zu kippen: heute ist gar kein Merge von Code-Änderungen mehr
+durchgekommen, obwohl zwei reine Markdown-Merges im selben Lauf
+anstandslos funktionierten. Das deutet darauf hin, dass die Restriktion
+generell Merges mit echter Code-Änderung betrifft, nicht nur ein
+Zeitfenster. Drei geprüfte, grüne IT-Chef-Fixes (Hin-/Rückflug-Label,
+HotelWizard-Datepicker, formatDuration-Nullstunden-Fix) stauen sich
+dadurch weiter auf `it-chef/auto`, ohne dass absehbar ist, wann/ob ein
+künftiger Lauf sie noch durchbekommt. Empfehlung an Ni: Auto-Mode-
+Berechtigung für den Freigabe-Chef so anpassen, dass Merges nach
+erfolgreicher eigener Prüfung erlaubt sind — sonst bleibt die
+Kernaufgabe dieses Skills (Code-Änderungen autonom freigeben) dauerhaft
+blockiert.
