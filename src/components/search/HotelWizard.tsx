@@ -21,6 +21,15 @@ function getTodayIso(): string {
   return `${y}-${m}-${d}`
 }
 
+function getNextDayIso(dateIso: string): string {
+  const date = new Date(`${dateIso}T00:00:00`)
+  date.setDate(date.getDate() + 1)
+  const y = String(date.getFullYear()).padStart(4, '0')
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 interface HotelWizardProps {
   onSearch: (params: StaySearchParams) => void
   loading: boolean
@@ -88,7 +97,7 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
             type="date"
             value={checkOutDate}
             onChange={(event) => setCheckOutDate(event.target.value)}
-            min={checkInDate || undefined}
+            min={checkInDate ? getNextDayIso(checkInDate) : undefined}
             required
           />
         </div>

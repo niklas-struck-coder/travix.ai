@@ -13174,3 +13174,75 @@ erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-26 (autonomer Tagesmodus-Lauf, zweiter Lauf desselben Tages)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git log origin/main..HEAD`/`git log HEAD..origin/main` beide leer) plus
+die sechs bereits gepushten, von Freigabe-Chef noch nicht gemergten
+Läufe (inkl. dem ersten heutigen Lauf ohne Code-Änderung). Keine neuen
+Commits auf `main`, keine neuen Einträge in `reports/it-chef.md`,
+`reports/support-chef.md` oder `reports/marketing-chef.md` seit dem
+25.09.
+
+**Vorprüfung bestehender Vorschläge:** Dieselben drei offenen
+Support-/Marketing-Chef-Funde vom 25.09. wie im ersten heutigen Lauf
+bleiben ausgeschlossen (FlightCard-Klarname: Formatentscheidung +
+bestehender Test; Hin-/Rückflug-Label: bereits behoben; Hilfe-Seite:
+blockiert auf fehlende FAQ-Inhalte). Zusätzlich die Badge-Kontrastfrage
+aus dem Marketing-Chef-Bericht vom 25.09. selbst am Code gegengeprüft:
+`Reiseentwuerfe.tsx:244` zeigt für den "Abgeschlossen"-Status
+`border-teal bg-teal/10 text-navy` — `text-navy`, nicht `text-teal` wie
+im Marketing-Chef-Bericht behauptet. Der bereits im 25.09.-Log (dritter
+Lauf) dokumentierte Fix vom 24.09. ist also tatsächlich vorhanden; der
+Marketing-Chef-Bericht war zu diesem Punkt veraltet.
+
+**Eigene Bug-Suche:** Ein Explore-Agent hat gezielt bisher seltener
+geprüfte Bereiche durchsucht (`Warenkorb.tsx`, `Kartenansicht.tsx`,
+`Profil.tsx`, `Einstellungen.tsx`, `Angebote.tsx`, `Dashboard.tsx`,
+`checklistRules.ts`, `calculateProgress.ts`, `cartTotals.ts`,
+Buchungs-Komponenten, `mockConcierge.ts`, `speech.ts`, `FlightWizard.tsx`,
+`HotelWizard.tsx` u.a.). Fund: `HotelWizard.tsx` hatte einen
+eigenständigen, bisher nicht gemeldeten Bug — Check-in-Feld erlaubt
+`min={getTodayIso()}`, Check-out-Feld erlaubte bisher `min={checkInDate}`
+(inklusiv), während die Validierung `checkOutDate > checkInDate` (Zeile
+39, bewusst strikt größer) verlangt. Damit ließ sich im nativen
+Datepicker ein Check-out-Datum gleich dem Check-in wählen, das die
+Formularvalidierung dann stillschweigend ablehnte — der
+"Hotels suchen"-Button blieb einfach deaktiviert, ohne jede Erklärung.
+Das strukturell vergleichbare `FlightWizard.tsx` zeigt für den
+analogen Fall (Start = Ziel) eine explizite Fehlermeldung; hier fehlte
+jedes Feedback. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Recht, keine offene Produktentscheidung
+(reiner Datepicker-Constraint, keine neue Fehlertext-Entscheidung
+nötig), klar durch den Code selbst beschrieben (Mismatch zwischen
+`min`-Attribut und Validierungsbedingung in derselben Datei), objektiv
+prüfbar (Test).
+
+**Fix:** Neue lokale `getNextDayIso()`-Hilfsfunktion in `HotelWizard.tsx`
+(analog zu `getTodayIso()` in derselben Datei: lokale
+`Date`-Komponenten statt `toISOString()`, um Zeitzonen-Verschiebung zu
+vermeiden). `min` auf dem Check-out-Feld ist jetzt
+`checkInDate ? getNextDayIso(checkInDate) : undefined` statt
+`checkInDate || undefined` — der Datepicker lässt ein Check-out-Datum
+gleich dem Check-in dadurch erst gar nicht mehr zu, keine neue
+Fehlertext-UI nötig. Neuer Regressionstest in `HotelWizard.test.tsx`
+(Check-out-`min` ist der Folgetag nach einem gesetzten Check-in) — vor
+dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+nur `HotelWizard.tsx`) reproduzierbar rot verifiziert (Testfehler:
+erwartetes `min="2026-10-02"`, tatsächlich `min="2026-10-01"`).
+
+**Geprüft:** `npm ci`, danach `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden, unveränderten
+Fast-Refresh-Warnungen), volle Suite `npm test` (59 Testdateien, 359
+Tests, alle grün — ein neuer Test gegenüber dem letzten Lauf), sowie
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich; die bestehende Chunk-Size-Warnung ist unverändert).
+
+**Ergebnis:** `HotelWizard.tsx` und `HotelWizard.test.tsx` geändert,
+`ZEITPLAN.md` (Phase-5-Eintrag) ergänzt, dieser Log-Eintrag committet
+und auf `it-chef/auto` gepusht, `main` unberührt.
+`tasks/tasks-prd-travix-platform.md` unverändert, da keine der
+betroffenen Checkbox-Beschreibungen (5.1-5.3, 5.6, bereits als fertig
+markiert) durch diesen reinen Bugfix an bestehendem Verhalten berührt
+wird.

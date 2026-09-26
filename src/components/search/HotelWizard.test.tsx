@@ -41,4 +41,13 @@ describe('HotelWizard', () => {
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     expect(screen.getByLabelText('Check-in')).toHaveAttribute('min', today)
   })
+
+  it('does not allow picking a check-out date equal to check-in in the date picker', () => {
+    render(<HotelWizard onSearch={vi.fn()} loading={false} />)
+
+    const checkIn = screen.getByLabelText('Check-in')
+    fireEvent.change(checkIn, { target: { value: '2026-10-01' } })
+
+    expect(screen.getByLabelText('Check-out')).toHaveAttribute('min', '2026-10-02')
+  })
 })

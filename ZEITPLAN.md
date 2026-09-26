@@ -700,6 +700,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Ladehinweis) — vor dem Fix durch temporäres Zurücknehmen der drei
   Quelländerungen (`git stash` nur der `.tsx`-Fixes) reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 26.09. (zweiter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug in `HotelWizard.tsx` behoben: Das
+  Check-out-Feld erlaubte über sein `min`-Attribut (bisher einfach
+  `checkInDate`, also inklusiv) die Auswahl desselben Datums wie
+  Check-in im nativen Datepicker — die Formularvalidierung
+  (`checkOutDate > checkInDate`, bewusst strikt größer, da eine
+  Hotelübernachtung nicht am selben Tag enden kann) lehnte diesen Wert
+  dann aber ab, ohne jede Erklärung: der Absenden-Button blieb einfach
+  deaktiviert. Das strukturell ähnliche `FlightWizard.tsx` hat für den
+  vergleichbaren Fall (Start = Ziel) eine explizite Fehlermeldung
+  ("Start und Ziel dürfen nicht gleich sein") — hier fehlte jedes
+  Feedback. Fix: neue lokale `getNextDayIso()`-Hilfsfunktion (analog zu
+  `getTodayIso()` in derselben Datei), `min` auf dem Check-out-Feld
+  zeigt jetzt den Tag nach dem gewählten Check-in statt Check-in selbst
+  — der Datepicker lässt das ungültige Datum dadurch erst gar nicht
+  mehr zu, keine neue Fehlertext-Entscheidung nötig. Neuer
+  Regressionstest in `HotelWizard.test.tsx` (Check-out-`min` ist der
+  Folgetag nach einem gesetzten Check-in) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `HotelWizard.tsx`) reproduzierbar rot verifiziert.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
