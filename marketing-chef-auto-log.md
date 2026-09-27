@@ -4,6 +4,69 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-27
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `966f025`, 26.09.) war laut
+`freigabe-chef-log.md` ("2026-09-26 Tages-Check") bereits vollständig in
+`main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Per Fast-Forward-Merge auf aktuellen `origin/main` (`35b9cbd`)
+gebracht.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret wieder nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf
+ergänzt. Kein neues eigenständiges Content-Stück, keine fünfte
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen
+seit dem 26.09. beantwortet wurde: keine Notiz in `status.md` (Stand
+weiterhin 26.09.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem
+Dokument, keine neuen Kanal-Links im Repo, kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen — jetzt seit über fünf
+Wochen. Danach `git log f29b5c9..origin/main` geprüft (Basislinie: der
+eigene Auto-Lauf-Commit vom 26.09.): acht neue Commits, jeder einzeln per
+`git show --stat` verifiziert — keine einzige echte Produkt-
+Codeänderung, ausschließlich Berichte, Logs und ein Daily-Status-Update.
+
+Wichtiger Nebenbefund, der nicht aus diesem Commit-Bereich stammt: über
+`git log --all -- src/components/search/FlightCard.tsx` gefunden, dass
+auf `origin/it-chef/auto` inzwischen vier reale, fertige Produkt-Fixes
+warten (Hinflug/Rückflug-Label, zwei `formatDuration()`-Korrekturen,
+FlightCard-Klarname), die laut `git merge-base --is-ancestor` einzeln
+bestätigt weiterhin **nicht** in `main` sind — der `it-chef/auto`-Merge
+ist laut `freigabe-chef-log.md` jetzt seit sieben Tagen in Folge durch
+eine Auto-Mode-Restriktion blockiert. Nach der seit dem 21./22.09.
+etablierten Regel ("nur gemergte Commits zählen") sind das noch keine
+Tier-4-Kandidaten, auch wenn Support-Chef einen davon (Hinflug/Rückflug-
+Label) im eigenen Bericht bereits als "behoben" bestätigt hat — offenbar
+weil dort der unmergte Branch direkt geprüft wurde. Als Beobachtung
+festgehalten: sollte der Merge-Rückstau sich lösen, könnten auf einen
+Schlag mehrere neue Kandidaten entstehen. Der separat gemeldete IATA-
+Code-Punkt (FlightCard zeigt "BER" statt "Berlin") ist laut
+Support-Chef-Bericht vom 26.09. inzwischen ohnehin kein offener Bug mehr,
+sondern eine bewusste, noch unentschiedene Formatfrage — zählt also
+unabhängig vom Merge-Status nicht als Kandidat.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: es gibt keinen neuen, in `main`
+gemergten Punkt, der eine Zahl bräuchte; die vier auf `it-chef/auto`
+wartenden Fixes werden ausdrücklich als noch nicht zählbar
+gekennzeichnet statt stillschweigend vorwegzunehmen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand plus den
+beobachteten Merge-Rückstau (der selbst außerhalb des Marketing-Bereichs
+liegt und hier nicht entschieden werden kann). Der Kandidatentopf bleibt
+bei sechs — weiterhin klar unter der Achter-Schwelle, die frühere
+Mini-Changelog-Ausgaben ausgelöst hat. Keine fünfte Ausgabe heute.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-26
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
