@@ -3318,3 +3318,81 @@ dort keine Datums-Reihenfolge, die nachträglich brechen könnte. Die
 heutigen `it-chef-auto-log.md`-Einträge) wurden hier nicht erneut
 einzeln nachvollzogen, da IT-Chef sie heute bereits mit einem
 Explore-Agenten breit abgedeckt hat.
+
+---
+
+## 2026-09-27 — Flugkarte (`FlightCard.tsx`/`TrainCard.tsx`)
+
+### Kontext
+Ausgewählt, weil `it-chef-auto-log.md` für heute (27.09.) zwei
+Code-Änderungen an genau diesem Bereich zeigt, beide noch nicht von
+Support-Chef geprüft (letzter Bericht, 26.09., deckte `HotelWizard.tsx`/
+`FlightWizard.tsx` ab): zweiter Lauf (`formatDuration()`-Fix für Dauern
+ohne "T"-Anteil, z. B. "P1D"), dritter Lauf (`FlightCard.tsx` zeigt jetzt
+Klarnamen statt IATA-Code an Abflug-/Ankunftsort — der am 25./26.09.
+wiederholt als offener Vorschlag notierte Punkt ist damit umgesetzt).
+Dieser Bericht prüft den Code-Stand von `origin/it-chef/auto` (noch
+nicht nach `main` gemergt), nicht den älteren Stand auf diesem
+`support-chef/auto`-Branch.
+
+Geprüft:
+- `src/components/search/FlightCard.tsx` (beide heutigen Fixes)
+- `src/components/search/TrainCard.tsx` (`formatDuration`-Fix von heute,
+  strukturell identische Klarname-Anzeige zum Vergleich)
+- `src/types/duffel.ts`, `src/lib/duffel/client.ts` (woher
+  `originName`/`destinationName` tatsächlich kommen)
+- `FlightCard.test.tsx` (ob die neue Anzeige gegen Randfälle abgesichert
+  ist)
+
+### Zuerst bestätigt: heutige Fixes tatsächlich im Code
+- `FlightCard.tsx:19`/`TrainCard.tsx:14` (`formatDuration()`): Regex ist
+  jetzt `/P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/` — der "T"-Teil steht
+  in einer eigenen optionalen Gruppe, eine reine Tagesangabe wie "P1D"
+  ergibt jetzt "24h" statt des rohen ISO-Strings.
+- `FlightCard.tsx:52,56`: zeigt jetzt `slice.originName`/
+  `slice.destinationName` statt `slice.originIata`/`slice.destinationIata`
+  — Abflug-/Ankunftsort erscheint als Klarname ("Berlin"/"Lissabon")
+  statt Code ("BER"/"LIS"), 1:1 dasselbe Muster wie in `TrainCard.tsx`.
+
+### Reibungspunkte
+1. **Neuer Klarname-Anzeige fehlt jede Absicherung gegen eine leere
+   Antwort — anders als jedes andere Feld direkt daneben.**
+   `FlightCard.tsx:52,56` rendert `slice.originName`/
+   `slice.destinationName` ungeprüft. In derselben Datei haben
+   `formatTime()` (Zeile 8-11), `formatDate()` (13-16) und
+   `formatDuration()` (18-25) alle explizit `if (!x) return '—'`, damit
+   ein fehlender Wert nie als leerer Text neben Uhrzeit/Dauer landet.
+   Für Name fehlt dieser Guard komplett. Das ist kein theoretischer
+   Fall: `mapSlice()` in `src/lib/duffel/client.ts:97,99` setzt
+   `originName`/`destinationName` explizit auf `slice.origin?.name ??
+   ''` — also bewusst optional, weil eine echte Duffel-Antwort das
+   Namensfeld auslassen kann, während der IATA-Code (Zeile 96,98, selbe
+   `?? ''`-Fallback-Logik, aber IATA-Codes sind laut Flughafen-Standard
+   praktisch immer vorhanden) das vorher zuverlässiger war. Vor dem
+   heutigen Fix stand an dieser Stelle fast immer wenigstens der
+   IATA-Code; jetzt kann bei einer echten Antwort ohne Namensfeld direkt
+   neben der Uhrzeit schlicht nichts stehen — für eine Nutzerin sieht
+   das aus wie ein kaputtes/halb geladenes Kärtchen, nicht wie ein
+   bewusst leeres Feld. `FlightCard.test.tsx` deckt diesen Fall bisher
+   nicht ab (nur der volle Erfolgsfall mit vorhandenem Namen wird
+   getestet). *Vorschlag:* in `formatTime()`-Manier ein `formatLocation`
+   (oder ein einfaches `name || iata || '—'`) einführen, das bei
+   fehlendem Namen auf den IATA-Code zurückfällt statt auf nichts — der
+   IATA-Code war schließlich schon vorher die Anzeige und ist besser als
+   eine leere Stelle.
+
+Sonst nichts Neues gefunden: Beide bestätigten Fixes selbst wirken
+sauber und lösen tatsächlich das vorher gemeldete Problem; `TrainCard.tsx`
+hat dieselbe Lücke (`offer.originName`/`offer.destinationName` ohne
+Fallback), aktuell aber für keine echte Nutzerin erreichbar — laut
+`ZEITPLAN.md` (5.7) ist `TrainResults`/`TrainCard` bisher in keiner Seite
+eingebunden (`git grep` bestätigt: außer den eigenen Testdateien
+verwendet nur `TrainResults.tsx` die Komponente, aber `TrainResults`
+selbst wird nirgends importiert).
+
+### Nicht geprüft
+Ob weitere Felder in `FlightOffer`/`TrainOffer` (z. B. `carrierName`,
+dort bereits mit `?? 'Unbekannte Fluggesellschaft'`-Fallback in
+`client.ts:85` abgesichert) ebenfalls Lücken haben, wurde nicht
+vollständig durchsucht — nur der heute geänderte Ausschnitt war Ziel
+dieses Berichts.
