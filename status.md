@@ -13,17 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-25):**
-- Marketing-Chef hat den Kontrastfund beim "Abgeschlossen"-Badge behoben; neue
-  kleinere Kandidaten (Teal-Badge, formatDuration()-Platzhalter) gesammelt
-- Support-Chef hat FlightCard, HotelWizard und FlightWizard geprüft, IT-Chef-Fixes
-  bestätigt; kleinere neue Funde (IATA-Code statt Klarname, fehlende Labels),
-  keine neuen kritischen Reibungspunkte
-- IT-Chef Bericht: gezielte Bug-Suche über weitere Dateien ohne neuen sicheren Fund
+**Seit letztem Update (2026-09-26):**
+- IT-Chef hat den Mietwagen-Quick-Reply-Fund automatisch gefixt (PR #23)
+- Support-Chef hat den Fix bestätigt und einen neuen kleineren Fund gemeldet:
+  FlightCard/TrainCard zeigen bei fehlendem Namensfeld keinen Klarname-Fallback
+- Marketing-Chef: keine neuen Kandidaten, verweist aber auf einen wachsenden
+  Rückstau bei it-chef/auto (mehrere geprüfte Fixes warten weiter auf Merge)
 - Freigabe-Chef hat marketing-chef/auto und support-chef/auto nach main gemergt;
-  it-chef/auto bleibt trotz grüner Prüfung durch eine Merge-Restriktion blockiert
-  (mittlerweile zum sechsten Mal)
+  it-chef/auto bleibt trotz grüner Prüfung weiterhin durch eine Merge-Restriktion
+  blockiert (mittlerweile zum achten Mal in Folge)
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-26_
+_Letztes Update: 2026-09-27_
