@@ -52,12 +52,12 @@ export function FlightCard({ offer, onSelect, selected }: FlightCardProps) {
               <div className="flex items-center gap-3">
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(firstSegment?.departingAt ?? '')}
-                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.originIata}</span>
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.originName}</span>
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground" />
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(slice.segments[slice.segments.length - 1]?.arrivingAt ?? '')}
-                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.destinationIata}</span>
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.destinationName}</span>
                 </div>
                 <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="size-3.5" />

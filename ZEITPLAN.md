@@ -390,6 +390,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Datei (`FlightCard.test.tsx`, `TrainCard.test.tsx`) — vor dem Fix durch
   temporäres Zurücknehmen beider Quelländerungen (`git stash`) reproduzierbar
   rot verifiziert (zeigte "P1D" statt "24h").
+  Vom autonomen IT-Chef-Lauf am 27.09. (dritter Lauf desselben Tages) einen
+  über mehrere `reports/it-chef.md`-Einträge hinweg offen gebliebenen Fund
+  behoben: `FlightCard.tsx` zeigte am Abflug-/Ankunftsort den rohen
+  IATA-Code (z. B. "BER"/"LIS") statt eines Klarnamens — das strukturell
+  identische `TrainCard.tsx` löst dasselbe Anzeigeproblem bereits korrekt
+  über `offer.originName`/`offer.destinationName`. `FlightSlice`
+  (`src/types/duffel.ts`) besitzt dieselben Felder, `callDuffelProxy()`
+  (`src/lib/duffel/client.ts`) befüllt sie bereits aus der echten
+  Duffel-Antwort — `FlightCard.tsx` griff nur versehentlich auf
+  `slice.originIata`/`slice.destinationIata` statt der schon vorhandenen
+  Namen zu. Fix: beide Stellen auf `slice.originName`/`slice.destinationName`
+  umgestellt, mechanische Übernahme des bereits in `TrainCard.tsx`
+  etablierten Musters, keine neue Design-Entscheidung. Bestehender Test in
+  `FlightCard.test.tsx` umgestellt (prüft jetzt "Berlin"/"Lissabon" statt
+  "BER"/"LIS") — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

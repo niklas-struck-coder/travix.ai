@@ -40,12 +40,14 @@ describe('FlightCard', () => {
     expect(screen.queryByText('249.00 EUR')).not.toBeInTheDocument()
   })
 
-  it('shows the carrier, origin/destination codes and formatted duration for a direct flight', () => {
+  it('shows the carrier, origin/destination city names and formatted duration for a direct flight', () => {
     render(<FlightCard offer={baseOffer} />)
 
     expect(screen.getByText('TAP Air Portugal')).toBeInTheDocument()
-    expect(screen.getByText('BER')).toBeInTheDocument()
-    expect(screen.getByText('LIS')).toBeInTheDocument()
+    expect(screen.getByText('Berlin')).toBeInTheDocument()
+    expect(screen.getByText('Lissabon')).toBeInTheDocument()
+    expect(screen.queryByText('BER')).not.toBeInTheDocument()
+    expect(screen.queryByText('LIS')).not.toBeInTheDocument()
     expect(screen.getByText('3h 15min')).toBeInTheDocument()
   })
 

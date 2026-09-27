@@ -13685,3 +13685,56 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-27 (dritter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` direkt, sondern ein bereits über
+mehrere `reports/it-chef.md`-Einträge hinweg als offen vermerkter Fund:
+`FlightCard.tsx` zeigt am Abflug-/Ankunftsort den rohen IATA-Code (z. B.
+"BER"/"LIS") statt eines Klarnamens.
+
+**Warum sicher genug:** Reiner Anzeige-Bugfix ohne Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung nötig — das strukturell identische
+`TrainCard.tsx` löst exakt dasselbe Anzeigeproblem bereits korrekt über
+`offer.originName`/`offer.destinationName` (keine neue Design-Entscheidung,
+reine Übernahme eines bestehenden Musters). Klar genug beschrieben: `git
+grep` bestätigte, dass `FlightSlice` (`src/types/duffel.ts`) bereits die
+Felder `originName`/`destinationName` besitzt und `callDuffelProxy()`
+(`src/lib/duffel/client.ts:97-99`) sie schon aus der echten Duffel-Antwort
+befüllt (`slice.origin?.name`/`slice.destination?.name`) — `FlightCard.tsx`
+liest sie nur nicht, sondern greift stattdessen auf
+`slice.originIata`/`slice.destinationIata` zu. Ergebnis objektiv prüfbar
+über Typecheck/Lint/Tests sowie einen live reproduzierten
+Vorher/Nachher-Vergleich.
+
+**Verifiziert vor dem Fix:** Bestehender Test in `FlightCard.test.tsx`
+prüfte ausdrücklich `screen.getByText('BER')`/`screen.getByText('LIS')` —
+bestätigt, dass die Komponente tatsächlich die IATA-Codes statt der schon
+vorhandenen Klarnamen rendert. Test entsprechend umgestellt (erwartet jetzt
+`'Berlin'`/`'Lissabon'`, verneint `'BER'`/`'LIS'`) und per `git stash` auf
+`FlightCard.tsx` (Quelländerung zurückgenommen, Test bleibt neu) laufen
+lassen: schlägt wie erwartet fehl (`getByText('Berlin')` findet nichts) —
+reproduzierbar rot verifiziert.
+
+**Umgesetzt:**
+- `src/components/search/FlightCard.tsx`: `slice.originIata` →
+  `slice.originName`, `slice.destinationIata` → `slice.destinationName` in
+  der Abflug-/Ankunftsanzeige — 1:1 dasselbe Muster wie in `TrainCard.tsx`.
+  Die IATA-Codes selbst bleiben an keiner anderen Stelle der Karte
+  angezeigt (waren es vorher auch nicht), reine Ersetzung.
+- Bestehenden Test in `FlightCard.test.tsx` ("shows the carrier,
+  origin/destination codes …") umbenannt und umgestellt: prüft jetzt die
+  Klarnamen statt der IATA-Codes und verneint zusätzlich explizit, dass die
+  Codes noch angezeigt werden.
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung), volle
+Suite `npm test` (59 Testdateien, 364 Tests, alle grün).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt. Der zugehörige, mehrfach in
+`reports/it-chef.md` wiederholte offene Punkt ("FlightCard.tsx zeigt
+IATA-Code statt Klarname") ist damit erledigt.
