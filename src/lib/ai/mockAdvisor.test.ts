@@ -15,6 +15,13 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('ein Roadtrip')).toBe('car')
   })
 
+  it('detects "flight" from natural verb forms of "fliegen", not just the noun "Flug"', () => {
+    expect(detectTransportMode('Wir fliegen dieses Jahr nach Rom')).toBe('flight')
+    expect(detectTransportMode('Ich möchte gerne fliegen')).toBe('flight')
+    expect(detectTransportMode('Sie fliegt morgen ab')).toBe('flight')
+    expect(detectTransportMode('Wir sind schon einmal geflogen')).toBe('flight')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })

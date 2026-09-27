@@ -406,6 +406,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `FlightCard.test.tsx` umgestellt (prüft jetzt "Berlin"/"Lissabon" statt
   "BER"/"LIS") — vor dem Fix durch temporäres Zurücknehmen der
   Quelländerung (`git stash`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 27.09. (vierter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug in `detectTransportMode()`
+  (`mockAdvisor.ts`) behoben: Das Stichwort `'flieg'` für Transportmittel
+  "Flug" war als Wortstamm für Verbformen von "fliegen" gedacht, wurde
+  aber wie alle Keywords mit Wortgrenzen `\bflieg\b` geprüft — die
+  Wortgrenze direkt nach "flieg" existiert bei keiner echten Verbform
+  ("fliegen", "fliege", "fliegt", "geflogen"), der Stamm matchte daher nie
+  etwas und war faktisch tot. Antwortete eine Nutzerin im KI-Chat auf "Wie
+  möchtest du anreisen?" natürlich mit z. B. "Wir fliegen dieses Jahr"
+  statt mit dem Nomen "Flug", erkannte der Advisor das Transportmittel
+  nicht und fragte stattdessen nach. Fix: `'flieg'` durch die tatsächlich
+  vorkommenden vollständigen Verbformen ersetzt (`'fliegen'`, `'fliege'`,
+  `'fliegt'`, `'geflogen'`) — gleiches Muster wie das bereits bestehende
+  Extra-Keyword `'flughafen'`, keine neue Design-Entscheidung. Neuer
+  Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash`) reproduzierbar rot
+  verifiziert (alle vier Verbformen lieferten `null` statt `'flight'`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

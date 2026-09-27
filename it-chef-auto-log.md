@@ -13738,3 +13738,70 @@ Suite `npm test` (59 Testdateien, 364 Tests, alle grün).
 committet auf `it-chef/auto`, `main` unberührt. Der zugehörige, mehrfach in
 `reports/it-chef.md` wiederholte offene Punkt ("FlightCard.tsx zeigt
 IATA-Code statt Klarname") ist damit erledigt.
+
+
+## 2026-09-27 (vierter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` direkt, sondern ein neuer,
+eigenständig gefundener Bug in `detectTransportMode()`
+(`src/lib/ai/mockAdvisor.ts`), bisher weder in `reports/it-chef.md` noch
+in diesem Log dokumentiert.
+
+**Warum sicher genug:** Reiner Logik-/Erkennungsbugfix im lokalen
+Mock-Advisor ohne Bezug zu Auth, Zahlungen, echten Nutzerdaten oder
+rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung nötig —
+das Keyword `'flughafen'` existiert im selben Array bereits als
+vollständiges Extra-Wort statt als Wortstamm von `'flug'`, das ist das
+etablierte Muster, dem der Fix folgt. Klar genug beschrieben: der Bug
+lässt sich mechanisch aus dem Zusammenspiel von Wortstamm und
+Wortgrenzen-Regex ableiten, keine Interpretation nötig. Ergebnis objektiv
+prüfbar über einen Regressionstest, der vor dem Fix rot und danach grün
+ist, sowie Typecheck/Lint/volle Testsuite/Build.
+
+**Fund:** `transportKeywords.flight` (`src/lib/ai/mockAdvisor.ts:14`)
+enthielt `'flieg'` — offensichtlich als Wortstamm für Verbformen von
+"fliegen" gedacht, im Gegensatz zu allen anderen Einträgen im Array, die
+vollständige Wörter sind. `detectTransportMode()`
+(`src/lib/ai/mockAdvisor.ts:36-42`) prüft aber jedes Keyword mit
+Wortgrenzen `\b${keyword}\b`, um Teilstring-Fehltreffer wie "bus" in
+"Business" zu vermeiden (siehe bestehender Test dafür). Genau diese
+Wortgrenze direkt nach "flieg" existiert bei keiner echten Verbform
+("fliegen", "fliege", "fliegt", "geflogen" — der nächste Buchstabe ist
+dort immer ein Wortzeichen) — der Stamm matchte daher nie etwas und war
+faktisch tot. Antwortete eine Nutzerin im KI-Chat auf die Frage "Wie
+möchtest du anreisen?" mit einer natürlichen Formulierung wie "Wir
+fliegen dieses Jahr nach Rom" statt mit dem Nomen "Flug", erkannte der
+Advisor das Transportmittel nicht und fragte stattdessen erneut nach
+("Ich möchte dein Transportmittel nicht falsch verstehen — bitte wähle
+eine Option aus"), obwohl die Eingabe eindeutig war.
+
+**Verifiziert vor dem Fix:** Neuer Test in `mockAdvisor.test.ts`
+(`detectTransportMode('Wir fliegen dieses Jahr nach Rom')` u. a.) gegen
+die unveränderte Quelle laufen lassen (per `git stash` auf
+`mockAdvisor.ts` zurückgesetzt): alle vier Verbform-Fälle lieferten `null`
+statt `'flight'` — reproduzierbar rot verifiziert.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts:14`: `flight: ['flug', 'flieg',
+  'flughafen']` → `flight: ['flug', 'fliegen', 'fliege', 'fliegt',
+  'geflogen', 'flughafen']` — der tote Wortstamm durch die tatsächlich
+  vorkommenden vollständigen Verbformen ersetzt, gleiches Muster wie das
+  bereits bestehende Keyword `'flughafen'`.
+- Neuer Test in `mockAdvisor.test.ts` ("detects \"flight\" from natural
+  verb forms of \"fliegen\", not just the noun \"Flug\"") mit vier
+  Beispielsätzen (Präsens 1./3. Person, Infinitiv, Partizip II).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt, nicht
+  an einer offenen Checkbox — 4.3 (echter `invokeLLM.ts`-Wrapper) bleibt
+  unberührt offen.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx
+vitest run` (59 Testdateien, 365 Tests inkl. des neuen, alle grün), `npm
+run build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.
