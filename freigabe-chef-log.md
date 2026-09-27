@@ -4838,3 +4838,67 @@ Berechtigung für den Freigabe-Chef so anpassen, dass Merges nach
 erfolgreicher eigener Prüfung erlaubt sind — sonst bleibt die
 Kernaufgabe dieses Skills (Code-Änderungen autonom freigeben) dauerhaft
 blockiert.
+
+---
+
+## 2026-09-27 — Früher Nacht-Check (0-4 Uhr)
+
+Geprüft: `it-chef/auto` (13 neue Commits ggü. `main`, davon 3 mit
+tatsächlicher Code-Änderung, Rest "kein neuer sicherer Punkt"-Läufe ohne
+Änderung + ein Merge von `main` in den Branch). `marketing-chef/auto`
+und `support-chef/auto` laut Anweisung für diesen frühen Lauf kurz
+mitgeprüft: beide **0 neue Commits** ggü. `main` — nichts zu tun,
+regulär für den späteren 6-Uhr-Lauf.
+
+### `it-chef/auto`
+Diff zu `main` komplett selbst gelesen. Drei inhaltliche Fixes seit dem
+letzten Merge-Stand:
+- `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx`: Regex verlangte
+  zwingend ein "T" vor Stunden/Minuten, obwohl ISO 8601 es bei reiner
+  Tagesangabe (z.B. "P1D") weglässt — zeigte rohen ISO-String statt "24h".
+  Fix macht den "T"-Teil optional, mechanisch identisch in beiden Dateien.
+- `FlightCard.tsx`: zeigte IATA-Code ("BER"/"LIS") statt Klarname am
+  Abflug-/Ankunftsort — `slice.originName`/`destinationName` waren bereits
+  im Typ (`src/types/duffel.ts`) und über `callDuffelProxy()` befüllt,
+  nur ungenutzt. Fix übernimmt das in `TrainCard.tsx` bereits etablierte
+  Muster. Selbst per `git show origin/it-chef/auto:src/types/duffel.ts`
+  gegengelesen — Felder existieren wie behauptet.
+- (aus dem vorherigen Lauf bereits geprüft, jetzt erneut mitverifiziert:)
+  `HotelWizard.tsx` Check-out-Datepicker `min` jetzt Folgetag statt
+  Check-in-Tag; `mockAdvisor.ts` fünfte Quick-Reply "Mietwagen" ergänzt.
+
+Scope deckt sich mit den `it-chef-auto-log.md`-Einträgen von heute, kein
+Scope-Creep, keine Berührung von Auth/Zahlungen/Rechtstexten. UI-Änderung
+(Hinflug/Rückflug-Label, Datum) nutzt bereits etablierten Wortlaut aus
+`FlightWizard.tsx` — passt zu `MARKENDESIGN.md`. `ZEITPLAN.md`-Änderung
+ist nur der laufende Log-Eintrag, Datei existiert bereits in `main`.
+
+**Unabhängig selbst verifiziert** (eigener `git worktree` auf
+`origin/it-chef/auto`, frisches `npm install`, danach selbst ausgeführt):
+`npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben 4
+vorbestehenden Fast-Refresh-Warnungen. `npx vitest run` → 59 Testdateien,
+**364 Tests, alle grün**.
+
+→ Inhaltlich **passt alles**, wäre regulär gemergt worden.
+
+**Merge nicht ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+erneut von der Auto-Mode-Sicherheitsklassifizierung dieser Umgebung mit
+der Begründung "Merge Without Review" blockiert (Permission denied).
+Kein Workaround versucht. `main` und `it-chef/auto` dadurch unverändert;
+lokaler Prüf-Worktree wieder entfernt.
+
+**Ergebnis:** Ein Branch vollständig geprüft und für gut befunden, aber
+technisch nicht mergbar (`it-chef/auto`, Environment-Restriktion).
+`marketing-chef/auto`/`support-chef/auto` ohne neue Commits, nichts zu
+tun.
+
+**Info an Ni: Ja, weiterhin dringend.** Das ist jetzt bereits die
+**siebte** dokumentierte Blockierung in Folge (18.09., 22.09., 24.09.,
+25.09., früher + später Nacht-Check 26.09., jetzt 27.09.) — die
+Restriktion hat sich seit dem 26.09. konsistent auf jeden Merge mit
+echter Code-Änderung ausgeweitet (reine Markdown-Merges liefen zuletzt
+noch durch). Drei geprüfte, grüne IT-Chef-Fixes stauen sich weiter auf
+`it-chef/auto` an, ohne dass ein künftiger Lauf sie absehbar
+durchbekommt. Empfehlung unverändert: Auto-Mode-Berechtigung so
+anpassen, dass Merges nach erfolgreicher eigener Prüfung durch den
+Freigabe-Chef erlaubt sind.
