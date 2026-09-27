@@ -13633,3 +13633,55 @@ unverändert).
 auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-27 (zweiter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Kein Punkt aus `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` direkt, sondern ein bereits in
+`reports/it-chef.md` (25./26.09.) vorgemerkter, dort ausdrücklich als
+"theoretisch" markierter Verdacht: mögliche Randfall-Bugs in
+`formatDuration()` (`FlightCard.tsx`/`TrainCard.tsx`) bei Eingaben wie
+fehlendem "T"-Anteil in der ISO-8601-Dauer.
+
+**Warum sicher genug:** Reiner Anzeige-/Parsing-Bugfix ohne Bezug zu
+Auth, Zahlungen, echten Nutzerdaten oder rechtlichen Texten. Keine offene
+Produkt-/Architekturentscheidung nötig — mechanische Regex-Korrektur nach
+der ISO-8601-Spezifikation, kein neuer Gestaltungsspielraum. Der Verdacht
+war klar genug beschrieben, um ihn zunächst zu verifizieren, statt eine
+Annahme zu treffen. Ergebnis objektiv prüfbar über Typecheck/Lint/Tests
+sowie einen live reproduzierten Vorher/Nachher-Vergleich.
+
+**Verifiziert vor dem Fix:** `/P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec('P1D')`
+liefert `null` (das "T" war zwingend im Muster, obwohl ISO 8601 es bei
+fehlendem Stunden-/Minutenanteil erlaubt wegzulassen) — die Funktion fiel
+dann auf ihren Fallback zurück und gab den rohen ISO-String ("P1D")
+zurück statt einer formatierten Dauer. Zusätzlich per `git stash` auf
+beide (identisch duplizierten) Quelldateien temporär zurückgesetzt und
+die neuen Tests dagegen laufen lassen: beide schlugen wie erwartet fehl
+(zeigten "P1D" statt "24h") — reproduzierbar rot verifiziert.
+
+**Umgesetzt:**
+- `src/components/search/FlightCard.tsx` und
+  `src/components/search/TrainCard.tsx`: `formatDuration()`-Regex von
+  `/P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/` auf
+  `/P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/` geändert — das "T" samt
+  Stunden-/Minutenteil steht jetzt in einer eigenen optionalen Gruppe.
+  Eine reine Tagesangabe ("P1D") ergibt jetzt korrekt "24h" statt des
+  rohen ISO-Strings; bestehendes Verhalten für alle bisher abgedeckten
+  Fälle (mit "T") bleibt unverändert.
+- Je ein neuer Regressionstest in `FlightCard.test.tsx` und
+  `TrainCard.test.tsx` ("formats a duration with only a days component
+  (no explicit time part) instead of showing the raw ISO string").
+- `ZEITPLAN.md` (Phase 5, Programmierung) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb bereits abgeschlossener Punkte (5.8/5.9) liegt, nicht an
+  einer offenen Checkbox.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite
+`npx vitest run` (59 Testdateien, 366 Tests inkl. der zwei neuen, alle
+grün), `npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

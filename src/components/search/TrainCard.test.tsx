@@ -51,6 +51,14 @@ describe('TrainCard', () => {
     expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
   })
 
+  it('formats a duration with only a days component (no explicit time part) instead of showing the raw ISO string', () => {
+    const offer: TrainOffer = { ...baseOffer, duration: 'P1D' }
+    render(<TrainCard offer={offer} />)
+
+    expect(screen.getByText('24h')).toBeInTheDocument()
+    expect(screen.queryByText('P1D')).not.toBeInTheDocument()
+  })
+
   it('shows a disabled "Ausgewählt" state instead of the select button when selected', () => {
     const onSelect = vi.fn()
     render(<TrainCard offer={baseOffer} onSelect={onSelect} selected />)

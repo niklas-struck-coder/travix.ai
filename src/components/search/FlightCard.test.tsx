@@ -81,6 +81,17 @@ describe('FlightCard', () => {
     expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
   })
 
+  it('formats a duration with only a days component (no explicit time part) instead of showing the raw ISO string', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, duration: 'P1D' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('24h')).toBeInTheDocument()
+    expect(screen.queryByText('P1D')).not.toBeInTheDocument()
+  })
+
   it('does not show a stops badge for a direct flight', () => {
     render(<FlightCard offer={baseOffer} />)
 

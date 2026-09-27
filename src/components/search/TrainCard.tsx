@@ -12,7 +12,7 @@ function formatTime(isoString: string) {
 
 function formatDuration(isoDuration: string) {
   if (!isoDuration) return '—'
-  const match = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/.exec(isoDuration)
+  const match = /P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/.exec(isoDuration)
   if (!match) return isoDuration
   const [, days, hours, minutes] = match
   const totalHours = Number(days || 0) * 24 + Number(hours || 0)

@@ -371,6 +371,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Korrektur ohne sonstige Verhaltensänderung. Neuer Regressionstest in
   `mockAdvisor.test.ts` (alle fünf Quick-Replies inkl. "Mietwagen" nach
   der Zieleingabe).
+  Vom autonomen IT-Chef-Lauf am 27.09. einen in `reports/it-chef.md`
+  (25.09./26.09.) als "theoretischer Randfall" vorgemerkten Verdacht bei
+  `formatDuration()` bestätigt und behoben: Die gemeinsame, in
+  `FlightCard.tsx` und `TrainCard.tsx` identisch dupliziert vorliegende
+  Funktion parste ISO-8601-Dauern über
+  `/P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?/` — das "T" vor dem Stunden-/
+  Minuten-Teil war dabei zwingend im Muster, obwohl ISO 8601 es erlaubt,
+  "T" ganz wegzulassen, wenn die Dauer keinen Stunden-/Minutenanteil hat
+  (z. B. eine reine Tagesangabe wie "P1D"). Live reproduziert: Bei einer
+  solchen Dauer schlug `.exec()` fehl (`match` war `null`), die Funktion
+  fiel auf ihren Fallback zurück und zeigte den rohen ISO-String ("P1D")
+  statt einer formatierten Dauer ("24h") an. Fix: das "T" in einer
+  eigenen optionalen Gruppe (`(?:T(?:(\d+)H)?(?:(\d+)M)?)?`), sodass ein
+  fehlender Zeitanteil weiterhin korrekt auf 0 Stunden/Minuten fällt,
+  identische Änderung an beiden Stellen (keine Deduplizierung, gleiches
+  Muster wie bei anderen Fixes dieser Funktion). Neuer Regressionstest je
+  Datei (`FlightCard.test.tsx`, `TrainCard.test.tsx`) — vor dem Fix durch
+  temporäres Zurücknehmen beider Quelländerungen (`git stash`) reproduzierbar
+  rot verifiziert (zeigte "P1D" statt "24h").
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
