@@ -1,10 +1,109 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-26)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-27)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-27: keine neuen Tier-4-Kandidaten, Kandidatentopf unverändert bei sechs, alle vier Fragen weiterhin offen, aber wachsender Rückstau auf `it-chef/auto` (jetzt vier unmergete Fixes) als neues Risiko für die Content-Pipeline vermerkt
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `966f025`, 26.09.) war laut
+`freigabe-chef-log.md` ("2026-09-26 Tages-Check") bereits vollständig in
+`main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Per Fast-Forward-Merge auf aktuellen `origin/main` (`35b9cbd`)
+gebracht (kein eigener Merge-Commit nötig, da der Branch reiner
+Vorgänger von `origin/main` war).
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 26.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile
+1490, weiterhin `[ ]`) oder diesem Dokument seit dem 26.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über fünf Wochen.
+
+**`git log f29b5c9..origin/main` zeigt acht neue Commits** (Basislinie
+bewusst `f29b5c9`, der eigene Auto-Lauf-Commit vom 26.09., auf dem die
+letzte Prüfung bereits abgeschlossen war). Jeder einzeln per
+`git show --stat` geprüft — **keine einzige echte Produkt-Codeänderung**,
+ausschließlich `reports/*.md`, `status.md`, `freigabe-chef-log.md` und
+`support-chef-auto-log.md` betroffen: zwei Support-Chef-Auto-Log-Einträge
+samt Main-Merge (HotelWizard/FlightWizard geprüft, keine neuen
+Reibungspunkte), ein Freigabe-Chef-Tages-Check, ein Daily-Status-Update,
+je ein IT-Chef-, Marketing-Chef- und Support-Chef-Bericht vom 26.09.
+sowie der Freigabe-Chef-Nacht-Check vom 27.09. Der IT-Chef-Bericht vom
+26.09. (`90fb44b`) beschreibt zwar einen automatischen Fix der fehlenden
+"Mietwagen"-Option im Chat-Advisor (PR #23), ändert selbst aber nur den
+Berichtstext — der eigentliche Codefix liegt laut Support-Chef-Bericht
+vom 26.09. weiterhin unbestätigt auf einem separaten PR/Branch und wartet
+auf Nis Review, ist also noch kein Kandidat.
+
+**Wichtiger Nebenbefund:** `git log --all -- src/components/search/FlightCard.tsx`
+zeigt, dass auf `origin/it-chef/auto` inzwischen vier reale
+Produkt-Fixes warten, die noch **nicht** in `main` angekommen sind
+(`git merge-base --is-ancestor <commit> origin/main` bestätigt für jeden
+einzeln "nein"): `efda747` (25.09., Hinflug/Rückflug-Label pro
+Flugabschnitt — von Support-Chef im Bericht vom 26.09. bereits als
+"behoben" bestätigt, vermutlich weil Support-Chef den unmergten Branch
+direkt geprüft hat, nicht `main`), `5e778f7` (26.09., `formatDuration()`
+zeigte fälschlich 0min bei voller Stunde), `b0a2e49` und `e3e3a40`
+(beide 27.09., weitere `formatDuration()`- bzw. FlightCard-Klarname-
+Fixes). Nach derselben Regel, die dieses Dokument seit dem 21./22.09.
+konsequent anwendet (z. B. beim damaligen PR #22), zählt keiner dieser
+vier Fixes als Tier-4-Kandidat, solange er nicht tatsächlich über einen
+Freigabe-Chef-Merge in `main` liegt — unabhängig davon, ob Support-Chef
+ihn bereits auf dem Branch selbst verifiziert hat. Neu und erwähnenswert
+ist aber das Ausmaß: laut `freigabe-chef-log.md` ist der Merge von
+`it-chef/auto` nach `main` jetzt seit sieben Tagen in Folge durch eine
+"Auto-Mode-Restriktion" blockiert. Dadurch stauen sich echte, bereits
+fertige Fixes auf, die sonst zeitnah zu weiteren Tier-4-Kandidaten für
+den Mini-Changelog geworden wären — das ist kein Content-Problem, aber
+ein wachsendes Risiko für den Nachschub dieser Content-Reihe, falls der
+Rückstau anhält. Das ist keine Entscheidung, die dieser Lauf treffen
+kann (Merge-Restriktion liegt außerhalb des Marketing-Bereichs) — nur ein
+Punkt, den Ni im Blick behalten sollte.
+
+**Der Kandidatentopf bleibt unverändert bei sechs** (Stand 26.09.) —
+weiterhin klar unter der Achter-Schwelle, die Ausgabe 2/3/4 ausgelöst
+hat. Keine fünfte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: es gibt schlicht keinen neuen,
+in `main` gemergten Punkt, der eine Zahl bräuchte; die vier auf
+`it-chef/auto` wartenden Fixes werden explizit als noch nicht zählbar
+gekennzeichnet, nicht stillschweigend vorweggenommen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf trifft keine neue inhaltliche
+Entscheidung, sondern dokumentiert nur den unveränderten Stand plus den
+beobachteten Merge-Rückstau.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine neue eigenständige Content-/fünfte Mini-Changelog-Ausgabe —
+  Kandidatentopf steht bei sechs, weiterhin klar unter dem etablierten
+  Maßstab (acht).
+- Die vier auf `it-chef/auto` wartenden Fixes schon jetzt als
+  Tier-4-Kandidaten zählen — verstößt gegen die seit Wochen etablierte
+  "nur gemergte Commits zählen"-Regel, auch wenn Support-Chef sie
+  teilweise bereits inhaltlich bestätigt hat.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 27.09. (Prüfung
+  der vier Fragen, acht neue Commits einzeln geprüft ohne neuen
+  Tier-4-Kandidaten, Merge-Rückstau auf `it-chef/auto` als neues Risiko
+  dokumentiert), "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum
+  im Titel auf 27.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-26: Kontrastfund jetzt behoben — Teal-Badge-Unterscheidung wird nachträglich 22. Tier-4-Kandidat, plus ein neuer 23. Kandidat (formatDuration()-Platzhalter), Kandidatentopf steigt von vier auf sechs, alle vier Fragen weiterhin offen
 
@@ -2652,4 +2751,22 @@ Hin-/Rückflug-Labels) ist noch nicht behoben und damit noch kein
 Kandidat. Der nächste Lauf sollte weiterhin zuerst die vier offenen
 Fragen gegenprüfen, prüfen ob der IATA-/Klarname-Fund inzwischen behoben
 wurde, und den Kandidatentopf (Stand 26.09.: sechs) gegen denselben
-06.09.-Maßstab weiterführen.
+06.09.-Maßstab weiterführen. Stand 27.09. ist kein neuer Kandidat
+dazugekommen — seit dem letzten Merge (`f29b5c9`) gab es keine einzige
+neue, per `git show --stat` verifizierte Produkt-Codeänderung in `main`,
+nur Berichte, Logs und ein Daily-Status-Update (siehe Update 2026-09-27
+oben). Der Topf bleibt bei sechs. Der IATA-/Klarname-Punkt selbst ist
+laut Support-Chef-Bericht vom 26.09. inzwischen keine offene
+Umsetzungslücke mehr, sondern eine bewusste, noch unentschiedene
+Formatfrage — zählt also weiterhin nicht als Kandidat, unabhängig vom
+Merge-Status. Auf `it-chef/auto` warten stattdessen vier andere, bereits
+fertige Fixes (Hinflug/Rückflug-Label, zwei `formatDuration()`-Korrekturen,
+FlightCard-Klarname) auf einen Merge, der seit sieben Tagen durch eine
+Auto-Mode-Restriktion blockiert ist — sobald dieser Rückstau sich löst,
+könnten daraus auf einen Schlag mehrere neue Kandidaten werden, die den
+Topf über die Achter-Schwelle heben. Der nächste Lauf sollte weiterhin
+zuerst die vier offenen Fragen gegenprüfen, prüfen ob der `it-chef/auto`-
+Merge-Rückstau sich gelöst hat (und falls ja, die dort wartenden Fixes
+einzeln wie gewohnt per `git show` auf Tier-4-Tauglichkeit prüfen), und
+den Kandidatentopf (Stand 27.09.: sechs) gegen denselben 06.09.-Maßstab
+weiterführen.
