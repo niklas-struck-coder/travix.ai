@@ -423,6 +423,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
   Zurücknehmen der Quelländerung (`git stash`) reproduzierbar rot
   verifiziert (alle vier Verbformen lieferten `null` statt `'flight'`).
+  Vom autonomen IT-Chef-Lauf am 27.09. (fünfter Lauf desselben Tages) einen
+  von Support-Chef (`support-chef-auto-log.md`, 27.09., Fund 1) sowie
+  eigenständig in `reports/it-chef.md` (27.09., Fund 1) gemeldeten
+  Fund behoben: Die Klarname-Anzeige für Abflug-/Ankunftsort in
+  `FlightCard.tsx` (dritter Lauf desselben Tages, s.o.) und die
+  strukturell identische Anzeige in `TrainCard.tsx` rendern
+  `originName`/`destinationName` bisher ungeprüft — anders als
+  `formatTime()`/`formatDuration()` direkt daneben, die beide explizit
+  `if (!x) return '—'` haben. `mapSlice()` (`src/lib/duffel/client.ts`)
+  setzt `originName`/`destinationName` bewusst optional (`?? ''`), eine
+  echte Duffel-Antwort ohne Namensfeld ist also kein theoretischer Fall.
+  Bei fehlendem Namen stünde seit dem dritten Lauf direkt neben der
+  Uhrzeit schlicht nichts, wo vorher zuverlässig der IATA-Code stand.
+  Fix: exakt der von Support-Chef vorgeschlagene Ansatz — neue
+  `formatLocation()`-Hilfsfunktion in `FlightCard.tsx`
+  (`name || iata || '—'`, fällt auf den weiterhin vorhandenen IATA-Code
+  zurück, erst danach auf den Platzhalter-Strich) sowie eine gleichnamige,
+  einfachere Variante in `TrainCard.tsx` (`name || '—'`, da `TrainOffer`
+  keinen IATA-Code kennt). Zwei neue Regressionstests in
+  `FlightCard.test.tsx` (Rückfall auf IATA-Code bei leerem Namen; Strich
+  bei beidem leer) und ein neuer Test in `TrainCard.test.tsx` (Strich bei
+  leerem Namen) — vor dem Fix durch temporäres Zurücknehmen beider
+  Quelländerungen (`git stash`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

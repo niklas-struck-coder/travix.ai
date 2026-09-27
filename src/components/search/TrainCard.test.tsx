@@ -59,6 +59,13 @@ describe('TrainCard', () => {
     expect(screen.queryByText('P1D')).not.toBeInTheDocument()
   })
 
+  it('shows a placeholder dash instead of a blank name when origin/destination name is missing', () => {
+    const offer: TrainOffer = { ...baseOffer, originName: '', destinationName: '' }
+    render(<TrainCard offer={offer} />)
+
+    expect(screen.getAllByText('—')).toHaveLength(2)
+  })
+
   it('shows a disabled "Ausgewählt" state instead of the select button when selected', () => {
     const onSelect = vi.fn()
     render(<TrainCard offer={baseOffer} onSelect={onSelect} selected />)

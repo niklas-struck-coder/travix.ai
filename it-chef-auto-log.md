@@ -13805,3 +13805,63 @@ unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-27 (fünfter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Ein bereits doppelt und unabhängig diagnostizierter
+Fund aus `reports/it-chef.md` (27.09., Fund 1) und
+`support-chef-auto-log.md` (27.09., Fund 1): Die im dritten Lauf von heute
+umgestellte Klarname-Anzeige für Abflug-/Ankunftsort in `FlightCard.tsx`
+(`slice.originName`/`slice.destinationName`) sowie die strukturell
+identische, unverändert bestehende Anzeige in `TrainCard.tsx`
+(`offer.originName`/`offer.destinationName`) rendern diese Felder bisher
+ungeprüft — anders als `formatTime()`/`formatDuration()` direkt daneben in
+beiden Dateien, die beide explizit `if (!x) return '—'` haben.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung —
+der genaue Fix (`name || iata || '—'` für Flug, da IATA-Code vorhanden;
+`name || '—'` für Zug, da `TrainOffer` keinen IATA-Code kennt) war von
+Support-Chef bereits konkret vorgeschlagen, keine eigene Interpretation
+nötig. `mapSlice()` (`src/lib/duffel/client.ts:97,99`) setzt
+`originName`/`destinationName` nachweislich über `?? ''` optional — der
+leere Fall ist also eine reale, keine theoretische Eingabe. Ergebnis
+objektiv prüfbar über Tests (Rückfall auf IATA-Code bzw. Strich bei
+leerem Namen).
+
+**Verifiziert vor dem Fix:** Neue Tests gegen die unveränderte Quelle
+laufen lassen (per `git stash` auf `FlightCard.tsx`/`TrainCard.tsx`
+zurückgesetzt): Bei leerem `originName`/`destinationName` stand dort
+buchstäblich nichts (leerer Text-Knoten) statt IATA-Code bzw. Strich —
+reproduzierbar rot verifiziert.
+
+**Umgesetzt:**
+- `src/components/search/FlightCard.tsx`: neue `formatLocation(name,
+  iata)`-Hilfsfunktion (`name || iata || '—'`), ersetzt die bisher
+  ungeprüfte Anzeige von `slice.originName`/`slice.destinationName`.
+- `src/components/search/TrainCard.tsx`: neue, einfachere
+  `formatLocation(name)`-Hilfsfunktion (`name || '—'`, kein IATA-Code im
+  `TrainOffer`-Typ vorhanden), ersetzt die bisher ungeprüfte Anzeige von
+  `offer.originName`/`offer.destinationName`.
+- Zwei neue Regressionstests in `FlightCard.test.tsx` (Rückfall auf
+  IATA-Code bei leerem Namen; Platzhalter-Strich, wenn Name und IATA-Code
+  beide leer sind) und ein neuer Test in `TrainCard.test.tsx`
+  (Platzhalter-Strich bei leerem Namen).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt.
+  `tasks/tasks-prd-travix-platform.md` unverändert, da keine Checkbox
+  betroffen ist (Bugfix innerhalb bereits fertiger Komponenten, keine
+  offene Aufgabe).
+
+**Geprüft:** `npm ci` (frischer Checkout, Abhängigkeiten fehlten zunächst),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in `src/components/
+ui/`), volle Suite `npm test` (59 Testdateien, 368 Tests inkl. der drei
+neuen, alle grün).
+
+**Ergebnis:** Ein kleiner, isolierter, doppelt vordiagnostizierter Bugfix
+umgesetzt und committet auf `it-chef/auto`, `main` unberührt. Zusätzlich
+`origin/main` (Stand nach den heutigen Support-Chef-/Marketing-Chef-
+Merges und dem Freigabe-Chef-Bericht) in `it-chef/auto` gemergt, um den
+Branch aktuell zu halten — reiner Merge ohne Konflikte, keine
+Code-Änderung dadurch.

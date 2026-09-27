@@ -94,6 +94,27 @@ describe('FlightCard', () => {
     expect(screen.queryByText('P1D')).not.toBeInTheDocument()
   })
 
+  it('falls back to the IATA code when the origin/destination name is missing', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, originName: '', destinationName: '' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('BER')).toBeInTheDocument()
+    expect(screen.getByText('LIS')).toBeInTheDocument()
+  })
+
+  it('falls back to a placeholder dash when both name and IATA code are missing', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, originName: '', originIata: '', destinationName: '', destinationIata: '' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getAllByText('—')).toHaveLength(2)
+  })
+
   it('does not show a stops badge for a direct flight', () => {
     render(<FlightCard offer={baseOffer} />)
 

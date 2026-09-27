@@ -25,6 +25,10 @@ function formatDuration(isoDuration: string) {
   return [totalHours && `${totalHours}h`, totalMinutes > 0 && `${totalMinutes}min`].filter(Boolean).join(' ') || '—'
 }
 
+function formatLocation(name: string, iata: string) {
+  return name || iata || '—'
+}
+
 interface FlightCardProps {
   offer: FlightOffer
   onSelect?: (offer: FlightOffer) => void
@@ -52,12 +56,16 @@ export function FlightCard({ offer, onSelect, selected }: FlightCardProps) {
               <div className="flex items-center gap-3">
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(firstSegment?.departingAt ?? '')}
-                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.originName}</span>
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">
+                    {formatLocation(slice.originName, slice.originIata)}
+                  </span>
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground" />
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(slice.segments[slice.segments.length - 1]?.arrivingAt ?? '')}
-                  <span className="ml-1 text-sm font-normal text-muted-foreground">{slice.destinationName}</span>
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">
+                    {formatLocation(slice.destinationName, slice.destinationIata)}
+                  </span>
                 </div>
                 <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="size-3.5" />

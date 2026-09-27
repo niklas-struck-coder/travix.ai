@@ -20,6 +20,10 @@ function formatDuration(isoDuration: string) {
   return [totalHours && `${totalHours}h`, totalMinutes > 0 && `${totalMinutes}min`].filter(Boolean).join(' ') || '—'
 }
 
+function formatLocation(name: string) {
+  return name || '—'
+}
+
 interface TrainCardProps {
   offer: TrainOffer
   onSelect?: (offer: TrainOffer) => void
@@ -42,12 +46,16 @@ export function TrainCard({ offer, onSelect, selected }: TrainCardProps) {
         <div className="flex items-center gap-3">
           <div className="text-lg font-semibold text-foreground">
             {formatTime(offer.departureTime)}
-            <span className="ml-1 text-sm font-normal text-muted-foreground">{offer.originName}</span>
+            <span className="ml-1 text-sm font-normal text-muted-foreground">
+              {formatLocation(offer.originName)}
+            </span>
           </div>
           <ArrowRight className="size-4 text-muted-foreground" />
           <div className="text-lg font-semibold text-foreground">
             {formatTime(offer.arrivalTime)}
-            <span className="ml-1 text-sm font-normal text-muted-foreground">{offer.destinationName}</span>
+            <span className="ml-1 text-sm font-normal text-muted-foreground">
+              {formatLocation(offer.destinationName)}
+            </span>
           </div>
           <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="size-3.5" />
