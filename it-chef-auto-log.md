@@ -13553,3 +13553,83 @@ Testdateien, 362 Tests, alle grün — unverändert), sowie `npm run build`
 `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
 `tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
 wurde.
+
+## 2026-09-27 (autonomer Tagesmodus-Lauf)
+
+**Branch-Stand:** `it-chef/auto` = `origin/main` (kein Unterschied,
+`git merge origin/main` meldet "Already up to date") plus alle sieben
+Läufe vom 26.09. Seit dem siebten Lauf gestern (letzter Commit
+`05b602b`) ist auf `origin/main` kein einziger neuer Commit dazugekommen
+— laut Freigabe-Chef-Log (`0216b12`) bleibt der Merge von `it-chef/auto`
+nach `main` weiterhin durch dieselbe Umgebungsrestriktion blockiert
+(sechstes Mal), das betrifft aber nur den Merge selbst, nicht diesen
+Lauf. Auch keine neuen Auto-Fix-PR-Branches (weiterhin dieselben 23
+`it-chef-autofix/*`-Branches wie gestern, PR #23
+`mockadvisor-transportmode-mietwagen` bereits im fünften Lauf gestern
+unabhängig auf `it-chef/auto` nachgezogen).
+
+**Vorprüfung bestehender Vorschläge:** `reports/it-chef.md`,
+`reports/support-chef.md` und `reports/marketing-chef.md` sind seit
+gestern (26.09.) unverändert — keine neuen Einträge. Die drei bekannten
+offenen Punkte bleiben nach den bereits am 26.09. getroffenen
+Einordnungen ausgeschlossen: Mietwagen-Quick-Reply bereits gefixt;
+IATA-Code vs. Klarname in `FlightCard.tsx` weiterhin eine bewusste
+Formatfrage (durch `FlightCard.test.tsx:47-48` als Ist-Verhalten
+verankert, Kriterium 3 verletzt, Entscheidung liegt bei Ni); Hilfe-Seite
+weiterhin blockiert auf fehlende FAQ-Inhalte/Support-Adresse (8.11).
+
+**Abgleich mit `tasks/tasks-prd-travix-platform.md`:** Alle noch offenen
+Checkboxen durchgesehen. Fast alle sind entweder ausdrücklich als
+blockiert markiert (2.0/4.1-4.3: Base44/Gemini-Zugangsdaten; 5.7:
+fehlende Zug/Bus/Fähr-Datenquelle, Anbieterwahl ist Ni's
+Produktentscheidung; 7.4: eigene Architekturentscheidung für mehrere
+gleichzeitig gespeicherte Chat-Historien nötig; 8.1-8.7/8.9/8.11/8.12:
+größere neue Features bzw. blockiert auf Backend-/Produktentscheidungen
+oder fehlende Inhalte) oder brauchen neue Datenmodell-Felder, die noch
+nicht existieren (6.2 `TripItem.tsx`: kein Provider-URL-Feld auf
+`TripDraft`; 6.6/6.7 `CostBreakdown`/`calculateCosts`: keine Preisfelder
+für Transport/Unterkunft; 7.12 Reisebudget-Seite: baut auf denselben
+fehlenden Preisfeldern auf) — jeweils eine eigene Architektur-
+/Datenmodell-Entscheidung, kein autonom umsetzbarer Einzelpunkt.
+8.13 ("Write unit tests for calculateProgress, calculateCosts,
+checklistRules, and schema validation") gezielt geprüft: `calculateProgress.ts`
+und `checklistRules.ts` haben bereits eigene Testdateien
+(`calculateProgress.test.ts`, `checklistRules.test.ts`), die übrigen
+beiden Teile (`calculateCosts`, Schema-Validierung) existieren im Code
+noch gar nicht (siehe 6.7/4.1) — nichts zu tun, was nicht entweder schon
+erledigt oder anderweitig blockiert ist.
+
+**Eigene Bug-Suche:** Mechanischer Abgleich aller `.ts`/`.tsx`-Dateien
+unter `src/` gegen ihre jeweilige `*.test.*`-Datei ergibt exakt dieselbe
+Restliste wie im sechsten Lauf gestern bereits einzeln geprüft und
+freigegeben: die zehn shadcn-ui-Primitives (Vorlagen-Markup ohne eigene
+Logik), `App.tsx`/`main.tsx` (Einstiegspunkte, bewusst ohne Tests),
+`routes.tsx` (bräuchte Router-Mocking, größerer Umfang),
+`design-tokens.ts`/`src/test/setup.ts` (keine Logik) sowie alle
+`src/types/*.ts` (reine Typdefinitionen). Keine neue Lücke. Stichprobe
+gegen den Auto-Log: `Profil.tsx`, `Einstellungen.tsx`, `Kartenansicht.tsx`,
+`mockConcierge.ts`, `Urlaubsmodus.tsx` und `Dashboard.tsx` sind laut
+`it-chef-auto-log.md`-Volltextsuche bereits in mindestens einem früheren
+Lauf einzeln gelesen und geprüft worden (17-34 Erwähnungen je Datei) —
+kein Hinweis auf eine bisher übersehene Datei.
+
+**Ergebnis:** Kein neuer sicherer Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt und noch nicht bereits umgesetzt ist. Seit
+dem gestrigen, bereits sehr gründlichen Durchgang (sieben Läufe,
+praktisch der komplette `src/`-Baum einzeln gelesen) ist weder im Code
+noch in den drei Fach-Berichten irgendeine neue Information
+hinzugekommen.
+
+**Geprüft (reiner Gesundheitscheck, da keine Code-Änderung):** `npm ci`,
+danach `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben
+vier vorbestehenden, unveränderten Fast-Refresh-Warnungen in
+`badge.tsx`/`button.tsx`/`sheet.tsx`/`tabs.tsx`), volle Suite `npm test`
+(59 Testdateien, 362 Tests, alle grün — unverändert gegenüber dem
+siebten Lauf gestern), sowie `npm run build` (`tsc -b && vite build`,
+kein Typfehler, Build erfolgreich; die bestehende Chunk-Size-Warnung ist
+unverändert).
+
+**Ergebnis:** Keine Code-Änderung. Nur dieser Log-Eintrag committet und
+auf `it-chef/auto` gepusht, `main` unberührt. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` unverändert, da nichts umgesetzt
+wurde.
