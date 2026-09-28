@@ -1,53 +1,62 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-27
+**Datum:** 2026-09-28
 
-## Was ist seit dem letzten Eintrag (2026-09-26) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-27) passiert?
 
-Kurz gesagt: für echte Nutzer:innen nichts. Ich hab nachgeschaut — der
-Code unter `src/` ist auf `main` seit dem letzten Bericht unverändert
-(`git log --since="2 days ago" -- src/` liefert keinen einzigen Treffer).
-Die viele Aktivität der letzten zwei Tage (Berichte, Logs, neue Branches)
-hat also noch keine einzige Zeile erreicht, die live ausgespielt wird.
-Konkret heißt das: Beide zuletzt gemeldeten Punkte sind für echte
-Besucher:innen weiterhin genau so spürbar wie gestern, auch wenn an
-anderer Stelle schon "gefixt" oder "bestätigt" steht.
+Diesmal einiges — und größtenteils gute Nachrichten. Alle drei zuletzt
+gemeldeten Punkte sind jetzt tatsächlich auf `main` gelandet und für echte
+Besucher:innen spürbar:
+
+1. **Mietwagen-Button ist da.** `src/lib/ai/mockAdvisor.ts:78` — die
+   Quick-Replies beim Transportmittel enthalten jetzt `'Mietwagen'`, nicht
+   mehr nur die vier anderen Optionen.
+2. **Flugkarte zeigt jetzt Klarnamen.** `src/components/search/FlightCard.tsx:60,66`
+   zeigt "Berlin"/"Lissabon" statt "BER"/"LIS" — inklusive Datum und
+   Hinflug-/Rückflug-Kennzeichnung bei Hin- und Rückflug in einer Karte.
+3. **Der Fallback ist mit drin.** Sowohl `FlightCard.tsx:28` (`name ||
+   iata || '—'`) als auch `TrainCard.tsx:20` (`name || '—'`) fangen jetzt
+   ein leeres Namensfeld ab, statt eine leere Stelle neben der Uhrzeit zu
+   zeigen. Genau das hatte ich gestern vorsorglich vorgeschlagen, bevor der
+   Klarname-Fix live geht — ist eingebaut.
+
+Dazu ein paar Fixes, die ich nicht selbst gemeldet hatte, aber aus
+Nutzersicht ebenfalls zählen: Hotelsuche lässt kein Ein-Nacht-mit-null-
+Nächten-Datum mehr zu (`HotelWizard.tsx`, Check-out-Minimum ist jetzt
+Check-in + 1 Tag), und die Spracherkennung für "Flugzeug"/"fliegen"/
+"Zugticket" wurde nachgeschärft (`mockAdvisor.ts`).
 
 ## Meine Vorschläge
 
-1. **Mietwagen-Button fehlt weiterhin im echten Chat.**
-   `src/lib/ai/mockAdvisor.ts:76-78`: Der Bot fragt wörtlich "Wie
-   möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?", die
-   Klick-Optionen sind aber weiterhin nur `['Zug', 'Flug', 'Bus',
-   'Fähre']`. Der Fix dafür liegt seit gestern fertig in
-   [PR #23](https://github.com/niklas-struck-coder/travix.ai/pull/23) —
-   eine Zeile, noch offen, noch nicht gemergt. Bis das passiert, tippt
-   jede Person, die Mietwagen will, es weiter freihändig ein.
+1. **Flug-Suche im Hauptchat verspricht mehr, als sie hält.**
+   `src/lib/ai/mockAdvisor.ts:154-165`: Wer im normalen Chat-Ablauf (nicht
+   über "Bearbeiten") Flug als Transportmittel wählt und bis zur Unterkunft
+   durchklickt, bekommt die Nachricht *"Ich suche jetzt nach echten
+   Flug-Verbindungen für [Ziel] — sobald ich etwas Verifiziertes gefunden
+   habe, zeige ich es dir. Nichts wird erfunden."* Das klingt nach einer
+   laufenden Suche — es passiert aber keine. Der Code-Kommentar direkt
+   daneben sagt es selbst: *"Der Hauptchat-Ablauf löst die echte Flugsuche
+   aktuell nicht aus (nur der separate 'Bearbeiten'-Pfad in useChat.ts tut
+   das)."* Die einzige Stelle, die wirklich sucht, ist
+   `src/hooks/useChat.ts:229-262` (`awaitingFlightOrigin`) — die aber nur
+   erreichbar ist, wenn man hinterher über den "Bearbeiten"-Button beim
+   Transportmittel nochmal Flug auswählt und einen Abflughafen eingibt.
+   Im normalen Ablauf bleibt der Person nur "Neue Reise planen" als
+   einziger Quick-Reply — keine Flüge, keine Erklärung, warum nicht. Das
+   ist genau die Sorte Widerspruch, die der Satz "Nichts wird erfunden"
+   eigentlich verhindern soll: Hier wird zwar nichts erfunden, aber auch
+   nichts geliefert, obwohl es angekündigt wurde. *Vorschlag:* entweder im
+   Hauptablauf ebenfalls nach dem Abflughafen fragen und `runFlightSearch`
+   auslösen (wie im Bearbeiten-Pfad), oder die Ankündigungsnachricht so
+   umformulieren, dass sie ehrlich auf den zusätzlichen Bearbeiten-Schritt
+   hinweist — ähnlich wie es für Bus/Fähre/Mietwagen bereits sauber gelöst
+   ist (`mockAdvisor.ts:167-174`).
 
-2. **Flugkarte zeigt weiterhin Flughafen-Codes statt Orten.**
-   `src/components/search/FlightCard.tsx:45,50` zeigt "BER"/"LIS" statt
-   "Berlin"/"Lissabon", obwohl der lesbare Name in der Duffel-Antwort
-   längst mitkommt. Der fertige Fix dafür liegt auf `it-chef/auto`, das
-   seit 8 Tagen nicht nach `main` gemergt werden kann. Wer den
-   Flughafencode seines Ziels nicht auswendig kennt, muss auf der
-   Ergebniskarte raten.
-
-3. **Bevor Punkt 2 gemergt wird: unbedingt einen Fallback einbauen.**
-   Schon heute live sichtbar in `src/components/search/TrainCard.tsx:44,49`
-   (technisch identischer Code): `offer.originName`/`offer.destinationName`
-   werden dort ganz ohne Absicherung angezeigt — bei leerem Namensfeld
-   stünde schlicht nichts neben der Uhrzeit, statt wie bisher wenigstens
-   der Code. `TrainCard` hat aktuell noch keine echten Nutzer:innen, aber
-   genau dieses Muster soll laut Punkt 2 als Nächstes auch in
-   `FlightCard.tsx` landen. *Vorschlag:* vor dem Merge einmal
-   `name || iata || '—'` ergänzen, damit aus dem Klarname-Fix keine neue
-   Lücke wird, die schlimmer ist als der ursprüngliche IATA-Code.
-
-4. **Hilfe-Seite (`/hilfe`) bleibt eine Sackgasse.**
+2. **Hilfe-Seite (`/hilfe`) bleibt eine Sackgasse.**
    `src/pages/PlaceholderPage.tsx:16` zeigt weiterhin nur "Hilfe wird als
-   Nächstes gebaut" — kein FAQ, kein Kontaktweg. Laut `ZEITPLAN.md`
-   bewusst blockiert, bis es echte FAQ-Inhalte und eine echte
-   Support-Adresse gibt. Bis dahin geht jede Person mit einem echten
-   Problem dort leer aus — unverändert seit mehreren Berichten.
+   Nächstes gebaut" — kein FAQ, kein Kontaktweg, keine E-Mail-Adresse im
+   Code zu finden. Laut `ZEITPLAN.md` bewusst blockiert, bis Sprint 1
+   "Support-E-Mail live" abgeschlossen ist. Nach wie vor der richtige
+   Zeitpunkt dafür, sobald das ansteht — bis dahin unverändert.
 
-_Letztes Update: 2026-09-27_
+_Letztes Update: 2026-09-28_
