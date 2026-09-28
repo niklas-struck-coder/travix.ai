@@ -4,6 +4,65 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-28
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `86423ea`, 27.09.) war 25 Commits hinter
+`origin/main` zurück (IT-Chef-/Support-Chef-/Freigabe-Chef-Arbeit vom
+27./28.09., u.a. die drei unten zitierten Fixes). Per Fast-Forward-Merge
+auf aktuellen `origin/main` (`609894b`) gebracht, bevor der eigentliche
+Lauf begann.
+
+**Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Laufende Content-Produktion" (kein einmaliger Abschluss, laufender
+Punkt). Konkret: der eigene Vorschlag aus `reports/marketing-chef.md`
+(2026-09-27, Punkt 1) — die "Klarname statt Rohdaten"-Reihe (IATA-Code-
+statt-Klarname-Fund, fehlende Hin-/Rückflug-Labels, fehlender
+Namensfallback) als eigenes Content-Stück bündeln, sobald alle drei
+zugrunde liegenden Fixes durch sind.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument, kein
+Live-Vorgang — nichts wird gepostet, kein Kanal angelegt. Keine
+erfundenen Kennzahlen (kein Follower-/Reichweiten-/Nutzerzahlen-Bezug,
+explizit klargestellt, dass die Fixes aus interner Prüfung stammen, nicht
+aus echtem Nutzer-Feedback). Klar genug beschrieben und direkt auf dem
+bereits verifizierten Produktstand aufbauend — vor dem Schreiben im Code
+geprüft, dass alle drei Fixes (`e3e3a40`, `efda747`, `f06700e`)
+tatsächlich auf `main` gelandet sind (`FlightCard.tsx`/`TrainCard.tsx`
+gelesen, `formatLocation()` zeigt Klarname mit Fallback, Hinflug/
+Rückflug-Label vorhanden). Keine offene Positionierungs-Grundsatzfrage —
+Säule 1 ("Ehrlichkeit als Feature") ist bereits in `MARKENDESIGN.md`/
+`content-plan.md` festgelegt und wird hier nur angewendet.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2) — ausdrücklich ein
+  Live-Vorgang, fällt unter das Verbot für den autonomen Modus.
+- "Community/Warteliste aufbauen" (Sprint 4) — hängt an derselben nicht
+  live geschalteten Landingpage/Warteliste, kein eigenständiger
+  Entwurfs-Punkt ohne diese Grundlage.
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) — ausdrücklich
+  ein Live-Vorgang (echtes Ad-Budget), fällt unter das Verbot.
+- "Launch-Kampagne vorbereiten" (Sprint 7) — noch keine konkrete,
+  abgegrenzte Aufgabe (Launch liegt laut `ZEITPLAN.md` erst in der
+  Launch-Woche 24.-30.11.), würde eher eine Grundsatzentscheidung zu
+  Timing/Umfang vorwegnehmen als einen klar abgegrenzten Entwurf liefern.
+
+**Umgesetzt:**
+- Neue Datei `marketing/content-stueck-klarname-statt-rohdaten.md` —
+  Content-Stück (LinkedIn-Post, Instagram-Caption + Bild-/Reel-Idee,
+  Hashtag-Vorschläge, Canva-Design-Brief) zur "Klarname statt
+  Rohdaten"-Erzählung, mit wörtlichen Code-Zitaten aus
+  `FlightCard.tsx`/`TrainCard.tsx` (vorher im Code geprüft) statt
+  erfundener Details, plus expliziten "was NICHT behauptet wird"-Absatz.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. Vor dem Schreiben die drei zitierten
+Commits/Codestellen direkt im Repo gelesen (nicht nur aus Commit-
+Messages übernommen).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-27
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
