@@ -34,6 +34,17 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Ich brauche noch ein Zugticket')).toBe('train')
   })
 
+  it('detects the other modes from the same kind of compound noun as "Zugticket"', () => {
+    // Dieselbe Wortgrenzen-Lücke wie bei "Zugticket" betrifft auch die
+    // übrigen vier Transportmittel-Keywords ("flug", "bus", "schiff",
+    // "auto"), da "\b<keyword>\b" ohne Übergang zwischen Wort- und
+    // Nicht-Wortzeichen nicht innerhalb eines zusammengesetzten Worts matcht.
+    expect(detectTransportMode('Ich brauche noch ein Flugticket')).toBe('flight')
+    expect(detectTransportMode('Busticket kaufen')).toBe('bus')
+    expect(detectTransportMode('Schifffahrt buchen')).toBe('ferry')
+    expect(detectTransportMode('Autovermietung buchen')).toBe('car')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
