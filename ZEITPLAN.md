@@ -526,6 +526,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   jeweils erwarteten Transportmittel). Der ursprüngliche Auto-Fix-PR #24
   bleibt als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
   geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 28.09. (fünfter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (28.09., "Gefundene Bugs (nicht automatisch
+  gefixt)") gemeldeten Konsistenzfund behoben: `loadStoredChat()`
+  (`tripStorage.ts`) griff bisher ungeschützt auf `parsed.trip.activities`
+  zu — fehlt einem gespeicherten `localStorage`-Eintrag (sehr alt oder von
+  Hand editiert) das komplette `trip`-Feld, warf das eine `TypeError`
+  mitten im an sich schon vorhandenen Normalisierungscode. Der umgebende
+  Try/Catch fing das zwar ab (kein Absturz), verwarf dabei aber den
+  gesamten gespeicherten Zustand inklusive `messages`/`quickReplies` —
+  obwohl genau diese beiden Felder direkt daneben bereits einzeln gegen
+  ihr eigenes Fehlen abgesichert sind (Fix vom 12.09.). Fix:
+  `parsed.trip?.activities` statt `parsed.trip.activities` (identisches
+  Optional-Chaining-Muster wie an den beiden anderen Stellen in derselben
+  Funktion), keine neue Design-Entscheidung. Neuer Regressionstest in
+  `tripStorage.test.ts` — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur auf `tripStorage.ts`) reproduzierbar rot
+  verifiziert (`loadStoredChat()` lieferte `null` statt des mit leerem
+  `trip.activities`-Array normalisierten Zustands samt erhaltenem
+  `messages`/`quickReplies`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

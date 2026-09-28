@@ -14171,3 +14171,82 @@ unveränderte Chunk-Size-Warnung).
 committet auf `it-chef/auto`, `main` unberührt. Auto-Fix-PR #24 bleibt
 als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
 werden).
+
+## 2026-09-28 (fünfter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Der einzige noch offene, bereits vollständig
+diagnostizierte Fund aus `reports/it-chef.md` (28.09., "Gefundene Bugs
+(nicht automatisch gefixt)"): `loadStoredChat()` (`src/lib/trip/tripStorage.ts:25`)
+griff ungeschützt auf `parsed.trip.activities` zu.
+
+**Fund:** Fehlt einem gespeicherten `localStorage`-Eintrag unter dem Schlüssel
+`travix.ki-chat.draft` das komplette `trip`-Feld (sehr alter oder von Hand
+editierter Eintrag), wirft `parsed.trip.activities` eine `TypeError`
+mitten im an sich schon vorhandenen Normalisierungscode. Der umgebende
+Try/Catch fängt das zwar ab (kein Absturz für die Nutzerin), verwirft
+dabei aber den gesamten gespeicherten Zustand — inklusive `messages` und
+`quickReplies`, obwohl genau diese beiden Felder direkt daneben bereits
+einzeln gegen ihr eigenes Fehlen abgesichert sind (Fix vom 12.09.,
+`it-chef-auto-log.md`). Der Bericht selbst stufte den Fund als reine
+"Konsistenzfrage" statt akuten Bug ein (sicher degradierend, kein
+Nutzer-Risiko) und hatte ihn deshalb nicht automatisch über den
+Auto-Fix-Kanal gefixt — für den heutigen autonomen Lauf ist er trotzdem
+der klarste verfügbare Punkt: bereits vollständig diagnostiziert, exakt
+lokalisiert, keine Interpretation nötig.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine `localStorage`-Parsing-Logik für den Chat-Demo-Zustand.
+- Keine offene Produkt-/Architekturentscheidung: identisches
+  Optional-Chaining-Muster wie an den beiden Nachbarstellen in derselben
+  Funktion (`parsed.messages`/`parsed.quickReplies`), keine neue
+  Design-Entscheidung.
+- Klar genug beschrieben: exakte Zeile, exakte Ursache und der bereits
+  etablierte Lösungsweg standen vollständig in `reports/it-chef.md`.
+- Ergebnis objektiv prüfbar: neuer Regressionstest simuliert einen
+  gespeicherten Zustand ganz ohne `trip`-Feld, erwartet den normalisierten
+  Zustand (erhaltene `messages`/`quickReplies`, `trip.activities: []`)
+  statt `null`.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/trip/tripStorage.ts`) — schlug
+reproduzierbar fehl (`expected null not to be null`, d. h. der gesamte
+Zustand ging verloren). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `parsed.trip.activities` durch
+  `parsed.trip?.activities` ersetzt (`loadStoredChat`), Kommentar direkt
+  darüber entsprechend erweitert (jetzt auch das komplette Fehlen von
+  `trip` erwähnt).
+- Neuer Regressionstest in `src/lib/trip/tripStorage.test.ts`
+  ("normalizes a completely missing trip field instead of discarding the
+  whole stored state").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout — `node_modules` fehlte zu
+Sessionbeginn komplett), `npx tsc -b` (kein Typfehler), `npm run lint`
+(0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 374
+Tests inkl. des neuen, alle grün — 373 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Unabhängig geprüft, aber nicht als heutigen Punkt gewählt:**
+`reports/support-chef.md` (28.09., Vorschlag 1) — Flugsuche im
+Hauptchat-Ablauf kündigt eine laufende Suche an, obwohl `runFlightSearch`
+im Hauptablauf tatsächlich nie ausgelöst wird (nur der separate
+"Bearbeiten"-Pfad in `useChat.ts` tut das). Bewusst nicht heute
+angefasst: der Bericht selbst nennt zwei gleichwertige Lösungen (echte
+Suche auch im Hauptablauf auslösen — größere Architekturänderung über
+mehrere Dateien — oder die Ankündigung umformulieren, ohne festzulegen,
+welche); genau das ist die Art von offener Produktentscheidung, die laut
+Kriterium 2 Ni treffen sollte, kein autonom fällbarer Punkt. Andere
+offene `tasks/tasks-prd-travix-platform.md`-Checkboxen (2.0 Base44-Setup,
+4.1-4.3 echte KI, 5.0/6.0/7.0/8.0-Reste) weiterhin blockiert auf fehlende
+Credentials, eine fehlende Datenquelle oder eine Produktentscheidung —
+unverändert seit den vorherigen Läufen heute.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

@@ -204,6 +204,20 @@ describe('loadStoredChat', () => {
     expect(loaded?.trip.activities).toEqual([])
   })
 
+  it('normalizes a completely missing trip field instead of discarding the whole stored state (legacy/corrupted stored trip)', () => {
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({ messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }], quickReplies: ['Ja'] }),
+    )
+
+    const loaded = loadStoredChat()
+
+    expect(loaded).not.toBeNull()
+    expect(loaded?.trip.activities).toEqual([])
+    expect(loaded?.messages).toEqual([{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }])
+    expect(loaded?.quickReplies).toEqual(['Ja'])
+  })
+
   it('normalizes a missing messages field to an empty array (legacy/corrupted stored trip)', () => {
     localStorage.setItem(
       CHAT_STORAGE_KEY,
