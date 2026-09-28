@@ -6,6 +6,7 @@ import { searchFlights, searchStays } from '@/lib/duffel/client'
 import { findKnownDestination } from '@/types/stays'
 import type { StayOffer } from '@/types/stays'
 import type { DuffelError, FlightOffer } from '@/types/duffel'
+import { toIsoDate } from '@/lib/trip/calendarUtils'
 import { clearStoredChat, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
@@ -47,7 +48,7 @@ function defaultStayDates() {
   checkIn.setDate(checkIn.getDate() + 30)
   const checkOut = new Date(checkIn)
   checkOut.setDate(checkOut.getDate() + 3)
-  const toIso = (date: Date) => date.toISOString().slice(0, 10)
+  const toIso = (date: Date) => toIsoDate(date.getFullYear(), date.getMonth(), date.getDate())
   return { checkInDate: toIso(checkIn), checkOutDate: toIso(checkOut) }
 }
 
@@ -59,7 +60,7 @@ function defaultFlightDates() {
   departureDate.setDate(departureDate.getDate() + 30)
   const returnDate = new Date(departureDate)
   returnDate.setDate(returnDate.getDate() + 3)
-  const toIso = (date: Date) => date.toISOString().slice(0, 10)
+  const toIso = (date: Date) => toIsoDate(date.getFullYear(), date.getMonth(), date.getDate())
   return { departureDate: toIso(departureDate), returnDate: toIso(returnDate) }
 }
 

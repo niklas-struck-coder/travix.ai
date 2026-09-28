@@ -463,6 +463,35 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
   stash`) reproduzierbar rot verifiziert (lieferte `null` statt
   `'flight'`).
+  Vom autonomen IT-Chef-Lauf am 28.09. (zweiter Lauf desselben Tages) einen
+  eigenständig gefundenen Zeitzonen-Bug in `useChat.ts` behoben:
+  `defaultStayDates()`/`defaultFlightDates()` (voreingestelltes
+  30-Tage-Fenster für die automatische Unterkunfts-/Flugsuche, siehe
+  Kommentar direkt darüber) berechneten das Zieldatum korrekt über lokale
+  Datumskomponenten (`setDate(getDate() + 30/33)`), formatierten es aber
+  über `date.toISOString().slice(0, 10)` — das rechnet zuerst auf UTC um.
+  In Zeitzonen westlich von UTC (z. B. US/Kanada) verschiebt das am späten
+  Abend das Datum künstlich einen Tag nach vorn: reproduziert mit
+  `TZ=America/Los_Angeles` und "jetzt" = 28.09.2026 23:30 Uhr Ortszeit —
+  das korrekt berechnete Check-in-/Abflugdatum (28.10.2026) wurde als
+  29.10.2026 an die Duffel-Suche übergeben, weil `toISOString()` zuerst auf
+  29.10.2026 06:30 UTC vorrückt. Die restliche Codebasis nutzt für exakt
+  diese Umrechnung bereits durchgängig das korrekte, lokale Muster
+  (`toIsoDate()` in `src/lib/trip/calendarUtils.ts`, `getTodayIso()`/
+  `getNextDayIso()` in `HotelWizard.tsx`/`FlightWizard.tsx`) — nur diese
+  beiden Stellen in `useChat.ts` waren die einzigen verbliebenen
+  `toISOString()`-Aufrufe im gesamten `src`-Baum. Fix: beide `toIso`-Helfer
+  nutzen jetzt `toIsoDate(date.getFullYear(), date.getMonth(),
+  date.getDate())` (importiert aus `calendarUtils.ts`, keine dritte
+  Duplizierung) statt `date.toISOString().slice(0, 10)` — mechanische
+  Übernahme des bereits zweifach etablierten Musters, keine neue
+  Design-Entscheidung. Zwei neue Regressionstests in `useChat.test.ts`
+  (`vi.setSystemTime` auf einen UTC-Zeitpunkt, der bei `TZ=America/
+  Los_Angeles` 23:30 Uhr Ortszeit entspricht, prüfen Check-in/Check-out
+  bzw. Abflug-/Rückflugdatum gegen das lokale statt das UTC-verschobene
+  Datum) — vor dem Fix durch temporäres Zurücknehmen der Quelländerung
+  (`git stash`) reproduzierbar rot verifiziert (lieferte `2026-10-29`
+  statt `2026-10-28`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

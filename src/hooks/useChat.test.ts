@@ -432,6 +432,53 @@ describe('useChat flight search failure vs. real zero results', () => {
   })
 })
 
+describe('useChat default search dates use the local calendar day, not UTC', () => {
+  const ORIGINAL_TZ = process.env.TZ
+
+  beforeEach(() => {
+    localStorage.clear()
+    // West of UTC, late evening: local calendar day is still "today", but
+    // toISOString() (which converts to UTC first) would already show
+    // "tomorrow" — this is exactly the window where defaultStayDates()/
+    // defaultFlightDates() used to shift their computed date one day ahead.
+    process.env.TZ = 'America/Los_Angeles'
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-29T06:30:00.000Z')) // 2026-09-28 23:30 PDT
+    vi.mocked(searchStays).mockReset()
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+    vi.mocked(searchFlights).mockReset()
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    process.env.TZ = ORIGINAL_TZ
+  })
+
+  it('keeps the hotel check-in/check-out on the local calendar day instead of shifting a day ahead in UTC', async () => {
+    completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const params = vi.mocked(searchStays).mock.calls[0][0]
+    expect(params.checkInDate).toBe('2026-10-28')
+    expect(params.checkOutDate).toBe('2026-10-31')
+  })
+
+  it('keeps the flight departure/return date on the local calendar day instead of shifting a day ahead in UTC', async () => {
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const params = vi.mocked(searchFlights).mock.calls[0][0]
+    expect(params.departureDate).toBe('2026-10-28')
+    expect(params.returnDate).toBe('2026-10-31')
+  })
+})
+
 describe('useChat persistence resilience', () => {
   beforeEach(() => {
     localStorage.clear()

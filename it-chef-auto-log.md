@@ -13943,3 +13943,80 @@ erfüllt die vier Sicherheitskriterien für einen autonomen Lauf.
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-28 (zweiter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Ein eigenständig gefundener Zeitzonen-Bug in
+`src/hooks/useChat.ts` (`defaultStayDates()`/`defaultFlightDates()`).
+
+**Fund:** Beide Funktionen berechnen das Zieldatum für die automatische
+Unterkunfts-/Flugsuche (fixes 30-Tage-Fenster, siehe Kommentar direkt
+darüber in der Datei) korrekt über lokale Datumskomponenten
+(`checkIn.setDate(checkIn.getDate() + 30)`), formatierten das Ergebnis
+aber jeweils über einen lokalen `toIso`-Helfer mit
+`date.toISOString().slice(0, 10)`. `toISOString()` rechnet dafür zuerst
+auf UTC um — in jeder Zeitzone westlich von UTC (z. B. gesamte USA/
+Kanada) verschiebt das am späten Abend das Ergebnis-Datum künstlich einen
+Kalendertag nach vorn, weil die Umrechnung auf UTC über Mitternacht
+hinausträgt, während der lokale Kalendertag noch der vorherige ist. Ein
+Abgleich per `git grep toISOString -- 'src/**'` zeigt: das sind die
+einzigen zwei verbliebenen Stellen im gesamten `src`-Baum, die diese
+Umrechnung so machen — jede andere Stelle mit derselben Aufgabe
+(`toIsoDate()` in `src/lib/trip/calendarUtils.ts`, `getTodayIso()`/
+`getNextDayIso()` in `HotelWizard.tsx`/`FlightWizard.tsx`) nutzt bereits
+das korrekte, lokale Muster (`getFullYear()`/`getMonth()`/`getDate()`
+statt UTC-Umrechnung).
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Datumsformatierungslogik, die in eine Duffel-Suchanfrage
+  einfließt.
+- Keine offene Produkt-/Architekturentscheidung: eine reine lokal-vs-UTC
+  Serialisierungskorrektur, keine Design-Frage.
+- Klar genug beschrieben, keine eigene Interpretation nötig: die
+  Codebasis etabliert das korrekte Muster bereits zweifach an anderer
+  Stelle (`toIsoDate()`, `getTodayIso()`) — exakt derselbe "Schwesterdatei
+  hat den Fix schon, diese hier noch nicht"-Fall wie bei früheren Läufen.
+- Ergebnis objektiv prüfbar: Regressionstest mit `vi.setSystemTime()` auf
+  einen festen UTC-Zeitpunkt kombiniert mit `TZ=America/Los_Angeles`
+  bestätigt das erwartete lokale Datum.
+
+**Verifiziert vor dem Fix:** Neue Tests gegen die unveränderte Quelle
+laufen lassen (per `git stash` auf `useChat.ts` zurückgesetzt), mit
+`process.env.TZ = 'America/Los_Angeles'` und `vi.setSystemTime(new
+Date('2026-09-29T06:30:00.000Z'))` (entspricht 28.09.2026 23:30 Uhr
+Ortszeit) — die an `searchStays`/`searchFlights` übergebenen Daten waren
+`2026-10-29`/`2026-11-01` statt der korrekten `2026-10-28`/`2026-10-31`,
+reproduzierbar rot verifiziert. Zusätzlich unabhängig per Node-Skript mit
+`TZ=America/Los_Angeles` nachvollzogen (`checkIn.toISOString()` liefert
+`2026-10-29T06:30:00.000Z`, obwohl der lokale Kalendertag von `checkIn`
+der 28.10. ist).
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts`: `toIsoDate` aus `src/lib/trip/calendarUtils.ts`
+  importiert; beide lokalen `toIso`-Helfer in `defaultStayDates()` und
+  `defaultFlightDates()` nutzen jetzt `toIsoDate(date.getFullYear(),
+  date.getMonth(), date.getDate())` statt
+  `date.toISOString().slice(0, 10)` — keine dritte Duplizierung des
+  bereits zweifach vorhandenen lokalen Formatierungsmusters, keine neue
+  Design-Entscheidung.
+- Zwei neue Regressionstests in `src/hooks/useChat.test.ts` (neue
+  `describe`-Gruppe "useChat default search dates use the local calendar
+  day, not UTC"): prüfen `checkInDate`/`checkOutDate` bzw.
+  `departureDate`/`returnDate` gegen die tatsächlich an
+  `searchStays`/`searchFlights` übergebenen Parameter, bei simulierter
+  Systemzeit am späten Abend in `America/Los_Angeles`.
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt, nicht
+  an einer offenen Checkbox.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), volle Suite `npx vitest
+run` (59 Testdateien, 371 Tests inkl. der zwei neuen, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.
