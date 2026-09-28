@@ -5009,3 +5009,74 @@ erfolgreicher eigener Prüfung erlaubt sind — die heutige Erkenntnis
 (Code-Merges auf `it-chef/auto` sind offenbar generell blockiert,
 unabhängig von der Merge-Strategie) sollte in diese Anpassung
 einfließen.
+
+---
+
+## 2026-09-28 — Früher Nacht-Check (0-4 Uhr)
+
+Geprüft: `it-chef/auto` (3 neue Commits ggü. `main` seit dem letzten
+geprüften Stand vom 27.09., alle mit tatsächlicher Code-Änderung).
+`marketing-chef/auto` und `support-chef/auto` laut Anweisung für diesen
+frühen Lauf kurz mitgeprüft: beide **0 neue Commits** ggü. `main` —
+nichts zu tun, regulär für den späteren 6-Uhr-Lauf.
+
+### `it-chef/auto`
+Diff zu `main` komplett selbst gelesen. Drei inhaltliche Fixes seit dem
+letzten Merge-Stand (alle in `mockAdvisor.ts`/`useChat.ts`, mechanisch
+identisch zu den bereits am 27.09. geprüften Mustern):
+- `detectTransportMode()`: Keyword "flugzeug" (und Verbformen "fliegen",
+  "fliege", "fliegt", "geflogen") zum `flight`-Array ergänzt, analog zum
+  bereits etablierten `\bwort\b`-Muster.
+- `defaultStayDates()`/`defaultFlightDates()` in `useChat.ts`: nutzten
+  `date.toISOString().slice(0, 10)`, was in Zeitzonen westlich von UTC
+  am späten Abend das Datum künstlich einen Tag nach vorn verschiebt.
+  Fix nutzt jetzt das bereits zweifach etablierte lokale Muster
+  (`toIsoDate()` aus `calendarUtils.ts`). Eigenständig per Node-Skript
+  mit `TZ=America/Los_Angeles` nachvollzogen: Fehlverhalten vor dem Fix
+  reproduzierbar, nach dem Fix korrekt.
+- `detectTransportMode()`: Keyword "zugticket" zum `train`-Array ergänzt
+  (Wortgrenzen-Lücke bei zusammengesetzten Wörtern, "Zugticket" bereits
+  an mehreren Stellen im App-Code als Cart-Item-Label etabliert).
+
+Scope deckt sich exakt mit den drei `it-chef-auto-log.md`-Einträgen vom
+28.09., kein Scope-Creep, keine Berührung von Auth/Zahlungen/
+Rechtstexten — reine Keyword-Listen und eine Datums-Serialisierungs-
+korrektur. Kein UI/Design-Aspekt betroffen (keine neuen Texte/Farben).
+
+**Unabhängig selbst verifiziert** (eigener `git worktree` auf
+`origin/it-chef/auto`, frisches `npm install`, danach selbst
+ausgeführt): `npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler,
+dieselben 4 vorbestehenden Fast-Refresh-Warnungen. `npx vitest run` → 59
+Testdateien, **372 Tests, alle grün** — deckt sich exakt mit der Angabe
+im letzten `it-chef-auto-log.md`-Eintrag. Zusätzlich den kompletten Diff
+zu `main` datei- für Datei gegengelesen (`FlightCard.tsx`,
+`TrainCard.tsx`, `HotelWizard.tsx`, `useChat.ts`, `mockAdvisor.ts`) —
+deckt sich mit den bereits am 27.09. und 28.09. dokumentierten Fixes,
+nichts Unerwartetes.
+
+→ Inhaltlich **passt alles**.
+
+**Merge ausgeführt:** `git merge --ff-only origin/it-chef/auto`
+(`e0a63d3..e9a5029`) ist diesmal **ohne Blockierung** durchgelaufen —
+anders als bei den letzten acht dokumentierten Läufen (18.09., 22.09.,
+24.09., 25.09., beide Läufe 26.09., beide Läufe 27.09.), bei denen genau
+dieser Merge-Typ (Code-Änderung auf `it-chef/auto`) durch die
+Auto-Mode-Sicherheitsklassifizierung mit "Merge Without Review"
+blockiert wurde. Kein Workaround nötig, kein zweiter Versuch. Gepusht
+nach `origin/main`. `it-chef/auto` zeigt danach (Fast-Forward) bereits
+auf denselben Stand wie `main`, kein separater Branch-Update-Push nötig.
+`marketing-chef/auto`/`support-chef/auto` frisch gegen den neuen
+`main`-Stand geprüft: beide weiterhin 0 neue Commits.
+
+**Ergebnis:** Alle drei geprüften Branches auf dem Stand von `main`
+(`it-chef/auto` reguär gemergt, `marketing-chef/auto`/`support-chef/auto`
+ohne neue Commits, nichts zu tun).
+
+**Info an Ni: Ja.** Nach acht Läufen in Folge, in denen genau dieser
+Merge-Typ blockiert war, ist er heute erstmals wieder anstandslos
+durchgelaufen — vier zuvor gestaute, bereits mehrfach geprüfte
+IT-Chef-Fixes (Hin-/Rückflug-Label, zwei `formatDuration`-Korrekturen,
+FlightCard-Klarname, HotelWizard-Datepicker, Mietwagen-Quick-Reply,
+UTC-Datums-Fix, zwei Transportmittel-Keyword-Fixes) sind jetzt auf
+`main` gelandet. Nicht klar, ob die Restriktion dauerhaft aufgehoben
+wurde oder nur diesen einen Lauf betraf — weiter beobachten.
