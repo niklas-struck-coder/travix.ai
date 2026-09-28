@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-26):**
-- IT-Chef hat den Mietwagen-Quick-Reply-Fund automatisch gefixt (PR #23)
-- Support-Chef hat den Fix bestätigt und einen neuen kleineren Fund gemeldet:
-  FlightCard/TrainCard zeigen bei fehlendem Namensfeld keinen Klarname-Fallback
-- Marketing-Chef: keine neuen Kandidaten, verweist aber auf einen wachsenden
-  Rückstau bei it-chef/auto (mehrere geprüfte Fixes warten weiter auf Merge)
-- Freigabe-Chef hat marketing-chef/auto und support-chef/auto nach main gemergt;
-  it-chef/auto bleibt trotz grüner Prüfung weiterhin durch eine Merge-Restriktion
-  blockiert (mittlerweile zum achten Mal in Folge)
+**Seit letztem Update (2026-09-27):**
+- IT-Chef hat mehrere Erkennungslücken in der Transportmittel-Erkennung behoben
+  ("Flugzeug", "Zugticket", Wortgrenzen bei Flugticket/Busticket/Autovermietung)
+  sowie einen Zeitzonenfehler bei Standard-Reisedaten und fehlenden Namensfallback
+  bei Flug-/Zugkarten
+- Freigabe-Chef hat den seit acht Läufen blockierten IT-Chef-Zweig erstmals wieder
+  gemergt sowie die Marketing- und Support-Fixe des Tages nach main übernommen
+- Marketing-Chef hat ein neues Content-Stück zum Thema "Klarname statt Rohdaten"
+  vorbereitet
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-27_
+_Letztes Update: 2026-09-28_
