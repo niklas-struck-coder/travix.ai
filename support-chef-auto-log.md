@@ -3396,3 +3396,101 @@ dort bereits mit `?? 'Unbekannte Fluggesellschaft'`-Fallback in
 `client.ts:85` abgesichert) ebenfalls Lücken haben, wurde nicht
 vollständig durchsucht — nur der heute geänderte Ausschnitt war Ziel
 dieses Berichts.
+
+---
+
+## 2026-09-28 — Transportmittel-Erkennung im KI-Chat (`mockAdvisor.ts`)
+
+### Kontext
+Ausgewählt, weil `it-chef-auto-log.md` für heute (28.09.) drei
+Code-Änderungen an genau diesem Bereich zeigt, alle noch nicht von
+Support-Chef geprüft: erster Lauf (`'flugzeug'` als neues Keyword für
+Transportmittel "Flug" ergänzt), zweiter Lauf (Zeitzonen-Bug in
+`defaultStayDates()`/`defaultFlightDates()`, `useChat.ts`, behoben),
+dritter Lauf (`'zugticket'` als neues Keyword für Transportmittel "Zug"
+ergänzt). Alle drei sind laut `git log` bereits auf `main` (Freigabe-Chef
+hat `it-chef/auto` heute Nacht gemergt, Commit `609894b`).
+
+Geprüft:
+- `src/lib/ai/mockAdvisor.ts` (`detectTransportMode()`,
+  `transportKeywords`, `getNextAdvisorStep()`)
+- `src/lib/ai/mockAdvisor.test.ts` (welche Fälle bereits abgedeckt sind)
+- `src/hooks/useChat.ts` (Zeitzonen-Fix, `defaultStayDates`/
+  `defaultFlightDates`)
+- `it-chef-auto-log.md` (alle drei heutigen Einträge), um keinen bereits
+  geprüften/verworfenen Kandidaten als neuen Fund auszugeben
+
+### Zuerst bestätigt: heutige Fixes tatsächlich im Code
+- `mockAdvisor.ts:14`: `flight`-Keywords enthalten jetzt `'flugzeug'`.
+- `mockAdvisor.ts:13`: `train`-Keywords enthalten jetzt `'zugticket'`.
+- `useChat.ts:51,61` (`defaultStayDates`/`defaultFlightDates`): nutzen
+  jetzt `toIsoDate(date.getFullYear(), date.getMonth(), date.getDate())`
+  statt `date.toISOString().slice(0, 10)` — kein UTC-Rundungsfehler mehr
+  am späten Abend in Zeitzonen westlich von UTC.
+
+### Reibungspunkte
+
+**1. Derselbe Wortgrenzen-Bug, der heute für "Zugticket"/"Flugzeug"
+behoben wurde, besteht für mehrere ebenso naheliegende zusammengesetzte
+Wörter weiter — u. a. für das direkte Flug-Gegenstück "Flugticket".**
+`mockAdvisor.ts:36-42` (`detectTransportMode`) prüft jedes Keyword über
+`\b<keyword>\b` — eine echte Wortgrenze verlangt einen Nicht-Wortzeichen-
+Übergang. Bei einem zusammengesetzten Wort wie "Flugticket" gibt es
+zwischen "flug" und "ticket" keinen solchen Übergang, das Keyword `'flug'`
+(Zeile 14) matcht also nicht — exakt dieselbe Ursache, die heute für
+"Zugticket" (train) und "Flugzeug"/Verbformen (flight) bereits als Bug
+erkannt und behoben wurde (siehe die drei heutigen `it-chef-auto-log.md`-
+Einträge). Nur wurde dabei jeweils ein einzelnes betroffenes Wort
+ergänzt, nicht das zugrunde liegende Muster systematisch durchgegangen.
+Live nachvollzogen (Node, exakt dieselbe Regex-Logik aus der Datei
+nachgebaut): `detectTransportMode('Ich brauche ein Flugticket')` →
+`null` statt `'flight'`, während `detectTransportMode('Ich brauche ein
+Zugticket')` (heutiger Fix) korrekt `'train'` liefert. "Flugticket" ist
+dabei kein exotisches Beispiel, sondern das unmittelbare Pendant zu
+"Zugticket" — einem Begriff, den die App selbst als Cart-Item-Label
+verwendet (`Dashboard.tsx:38`, `Warenkorb.tsx:32`: "Zugticket Kyoto →
+Osaka"); "ein Flugticket buchen" ist mindestens genauso alltagssprachlich.
+Dieselbe Lücke betrifft weitere naheliegende zusammengesetzte Wörter in
+den übrigen drei Modi, ebenfalls live verifiziert:
+`detectTransportMode('Busticket kaufen')` → `null` statt `'bus'` (Keyword
+`'bus'`, Zeile 15), `detectTransportMode('Autovermietung buchen')` →
+`null` statt `'car'` (Keyword `'auto'`, Zeile 17), sowie sinngemäß
+"Schifffahrt" für `'schiff'` (ferry, Zeile 16). Antwortet eine Nutzerin
+im KI-Chat auf "Wie möchtest du anreisen?" mit einem dieser ebenso
+natürlichen Sätze, bekommt sie dieselbe Rückfrage-Sackgasse
+("Ich möchte dein Transportmittel nicht falsch verstehen …"), die die
+heutigen drei Fixes gerade für die anderen Fälle beseitigt haben.
+`mockAdvisor.test.ts` deckt "Flugticket"/"Busticket"/"Autovermietung"
+bisher nicht ab (nur "Zugticket" seit dem heutigen dritten Lauf, siehe
+Zeile 29-35 dort). *Vorschlag:* `'flugticket'` als weiteres `flight`-
+Keyword ergänzen (gleiches Muster wie `'zugticket'`/`'flugzeug'` heute);
+bei Gelegenheit auch `'busticket'`/`'autovermietung'`/`'schifffahrt'` o. Ä.
+prüfen, statt bei jedem einzelnen gemeldeten Wort einzeln nachzuziehen.
+
+**2. Kleinere Sprachauffälligkeit: "Mietwagen-Verbindungen" /
+"Fähre-Verbindungen" klingt für deutsche Muttersprachler:innen ungewohnt.**
+`mockAdvisor.ts:167-174`: Nach der Unterkunftsauswahl heißt es für jeden
+nicht-Flug-Modus wörtlich `Für ${modeLabel}-Verbindungen hab ich noch
+keine automatische Suche …`. Für `train`/`bus` liest sich das noch
+natürlich ("Für Zug-Verbindungen …", vgl. auch `TrainResults.tsx`s eigene
+Formulierung "Zug-, Bus- und Fährverbindungen"), aber "Mietwagen" ist
+begrifflich keine "Verbindung" (das Wort impliziert eine Fahrplan-Route),
+und "Fähre-Verbindungen" ist keine idiomatische Zusammensetzung (korrekt
+wäre "Fährverbindungen", ohne Bindestrich und ohne das "e"). Rein
+sprachlich, keine funktionale Auswirkung — aber an einer Stelle, an der
+der Rest der App (siehe oben) erkennbar auf saubere deutsche
+Formulierungen achtet. *Vorschlag:* für `car` einen eigenen Satz ohne
+"Verbindungen" verwenden (z. B. "Für einen Mietwagen hab ich noch keine
+automatische Suche …"), für `ferry` "Fährverbindungen" statt
+"Fähre-Verbindungen".
+
+### Nicht geprüft
+Ob der Zeitzonen-Fix (Fund oben, "Zuerst bestätigt") weitere, noch nicht
+umgestellte `toISOString()`-Aufrufe im restlichen `src`-Baum übersehen
+haben könnte, wurde nicht erneut eigenständig durchsucht — laut dem
+heutigen `it-chef-auto-log.md`-Eintrag selbst war das bereits Teil der
+dortigen Diagnose (keine weiteren Fundstellen). Ebenfalls nicht vertieft:
+ob noch weitere, seltenere zusammengesetzte Wörter für die fünf
+Transportmittel-Keywords fehlen — die drei oben genannten Beispiele
+wurden als naheliegendste, alltagssprachlichste Fälle ausgewählt, kein
+vollständiger Abgleich gegen ein Wörterbuch.
