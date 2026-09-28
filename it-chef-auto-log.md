@@ -14020,3 +14020,88 @@ unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-28 (dritter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Ein eigenständig gefundener Bug in
+`detectTransportMode()` (`src/lib/ai/mockAdvisor.ts`) — dieselbe Funktion
+und Kategorie wie der "Flugzeug"-Fund im ersten Lauf desselben Tages.
+
+**Fund:** Das Keyword-Array für Transportmittel "Zug" enthielt bisher
+`['zug', 'bahn', 'ice', 'railjet']`. Die Wortgrenzen-Prüfung `\bzug\b`
+(nötig, damit z. B. "Business" nicht fälschlich als "Bus" erkannt wird)
+matcht das Präfix "zug" aber nicht innerhalb des zusammengesetzten Worts
+"Zugticket", weil zwischen "zug" und "ticket" kein Übergang zwischen
+Wort- und Nicht-Wortzeichen liegt — beides sind Wortzeichen. Reproduziert:
+`/\bzug\b/i.test('zugticket')` liefert `false`, `/\bzug\b/i.test('mit dem
+zug')` liefert `true`. Antwortete eine Nutzerin im KI-Chat auf "Wie
+möchtest du anreisen — Zug, Flug, Bus, Fähre oder Mietwagen?" z. B. "Ich
+brauche noch ein Zugticket", erkannte der Advisor kein Transportmittel und
+wies die Antwort mit "Ich möchte dein Transportmittel nicht falsch
+verstehen — bitte wähle eine Option aus" zurück, obwohl die Absicht
+eindeutig ist.
+
+**Warum kein erfundenes Beispiel:** "Zugticket" ist kein beliebig
+gewähltes Testwort, sondern von der App selbst als Cart-Item-Label
+etabliert — der exakte String "Zugticket Kyoto → Osaka" taucht in
+`src/lib/trip/cartTotals.test.ts`, `src/pages/Dashboard.tsx`,
+`src/pages/Warenkorb.tsx` und `src/pages/Warenkorb.test.tsx` auf. Die
+Codebasis selbst behandelt "Zugticket" bereits als Synonym für
+Zugreisen — keine neue Interpretation nötig.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Keyword-Liste im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: exakt dasselbe Muster
+  wie der "Flugzeug"-Fix desselben Tages (ein offensichtlich fehlendes,
+  von der App selbst bereits etabliertes Keyword ergänzen).
+- Klar genug beschrieben: keine eigene Interpretation nötig, da die
+  Codebasis "Zugticket" bereits an anderer Stelle als Zugreise-Begriff
+  verwendet.
+- Ergebnis objektiv prüfbar: Regressionstest ruft
+  `detectTransportMode('Ich brauche noch ein Zugticket')` auf, liefert vor
+  dem Fix `null`, danach `'train'`.
+
+**Bewusst nicht mit angegangen:** Dieselbe Wortgrenzen-Lücke besteht auch
+bei anderen Transportmitteln (z. B. "Flugreise", "Direktflug",
+"Busfahrt", "Autoreise"). Anders als bei "Zugticket" taucht keines dieser
+zusammengesetzten Wörter an anderer Stelle im App-Code auf — welche
+Variante(n) ergänzt werden sollten, wäre eine eigene Interpretation, die
+das vierte Sicherheitskriterium verletzen würde. Bleibt offener Punkt für
+einen möglichen künftigen Lauf, falls eines dieser Wörter einmal echt in
+der App-Copy auftaucht.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (per `git stash` auf `mockAdvisor.ts` zurückgesetzt) —
+schlug reproduzierbar fehl (`expected null to be 'train'`). Nach dem Fix
+(`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `'zugticket'` zum `train`-Keyword-Array
+  ergänzt (`['zug', 'bahn', 'ice', 'railjet', 'zugticket']`).
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` ("detects
+  'train' from the compound noun 'Zugticket', not just the standalone
+  word 'Zug'").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), volle Suite `npx vitest
+run` (59 Testdateien, 372 Tests inkl. des neuen, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Unabhängig geprüft, aber nicht als heutigen Punkt gewählt:** Andere
+offene `tasks/tasks-prd-travix-platform.md`-Checkboxen (2.0 Base44-Setup,
+4.1-4.3 echte KI, 5.0/6.0/7.0/8.0-Reste) — alle weiterhin blockiert auf
+fehlende Credentials, eine fehlende Datenquelle oder eine
+Produktentscheidung, die Ni treffen sollte. `MeineReisen.tsx`-Demo-Trip
+mit inzwischen vergangenem Datum (15.–22.09.2026) — bereits am 25.09.
+gefunden und aus denselben Gründen zurückgestellt (würde erfundene
+Demo-Daten oder eine eigene Status-aus-Datum-Architekturentscheidung
+brauchen), Begründung heute erneut bestätigt.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

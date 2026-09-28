@@ -492,6 +492,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Datum) — vor dem Fix durch temporäres Zurücknehmen der Quelländerung
   (`git stash`) reproduzierbar rot verifiziert (lieferte `2026-10-29`
   statt `2026-10-28`).
+  Vom autonomen IT-Chef-Lauf am 28.09. (dritter Lauf desselben Tages) einen
+  weiteren eigenständig gefundenen Bug in `detectTransportMode()`
+  (`mockAdvisor.ts`) behoben, gleiche Ursache wie beim "Flugzeug"-Fund
+  desselben Tages: Die Wortgrenzen-Prüfung `\bzug\b` matcht das Präfix
+  "zug" nicht innerhalb des zusammengesetzten Worts "Zugticket" (kein
+  Wortübergang zwischen "zug" und "ticket"). Antwortete eine Nutzerin im
+  KI-Chat auf "Wie möchtest du anreisen?" z. B. "Ich brauche noch ein
+  Zugticket", erkannte der Advisor kein Transportmittel — obwohl
+  "Zugticket" kein beliebig gewähltes Beispiel ist, sondern von der App
+  selbst als Cart-Item-Label verwendet wird (`Dashboard.tsx`,
+  `Warenkorb.tsx`: "Zugticket Kyoto → Osaka"). Fix: `'zugticket'` als
+  weiteres Keyword im `train`-Array ergänzt, gleiches Muster wie
+  `'flugzeug'` vom selben Tag, keine neue Design-Entscheidung. Neuer
+  Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash`) reproduzierbar rot
+  verifiziert (lieferte `null` statt `'train'`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

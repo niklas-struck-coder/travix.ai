@@ -26,6 +26,14 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Wir nehmen lieber das Flugzeug')).toBe('flight')
   })
 
+  it('detects "train" from the compound noun "Zugticket", not just the standalone word "Zug"', () => {
+    // "\bzug\b" matcht "Zugticket" nicht, weil zwischen "zug" und "ticket"
+    // keine Wortgrenze liegt (beides Wortzeichen) — genau dieses
+    // zusammengesetzte Wort nutzt die App selbst als Cart-Item-Label
+    // (z.B. Dashboard.tsx/Warenkorb.tsx: "Zugticket Kyoto → Osaka").
+    expect(detectTransportMode('Ich brauche noch ein Zugticket')).toBe('train')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })

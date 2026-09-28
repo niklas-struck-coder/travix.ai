@@ -10,7 +10,7 @@ import { findKnownDestination, knownDestinations } from '@/types/stays'
  */
 
 const transportKeywords: Record<TransportMode, string[]> = {
-  train: ['zug', 'bahn', 'ice', 'railjet'],
+  train: ['zug', 'bahn', 'ice', 'railjet', 'zugticket'],
   flight: ['flug', 'fliegen', 'fliege', 'fliegt', 'geflogen', 'flughafen', 'flugzeug'],
   bus: ['bus', 'flixbus'],
   ferry: ['fähre', 'faehre', 'schiff'],
