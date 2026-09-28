@@ -5080,3 +5080,65 @@ FlightCard-Klarname, HotelWizard-Datepicker, Mietwagen-Quick-Reply,
 UTC-Datums-Fix, zwei Transportmittel-Keyword-Fixes) sind jetzt auf
 `main` gelandet. Nicht klar, ob die Restriktion dauerhaft aufgehoben
 wurde oder nur diesen einen Lauf betraf — weiter beobachten.
+
+---
+
+## 2026-09-28 — Tageslauf (Nachmittag)
+
+Geprüft: `it-chef/auto`, `marketing-chef/auto`, `support-chef/auto`.
+
+### `it-chef/auto`
+0 neue Commits gegenüber `main` (bereits im frühen Nacht-Check von heute
+gemergt, `609894b`). Nichts zu tun.
+
+### `marketing-chef/auto`
+Ein neuer Commit: Content-Stück
+`marketing/content-stueck-klarname-statt-rohdaten.md` ("Klarname statt
+Rohdaten") plus zugehöriger `marketing-chef-auto-log.md`-Eintrag.
+
+Geprüft: reines Entwurfsdokument, kein Hinweis auf tatsächliches
+Posten/Versenden (Datei selbst enthält "Kein Post daraus wurde oder wird
+automatisch veröffentlicht"). Keine erfundenen Kennzahlen — Datei hat
+sogar einen expliziten "Was NICHT behauptet wird"-Absatz (keine
+Nutzerzahlen, keine Konkurrenzvergleiche). Die drei zitierten Commits
+(`e3e3a40`, `efda747`, `f06700e`) existieren im Repo und sind auf `main`.
+Die wörtlich zitierten Code-Stellen selbst nachgeprüft: `FlightCard.tsx`
+Zeile 28-30 (`function formatLocation(name: string, iata: string) {
+return name || iata || '—' }`) und `TrainCard.tsx` Zeile 23-25
+(`function formatLocation(name: string) { return name || '—' }`) stimmen
+exakt mit dem Zitat im Content-Stück überein. Text ist vollständig
+(LinkedIn-Post, Instagram-Caption, Bild-/Reel-Idee, Hashtags,
+Canva-Design-Brief), keine Stichpunkt-Skizze.
+
+→ **Gemergt** (Fast-Forward, `609894b..b6715d6`).
+
+### `support-chef/auto`
+Ein neuer Commit: `support-chef-auto-log.md`-Eintrag zu
+Transportmittel-Erkennung in `mockAdvisor.ts` — Hauptfund: derselbe
+Wortgrenzen-Bug, der heute für "Zugticket"/"Flugzeug" gefixt wurde,
+besteht für "Flugticket"/"Busticket"/"Autovermietung" weiter; dazu ein
+kleinerer Sprach-Nitpick bei "Mietwagen-/Fähre-Verbindungen".
+
+Stichprobenartig nachvollzogen: Zeilenangaben (`mockAdvisor.ts:13/14` für
+`train`/`flight`-Keywords, `:15/16/17` für `bus`/`ferry`/`car`) stimmen
+mit dem aktuellen `main`-Stand überein. Zitat "Zugticket Kyoto → Osaka"
+in `Dashboard.tsx:38`/`Warenkorb.tsx:32` verifiziert, exakt vorhanden.
+Kernbehauptung selbst mit der echten `detectTransportMode()`-Logik
+nachgestellt (Node-Skript, identische Regex `\b<keyword>\b`):
+`detectTransportMode('Ich brauche ein Flugticket')` → `null`,
+`detectTransportMode('Busticket kaufen')` → `null`,
+`detectTransportMode('Autovermietung buchen')` → `null` — alle drei
+reproduzieren den behaupteten Bug exakt, während der bereits gefixte
+Fall ("Zugticket") korrekt `'train'` liefert. Reine Analyse ohne
+Code-Änderung, nichts wirkt erfunden.
+
+→ **Gemergt** (Merge-Commit `d20094c`, da `main` zwischenzeitlich durch
+den `marketing-chef/auto`-Merge weitergerückt war und kein reiner
+Fast-Forward mehr möglich war).
+
+**Ergebnis:** Alle drei geprüften Branches auf dem Stand von `main`
+(`it-chef/auto` ohne neue Commits, `marketing-chef/auto` und
+`support-chef/auto` beide gemergt, beide unabhängig verifiziert).
+
+**Info an Ni:** Nein — beide Merges liefen sauber durch, keine
+Auffälligkeit, die seine Aufmerksamkeit bräuchte.
