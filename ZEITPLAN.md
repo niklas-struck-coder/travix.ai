@@ -446,6 +446,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bei beidem leer) und ein neuer Test in `TrainCard.test.tsx` (Strich bei
   leerem Namen) — vor dem Fix durch temporäres Zurücknehmen beider
   Quelländerungen (`git stash`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 28.09. einen eigenständig gefundenen Bug
+  in `detectTransportMode()` (`mockAdvisor.ts`) behoben, in derselben
+  Funktion und Kategorie wie der Verbform-Fund vom 27.09.: Das Keyword-
+  Array für Transportmittel "Flug" enthielt bisher nur `'flug'`,
+  Verbformen von "fliegen" und `'flughafen'`, nicht aber `'flugzeug'`
+  (das Substantiv für das Fahrzeug selbst). Wegen der Wortgrenzen-Prüfung
+  `\bflug\b` matcht das Präfix "flug" nicht innerhalb des zusammengesetzten
+  Worts "Flugzeug" (kein Wortübergang zwischen "flug" und "zeug"). Sagte
+  eine Nutzerin im KI-Chat auf "Wie möchtest du anreisen?" z. B. "Wir
+  nehmen lieber das Flugzeug", erkannte der Advisor das Transportmittel
+  nicht, obwohl "Flugzeug" eine der natürlichsten deutschen Bezeichnungen
+  für Flugreisen ist. Fix: `'flugzeug'` als weiteres Keyword ergänzt,
+  gleiches Muster wie das bereits bestehende `'flughafen'`, keine neue
+  Design-Entscheidung. Neuer Regressionstest in `mockAdvisor.test.ts` —
+  vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash`) reproduzierbar rot verifiziert (lieferte `null` statt
+  `'flight'`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

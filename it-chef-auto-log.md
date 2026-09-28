@@ -13865,3 +13865,81 @@ umgesetzt und committet auf `it-chef/auto`, `main` unberührt. Zusätzlich
 Merges und dem Freigabe-Chef-Bericht) in `it-chef/auto` gemergt, um den
 Branch aktuell zu halten — reiner Merge ohne Konflikte, keine
 Code-Änderung dadurch.
+
+## 2026-09-28
+
+**Ausgewählter Punkt:** Ein eigenständig gefundener Bug in
+`detectTransportMode()` (`src/lib/ai/mockAdvisor.ts`), in derselben
+Funktion wie der bereits am 27.09. behobene Verbform-Fund ("fliegen"/
+"fliege"/"fliegt"/"geflogen" statt des toten Wortstamms `'flieg'`).
+
+**Fund:** Das Keyword-Array für Transportmittel "Flug" (`mockAdvisor.ts`,
+Zeile 14: `flight: ['flug', 'fliegen', 'fliege', 'fliegt', 'geflogen',
+'flughafen']`) enthält kein Keyword für das Substantiv "Flugzeug" (das
+Fahrzeug selbst — eine der natürlichsten deutschen Bezeichnungen für
+Flugreisen, neben "Flug"). `detectTransportMode()` prüft jedes Keyword mit
+Wortgrenzen (`\b${keyword}\b`), um Teilstring-Fehltreffer wie "bus" in
+"Business" zu vermeiden (siehe bestehender Test dafür). Das vorhandene
+Keyword `'flug'` matcht deshalb nicht als Präfix innerhalb des
+zusammengesetzten Worts "Flugzeug" — zwischen "flug" und "zeug" liegt
+keine Wortgrenze (beides Wortzeichen). Antwortete eine Nutzerin im KI-Chat
+auf die Frage "Wie möchtest du anreisen?" mit z. B. "Wir nehmen lieber das
+Flugzeug", erkannte der Advisor das Transportmittel nicht und fragte
+stattdessen erneut nach, obwohl die Eingabe eindeutig war.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten.
+- Keine offene Produkt-/Architekturentscheidung: derselbe, bereits am
+  27.09. etablierte Ansatz (ein fehlendes, offensichtlich zugehöriges
+  reales Keyword ergänzen), keine eigene Interpretation über das hinaus
+  nötig, was der Wortlaut der Frage ("Wie möchtest du anreisen?") und die
+  bestehenden Keywords selbst nahelegen.
+- Klar genug beschrieben: Eine-Wort-Ergänzung nach exakt demselben Muster
+  wie das bereits bestehende `'flughafen'`-Keyword.
+- Ergebnis objektiv prüfbar: neuer Regressionstest, vor dem Fix
+  reproduzierbar rot verifiziert.
+
+**Verifiziert vor dem Fix:** `detectTransportMode('Wir nehmen lieber das
+Flugzeug')` gegen die unveränderte Quelle ausgeführt (per `git stash` auf
+`mockAdvisor.ts` zurückgesetzt) — lieferte `null` statt `'flight'`,
+reproduzierbar rot verifiziert (auch unabhängig per Node-Skript mit
+derselben Regex-Logik bestätigt).
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts:14`: `flight: ['flug', 'fliegen', 'fliege',
+  'fliegt', 'geflogen', 'flughafen']` → `flight: ['flug', 'fliegen',
+  'fliege', 'fliegt', 'geflogen', 'flughafen', 'flugzeug']`.
+- Neuer Test in `mockAdvisor.test.ts` ("detects \"flight\" from the noun
+  \"Flugzeug\" (airplane), not just \"Flug\"/\"Flughafen\"").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt, nicht
+  an einer offenen Checkbox.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), volle Suite `npx vitest
+run` (59 Testdateien, 369 Tests inkl. des neuen, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Vorher unabhängig geprüft, aber nicht als heutigen Punkt gewählt:**
+Icon-only-Buttons auf `aria-label` (Sidebar-Muster von früheren Läufen)
+in `EditMode.tsx`, `KiChat.tsx`, `ChatInput.tsx`, `Favoriten.tsx`,
+`Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Buchung.tsx`,
+`Reiseentwuerfe.tsx`, `Warenkorb.tsx`, `Kalender.tsx` — überall bereits
+vorhanden, kein neuer Fund. Fehlende Testdateien (Abgleich aller
+`src/**/*.ts(x)` gegen vorhandene `*.test.ts(x)`) — verbleibende
+ungetestete Dateien sind ausschließlich Typdefinitionen, App-Einstieg/
+Routing oder Test-Setup selbst, kein sinnvoller Testkandidat mehr offen.
+NaN-Schutz bei numerischen Eingaben (`Number(...)`-Aufrufe repo-weit
+durchsucht) — alle bereits abgesichert. `tasks/tasks-prd-travix-platform.md`
+verbleibende offene Checkboxen (2.0 Base44-Setup, 4.1-4.3 echte KI,
+5.0-Rest, 6.0/7.0/8.0-Rest) alle entweder blockiert auf fehlende
+Credentials, eine noch fehlende Datenquelle (Zug/Bus/Fähre) oder eine
+Produktentscheidung, die eigentlich Ni treffen sollte — keine davon
+erfüllt die vier Sicherheitskriterien für einen autonomen Lauf.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

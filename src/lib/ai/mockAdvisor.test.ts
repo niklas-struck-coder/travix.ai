@@ -22,6 +22,10 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Wir sind schon einmal geflogen')).toBe('flight')
   })
 
+  it('detects "flight" from the noun "Flugzeug" (airplane), not just "Flug"/"Flughafen"', () => {
+    expect(detectTransportMode('Wir nehmen lieber das Flugzeug')).toBe('flight')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
