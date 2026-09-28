@@ -508,6 +508,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
   Zurücknehmen der Quelländerung (`git stash`) reproduzierbar rot
   verifiziert (lieferte `null` statt `'train'`).
+  Vom autonomen IT-Chef-Lauf am 28.09. (vierter Lauf desselben Tages) einen
+  bereits über den separaten Auto-Fix-Kanal vollständig diagnostizierten
+  Fund (Auto-Fix-PR #24,
+  `it-chef-autofix/transportmode-compound-keywords-2026-09-28`) direkt auf
+  `it-chef/auto` übernommen, statt auf Ni's Review des PRs zu warten:
+  dieselbe Wortgrenzen-Lücke wie beim "Zugticket"-Fund (dritter Lauf
+  desselben Tages) betraf auch "Flugticket", "Busticket",
+  "Autovermietung" und "Schifffahrt" — `\bflug\b`/`\bbus\b`/`\bauto\b`/
+  `\bschiff\b` matchen das jeweilige Präfix nicht innerhalb des
+  zusammengesetzten Worts. Fix: die vier Keywords in den jeweiligen
+  Arrays (`flight`/`bus`/`car`/`ferry`) ergänzt, gleiches Muster wie
+  `'zugticket'`/`'flugzeug'` vom selben Tag, keine neue
+  Design-Entscheidung. Neuer Regressionstest in `mockAdvisor.test.ts` —
+  vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash`) reproduzierbar rot verifiziert (lieferte `null` statt dem
+  jeweils erwarteten Transportmittel). Der ursprüngliche Auto-Fix-PR #24
+  bleibt als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
+  geschlossen werden).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

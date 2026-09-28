@@ -14105,3 +14105,69 @@ brauchen), Begründung heute erneut bestätigt.
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-28 (vierter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein bereits über den separaten Auto-Fix-Kanal
+vollständig diagnostizierter Fund — [Auto-Fix-PR #24](https://github.com/niklas-struck-coder/travix.ai/pull/24)
+(`it-chef-autofix/transportmode-compound-keywords-2026-09-28`), noch
+offen und ungerevieued, siehe `reports/it-chef.md` (28.09.).
+
+**Fund:** `detectTransportMode()` (`src/lib/ai/mockAdvisor.ts`) erkannte
+die zusammengesetzten Wörter "Flugticket", "Busticket", "Autovermietung"
+und "Schifffahrt" nicht als Transportwunsch — dieselbe Ursache wie beim
+"Zugticket"-Fund im dritten Lauf desselben Tages: die
+Wortgrenzen-Prüfung `\b<keyword>\b` verlangt einen Übergang zwischen
+Wort- und Nicht-Wortzeichen, den es zwischen Präfix und Rest bei einem
+zusammengesetzten Wort nicht gibt (`\bflug\b` matcht "Flugticket" nicht,
+ebenso `\bbus\b`/"Busticket", `\bauto\b`/"Autovermietung",
+`\bschiff\b`/"Schifffahrt"). Live gegen den aktuellen `main`-Stand
+nachvollzogen: alle vier lieferten `null` statt des jeweiligen
+Transportmittels.
+
+**Warum direkt auf `it-chef/auto` statt auf Review zu warten:** Exakt
+dasselbe Muster wie bei mehreren früheren Läufen (z. B. 06.09., 15.09.,
+21.09., 26.09.) — ein bereits über den Auto-Fix-Kanal vollständig
+diagnostizierter und im heutigen `reports/it-chef.md` dokumentierter
+Fund, dessen Fix eine mechanische Ein-Zeilen-Ergänzung pro Kategorie ist
+und keine eigene Interpretation braucht.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Keyword-Listen im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: identisches Muster zu
+  den bereits etablierten Fixes für "Zugticket"/"Flugzeug" desselben
+  Tages.
+- Klar genug beschrieben: die vier exakten Wörter und betroffenen
+  Kategorien standen bereits vollständig diagnostiziert in
+  `reports/it-chef.md`.
+- Ergebnis objektiv prüfbar: neuer Regressionstest ruft
+  `detectTransportMode()` für alle vier Fälle auf, liefert vor dem Fix
+  `null`, danach das jeweils richtige Transportmittel.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (per `git stash` auf `mockAdvisor.ts` zurückgesetzt) —
+schlug reproduzierbar fehl (`expected null to be 'flight'`). Nach dem
+Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `'flugticket'` (flight), `'busticket'`
+  (bus), `'autovermietung'` (car) und `'schifffahrt'` (ferry) zu den
+  jeweiligen Keyword-Arrays ergänzt.
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (alle vier
+  zusammengesetzten Wörter).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), volle Suite `npx vitest
+run` (59 Testdateien, 374 Tests inkl. des neuen, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt. Auto-Fix-PR #24 bleibt
+als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
+werden).

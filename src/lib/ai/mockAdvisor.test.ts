@@ -34,6 +34,18 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Ich brauche noch ein Zugticket')).toBe('train')
   })
 
+  it('detects the compound nouns "Flugticket", "Busticket", "Autovermietung" and "Schifffahrt", not just their standalone words', () => {
+    // Gleiche Wortgrenzen-Lücke wie beim "Zugticket"-Fund oben, hier für
+    // die übrigen vier Transportmittel: "\bflug\b"/"\bbus\b"/"\bauto\b"/
+    // "\bschiff\b" matchen das jeweilige Präfix nicht innerhalb des
+    // zusammengesetzten Worts, weil zwischen Präfix und Rest keine
+    // Wortgrenze liegt (beides Wortzeichen).
+    expect(detectTransportMode('Ich brauche ein Flugticket')).toBe('flight')
+    expect(detectTransportMode('Ich brauche ein Busticket')).toBe('bus')
+    expect(detectTransportMode('Wir buchen eine Autovermietung')).toBe('car')
+    expect(detectTransportMode('Die Schifffahrt dauert drei Tage')).toBe('ferry')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
