@@ -14105,3 +14105,388 @@ brauchen), Begründung heute erneut bestätigt.
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-28 (vierter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein bereits über den separaten Auto-Fix-Kanal
+vollständig diagnostizierter Fund — [Auto-Fix-PR #24](https://github.com/niklas-struck-coder/travix.ai/pull/24)
+(`it-chef-autofix/transportmode-compound-keywords-2026-09-28`), noch
+offen und ungerevieued, siehe `reports/it-chef.md` (28.09.).
+
+**Fund:** `detectTransportMode()` (`src/lib/ai/mockAdvisor.ts`) erkannte
+die zusammengesetzten Wörter "Flugticket", "Busticket", "Autovermietung"
+und "Schifffahrt" nicht als Transportwunsch — dieselbe Ursache wie beim
+"Zugticket"-Fund im dritten Lauf desselben Tages: die
+Wortgrenzen-Prüfung `\b<keyword>\b` verlangt einen Übergang zwischen
+Wort- und Nicht-Wortzeichen, den es zwischen Präfix und Rest bei einem
+zusammengesetzten Wort nicht gibt (`\bflug\b` matcht "Flugticket" nicht,
+ebenso `\bbus\b`/"Busticket", `\bauto\b`/"Autovermietung",
+`\bschiff\b`/"Schifffahrt"). Live gegen den aktuellen `main`-Stand
+nachvollzogen: alle vier lieferten `null` statt des jeweiligen
+Transportmittels.
+
+**Warum direkt auf `it-chef/auto` statt auf Review zu warten:** Exakt
+dasselbe Muster wie bei mehreren früheren Läufen (z. B. 06.09., 15.09.,
+21.09., 26.09.) — ein bereits über den Auto-Fix-Kanal vollständig
+diagnostizierter und im heutigen `reports/it-chef.md` dokumentierter
+Fund, dessen Fix eine mechanische Ein-Zeilen-Ergänzung pro Kategorie ist
+und keine eigene Interpretation braucht.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Keyword-Listen im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: identisches Muster zu
+  den bereits etablierten Fixes für "Zugticket"/"Flugzeug" desselben
+  Tages.
+- Klar genug beschrieben: die vier exakten Wörter und betroffenen
+  Kategorien standen bereits vollständig diagnostiziert in
+  `reports/it-chef.md`.
+- Ergebnis objektiv prüfbar: neuer Regressionstest ruft
+  `detectTransportMode()` für alle vier Fälle auf, liefert vor dem Fix
+  `null`, danach das jeweils richtige Transportmittel.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (per `git stash` auf `mockAdvisor.ts` zurückgesetzt) —
+schlug reproduzierbar fehl (`expected null to be 'flight'`). Nach dem
+Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `'flugticket'` (flight), `'busticket'`
+  (bus), `'autovermietung'` (car) und `'schifffahrt'` (ferry) zu den
+  jeweiligen Keyword-Arrays ergänzt.
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (alle vier
+  zusammengesetzten Wörter).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), volle Suite `npx vitest
+run` (59 Testdateien, 374 Tests inkl. des neuen, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt. Auto-Fix-PR #24 bleibt
+als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
+werden).
+
+## 2026-09-28 (fünfter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Der einzige noch offene, bereits vollständig
+diagnostizierte Fund aus `reports/it-chef.md` (28.09., "Gefundene Bugs
+(nicht automatisch gefixt)"): `loadStoredChat()` (`src/lib/trip/tripStorage.ts:25`)
+griff ungeschützt auf `parsed.trip.activities` zu.
+
+**Fund:** Fehlt einem gespeicherten `localStorage`-Eintrag unter dem Schlüssel
+`travix.ki-chat.draft` das komplette `trip`-Feld (sehr alter oder von Hand
+editierter Eintrag), wirft `parsed.trip.activities` eine `TypeError`
+mitten im an sich schon vorhandenen Normalisierungscode. Der umgebende
+Try/Catch fängt das zwar ab (kein Absturz für die Nutzerin), verwirft
+dabei aber den gesamten gespeicherten Zustand — inklusive `messages` und
+`quickReplies`, obwohl genau diese beiden Felder direkt daneben bereits
+einzeln gegen ihr eigenes Fehlen abgesichert sind (Fix vom 12.09.,
+`it-chef-auto-log.md`). Der Bericht selbst stufte den Fund als reine
+"Konsistenzfrage" statt akuten Bug ein (sicher degradierend, kein
+Nutzer-Risiko) und hatte ihn deshalb nicht automatisch über den
+Auto-Fix-Kanal gefixt — für den heutigen autonomen Lauf ist er trotzdem
+der klarste verfügbare Punkt: bereits vollständig diagnostiziert, exakt
+lokalisiert, keine Interpretation nötig.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine `localStorage`-Parsing-Logik für den Chat-Demo-Zustand.
+- Keine offene Produkt-/Architekturentscheidung: identisches
+  Optional-Chaining-Muster wie an den beiden Nachbarstellen in derselben
+  Funktion (`parsed.messages`/`parsed.quickReplies`), keine neue
+  Design-Entscheidung.
+- Klar genug beschrieben: exakte Zeile, exakte Ursache und der bereits
+  etablierte Lösungsweg standen vollständig in `reports/it-chef.md`.
+- Ergebnis objektiv prüfbar: neuer Regressionstest simuliert einen
+  gespeicherten Zustand ganz ohne `trip`-Feld, erwartet den normalisierten
+  Zustand (erhaltene `messages`/`quickReplies`, `trip.activities: []`)
+  statt `null`.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/trip/tripStorage.ts`) — schlug
+reproduzierbar fehl (`expected null not to be null`, d. h. der gesamte
+Zustand ging verloren). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `parsed.trip.activities` durch
+  `parsed.trip?.activities` ersetzt (`loadStoredChat`), Kommentar direkt
+  darüber entsprechend erweitert (jetzt auch das komplette Fehlen von
+  `trip` erwähnt).
+- Neuer Regressionstest in `src/lib/trip/tripStorage.test.ts`
+  ("normalizes a completely missing trip field instead of discarding the
+  whole stored state").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Bug innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout — `node_modules` fehlte zu
+Sessionbeginn komplett), `npx tsc -b` (kein Typfehler), `npm run lint`
+(0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 374
+Tests inkl. des neuen, alle grün — 373 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Unabhängig geprüft, aber nicht als heutigen Punkt gewählt:**
+`reports/support-chef.md` (28.09., Vorschlag 1) — Flugsuche im
+Hauptchat-Ablauf kündigt eine laufende Suche an, obwohl `runFlightSearch`
+im Hauptablauf tatsächlich nie ausgelöst wird (nur der separate
+"Bearbeiten"-Pfad in `useChat.ts` tut das). Bewusst nicht heute
+angefasst: der Bericht selbst nennt zwei gleichwertige Lösungen (echte
+Suche auch im Hauptablauf auslösen — größere Architekturänderung über
+mehrere Dateien — oder die Ankündigung umformulieren, ohne festzulegen,
+welche); genau das ist die Art von offener Produktentscheidung, die laut
+Kriterium 2 Ni treffen sollte, kein autonom fällbarer Punkt. Andere
+offene `tasks/tasks-prd-travix-platform.md`-Checkboxen (2.0 Base44-Setup,
+4.1-4.3 echte KI, 5.0/6.0/7.0/8.0-Reste) weiterhin blockiert auf fehlende
+Credentials, eine fehlende Datenquelle oder eine Produktentscheidung —
+unverändert seit den vorherigen Läufen heute.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein bereits vollständig diagnostizierter, noch
+offener Fund aus `support-chef-auto-log.md` (28.09., "2. Kleinere
+Sprachauffälligkeit: 'Mietwagen-Verbindungen' / 'Fähre-Verbindungen'
+klingt für deutsche Muttersprachler:innen ungewohnt").
+
+**Fund:** `getNextAdvisorStep()` (`src/lib/ai/mockAdvisor.ts`) bildete
+den "noch keine automatische Suche"-Satz für Zug/Bus/Fähre/Mietwagen
+bisher immer mechanisch aus `transportLabelsDe[mode]` + "-Verbindungen"
+(Zeile 169 vor dem Fix). Für Zug/Bus liest sich das natürlich ("Für
+Zug-Verbindungen hab ich noch keine automatische Suche …"), aber
+"Mietwagen" ist begrifflich keine "Verbindung" (das Wort impliziert eine
+Fahrplan-Route), und "Fähre-Verbindungen" ist keine idiomatische
+Zusammensetzung (korrekt wäre "Fährverbindungen"). Live im Code
+nachvollzogen: `getNextAdvisorStep()` mit `transportMode: 'car'` liefert
+"Für Mietwagen-Verbindungen hab ich noch keine automatische Suche …",
+mit `transportMode: 'ferry'` "Für Fähre-Verbindungen hab ich noch keine
+automatische Suche …" — beide exakt wie im Bericht beschrieben.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Chat-Textformulierung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: reine Sprachkorrektur an
+  einer einzelnen, bereits identifizierten Stelle, kein neues Feature und
+  keine Verhaltensänderung außer dem Wortlaut.
+- Klar genug beschrieben: der Bericht nennt exakt die betroffene Stelle,
+  die konkreten fehlerhaften Formulierungen und bereits einen konkreten
+  Korrekturvorschlag ("Fährverbindungen" statt "Fähre-Verbindungen", ein
+  eigener Satz ohne "Verbindungen" für Mietwagen) — beides 1:1
+  übernommen, keine eigene Interpretation nötig.
+- Ergebnis objektiv prüfbar: zwei neue Regressionstests prüfen den
+  exakten Wortlaut für `ferry`/`car`.
+
+Bewusst nicht mit angefasst: dieselbe `transportLabelsDe[mode]`-Nutzung
+an den drei anderen Stellen in derselben Datei (u. a. "nur {Label}, wie
+gewünscht" direkt nach der Moduswahl) — dort steht nur das reine Nomen,
+nicht die hier bemängelte "-Verbindungen"-Zusammensetzung, und der
+Bericht bezog sich ausdrücklich nur auf den "noch keine automatische
+Suche"-Satz.
+
+**Verifiziert vor dem Fix:** Neue Tests gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlugen
+reproduzierbar fehl (erwartete "Fährverbindungen"/"einen Mietwagen",
+erhielt "Fähre-Verbindungen"/"Mietwagen-Verbindungen"). Nach dem Fix
+(`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: neue `noAutoSearchPhraseDe`-Map (pro
+  `TransportMode` die vollständige, grammatisch passende Ergänzung nach
+  "Für …" — Zug/Flug/Bus unverändert als "{Label}-Verbindungen",
+  `ferry: 'Fährverbindungen'`, `car: 'einen Mietwagen'`); der
+  "noch keine automatische Suche"-Satz nutzt sie jetzt statt
+  `transportLabelsDe` + hartkodiertem "-Verbindungen"-Suffix. Variable
+  entsprechend von `modeLabel` zu `noAutoSearchPhrase` umbenannt, um den
+  neuen Inhalt (vollständige Phrase statt reines Nomen) klar zu machen.
+- Zwei neue Regressionstests in `src/lib/ai/mockAdvisor.test.ts` (ferry:
+  Satz enthält "Fährverbindungen", nicht "Fähre-Verbindungen"; car: Satz
+  enthält "einen Mietwagen", nicht "Mietwagen-Verbindungen").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 376
+Tests inkl. der beiden neuen, alle grün — 374 ohne die neuen Tests, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (weiterer Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Eine bisher übersehene Wortgrenzen-Lücke bei der
+Transportmittel-Erkennung im Mock-Advisor (`src/lib/ai/mockAdvisor.ts`),
+gefunden über eine gezielte eigene Bug-Suche (per Explore-Agent), da alle
+bereits im `support-chef-auto-log.md`/`reports/it-chef.md` dokumentierten
+Funde entweder schon behoben sind oder eine offene Produktentscheidung
+voraussetzen (u. a. die Flugsuche-im-Hauptablauf-Lücke, siehe der Vermerk
+im vorherigen Log-Eintrag von heute).
+
+**Fund:** `detectTransportMode()` prüft jedes Keyword über `\bkeyword\b`
+— eine echte Wortgrenze verlangt einen Nicht-Wortzeichen-Übergang. Bei
+zusammengesetzten Wörtern wie "Zugticket" oder "Flugticket" gibt es
+zwischen Präfix und Suffix keinen solchen Übergang, sodass das reine
+Keyword nicht matcht — genau die Lücke, die am 28.09. bereits für
+`zug`→`zugticket`, `flug`→`flugticket`, `bus`→`busticket`,
+`auto`→`autovermietung` und `schiff`→`schifffahrt` gefixt wurde. Dabei
+wurde `bahn` (in `transportKeywords.train` als Synonym zu `zug` gelistet)
+übersehen: kein eigenes Kompositum-Pendant ergänzt. Live nachvollzogen
+(exakt dieselbe Regex-Logik aus der Datei nachgebaut):
+`detectTransportMode('Ich buche eine Bahnfahrt')` und
+`detectTransportMode('Ich brauche ein Bahnticket')` liefern beide `null`
+statt `'train'` — eine Nutzerin, die auf "Wie möchtest du anreisen?" mit
+einem dieser ebenso natürlichen Sätze antwortet, landet in derselben
+Rückfrage-Sackgasse, die die 28.09.-Fixes für die anderen vier
+Transportmittel bereits beseitigt haben.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Keyword-Erkennung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: exakt dasselbe, bereits
+  fünffach angewandte Muster (ein weiteres Kompositum-Keyword pro
+  betroffenem Transportmittel), keine neue Design-Entscheidung.
+- Klar genug beschrieben: der Fund nennt exakt die betroffene Stelle
+  (`transportKeywords.train`, `mockAdvisor.ts`), die konkreten
+  fehlenden Wörter ("bahnfahrt"/"bahnticket") und den 1:1 anwendbaren
+  Korrekturvorschlag — keine eigene Interpretation nötig.
+- Ergebnis objektiv prüfbar: neuer Regressionstest prüft den exakten
+  Rückgabewert für beide Sätze.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlug
+reproduzierbar fehl (erwartete `'train'`, erhielt `null` für beide
+Sätze). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `transportKeywords.train` um
+  `'bahnfahrt'`/`'bahnticket'` ergänzt (gleiches Muster wie die
+  bestehenden Komposita-Einträge der anderen vier Transportmittel).
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (prüft
+  `'Ich buche eine Bahnfahrt'` und `'Ich brauche ein Bahnticket'` gegen
+  `'train'`).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da
+  der Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 377
+Tests inkl. des neuen, alle grün — 376 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Unabhängig geprüft, aber nicht als heutigen Punkt gewählt:** Zwei
+weitere, vom Explore-Agenten gefundene, aber schwächere Kandidaten
+bewusst zurückgestellt (nicht behoben):
+1. `formatDuration()` (`FlightCard.tsx`/`TrainCard.tsx`) zeigt bei einer
+   reinen Sekundenangabe wie `"PT45S"` "—" statt einer sinnvollen Dauer
+   (Sekunden-Gruppe fehlt im Regex). Praktisch kaum relevant, da echte
+   Flug-/Zugdauern nie nur in Sekunden angegeben werden — als Fund
+   dokumentiert, nicht heute als Punkt gewählt, da geringere reale
+   Auswirkung als der Bahn-Fund.
+2. `Preisalarme.tsx`/`Warenkorb.tsx`/`Aktivitaeten.tsx` bilden
+   `aria-label` ohne Duplikat-Behandlung (anders als
+   `Reiseentwuerfe.tsx`/`EditMode.tsx`) — mit den aktuellen, fixen
+   Demo-Daten nicht sichtbar auslösbar, träfe erst bei mehreren
+   gleichnamigen Einträgen pro Nutzerin zu. Zurückgestellt, da aktuell
+   nicht objektiv als real auftretendes Problem nachweisbar.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (dritter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein eigenständig gefundener Bug in
+`getNextAdvisorStep()` (`src/lib/ai/mockAdvisor.ts`), gefunden über einen
+gezielt beauftragten Explore-Agenten, nachdem die eigene Durchsicht von
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` sowie der bisherigen
+Berichte keinen weiteren offenen, sicher genug beschriebenen Punkt ergab
+(2.0/4.1-4.3 blockiert auf Base44/Gemini-Zugangsdaten, 5.7/7.4 auf offene
+Architektur-/Produktentscheidungen, 6.6/6.7/7.12 auf fehlende Preisfelder in
+`TripDraft`, 8.9/8.12 auf offene Produktentscheidungen bzw. ungeklärte
+Loyalty-Regeln (OQ-04), 8.11 auf die noch nicht abgeschlossene
+Support-E-Mail per `ZEITPLAN.md`). Zwei vom heutigen zweiten Lauf bereits
+identifizierte, aber bewusst zurückgestellte schwächere Kandidaten
+(`formatDuration()`-Sekunden-Lücke, `aria-label`-Duplikat-Fall in
+`Preisalarme.tsx`/`Warenkorb.tsx`/`Aktivitaeten.tsx`) selbst nachgeprüft:
+Bei allen drei Seiten gibt es keinen Add-Flow und die fest verdrahteten
+Demo-Daten haben ausschließlich eindeutige Namen — anders als bei
+`EditMode.tsx`/`Reiseentwuerfe.tsx` (dort ermöglicht ein echter Add-Flow
+Duplikate) ist der Fund hier aktuell nicht über die App erreichbar, bleibt
+also weiterhin zurückgestellt.
+
+**Fund:** `SURPRISE_ME_PATTERN` (Zeile 44, `/^überrasche? mich$/i`) verlangt
+eine exakte Übereinstimmung ohne jedes Satzzeichen. Der Quick-Reply-Button
+aus der Begrüßung sendet exakt den String `"Überrasch mich"` (matcht daher
+immer), aber die erste Chat-Frage ("Wohin soll es gehen?") ist ein freies
+Texteingabefeld — tippt eine Nutzerin die Phrase von Hand mit natürlichem
+Satzzeichen ("Überrasch mich!", "Überrasche mich."), matcht die Regex
+nicht mehr. Live nachvollzogen (Node-Repl):
+`SURPRISE_ME_PATTERN.test('Überrasch mich!')` → `false`,
+`SURPRISE_ME_PATTERN.test('Überrasche mich.')` → `false`. Fällt der Match
+aus, landet der wörtliche, satzzeichenbehaftete Text selbst in
+`trip.destination` (Zeile 85-88) statt eines zufälligen kuratierten Ziels
+— sichtbar in der Antwort ("Überrasch mich! klingt nach einer großartigen
+Idee!") und danach ungeprüft an `findKnownDestination()` weitergegeben,
+das dafür naturgemäß nie etwas findet. Das derailt den gesamten
+Planungsablauf mit einem unauflösbaren Reiseziel, exakt der Fall, den der
+bestehende Kommentar über der Regex ausdrücklich verhindern will
+("wörtlich übernommen wäre es ein Reiseziel, das weder die
+Unterkunfts- noch die Flugsuche noch die Kartenansicht je auflösen
+können").
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Text-Erkennung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: mechanische
+  Regex-Erweiterung um eine optionale Satzzeichen-Klasse am Ende, keine
+  neue Design-Entscheidung, keine Verhaltensänderung für den unverändert
+  funktionierenden Quick-Reply-Klick.
+- Klar genug beschrieben: exakte Fundstelle, konkreter Repro-String
+  (`'Überrasch mich!'`), erwartetes vs. tatsächliches Verhalten sind
+  eindeutig, keine Interpretation nötig.
+- Ergebnis objektiv prüfbar: neuer Regressionstest mit drei
+  satzzeichenbehafteten Varianten, erwartet ein kuratiertes Ziel statt des
+  wörtlichen Texts.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlug
+reproduzierbar fehl (`expected 'Überrasch mich!' not to be 'Überrasch
+mich!'`, d. h. der wörtliche Text landete unverändert in
+`trip.destination`). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `SURPRISE_ME_PATTERN` von
+  `/^überrasche? mich$/i` auf `/^überrasche? mich[!.?]*$/i` erweitert,
+  Kommentar direkt darüber ergänzt.
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (drei Varianten:
+  "Überrasch mich!", "Überrasche mich.", "überrasch mich?").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt,
+  gleiches Muster wie die beiden vorherigen Läufe von heute.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 378
+Tests inkl. des neuen, alle grün — 377 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

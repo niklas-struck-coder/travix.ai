@@ -508,6 +508,105 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
   Zurücknehmen der Quelländerung (`git stash`) reproduzierbar rot
   verifiziert (lieferte `null` statt `'train'`).
+  Vom autonomen IT-Chef-Lauf am 28.09. (vierter Lauf desselben Tages) einen
+  bereits über den separaten Auto-Fix-Kanal vollständig diagnostizierten
+  Fund (Auto-Fix-PR #24,
+  `it-chef-autofix/transportmode-compound-keywords-2026-09-28`) direkt auf
+  `it-chef/auto` übernommen, statt auf Ni's Review des PRs zu warten:
+  dieselbe Wortgrenzen-Lücke wie beim "Zugticket"-Fund (dritter Lauf
+  desselben Tages) betraf auch "Flugticket", "Busticket",
+  "Autovermietung" und "Schifffahrt" — `\bflug\b`/`\bbus\b`/`\bauto\b`/
+  `\bschiff\b` matchen das jeweilige Präfix nicht innerhalb des
+  zusammengesetzten Worts. Fix: die vier Keywords in den jeweiligen
+  Arrays (`flight`/`bus`/`car`/`ferry`) ergänzt, gleiches Muster wie
+  `'zugticket'`/`'flugzeug'` vom selben Tag, keine neue
+  Design-Entscheidung. Neuer Regressionstest in `mockAdvisor.test.ts` —
+  vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash`) reproduzierbar rot verifiziert (lieferte `null` statt dem
+  jeweils erwarteten Transportmittel). Der ursprüngliche Auto-Fix-PR #24
+  bleibt als überholt zurück (kann bei nächster PR-Hygiene-Aufräumung
+  geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 28.09. (fünfter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (28.09., "Gefundene Bugs (nicht automatisch
+  gefixt)") gemeldeten Konsistenzfund behoben: `loadStoredChat()`
+  (`tripStorage.ts`) griff bisher ungeschützt auf `parsed.trip.activities`
+  zu — fehlt einem gespeicherten `localStorage`-Eintrag (sehr alt oder von
+  Hand editiert) das komplette `trip`-Feld, warf das eine `TypeError`
+  mitten im an sich schon vorhandenen Normalisierungscode. Der umgebende
+  Try/Catch fing das zwar ab (kein Absturz), verwarf dabei aber den
+  gesamten gespeicherten Zustand inklusive `messages`/`quickReplies` —
+  obwohl genau diese beiden Felder direkt daneben bereits einzeln gegen
+  ihr eigenes Fehlen abgesichert sind (Fix vom 12.09.). Fix:
+  `parsed.trip?.activities` statt `parsed.trip.activities` (identisches
+  Optional-Chaining-Muster wie an den beiden anderen Stellen in derselben
+  Funktion), keine neue Design-Entscheidung. Neuer Regressionstest in
+  `tripStorage.test.ts` — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur auf `tripStorage.ts`) reproduzierbar rot
+  verifiziert (`loadStoredChat()` lieferte `null` statt des mit leerem
+  `trip.activities`-Array normalisierten Zustands samt erhaltenem
+  `messages`/`quickReplies`).
+  Vom autonomen IT-Chef-Lauf am 29.09. einen von
+  `support-chef-auto-log.md` (28.09., Fund 2) gemeldeten Sprachfund
+  behoben: Der "noch keine automatische Suche"-Satz in `mockAdvisor.ts`
+  (`getNextAdvisorStep()`) bildete den Verbindungsbegriff bisher immer
+  mechanisch aus `transportLabelsDe[mode]` + "-Verbindungen" — für
+  Zug/Bus liest sich das natürlich, aber "Mietwagen-Verbindungen" ist
+  begrifflich falsch (ein Mietwagen ist keine "Verbindung", die eine
+  Fahrplan-Route impliziert) und "Fähre-Verbindungen" ist keine
+  idiomatische Zusammensetzung (korrekt wäre "Fährverbindungen"). Fix:
+  neue `noAutoSearchPhraseDe`-Map mit der vollständigen, grammatisch
+  passenden Ergänzung pro Modus ("Zug-Verbindungen"/"Flug-Verbindungen"/
+  "Bus-Verbindungen" unverändert, "Fährverbindungen" statt
+  "Fähre-Verbindungen", "einen Mietwagen" statt "Mietwagen-Verbindungen"),
+  ersetzt die bisherige `transportLabelsDe`-Nutzung an dieser einen
+  Stelle; `transportLabelsDe` selbst bleibt für die anderen drei
+  Verwendungsstellen (u. a. "nur {Label}, wie gewünscht") unverändert, da
+  dort nur das reine Nomen gebraucht wird und der Bericht ausdrücklich nur
+  diesen einen Satz nannte. Zwei neue Regressionstests in
+  `mockAdvisor.test.ts` (ferry: enthält "Fährverbindungen", nicht
+  "Fähre-Verbindungen"; car: enthält "einen Mietwagen", nicht
+  "Mietwagen-Verbindungen") — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `mockAdvisor.ts`) reproduzierbar rot
+  verifiziert.
+  Vom autonomen IT-Chef-Lauf am 29.09. (weiterer Lauf desselben Tages) die
+  gleiche, bereits mehrfach gefixte Wortgrenzen-Lücke (`\bkeyword\b`
+  matcht ein zusammengesetztes Wort wie "Zugticket" nicht, weil zwischen
+  Präfix und Suffix keine Wortgrenze liegt) an einer bisher übersehenen
+  Stelle nachgezogen: `bahn` (Synonym zu `zug`) bekam beim 28.09.-Fix nie
+  sein eigenes Kompositum-Pendant, anders als `zug`→`zugticket`,
+  `flug`→`flugticket`, `bus`→`busticket`, `auto`→`autovermietung`,
+  `schiff`→`schifffahrt`. Live nachvollzogen:
+  `detectTransportMode('Ich buche eine Bahnfahrt')` und
+  `detectTransportMode('Ich brauche ein Bahnticket')` lieferten beide
+  `null` statt `'train'`. Fix: `'bahnfahrt'`/`'bahnticket'` als weitere
+  `train`-Keywords in `transportKeywords` (`mockAdvisor.ts`) ergänzt,
+  gleiches Muster wie die bestehenden Komposita-Einträge. Neuer
+  Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
+  reproduzierbar rot verifiziert (lieferte `null` statt `'train'`).
+  Vom autonomen IT-Chef-Lauf am 29.09. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug in `getNextAdvisorStep()` (`mockAdvisor.ts`) behoben:
+  `SURPRISE_ME_PATTERN` (`/^überrasche? mich$/i`) verlangte bisher eine
+  exakte Übereinstimmung ohne jedes Satzzeichen. Der Quick-Reply-Button aus
+  der Begrüßung sendet exakt "Überrasch mich" (funktionierte also immer),
+  aber die erste Chat-Frage nimmt auch freien Text entgegen — tippt eine
+  Nutzerin die Phrase natürlich mit Satzzeichen ("Überrasch mich!",
+  "Überrasche mich."), matcht die Regex nicht mehr. Live nachvollzogen:
+  `SURPRISE_ME_PATTERN.test('Überrasch mich!')` liefert `false`. Fällt der
+  Match aus, wird der wörtliche, satzzeichenbehaftete Text selbst zum
+  `trip.destination` (statt eines zufälligen kuratierten Ziels) — sowohl in
+  der Antwort ("Überrasch mich! klingt nach einer großartigen Idee!")
+  sichtbar als auch nachfolgend an `findKnownDestination()` übergeben, das
+  dafür naturgemäß nie etwas findet, und derailt damit den gesamten
+  Planungsablauf mit einem unauflösbaren Reiseziel. Fix: Regex um eine
+  optionale Satzzeichen-Klasse am Ende ergänzt
+  (`/^überrasche? mich[!.?]*$/i`), mechanische Erweiterung ohne sonstige
+  Verhaltensänderung (Klick auf den Quick-Reply-Button bleibt unverändert
+  erkannt). Neuer Regressionstest in `mockAdvisor.test.ts` (drei
+  satzzeichenbehaftete Varianten) — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
+  reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

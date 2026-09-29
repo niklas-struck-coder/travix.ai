@@ -10,11 +10,11 @@ import { findKnownDestination, knownDestinations } from '@/types/stays'
  */
 
 const transportKeywords: Record<TransportMode, string[]> = {
-  train: ['zug', 'bahn', 'ice', 'railjet', 'zugticket'],
-  flight: ['flug', 'fliegen', 'fliege', 'fliegt', 'geflogen', 'flughafen', 'flugzeug'],
-  bus: ['bus', 'flixbus'],
-  ferry: ['fähre', 'faehre', 'schiff'],
-  car: ['auto', 'mietwagen', 'roadtrip'],
+  train: ['zug', 'bahn', 'ice', 'railjet', 'zugticket', 'bahnfahrt', 'bahnticket'],
+  flight: ['flug', 'fliegen', 'fliege', 'fliegt', 'geflogen', 'flughafen', 'flugzeug', 'flugticket'],
+  bus: ['bus', 'flixbus', 'busticket'],
+  ferry: ['fähre', 'faehre', 'schiff', 'schifffahrt'],
+  car: ['auto', 'mietwagen', 'roadtrip', 'autovermietung'],
 }
 
 const transportLabelsDe: Record<TransportMode, string> = {
@@ -25,9 +25,26 @@ const transportLabelsDe: Record<TransportMode, string> = {
   car: 'Mietwagen',
 }
 
+// Eigene Formulierung für den "noch keine automatische Suche"-Satz: anders
+// als transportLabelsDe (reines Nomen für "nur X, wie gewünscht") braucht
+// dieser Satz eine vollständige, grammatisch passende Ergänzung nach "Für
+// …" — "Mietwagen" ist keine "Verbindung" (impliziert eine Fahrplan-Route)
+// und "Fähre-Verbindungen" ist keine idiomatische Zusammensetzung (siehe
+// reports/support-chef.md, 2026-09-28, Fund 2).
+const noAutoSearchPhraseDe: Record<TransportMode, string> = {
+  train: 'Zug-Verbindungen',
+  flight: 'Flug-Verbindungen',
+  bus: 'Bus-Verbindungen',
+  ferry: 'Fährverbindungen',
+  car: 'einen Mietwagen',
+}
+
 // Deckt den Quick-Reply-Text selbst und die naheliegenden Tippvarianten ab
-// ("überrasch mich", "Überrasche mich").
-const SURPRISE_ME_PATTERN = /^überrasche? mich$/i
+// ("überrasch mich", "Überrasche mich"), inklusive frei eingetippter
+// Satzzeichen am Ende ("Überrasch mich!", "Überrasche mich.") — anders als
+// der Quick-Reply-Klick ist dies das erste Chat-Feld, das auch Freitext
+// entgegennimmt.
+const SURPRISE_ME_PATTERN = /^überrasche? mich[!.?]*$/i
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -164,9 +181,11 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       }
     }
 
-    const modeLabel = next.transportMode ? transportLabelsDe[next.transportMode] : 'deine Verbindung'
+    const noAutoSearchPhrase = next.transportMode
+      ? noAutoSearchPhraseDe[next.transportMode]
+      : 'deine Verbindung'
     return {
-      content: `Für ${modeLabel}-Verbindungen hab ich noch keine automatische Suche — dein Reiseplan steht trotzdem! Öffne den Reiseplan, um alles im Detail zu sehen und einzelne Bausteine zu bearbeiten.`,
+      content: `Für ${noAutoSearchPhrase} hab ich noch keine automatische Suche — dein Reiseplan steht trotzdem! Öffne den Reiseplan, um alles im Detail zu sehen und einzelne Bausteine zu bearbeiten.`,
       avatarState: 'happy',
       quickReplies: ['Neue Reise planen'],
       trip: next,

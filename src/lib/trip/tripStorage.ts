@@ -13,16 +13,19 @@ export function loadStoredChat(): StoredChatState | null {
     const raw = localStorage.getItem(CHAT_STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as StoredChatState
-    // Legacy/corrupted stored trips can be missing `activities`, `messages`
-    // or `quickReplies` entirely. useChat.ts reads `stored.messages.length`
-    // right after loading, and QuickReplies renders `options.length` off
-    // `quickReplies` unguarded — same reasoning as the `activities` guard
-    // below (see hasTripData), so all three must always come back as arrays.
+    // Legacy/corrupted stored trips can be missing `activities`, `messages`,
+    // `quickReplies` or even `trip` itself entirely. useChat.ts reads
+    // `stored.messages.length` right after loading, and QuickReplies renders
+    // `options.length` off `quickReplies` unguarded — same reasoning as the
+    // `activities` guard below (see hasTripData), so all four must always
+    // come back as arrays/objects instead of throwing here and discarding
+    // the whole stored state (including the otherwise-guarded messages/
+    // quickReplies) in the catch below.
     return {
       ...parsed,
       messages: Array.isArray(parsed.messages) ? parsed.messages : [],
       quickReplies: Array.isArray(parsed.quickReplies) ? parsed.quickReplies : [],
-      trip: { ...parsed.trip, activities: Array.isArray(parsed.trip.activities) ? parsed.trip.activities : [] },
+      trip: { ...parsed.trip, activities: Array.isArray(parsed.trip?.activities) ? parsed.trip.activities : [] },
     }
   } catch {
     return null

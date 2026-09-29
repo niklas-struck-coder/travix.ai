@@ -34,6 +34,26 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Ich brauche noch ein Zugticket')).toBe('train')
   })
 
+  it('detects the compound nouns "Flugticket", "Busticket", "Autovermietung" and "Schifffahrt", not just their standalone words', () => {
+    // Gleiche Wortgrenzen-Lücke wie beim "Zugticket"-Fund oben, hier für
+    // die übrigen vier Transportmittel: "\bflug\b"/"\bbus\b"/"\bauto\b"/
+    // "\bschiff\b" matchen das jeweilige Präfix nicht innerhalb des
+    // zusammengesetzten Worts, weil zwischen Präfix und Rest keine
+    // Wortgrenze liegt (beides Wortzeichen).
+    expect(detectTransportMode('Ich brauche ein Flugticket')).toBe('flight')
+    expect(detectTransportMode('Ich brauche ein Busticket')).toBe('bus')
+    expect(detectTransportMode('Wir buchen eine Autovermietung')).toBe('car')
+    expect(detectTransportMode('Die Schifffahrt dauert drei Tage')).toBe('ferry')
+  })
+
+  it('detects "train" from the compound nouns "Bahnfahrt" and "Bahnticket", not just the standalone word "Bahn"', () => {
+    // Dieselbe Wortgrenzen-Lücke wie bei "Zugticket"/"Flugticket" oben,
+    // hier übersehen: "zug" bekam sein Kompositum-Pendant "zugticket",
+    // "bahn" nicht — "\bbahn\b" matcht "Bahnfahrt"/"Bahnticket" nicht.
+    expect(detectTransportMode('Ich buche eine Bahnfahrt')).toBe('train')
+    expect(detectTransportMode('Ich brauche ein Bahnticket')).toBe('train')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })
@@ -77,6 +97,18 @@ describe('getNextAdvisorStep', () => {
     expect(reply.trip.destination).not.toBe('Überrasch mich')
     expect(knownDestinations.map((destination) => destination.name)).toContain(reply.trip.destination)
     expect(reply.content).toContain(reply.trip.destination as string)
+  })
+
+  it('still recognizes "Überrasch mich" typed by hand with trailing punctuation', () => {
+    // Anders als der exakte Quick-Reply-Text kann Freitext im Chat-Eingabefeld
+    // natürliche Satzzeichen enthalten ("Überrasch mich!", "Überrasche mich.")
+    // — sonst würde der wörtliche, satzzeichenbehaftete Text selbst zum
+    // (unauflösbaren) Reiseziel.
+    for (const message of ['Überrasch mich!', 'Überrasche mich.', 'überrasch mich?']) {
+      const reply = getNextAdvisorStep(emptyTrip, message)
+      expect(reply.trip.destination).not.toBe(message)
+      expect(knownDestinations.map((destination) => destination.name)).toContain(reply.trip.destination)
+    }
   })
 
   it('re-asks for transport mode without advancing when the message has no recognizable mode', () => {
@@ -182,6 +214,32 @@ describe('getNextAdvisorStep', () => {
     expect(reply.content).toContain('Reiseplan steht')
     expect(reply.avatarState).toBe('happy')
     expect(reply.quickReplies).toEqual(['Neue Reise planen'])
+  })
+
+  it('uses natural German phrasing for the ferry no-auto-search message instead of "Fähre-Verbindungen"', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'ferry' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).toContain('Fährverbindungen')
+    expect(reply.content).not.toContain('Fähre-Verbindungen')
+  })
+
+  it('uses natural German phrasing for the car no-auto-search message instead of "Mietwagen-Verbindungen"', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'car' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).toContain('einen Mietwagen')
+    expect(reply.content).not.toContain('Mietwagen-Verbindungen')
   })
 
   it('announces the finished plan once every field is already filled', () => {
