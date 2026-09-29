@@ -545,6 +545,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   verifiziert (`loadStoredChat()` lieferte `null` statt des mit leerem
   `trip.activities`-Array normalisierten Zustands samt erhaltenem
   `messages`/`quickReplies`).
+  Vom autonomen IT-Chef-Lauf am 29.09. einen von
+  `support-chef-auto-log.md` (28.09., Fund 2) gemeldeten Sprachfund
+  behoben: Der "noch keine automatische Suche"-Satz in `mockAdvisor.ts`
+  (`getNextAdvisorStep()`) bildete den Verbindungsbegriff bisher immer
+  mechanisch aus `transportLabelsDe[mode]` + "-Verbindungen" — für
+  Zug/Bus liest sich das natürlich, aber "Mietwagen-Verbindungen" ist
+  begrifflich falsch (ein Mietwagen ist keine "Verbindung", die eine
+  Fahrplan-Route impliziert) und "Fähre-Verbindungen" ist keine
+  idiomatische Zusammensetzung (korrekt wäre "Fährverbindungen"). Fix:
+  neue `noAutoSearchPhraseDe`-Map mit der vollständigen, grammatisch
+  passenden Ergänzung pro Modus ("Zug-Verbindungen"/"Flug-Verbindungen"/
+  "Bus-Verbindungen" unverändert, "Fährverbindungen" statt
+  "Fähre-Verbindungen", "einen Mietwagen" statt "Mietwagen-Verbindungen"),
+  ersetzt die bisherige `transportLabelsDe`-Nutzung an dieser einen
+  Stelle; `transportLabelsDe` selbst bleibt für die anderen drei
+  Verwendungsstellen (u. a. "nur {Label}, wie gewünscht") unverändert, da
+  dort nur das reine Nomen gebraucht wird und der Bericht ausdrücklich nur
+  diesen einen Satz nannte. Zwei neue Regressionstests in
+  `mockAdvisor.test.ts` (ferry: enthält "Fährverbindungen", nicht
+  "Fähre-Verbindungen"; car: enthält "einen Mietwagen", nicht
+  "Mietwagen-Verbindungen") — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `mockAdvisor.ts`) reproduzierbar rot
+  verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

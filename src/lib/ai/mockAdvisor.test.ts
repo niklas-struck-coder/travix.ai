@@ -196,6 +196,32 @@ describe('getNextAdvisorStep', () => {
     expect(reply.quickReplies).toEqual(['Neue Reise planen'])
   })
 
+  it('uses natural German phrasing for the ferry no-auto-search message instead of "Fähre-Verbindungen"', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'ferry' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).toContain('Fährverbindungen')
+    expect(reply.content).not.toContain('Fähre-Verbindungen')
+  })
+
+  it('uses natural German phrasing for the car no-auto-search message instead of "Mietwagen-Verbindungen"', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: 'Lissabon',
+      transportMode: 'car' as const,
+      dates: 'Im Sommer',
+      budget: 'bis 1.000 €',
+    }
+    const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
+    expect(reply.content).toContain('einen Mietwagen')
+    expect(reply.content).not.toContain('Mietwagen-Verbindungen')
+  })
+
   it('announces the finished plan once every field is already filled', () => {
     const trip = {
       ...emptyTrip,

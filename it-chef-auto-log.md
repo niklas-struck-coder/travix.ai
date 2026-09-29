@@ -14250,3 +14250,77 @@ unverändert seit den vorherigen Läufen heute.
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein bereits vollständig diagnostizierter, noch
+offener Fund aus `support-chef-auto-log.md` (28.09., "2. Kleinere
+Sprachauffälligkeit: 'Mietwagen-Verbindungen' / 'Fähre-Verbindungen'
+klingt für deutsche Muttersprachler:innen ungewohnt").
+
+**Fund:** `getNextAdvisorStep()` (`src/lib/ai/mockAdvisor.ts`) bildete
+den "noch keine automatische Suche"-Satz für Zug/Bus/Fähre/Mietwagen
+bisher immer mechanisch aus `transportLabelsDe[mode]` + "-Verbindungen"
+(Zeile 169 vor dem Fix). Für Zug/Bus liest sich das natürlich ("Für
+Zug-Verbindungen hab ich noch keine automatische Suche …"), aber
+"Mietwagen" ist begrifflich keine "Verbindung" (das Wort impliziert eine
+Fahrplan-Route), und "Fähre-Verbindungen" ist keine idiomatische
+Zusammensetzung (korrekt wäre "Fährverbindungen"). Live im Code
+nachvollzogen: `getNextAdvisorStep()` mit `transportMode: 'car'` liefert
+"Für Mietwagen-Verbindungen hab ich noch keine automatische Suche …",
+mit `transportMode: 'ferry'` "Für Fähre-Verbindungen hab ich noch keine
+automatische Suche …" — beide exakt wie im Bericht beschrieben.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Chat-Textformulierung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: reine Sprachkorrektur an
+  einer einzelnen, bereits identifizierten Stelle, kein neues Feature und
+  keine Verhaltensänderung außer dem Wortlaut.
+- Klar genug beschrieben: der Bericht nennt exakt die betroffene Stelle,
+  die konkreten fehlerhaften Formulierungen und bereits einen konkreten
+  Korrekturvorschlag ("Fährverbindungen" statt "Fähre-Verbindungen", ein
+  eigener Satz ohne "Verbindungen" für Mietwagen) — beides 1:1
+  übernommen, keine eigene Interpretation nötig.
+- Ergebnis objektiv prüfbar: zwei neue Regressionstests prüfen den
+  exakten Wortlaut für `ferry`/`car`.
+
+Bewusst nicht mit angefasst: dieselbe `transportLabelsDe[mode]`-Nutzung
+an den drei anderen Stellen in derselben Datei (u. a. "nur {Label}, wie
+gewünscht" direkt nach der Moduswahl) — dort steht nur das reine Nomen,
+nicht die hier bemängelte "-Verbindungen"-Zusammensetzung, und der
+Bericht bezog sich ausdrücklich nur auf den "noch keine automatische
+Suche"-Satz.
+
+**Verifiziert vor dem Fix:** Neue Tests gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlugen
+reproduzierbar fehl (erwartete "Fährverbindungen"/"einen Mietwagen",
+erhielt "Fähre-Verbindungen"/"Mietwagen-Verbindungen"). Nach dem Fix
+(`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: neue `noAutoSearchPhraseDe`-Map (pro
+  `TransportMode` die vollständige, grammatisch passende Ergänzung nach
+  "Für …" — Zug/Flug/Bus unverändert als "{Label}-Verbindungen",
+  `ferry: 'Fährverbindungen'`, `car: 'einen Mietwagen'`); der
+  "noch keine automatische Suche"-Satz nutzt sie jetzt statt
+  `transportLabelsDe` + hartkodiertem "-Verbindungen"-Suffix. Variable
+  entsprechend von `modeLabel` zu `noAutoSearchPhrase` umbenannt, um den
+  neuen Inhalt (vollständige Phrase statt reines Nomen) klar zu machen.
+- Zwei neue Regressionstests in `src/lib/ai/mockAdvisor.test.ts` (ferry:
+  Satz enthält "Fährverbindungen", nicht "Fähre-Verbindungen"; car: Satz
+  enthält "einen Mietwagen", nicht "Mietwagen-Verbindungen").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 376
+Tests inkl. der beiden neuen, alle grün — 374 ohne die neuen Tests, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

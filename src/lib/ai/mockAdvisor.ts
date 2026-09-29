@@ -25,6 +25,20 @@ const transportLabelsDe: Record<TransportMode, string> = {
   car: 'Mietwagen',
 }
 
+// Eigene Formulierung für den "noch keine automatische Suche"-Satz: anders
+// als transportLabelsDe (reines Nomen für "nur X, wie gewünscht") braucht
+// dieser Satz eine vollständige, grammatisch passende Ergänzung nach "Für
+// …" — "Mietwagen" ist keine "Verbindung" (impliziert eine Fahrplan-Route)
+// und "Fähre-Verbindungen" ist keine idiomatische Zusammensetzung (siehe
+// reports/support-chef.md, 2026-09-28, Fund 2).
+const noAutoSearchPhraseDe: Record<TransportMode, string> = {
+  train: 'Zug-Verbindungen',
+  flight: 'Flug-Verbindungen',
+  bus: 'Bus-Verbindungen',
+  ferry: 'Fährverbindungen',
+  car: 'einen Mietwagen',
+}
+
 // Deckt den Quick-Reply-Text selbst und die naheliegenden Tippvarianten ab
 // ("überrasch mich", "Überrasche mich").
 const SURPRISE_ME_PATTERN = /^überrasche? mich$/i
@@ -164,9 +178,11 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
       }
     }
 
-    const modeLabel = next.transportMode ? transportLabelsDe[next.transportMode] : 'deine Verbindung'
+    const noAutoSearchPhrase = next.transportMode
+      ? noAutoSearchPhraseDe[next.transportMode]
+      : 'deine Verbindung'
     return {
-      content: `Für ${modeLabel}-Verbindungen hab ich noch keine automatische Suche — dein Reiseplan steht trotzdem! Öffne den Reiseplan, um alles im Detail zu sehen und einzelne Bausteine zu bearbeiten.`,
+      content: `Für ${noAutoSearchPhrase} hab ich noch keine automatische Suche — dein Reiseplan steht trotzdem! Öffne den Reiseplan, um alles im Detail zu sehen und einzelne Bausteine zu bearbeiten.`,
       avatarState: 'happy',
       quickReplies: ['Neue Reise planen'],
       trip: next,
