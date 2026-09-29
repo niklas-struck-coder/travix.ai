@@ -4,6 +4,71 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-29
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `8b1adbc`, 28.09.) war bereits vollständig
+in `main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`fb1af14`) aus angelegt, wie in
+den Session-Regeln für bereits gemergte Branches vorgesehen.
+
+**Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Laufende Content-Produktion" (kein einmaliger Abschluss, laufender
+Punkt). Konkret: fünfte Ausgabe des Mini-Changelog-Konzepts
+(`marketing/mini-changelog-konzept.md`), da der Tier-4-Kandidatentopf
+seit Ausgabe 4 (17.09.) auf zehn Kandidaten angewachsen ist — deutlich
+über der Achter-Schwelle, die bereits Ausgabe 2-4 ausgelöst hat.
+
+**Warum sicher genug:** Ergebnis ist ein reines Entwurfsdokument, kein
+Live-Vorgang — die Footer-Seite existiert weiterhin nicht, nichts wird
+gepostet oder veröffentlicht. Keine erfundenen Kennzahlen (kein Follower-/
+Reichweiten-/Nutzerzahlen-Bezug). Klar genug beschrieben und direkt auf
+bereits einzeln verifizierten, in `main` gemergten Commits aufbauend —
+vor dem Schreiben per `git log 8b1adbc..origin/main` und `git show` je
+Commit geprüft, welche der elf neuen Commits eine echte
+Produkt-Codeänderung enthalten (fünf) und welche davon zur "Ehrlichkeit/
+Vertrauen"-Erzählung des Formats passen (vier: zwei weitere
+Transportmittel-Erkennungslücken im Chat, ein `loadStoredChat()`-
+Robustheitsfix, das "Überrasch mich!"-Satzzeichen-Problem). Ein fünfter,
+echter Fix (unidiomatische "Mietwagen-Verbindungen"/"Fähre-Verbindungen"-
+Formulierung) wurde bewusst nicht aufgenommen — reine Sprach-/
+Grammatikkorrektur ohne Ehrlichkeits-/Vertrauens-Aussage, gleiche
+Begründung wie frühere Sprachkonsistenz-Ausschlüsse. Keine offene
+Positionierungs-Grundsatzfrage — Säule 1 ("Ehrlichkeit als Feature") ist
+bereits in `MARKENDESIGN.md`/`content-plan.md` festgelegt und wird hier
+nur angewendet; das Format selbst wartet weiterhin auf dieselbe, seit
+05.09. unbeantwortete Freigabe-Frage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden, unabhängig vom
+  Mini-Changelog.
+- "Landingpage/Warteliste live" (Sprint 2) und "Community/Warteliste
+  aufbauen" (Sprint 4) — ausdrücklich Live-Vorgänge, fallen unter das
+  Verbot für den autonomen Modus.
+- "Test-Kampagnen mit kleinem Budget starten" (Sprint 6) — ausdrücklich
+  ein Live-Vorgang (echtes Ad-Budget).
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md` — Ausgabe 5 ergänzt (vier neue
+  Tier-4-Kandidaten plus die sechs bereits wartenden, zehn insgesamt, ein
+  Ausschluss dokumentiert).
+- `marketing/freigabe-uebersicht.md` — neues Update vom 29.09. (Prüfung
+  der vier offenen Fragen, elf neue Commits einzeln geprüft, vier als
+  Tier-4-Kandidaten 24-27, einer bewusst ausgeschlossen), Tier-4-/
+  Tier-5-Abschnitt und "Nächster autonomer Lauf" aktualisiert, Datum im
+  Titel auf 29.09. gesetzt.
+- `ZEITPLAN.md` — Sprint-4-Bullet zum Mini-Changelog um die fünfte
+  Ausgabe ergänzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. Vor dem Schreiben die fünf zitierten
+Commits direkt im Repo gelesen (`git show`), nicht nur aus
+Commit-Messages übernommen.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-28
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`

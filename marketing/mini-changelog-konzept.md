@@ -610,3 +610,135 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
 (siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
 jetzt für eine mögliche fünfte Ausgabe.
+
+## Ausgabe 5 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-09-29
+
+Wie Ausgabe 1-4: **nichts davon ist live.** Reiner Textentwurf für
+dieselbe, noch nicht gebaute Footer-Seite — hängt an derselben vierten
+Frage wie Ausgabe 1-4 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine fünfte Ausgabe
+
+Dieselbe Selbstauflage wie bei Ausgabe 2-4: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue,
+einzeln verifizierte Tier-4-Kandidaten angesammelt haben — Richtwert
+bleibt der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst).
+Der Kandidatentopf war laut `marketing/freigabe-uebersicht.md` seit
+Ausgabe 4 (17.09.) auf sechs gewachsen (Kandidaten 18-23: Abschließen-
+Bestätigung für Reiseentwürfe, ausgeblendeter "Planung
+fortsetzen"-Button bei abgeschlossenen Entwürfen, neuer "Details
+ansehen"-Button dafür, dessen anfänglich verschwiegene Lücken jetzt als
+"nicht angegeben" markiert, der nachgezogene Kontrast-Fix der
+"Abgeschlossen"-Badge sowie ein zweiter `formatDuration()`-Platzhalter-
+Fix).
+
+Vor der Auswahl `git log 8b1adbc..origin/main` geprüft (letzter
+Marketing-Lauf, 28.09., dessen Inhalt laut Branch-Vergleich bereits
+vollständig in `main` gemergt war — `marketing-chef/auto` wurde deshalb
+neu von aktuellem `origin/main` aus angelegt, wie bei jedem bereits
+gemergten Branch). Elf neue Commits, fünf davon mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` geprüft:
+
+- **`5f7e0db` (28.09.):** `detectTransportMode()` erkannte "Flugticket"/
+  "Busticket"/"Autovermietung"/"Schifffahrt" bisher nicht als
+  entsprechenden Transportwunsch — derselbe Wortgrenzen-Fehler
+  (`\bkeyword\b` matcht nicht innerhalb eines zusammengesetzten Worts),
+  der schon "Zugticket" betroffen hatte. Wer diese Wörter tippte, bekam
+  keine Erkennung, ohne dass ein Fehler sichtbar wurde.
+- **`93f7de4` (28.09.):** Fehlte einem gespeicherten Reiseplan das
+  komplette `trip`-Feld (z. B. ein alter, von Hand editierter
+  `localStorage`-Eintrag), warf das Laden einen Fehler, der zwar
+  abgefangen wurde, dabei aber Chatverlauf und Quick-Replies gleich mit
+  verwarf — obwohl beide direkt daneben schon einzeln gegen genau dieses
+  Fehlen abgesichert waren.
+- **`473c0bc` (29.09.):** "Ich buche eine Bahnfahrt"/"Ich brauche ein
+  Bahnticket" lieferten bisher keine Zug-Erkennung — derselbe
+  Kompositum-Fehler wie bei Kandidat 24, nur für "bahn" statt "zug".
+- **`1937853` (29.09.):** Ein freihändig eingetippter Text wie
+  "Überrasch mich!" (mit Ausrufezeichen) wurde von der Erkennung nicht
+  als Zufallsziel-Wunsch verstanden und stattdessen wörtlich als
+  Reiseziel übernommen — ein unauflösbarer Dead End im Planungsablauf,
+  während derselbe Wunsch über den Quick-Reply-Button weiterhin
+  funktionierte.
+
+Zusammen mit den sechs bereits im Topf wartenden Kandidaten (18-23,
+siehe `marketing/freigabe-uebersicht.md`, Tier 4) ergeben sich **zehn**
+Kandidaten — deutlich über der Achter-Schwelle, die bereits Ausgabe 2-4
+ausgelöst hat.
+
+Ein weiterer geprüfter Commit **nicht** aufgenommen (ein realer,
+verifizierter Fix, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung, die
+dieses Format trägt — gleiche Einstufung wie frühere Sprachkonsistenz-
+Ausschlüsse, z. B. `538bb25`):
+- **`b0a746e` (29.09.):** Der "noch keine automatische Suche"-Satz im
+  Chat bildete den Verbindungsbegriff für Mietwagen/Fähre bisher
+  mechanisch aus Label + "-Verbindungen" — grammatisch falsch bzw.
+  unidiomatisch, aber keine falsche oder verschwiegene Information; jetzt
+  eine passende Formulierung pro Verkehrsmittel. Reine Sprachkorrektur,
+  kein Fall von irreführender Information.
+
+### Fünfte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 21.09. bis 29.09.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-4, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Du wirst gefragt, bevor etwas unwiderruflich passiert**
+- Der "Abschließen"-Button auf der Reiseentwürfe-Seite setzte eine
+  Entwurfskarte bisher sofort und endgültig auf "abgeschlossen", ohne
+  Rückfrage — jetzt fragt derselbe Bestätigungsdialog vorher nach wie
+  beim Löschen.
+
+**Eine Karte bietet nur Aktionen, die für ihren Zustand auch wirklich
+etwas bewirken**
+- Der hervorgehobene "Planung fortsetzen"-Button erschien bisher auch
+  auf bereits abgeschlossenen Reiseentwürfen und führte dort ins Leere —
+  jetzt nur noch dort, wo tatsächlich etwas fortzusetzen ist.
+- Eine abgeschlossene Reiseentwurf-Karte hatte dadurch zeitweise gar
+  keine sinnvolle Aktion mehr außer Löschen — ein neuer "Details
+  ansehen"-Button zeigt jetzt die vorhandenen Reisedaten in einer
+  eigenen Ansicht.
+
+**Echte statt verschwiegene oder verwirrende Angaben**
+- In genau diesem "Details ansehen"-Dialog verschwanden fehlende Angaben
+  (z. B. Budget oder Unterkunft) bisher kommentarlos — jetzt stehen sie
+  explizit als "nicht angegeben" da, wie an anderer Stelle im Produkt
+  schon üblich.
+- Eine abgeschlossene Reise war farblich kaum von einer pausierten zu
+  unterscheiden (beide graue Badge) — jetzt hat "Abgeschlossen" einen
+  eigenen, ausreichend kontrastreichen Teal-Akzent.
+- Fehlt bei einer Flug- oder Zugverbindung die Dauer-Angabe, steht dort
+  jetzt ein "—" statt einer leeren, verwirrenden Stelle neben dem
+  Uhr-Symbol.
+- Tippst du "Überrasch mich!" mit Satzzeichen frei in den Chat statt den
+  Quick-Reply-Button zu nutzen, wird das jetzt zuverlässig als
+  Zufallsziel-Wunsch verstanden statt wörtlich als (nicht existierendes)
+  Reiseziel übernommen zu werden.
+
+**Verlässlichere Technik im Hintergrund**
+- Die Chat-Erkennung verstand "Flugticket", "Busticket",
+  "Autovermietung", "Schifffahrt" und jetzt auch "Bahnfahrt"/
+  "Bahnticket" bisher nicht als das jeweils gemeinte Verkehrsmittel —
+  jetzt werden alle fünf zuverlässig erkannt.
+- Ein alter, von Hand bearbeiteter gespeicherter Reiseplan ohne
+  vollständige Reisedaten ließ den gesamten Chatverlauf beim Neuladen
+  verschwinden — jetzt bleiben Chatverlauf und Vorschläge erhalten, auch
+  wenn die Reisedaten selbst fehlen.
+
+---
+
+*Wie in Ausgabe 1-4: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig, nicht zuverlässig
+oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 5 hängt an derselben vierten Frage wie Ausgabe 1-4 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche sechste Ausgabe.

@@ -1,10 +1,120 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-27)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-29)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-29: fünfte Mini-Changelog-Ausgabe geschrieben (vier neue Tier-4-Kandidaten seit Ausgabe 4, Topf damit von sechs auf zehn), ein Sprach-/Grammatik-Fix bewusst ausgeschlossen, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `8b1adbc`, 28.09.) war bereits vollständig
+in `main` gemergt (der Freigabe-Chef-Merge-Commit `8b1adbc` selbst ist
+Ancestor von `origin/main`) — der Branch war also nur noch veraltet,
+nicht mehr in Arbeit. Neu von aktuellem `origin/main` (`fb1af14`) aus
+angelegt, statt auf dem veralteten Stand weiterzuarbeiten (wie in den
+Session-Regeln für bereits gemergte Branches vorgesehen).
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (Stand weiterhin 28.09., keine neue
+Antwort zu Kanal/6.2/Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile
+1803, weiterhin `[ ]`) oder diesem Dokument seit dem 27.09. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+jetzt seit über sieben Wochen.
+
+**`git log 8b1adbc..origin/main` zeigt elf neue Commits** (Basislinie
+bewusst `8b1adbc`, der Freigabe-Chef-Merge-Commit vom 28.09., auf dem die
+letzte Prüfung am 27.09. bereits abgeschlossen war). Fünf davon mit
+echter Produkt-Codeänderung, jeder einzeln per `git show` geprüft:
+
+- **`5f7e0db` (28.09.):** `detectTransportMode()` erkannte "Flugticket"/
+  "Busticket"/"Autovermietung"/"Schifffahrt" nicht — derselbe
+  Wortgrenzen-Fehler wie beim bereits behobenen "Zugticket"-Fall.
+  **Vierundzwanzigster Tier-4-Kandidat.**
+- **`93f7de4` (28.09.):** `loadStoredChat()` warf bei komplett fehlendem
+  `trip`-Feld einen TypeError, der zwar abgefangen wurde, dabei aber
+  Chatverlauf und Quick-Replies gleich mit verwarf, obwohl beide direkt
+  daneben schon einzeln gegen ihr Fehlen abgesichert sind.
+  **Fünfundzwanzigster Tier-4-Kandidat** — dieselbe Fundgruppe wie die
+  bereits gezählten `loadStoredChat()`/`resetChat()`-Robustheits-Fixes
+  aus Ausgabe 4.
+- **`473c0bc` (29.09.):** "Bahnfahrt"/"Bahnticket" wurden nicht als Zug
+  erkannt — derselbe Kompositum-Fehler wie bei Kandidat 24, nur für
+  "bahn" statt "zug"/"flug"/"bus"/"auto"/"schiff". **Sechsundzwanzigster
+  Tier-4-Kandidat.**
+- **`1937853` (29.09.):** "Überrasch mich!" mit Satzzeichen wurde
+  wörtlich als Reiseziel übernommen statt als Zufallsziel-Wunsch
+  erkannt zu werden — ein unauflösbarer Dead End, während der
+  Quick-Reply-Button weiterhin funktioniert. **Siebenundzwanzigster
+  Tier-4-Kandidat** — passt in dieselbe Fundgruppe wie der frühere
+  "nicht-kuriertes Reiseziel"-Fix (03.09.): ein Nutzereingabe-Fall, der
+  am Ende falsche statt ehrlicher Information erzeugt hätte.
+- **`b0a746e` (29.09.):** Der "noch keine automatische Suche"-Satz im
+  Chat bildete den Verbindungsbegriff für Mietwagen/Fähre bisher
+  mechanisch aus Label + "-Verbindungen" — grammatisch falsch bzw.
+  unidiomatisch. **Bewusst nicht** als Tier-4-Kandidat aufgenommen: reine
+  Sprach-/Grammatikkorrektur ohne die "Ehrlichkeit/Vertrauen"-Erzählung
+  dieses Formats (der alte Text war unbeholfen, aber nicht falsch oder
+  verschwiegen) — gleiche Begründung wie beim früher ausgeschlossenen
+  `538bb25` (Sprachkonsistenz).
+
+Die übrigen sechs Commits im Bereich (der Freigabe-Chef-Nacht-Check vom
+29.09., der zugehörige `it-chef/auto`-Merge-Commit, ein Daily-Status-
+Update, ein Support-Chef-Bericht, ein Marketing-Chef-Bericht und ein
+IT-Chef-Bericht vom 28.09.) enthalten keine weitere, für dieses Format
+relevante Codeänderung — jeweils per `git show --stat` geprüft
+(ausschließlich `reports/*.md`, `status.md`, `*-log.md` betroffen).
+
+**Damit wächst der Kandidatentopf von sechs (Kandidaten 18-23, Stand
+27.09.) auf zehn (Kandidaten 18-27)** — deutlich über der Achter-Schwelle,
+die bereits Ausgabe 2-4 ausgelöst hat. **Fünfte Mini-Changelog-Ausgabe
+heute geschrieben** (siehe `marketing/mini-changelog-konzept.md`,
+Ausgabe 5) — bündelt alle zehn Kandidaten. Der Kandidatentopf ist damit
+wieder leer, neue Funde sammeln sich ab jetzt für eine mögliche sechste
+Ausgabe.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung (neue Ausgabe eines bereits laufenden Entwurfsformats
+plus diese Übersicht), kein Live-Vorgang — nichts gepostet, versendet
+oder verändert; die Footer-Seite selbst existiert weiterhin nicht. Keine
+erfundenen Kennzahlen: alle vier neuen Kandidaten stammen aus einzeln per
+`git show` verifizierten, bereits in `main` gemergten Commits, der
+Ausschluss ist transparent mit eigener Begründung versehen statt
+stillschweigend übergangen. Keine offene Positionierungs-Grundsatzfrage:
+dieser Lauf wendet nur die bereits etablierte "Ehrlichkeit/Vertrauen"-
+Abgrenzung und den etablierten Achter-Schwellenwert an, trifft keine neue
+inhaltliche Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Ein neues eigenständiges Social-Content-Stück — bleibt an dieselbe
+  Selbstbeschränkung wie seit 20.08. gebunden (siehe unten), unabhängig
+  vom Mini-Changelog.
+- `b0a746e` als Tier-4-Kandidat zählen, nur weil er ein echter,
+  verifizierter Fix ist — verstößt gegen die etablierte "Ehrlichkeit/
+  Vertrauen statt reiner Korrektheit"-Abgrenzung dieses Formats.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: Ausgabe 5 ergänzt (vier neue
+  Tier-4-Kandidaten plus die sechs bereits wartenden, zehn Kandidaten
+  insgesamt, ein Ausschluss dokumentiert).
+- `marketing/freigabe-uebersicht.md`: neues Update vom 29.09. (Prüfung
+  der vier Fragen, elf neue Commits einzeln geprüft, vier als
+  Tier-4-Kandidaten 24-27, einer bewusst ausgeschlossen, Tier-4- und
+  Tier-5-Abschnitt aktualisiert, Kandidatentopf-Stand auf "wieder leer,
+  nach Ausgabe 5" gesetzt), "Nächster autonomer Lauf"-Abschnitt
+  aktualisiert, Datum im Titel auf 29.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-27: keine neuen Tier-4-Kandidaten, Kandidatentopf unverändert bei sechs, alle vier Fragen weiterhin offen, aber wachsender Rückstau auf `it-chef/auto` (jetzt vier unmergete Fixes) als neues Risiko für die Content-Pipeline vermerkt
 
@@ -2551,18 +2661,36 @@ Anfang-bis-Ende-Weg im Code.
    Update 2026-09-26): `formatDuration()` zeigt eine fehlende Duffel-Dauer
    in `FlightCard`/`TrainCard` jetzt als "—" statt als leere Textstelle
    (**dreiundzwanzigster Kandidat**, dieselbe Fundgruppe wie der bereits
-   gezählte vierzehnte Kandidat). **Kandidatentopf damit bei sechs**
-   (Kandidaten 18-23) — weiterhin unter der Achter-Schwelle von
-   Ausgabe 2/3/4.
+   gezählte vierzehnte Kandidat). Seit dem 28./29.09. vier weitere
+   Kandidaten (siehe Update 2026-09-29 oben): `detectTransportMode()`
+   erkannte "Flugticket"/"Busticket"/"Autovermietung"/"Schifffahrt"
+   (**vierundzwanzigster Kandidat**) und, einen Tag später,
+   "Bahnfahrt"/"Bahnticket" (**sechsundzwanzigster Kandidat**) jeweils
+   nicht als das gemeinte Verkehrsmittel — derselbe Wortgrenzen-/
+   Kompositum-Fehler wie beim bereits behobenen "Zugticket"-Fall.
+   `loadStoredChat()` warf bei komplett fehlendem `trip`-Feld einen
+   TypeError, der Chatverlauf und Quick-Replies gleich mit verwarf, obwohl
+   beide direkt daneben schon einzeln abgesichert sind
+   (**fünfundzwanzigster Kandidat**). Und "Überrasch mich!" mit
+   Satzzeichen wurde wörtlich als Reiseziel übernommen statt als
+   Zufallsziel-Wunsch erkannt zu werden — ein unauflösbarer Dead End
+   (**siebenundzwanzigster Kandidat**). Ein weiterer, am 29.09. geprüfter
+   Commit bewusst nicht aufgenommen: eine Grammatikkorrektur bei der
+   "noch keine automatische Suche"-Formulierung für Mietwagen/Fähre —
+   unbeholfen, aber nicht falsch oder verschwiegen, gleiche
+   Ausschlussbegründung wie bei `538bb25`. **Kandidatentopf damit bei
+   zehn (Kandidaten 18-27) — deutlich über der Achter-Schwelle, alle zehn
+   seit dem 29.09. in Ausgabe 5 verarbeitet.** Der Kandidatentopf ist
+   damit wieder leer.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
 8. **`mini-changelog-konzept.md`** (05.09., Ausgabe 2 am 07.09., Ausgabe 3
-   am 14.09., Ausgabe 4 am 17.09. ergänzt) — Konzept + vier fertige
-   Ausgaben für einen öffentlichen Mini-Changelog *im Produkt*
-   (Footer-Seite), nicht für Social Media gedacht. Bündelt den gesamten
-   seitherigen Tier-4-Kandidatentopf in fünfzehn kuratierten
-   Themenblöcken über alle vier Ausgaben. Berührt bewusst keine der drei
+   am 14.09., Ausgabe 4 am 17.09., Ausgabe 5 am 29.09. ergänzt) — Konzept
+   + fünf fertige Ausgaben für einen öffentlichen Mini-Changelog *im
+   Produkt* (Footer-Seite), nicht für Social Media gedacht. Bündelt den
+   gesamten seitherigen Tier-4-Kandidatentopf in kuratierten
+   Themenblöcken über alle fünf Ausgaben. Berührt bewusst keine der drei
    Fragen unten — hat dafür eine eigene, vierte Frage (siehe unten).
 
 ## Für Ni: die eigentliche Entscheidung
@@ -2581,7 +2709,7 @@ autonome Lauf nicht vorwegnehmen. Konkret zu entscheiden bleibt
 - **Neu seit 05.09.:** Soll der Mini-Changelog (Tier 5, Seite im Produkt
   statt Social) gebaut werden? Unabhängig von den drei Fragen oben zu
   beantworten — braucht weder Kanal noch 6.2 noch eine Social-Format-
-  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen vier
+  Entscheidung, nur IT-Chefs Umsetzung der Footer-Seite. Inzwischen fünf
   fertige Ausgaben, die auf diese eine Antwort warten.
 - **Kein neuer Entscheidungsbedarf, nur zur Kenntnis (seit 07.09.):** Die
   Vorlesen-Funktion im Chat hat seit heute keinen bekannten technischen
@@ -2769,4 +2897,12 @@ zuerst die vier offenen Fragen gegenprüfen, prüfen ob der `it-chef/auto`-
 Merge-Rückstau sich gelöst hat (und falls ja, die dort wartenden Fixes
 einzeln wie gewohnt per `git show` auf Tier-4-Tauglichkeit prüfen), und
 den Kandidatentopf (Stand 27.09.: sechs) gegen denselben 06.09.-Maßstab
-weiterführen.
+weiterführen. Stand 29.09. sind vier weitere Kandidaten dazugekommen
+(zwei weitere Transportmittel-Erkennungslücken, ein `loadStoredChat()`-
+Robustheitsfix, das "Überrasch mich!"-Satzzeichen-Problem, siehe Update
+2026-09-29 oben) — der Topf erreichte damit zehn, deutlich über der
+Achter-Schwelle, und wurde deshalb vollständig in Ausgabe 5 verarbeitet.
+Der Kandidatentopf ist damit wieder leer; der nächste Lauf sammelt neue
+Funde von vorn, mit demselben 06.09.-Maßstab (acht = genug) als Richtwert
+für eine sechste Ausgabe, und sollte weiterhin zuerst die vier offenen
+Fragen gegenprüfen.
