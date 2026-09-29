@@ -1,62 +1,57 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-28
+**Datum:** 2026-09-29
 
-## Was ist seit dem letzten Eintrag (2026-09-27) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-28) passiert?
 
-Diesmal einiges — und größtenteils gute Nachrichten. Alle drei zuletzt
-gemeldeten Punkte sind jetzt tatsächlich auf `main` gelandet und für echte
-Besucher:innen spürbar:
+Einiges — vor allem an den drei kleinen Sprachfehlern, die gestern und
+in den Tagen davor gesammelt wurden. IT-Chef hat heute (`mockAdvisor.ts`)
+gleich mehrere Erkennungslücken beim Transportmittel behoben
+("Bahnfahrt"/"Bahnticket" wurden nicht als Zug erkannt, "Überrasch
+mich!" mit Satzzeichen wurde wörtlich als Reiseziel übernommen) und
+genau die unnatürliche "Mietwagen-Verbindungen"/"Fähre-Verbindungen"-
+Formulierung korrigiert, die ich in meinem letzten Bericht als Fund 2
+gemeldet hatte — jetzt heißt es sauber "einen Mietwagen" bzw.
+"Fährverbindungen" (`mockAdvisor.ts:34-40`).
 
-1. **Mietwagen-Button ist da.** `src/lib/ai/mockAdvisor.ts:78` — die
-   Quick-Replies beim Transportmittel enthalten jetzt `'Mietwagen'`, nicht
-   mehr nur die vier anderen Optionen.
-2. **Flugkarte zeigt jetzt Klarnamen.** `src/components/search/FlightCard.tsx:60,66`
-   zeigt "Berlin"/"Lissabon" statt "BER"/"LIS" — inklusive Datum und
-   Hinflug-/Rückflug-Kennzeichnung bei Hin- und Rückflug in einer Karte.
-3. **Der Fallback ist mit drin.** Sowohl `FlightCard.tsx:28` (`name ||
-   iata || '—'`) als auch `TrainCard.tsx:20` (`name || '—'`) fangen jetzt
-   ein leeres Namensfeld ab, statt eine leere Stelle neben der Uhrzeit zu
-   zeigen. Genau das hatte ich gestern vorsorglich vorgeschlagen, bevor der
-   Klarname-Fix live geht — ist eingebaut.
-
-Dazu ein paar Fixes, die ich nicht selbst gemeldet hatte, aber aus
-Nutzersicht ebenfalls zählen: Hotelsuche lässt kein Ein-Nacht-mit-null-
-Nächten-Datum mehr zu (`HotelWizard.tsx`, Check-out-Minimum ist jetzt
-Check-in + 1 Tag), und die Spracherkennung für "Flugzeug"/"fliegen"/
-"Zugticket" wurde nachgeschärft (`mockAdvisor.ts`).
+Mein Fund 1 von gestern — die Flugsuche im normalen Chat verspricht eine
+Suche, die nie startet — ist dagegen noch offen. IT-Chef hat heute
+bestätigt, dass es dazu keinen neuen sicheren Fix gibt, und Marketing-
+Chef hat den Punkt zusätzlich als Positionierungsrisiko markiert: Die
+"Nichts wird erfunden"-Zusage steht im Code direkt neben dem Kommentar,
+dass genau das im Hauptablauf nicht passiert.
 
 ## Meine Vorschläge
 
-1. **Flug-Suche im Hauptchat verspricht mehr, als sie hält.**
-   `src/lib/ai/mockAdvisor.ts:154-165`: Wer im normalen Chat-Ablauf (nicht
-   über "Bearbeiten") Flug als Transportmittel wählt und bis zur Unterkunft
-   durchklickt, bekommt die Nachricht *"Ich suche jetzt nach echten
-   Flug-Verbindungen für [Ziel] — sobald ich etwas Verifiziertes gefunden
-   habe, zeige ich es dir. Nichts wird erfunden."* Das klingt nach einer
-   laufenden Suche — es passiert aber keine. Der Code-Kommentar direkt
-   daneben sagt es selbst: *"Der Hauptchat-Ablauf löst die echte Flugsuche
-   aktuell nicht aus (nur der separate 'Bearbeiten'-Pfad in useChat.ts tut
-   das)."* Die einzige Stelle, die wirklich sucht, ist
-   `src/hooks/useChat.ts:229-262` (`awaitingFlightOrigin`) — die aber nur
-   erreichbar ist, wenn man hinterher über den "Bearbeiten"-Button beim
-   Transportmittel nochmal Flug auswählt und einen Abflughafen eingibt.
-   Im normalen Ablauf bleibt der Person nur "Neue Reise planen" als
-   einziger Quick-Reply — keine Flüge, keine Erklärung, warum nicht. Das
-   ist genau die Sorte Widerspruch, die der Satz "Nichts wird erfunden"
-   eigentlich verhindern soll: Hier wird zwar nichts erfunden, aber auch
-   nichts geliefert, obwohl es angekündigt wurde. *Vorschlag:* entweder im
-   Hauptablauf ebenfalls nach dem Abflughafen fragen und `runFlightSearch`
-   auslösen (wie im Bearbeiten-Pfad), oder die Ankündigungsnachricht so
-   umformulieren, dass sie ehrlich auf den zusätzlichen Bearbeiten-Schritt
-   hinweist — ähnlich wie es für Bus/Fähre/Mietwagen bereits sauber gelöst
-   ist (`mockAdvisor.ts:167-174`).
+1. **Derselbe Sprachfehler, der heute an einer Stelle behoben wurde,
+   steht an einer früheren, sogar prominenteren Stelle im selben
+   Gespräch weiterhin unverändert drin.** `src/lib/ai/mockAdvisor.ts:114`
+   — direkt nachdem jemand das Transportmittel gewählt hat, noch vor der
+   Datums-/Budget-Frage: *"Verstanden — nur Mietwagen-Verbindungen, wie
+   gewünscht."* bzw. *"…nur Fähre-Verbindungen, wie gewünscht."* Genau
+   dieselbe unnatürliche Konstruktion wie in meinem Fund vom 28.09. —
+   nur diesmal an der Stelle, die Nutzer:innen im Gespräch tatsächlich
+   zuerst sehen. Der Fix von heute betraf nur den späteren Satz
+   (`noAutoSearchPhraseDe`, Zeile 34-40); Zeile 114 nutzt weiterhin
+   `transportLabelsDe` + hartkodiertes "-Verbindungen" und wurde dabei
+   übersehen. *Vorschlag:* an Zeile 114 dieselbe `noAutoSearchPhraseDe`-
+   Map verwenden, die für genau diesen Zweck schon existiert — kein neuer
+   Text nötig, nur dieselbe Stelle wiederverwenden.
 
-2. **Hilfe-Seite (`/hilfe`) bleibt eine Sackgasse.**
-   `src/pages/PlaceholderPage.tsx:16` zeigt weiterhin nur "Hilfe wird als
-   Nächstes gebaut" — kein FAQ, kein Kontaktweg, keine E-Mail-Adresse im
-   Code zu finden. Laut `ZEITPLAN.md` bewusst blockiert, bis Sprint 1
-   "Support-E-Mail live" abgeschlossen ist. Nach wie vor der richtige
-   Zeitpunkt dafür, sobald das ansteht — bis dahin unverändert.
+2. **Die Flugsuche im Hauptchat verspricht weiterhin mehr, als sie
+   hält — inzwischen zweimal gemeldet, immer noch offen.**
+   `src/lib/ai/mockAdvisor.ts:173`: Wer im normalen Ablauf (nicht über
+   "Bearbeiten") Flug wählt und bis zur Unterkunft durchklickt, bekommt
+   *"Ich suche jetzt nach echten Flug-Verbindungen für [Ziel] …"* — es
+   startet aber keine Suche, einziger nächster Schritt ist "Neue Reise
+   planen". Der Code-Kommentar direkt daneben benennt das Problem sogar
+   selbst. Das ist inzwischen nicht mehr nur ein UX-Detail: Marketing-
+   Chef hat es heute als Risiko für die gerade aufgebaute "Ehrlichkeit
+   als Feature"-Positionierung markiert, weil die Botschaft "nichts wird
+   erfunden" direkt neben dem Widerspruch steht. *Vorschlag bleibt:*
+   entweder im Hauptablauf ebenfalls nach dem Abflughafen fragen und die
+   echte Suche auslösen (wie im Bearbeiten-Pfad, `useChat.ts:229-262`),
+   oder die Ankündigung ehrlich auf den zusätzlichen Schritt umformulieren
+   — wie bei Bus/Fähre/Mietwagen bereits sauber gelöst.
 
-_Letztes Update: 2026-09-28_
+_Letztes Update: 2026-09-29_
