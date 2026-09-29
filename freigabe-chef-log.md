@@ -5198,3 +5198,72 @@ verifiziert, alle Checks grün). `marketing-chef/auto` und
 **Info an Ni:** Nein — Merge lief sauber durch, keine Auffälligkeit, die
 seine Aufmerksamkeit bräuchte. Die geblockte Branch-Nachzieh-Aktion ist
 rein kosmetisch und braucht keine Entscheidung von ihm.
+
+## 2026-09-29, 6-Uhr-Lauf (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits gegenüber `main` (bereits im heutigen
+  "früher Nacht-Check" geprüft und gemergt, `e3657e6`/`fb1af14`).
+  Planmäßig übersprungen, keine neue Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`d0811ed`).
+- `support-chef/auto` — 1 neuer Commit (`546951f`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert `ZEITPLAN.md` (Sprint-4-Bullet zur fünften Mini-Changelog-
+  Ausgabe ergänzt), `marketing-chef-auto-log.md`,
+  `marketing/freigabe-uebersicht.md` (Update vom 29.09.) und
+  `marketing/mini-changelog-konzept.md` (Ausgabe 5) — reine
+  Markdown-Ergänzung, kein Produktcode betroffen, kein
+  Build/Lint/Test nötig.
+- Fünf im Log zitierte Commits (`5f7e0db`, `93f7de4`, `473c0bc`,
+  `1937853`, `b0a746e`) per `git log`/Commit-Titel gegengeprüft — alle
+  fünf existieren und die Beschreibung im Diff stimmt mit den
+  tatsächlichen Commit-Titeln überein. Vier davon als neue
+  Tier-4-Kandidaten 24/25/26/27 aufgenommen, einer (`b0a746e`,
+  Grammatikkorrektur "Mietwagen-/Fähre-Verbindungen") nachvollziehbar
+  und transparent ausgeschlossen (reine Sprachkorrektur ohne
+  Ehrlichkeits-/Vertrauens-Aussage, gleiche Begründung wie frühere
+  Ausschlüsse).
+- Keine erfundenen Kennzahlen (keine Follower-/Reichweiten-/
+  Nutzerzahlen), durchgehend als reiner Entwurf gekennzeichnet ("nichts
+  davon ist live", Footer-Seite existiert weiterhin nicht), keine neue
+  Positionierungs-Entscheidung — wendet nur die bereits bestehende
+  Ehrlichkeits-/Vertrauens-Abgrenzung und den etablierten
+  Achter-Schwellenwert an. Vollständiger, kohärenter Text, keine
+  Stichpunkt-Skizze.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `fb1af14..d0811ed`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `support-chef-auto-log.md` — reine
+  Analyse ohne Code-Änderung, niedrigstes Risiko.
+- Kernbehauptung stichprobenartig direkt im Code nachvollzogen: Zeile
+  114 in `src/lib/ai/mockAdvisor.ts` (`Verstanden — nur
+  ${transportLabelsDe[mode]}-Verbindungen, wie gewünscht.`) tatsächlich
+  für jeden Transportmodus ohne Filter erreichbar (kein
+  `if (transportMode === 'flight')` davor, anders als bei der zu Recht
+  ausgenommenen Stelle in Zeile ~173) und enthält exakt dieselbe
+  `<Label>-Verbindungen`-Konstruktion, die im heutigen ersten
+  IT-Chef-Lauf an anderer Stelle (`noAutoSearchPhraseDe`) bereits als
+  sprachlich falsch erkannt und korrigiert wurde. Fund ist damit
+  nachvollziehbar, nicht erfunden, und logisch stimmig (dieselbe
+  Fehlerklasse, andere Stelle im selben Gespräch, vom heutigen Fix
+  übersehen).
+- Die drei referenzierten heutigen `it-chef-auto-log.md`-Einträge
+  (Mietwagen-/Fähre-Formulierung, Bahnfahrt/Bahnticket,
+  Satzzeichen-Toleranz bei "Überrasch mich!") existieren wie
+  beschrieben und sind bereits auf `main` (via `it-chef/auto`-Merge
+  heute Nacht).
+→ **Alles passt, nach `main` gemergt** (Merge-Commit, da `main`
+zwischenzeitlich durch den `marketing-chef/auto`-Merge weitergerückt
+war und kein reiner Fast-Forward mehr möglich war; `fb1af14..f0d52af`
+gesamt gepusht).
+
+**Ergebnis:** `it-chef/auto` ohne neue Commits (bereits heute Nacht
+gemergt). `marketing-chef/auto` und `support-chef/auto` beide geprüft,
+beide unabhängig verifiziert, beide gemergt.
+
+**Info an Ni:** Nein — beide Merges liefen sauber durch, keine
+Auffälligkeit, die seine Aufmerksamkeit bräuchte.
