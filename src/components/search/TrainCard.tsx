@@ -12,11 +12,14 @@ function formatTime(isoString: string) {
 
 function formatDuration(isoDuration: string) {
   if (!isoDuration) return '—'
-  const match = /P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/.exec(isoDuration)
+  const match = /P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/.exec(isoDuration)
   if (!match) return isoDuration
-  const [, days, hours, minutes] = match
+  const [, days, hours, minutes, seconds] = match
   const totalHours = Number(days || 0) * 24 + Number(hours || 0)
-  const totalMinutes = Number(minutes || 0)
+  let totalMinutes = Number(minutes || 0)
+  if (totalHours === 0 && totalMinutes === 0 && Number(seconds || 0) > 0) {
+    totalMinutes = 1
+  }
   return [totalHours && `${totalHours}h`, totalMinutes > 0 && `${totalMinutes}min`].filter(Boolean).join(' ') || '—'
 }
 

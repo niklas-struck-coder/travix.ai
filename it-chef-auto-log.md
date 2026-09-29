@@ -14535,3 +14535,65 @@ build`, kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (vierter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut durchgesehen — keine neuen offenen, sicher genug beschriebenen
+Punkte über die bereits in den früheren Läufen von heute dokumentierten
+Blocker hinaus (2.0/4.1-4.3 Base44/Gemini-Zugangsdaten, 5.7/7.4/7.12
+Architektur-/Datenmodell-Lücken, 6.6/6.7 fehlende Preisfelder, 8.9/8.12
+offene Produktentscheidungen bzw. OQ-04, 8.11 laufende Support-E-Mail).
+Stattdessen einen der beiden im zweiten Lauf heute bereits gefundenen,
+aber damals bewusst als schwächer zurückgestellten Kandidaten erneut
+geprüft und diesmal umgesetzt: die fehlende Sekunden-Erfassungsgruppe in
+`formatDuration()` (`FlightCard.tsx`/`TrainCard.tsx`).
+
+**Fund:** Der Regex in `formatDuration()` (`/P(?:(\d+)D)?(?:T(?:(\d+)H)?
+(?:(\d+)M)?)?/`) hat keine Erfassungsgruppe für Sekunden. Bei einer ISO-
+8601-Dauer, die ausschließlich Sekunden enthält (z. B. `"PT45S"`), liefert
+`totalHours` und `totalMinutes` jeweils `0`, wodurch die Funktion den
+Fallback-Platzhalter `"—"` zurückgibt — obwohl eine reale, wenn auch sehr
+kurze Dauer vorliegt. Live nachvollzogen (Node-Repl):
+`formatDuration('PT45S')` → `'—'`.
+
+**Warum heute (anders als im zweiten Lauf) umgesetzt:** Weiterhin dieselben
+vier Kriterien erfüllt (kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug;
+rein mechanische Regex-Erweiterung ohne neue Design-/Produktentscheidung —
+"1min" statt "—" nutzt lediglich das bereits etablierte `Xmin`-Format;
+klar beschrieben mit exaktem Repro-String; objektiv per Regressionstest
+prüfbar). Im zweiten Lauf nur wegen geringerer realer Auswirkung
+gegenüber dem damals gewählten Bahn-Fund zurückgestellt, nicht wegen einer
+der vier Sicherheitskriterien — deshalb heute, mangels eines neuen
+stärkeren Kandidaten, regulär umgesetzt.
+
+**Verifiziert vor dem Fix:** Neue Tests gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/components/search/FlightCard.tsx
+src/components/search/TrainCard.tsx`) — beide schlugen reproduzierbar
+fehl (`Unable to find an element with the text: 1min`, stattdessen wurde
+weiterhin `—` gerendert). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/components/search/FlightCard.tsx` und
+  `src/components/search/TrainCard.tsx`: `formatDuration()` identisch
+  angepasst — Regex um `(?:(\d+)S)?` erweitert; liegt die Dauer unter
+  einer vollen Minute (kein Stunden-/Minuten-Anteil, aber Sekunden
+  vorhanden), wird `totalMinutes` auf `1` gesetzt statt bei `0` zu bleiben.
+- Je ein neuer Regressionstest in `FlightCard.test.tsx`/`TrainCard.test.tsx`
+  (`duration: 'PT45S'` → `"1min"` statt `"—"`).
+- `ZEITPLAN.md` (Sprint 1 — Fundament, Punkt 5.4) um den Eintrag ergänzt.
+  Keine Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da
+  5.4 dort bereits als erledigt (`[x]`) markiert ist und der Fund
+  innerhalb des bereits fertigen Teils liegt (gleiches Muster wie bei den
+  vorherigen `formatDuration()`-Fixes am 25.09.).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 382
+Tests inkl. der beiden neuen, alle grün), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-
+Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

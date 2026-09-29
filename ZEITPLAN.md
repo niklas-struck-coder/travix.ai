@@ -1659,6 +1659,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Muster aus `formatTime()`. Je ein neuer Regressionstest in
   `FlightCard.test.tsx`/`TrainCard.test.tsx` (vor dem Fix per `git stash`
   auf nur diese beiden Quelldateien reproduzierbar rot verifiziert).
+  Vom autonomen IT-Chef-Lauf am 29.09. (vierter Lauf) einen bereits am
+  25.09. als schwächerer Kandidat zurückgestellten Fund in derselben
+  Funktion behoben: `formatDuration()` fehlte die Erfassungsgruppe für
+  Sekunden im Regex — bei einer reinen Sekundenangabe wie `"PT45S"` (kein
+  Tage-/Stunden-/Minuten-Anteil) lieferte die Funktion `"—"`, obwohl eine
+  echte, wenn auch sehr kurze Dauer vorlag; live verifiziert
+  (`formatDuration('PT45S')` → `'—'` vor dem Fix). Fix in `FlightCard.tsx`
+  und `TrainCard.tsx` identisch: Regex um eine optionale `(?:(\d+)S)?`-
+  Gruppe erweitert; liegt die Dauer unter einer vollen Minute (kein
+  Stunden-/Minuten-Anteil, aber Sekunden vorhanden), wird auf `"1min"`
+  aufgerundet statt `"—"` zu zeigen — kein neues Anzeigeformat, nur
+  Wiederverwendung des bereits etablierten `Xmin`-Musters. Je ein neuer
+  Regressionstest in `FlightCard.test.tsx`/`TrainCard.test.tsx` (vor dem
+  Fix per `git stash` auf nur diese beiden Quelldateien reproduzierbar rot
+  verifiziert).
   Vom autonomen IT-Chef-Lauf am 25.09. (weiterer Lauf) den zweiten der
   beiden neuen Funde aus `reports/support-chef.md` (25.09.) behoben: bei
   einer Hin- und Rückflug-Suche zeigte `FlightCard.tsx` beide

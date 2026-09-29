@@ -83,6 +83,17 @@ describe('FlightCard', () => {
     expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
   })
 
+  it('shows a rounded-up minute instead of a placeholder dash for a sub-minute (seconds-only) duration', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, duration: 'PT45S' }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.getByText('1min')).toBeInTheDocument()
+    expect(screen.queryByText('—')).not.toBeInTheDocument()
+  })
+
   it('formats a duration with only a days component (no explicit time part) instead of showing the raw ISO string', () => {
     const offer: FlightOffer = {
       ...baseOffer,
