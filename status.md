@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-27):**
-- IT-Chef hat mehrere Erkennungslücken in der Transportmittel-Erkennung behoben
-  ("Flugzeug", "Zugticket", Wortgrenzen bei Flugticket/Busticket/Autovermietung)
-  sowie einen Zeitzonenfehler bei Standard-Reisedaten und fehlenden Namensfallback
-  bei Flug-/Zugkarten
-- Freigabe-Chef hat den seit acht Läufen blockierten IT-Chef-Zweig erstmals wieder
-  gemergt sowie die Marketing- und Support-Fixe des Tages nach main übernommen
-- Marketing-Chef hat ein neues Content-Stück zum Thema "Klarname statt Rohdaten"
-  vorbereitet
+**Seit letztem Update (2026-09-28):**
+- IT-Chef hat weitere Lücken in der Transportmittel-Erkennung behoben (u.a.
+  "Bahnfahrt"/"Bahnticket" nicht als Zug erkannt, wörtlich übernommenes
+  "Überrasch mich!" als Reiseziel, unnatürliche Mietwagen-/Fähre-Formulierung)
+  sowie begleitende Tests für mehrere Komponenten ergänzt
+- Freigabe-Chef hat die IT-, Marketing- und Support-Änderungen des Tages
+  wieder eigenständig geprüft und nach main gemergt
+- Marketing-Chef und Support-Chef haben ihre Tagesläufe fortgesetzt (Mini-
+  Changelog-Kandidaten, Beobachtung bestehender Formulierungs-Funde)
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-28_
+_Letztes Update: 2026-09-29_
