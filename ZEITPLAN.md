@@ -584,6 +584,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
   Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
   reproduzierbar rot verifiziert (lieferte `null` statt `'train'`).
+  Vom autonomen IT-Chef-Lauf am 29.09. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug in `getNextAdvisorStep()` (`mockAdvisor.ts`) behoben:
+  `SURPRISE_ME_PATTERN` (`/^überrasche? mich$/i`) verlangte bisher eine
+  exakte Übereinstimmung ohne jedes Satzzeichen. Der Quick-Reply-Button aus
+  der Begrüßung sendet exakt "Überrasch mich" (funktionierte also immer),
+  aber die erste Chat-Frage nimmt auch freien Text entgegen — tippt eine
+  Nutzerin die Phrase natürlich mit Satzzeichen ("Überrasch mich!",
+  "Überrasche mich."), matcht die Regex nicht mehr. Live nachvollzogen:
+  `SURPRISE_ME_PATTERN.test('Überrasch mich!')` liefert `false`. Fällt der
+  Match aus, wird der wörtliche, satzzeichenbehaftete Text selbst zum
+  `trip.destination` (statt eines zufälligen kuratierten Ziels) — sowohl in
+  der Antwort ("Überrasch mich! klingt nach einer großartigen Idee!")
+  sichtbar als auch nachfolgend an `findKnownDestination()` übergeben, das
+  dafür naturgemäß nie etwas findet, und derailt damit den gesamten
+  Planungsablauf mit einem unauflösbaren Reiseziel. Fix: Regex um eine
+  optionale Satzzeichen-Klasse am Ende ergänzt
+  (`/^überrasche? mich[!.?]*$/i`), mechanische Erweiterung ohne sonstige
+  Verhaltensänderung (Klick auf den Quick-Reply-Button bleibt unverändert
+  erkannt). Neuer Regressionstest in `mockAdvisor.test.ts` (drei
+  satzzeichenbehaftete Varianten) — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
+  reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -14407,3 +14407,86 @@ bewusst zurückgestellt (nicht behoben):
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (dritter Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Ein eigenständig gefundener Bug in
+`getNextAdvisorStep()` (`src/lib/ai/mockAdvisor.ts`), gefunden über einen
+gezielt beauftragten Explore-Agenten, nachdem die eigene Durchsicht von
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` sowie der bisherigen
+Berichte keinen weiteren offenen, sicher genug beschriebenen Punkt ergab
+(2.0/4.1-4.3 blockiert auf Base44/Gemini-Zugangsdaten, 5.7/7.4 auf offene
+Architektur-/Produktentscheidungen, 6.6/6.7/7.12 auf fehlende Preisfelder in
+`TripDraft`, 8.9/8.12 auf offene Produktentscheidungen bzw. ungeklärte
+Loyalty-Regeln (OQ-04), 8.11 auf die noch nicht abgeschlossene
+Support-E-Mail per `ZEITPLAN.md`). Zwei vom heutigen zweiten Lauf bereits
+identifizierte, aber bewusst zurückgestellte schwächere Kandidaten
+(`formatDuration()`-Sekunden-Lücke, `aria-label`-Duplikat-Fall in
+`Preisalarme.tsx`/`Warenkorb.tsx`/`Aktivitaeten.tsx`) selbst nachgeprüft:
+Bei allen drei Seiten gibt es keinen Add-Flow und die fest verdrahteten
+Demo-Daten haben ausschließlich eindeutige Namen — anders als bei
+`EditMode.tsx`/`Reiseentwuerfe.tsx` (dort ermöglicht ein echter Add-Flow
+Duplikate) ist der Fund hier aktuell nicht über die App erreichbar, bleibt
+also weiterhin zurückgestellt.
+
+**Fund:** `SURPRISE_ME_PATTERN` (Zeile 44, `/^überrasche? mich$/i`) verlangt
+eine exakte Übereinstimmung ohne jedes Satzzeichen. Der Quick-Reply-Button
+aus der Begrüßung sendet exakt den String `"Überrasch mich"` (matcht daher
+immer), aber die erste Chat-Frage ("Wohin soll es gehen?") ist ein freies
+Texteingabefeld — tippt eine Nutzerin die Phrase von Hand mit natürlichem
+Satzzeichen ("Überrasch mich!", "Überrasche mich."), matcht die Regex
+nicht mehr. Live nachvollzogen (Node-Repl):
+`SURPRISE_ME_PATTERN.test('Überrasch mich!')` → `false`,
+`SURPRISE_ME_PATTERN.test('Überrasche mich.')` → `false`. Fällt der Match
+aus, landet der wörtliche, satzzeichenbehaftete Text selbst in
+`trip.destination` (Zeile 85-88) statt eines zufälligen kuratierten Ziels
+— sichtbar in der Antwort ("Überrasch mich! klingt nach einer großartigen
+Idee!") und danach ungeprüft an `findKnownDestination()` weitergegeben,
+das dafür naturgemäß nie etwas findet. Das derailt den gesamten
+Planungsablauf mit einem unauflösbaren Reiseziel, exakt der Fall, den der
+bestehende Kommentar über der Regex ausdrücklich verhindern will
+("wörtlich übernommen wäre es ein Reiseziel, das weder die
+Unterkunfts- noch die Flugsuche noch die Kartenansicht je auflösen
+können").
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Text-Erkennung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: mechanische
+  Regex-Erweiterung um eine optionale Satzzeichen-Klasse am Ende, keine
+  neue Design-Entscheidung, keine Verhaltensänderung für den unverändert
+  funktionierenden Quick-Reply-Klick.
+- Klar genug beschrieben: exakte Fundstelle, konkreter Repro-String
+  (`'Überrasch mich!'`), erwartetes vs. tatsächliches Verhalten sind
+  eindeutig, keine Interpretation nötig.
+- Ergebnis objektiv prüfbar: neuer Regressionstest mit drei
+  satzzeichenbehafteten Varianten, erwartet ein kuratiertes Ziel statt des
+  wörtlichen Texts.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlug
+reproduzierbar fehl (`expected 'Überrasch mich!' not to be 'Überrasch
+mich!'`, d. h. der wörtliche Text landete unverändert in
+`trip.destination`). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `SURPRISE_ME_PATTERN` von
+  `/^überrasche? mich$/i` auf `/^überrasche? mich[!.?]*$/i` erweitert,
+  Kommentar direkt darüber ergänzt.
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (drei Varianten:
+  "Überrasch mich!", "Überrasche mich.", "überrasch mich?").
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da der
+  Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt,
+  gleiches Muster wie die beiden vorherigen Läufe von heute.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 378
+Tests inkl. des neuen, alle grün — 377 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

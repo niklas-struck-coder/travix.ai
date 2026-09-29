@@ -40,8 +40,11 @@ const noAutoSearchPhraseDe: Record<TransportMode, string> = {
 }
 
 // Deckt den Quick-Reply-Text selbst und die naheliegenden Tippvarianten ab
-// ("überrasch mich", "Überrasche mich").
-const SURPRISE_ME_PATTERN = /^überrasche? mich$/i
+// ("überrasch mich", "Überrasche mich"), inklusive frei eingetippter
+// Satzzeichen am Ende ("Überrasch mich!", "Überrasche mich.") — anders als
+// der Quick-Reply-Klick ist dies das erste Chat-Feld, das auch Freitext
+// entgegennimmt.
+const SURPRISE_ME_PATTERN = /^überrasche? mich[!.?]*$/i
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

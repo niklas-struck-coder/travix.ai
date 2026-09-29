@@ -99,6 +99,18 @@ describe('getNextAdvisorStep', () => {
     expect(reply.content).toContain(reply.trip.destination as string)
   })
 
+  it('still recognizes "Überrasch mich" typed by hand with trailing punctuation', () => {
+    // Anders als der exakte Quick-Reply-Text kann Freitext im Chat-Eingabefeld
+    // natürliche Satzzeichen enthalten ("Überrasch mich!", "Überrasche mich.")
+    // — sonst würde der wörtliche, satzzeichenbehaftete Text selbst zum
+    // (unauflösbaren) Reiseziel.
+    for (const message of ['Überrasch mich!', 'Überrasche mich.', 'überrasch mich?']) {
+      const reply = getNextAdvisorStep(emptyTrip, message)
+      expect(reply.trip.destination).not.toBe(message)
+      expect(knownDestinations.map((destination) => destination.name)).toContain(reply.trip.destination)
+    }
+  })
+
   it('re-asks for transport mode without advancing when the message has no recognizable mode', () => {
     const trip = { ...emptyTrip, destination: 'Lissabon' }
     const reply = getNextAdvisorStep(trip, 'irgendwie halt')
