@@ -5142,3 +5142,59 @@ Fast-Forward mehr möglich war).
 
 **Info an Ni:** Nein — beide Merges liefen sauber durch, keine
 Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## 2026-09-29, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 3 neue Commits von heute gegenüber `main`
+  (`1937853`, `473c0bc`, `b0a746e`).
+- `marketing-chef/auto` — 0 neue Commits. Planmäßig übersprungen (läuft
+  erst um 6 Uhr, separater späterer Lauf).
+- `support-chef/auto` — 0 neue Commits. Planmäßig übersprungen (läuft
+  erst um 6 Uhr, separater späterer Lauf).
+
+**Prüfung `it-chef/auto`:**
+- Diff zu `main` gelesen: `ZEITPLAN.md`, `it-chef-auto-log.md`,
+  `src/lib/ai/mockAdvisor.ts` (+Test), `src/lib/trip/tripStorage.ts`
+  (+Test). Drei fachliche Fixes, alle im Log klar begründet:
+  1. `SURPRISE_ME_PATTERN` akzeptiert jetzt Satzzeichen am Ende
+     ("Überrasch mich!"/"Überrasche mich.") statt sie wörtlich als
+     Reiseziel zu übernehmen.
+  2. `detectTransportMode()` erkennt jetzt auch "Bahnfahrt"/
+     "Bahnticket" als Zug (fehlende Kompositum-Variante zum
+     `bahn`-Synonym, analog zu den bereits gefixten
+     Zugticket/Flugticket/Busticket/Autovermietung/Schifffahrt-Fällen).
+  3. Der "noch keine automatische Suche"-Satz verwendet jetzt eine
+     eigene `noAutoSearchPhraseDe`-Map statt mechanisch
+     `transportLabelsDe[mode] + "-Verbindungen"` — behebt die
+     unnatürlichen Formulierungen "Mietwagen-Verbindungen" und
+     "Fähre-Verbindungen" (→ "einen Mietwagen"/"Fährverbindungen"),
+     Fund kam ursprünglich aus `support-chef-auto-log.md`.
+- Kein Bezug zu Auth/Zahlungen/rechtlichen Texten, kein Scope-Creep
+  über die drei beschriebenen Punkte hinaus. Kein UI/Design betroffen
+  (reine Text-/Logik-Änderung im Mock-Advisor und im Storage-Parsing),
+  `MARKENDESIGN.md` daher nicht einschlägig.
+- **Unabhängig verifiziert** (eigene Ausführung in isolierter Worktree,
+  nicht nur den Log-Eintrag geglaubt): `npm install`, `npx tsc -b` →
+  grün (keine Fehler), `npx eslint .` → 0 Errors (nur 4
+  pre-existierende `react-refresh/only-export-components`-Warnungen in
+  `ui/badge.tsx`/`ui/button.tsx`/`ui/sheet.tsx`/`ui/tabs.tsx`, nicht
+  Teil dieses Diffs), `npx vitest run` → 378/378 Tests grün (59 Dateien).
+
+→ **Gemergt** (Merge-Commit `e3657e6`, `653ec3b..e3657e6` auf `main`
+gepusht). Der Versuch, den `it-chef/auto`-Branch selbst danach per
+Force-Push auf den neuen `main`-Stand nachzuziehen, wurde vom
+Auto-Mode-Classifier der Umgebung blockiert ("Merge Without Review") —
+reine Housekeeping-Nacharbeit ohne Einfluss auf den bereits erfolgten
+Merge; `it-chef/auto` zeigt daher weiterhin auf `1937853` statt auf
+`e3657e6`, was beim nächsten IT-Chef-Lauf zu einem non-fast-forward-Diff
+führen kann, aber inhaltlich unproblematisch ist.
+
+**Ergebnis:** `it-chef/auto` geprüft und gemergt (unabhängig
+verifiziert, alle Checks grün). `marketing-chef/auto` und
+`support-chef/auto` planmäßig noch nicht geprüft (kommen im späteren
+6-Uhr-Lauf).
+
+**Info an Ni:** Nein — Merge lief sauber durch, keine Auffälligkeit, die
+seine Aufmerksamkeit bräuchte. Die geblockte Branch-Nachzieh-Aktion ist
+rein kosmetisch und braucht keine Entscheidung von ihm.
