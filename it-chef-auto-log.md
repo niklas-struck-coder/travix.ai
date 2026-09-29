@@ -14490,3 +14490,48 @@ Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (weiterer Lauf desselben Tages)
+
+**Fund:** In `getNextAdvisorStep()` (`src/lib/ai/mockAdvisor.ts:114`) nutzte
+die Bestätigungsantwort direkt nach der Transportmittel-Erkennung
+("Verstanden — nur {Label}-Verbindungen, wie gewünscht.") weiterhin das
+reine Nomen aus `transportLabelsDe` statt der bereits im ersten Lauf von
+heute angelegten `noAutoSearchPhraseDe`-Map — genau dieselbe sprachliche
+Lücke ("Mietwagen-Verbindungen" ist begrifflich falsch, "Fähre-
+Verbindungen" keine idiomatische Zusammensetzung), nur an einer im
+Gesprächsverlauf früheren Stelle, die vom ersten Lauf übersehen wurde.
+Live nachvollzogen: `transportMode: 'car'` → "Verstanden — nur Mietwagen-
+Verbindungen, wie gewünscht." und `transportMode: 'ferry'` → "Verstanden —
+nur Fähre-Verbindungen, wie gewünscht." — beide unverändert falsch. Bereits
+von Support-Chef in `support-chef-auto-log.md` (29.09.) gemeldet und im
+`main`-Commit "Support-Chef Bericht: 2026-09-29 - Mietwagen-/Fähre-
+Verbindungen-Formulierung an früherer Chat-Stelle (Zeile 114) weiterhin
+unnatürlich …" bestätigt, von den bisherigen IT-Chef-Läufen heute aber noch
+nicht aufgegriffen.
+
+**Verifiziert vor dem Fix:** Zwei neue Tests gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlugen
+reproduzierbar fehl (`expected '... nur Fähre-Verbindungen, …' to contain
+'Fährverbindungen'` bzw. `... to contain 'nur einen Mietwagen'`). Nach dem
+Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts` (Zeile 114): `transportLabelsDe[mode]}-
+  Verbindungen` durch die bereits vorhandene `noAutoSearchPhraseDe[mode]`
+  ersetzt — reine Wiederverwendung des im ersten Lauf heute etablierten
+  Musters, keine neue Formulierung, keine Design-Entscheidung. Zeile 173
+  (nur für `flight` erreichbar, reines Nomen "Flug-Verbindungen" bleibt dort
+  korrekt) bewusst unverändert, wie schon im ersten Lauf entschieden.
+- Zwei neue Regressionstests in `src/lib/ai/mockAdvisor.test.ts` (Ferry-/
+  Car-Variante der Transportmittel-Bestätigung).
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 380
+Tests inkl. der beiden neuen, alle grün), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

@@ -125,6 +125,20 @@ describe('getNextAdvisorStep', () => {
     expect(reply.nextField).toBe('dates')
   })
 
+  it('uses natural German phrasing for the ferry transport-mode confirmation instead of "Fähre-Verbindungen"', () => {
+    const trip = { ...emptyTrip, destination: 'Lissabon' }
+    const reply = getNextAdvisorStep(trip, 'Fähre bitte')
+    expect(reply.content).toContain('Fährverbindungen')
+    expect(reply.content).not.toContain('Fähre-Verbindungen')
+  })
+
+  it('uses natural German phrasing for the car transport-mode confirmation instead of "Mietwagen-Verbindungen"', () => {
+    const trip = { ...emptyTrip, destination: 'Lissabon' }
+    const reply = getNextAdvisorStep(trip, 'Mietwagen bitte')
+    expect(reply.content).toContain('nur einen Mietwagen')
+    expect(reply.content).not.toContain('Mietwagen-Verbindungen')
+  })
+
   it('sets dates and asks for budget next', () => {
     const trip = { ...emptyTrip, destination: 'Lissabon', transportMode: 'train' as const }
     const reply = getNextAdvisorStep(trip, 'Im Sommer')

@@ -111,7 +111,7 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
     }
     next.transportMode = mode
     return {
-      content: `Verstanden — nur ${transportLabelsDe[mode]}-Verbindungen, wie gewünscht. Wann soll die Reise stattfinden?`,
+      content: `Verstanden — nur ${noAutoSearchPhraseDe[mode]}, wie gewünscht. Wann soll die Reise stattfinden?`,
       avatarState: 'writing',
       quickReplies: ['Nächstes Wochenende', 'In 2 Wochen', 'Im Sommer'],
       trip: next,

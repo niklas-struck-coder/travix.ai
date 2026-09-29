@@ -607,6 +607,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   satzzeichenbehaftete Varianten) — vor dem Fix durch temporäres
   Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
   reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 29.09. (weiterer Lauf desselben Tages) den
+  von Support-Chef gemeldeten Rest desselben Formulierungsfundes vom
+  selben Tag nachgezogen: Die Transportmittel-Bestätigung direkt nach
+  der Moduserkennung ("Verstanden — nur {Label}-Verbindungen, wie
+  gewünscht.") nutzte an dieser früheren Chat-Stelle (Zeile 114) weiterhin
+  `transportLabelsDe` statt der im ersten Lauf angelegten
+  `noAutoSearchPhraseDe`-Map — "Mietwagen-Verbindungen"/"Fähre-
+  Verbindungen" blieben dort unverändert falsch. Fix: Zeile 114 auf
+  `noAutoSearchPhraseDe[mode]` umgestellt, reine Wiederverwendung des
+  bereits etablierten Musters. Zwei neue Regressionstests in
+  `mockAdvisor.test.ts` (Ferry-/Car-Variante) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockAdvisor.ts`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
