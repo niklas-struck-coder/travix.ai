@@ -3494,3 +3494,90 @@ ob noch weitere, seltenere zusammengesetzte Wörter für die fünf
 Transportmittel-Keywords fehlen — die drei oben genannten Beispiele
 wurden als naheliegendste, alltagssprachlichste Fälle ausgewählt, kein
 vollständiger Abgleich gegen ein Wörterbuch.
+
+---
+
+## 2026-09-29 — KI-Chat / Transportmittel-Antwort (`mockAdvisor.ts`)
+
+### Kontext
+Ausgewählt, weil `it-chef-auto-log.md` für heute (29.09.) drei
+Code-Änderungen an genau diesem Bereich zeigt, alle noch nicht von
+Support-Chef geprüft: erster Lauf ("Mietwagen-Verbindungen"/
+"Fähre-Verbindungen" korrigiert, Vorschlag aus dem eigenen 28.09.-Bericht
+umgesetzt), zweiter Lauf (`'bahnfahrt'`/`'bahnticket'` als neue
+Zug-Keywords ergänzt), dritter Lauf (Satzzeichen bei "Überrasch mich!"
+werden jetzt toleriert). Alle drei laut `git log` bereits auf `main`
+(Freigabe-Chef hat `it-chef/auto` heute Nacht gemergt).
+
+Geprüft:
+- `src/lib/ai/mockAdvisor.ts` (komplette Datei, insbesondere
+  `getNextAdvisorStep()`, `transportKeywords`, `noAutoSearchPhraseDe`,
+  `SURPRISE_ME_PATTERN`)
+- `src/lib/ai/mockAdvisor.test.ts` (welche Fälle bereits abgedeckt sind)
+- `src/components/chat/ChatInput.tsx` (ob Freitext vor der Übergabe an
+  den Advisor getrimmt wird)
+- `it-chef-auto-log.md` (alle drei heutigen Einträge), um keinen bereits
+  geprüften/verworfenen Kandidaten als neuen Fund auszugeben
+
+### Zuerst bestätigt: heutige Fixes tatsächlich im Code
+- `mockAdvisor.ts:34-40` (`noAutoSearchPhraseDe`): neue Map, der
+  "noch keine automatische Suche"-Satz (Zeile 184-188) nutzt jetzt
+  `Fährverbindungen`/`einen Mietwagen` statt `Fähre-Verbindungen`/
+  `Mietwagen-Verbindungen`.
+- `mockAdvisor.ts:13`: `train`-Keywords enthalten jetzt `'bahnfahrt'`/
+  `'bahnticket'`.
+- `mockAdvisor.ts:47`: `SURPRISE_ME_PATTERN` ist jetzt
+  `/^überrasche? mich[!.?]*$/i` — akzeptiert Satzzeichen am Ende.
+
+### Reibungspunkte
+
+**1. Derselbe Sprachfehler, der heute im ersten Lauf für den "noch keine
+automatische Suche"-Satz behoben wurde, besteht an einer früheren Stelle
+im selben Gespräch unverändert weiter — Nutzer:innen sehen ihn sogar
+eher.**
+`mockAdvisor.ts:114` (direkt nachdem das Transportmittel erkannt wurde,
+noch vor der Datums-/Budget-/Unterkunftsfrage):
+```
+content: `Verstanden — nur ${transportLabelsDe[mode]}-Verbindungen, wie gewünscht. Wann soll die Reise stattfinden?`,
+```
+Das ist exakt dieselbe `<Label>-Verbindungen`-Konstruktion, die heute im
+ersten Lauf für den späteren Satz als sprachlich falsch erkannt und
+korrigiert wurde (siehe oben, `noAutoSearchPhraseDe` und der Verweis auf
+den eigenen Bericht vom 28.09.) — nur wurde diese frühere, im
+Gesprächsverlauf tatsächlich zuerst sichtbare Stelle dabei übersehen.
+Live nachvollzogen (dieselbe Template-Logik nachgebaut):
+`transportMode: 'car'` → "Verstanden — nur Mietwagen-Verbindungen, wie
+gewünscht." und `transportMode: 'ferry'` → "Verstanden — nur
+Fähre-Verbindungen, wie gewünscht." — beide exakt so unnatürlich wie im
+28.09.-Bericht beschrieben ("Mietwagen" ist keine "Verbindung", korrekt
+wäre "Fährverbindungen" ohne Bindestrich/"e"). Der heutige Log-Eintrag
+begründet das bewusste Auslassen der "drei anderen Stellen" in derselben
+Datei damit, dass dort "nur das reine Nomen" stehe — das trifft auf
+`mockAdvisor.ts:173` zu (dort aber ohnehin nur für `flight` erreichbar,
+siehe `if (next.transportMode === 'flight')` davor, also unproblematisch),
+aber nicht auf Zeile 114: Die ist für **jeden** Modus erreichbar (direkt
+nach `next.transportMode = mode`, kein Filter), enthält ebenfalls den
+"-Verbindungen"-Zusatz, und ist damit sprachlich exakt derselbe Fall.
+`mockAdvisor.test.ts` deckt diese Stelle bisher nicht ab (kein Test prüft
+den Wortlaut von Zeile 114 für `car`/`ferry`). *Vorschlag:* an Zeile 114
+dieselbe bereits vorhandene `noAutoSearchPhraseDe`-Map verwenden statt
+`transportLabelsDe` + hartkodiertem `-Verbindungen`-Suffix — spart sogar
+eine eigene neue Formulierung, da die Map bereits exakt für diesen Zweck
+angelegt wurde.
+
+Sonst nichts Neues gefunden: Die beiden anderen heutigen Fixes
+(`bahnfahrt`/`bahnticket`, Satzzeichen-Toleranz bei "Überrasch mich")
+wirken sauber und lösen tatsächlich das jeweils beschriebene Problem,
+keine Regression oder Lücke dabei entdeckt. `ChatInput.tsx:20-26`
+(`handleSend`) trimmt Freitext vor der Weitergabe — der in einem früheren
+Bericht vermutete Fall eines nicht getrimmten `destination`-Werts tritt
+über den normalen Chat-Weg nicht auf.
+
+### Nicht geprüft
+Der bereits im vorherigen (29.09., zweiter Lauf) `it-chef-auto-log.md`-
+Eintrag dokumentierte, bewusst zurückgestellte Kandidat
+(`formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx` zeigt bei einer
+reinen Sekundenangabe wie `"PT45S"` "—" statt einer Dauer) wurde heute
+nicht erneut eigenständig nachgeprüft — IT-Chef stuft ihn selbst bereits
+als praktisch kaum relevant ein (Flug-/Zugdauern kommen nie nur in
+Sekunden vor), keine neue Einschätzung dazu von hier.
