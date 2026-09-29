@@ -46,6 +46,14 @@ describe('detectTransportMode', () => {
     expect(detectTransportMode('Die Schifffahrt dauert drei Tage')).toBe('ferry')
   })
 
+  it('detects "train" from the compound nouns "Bahnfahrt" and "Bahnticket", not just the standalone word "Bahn"', () => {
+    // Dieselbe Wortgrenzen-Lücke wie bei "Zugticket"/"Flugticket" oben,
+    // hier übersehen: "zug" bekam sein Kompositum-Pendant "zugticket",
+    // "bahn" nicht — "\bbahn\b" matcht "Bahnfahrt"/"Bahnticket" nicht.
+    expect(detectTransportMode('Ich buche eine Bahnfahrt')).toBe('train')
+    expect(detectTransportMode('Ich brauche ein Bahnticket')).toBe('train')
+  })
+
   it('returns null when no keyword matches', () => {
     expect(detectTransportMode('Ich weiß noch nicht')).toBeNull()
   })

@@ -14324,3 +14324,86 @@ kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+## 2026-09-29 (weiterer Lauf desselben Tages, autonomer Cloud-Lauf ohne Ni live)
+
+**Ausgewählter Punkt:** Eine bisher übersehene Wortgrenzen-Lücke bei der
+Transportmittel-Erkennung im Mock-Advisor (`src/lib/ai/mockAdvisor.ts`),
+gefunden über eine gezielte eigene Bug-Suche (per Explore-Agent), da alle
+bereits im `support-chef-auto-log.md`/`reports/it-chef.md` dokumentierten
+Funde entweder schon behoben sind oder eine offene Produktentscheidung
+voraussetzen (u. a. die Flugsuche-im-Hauptablauf-Lücke, siehe der Vermerk
+im vorherigen Log-Eintrag von heute).
+
+**Fund:** `detectTransportMode()` prüft jedes Keyword über `\bkeyword\b`
+— eine echte Wortgrenze verlangt einen Nicht-Wortzeichen-Übergang. Bei
+zusammengesetzten Wörtern wie "Zugticket" oder "Flugticket" gibt es
+zwischen Präfix und Suffix keinen solchen Übergang, sodass das reine
+Keyword nicht matcht — genau die Lücke, die am 28.09. bereits für
+`zug`→`zugticket`, `flug`→`flugticket`, `bus`→`busticket`,
+`auto`→`autovermietung` und `schiff`→`schifffahrt` gefixt wurde. Dabei
+wurde `bahn` (in `transportKeywords.train` als Synonym zu `zug` gelistet)
+übersehen: kein eigenes Kompositum-Pendant ergänzt. Live nachvollzogen
+(exakt dieselbe Regex-Logik aus der Datei nachgebaut):
+`detectTransportMode('Ich buche eine Bahnfahrt')` und
+`detectTransportMode('Ich brauche ein Bahnticket')` liefern beide `null`
+statt `'train'` — eine Nutzerin, die auf "Wie möchtest du anreisen?" mit
+einem dieser ebenso natürlichen Sätze antwortet, landet in derselben
+Rückfrage-Sackgasse, die die 28.09.-Fixes für die anderen vier
+Transportmittel bereits beseitigt haben.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Keyword-Erkennung im Mock-Advisor.
+- Keine offene Produkt-/Architekturentscheidung: exakt dasselbe, bereits
+  fünffach angewandte Muster (ein weiteres Kompositum-Keyword pro
+  betroffenem Transportmittel), keine neue Design-Entscheidung.
+- Klar genug beschrieben: der Fund nennt exakt die betroffene Stelle
+  (`transportKeywords.train`, `mockAdvisor.ts`), die konkreten
+  fehlenden Wörter ("bahnfahrt"/"bahnticket") und den 1:1 anwendbaren
+  Korrekturvorschlag — keine eigene Interpretation nötig.
+- Ergebnis objektiv prüfbar: neuer Regressionstest prüft den exakten
+  Rückgabewert für beide Sätze.
+
+**Verifiziert vor dem Fix:** Neuen Test gegen die unveränderte Quelle
+laufen lassen (`git stash push -- src/lib/ai/mockAdvisor.ts`) — schlug
+reproduzierbar fehl (erwartete `'train'`, erhielt `null` für beide
+Sätze). Nach dem Fix (`git stash pop`) grün.
+
+**Umgesetzt:**
+- `src/lib/ai/mockAdvisor.ts`: `transportKeywords.train` um
+  `'bahnfahrt'`/`'bahnticket'` ergänzt (gleiches Muster wie die
+  bestehenden Komposita-Einträge der anderen vier Transportmittel).
+- Neuer Regressionstest in `src/lib/ai/mockAdvisor.test.ts` (prüft
+  `'Ich buche eine Bahnfahrt'` und `'Ich brauche ein Bahnticket'` gegen
+  `'train'`).
+- `ZEITPLAN.md` (Phase 4, KI-Chat) um den Eintrag ergänzt. Keine
+  Checkbox-Änderung in `tasks/tasks-prd-travix-platform.md` nötig, da
+  der Fund innerhalb des bereits fertigen Chat-UI-Teils (4.4-4.14) liegt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Sessionbeginn), `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 377
+Tests inkl. des neuen, alle grün — 376 ohne den neuen Test, per
+`git stash` gegengecheckt), `npm run build` (`tsc -b && vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Unabhängig geprüft, aber nicht als heutigen Punkt gewählt:** Zwei
+weitere, vom Explore-Agenten gefundene, aber schwächere Kandidaten
+bewusst zurückgestellt (nicht behoben):
+1. `formatDuration()` (`FlightCard.tsx`/`TrainCard.tsx`) zeigt bei einer
+   reinen Sekundenangabe wie `"PT45S"` "—" statt einer sinnvollen Dauer
+   (Sekunden-Gruppe fehlt im Regex). Praktisch kaum relevant, da echte
+   Flug-/Zugdauern nie nur in Sekunden angegeben werden — als Fund
+   dokumentiert, nicht heute als Punkt gewählt, da geringere reale
+   Auswirkung als der Bahn-Fund.
+2. `Preisalarme.tsx`/`Warenkorb.tsx`/`Aktivitaeten.tsx` bilden
+   `aria-label` ohne Duplikat-Behandlung (anders als
+   `Reiseentwuerfe.tsx`/`EditMode.tsx`) — mit den aktuellen, fixen
+   Demo-Daten nicht sichtbar auslösbar, träfe erst bei mehreren
+   gleichnamigen Einträgen pro Nutzerin zu. Zurückgestellt, da aktuell
+   nicht objektiv als real auftretendes Problem nachweisbar.
+
+**Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
+committet auf `it-chef/auto`, `main` unberührt.

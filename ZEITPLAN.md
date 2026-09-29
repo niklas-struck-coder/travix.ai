@@ -568,6 +568,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   "Mietwagen-Verbindungen") — vor dem Fix durch temporäres Zurücknehmen
   der Quelländerung (`git stash` nur `mockAdvisor.ts`) reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 29.09. (weiterer Lauf desselben Tages) die
+  gleiche, bereits mehrfach gefixte Wortgrenzen-Lücke (`\bkeyword\b`
+  matcht ein zusammengesetztes Wort wie "Zugticket" nicht, weil zwischen
+  Präfix und Suffix keine Wortgrenze liegt) an einer bisher übersehenen
+  Stelle nachgezogen: `bahn` (Synonym zu `zug`) bekam beim 28.09.-Fix nie
+  sein eigenes Kompositum-Pendant, anders als `zug`→`zugticket`,
+  `flug`→`flugticket`, `bus`→`busticket`, `auto`→`autovermietung`,
+  `schiff`→`schifffahrt`. Live nachvollzogen:
+  `detectTransportMode('Ich buche eine Bahnfahrt')` und
+  `detectTransportMode('Ich brauche ein Bahnticket')` lieferten beide
+  `null` statt `'train'`. Fix: `'bahnfahrt'`/`'bahnticket'` als weitere
+  `train`-Keywords in `transportKeywords` (`mockAdvisor.ts`) ergänzt,
+  gleiches Muster wie die bestehenden Komposita-Einträge. Neuer
+  Regressionstest in `mockAdvisor.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `mockAdvisor.ts`)
+  reproduzierbar rot verifiziert (lieferte `null` statt `'train'`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
