@@ -3581,3 +3581,71 @@ reinen Sekundenangabe wie `"PT45S"` "—" statt einer Dauer) wurde heute
 nicht erneut eigenständig nachgeprüft — IT-Chef stuft ihn selbst bereits
 als praktisch kaum relevant ein (Flug-/Zugdauern kommen nie nur in
 Sekunden vor), keine neue Einschätzung dazu von hier.
+
+---
+
+## 2026-09-30 — Flug-/Zugdauer bei extrem kurzen (Sekunden-)Werten (`FlightCard.tsx`, `TrainCard.tsx`)
+
+### Kontext
+Ausgewählt, weil `it-chef-auto-log.md` (29.09., vierter Lauf, Commit
+`1450703`) eine Code-Änderung an genau diesem Bereich zeigt, die noch
+nicht von Support-Chef geprüft wurde: `formatDuration()` in
+`FlightCard.tsx`/`TrainCard.tsx` zeigte bisher bei einer reinen
+Sekundenangabe (z. B. `"PT45S"`, kein Stunden-/Minutenanteil) den
+Platzhalter "—" statt einer Dauer. Der Fix erweitert die Regex um eine
+Sekunden-Gruppe und rundet jede Dauer unter einer vollen Minute auf
+"1min" auf. Laut `git log` bereits auf `main` (Freigabe-Chef hat
+`it-chef/auto` in der Nacht zum 30.09. gemergt).
+
+Geprüft:
+- `src/components/search/FlightCard.tsx:18-26` (`formatDuration`)
+- `src/components/search/TrainCard.tsx:13-20` (identische Funktion)
+- `src/components/search/FlightCard.test.tsx:86-95`,
+  `TrainCard.test.tsx:54-60` (neue Regressionstests für den Fix)
+- Codesuche nach `formatDuration`/ISO-8601-Dauer-Parsing im gesamten
+  `src`-Baum — keine weiteren Fundstellen außer den beiden genannten
+  Dateien.
+
+### Reibungspunkte
+
+**1. "1min" wird als konkrete Zahl angezeigt, obwohl sie erfunden ist —
+genau in dem Fall, in dem die Daten am unglaubwürdigsten sind**
+`FlightCard.tsx:18-26`/`TrainCard.tsx:13-20`: Liefert die Duffel-Antwort
+(bzw. die entsprechende Zug-Quelle) eine Dauer, die nach Abzug von Tagen/
+Stunden/Minuten bei 0 landet, aber einen Sekundenanteil > 0 hat, zeigt
+die Karte jetzt fest "1min" an — unabhängig davon, ob die tatsächliche
+Sekundenzahl 1 oder 59 ist. Das bricht mit dem Muster, das direkt
+daneben in derselben Datei etabliert ist: `formatTime()` und
+`formatLocation()` (`FlightCard.tsx:8-11,28-30`) zeigen bei fehlendem/
+unbrauchbarem Wert konsequent den ehrlichen Platzhalter "—", statt einen
+Wert zu erfinden. Eine reale Flug- oder Zugdauer von unter einer Minute
+gibt es praktisch nicht — ein solcher Wert ist so gut wie immer ein
+Zeichen für fehlerhafte/verstümmelte Rohdaten von der API (falsche
+Einheit, abgeschnittenes Feld o. Ä.), nicht für eine tatsächlich extrem
+kurze Reise. Vor dem Fix signalisierte "—" in genau diesem Fall
+immerhin ehrlich "unbekannt/unplausibel"; nach dem Fix sieht die
+Nutzerin stattdessen eine selbstbewusst formatierte, aber tatsächlich
+frei erfundene Angabe ("1min" Flugdauer) — das wirkt bei kaputten Daten
+eher wie ein Anzeige-Bug der App selbst, als es das vorherige "—" je
+hätte tun können. Der ursprüngliche IT-Chef-Befund
+(`it-chef-auto-log.md`, 29.09.) belegt den Fall zwar nur mit dem
+synthetischen Testwert `"PT45S"`, das Problem (falscher Wert statt
+ehrlicher Unbekannt-Markierung) besteht aber unabhängig vom genauen
+Sekundenwert.
+
+*Vorschlag:* Für den Fall "Tage/Stunden/Minuten ergeben zusammen 0"
+weiterhin `'—'` zurückgeben, statt auf "1min" aufzurunden — das deckt
+den im ursprünglichen Bericht beschriebenen Ausgangsfall ab (kein
+Platzhalter mehr, der wie ein Darstellungsfehler aussieht), ohne das an
+anderer Stelle in denselben zwei Dateien bereits etablierte
+Ehrlichkeits-Muster zu durchbrechen.
+
+### Nicht geprüft
+Der restliche Inhalt beider Karten (`FlightCard.tsx`/`TrainCard.tsx`)
+wurde bereits in früheren Läufen (25.09., 27.09.) geprüft und hier nicht
+erneut vollständig durchgesehen — nur die konkrete, seit dem letzten
+Lauf neu hinzugekommene Änderung an `formatDuration()`. Ob reale
+Zugdaten (`TrainOffer`) aktuell überhaupt aus einer echten API oder noch
+aus Demo-/Mock-Daten stammen, wurde für diesen Fund nicht weiter
+verfolgt — die Beobachtung gilt unabhängig davon für beide Kartentypen,
+da die Funktion identisch dupliziert ist.
