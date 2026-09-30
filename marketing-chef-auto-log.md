@@ -4,6 +4,98 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-09-30
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `d0811ed`, 29.09.) war bereits vollständig
+in `main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Per Fast-Forward-Merge auf aktuellen `origin/main` (`eccc167`)
+gebracht.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret wieder nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf
+ergänzt. Kein neues eigenständiges Content-Stück, keine sechste
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen
+seit dem 29.09. beantwortet wurde: keine Notiz in `status.md`,
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder `marketing/freigabe-uebersicht.md`,
+keine neuen Kanal-Links im Repo, kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen — jetzt seit über acht
+Wochen. Danach `git log fb1af14..origin/main` geprüft (Basislinie: der
+Freigabe-Chef-Stand, auf dem die fünfte Mini-Changelog-Ausgabe am 29.09.
+aufgebaut hat): zehn neue Commits, jeder einzeln per `git show`
+verifiziert — genau zwei mit echter Produkt-Codeänderung.
+
+Der erste (`1450703`, vierter IT-Chef-Auto-Lauf vom 29.09.) behebt eine
+fehlende Sekunden-Erfassungsgruppe in `formatDuration()`
+(`FlightCard.tsx`/`TrainCard.tsx`): eine reine Sekundenangabe wie
+`"PT45S"` zeigte bisher fälschlich den Platzhalter `"—"` statt einer
+echten, wenn auch kurzen Dauer — passt in dieselbe "Ehrlichkeit/
+Vertrauen"-Fundgruppe wie der bereits gezählte `formatDuration()`-
+Platzhalter-Fix vom 26.09. und wird als 28. Tier-4-Kandidat aufgenommen.
+Der zweite (`c36da4e`, weiterer IT-Chef-Auto-Lauf vom 29.09.) korrigiert
+eine unidiomatische "Mietwagen-Verbindungen"/"Fähre-Verbindungen"-
+Formulierung an einer früheren Stelle desselben Chat-Ablaufs — bewusst
+**nicht** als Kandidat gezählt, gleiche Begründung wie beim strukturell
+identischen, bereits ausgeschlossenen `b0a746e` vom 29.09. (reine
+Sprach-/Grammatikkorrektur, keine Ehrlichkeits-/Vertrauens-Aussage).
+
+Wichtiger Nebenbefund: `reports/marketing-chef.md` und
+`reports/support-chef.md` (beide 29.09.) melden übereinstimmend, dass die
+Flugsuche im normalen Chat-Ablauf eine echte Suche ankündigt, aber laut
+Fund keine auslöst (`mockAdvisor.ts:171-182`). Der heutige IT-Chef-Lauf
+(`7b822ef`) hat das bewusst offen gelassen, weil beide Lösungswege
+sichtbares Chat-Verhalten/Nutzerversprechen ändern und damit nicht
+autonom entscheidbar sind. Für den Marketing-Bereich gilt dieselbe
+Zurückhaltung: kein Content zu "ehrlicher Flugsuche", solange dieser Fund
+offen ist, und keine Aufnahme in den Tier-4-Topf vor einem tatsächlichen
+Fix.
+
+**Kandidatentopf wächst von null (Stand nach Ausgabe 5) auf eins** — weit
+unter der Achter-Schwelle, die frühere Ausgaben ausgelöst hat. Keine
+sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus
+einem einzeln verifizierten, gemergten Commit, der Ausschluss und der
+offene Flugsuche-Fund sind transparent mit eigener Begründung
+dokumentiert statt stillschweigend übergangen. Keine offene
+Positionierungs-Grundsatzfrage: dieser Lauf wendet nur bereits
+etablierte Abgrenzungen an und trifft keine neue inhaltliche
+Entscheidung.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei eins,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden, unabhängig vom
+  Mini-Changelog.
+- `c36da4e` als Tier-4-Kandidat zählen, nur weil er ein echter,
+  verifizierter Fix ist — verstößt gegen die etablierte "Ehrlichkeit/
+  Vertrauen statt reiner Korrektheit"-Abgrenzung.
+- Content rund um "ehrliche Flugsuche" vorbereiten, bevor der
+  "verspricht/löst nicht aus"-Fund behoben ist — würde die eigene
+  Positionierung angreifbar machen.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` — neues Update vom 30.09. (Prüfung
+  der vier Fragen, zehn neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 28, einer bewusst ausgeschlossen, offener
+  "Flugsuche"-Fund als Nebenbefund dokumentiert), "Nächster autonomer
+  Lauf"-Abschnitt aktualisiert, Datum im Titel auf 30.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-29
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
