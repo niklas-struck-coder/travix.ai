@@ -1,59 +1,53 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-29
+**Datum:** 2026-09-30
 
-## Was ist seit dem letzten Eintrag (2026-09-28) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-29) passiert?
 
-Auf der Fix-Seite ging es nahtlos weiter: `main` hat seit gestern fünf
-weitere IT-Chef-Läufe eingesammelt, darunter erneut die Wortgrenzen-Lücke
-(diesmal "Bahnfahrt"/"Bahnticket"), einen Dead-End-Bug bei "Überrasch
-mich!" mit Satzzeichen und einen TypeError beim Laden eines
-unvollständigen gespeicherten Reiseplans. Die eigenständige
-Marketing-Auto-Spur (`marketing-chef/auto`) hat daraus bereits die
-fünfte Mini-Changelog-Ausgabe entworfen und über den Freigabe-Chef nach
-`main` gemergt (`marketing/mini-changelog-konzept.md`) — dieser Teil der
-Content-Pipeline läuft also bereits von selbst und muss hier nicht
-doppelt vorgeschlagen werden.
+Auf der Fix-Seite: Support-Chef hat einen neuen Ehrlichkeits-Bug gefunden —
+`formatDuration()` rundete reine Sekundenwerte zu einer erfundenen
+"1min"-Anzeige hoch, statt ehrlich einen Platzhalter zu zeigen. IT-Chef hat
+das noch am selben Tag automatisch gefixt (PR #25, gemergt). Die
+Marketing-Auto-Spur (`marketing-chef/auto`) hat den Fund parallel schon als
+Tier-4-Kandidat für den nächsten Mini-Changelog vorgemerkt — dieser Teil
+läuft also bereits von selbst, ich muss ihn hier nicht doppelt anstoßen.
 
-Wichtiger neuer Punkt kam vom Support-Chef: Die Flugsuche im normalen
-Chat-Ablauf (nicht über "Bearbeiten") verspricht dem Nutzer wörtlich
-"Ich suche jetzt nach echten Flug-Verbindungen ... Nichts wird
-erfunden" — löst aber laut Fund keine tatsächliche Suche aus
-(`src/lib/ai/mockAdvisor.ts:154-165`). Das ist kein normaler UX-Nitpick,
-sondern trifft direkt den Kern der "Ehrlichkeit als Feature"-Positionierung,
-die die letzten Mini-Changelogs gerade aufgebaut haben. Laut heutigem
-IT-Chef-Bericht (kein neuer Fund über ~50 Dateien) ist das noch nicht
-gefixt.
+Der wichtigere Punkt von gestern bleibt unverändert offen: Die Flugsuche im
+normalen Chat-Ablauf verspricht wörtlich "Ich suche jetzt nach echten
+Flug-Verbindungen ... Nichts wird erfunden", löst aber laut Code-Kommentar
+in `src/lib/ai/mockAdvisor.ts` (Zeile ~166) weiterhin keine echte Suche aus
+— nur der separate "Bearbeiten"-Pfad tut das. Mehrere IT-Chef-Läufe seit
+gestern fanden dazu keinen sicheren Automatik-Fix; es ist also bewusst noch
+offen, nicht vergessen.
 
 Die Kanal-/Zielgruppen-Entscheidung (Sprint 1) ist weiterhin offen, jetzt
-über acht Wochen. Keine neuen Nutzungs- oder Erfolgszahlen bekannt.
+über neun Wochen. Keine neuen Nutzungs- oder Erfolgszahlen bekannt.
 
 ## Vorschläge
 
-1. **Vor jeder Flug-bezogenen Kommunikation: den "verspricht Suche,
-   löst keine aus"-Fund im Blick behalten.** Solange dieser offen ist,
-   wäre jede Botschaft à la "wir suchen echte Verbindungen für dich" beim
-   Flug-Flow angreifbar — genau das Gegenteil von dem, was die
-   Klarname- und Mini-Changelog-Serie gerade glaubwürdig aufbaut. Kein
-   Content-Vorschlag dazu, nur eine Reihenfolge-Empfehlung: erst fixen
-   lassen, dann erst in Flug-Flows aktiv mit "ehrlicher Suche" werben.
+1. **formatDuration-Fix ist fertiges Rohmaterial für den nächsten
+   Mini-Changelog** — läuft schon über die Auto-Spur, hier nur als
+   Bestätigung: genau das richtige kleine, ehrliche Beispiel für die
+   "sagt, was es tut"-Serie, kein neuer Aufwand nötig.
 
-2. **Sobald der Fund oben gefixt ist, ist er ein natürlicher Kandidat
-   für die nächste Mini-Changelog-Ausgabe oder ein eigenes
-   Content-Stück** — passt exakt ins bestehende Muster ("sagt, was es
-   tut, tut, was es sagt") und bräuchte keine neue Erzählung, nur die
-   bereits etablierte Vorlage.
+2. **Bei der Flugsuche weiterhin Zurückhaltung:** Solange der
+   "verspricht Suche, löst keine aus"-Fund offen ist, sollte keine
+   Kommunikation aktiv mit "wir suchen ehrlich echte Flüge für dich"
+   werben — das wäre nach mehreren offenen Läufen ohne Fix inzwischen
+   ein Risiko, keine Randnotiz mehr. Sobald gefixt: prädestiniert für ein
+   eigenes, etwas größeres Content-Stück (nicht nur Mini-Changelog-Zeile),
+   weil es der bisher greifbarste Beweis für "Ehrlichkeit als Feature"
+   wäre.
 
-3. **Ehrlich gesagt: strategisch hat sich seit gestern nichts bewegt.**
-   Die Kanal-Frage ist der unverändert selbe Engpass wie in den letzten
-   Berichten, nur zwei Wochen älter, während sich fünf Mini-Changelog-
-   Ausgaben, mehrere fertige Content-Stücke und ein Kampagnen-Konzept
-   stapeln. Statt das nochmal nur zu wiederholen: Eine Idee, den Stau
-   zu entschärfen, ohne die finale Sprint-1-Entscheidung vorwegzunehmen
-   — einen einzelnen, risikoarmen Kanal (z. B. ein "Build in
-   public"-Account auf X/LinkedIn, nur Changelog- und Fix-Content, keine
-   Zielgruppen-Kampagne) testweise zu bespielen. Das würde den
-   wachsenden Rückstau abbauen, ohne die eigentliche
-   Positionierungs-Entscheidung zu ersetzen.
+3. **Ehrlich gesagt: an der großen Linie hat sich seit gestern nichts
+   bewegt.** Die Kanal-Frage steht seit Wochen still, während sich
+   auf der Fix-Seite inzwischen ein kleines, wiederkehrendes Muster
+   zeigt: Support-Chef findet einen Ehrlichkeits-Bug, IT-Chef fixt ihn
+   noch am selben Tag. Das ist an sich schon eine Geschichte ("wir
+   reagieren live auf unsere eigenen Fehler") — mein Vorschlag von
+   gestern (ein risikoarmer Build-in-public-Kanal nur für
+   Changelog-/Fix-Content) würde genau das ohne Vorgriff auf die
+   Sprint-1-Entscheidung sichtbar machen. Bleibt unverändert als
+   niedrigschwellige Idee im Raum stehen.
 
-_Letztes Update: 2026-09-29_
+_Letztes Update: 2026-09-30_
