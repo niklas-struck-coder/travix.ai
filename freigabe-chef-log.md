@@ -5267,3 +5267,45 @@ beide unabhängig verifiziert, beide gemergt.
 
 **Info an Ni:** Nein — beide Merges liefen sauber durch, keine
 Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## 2026-09-30, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (zwei mit
+  Code-Änderung, drei reine Log-Einträge ohne Fund vom 30.09.).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `FlightCard.tsx`/`.test.tsx`, `TrainCard.tsx`/`.test.tsx`,
+  `mockAdvisor.ts`/`.test.ts`, `ZEITPLAN.md`, `it-chef-auto-log.md` — genau
+  zwei inhaltliche Punkte, beide im Log beschrieben:
+  1. `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx`: Regex um
+     optionale Sekunden-Gruppe erweitert, reine Sekundenangabe (z. B.
+     `PT45S`) zeigt jetzt `1min` statt fälschlich `—`.
+  2. `mockAdvisor.ts:114`: Transportmittel-Bestätigung an früherer
+     Chat-Stelle nutzte noch `transportLabelsDe` statt der bereits
+     etablierten `noAutoSearchPhraseDe`-Map — jetzt konsistent
+     umgestellt (`einen Mietwagen`/`Fährverbindungen` statt falsch
+     `Mietwagen-Verbindungen`/`Fähre-Verbindungen`).
+  Beide Fixes scoped, kein Scope-Creep, keine Berührung von Auth/
+  Zahlungen/rechtlichen Texten. Keine UI/Design-Änderung (reine
+  Text-/Logikkorrektur), daher kein `MARKENDESIGN.md`-Abgleich nötig.
+- **Unabhängig selbst verifiziert** (frischer `npm install`, danach
+  tatsächlich selbst ausgeführt, nicht nur Log geglaubt):
+  `npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben vier
+  vorbestehenden Fast-Refresh-Warnungen in `src/components/ui/`.
+  `npx vitest run` → 59 Testdateien, 382 Tests, alle grün. Deckt sich
+  exakt mit den Angaben im `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `61f9ba4..bf46f10`,
+gepusht).
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
