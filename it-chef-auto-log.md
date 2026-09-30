@@ -14597,3 +14597,56 @@ Warnung).
 
 **Ergebnis:** Ein kleiner, isolierter, verifizierter Bugfix umgesetzt und
 committet auf `it-chef/auto`, `main` unberührt.
+
+
+## 2026-09-30
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, `it-chef/auto` lag
+zwei Läufe vor `origin/main` (Mietwagen-/Fähre-Formulierung an früherer
+Stelle, `formatDuration()`-Sekunden-Fix), `main` selbst nicht weiter
+voraus — kein Merge/Rebase nötig, direkt auf `it-chef/auto` weitergearbeitet.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+durchgesehen — alle verbliebenen offenen Punkte hängen weiterhin an
+Base44/Gemini-Zugangsdaten (2.0/4.1-4.3), Architektur-/Datenmodell-Lücken
+(5.7 Zug/Bus/Fähre-Suche, 6.2/6.6/6.7/7.12 fehlende Preisfelder), offenen
+Produktentscheidungen (7.4 Mehrfach-Chat-Historien, 8.5-8.7 Deal-
+Finder/Kanäle, 8.9/8.12 OQ-04) oder fehlenden Inhalten, die Ni bzw. andere
+Chef-Rollen liefern müssen (8.11 Hilfe/FAQ, hängt zusätzlich an der noch
+nicht live geschalteten Support-E-Mail). Keiner davon erfüllt die vier
+Sicherheitskriterien.
+
+Zusätzlich eine gezielte Bug-Suche über einen eigens beauftragten
+Explore-Agenten, bewusst auf Bereiche fokussiert, die in
+`reports/it-chef.md` (29.09.) noch nicht als "vollständig gelesen" gelten:
+`calculateProgress.ts`/`checklistRules.ts`/`cartTotals.ts`/
+`calendarUtils.ts`/`tripStorage.ts`, die demo-datengetriebenen Seiten
+(`Warenkorb.tsx`, `Aktivitaeten.tsx`, `Angebote.tsx`, `Preisalarme.tsx`,
+`Favoriten.tsx`, `Reiseentwuerfe.tsx`, `MeineReisen.tsx`, `Kalender.tsx`,
+`Buchung.tsx`), `duffel/client.ts`/`types/duffel.ts`/`types/stays.ts`
+sowie `mockConcierge.ts`/`useConcierge.ts` (Urlaubsmodus-Chat, strukturell
+ähnlich zu den bereits mehrfach gefixten Wortgrenzen-Lücken in
+`mockAdvisor.ts`). Alle Dateien vollständig gelesen, nicht nur gegrept.
+
+**Ergebnis:** Kein neuer Bug gefunden, der alle vier Sicherheitskriterien
+erfüllt (eindeutig, klein, isoliert, objektiv prüfbar, echt neu). Die
+geprüften Stellen sind bereits durchgängig defensiv geschrieben
+(Array-/Optional-Chaining-Guards, eskapierte Wortgrenzen-Regexe wie in den
+bereits gefixten Stellen, konsistente Fallback-Werte). Eine rein
+kosmetische Beobachtung (Demo-Trip "Lissabon" in `MeineReisen.tsx`/
+`Kalender.tsx` liegt inzwischen relativ zum heutigen Datum in der
+Vergangenheit, ist aber weiterhin als "upcoming" hartcodiert) wurde bewusst
+nicht als Fund gewertet — reiner Demo-Daten-String ohne Code-Logikfehler,
+nicht objektiv per Test verifizierbar. Kein Code-Commit für einen neuen
+Punkt, nur dieser Log-Eintrag.
+
+**Geprüft (Status quo, keine Codeänderung, daher kein Regressionsrisiko):**
+`npm ci` (frischer Checkout, `node_modules` fehlte zu Sessionbeginn),
+`npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen in `src/components/ui/`), volle
+Suite `npx vitest run` (59 Testdateien, 382 Tests, alle grün), `npm run
+build` (`tsc -b && vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
