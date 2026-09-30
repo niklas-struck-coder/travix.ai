@@ -1,10 +1,136 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-29)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-30)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-09-30: ein neuer Tier-4-Kandidat (formatDuration()-Sekundenlücke), ein Sprach-/Grammatik-Fix bewusst ausgeschlossen, Kandidatentopf bei eins, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen und bewusst nicht autonom entscheidbar
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `d0811ed`, 29.09.) war bereits vollständig
+in `main` gemergt (reiner Vorgänger-Commit von `origin/main`) — der
+Branch war also nur noch veraltet, nicht mehr in Arbeit. Per
+Fast-Forward-Merge auf aktuellen `origin/main` (`eccc167`) gebracht,
+statt auf dem veralteten Stand weiterzuarbeiten.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (letztes Update weiterhin von
+Support-/IT-/Marketing-Chef selbst, keine neue Antwort zu Kanal/6.2/
+Format/Mini-Changelog), `ZEITPLAN.md` (6.2, Zeile 1803, weiterhin `[ ]`)
+oder diesem Dokument seit dem 29.09. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen — jetzt seit über acht
+Wochen.
+
+**`git log fb1af14..origin/main` zeigt zehn neue Commits** (Basislinie
+bewusst `fb1af14`, der Freigabe-Chef-Stand, auf dem Ausgabe 5 am 29.09.
+aufgebaut hat). Zwei davon mit echter Produkt-Codeänderung, jeder einzeln
+per `git show` geprüft:
+
+- **`1450703` (29.09., vierter IT-Chef-Auto-Lauf):** `formatDuration()`
+  in `FlightCard.tsx`/`TrainCard.tsx` fehlte die Erfassungsgruppe für
+  Sekunden im Regex — bei einer reinen Sekundenangabe wie `"PT45S"`
+  (kein Tage-/Stunden-/Minuten-Anteil) lieferte die Funktion bisher den
+  Platzhalter `"—"`, obwohl eine reale, wenn auch sehr kurze Dauer
+  vorlag; live im Code nachvollzogen. Fix zeigt jetzt `"1min"` (Aufrunden
+  auf das bereits etablierte `Xmin`-Format), mit Regressionstests in
+  `FlightCard.test.tsx`/`TrainCard.test.tsx`. Passt in dieselbe
+  Fundgruppe wie der bereits als 23. Kandidat gezählte
+  `formatDuration()`-Platzhalter-Fix vom 26.09. — derselbe
+  Irreführungs-Mechanismus (Platzhalter statt echtem, wenn auch kleinem
+  Wert), nur eine andere Regex-Lücke in derselben Funktion.
+  **Achtundzwanzigster Tier-4-Kandidat.**
+- **`c36da4e` (29.09., weiterer IT-Chef-Auto-Lauf):** Die
+  "noch keine automatische Suche"-Formulierung im Chat nutzte an einer
+  früheren Stelle desselben Ablaufs (`mockAdvisor.ts:114`) weiterhin die
+  alte `transportLabelsDe`-Map statt der bereits etablierten
+  `noAutoSearchPhraseDe`-Map — mechanisch aus Label + "-Verbindungen"
+  gebildet ("Mietwagen-Verbindungen"/"Fähre-Verbindungen"), grammatisch
+  falsch bzw. unidiomatisch, jetzt auf "einen Mietwagen"/
+  "Fährverbindungen" korrigiert. **Bewusst nicht** als Tier-4-Kandidat
+  aufgenommen: reine Sprach-/Grammatikkorrektur an derselben Stelle, die
+  bereits einmal (`b0a746e`, 29.09., Kandidatentopf-Update vom selben
+  Tag) aus genau diesem Grund ausgeschlossen wurde — der alte Text war
+  unbeholfen, aber nicht falsch oder verschwiegen, also keine
+  "Ehrlichkeit/Vertrauen"-Erzählung.
+
+Die übrigen acht Commits im Bereich (zwei Berichte vom 29.09.,
+drei IT-Chef-Auto-Läufe vom 30.09. ohne neuen Fund, der
+Freigabe-Chef-Nacht-Check vom 30.09. selbst sowie die bereits in diesen
+Läufen enthaltenen Log-Einträge) enthalten keine weitere, für dieses
+Format relevante Codeänderung — jeweils per `git show --stat` geprüft.
+
+**Wichtiger Nebenbefund (kein neuer Kandidat, aber relevant für künftige
+Content-Entscheidungen):** `reports/marketing-chef.md` (29.09.) und
+`reports/support-chef.md` (29.09.) melden übereinstimmend einen neuen,
+noch offenen Fund: Die Flugsuche im normalen Chat-Ablauf (nicht über
+"Bearbeiten") kündigt wörtlich eine echte Suche an ("Ich suche jetzt nach
+echten Flug-Verbindungen ... Nichts wird erfunden"), löst laut Fund aber
+keine tatsächliche Suche aus (`src/lib/ai/mockAdvisor.ts:171-182`). Der
+heutige IT-Chef-Auto-Lauf (`7b822ef`) hat das bewusst offen gelassen und
+selbst festgehalten, dass beide möglichen Lösungswege (echte Suche
+auslösen, oder die Ankündigung umformulieren) sichtbares
+Chat-Verhalten/Nutzerversprechen ändern und damit nicht autonom
+entscheidbar sind — dieselbe Einschätzung gilt hier für den
+Marketing-Bereich: **kein Content dazu, solange der Fund offen ist**,
+und keine Aufnahme in den Tier-4-Topf, bevor er behoben ist (gleiche
+Regel wie bisher: nur tatsächlich gemergte Fixes zählen). Sobald behoben,
+ist er laut eigenem Bericht vom 29.09. ein naheliegender Kandidat für
+eine künftige Mini-Changelog-Ausgabe oder ein eigenes Content-Stück
+("sagt, was es tut, tut, was es sagt").
+
+**Der Kandidatentopf wächst von null (Stand nach Ausgabe 5) auf eins**
+(Kandidat 28) — weit unter der Achter-Schwelle, die Ausgabe 2-5 ausgelöst
+hat. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung (diese Übersicht), kein Live-Vorgang — nichts gepostet,
+versendet oder verändert; die Footer-Seite selbst existiert weiterhin
+nicht. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus einem
+einzeln per `git show` verifizierten, bereits in `main` gemergten Commit,
+der Ausschluss ist transparent mit eigener Begründung versehen, der
+offene "Flugsuche"-Fund wird ausdrücklich als noch nicht zählbar und
+nicht bewerbbar gekennzeichnet statt stillschweigend vorwegzunehmen.
+Keine offene Positionierungs-Grundsatzfrage: dieser Lauf wendet nur die
+bereits etablierte "Ehrlichkeit/Vertrauen"-Abgrenzung und den
+etablierten Achter-Schwellenwert an, trifft keine neue inhaltliche
+Entscheidung — und lässt die "Flugsuche"-Frage bewusst bei IT-Chef/Ni,
+statt sie hier vorwegzunehmen.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei eins,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an dieselbe
+  Selbstbeschränkung wie seit 20.08. gebunden, unabhängig vom
+  Mini-Changelog.
+- `c36da4e` als Tier-4-Kandidat zählen, nur weil er ein echter,
+  verifizierter Fix ist — verstößt gegen dieselbe etablierte
+  "Ehrlichkeit/Vertrauen statt reiner Korrektheit"-Abgrenzung wie beim
+  bereits ausgeschlossenen `b0a746e`.
+- Content rund um "ehrliche Flugsuche" vorbereiten, bevor der
+  "verspricht/löst nicht aus"-Fund behoben ist — würde die eigene
+  "Ehrlichkeit als Feature"-Positionierung angreifbar machen, siehe
+  Nebenbefund oben.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 30.09. (Prüfung
+  der vier Fragen, zehn neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 28, einer bewusst ausgeschlossen, offener
+  "Flugsuche"-Fund als Nebenbefund dokumentiert, Kandidatentopf-Stand auf
+  "eins" gesetzt), "Nächster autonomer Lauf"-Abschnitt aktualisiert,
+  Datum im Titel auf 30.09. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-29: fünfte Mini-Changelog-Ausgabe geschrieben (vier neue Tier-4-Kandidaten seit Ausgabe 4, Topf damit von sechs auf zehn), ein Sprach-/Grammatik-Fix bewusst ausgeschlossen, alle vier Fragen weiterhin offen
 
@@ -2905,4 +3031,19 @@ Achter-Schwelle, und wurde deshalb vollständig in Ausgabe 5 verarbeitet.
 Der Kandidatentopf ist damit wieder leer; der nächste Lauf sammelt neue
 Funde von vorn, mit demselben 06.09.-Maßstab (acht = genug) als Richtwert
 für eine sechste Ausgabe, und sollte weiterhin zuerst die vier offenen
-Fragen gegenprüfen.
+Fragen gegenprüfen. Stand 30.09. ist genau ein weiterer Kandidat
+dazugekommen (`formatDuration()`-Sekundenlücke, siehe Update 2026-09-30
+oben) — der Topf steht damit bei eins, weit unter der Achter-Schwelle.
+Ein zweiter, echter Fix desselben Tages (`c36da4e`) wurde erneut bewusst
+ausgeschlossen, gleiche Begründung wie beim strukturell identischen
+`b0a746e` vom 29.09. (reine Sprach-/Grammatikkorrektur ohne Ehrlichkeits-/
+Vertrauens-Erzählung). Neu und wichtig für künftige Läufe: der von
+Support-/Marketing-Chef am 29.09. gemeldete "Flugsuche verspricht/löst
+nicht aus"-Fund (`mockAdvisor.ts:171-182`) bleibt trotz drei IT-Chef-
+Auto-Läufen am 30.09. unbehoben — der nächste Lauf sollte vor jedem
+Content-Vorschlag zu Flug-Suche/"ehrliche Suche" prüfen, ob dieser Fund
+inzwischen behoben wurde, und ihn erst dann als möglichen Tier-4-
+Kandidaten bzw. eigenes Content-Stück aufnehmen. Der nächste Lauf sollte
+weiterhin zuerst die vier offenen Fragen gegenprüfen und den
+Kandidatentopf (Stand 30.09.: eins) gegen denselben 06.09.-Maßstab
+weiterführen.
