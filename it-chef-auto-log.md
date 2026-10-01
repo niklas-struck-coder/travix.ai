@@ -15115,3 +15115,66 @@ an Task 4.10) um den Fund/Fix ergänzt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-01 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` lag bereits drei Commits vor `main`
+(heutige Läufe eins bis drei, Details oben), `main` unberührt. Branch neu
+von `origin/it-chef/auto` ausgecheckt (bereits aktuell, kein Merge von
+`origin/main` nötig). Frischer `npm ci`: 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), `npm run build` (`tsc -b` + `vite build`)
+fehlerfrei, volle Suite `npx vitest run` (59 Testdateien, 386 Tests, alle
+grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben
+weiterhin an offene Backend-/Produktentscheidungen oder externe
+Abhängigkeiten gebunden (Base44 vs. Alternative, LLM-Zugangsdaten,
+fehlende Preisfelder im `TripDraft`-Datenmodell, FAQ-Inhalte von
+Support-Chef), kein neuer eigenständig umsetzbarer Punkt dort. Statt einer
+neuen Bug-Suche (die drei heutigen Läufe sowie der parallele,
+plattform-verwaltete IT-Chef-Kanal haben den Code bereits mehrfach
+durchleuchtet) zuerst geprüft, ob einer der noch offenen Auto-Fix-PRs
+einen bereits vollständig diagnostizierten, aber noch nicht übernommenen
+Fund enthält — genau wie an mehreren Tagen zuvor (z. B. 26.09./28.09.).
+
+**Ausgewählter Punkt:** PR #26 (`useConcierge()` räumt ausstehenden
+Antwort-Timeout beim Unmount nicht auf, siehe `reports/it-chef.md`,
+01.10.) ist zwar bereits auf seiner eigenen Auto-Fix-PR-Branch
+(`it-chef-autofix/useconcierge-timeout-cleanup-2026-10-01`) vollständig
+diagnostiziert, gefixt und sogar nachträglich um einen Typfix ergänzt
+(`window.setTimeout()`-Overload-Konflikt mit `@types/node`), steckte aber
+weder in `main` noch in `it-chef/auto` — verifiziert über `grep` auf
+`replyTimeout`/`clearTimeout` in `src/hooks/useConcierge.ts` vor der
+Änderung (kein Treffer). Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug, keine offene Produkt-/
+Architekturentscheidung (rein mechanischer Fix 1:1 nach dem bereits
+zweimal heute etablierten `ChatInput.tsx`/`useChat.ts`-Muster), bereits
+vollständig beschrieben und objektiv prüfbar.
+
+**Fix:** Identisch zur Auto-Fix-PR-Branch übernommen: neuer
+`replyTimeoutRef` (`useRef<number | null>`) hält die aktive Timeout-ID,
+ein neuer `useEffect(() => () => window.clearTimeout(...), [])` clearet
+sie beim Unmount, inkl. des auf der Branch bereits korrigierten Typs
+(`number | null` statt über `ReturnType<typeof window.setTimeout>`
+inferiert, da das sonst mit `@types/node` kollidiert). Keine
+Verhaltensänderung am bestehenden 600ms-Delay-Ablauf. Neuer
+Regressionstest in `useConcierge.test.ts` (1:1 aus der Auto-Fix-PR-Branch
+übernommen: unmounten mit ausstehendem Timeout, `clearTimeout` erwarten)
+— vor dem Fix durch temporäres Zurücknehmen nur der Quelländerung (`git
+stash` nur `useConcierge.ts`) reproduzierbar rot verifiziert (neuer Test
+schlug fehl: `clearTimeout` 0 statt 1 Aufrufe).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung), volle
+Suite `npx vitest run` (59 Testdateien, 387 Tests — 1 neu gegenüber
+vorher, alle grün).
+
+**Dokumentation aktualisiert:** `ZEITPLAN.md` (Phase-4-Eintrag im
+Ist-Stand-Abschnitt) und `tasks/tasks-prd-travix-platform.md` (Anmerkung
+an Task 8.1) um den Fund/Fix ergänzt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

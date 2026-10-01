@@ -640,6 +640,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (unmounten mit ausstehendem Timeout, `clearTimeout` erwarten) — vor dem
   Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `useChat.ts`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (vierter Lauf desselben Tages) den
+  bereits über den separaten Auto-Fix-Kanal vollständig diagnostizierten
+  und typsicher gemachten Fund (Auto-Fix-PR #26,
+  `it-chef-autofix/useconcierge-timeout-cleanup-2026-10-01`) direkt auf
+  `it-chef/auto` übernommen, statt auf Nis Review des PRs zu warten:
+  `useConcierge()` (`src/hooks/useConcierge.ts`, Concierge-Chat in
+  `Urlaubsmodus.tsx`) hielt den 600ms-`window.setTimeout()` in
+  `sendMessage()` bisher nirgends und räumte ihn beim Unmount nicht ab —
+  exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+  `ChatInput.tsx` (erster Lauf) und `useChat.ts` (dritter Lauf). Verlässt
+  man `/urlaubsmodus` innerhalb der 600ms-"Denk"-Verzögerung nach einer
+  Concierge-Frage, feuert der Timeout trotzdem gegen die bereits
+  unmountete Hook-Instanz. Fix: identisches `replyTimeoutRef`/
+  `useEffect`-Cleanup-Muster wie bei `useChat.ts`/`ChatInput.tsx`
+  übernommen (inkl. des auf der Auto-Fix-PR-Branch bereits behobenen
+  Typfehlers: `useRef<number | null>` statt über `ReturnType` inferiert,
+  da `window.setTimeout()` sonst mit `@types/node` kollidiert). Neuer
+  Regressionstest in `useConcierge.test.ts` (1:1 aus der Auto-Fix-PR-
+  Branch übernommen) — vor dem Fix durch temporäres Zurücknehmen nur der
+  Quelländerung (`git stash` nur `useConcierge.ts`) reproduzierbar rot
+  verifiziert (Test schlug fehl: `clearTimeout` wurde nicht aufgerufen).
+  Der ursprüngliche Auto-Fix-PR #26 bleibt als überholt zurück (kann bei
+  nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
