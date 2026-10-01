@@ -1,23 +1,21 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-09-30
+**Datum:** 2026-10-01
 
-## Was ist seit dem letzten Eintrag (2026-09-29) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-30) passiert?
 
-Gute Nachricht zuerst: Mein Fund 1 von gestern ist behoben.
-`src/lib/ai/mockAdvisor.ts:114` sagt nach der Transportmittel-Wahl jetzt
-sauber "nur einen Mietwagen" bzw. "nur Fährverbindungen" — genau die
-`noAutoSearchPhraseDe`-Map wiederverwendet, die ich vorgeschlagen hatte.
+Der formatDuration-Fix (PR #25) ist weiterhin nicht gemerged — im
+Code-Gegencheck heute bestätigt: `src/components/search/FlightCard.tsx:25-27`
+zeigt bei reiner Sekundenangabe immer noch das erfundene "1min" statt
+eines ehrlichen "—". Auch der Marketing-Chef hat das heute per eigenem
+Code-Check bestätigt. Für Nutzer:innen also weiterhin unverändert live.
 
-Neu dazugekommen ist ein echter kleiner Bug, den der automatische
-Kanal heute gefunden hat: `formatDuration()` in `FlightCard.tsx` und
-`TrainCard.tsx` zeigt bei einer reinen Sekundenangabe (z. B. defekte
-Rohdaten von der Fluglinie) erfunden "1min" an, statt wie überall sonst
-in denselben Dateien ehrlich "—". Der Fix dafür liegt bereits als PR #25
-bereit, ist aber noch nicht auf main gemerged — für Nutzer:innen also
-heute noch live.
+Neu dazugekommen ist ein kleiner, aber echter Fund im automatischen
+Kanal: Beim letzten größeren Reiseentwürfe-Fix (Disambiguierung von
+Lösch-/Abschließen-Dialogen bei doppelten Zielen) wurde ein dritter,
+sehr ähnlicher Dialog übersehen — siehe Vorschlag 2.
 
-Mein Fund 2 von gestern — die Flugsuche im Hauptchat verspricht eine
+Mein Fund von vorgestern — die Flugsuche im Hauptchat verspricht eine
 Suche, die nie startet — ist weiterhin unverändert offen.
 
 ## Meine Vorschläge
@@ -30,16 +28,29 @@ Suche, die nie startet — ist weiterhin unverändert offen.
    korrekt gelöst ist. Kleiner, klar abgegrenzter Fix, der nur noch auf
    Merge wartet.
 
-2. **Flugsuche im Hauptchat verspricht weiterhin mehr, als sie hält —
-   inzwischen zum dritten Mal gemeldet.** `src/lib/ai/mockAdvisor.ts:172`:
+2. **"Details ansehen"-Dialog bei Reiseentwürfen zeigt bei Duplikaten
+   weiterhin keinen unterscheidbaren Titel.** `src/pages/Reiseentwuerfe.tsx:373`:
+   `<DialogTitle>{detailsDraft?.destination}</DialogTitle>` nutzt noch
+   den rohen Namen statt der neuen `getDraftLabel()`-Hilfsfunktion, die
+   der Lösch- und der Abschließen-Dialog bereits korrekt verwenden. Wer
+   einen Entwurf dupliziert und beide "Lissabon"-Karten abschließt, sieht
+   beim Öffnen von "Details ansehen" für beide denselben Titel "Lissabon"
+   — der zugehörige Button kündigt per Screenreader zwar schon korrekt
+   "Lissabon (Eintrag 2) Details ansehen" an, der Dialog selbst macht den
+   Unterschied danach aber wieder unsichtbar. *Vorschlag:* dieselbe schon
+   etablierte Lösung übernehmen — `{detailsDraft && getDraftLabel(detailsDraft, drafts)}`
+   statt `{detailsDraft?.destination}`. Keine neue Design-Entscheidung,
+   nur die dritte von drei Stellen nachziehen.
+
+3. **Flugsuche im Hauptchat verspricht weiterhin mehr, als sie hält —
+   inzwischen zum vierten Mal gemeldet.** `src/lib/ai/mockAdvisor.ts:172`:
    Wer im normalen Ablauf (nicht über "Bearbeiten") Flug wählt, bekommt
    *"Ich suche jetzt nach echten Flug-Verbindungen für [Ziel] …"* — es
    startet aber keine Suche, einziger nächster Schritt ist "Neue Reise
-   planen". Der Code-Kommentar direkt daneben erklärt den Kompromiss,
-   löst das Grundproblem für Nutzer:innen aber nicht. *Vorschlag bleibt:*
-   entweder im Hauptablauf ebenfalls nach dem Abflughafen fragen und die
-   echte Suche auslösen (wie im Bearbeiten-Pfad, `useChat.ts:229-262`),
-   oder die Ankündigung ehrlich auf den zusätzlichen Schritt umformulieren
-   — wie bei Bus/Fähre/Mietwagen bereits sauber gelöst.
+   planen". *Vorschlag bleibt:* entweder im Hauptablauf ebenfalls nach
+   dem Abflughafen fragen und die echte Suche auslösen (wie im
+   Bearbeiten-Pfad, `useChat.ts:229-262`), oder die Ankündigung ehrlich
+   auf den zusätzlichen Schritt umformulieren — wie bei Bus/Fähre/
+   Mietwagen bereits sauber gelöst.
 
-_Letztes Update: 2026-09-30_
+_Letztes Update: 2026-10-01_
