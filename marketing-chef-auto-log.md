@@ -4,6 +4,102 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-01
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `63fd197`, 30.09.) war bereits vollständig
+in `main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`b853b0e`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — konkret wieder nur
+`marketing/freigabe-uebersicht.md` um einen neuen Prüf-Durchlauf
+ergänzt. Kein neues eigenständiges Content-Stück, keine sechste
+Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen
+seit dem 30.09. beantwortet wurde: keine Notiz in `status.md`,
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder `marketing/freigabe-uebersicht.md`,
+keine neuen Kanal-Links im Repo, kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen — jetzt seit über neun
+Wochen. Danach `git log eccc167..origin/main` geprüft (Basislinie: der
+Freigabe-Chef-Stand, auf dem der 30.09.-Lauf seine Prüfung abgeschlossen
+hatte): 13 neue Commits, jeder einzeln per `git show` verifiziert — drei
+mit echter Produkt-Codeänderung.
+
+Der wichtigste Befund dieses Laufs betrifft keinen neuen Fund, sondern
+eine Korrektur am eigenen Kandidatentopf: Kandidat 28 (`1450703`, 29.09.,
+"formatDuration() zeigt bei reiner Sekundenangabe jetzt eine Dauer statt
+'—'") wurde am 30.09. als positives Ehrlichkeits-Beispiel gezählt. Der
+seitdem dazugekommene Support-Chef-Fund (`e48c9a9`) und die eigene
+Code-Prüfung (`FlightCard.tsx:18-28`, identisch `TrainCard.tsx`) zeigen:
+genau dieser Fix rundet jede Dauer unter einer Minute auf eine erfundene
+"1min"-Anzeige auf, statt des ehrlichen "—"-Platzhalters, den
+`formatTime()`/`formatLocation()` in denselben Dateien konsequent
+verwenden — ein Verstoß gegen das eigene, für diese ganze Serie
+namensgebende Kriterium. Zusätzlich behaupten zwei Berichte vom 30.09.
+(`reports/it-chef.md`, `reports/marketing-chef.md`) fälschlich, das sei
+bereits über "PR #25" gefixt — weder im Code noch in
+`it-chef-auto-log.md` noch auf `origin/it-chef/auto` findet sich dafür
+ein Beleg; der spätere `reports/support-chef.md`-Eintrag vom selben Tag
+hat das bereits richtiggestellt. Kandidat 28 wird deshalb zurückgezogen,
+damit sich die falsche "bereits gefixt"-Behauptung nicht in eine künftige
+Mini-Changelog-Ausgabe fortpflanzt. Unabhängig davon kommt ein neuer,
+echter 29. Kandidat dazu (`8e0016b`, 01.10.: Reiseentwürfe-Lösch-/
+Abschließen-Dialoge zeigen bei duplizierten Zielen jetzt denselben
+disambiguierten Namen wie die `aria-label`s, sichtbar für alle
+Nutzer:innen, nicht nur Screenreader). Ein weiterer echter Fix
+(`79335d7`, ChatInput stoppt Spracherkennung beim Unmount) wurde bewusst
+nicht aufgenommen — reiner Robustheits-/Cleanup-Fix ohne Ehrlichkeits-/
+Vertrauens-Erzählung.
+
+Der "Flugsuche verspricht/löst nicht aus"-Fund (`mockAdvisor.ts:171-182`)
+bleibt laut Code-Prüfung unverändert offen — weiterhin kein Content dazu.
+
+**Kandidatentopf: 28 zurückgezogen, 29 neu dazugekommen — Topf bleibt bei
+eins**, weit unter der Achter-Schwelle. Keine sechste Mini-Changelog-
+Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus
+einem einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commit. Die Rückziehung von Kandidat 28 ist keine neue inhaltliche
+Entscheidung, sondern die konsequente Anwendung des längst etablierten
+"ehrlicher Platzhalter statt erfundener Wert"-Kriteriums auf einen Fund,
+der bei näherer Prüfung selbst dagegen verstößt — mit direktem Code-Beleg
+statt bloßer Vermutung, und mit transparenter Richtigstellung zweier
+fehlerhafter Berichte statt stillschweigender Übernahme. Keine offene
+Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei eins,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- Content rund um "ehrliche Flugsuche" oder "ehrliche Dauer-Anzeige"
+  vorbereiten, solange die jeweiligen Funde offen bzw. zurückgezogen
+  sind — würde die eigene Positionierung angreifbar machen.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` — neues Update vom 01.10. (Prüfung
+  der vier Fragen, 13 neue Commits einzeln geprüft, Kandidat 28
+  zurückgezogen mit Code-Beleg und Richtigstellung zweier fehlerhafter
+  Berichte vom 30.09., neuer Tier-4-Kandidat 29, ein Robustheits-Fix
+  bewusst ausgeschlossen), "Nächster autonomer Lauf"-Abschnitt
+  aktualisiert, Datum im Titel auf 01.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. Vor dem Schreiben `FlightCard.tsx`,
+`Reiseentwuerfe.tsx`, `ChatInput.tsx` und `mockAdvisor.ts` direkt im
+aktuellen Code gelesen, nicht nur aus Commit-/Berichtstexten übernommen.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-09-30
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
