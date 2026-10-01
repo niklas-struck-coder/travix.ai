@@ -3649,3 +3649,67 @@ Zugdaten (`TrainOffer`) aktuell überhaupt aus einer echten API oder noch
 aus Demo-/Mock-Daten stammen, wurde für diesen Fund nicht weiter
 verfolgt — die Beobachtung gilt unabhängig davon für beide Kartentypen,
 da die Funktion identisch dupliziert ist.
+
+---
+
+## 2026-10-01 — Reiseentwürfe: Disambiguierung der Lösch-/Abschließen-Dialoge (`Reiseentwuerfe.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil dies laut `it-chef-auto-log.md`/`ZEITPLAN.md` die
+zuletzt auf `main` gelandete inhaltliche Änderung ist (Commit `8e0016b`,
+heute Nacht): Eine neue `getDraftLabel()`-Hilfsfunktion
+(`Reiseentwuerfe.tsx:113-121`) sorgt dafür, dass bei zwei oder mehr
+Entwürfen mit identischem `destination` (entsteht über "Duplizieren")
+sowohl die Karten-`aria-label`s als auch die Lösch-/Abschließen-
+Bestätigungstexte jetzt "Lissabon (Eintrag 2)" statt nur "Lissabon"
+zeigen — laut Commit-Nachricht ausdrücklich "von Kartenliste und beiden
+Dialogtexten gemeinsam genutzt". Dieser Lauf hat geprüft, ob diese
+beiden Dialoge wirklich die einzigen Stellen sind, die das betrifft.
+
+### Reibungspunkt
+
+**1. Der dritte Dialog ("Details ansehen") zeigt bei Duplikaten weiterhin
+den nicht unterscheidbaren rohen Namen als Titel**
+
+`Reiseentwuerfe.tsx:373`: `<DialogTitle>{detailsDraft?.destination}</DialogTitle>`
+nutzt weiterhin `destination` direkt statt der neuen `getDraftLabel()`
+-Funktion. Der zugehörige Öffnen-Button hat sein `aria-label` dagegen
+bereits korrekt disambiguiert (Zeile 296: `` `${draftLabel} Details
+ansehen` ``, stammt noch aus dem ursprünglichen 17.09.-Fix). Das ergibt
+einen Bruch mitten im selben Bedienfluss: "Details ansehen" ist nur für
+`status === 'finalized'`-Karten sichtbar (Zeile 291-302) — dorthin
+kommt man z. B., indem man einen Entwurf dupliziert (`duplicateDraft`,
+Zeile 145-153, Kopie startet immer als `'in_progress'`) und danach
+sowohl Original als auch Kopie einzeln über "Abschließen" abschließt.
+Hat man zwei (oder mehr) abgeschlossene "Lissabon"-Entwürfe, liest der
+Screenreader vor dem Klick korrekt "Lissabon (Eintrag 1) Details
+ansehen" bzw. "… (Eintrag 2) …" — öffnet sich der Dialog, zeigt dessen
+Titel aber für beide schlicht "Lissabon", ohne jede Ergänzung. Genau in
+diesem reinen Lese-Dialog, dessen einziger Zweck es ist, sich die Details
+*eines bestimmten* Entwurfs anzusehen, kann man danach nicht mehr
+nachvollziehen, welchen der beiden gleichnamigen Entwürfe man gerade vor
+sich hat — weder sehend (kein sichtbarer Unterschied zum anderen
+Dialog) noch per Screenreader (der Ankündigungstext beim Button ist
+zwar korrekt, der Dialoginhalt selbst aber nicht). Mit einem temporären,
+nicht committeten Testfall lokal nachvollzogen: Nach Duplizieren und
+Abschließen beider "Lissabon"-Karten zeigen beide "Details
+ansehen"-Dialoge denselben `getByRole('heading', { name: 'Lissabon' })`
+ohne jede Unterscheidung.
+
+*Vorschlag:* `{detailsDraft?.destination}` in Zeile 373 durch
+`{detailsDraft && getDraftLabel(detailsDraft, drafts)}` ersetzen —
+exakt dieselbe, bereits für die anderen beiden Dialoge etablierte
+Lösung, keine neue Design-Entscheidung. Kleine, mechanische Ergänzung,
+die `getDraftLabel()` konsequent an allen drei Stellen nutzt, an denen
+heute schon zwei von drei genutzt werden.
+
+### Nicht geprüft
+Die übrigen, mehrfach dokumentierten offenen Punkte zu dieser Datei
+(z. B. derselbe aktive KI-Chat für alle Entwürfe, Aufgabe 7.4) wurden
+hier nicht erneut aufgeführt, da sie unverändert und bereits gemeldet
+sind. Der heutige zweite IT-Chef-Lauf (`79335d7`, Spracherkennung stoppt
+beim Unmount in `ChatInput.tsx`) ist laut eigener Commit-Beschreibung ein
+reiner internen Bugfix ohne sichtbare Textänderung und wurde deshalb
+nicht gesondert geprüft.
