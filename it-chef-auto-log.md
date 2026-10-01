@@ -14871,3 +14871,58 @@ Tests, alle grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-09-30 (sechster Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` war
+gegenüber `origin/main` genau um die fünf heutigen Log-Commits voraus,
+`origin/main` selbst seit dem fünften Lauf nicht weitergewandert. Kein
+Merge nötig.
+
+**Ausgewählter Punkt:** Erneute, unabhängige Suche nach einem neuen
+Bugfund — `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` durchgesehen
+(Befund unverändert zu den fünf vorherigen Läufen: alle verbliebenen
+offenen Punkte hängen an Base44/Gemini-Zugangsdaten, Architektur-/
+Datenmodell-Lücken oder offenen Produktentscheidungen), `reports/*.md`
+auf neue Funde geprüft (keine neuen gegenüber dem, was der fünfte Lauf
+bereits gesehen hat). Eigene gezielte Prüfung bisher nicht in diesem Licht
+untersuchter Bereiche (Preisformatierung in `Angebote.tsx`/`Warenkorb.tsx`/
+`Preisalarme.tsx`/`Dashboard.tsx`/`Aktivitaeten.tsx`, `cartTotals.ts`,
+Preisalarm-Schwellenwert-Vergleich, mögliche Race Conditions in
+`useChat.ts`s Flug-/Unterkunftssuche, `tripStorage.ts` erneut) ergab
+keinen neuen Code-Bug — alle Stellen bereits defensiv/korrekt. Punkt 8.13
+(Unit-Tests für `calculateProgress`/`calculateCosts`/`checklistRules`/
+Schema-Validierung) erneut geprüft, aber laut diesem Log bereits über
+mehrere frühere Läufe hinweg exakt in diesem Teilzustand
+(`calculateProgress.test.ts`/`checklistRules.test.ts` existieren bereits,
+die beiden anderen Teile bleiben an 4.1/6.7 blockiert) dokumentiert — kein
+neuer Fund, keine Dopplung vorgenommen.
+
+Stattdessen `npm audit` laufen lassen (gleiches etabliertes Vorgehen wie
+in früheren Läufen, siehe die `fast-uri`/`nanoid`/`qs`-Einträge weiter
+oben in diesem Log): 4 Schwachstellen in transitiven Dev-Abhängigkeiten
+(2 hoch: `undici` über `jsdom`/`shadcn`-CLI sowie `brace-expansion` über
+`@ts-morph`/`@typescript-eslint`; 2 mittel: `ip-address` über die
+`shadcn`-CLI, `fast-uri`). Alle vier ausschließlich in Dev-/Tooling-
+Abhängigkeiten (Testlaufzeit `jsdom`, CLI-Tool `shadcn`, Lint-Tooling),
+keine davon im produktiven Bundle (`dist/`) — kein Nutzerdaten-/Auth-/
+Zahlungsbezug, keine offene Entscheidung nötig. Behoben über `npm audit
+fix` (ohne `--force`, ausschließlich Patch-Versionssprünge: `undici`
+7.29.0→7.30.0 und 8.10.0→8.11.2, `ip-address` 10.4.0→10.7.2, `fast-uri`
+3.1.7→3.1.8, `brace-expansion` 1.1.18→1.1.21/5.0.9→5.0.12). Nur
+`package-lock.json` geändert, kein Quellcode betroffen.
+
+**Ergebnis:** Kein neuer Code-Bug gefunden (sechster Lauf in Folge ohne
+unabhängigen neuen Fund), aber eine echte, objektiv geschlossene
+Sicherheitslücke in den Dev-Abhängigkeiten behoben.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npm audit` vorher: 4
+Schwachstellen (2 hoch, 2 mittel); nachher: 0 Schwachstellen. `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen in `src/components/ui/`), volle
+Suite `npx vitest run` (59 Testdateien, 382 Tests, alle grün), `npm run
+build` (kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
