@@ -1,10 +1,156 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-09-30)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-01)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-01: Kandidat 28 zurückgezogen (eigener "Fix" rundet auf erfundene "1min"-Anzeige, "automatisch gefixt"-Behauptung in zwei Berichten vom 30.09. stimmt nicht), ein neuer 29. Tier-4-Kandidat (Reiseentwürfe-Dialogtexte disambiguiert), ein Robustheits-Fix bewusst ausgeschlossen, Kandidatentopf bei eins, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `63fd197`, 30.09.) war bereits vollständig
+in `main` gemergt — der Branch war also nur noch veraltet, nicht mehr in
+Arbeit. Neu von aktuellem `origin/main` (`b853b0e`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md`, `ZEITPLAN.md` (6.2 weiterhin `[ ]`)
+oder diesem Dokument seit dem 30.09. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen — die Kanal-/
+Mini-Changelog-Frage jetzt seit über neun Wochen.
+
+**`git log eccc167..origin/main` zeigt 13 neue Commits** (Basislinie
+bewusst `eccc167`, der Freigabe-Chef-Stand, auf dem der 30.09.-Lauf seine
+eigene Prüfung bereits abgeschlossen hatte). Davon drei mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` geprüft:
+
+- **`4618070` (30.09., sechster IT-Chef-Auto-Lauf):** `npm audit fix` für
+  vier Dev-Dependency-Schwachstellen. Reine Build-/Tooling-Änderung ohne
+  Nutzer-Sichtbarkeit — **kein Kandidat**, gleiche Begründung wie bei
+  jeder bisherigen reinen Infrastruktur-/Dependency-Änderung.
+- **`8e0016b` (01.10., IT-Chef Auto):** Die Lösch-/Abschließen-
+  Bestätigungsdialoge auf `/reiseentwuerfe` zeigten bei duplizierten
+  Entwürfen (z. B. zweimal "Lissabon") weiterhin den mehrdeutigen rohen
+  Zielnamen im sichtbaren Dialogtext, obwohl dieselben Buttons seit
+  17./21.09. in ihren `aria-label`s bereits disambiguiert sind
+  ("Lissabon (Eintrag 2)"). Live im Code nachvollzogen
+  (`Reiseentwuerfe.tsx`, neue `getDraftLabel()`-Hilfsfunktion, von
+  Kartenliste und beiden Dialogtexten gemeinsam genutzt), zwei neue
+  Regressionstests. Anders als die ursprüngliche `aria-label`-
+  Disambiguierung (`6a12606`, 21.09.), die bewusst als reiner
+  Barrierefreiheits-Fund ausgeschlossen wurde, weil sie nur für
+  Screenreader-Nutzer:innen sichtbar war: dieser Fix ändert den Text, den
+  **alle** Nutzer:innen im Bestätigungsdialog sehen — vorher hätte eine
+  Nutzerin mit zwei "Lissabon"-Entwürfen beim Löschen/Abschließen nicht
+  sicher wissen können, welcher der beiden gemeint ist. Passt damit in
+  dieselbe "Reiseentwürfe-Konsistenz"-Fundgruppe wie die bereits
+  gezählten Löschbestätigungs-/CTA-Konsistenz-Fixes (nicht die
+  Accessibility-Ausschlussgruppe). **Neunundzwanzigster Tier-4-Kandidat.**
+- **`79335d7` (01.10., zweiter IT-Chef-Auto-Lauf):** `ChatInput.tsx`
+  stoppt eine laufende Spracherkennung jetzt auch beim Unmount der
+  Komponente (z. B. Navigation weg von `/ki-chat` während die Aufnahme
+  noch läuft), nicht mehr nur per erneutem Klick auf den Mikrofon-Button.
+  **Bewusst nicht** als Tier-4-Kandidat aufgenommen: ein reiner
+  technischer Robustheits-/Cleanup-Fix ohne sichtbar falsche oder
+  verschwiegene Information gegenüber der Nutzerin — gleiche
+  Ausschlussgruppe wie frühere reine Race-/Validierungs-Fixes (z. B. die
+  Kalender-Doppelklick-Absicherung vom 24.09.).
+
+**Wichtigste Korrektur dieses Laufs — Kandidat 28 wird zurückgezogen:**
+Der 28. Tier-4-Kandidat (`1450703`, 29.09.: `formatDuration()` zeigt bei
+reiner Sekundenangabe jetzt eine Dauer statt "—") wurde am 30.09. als
+positives Ehrlichkeits-Beispiel gezählt. Ein genauerer Blick auf den
+seitdem dazugekommenen Support-Chef-Fund (`e48c9a9`, 30.09.) zeigt: genau
+dieser Fix verstößt selbst gegen das Kriterium, für das er stehen sollte.
+Live im Code verifiziert (`FlightCard.tsx:18-28`, identisch in
+`TrainCard.tsx`):
+
+```
+if (totalHours === 0 && totalMinutes === 0 && Number(seconds || 0) > 0) {
+  totalMinutes = 1
+}
+```
+
+Jede Dauer unter einer vollen Minute wird fest auf "1min" aufgerundet —
+ein erfundener, konkret wirkender Wert, anstelle des ehrlichen "—", den
+`formatTime()`/`formatLocation()` in denselben Dateien bei fehlenden/
+unplausiblen Werten konsequent zeigen. Genau das Muster, das die
+komplette Tier-4-Serie bisher auszeichnet ("echter Wert statt
+Platzhalter" bzw. "ehrlicher Platzhalter statt erfundenem Wert"), wird
+hier in die falsche Richtung angewendet.
+
+Zusätzlich: Zwei Berichte vom 30.09. — `reports/it-chef.md` (`da805a8`,
+"automatisch gefixt, PR #25, gemergt") und `reports/marketing-chef.md`
+(`b5de019`, übernimmt dieselbe Behauptung) — erklären das Problem
+fälschlich für bereits behoben. Das stimmt nicht: `git log
+origin/main..origin/it-chef/auto` zeigt keinen einzigen offenen Commit,
+`it-chef-auto-log.md` enthält keinen Treffer für "PR #25", und der Code
+selbst (s. o.) rundet weiterhin auf "1min". Der spätere
+`reports/support-chef.md`-Eintrag vom selben Tag (`e39f9a6`) hat das
+bereits richtiggestellt ("PR #25 noch nicht live") — dieser Lauf
+übernimmt bewusst die korrigierte, code-verifizierte Fassung statt der
+beiden fehlerhaften Berichte, damit sich die falsche "bereits gefixt"-
+Behauptung nicht in eine künftige Mini-Changelog-Ausgabe oder ein
+Content-Stück fortpflanzt. **Kandidat 28 gilt ab sofort als
+zurückgezogen/blockiert**, bis tatsächlich ein verifizierter Fix in
+`main` landet — Support-Chefs eigener Vorschlag (`'—'` statt Aufrunden
+zurückgeben, wenn Tage/Stunden/Minuten zusammen 0 ergeben) wäre dafür der
+naheliegende Weg, das zu entscheiden ist aber IT-Chefs Sache, nicht
+dieses Laufs.
+
+**Kandidatentopf:** 28 zurückgezogen, 29 neu dazugekommen — der aktive
+Topf steht damit bei **eins** (nur Kandidat 29), weiterhin weit unter der
+Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Flugsuche-Fund weiterhin offen:** `mockAdvisor.ts:171-182` live
+geprüft — der Chat kündigt bei Flugreisen weiterhin wörtlich eine echte
+Suche an ("Ich suche jetzt nach echten Flug-Verbindungen ... Nichts wird
+erfunden"), löst aber unverändert keine aus (nur der separate
+"Bearbeiten"-Pfad tut das). Kein Content dazu, solange das offen ist —
+gleiche Selbstbeschränkung wie seit dem 29.09.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus
+einem einzeln per `git show` verifizierten, bereits in `main` gemergten
+Commit, der Ausschluss ist transparent begründet. Die Rückziehung von
+Kandidat 28 ist ebenfalls keine neue inhaltliche Entscheidung, sondern
+die konsequente Anwendung des längst etablierten "ehrlicher Platzhalter
+statt erfundener Wert"-Kriteriums auf einen Fund, der bei näherer Prüfung
+selbst dagegen verstößt — mit Code-Beleg statt bloßer Vermutung. Keine
+offene Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei eins,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an dieselbe
+  Selbstbeschränkung wie seit 20.08. gebunden.
+- Content rund um "ehrliche Flugsuche" oder "ehrliche Dauer-Anzeige"
+  vorbereiten — beide zugrunde liegenden Funde sind aktuell offen bzw.
+  zurückgezogen, würde die eigene "Ehrlichkeit als Feature"-Positionierung
+  angreifbar machen.
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 01.10. (Prüfung
+  der vier Fragen, 13 neue Commits einzeln geprüft, Kandidat 28
+  zurückgezogen mit Code-Beleg und Richtigstellung zweier fehlerhafter
+  Berichte vom 30.09., ein neuer Tier-4-Kandidat 29, ein Robustheits-Fix
+  bewusst ausgeschlossen, Kandidatentopf-Stand auf "eins" gesetzt),
+  "Nächster autonomer Lauf"-Abschnitt aktualisiert, Datum im Titel auf
+  01.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. Vor dem Schreiben `FlightCard.tsx`,
+`Reiseentwuerfe.tsx`, `ChatInput.tsx` und `mockAdvisor.ts` direkt im
+aktuellen Code gelesen, nicht nur aus Commit-/Berichtstexten übernommen.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-09-30: ein neuer Tier-4-Kandidat (formatDuration()-Sekundenlücke), ein Sprach-/Grammatik-Fix bewusst ausgeschlossen, Kandidatentopf bei eins, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen und bewusst nicht autonom entscheidbar
 
@@ -3046,4 +3192,19 @@ inzwischen behoben wurde, und ihn erst dann als möglichen Tier-4-
 Kandidaten bzw. eigenes Content-Stück aufnehmen. Der nächste Lauf sollte
 weiterhin zuerst die vier offenen Fragen gegenprüfen und den
 Kandidatentopf (Stand 30.09.: eins) gegen denselben 06.09.-Maßstab
-weiterführen.
+weiterführen. Stand 01.10. wird Kandidat 28 zurückgezogen (der eigene
+"Fix" rundet selbst auf eine erfundene "1min"-Anzeige statt eines
+ehrlichen Platzhalters, siehe Update 2026-10-01 oben) und ein neuer,
+unabhängiger 29. Kandidat kommt dazu (Reiseentwürfe-Dialogtexte bei
+Duplikaten disambiguiert) — der Topf steht damit weiterhin bei eins,
+weit unter der Achter-Schwelle. Wichtig für künftige Läufe: zwei Berichte
+vom 30.09. (`reports/it-chef.md`, `reports/marketing-chef.md`) behaupten
+fälschlich, der formatDuration-Fund sei bereits gefixt ("PR #25") — das
+stimmt laut Code-Prüfung nicht, der nächste Lauf sollte vor jeder
+Wiederverwendung dieser Berichte den tatsächlichen Code-Stand gegenprüfen
+statt Berichtstexte ungeprüft zu übernehmen, und erst dann entscheiden,
+ob Kandidat 28 wieder aufgenommen werden kann. Der "Flugsuche verspricht/
+löst nicht aus"-Fund (`mockAdvisor.ts:171-182`) bleibt ebenfalls
+unverändert offen. Der nächste Lauf sollte weiterhin zuerst die vier
+offenen Fragen gegenprüfen und den Kandidatentopf (Stand 01.10.: eins)
+gegen denselben 06.09.-Maßstab weiterführen.
