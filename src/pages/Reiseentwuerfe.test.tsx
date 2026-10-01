@@ -164,6 +164,32 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getByRole('button', { name: 'Kyoto löschen' })).toBeInTheDocument()
   })
 
+  it('disambiguates the delete confirmation text for duplicated drafts, like the aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 2) löschen' }))
+
+    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 2\) wird gelöscht/)).toBeInTheDocument()
+  })
+
+  it('disambiguates the finalize confirmation text for duplicated drafts, like the aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 1) abschließen' }))
+
+    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 1\) wird abgeschlossen/)).toBeInTheDocument()
+  })
+
   it('asks for confirmation before deleting a draft, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>

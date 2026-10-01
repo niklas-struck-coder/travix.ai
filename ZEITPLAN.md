@@ -1970,6 +1970,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `text-navy` umgestellt, da identischer Fehler und identischer Fix.
   Regressionstest in `Reiseentwuerfe.test.tsx` entsprechend angepasst
   (prüft jetzt `text-navy` statt `text-teal`).
+  Vom autonomen IT-Chef-Lauf am 01.10. einen über einen Explore-Agenten
+  gefundenen, eigenständigen Bug behoben: Die Lösch-/Abschließen-
+  Bestätigungsdialoge in `Reiseentwuerfe.tsx` zeigten bisher immer den
+  rohen `destination`-Namen ("Der Entwurf für Lissabon wird gelöscht."),
+  obwohl die aria-labels derselben Buttons seit dem 17.09./20.09.-Fix bei
+  duplizierten Entwürfen bereits disambiguiert sind ("Lissabon (Eintrag
+  2) löschen"). Nach einem Klick auf "Duplizieren" zeigten beide
+  resultierenden Lissabon-Karten im sichtbaren Dialogtext exakt denselben
+  Satz — für alle Nutzer:innen (nicht nur Screenreader) nicht mehr
+  erkennbar, welcher der beiden Entwürfe tatsächlich betroffen ist (die
+  zugrunde liegende Aktion selbst arbeitete weiterhin korrekt über die
+  jeweilige `id`). Fix: Die bereits bestehende Disambiguierungslogik
+  (`hasDuplicates`/`occurrence`) in eine wiederverwendbare
+  `getDraftLabel()`-Hilfsfunktion ausgelagert, von der Kartenliste UND
+  beiden Dialogtexten genutzt — mechanische Wiederverwendung des bereits
+  etablierten Musters, keine neue Design-Entscheidung. Zwei neue
+  Regressionstests in `Reiseentwuerfe.test.tsx` (Lösch- bzw.
+  Abschließen-Dialogtext zeigt "Lissabon (Eintrag N)" statt des
+  mehrdeutigen "Lissabon") — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `Reiseentwuerfe.tsx`) reproduzierbar
+  rot verifiziert.
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,

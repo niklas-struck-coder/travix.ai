@@ -14926,3 +14926,64 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-01
+
+**Ausgangslage:** `it-chef/auto` lag seit dem letzten Lauf (30.09.,
+sechster Lauf) 3 Commits vor `main`, noch ungemerged — darauf
+weitergearbeitet, `main` unberührt gelassen. `npm ci` erstmals in dieser
+Session nötig (frischer Checkout), lief diesmal ohne Netzwerkprobleme
+durch; `npm audit` direkt danach: 0 Schwachstellen (bestätigt den
+sechsten Lauf vom 30.09.). Lint/Build/Tests vor jeder Änderung geprüft:
+alle grün (0 Lint-Fehler, nur die vier vorbestehenden Fast-Refresh-
+Warnungen; `tsc -b` + `vite build` fehlerfrei; 59 Testdateien, 382 Tests
+grün).
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte (4.1-4.3,
+6.2, 6.6/6.7, 7.4, 7.12, 8.2-8.7, 8.9/8.11/8.12, 8.13) bleiben wie in
+den letzten ~15 Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden — kein neuer, eigenständig umsetzbarer Punkt dort. Stattdessen
+wie in den meisten vorherigen Läufen gezielt nach einem neuen,
+eigenständigen Bug gesucht: ein Explore-Agent beauftragt, bewusst
+außerhalb der am häufigsten schon durchleuchteten Dateien
+(`mockAdvisor.ts`, `tripStorage.ts`, `useChat.ts`, `FlightCard.tsx`,
+`TrainCard.tsx`, `EditMode.tsx`, `KiChat.tsx` u. a.) zu suchen.
+
+**Gefundener und behobener Bug:** `Reiseentwuerfe.tsx` — die Lösch- und
+Abschließen-Bestätigungsdialoge zeigten bei duplizierten Entwürfen
+weiterhin den mehrdeutigen rohen `destination`-Namen ("Der Entwurf für
+Lissabon wird gelöscht."), obwohl dieselben Buttons seit dem
+17.09./20.09.-Fix in ihren aria-labels bereits disambiguiert sind
+("Lissabon (Eintrag 2) löschen"). Reproduzierbar mit einem einzigen Klick
+auf "Duplizieren": beide resultierenden Lissabon-Karten zeigen danach im
+*sichtbaren* Dialogtext exakt denselben Satz — für alle Nutzer:innen
+(nicht nur Screenreader) nicht erkennbar, welcher der beiden Entwürfe
+tatsächlich betroffen ist (die zugrunde liegende Aktion selbst arbeitete
+weiterhin korrekt über die jeweilige `id`, kein Datenverlust-Risiko,
+aber ein echter Vertrauens-/Verwechslungs-Bug). Fund erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Rechtsbezug, keine offene
+Produktentscheidung, rein mechanischer Fix nach bereits etabliertem
+Muster, objektiv prüfbar.
+
+**Fix:** Die bereits bestehende Disambiguierungslogik
+(`hasDuplicates`/`occurrence`) aus der Kartenliste in eine
+wiederverwendbare `getDraftLabel(draft, allDrafts)`-Hilfsfunktion
+ausgelagert, die jetzt sowohl die Kartenliste (aria-labels) als auch
+beide Dialogtexte (`pendingRemoval`/`pendingFinalize`) nutzt — keine
+Verhaltensänderung für nicht-duplizierte Entwürfe, keine neue
+Design-Entscheidung. Zwei neue Regressionstests in
+`Reiseentwuerfe.test.tsx` (Lösch- bzw. Abschließen-Dialogtext zeigt
+"Lissabon (Eintrag N)" statt des mehrdeutigen "Lissabon") — vor dem Fix
+durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert (beide neuen Tests
+schlugen fehl, da `getByText` den disambiguierten Text nicht fand).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` + `npm run build` (kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung), volle Suite `npm
+test` (59 Testdateien, 384 Tests — 2 neue gegenüber vorher, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
