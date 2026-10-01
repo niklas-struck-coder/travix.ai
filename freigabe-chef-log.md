@@ -5359,3 +5359,61 @@ gepusht).
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-01, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (die drei
+  09-30-Commits ohne neuen Fund waren noch unverändert ungemerged
+  liegengeblieben; zwei neue mit Code-Änderung vom 01.10.).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`, `package-lock.json`,
+  `ChatInput.tsx`/`.test.tsx`, `Reiseentwuerfe.tsx`/`.test.tsx`,
+  `tasks/tasks-prd-travix-platform.md` — genau zwei inhaltliche Punkte,
+  beide im Log beschrieben:
+  1. `Reiseentwuerfe.tsx`: Lösch-/Abschließen-Bestätigungsdialoge
+     zeigten bei duplizierten Entwürfen weiterhin den mehrdeutigen
+     rohen `destination`-Namen, obwohl die aria-labels derselben
+     Buttons seit dem 17.09./20.09.-Fix bereits disambiguiert sind.
+     Fix lagert die bestehende Disambiguierungslogik in eine
+     wiederverwendbare `getDraftLabel()`-Hilfsfunktion aus, die jetzt
+     Kartenliste UND beide Dialogtexte nutzt — mechanische
+     Wiederverwendung, keine neue Design-Entscheidung geprüft:
+     Diff zeigt wirklich nur Extraktion + Aufruf, Verhalten für
+     nicht-duplizierte Entwürfe unverändert.
+  2. `ChatInput.tsx`: laufende Spracherkennung wurde beim Unmount der
+     Komponente nicht gestoppt (kein Cleanup, anders als das etablierte
+     Pendant für Sprachausgabe in `KiChat.tsx:77`) — jetzt per
+     `useEffect(() => () => recognitionRef.current?.stop(), [])`
+     behoben, spiegelt exakt das bestehende Muster, keine
+     Verhaltensänderung für Start/Stop-per-Klick.
+  `package-lock.json`-Änderung stammt aus dem bereits vom vorletzten
+  Lauf (30.09., sechster Lauf) committeten `npm audit fix` und wird
+  durch den heutigen `npm install` (0 Schwachstellen) bestätigt.
+  Beide neuen Fixes scoped, kein Scope-Creep, keine Berührung von
+  Auth/Zahlungen/rechtlichen Texten. Keine UI/Design-Änderung im Sinne
+  von `MARKENDESIGN.md` (reine Logik-/Text-Korrektur nach etabliertem
+  Muster).
+- **Unabhängig selbst verifiziert** (frischer `npm install`, danach
+  tatsächlich selbst ausgeführt, nicht nur Log geglaubt):
+  `npm install` → 0 Schwachstellen. `npx tsc -b` → 0 Fehler.
+  `npx eslint .` → 0 Fehler, dieselben vier vorbestehenden
+  Fast-Refresh-Warnungen in `src/components/ui/`. `npx vitest run` →
+  59 Testdateien, 385 Tests, alle grün. Deckt sich exakt mit den
+  Angaben im `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward
+`e39f9a6..79335d7`, gepusht). `it-chef/auto` war danach bereits
+deckungsgleich mit `main`, kein separater Reset nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
