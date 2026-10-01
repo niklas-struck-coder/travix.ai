@@ -92,4 +92,16 @@ describe('useConcierge', () => {
 
     expect(result.current.avatarState).toBe('error')
   })
+
+  it('clears the pending reply timeout on unmount so it cannot fire against a stale instance', () => {
+    const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+    const { result, unmount } = renderHook(() => useConcierge('Rom'))
+
+    act(() => {
+      result.current.sendMessage('Welche Währung brauche ich?')
+    })
+    unmount()
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+  })
 })
