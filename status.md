@@ -13,16 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-29):**
-- Support-Chef hat einen Rundungsfehler in formatDuration() behoben (reine
-  Sekundenwerte wurden fälschlich als "1min" statt ehrlichem Platzhalter
-  angezeigt); von Freigabe-Chef geprüft und gemergt
-- IT-Chef hat mehrere Läufe ohne neuen sicheren Fund abgeschlossen (bereits
-  behobene Punkte gegengeprüft, gezielt in bisher weniger untersuchten
-  Bereichen gesucht)
-- Freigabe-Chef hat die Tagesänderungen von Marketing- und Support-Chef
-  wie gewohnt eigenständig geprüft und nach main gemergt
+**Seit letztem Update (2026-09-30):**
+- IT-Chef hat einen Fund behoben: ChatInput stoppt die Spracherkennung jetzt
+  korrekt beim Unmount
+- Support-Chef fand uneindeutige Dialogtitel bei doppelten Reiseentwürfen;
+  IT-Chef hat die Dialogtexte daraufhin disambiguiert, von Freigabe-Chef geprüft
+  und gemergt
+- npm audit fix: vier Dev-Dependency-Schwachstellen behoben
+- Marketing-Chef hat einen Kandidaten zurückgezogen (eigener Fix hätte eine
+  Zeitangabe erfunden) und einen neuen Kandidaten vorgeschlagen
+- Freigabe-Chef hat die Tagesänderungen wie gewohnt eigenständig geprüft und
+  nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-30_
+_Letztes Update: 2026-10-01_
