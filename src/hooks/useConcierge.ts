@@ -12,7 +12,7 @@ export function useConcierge(destination: string | null) {
   const [quickReplies, setQuickReplies] = useState<string[]>(hasKnownDestination(destination) ? conciergeQuickReplies : [])
   const [avatarState, setAvatarState] = useState<AvatarState>('greeting')
   const [isThinking, setIsThinking] = useState(false)
-  const replyTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null)
+  const replyTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     return () => {
