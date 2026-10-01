@@ -5417,3 +5417,52 @@ deckungsgleich mit `main`, kein separater Reset nötig.
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-01, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits beim früheren
+  Nacht-Check heute vollständig gemergt), planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`3960d39`).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`e240516`).
+
+**Prüfung `marketing-chef/auto`:** Diff gegen `main` zunächst
+irreführend groß (Branch war 14 Commits hinter `main` zurück, Diff
+zeigte u. a. Löschungen von `ZEITPLAN.md`/`it-chef-auto-log.md`/
+`support-chef-auto-log.md`-Inhalten, die real nur daher kamen, dass der
+Branch diese neueren `main`-Commits noch nicht hatte). Deshalb stattdessen
+gezielt nur den eigenen neuen Commit (`3960d39`) einzeln angeschaut:
+betrifft ausschließlich `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Hinweis auf tatsächliches Posten/Versenden. Inhalt: Kandidat 28
+(formatDuration-"1min"-Fix) wird mit Code-Beleg zurückgezogen (verstößt
+selbst gegen das eigene "ehrlicher Platzhalter statt erfundener Wert"-
+Kriterium), neuer Kandidat 29 (Reiseentwürfe-Dialogtexte bei Duplikaten)
+kommt dazu. Keine erfundenen Kennzahlen/Nutzerzahlen. Zentrale Behauptung
+selbst nachverifiziert: `src/components/search/FlightCard.tsx:18-29`
+zeigt tatsächlich `totalMinutes = 1`, wenn Stunden/Minuten 0 sind aber
+Sekunden > 0 — Befund stimmt.
+→ **Passt, nach `main` gemergt** (`git merge`, sauberer Merge, nur die
+zwei erwarteten Dateien geändert).
+
+**Prüfung `support-chef/auto`:** Einziger neuer Commit (`e240516`)
+ändert nur `support-chef-auto-log.md` (+64 Zeilen, reine Analyse, kein
+Code geändert). Behauptung: Details-Dialog bei Reiseentwürfen
+(`Reiseentwuerfe.tsx:373`) nutzt weiterhin den rohen `destination`-Namen
+statt der heute (`8e0016b`) eingeführten `getDraftLabel()`-Funktion, die
+Karten-aria-labels sowie Lösch-/Abschließen-Dialoge bereits
+disambiguiert — bei Duplikaten zeigt der Dialog für beide denselben
+Titel. Stichprobe direkt im Code nachvollzogen: Zeile 373 lautet
+`<DialogTitle>{detailsDraft?.destination}</DialogTitle>`, tatsächlich
+ohne `getDraftLabel()`-Aufruf — Fund stimmt, nicht erfunden.
+→ **Passt, nach `main` gemergt** (`git merge`, sauberer Merge, nur die
+eine erwartete Datei geändert).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, gemergt. `it-chef/auto` planmäßig übersprungen
+(kein neuer Stand seit dem früheren Nacht-Check). Alle drei Branches
+jetzt deckungsgleich mit `main`. `main` gepusht
+(`b853b0e..a90e4c4`).
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
