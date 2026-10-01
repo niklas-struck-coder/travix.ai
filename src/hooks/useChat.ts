@@ -87,6 +87,15 @@ export function useChat(speechEnabled: boolean) {
   const [awaitingFlightOrigin, setAwaitingFlightOrigin] = useState(false)
   const [storageWarning, setStorageWarning] = useState(false)
   const initialized = useRef(false)
+  const replyTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (replyTimeoutRef.current !== null) {
+        window.clearTimeout(replyTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const runFlightSearch = (origin: string, destinationIata: string) => {
     setFlightLoading(true)
@@ -228,7 +237,8 @@ export function useChat(speechEnabled: boolean) {
 
     if (editingField === 'transportMode' && awaitingFlightOrigin) {
       const origin = content.trim().toUpperCase()
-      window.setTimeout(() => {
+      replyTimeoutRef.current = window.setTimeout(() => {
+        replyTimeoutRef.current = null
         if (!IATA_CODE_PATTERN.test(origin)) {
           setMessages((prev) => [
             ...prev,
@@ -267,7 +277,8 @@ export function useChat(speechEnabled: boolean) {
 
     if (editingField) {
       const field = editingField
-      window.setTimeout(() => {
+      replyTimeoutRef.current = window.setTimeout(() => {
+        replyTimeoutRef.current = null
         // transportMode is a fixed union ('flight'|'train'|...), not free
         // text — unlike dates/budget/accommodation it can't just take the
         // raw quick-reply label ("Zug"), that has to be mapped to the
@@ -315,7 +326,8 @@ export function useChat(speechEnabled: boolean) {
       return
     }
 
-    window.setTimeout(() => {
+    replyTimeoutRef.current = window.setTimeout(() => {
+      replyTimeoutRef.current = null
       const reply = getNextAdvisorStep(trip, content)
       setMessages((prev) => [...prev, makeMessage('assistant', reply.content)])
       setTrip(reply.trip)

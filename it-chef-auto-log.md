@@ -15048,3 +15048,70 @@ grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-01 (dritter Lauf)
+
+**Vorlauf:** `it-chef/auto` hatte bereits zwei unmergete Läufe von heute
+(Details oben). Branch neu von `origin/it-chef/auto` ausgecheckt und
+`origin/main` eingemergt (Fast-Forward, keine Konflikte) — `main` war seit
+dem letzten Merge um mehrere Freigabe-Chef-Merges weitergewandert, `main`
+selbst blieb dabei unberührt.
+
+**Ausgewählter Punkt:** Kein offener, klar abgegrenzter Punkt aus
+`ZEITPLAN.md`/`tasks-prd-travix-platform.md` erfüllte alle vier
+Sicherheitskriterien (die verbleibenden offenen Punkte — 8.9 Premium
+(OQ-03 Feature-/Preis-Entscheidung offen), 8.12 Rewards/Loyalty (OQ-04
+offen), 8.2-8.7 (KI-Vision/Deal-Finder, blockiert auf fehlende
+LLM-Zugangsdaten wie 4.1-4.3), 8.11 Hilfe (blockiert auf FAQ-Inhalte von
+Support-Chef), 6.6/6.7/7.12 (Kostenaufschlüsselung, blockiert auf
+fehlende Preisfelder im `TripDraft`-Datenmodell) — brauchen entweder eine
+Produktentscheidung oder hängen an einer externen Abhängigkeit). Stattdessen,
+wie an den Vortagen üblich, einen Explore-Agenten mit gezielter Bug-Suche
+in bisher an diesem Tag noch nicht angefassten Bereichen beauftragt.
+
+**Gefundener und behobener Bug:** `src/hooks/useChat.ts`, `sendMessage()`
+— drei `window.setTimeout(..., 700)`-Aufrufe (Flughafen-Rückfrage beim
+Flug-Edit, Bearbeiten-Rückfrage für andere Felder, Haupt-Chat-Ablauf)
+hielten ihre Timeout-ID nirgends und räumten sie beim Unmount nicht ab.
+Exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+`ChatInput.tsx` (Spracherkennung, erster Lauf heute) und `useConcierge.ts`
+(600ms-Antwort-Timeout, PR #26, noch nicht gemerged). Verlässt man
+`/ki-chat` innerhalb der 700ms-"Denk"-Verzögerung nach einer Nachricht
+(z. B. Klick auf eine andere Sidebar-Seite), feuert der Timeout trotzdem
+gegen die bereits unmountete Hook-Instanz und ruft `setMessages`/
+`setTrip`/`setStayOffers`/`setStayErrors` usw. unnötig auf einer
+verworfenen Instanz auf — plus ggf. einen nachträglich startenden,
+nicht mehr gebrauchten `runFlightSearch`/`searchStays`-Netzwerkaufruf.
+Geprüft, dass `useChat.ts` von keinem der beiden anderen heutigen Fixes
+erfasst ist (weder auf `main`, `it-chef/auto` noch in einem
+`it-chef-autofix/*`-Branch) — kein Duplikat. Erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug,
+keine offene Produkt-/Architekturentscheidung (rein mechanischer Fix
+1:1 nach dem bereits etablierten `useConcierge.ts`-Muster), klar isoliert
+auf drei Stellen in einer Funktion, objektiv prüfbar.
+
+**Fix:** Neuer `replyTimeoutRef` (`useRef<number | null>`) hält die
+jeweils aktive Timeout-ID; ein neuer `useEffect(() => () =>
+window.clearTimeout(...), [])` clearet sie beim Unmount — identisch zum
+`useConcierge.ts`-Fix von heute. Keine Verhaltensänderung am bestehenden
+700ms-Delay-Ablauf. Neuer Regressionstest in `useChat.test.ts`
+("clears the pending reply timeout on unmount so it cannot fire against
+a stale instance", Muster 1:1 aus `useConcierge.test.ts` übernommen) —
+vor dem Fix durch temporäres Zurücknehmen nur der Quelländerung (`git
+stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Test schlug
+fehl: `clearTimeout` wurde nicht aufgerufen).
+
+**Geprüft:** `npm install` (frisches Environment ohne `node_modules`,
+Install erfolgreich, keine Sicherheitslücken), `npm run build` (`tsc -b`
++ `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen in shadcn/ui-Dateien), volle Suite
+`npm test` (59 Testdateien, 386 Tests — 1 neu gegenüber vorher, alle
+grün).
+
+**Dokumentation aktualisiert:** `ZEITPLAN.md` (Phase-4-Eintrag im
+Ist-Stand-Abschnitt) und `tasks/tasks-prd-travix-platform.md` (Anmerkung
+an Task 4.10) um den Fund/Fix ergänzt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

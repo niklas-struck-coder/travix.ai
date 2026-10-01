@@ -620,6 +620,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `mockAdvisor.test.ts` (Ferry-/Car-Variante) — vor dem Fix durch
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `mockAdvisor.ts`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug in `useChat.ts` (4.10) behoben: `sendMessage()` hat an
+  drei Stellen (Flughafen-Rückfrage beim Flug-Edit, Bearbeiten-Rückfrage
+  für andere Felder, Haupt-Chat-Ablauf) einen 700ms-`window.setTimeout()`
+  gestartet, ohne die Timeout-ID zu halten oder beim Unmount zu clearen —
+  exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+  `ChatInput.tsx` (Spracherkennung) und `useConcierge.ts` (PR #26, noch
+  nicht gemerged). Verlässt man `/ki-chat` innerhalb der 700ms-Verzögerung
+  nach einer Nachricht (z. B. Klick auf eine andere Sidebar-Seite), feuert
+  der Timeout trotzdem gegen die bereits unmountete Hook-Instanz und ruft
+  `setMessages`/`setTrip`/`setStayOffers` usw. unnötig auf einer
+  verworfenen Instanz auf, inklusive eines danach ggf. unnötig startenden
+  Netzwerkaufrufs (`runFlightSearch`/`searchStays`). Fix: `replyTimeoutRef`
+  (`useRef<number | null>`) hält die jeweils aktive Timeout-ID, ein neuer
+  `useEffect`-Cleanup clearet sie beim Unmount — 1:1 dasselbe Muster wie
+  der `useConcierge.ts`-Fix. Neuer Regressionstest in `useChat.test.ts`
+  (unmounten mit ausstehendem Timeout, `clearTimeout` erwarten) — vor dem
+  Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `useChat.ts`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
