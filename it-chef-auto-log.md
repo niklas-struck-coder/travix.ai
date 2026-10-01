@@ -14987,3 +14987,64 @@ test` (59 Testdateien, 384 Tests — 2 neue gegenüber vorher, alle grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-10-01 (zweiter Lauf)
+
+**Ausgangslage:** `it-chef/auto` lag bereits einen Commit vor `main`
+(heutiger erster Lauf, Reiseentwuerfe-Dialogtexte), `main` unberührt.
+Frischer `npm ci`: 0 Schwachstellen. Vor jeder Änderung geprüft: Lint 0
+Fehler (nur die vier vorbestehenden Fast-Refresh-Warnungen), `tsc -b`
+fehlerfrei, volle Suite `npx vitest run` (59 Testdateien, 384 Tests,
+alle grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten ~15 Berichten dokumentiert an offene Backend-/
+Produktentscheidungen gebunden, kein neuer eigenständig umsetzbarer
+Punkt dort. Stattdessen zwei Explore-Agenten beauftragt, gezielt in den
+bisher am wenigsten durchleuchteten Dateien nach einem neuen,
+eigenständigen Bug zu suchen (u. a. `Kalender.tsx`/`calendarUtils.ts`,
+`Preisalarme.tsx`, `Warenkorb.tsx`/`cartTotals.ts`, `HotelWizard.tsx`/
+`FlightWizard.tsx`, `speech.ts`, `duffel/client.ts`, `AppShell.tsx`,
+`ChatInput.tsx`, `ChatMessage.tsx`, `TravixAvatar.tsx`, `Home.tsx`,
+`Hotelsuche.tsx`, `MeineReisen.tsx`, `Urlaubsmodus.tsx` u. a. — volle
+Liste in den Agent-Prompts). Erster Durchgang (19 Dateien) ergab keinen
+Fund. Zweiter Durchgang (verbleibende, bisher unberührte Dateien) fand
+einen echten Bug.
+
+**Gefundener und behobener Bug:** `ChatInput.tsx` stoppte eine laufende
+Spracherkennung nicht beim Unmount der Komponente — nur ein zweiter
+Klick auf den Mikrofon-Button (`handleMicClick`) rief
+`recognitionRef.current?.stop()` auf, es gab kein `useEffect`-Cleanup
+analog zum bereits etablierten Muster für Sprachausgabe in
+`KiChat.tsx:77` (`useEffect(() => stopSpeaking, [])`). Da `ChatInput`
+auf gerouteten Seiten (`/ki-chat`, `/urlaubsmodus`) eingebunden ist,
+blieb die Browser-`SpeechRecognition`-Instanz (inkl. aktivem
+Mikrofon-Hardware-Indikator) weiter aktiv, wenn Nutzer:innen nach dem
+Start der Aufnahme auf eine andere Seite navigierten — danach gab es
+keine Möglichkeit mehr, sie zu stoppen, und ihre `onresult`/`onend`-
+Callbacks konnten später gegen eine bereits abgebaute Komponente
+feuern. Erfüllt die Sicherheitskriterien: kein Auth-/Zahlungs-/
+Rechtsbezug, keine offene Produktentscheidung, rein mechanischer Fix
+nach bereits etabliertem Muster (Sprachausgabe-Pendant), objektiv
+prüfbar.
+
+**Fix:** `useEffect(() => () => recognitionRef.current?.stop(), [])`
+in `ChatInput.tsx` ergänzt (spiegelt `KiChat.tsx:77` für Spracherkennung
+statt Sprachausgabe) — keine Verhaltensänderung für den bestehenden
+Start/Stop-per-Klick-Ablauf. Neuer Regressionstest in
+`ChatInput.test.tsx` (Aufnahme starten, Komponente unmounten, `stop()`
+auf der laufenden Instanz erwarten) — vor dem Fix durch temporäres
+Zurücknehmen nur der Quelländerung (`git stash` nur `ChatInput.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: `stop()` 0 statt
+1 Aufrufe).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` + `npm run build` (kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung), volle Suite `npx
+vitest run` (59 Testdateien, 385 Tests — 1 neu gegenüber vorher, alle
+grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

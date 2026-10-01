@@ -1991,6 +1991,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   mehrdeutigen "Lissabon") — vor dem Fix durch temporäres Zurücknehmen
   der Quelländerung (`git stash` nur `Reiseentwuerfe.tsx`) reproduzierbar
   rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (zweiter Lauf) einen weiteren,
+  über zwei Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `ChatInput.tsx` stoppte eine laufende Spracherkennung nicht beim
+  Unmount der Komponente (z. B. Navigation weg von `/ki-chat` während
+  die Aufnahme läuft) — es gab kein `useEffect`-Cleanup analog zum
+  bereits etablierten Muster für Sprachausgabe in `KiChat.tsx:77`
+  (`useEffect(() => stopSpeaking, [])`). Fix: spiegelbildliches
+  `useEffect(() => () => recognitionRef.current?.stop(), [])` ergänzt,
+  keine Verhaltensänderung für den bestehenden Start/Stop-per-Klick-
+  Ablauf. Neuer Regressionstest in `ChatInput.test.tsx` — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
+  verifiziert.
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,
