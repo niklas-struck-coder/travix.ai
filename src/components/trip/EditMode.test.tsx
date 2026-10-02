@@ -133,4 +133,17 @@ describe('EditMode', () => {
     expect(screen.getByLabelText('Preis für Museum')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Museum entfernen' })).toBeInTheDocument()
   })
+
+  it('clears the unsaved "Neue Aktivität" draft when the dialog is closed without adding it', () => {
+    renderEditMode([])
+
+    fireEvent.change(screen.getByLabelText('Neue Aktivität'), { target: { value: 'Stadtführung' } })
+    fireEvent.change(screen.getByLabelText('Preis'), { target: { value: '25 €' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Fertig' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Aktivitäten bearbeiten' }))
+
+    expect(screen.getByLabelText('Neue Aktivität')).toHaveValue('')
+    expect(screen.getByLabelText('Preis')).toHaveValue('')
+  })
 })

@@ -15256,3 +15256,62 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-02 (weiterer Lauf)
+
+**Ausgangslage:** Erneuter geplanter Cloud-Lauf, frischer Checkout,
+`it-chef/auto` lag bereits beim ersten heutigen Lauf drei Commits vor
+`origin/main` (01.10., dritter/vierter Lauf) plus dem Fix vom ersten
+heutigen Lauf (Details-Dialog-Titel bei Reiseentwürfen) — vier Commits
+insgesamt, `main` weiterhin Vorfahr, kein Merge nötig, `main` unberührt
+gelassen. `npm ci` (frischer Checkout): 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` fehlerfrei, volle Suite `npx vitest
+run` (59 Testdateien, 388 Tests, alle grün) — Ausgangszustand bestätigt
+grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden. Der erste heutige Lauf hatte bereits einen Kandidaten für einen
+künftigen Lauf notiert (Explore-Agent-Fund, bewusst zurückgestellt, weil
+an dem Tag schon ein anderer Punkt gewählt war): stale Entwurfstext im
+"Neue Aktivität"-Formular von `EditMode.tsx` nach Schließen des Dialogs.
+Diesen Kandidaten zunächst unabhängig am Code verifiziert (nicht blind
+übernommen): `src/components/trip/EditMode.tsx` — der Haupt-`<Dialog>`
+(Zeile 58) hatte kein `onOpenChange`, anders als der direkt darunter
+stehende Lösch-Bestätigungsdialog (`onOpenChange={(open) => !open &&
+setPendingRemoval(null)}`); `name`/`price`-State wird nur in
+`addActivity()` zurückgesetzt, nicht beim Schließen über "Fertig",
+Escape oder Klick auf das Overlay. Bestätigt reproduzierbar. Erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug,
+keine offene Produkt-/Architekturentscheidung (reine State-Cleanup-Lücke,
+identisches Muster bereits für den Lösch-Dialog in derselben Datei
+etabliert), klar beschrieben und objektiv prüfbar.
+
+**Fix:** `src/components/trip/EditMode.tsx` — Haupt-`<Dialog>` bekam
+`onOpenChange={(open) => { if (!open) { setName(''); setPrice('') } }}`.
+Radix' `Dialog.Root` feuert `onOpenChange` bei jeder Zustandsänderung
+auch ohne kontrolliertes `open`-Prop, daher genügte diese Ergänzung ohne
+den Dialog komplett auf kontrollierten State umzustellen. Keine
+Verhaltensänderung beim Öffnen oder beim tatsächlichen Hinzufügen einer
+Aktivität. Neuer Regressionstest in `EditMode.test.tsx` (Text in beide
+Felder eintippen, Dialog über "Fertig" schließen, erneut öffnen, beide
+Felder leer erwarten) — vor dem Fix durch temporäres Zurücknehmen nur der
+Quelländerung (`git stash push -- src/components/trip/EditMode.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: Namensfeld zeigte
+weiterhin "Stadtführung" statt des erwarteten leeren Werts).
+
+`ZEITPLAN.md` (Eintrag bei Task 6.12) und
+`tasks/tasks-prd-travix-platform.md` (Anmerkung an Task 6.12) um den
+Fund/Fix ergänzt.
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` (kein Typfehler), volle Suite `npx
+vitest run` (59 Testdateien, 389 Tests — 1 neu gegenüber vorher, alle
+grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -1962,6 +1962,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Test schlug fehl). Neuer Regressionstest in `EditMode.test.tsx` (zwei
   gleichnamige plus eine eindeutig benannte Aktivität, alle vier Labels
   unterscheidbar).
+  Vom autonomen IT-Chef-Lauf am 02.10. (weiterer Lauf) einen von einem
+  vorherigen Lauf desselben Tages per Explore-Agent gefundenen, aber
+  zurückgestellten Kandidaten behoben: Der Haupt-Dialog hatte anders als
+  der Lösch-Bestätigungsdialog kein `onOpenChange` — Text im "Neue
+  Aktivität"-Namens-/Preisfeld blieb nach dem Schließen ohne Hinzufügen
+  (z. B. über "Fertig", Escape oder Klick auf das Overlay) stehen und war
+  beim nächsten Öffnen des Dialogs immer noch da, ein unfertiger Entwurf
+  wirkt dann wie eine bereits hinzugefügte Aktivität. Fix: `onOpenChange`
+  auf dem Haupt-Dialog setzt `name`/`price` zurück, sobald er schließt;
+  keine Verhaltensänderung beim Öffnen oder beim echten Hinzufügen. Vor
+  dem Fix reproduzierbar rot verifiziert (`git stash` nur der
+  Quelländerung, neuer Test schlug fehl: Feld zeigte weiterhin
+  "Stadtführung" statt leer). Neuer Regressionstest in
+  `EditMode.test.tsx`.
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
