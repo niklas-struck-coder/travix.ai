@@ -3713,3 +3713,77 @@ sind. Der heutige zweite IT-Chef-Lauf (`79335d7`, Spracherkennung stoppt
 beim Unmount in `ChatInput.tsx`) ist laut eigener Commit-Beschreibung ein
 reiner internen Bugfix ohne sichtbare Textänderung und wurde deshalb
 nicht gesondert geprüft.
+
+---
+
+## 2026-10-02 — Favoriten: „Reise mit KI planen“ verliert das gespeicherte Ziel (`Favoriten.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `Favoriten.tsx` zwar schon mehrfach als Vergleichsstelle
+für Bestätigungsdialoge/Leertexte herangezogen wurde (zuletzt 09-14/09-16),
+aber noch nie als eigener, vollständiger Seiten-Review — und weil die
+jüngsten IT-Chef-Läufe (01./02.10., `useChat.ts`/`useConcierge.ts`-Timeout-
+Cleanups, `EditMode.tsx`-Dialog-Reset, `formatEuro`-Dedup) alle reine
+interne Bugfixes ohne sichtbare Textänderung sind und laut eigener
+Commit-Beschreibung bzw. bisherigem Logmuster (vgl. 10-01-Eintrag) nicht
+gesondert geprüft werden müssen.
+
+### Reibungspunkt
+
+**„Reise mit KI planen“ auf jeder Favoriten-Karte ignoriert das Ziel
+dieser Karte komplett**
+
+`src/pages/Favoriten.tsx:112-117`: Jede gespeicherte Favoriten-Karte
+(z. B. „Kapstadt“, „Reykjavik“) hat einen eigenen Button „Reise mit KI
+planen“, der schlicht auf `<Link to="/ki-chat">` zeigt — ohne jeden
+Bezug zum `favorite.destination` dieser Karte. Geprüft, was `/ki-chat`
+(`src/components/chat/KiChat.tsx`, `src/hooks/useChat.ts:124-137`)
+beim Laden tatsächlich tut: `useChat()` ruft beim Mount ausschließlich
+`loadStoredChat()` auf und zeigt entweder den bereits laufenden, einzigen
+gespeicherten Reiseentwurf (ein anderes Ziel, falls man gerade woanders
+mitten in der Planung ist) oder — wenn noch kein Entwurf existiert — die
+generische Begrüßung `getGreeting()`, die nach dem Reiseziel fragt. Es
+gibt keinen Mechanismus (kein Query-Parameter, kein State), der das Ziel
+der angeklickten Karte überhaupt an den Chat übergibt — anders als die
+bereits etablierten `?edit=<feld>`-Links in `Buchung.tsx`/
+`ChecklistPanel.tsx`, die gezielt einen Chat-Schritt vorausgewählt öffnen
+(`KiChat.tsx:64`, `searchParams.get('edit')`). Für „Ziel“ existiert dort
+kein entsprechendes `editableFields`-Element.
+
+Live im Code nachvollzogen (zwei konkrete Fälle):
+1. Ohne bestehenden Entwurf: Klick auf „Reise mit KI planen“ bei
+   „Kapstadt“ landet im Chat bei der Standard-Begrüßung, die erneut
+   „Wohin soll die Reise gehen?“ fragt — die Nutzerin muss „Kapstadt“
+   erneut eintippen, obwohl sie es gerade durch einen gezielten Klick auf
+   genau diese Karte ausgewählt hat.
+2. Mit bestehendem Entwurf für ein anderes Ziel (z. B. läuft gerade eine
+   Lissabon-Planung): Der Klick auf die Kapstadt-Karte öffnet stattdessen
+   unverändert die laufende Lissabon-Konversation — für die Nutzerin ohne
+   jeden sichtbaren Hinweis, dass ihr Klick auf „Kapstadt“ wirkungslos war.
+
+Das wirkt besonders auf dieser Seite irreführend, weil jede Karte ihren
+eigenen, pro Favorit beschrifteten Button hat (anders als z. B. der
+generische „Reise mit KI planen“-Button auf `Home.tsx`, der nie ein
+konkretes Ziel verspricht) — der Button suggeriert eine Fortsetzung
+speziell für dieses Ziel, löst aber faktisch immer denselben
+zielunabhängigen Link aus.
+
+*Vorschlag:* Mindestens das Ziel als Vorbelegung an den Chat übergeben,
+z. B. über einen neuen Query-Parameter (`/ki-chat?destination=Kapstadt`),
+den `useChat`/`KiChat.tsx` nur dann nutzt, wenn noch kein eigener
+Reiseentwurf existiert (`!hasTripData(trip)`) — passt zum bereits
+etablierten Muster, dass `?edit=`-Parameter ebenfalls nur greifen, wenn
+die Vorbedingung stimmt. Existiert bereits ein anderer Entwurf, wäre
+zumindest ein klarer Hinweis/Rückfrage sinnvoll, bevor der Klick stillschweigend
+im alten Ziel landet, statt im neu angeklickten.
+
+### Nicht geprüft
+Die übrigen, bereits mehrfach dokumentierten Punkte zu `Favoriten.tsx`
+(Herz-Icon als Entfernen-Button, fehlende Persistenz über Reloads,
+09-14/09-16) wurden hier nicht erneut aufgeführt, da unverändert und
+bereits gemeldet. Ob derselbe generische „Reise mit KI planen“-Link ohne
+Zielbezug auch bei `Angebote.tsx`/`Preisalarme.tsx` vorliegt (strukturell
+ähnliche Karten mit Ziel/Angebot-Bezug), wurde nicht mitgeprüft und
+bleibt ein naheliegender Kandidat für einen künftigen Lauf.
