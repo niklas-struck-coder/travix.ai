@@ -51,12 +51,12 @@ describe('TrainCard', () => {
     expect(screen.queryByText('4h 0min')).not.toBeInTheDocument()
   })
 
-  it('shows a rounded-up minute instead of a placeholder dash for a sub-minute (seconds-only) duration', () => {
+  it('shows the honest placeholder dash instead of a fabricated minute for a sub-minute (seconds-only) duration', () => {
     const offer: TrainOffer = { ...baseOffer, duration: 'PT45S' }
     render(<TrainCard offer={offer} />)
 
-    expect(screen.getByText('1min')).toBeInTheDocument()
-    expect(screen.queryByText('—')).not.toBeInTheDocument()
+    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.queryByText('1min')).not.toBeInTheDocument()
   })
 
   it('formats a duration with only a days component (no explicit time part) instead of showing the raw ISO string', () => {
