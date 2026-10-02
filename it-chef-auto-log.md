@@ -15178,3 +15178,81 @@ an Task 8.1) um den Fund/Fix ergänzt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-10-02
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` lag
+gegenüber `origin/main` um die beiden Commits vom 01.10. (dritter/vierter
+Lauf, Timeout-Cleanups in `useChat.ts`/`useConcierge.ts`) voraus, noch
+ungemerged — darauf weitergearbeitet, `main` unberührt gelassen. Kein
+Merge nötig. `npm ci` (frischer Checkout): 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), `npx tsc -b` fehlerfrei,
+volle Suite `npx vitest run` (59 Testdateien, 387 Tests, alle grün) —
+Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden, kein neuer eigenständig umsetzbarer Punkt dort. Danach
+`reports/support-chef.md` auf offene, noch nicht umgesetzte Funde
+geprüft (dort wird unabhängig nach Reibungspunkten gesucht) — Vorschlag 2
+vom 01.10. war noch nicht behoben. Parallel dazu einen Explore-Agenten
+beauftragt, unabhängig in bisher seltener angefassten Dateien
+(`DealFinderChat`/`Premium`-Platzhalter, `Einstellungen.tsx`,
+`Profil.tsx`, `Angebote.tsx`, `Favoriten.tsx`, `Aktivitaeten.tsx`,
+`nav-config.ts`, `routes.tsx`, `EditMode.tsx`, `ChecklistPanel.tsx`,
+`TripSummaryCard.tsx`, `QuickReplies.tsx`, `FlightCard.tsx`,
+`TrainCard.tsx`, `HotelCard.tsx`, `NoResultsMessage.tsx`, `format.ts`,
+`checklistRules.ts`, `calculateProgress.ts`, `Buchung.tsx`) nach einem
+neuen, unabhängigen Bug zu suchen. Der Agent fand dort nichts mit
+ausreichender Sicherheit (ein mögliches Finding zu stale Draft-Text in
+`EditMode.tsx`s "Neue Aktivität"-Formular nach Dialog-Schließen wurde
+genannt, aber als nur ein Punkt pro Lauf gewählt bewusst
+zurückgestellt — kleiner als das unten gewählte, bereits von Support-Chef
+diagnostizierte Finding, bleibt Kandidat für einen künftigen Lauf).
+
+**Ausgewählter und behobener Punkt:** `reports/support-chef.md`
+(01.10.), Vorschlag 2 — `src/pages/Reiseentwuerfe.tsx:373`. Der "Details
+ansehen"-Dialog zeigte als Titel weiterhin
+`{detailsDraft?.destination}`, den rohen, nicht disambiguierten
+Zielnamen — obwohl der Lösch- und der Abschließen-Dialog auf derselben
+Seite seit dem 01.10.-Fix (erster Lauf) bereits die wiederverwendbare
+`getDraftLabel(draft, allDrafts)`-Hilfsfunktion nutzen. Reproduzierbar
+mit einem Klick auf "Duplizieren": beide resultierenden
+"Lissabon"-Karten werden (einmal abgeschlossen) im Details-Dialog mit
+exakt demselben, nicht unterscheidbaren Titel "Lissabon" angezeigt,
+obwohl der zugehörige Button per Screenreader bereits korrekt
+"Lissabon (Eintrag 2) Details ansehen" ankündigt — der Dialog selbst
+macht den Unterschied danach für alle Nutzer:innen (nicht nur
+Screenreader) wieder unsichtbar. Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung, bereits
+von Support-Chef bis auf die exakte Zeile diagnostiziert und als reine
+Wiederverwendung eines etablierten Musters beschrieben, objektiv
+prüfbar.
+
+**Fix:** `<DialogTitle>{detailsDraft?.destination}</DialogTitle>` zu
+`<DialogTitle>{detailsDraft && getDraftLabel(detailsDraft, drafts)}</DialogTitle>`
+geändert — dieselbe Hilfsfunktion, die Lösch- und Abschließen-Dialog
+bereits nutzen, keine Verhaltensänderung für nicht-duplizierte Entwürfe.
+Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (zwei duplizierte,
+beide abgeschlossene "Lissabon"-Entwürfe, Details-Dialog für "Eintrag 2"
+zeigt den disambiguierten Titel "Lissabon (Eintrag 2)" statt des
+mehrdeutigen "Lissabon") — vor dem Fix durch temporäres Zurücknehmen nur
+der Quelländerung (`git stash push -- src/pages/Reiseentwuerfe.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: `getByText`
+fand "Lissabon (Eintrag 2)" nicht, nur das mehrdeutige "Lissabon").
+
+`ZEITPLAN.md` (Eintrag bei Task 7.2) um den Fund/Fix ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, 0 Schwachstellen), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx vitest run` (59
+Testdateien, 388 Tests — 1 neu gegenüber vorher, alle grün), `npm run
+build` (kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

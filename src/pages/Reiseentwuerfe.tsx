@@ -370,7 +370,7 @@ export function Reiseentwuerfe() {
       <Dialog open={detailsDraft !== null} onOpenChange={(open) => !open && setDetailsDraft(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{detailsDraft?.destination}</DialogTitle>
+            <DialogTitle>{detailsDraft && getDraftLabel(detailsDraft, drafts)}</DialogTitle>
             <DialogDescription>Abgeschlossener Reiseentwurf — nur zum Ansehen.</DialogDescription>
           </DialogHeader>
           {detailsDraft && (

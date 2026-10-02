@@ -2168,6 +2168,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abschließen alle drei fehlenden Angaben statt sie wegzulassen) — vor
   dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
   nur `Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 02.10. Vorschlag 2 aus
+  `reports/support-chef.md` (01.10.) behoben: Der "Details ansehen"-Dialog
+  zeigte als Titel weiterhin den rohen `detailsDraft?.destination`, obwohl
+  der Lösch- und der Abschließen-Dialog seit dem 01.10.-Fix (siehe oben,
+  `getDraftLabel()`) bei duplizierten Entwürfen bereits disambiguieren.
+  Zwei duplizierte, beide abgeschlossene "Lissabon"-Entwürfe zeigten beim
+  Öffnen von "Details ansehen" für beide denselben Titel "Lissabon",
+  obwohl der zugehörige Button per Screenreader bereits korrekt
+  "Lissabon (Eintrag 2) Details ansehen" ankündigt — der Dialog selbst
+  machte den Unterschied danach wieder unsichtbar. Fix: dieselbe bereits
+  etablierte `getDraftLabel(detailsDraft, drafts)`-Hilfsfunktion jetzt
+  auch im `DialogTitle` des Details-Dialogs verwendet, analog den beiden
+  anderen Dialogen — keine neue Design-Entscheidung, nur die dritte von
+  drei Stellen nachgezogen. Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (zwei duplizierte, abgeschlossene
+  Lissabon-Entwürfe, Details-Dialog für "Eintrag 2" zeigt den
+  disambiguierten Titel) — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `Reiseentwuerfe.tsx`) reproduzierbar rot
+  verifiziert.
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
