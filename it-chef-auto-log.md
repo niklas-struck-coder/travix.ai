@@ -15386,3 +15386,77 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-02 (vierter Lauf)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war zu diesem Zeitpunkt bereits identisch mit
+`origin/main` (alle vorherigen Läufe des Tages inkl. des dritten Laufs
+waren vom Freigabe-Chef bereits nach `main` gemergt) — Branch frisch von
+`origin/main` neu aufgesetzt (Fast-Forward, kein Merge nötig, `main`
+unberührt). `npm ci` (frischer Checkout): 0 Schwachstellen.
+
+**Vorgehen:** Einen Explore-Agenten beauftragt, unabhängig in
+`ZEITPLAN.md` (Ist-Stand-Abschnitt), `tasks/tasks-prd-travix-platform.md`
+(offene Checkboxen), `it-chef-auto-log.md` sowie `reports/it-chef.md` nach
+einem neuen, noch offenen und sicheren Kandidaten zu suchen, ohne bereits
+erledigte Punkte zu wiederholen. Ergebnis: `reports/it-chef.md` (02.10.)
+bestätigt, dass von den ursprünglich ~21 alten, unabhängig diagnostizierten
+Auto-Fix-PR-Branches nur noch einer nicht überholt ist — Auto-Fix-PR #25
+(`it-chef-autofix/formatduration-fake-1min-2026-09-30`), der auf eine
+Review-/Merge-Entscheidung wartet. Der darin bereits vollständig
+diagnostizierte und implementierte Fix selbst (nicht der Merge des PRs)
+ist eine rein mechanische, bereits mehrfach erprobte Korrektur — exakt das
+Vorgehen, das z. B. beim 28.09.-Fund (vierter Lauf, PR #24) und beim
+01.10.-Fund (vierter Lauf, PR #26 eingeordnet) bereits etabliert ist:
+denselben, bereits diagnostizierten Fix frisch auf `it-chef/auto`
+reimplementieren statt auf eine Merge-Entscheidung des separaten PR-Branchs
+zu warten.
+
+**Befund:** `formatDuration()` (identisch dupliziert in
+`src/components/search/FlightCard.tsx:18-29` und
+`src/components/search/TrainCard.tsx:13-24`) rundete eine
+Sekunden-only-ISO-8601-Dauer (z. B. `"PT45S"` — in der Praxis nur bei
+kaputten/unvollständigen Rohdaten, nie bei einer echten Flug-/
+Zugverbindung) bisher künstlich auf `"1min"` hoch:
+```ts
+let totalMinutes = Number(minutes || 0)
+if (totalHours === 0 && totalMinutes === 0 && Number(seconds || 0) > 0) {
+  totalMinutes = 1
+}
+```
+Das widerspricht dem im übrigen Code (u. a. `formatLocation()` direkt
+daneben in denselben Dateien) durchgehend etablierten Grundsatz "ehrlich
+statt erfunden" bei fehlenden/unbrauchbaren Daten (Platzhalter-Strich `—`
+statt erfundener Werte) — bestätigt noch im aktuellen Code vorhanden, bevor
+der Fix angewendet wurde.
+
+**Ausgewählter Punkt:** Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Anzeige-Formatierung
+bereits abgerufener Angebotsdaten), keine offene Produkt-/Architektur-
+entscheidung (mechanische Entfernung eines Sonderfalls, folgt dem im
+selben Code bereits etablierten Muster), klar beschrieben, objektiv
+prüfbar (Tests/Build/Lint, klarer Rot-vor-Fix-Nachweis über die
+bestehenden Testfälle).
+
+**Fix:** Die Sekunden-Rundungs-Sonderbehandlung in beiden Dateien
+ersatzlos entfernt — eine reine Sekunden-Dauer liefert jetzt wie jede
+andere unbrauchbare Dauer den Platzhalter-Strich `—` statt `"1min"`.
+Bestehende Tests in `FlightCard.test.tsx`/`TrainCard.test.tsx` (jeweils
+ein Test für `"PT45S"`) entsprechend umgedreht: erwarten jetzt `—` statt
+`1min`.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx
+vitest run` (59 Testdateien, 392 Tests, alle grün — Testanzahl
+unverändert, nur die zwei Assertions umgedreht), `npm run build` (`tsc -b`
++ `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+Der ursprüngliche Auto-Fix-PR-Branch
+`it-chef-autofix/formatduration-fake-1min-2026-09-30` (PR #25) ist damit
+überholt und kann bei der nächsten PR-Hygiene-Aufräumung geschlossen
+werden.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

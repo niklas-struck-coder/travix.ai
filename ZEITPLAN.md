@@ -1049,6 +1049,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ohne "0min") — vor dem Fix durch temporäres Zurücknehmen beider
   Quelländerungen (`git stash` nur der beiden `.tsx`-Dateien)
   reproduzierbar rot verifiziert (beide Karten zeigten "4h 0min").
+  Vom autonomen IT-Chef-Lauf am 02.10. (vierter Lauf desselben Tages) den
+  letzten noch offenen, bereits über den separaten Auto-Fix-Kanal
+  vollständig diagnostizierten Fund (Auto-Fix-PR #25,
+  `it-chef-autofix/formatduration-fake-1min-2026-09-30`) direkt auf
+  `it-chef/auto` übernommen, statt länger auf eine Review-/Merge-
+  Entscheidung zu warten: `formatDuration()` (`TrainCard.tsx`/
+  `FlightCard.tsx`, dieselbe Funktion wie beim 26.09.-Fund oben) rundete
+  eine Sekunden-only-ISO-8601-Dauer (z. B. "PT45S" — in der Praxis nur bei
+  kaputten Rohdaten, nie bei einer echten Verbindung) künstlich auf
+  "1min" hoch, statt wie jede andere unbrauchbare Dauer den
+  Platzhalter-Strich "—" zu zeigen — widersprach damit dem im selben Code
+  (`formatLocation()` direkt daneben) etablierten Grundsatz "ehrlich statt
+  erfunden". Fix: die Sekunden-Rundungs-Sonderbehandlung ersatzlos
+  entfernt, mechanisch identisch in beiden Dateien. Bestehende Tests in
+  `FlightCard.test.tsx`/`TrainCard.test.tsx` (je ein Test für "PT45S")
+  entsprechend umgedreht (erwarten jetzt "—" statt "1min"). Der
+  ursprüngliche Auto-Fix-PR #25 bleibt als überholt zurück (kann bei
+  nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
