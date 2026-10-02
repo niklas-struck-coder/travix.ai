@@ -164,6 +164,32 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getByRole('button', { name: 'Kyoto löschen' })).toBeInTheDocument()
   })
 
+  it('disambiguates the delete confirmation text for duplicated drafts, like the aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 2) löschen' }))
+
+    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 2\) wird gelöscht/)).toBeInTheDocument()
+  })
+
+  it('disambiguates the finalize confirmation text for duplicated drafts, like the aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 1) abschließen' }))
+
+    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 1\) wird abgeschlossen/)).toBeInTheDocument()
+  })
+
   it('asks for confirmation before deleting a draft, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
@@ -230,6 +256,22 @@ describe('Reiseentwuerfe', () => {
     expect(dialog.getByText('Noch kein Transport ausgewählt')).toBeInTheDocument()
     expect(dialog.getByText('Noch kein Budget angegeben')).toBeInTheDocument()
     expect(dialog.getByText('Noch keine Unterkunft ausgewählt')).toBeInTheDocument()
+  })
+
+  it('disambiguates the details dialog title for duplicated, finalized drafts, like the aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 2) abschließen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, abschließen' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 2) Details ansehen' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('Lissabon (Eintrag 2)')).toBeInTheDocument()
   })
 
   it('deletes a draft once its removal is confirmed, and shows the empty state once none are left', () => {

@@ -620,6 +620,49 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `mockAdvisor.test.ts` (Ferry-/Car-Variante) — vor dem Fix durch
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `mockAdvisor.ts`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug in `useChat.ts` (4.10) behoben: `sendMessage()` hat an
+  drei Stellen (Flughafen-Rückfrage beim Flug-Edit, Bearbeiten-Rückfrage
+  für andere Felder, Haupt-Chat-Ablauf) einen 700ms-`window.setTimeout()`
+  gestartet, ohne die Timeout-ID zu halten oder beim Unmount zu clearen —
+  exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+  `ChatInput.tsx` (Spracherkennung) und `useConcierge.ts` (PR #26, noch
+  nicht gemerged). Verlässt man `/ki-chat` innerhalb der 700ms-Verzögerung
+  nach einer Nachricht (z. B. Klick auf eine andere Sidebar-Seite), feuert
+  der Timeout trotzdem gegen die bereits unmountete Hook-Instanz und ruft
+  `setMessages`/`setTrip`/`setStayOffers` usw. unnötig auf einer
+  verworfenen Instanz auf, inklusive eines danach ggf. unnötig startenden
+  Netzwerkaufrufs (`runFlightSearch`/`searchStays`). Fix: `replyTimeoutRef`
+  (`useRef<number | null>`) hält die jeweils aktive Timeout-ID, ein neuer
+  `useEffect`-Cleanup clearet sie beim Unmount — 1:1 dasselbe Muster wie
+  der `useConcierge.ts`-Fix. Neuer Regressionstest in `useChat.test.ts`
+  (unmounten mit ausstehendem Timeout, `clearTimeout` erwarten) — vor dem
+  Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `useChat.ts`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (vierter Lauf desselben Tages) den
+  bereits über den separaten Auto-Fix-Kanal vollständig diagnostizierten
+  und typsicher gemachten Fund (Auto-Fix-PR #26,
+  `it-chef-autofix/useconcierge-timeout-cleanup-2026-10-01`) direkt auf
+  `it-chef/auto` übernommen, statt auf Nis Review des PRs zu warten:
+  `useConcierge()` (`src/hooks/useConcierge.ts`, Concierge-Chat in
+  `Urlaubsmodus.tsx`) hielt den 600ms-`window.setTimeout()` in
+  `sendMessage()` bisher nirgends und räumte ihn beim Unmount nicht ab —
+  exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+  `ChatInput.tsx` (erster Lauf) und `useChat.ts` (dritter Lauf). Verlässt
+  man `/urlaubsmodus` innerhalb der 600ms-"Denk"-Verzögerung nach einer
+  Concierge-Frage, feuert der Timeout trotzdem gegen die bereits
+  unmountete Hook-Instanz. Fix: identisches `replyTimeoutRef`/
+  `useEffect`-Cleanup-Muster wie bei `useChat.ts`/`ChatInput.tsx`
+  übernommen (inkl. des auf der Auto-Fix-PR-Branch bereits behobenen
+  Typfehlers: `useRef<number | null>` statt über `ReturnType` inferiert,
+  da `window.setTimeout()` sonst mit `@types/node` kollidiert). Neuer
+  Regressionstest in `useConcierge.test.ts` (1:1 aus der Auto-Fix-PR-
+  Branch übernommen) — vor dem Fix durch temporäres Zurücknehmen nur der
+  Quelländerung (`git stash` nur `useConcierge.ts`) reproduzierbar rot
+  verifiziert (Test schlug fehl: `clearTimeout` wurde nicht aufgerufen).
+  Der ursprüngliche Auto-Fix-PR #26 bleibt als überholt zurück (kann bei
+  nächster PR-Hygiene-Aufräumung geschlossen werden).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -1919,6 +1962,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Test schlug fehl). Neuer Regressionstest in `EditMode.test.tsx` (zwei
   gleichnamige plus eine eindeutig benannte Aktivität, alle vier Labels
   unterscheidbar).
+  Vom autonomen IT-Chef-Lauf am 02.10. (weiterer Lauf) einen von einem
+  vorherigen Lauf desselben Tages per Explore-Agent gefundenen, aber
+  zurückgestellten Kandidaten behoben: Der Haupt-Dialog hatte anders als
+  der Lösch-Bestätigungsdialog kein `onOpenChange` — Text im "Neue
+  Aktivität"-Namens-/Preisfeld blieb nach dem Schließen ohne Hinzufügen
+  (z. B. über "Fertig", Escape oder Klick auf das Overlay) stehen und war
+  beim nächsten Öffnen des Dialogs immer noch da, ein unfertiger Entwurf
+  wirkt dann wie eine bereits hinzugefügte Aktivität. Fix: `onOpenChange`
+  auf dem Haupt-Dialog setzt `name`/`price` zurück, sobald er schließt;
+  keine Verhaltensänderung beim Öffnen oder beim echten Hinzufügen. Vor
+  dem Fix reproduzierbar rot verifiziert (`git stash` nur der
+  Quelländerung, neuer Test schlug fehl: Feld zeigte weiterhin
+  "Stadtführung" statt leer). Neuer Regressionstest in
+  `EditMode.test.tsx`.
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
@@ -1970,6 +2027,39 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `text-navy` umgestellt, da identischer Fehler und identischer Fix.
   Regressionstest in `Reiseentwuerfe.test.tsx` entsprechend angepasst
   (prüft jetzt `text-navy` statt `text-teal`).
+  Vom autonomen IT-Chef-Lauf am 01.10. einen über einen Explore-Agenten
+  gefundenen, eigenständigen Bug behoben: Die Lösch-/Abschließen-
+  Bestätigungsdialoge in `Reiseentwuerfe.tsx` zeigten bisher immer den
+  rohen `destination`-Namen ("Der Entwurf für Lissabon wird gelöscht."),
+  obwohl die aria-labels derselben Buttons seit dem 17.09./20.09.-Fix bei
+  duplizierten Entwürfen bereits disambiguiert sind ("Lissabon (Eintrag
+  2) löschen"). Nach einem Klick auf "Duplizieren" zeigten beide
+  resultierenden Lissabon-Karten im sichtbaren Dialogtext exakt denselben
+  Satz — für alle Nutzer:innen (nicht nur Screenreader) nicht mehr
+  erkennbar, welcher der beiden Entwürfe tatsächlich betroffen ist (die
+  zugrunde liegende Aktion selbst arbeitete weiterhin korrekt über die
+  jeweilige `id`). Fix: Die bereits bestehende Disambiguierungslogik
+  (`hasDuplicates`/`occurrence`) in eine wiederverwendbare
+  `getDraftLabel()`-Hilfsfunktion ausgelagert, von der Kartenliste UND
+  beiden Dialogtexten genutzt — mechanische Wiederverwendung des bereits
+  etablierten Musters, keine neue Design-Entscheidung. Zwei neue
+  Regressionstests in `Reiseentwuerfe.test.tsx` (Lösch- bzw.
+  Abschließen-Dialogtext zeigt "Lissabon (Eintrag N)" statt des
+  mehrdeutigen "Lissabon") — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `Reiseentwuerfe.tsx`) reproduzierbar
+  rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 01.10. (zweiter Lauf) einen weiteren,
+  über zwei Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `ChatInput.tsx` stoppte eine laufende Spracherkennung nicht beim
+  Unmount der Komponente (z. B. Navigation weg von `/ki-chat` während
+  die Aufnahme läuft) — es gab kein `useEffect`-Cleanup analog zum
+  bereits etablierten Muster für Sprachausgabe in `KiChat.tsx:77`
+  (`useEffect(() => stopSpeaking, [])`). Fix: spiegelbildliches
+  `useEffect(() => () => recognitionRef.current?.stop(), [])` ergänzt,
+  keine Verhaltensänderung für den bestehenden Start/Stop-per-Klick-
+  Ablauf. Neuer Regressionstest in `ChatInput.test.tsx` — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
+  verifiziert.
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,
@@ -2092,6 +2182,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Abschließen alle drei fehlenden Angaben statt sie wegzulassen) — vor
   dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
   nur `Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 02.10. Vorschlag 2 aus
+  `reports/support-chef.md` (01.10.) behoben: Der "Details ansehen"-Dialog
+  zeigte als Titel weiterhin den rohen `detailsDraft?.destination`, obwohl
+  der Lösch- und der Abschließen-Dialog seit dem 01.10.-Fix (siehe oben,
+  `getDraftLabel()`) bei duplizierten Entwürfen bereits disambiguieren.
+  Zwei duplizierte, beide abgeschlossene "Lissabon"-Entwürfe zeigten beim
+  Öffnen von "Details ansehen" für beide denselben Titel "Lissabon",
+  obwohl der zugehörige Button per Screenreader bereits korrekt
+  "Lissabon (Eintrag 2) Details ansehen" ankündigt — der Dialog selbst
+  machte den Unterschied danach wieder unsichtbar. Fix: dieselbe bereits
+  etablierte `getDraftLabel(detailsDraft, drafts)`-Hilfsfunktion jetzt
+  auch im `DialogTitle` des Details-Dialogs verwendet, analog den beiden
+  anderen Dialogen — keine neue Design-Entscheidung, nur die dritte von
+  drei Stellen nachgezogen. Neuer Regressionstest in
+  `Reiseentwuerfe.test.tsx` (zwei duplizierte, abgeschlossene
+  Lissabon-Entwürfe, Details-Dialog für "Eintrag 2" zeigt den
+  disambiguierten Titel) — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `Reiseentwuerfe.tsx`) reproduzierbar rot
+  verifiziert.
 - [x] 7.6 `Warenkorb.tsx` (`/warenkorb`) — vom autonomen IT-Chef-Lauf am
   17.08. gebaut: Positionen nach Typ gruppiert (Flüge, Unterkünfte,
   Transport, Aktivitäten, Versicherung — Typen laut FR-1002), pro Gruppe
@@ -2216,6 +2325,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `border`-Utilities nutzt (vom Support-Chef am 23.08. gemeldet) — durch
   ein sichtbares "Empfohlen"-Badge ersetzt, analog dem bestehenden
   Badge-Muster in `Preisalarme.tsx`/`Buchung.tsx`.
+- Vom autonomen IT-Chef-Lauf am 02.10. (dritter Lauf) aufgeräumt (betrifft
+  7.6, 7.7, 7.10): `Warenkorb.tsx`, `Preisalarme.tsx` und `Dashboard.tsx`
+  definierten alle drei byte-identisch eine lokale `formatEuro()`-Funktion.
+  Jetzt eine einzige exportierte `formatEuro()` in `src/lib/format.ts`
+  (neben `formatOfferPrice()`), von allen drei Seiten importiert. Reine
+  Wiederverwendung, keine Verhaltensänderung, drei neue Unit-Tests in
+  `format.test.ts`. `formatPrice()` in `Aktivitaeten.tsx`/`Angebote.tsx`
+  bewusst unverändert gelassen (andere Signatur/Logik, kein echtes Duplikat).
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse

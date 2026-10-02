@@ -14754,3 +14754,635 @@ unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-09-30 (vierter Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` war
+gegenüber `origin/main` zurück (mehrere Dateien wie
+`support-chef-auto-log.md`, `marketing-chef-auto-log.md`,
+`freigabe-chef-log.md`, `marketing/freigabe-uebersicht.md`, `status.md`
+sowie die Berichte anderer Chef-Rollen waren auf `main` neuer, vermutlich
+weil Freigabe-Chef die vorherigen drei Läufe von heute bereits nach `main`
+gemerged und dort weiter aktualisiert hat) — `main` per Fast-Forward-Merge
+in `it-chef/auto` übernommen, keine eigenen Codeänderungen betroffen.
+
+**Ausgewählter Punkt:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+ein weiteres Mal durchgesehen — Befund unverändert zu den drei
+vorherigen Läufen von heute: alle verbliebenen offenen Punkte hängen an
+Base44/Gemini-Zugangsdaten (2.0/4.1-4.3), Architektur-/Datenmodell-Lücken
+(5.7, 6.2, 6.6/6.7, 7.4, 7.12), offenen Produktentscheidungen (8.5-8.7,
+8.9/8.12) oder fehlenden Inhalten (8.11). `reports/it-chef.md`,
+`reports/support-chef.md` und `reports/marketing-chef.md` (beide
+2026-09-30) erneut geprüft: der einzige heute neu gemeldete Bugfund
+(`formatDuration()` zeigt bei reiner Sekundenangabe erfunden "1min" statt
+"—", `FlightCard.tsx`/`TrainCard.tsx`) ist bereits vollständig als PR #25
+auf dem separaten Auto-Fix-Kanal
+(`it-chef-autofix/formatduration-fake-1min-2026-09-30`) umgesetzt und
+wartet dort auf Review — kein Grund, ihn zusätzlich auf `it-chef/auto` zu
+duplizieren. Der einzige weiterhin offene Fund (`mockAdvisor.ts:171-182`,
+Flug-Ankündigung im Hauptchat-Ablauf löst keine echte Suche aus) bleibt
+architekturell/produktseitig eingestuft.
+
+Zusätzlich eigene gezielte Prüfung dreier bisher nicht explizit als
+"vollständig gelesen" dokumentierter Dateien: `AppShell.tsx` (reines
+Layout, keine Logik), `PageTransition.tsx` (Framer-Motion-Wrapper mit
+`useReducedMotion`-Fallback, sauber), `useConcierge.ts` (Sende-/
+Antwort-Logik des Urlaubsmodus-Chats, bereits über `useConcierge.test.ts`
+abgedeckt). Außerdem eine gezielte Grep-Suche über den gesamten
+`src`-Baum nach Mustern, die in der Vergangenheit bereits echte Bugs
+verursacht haben (`toISOString()`, `Number(...)`/`parseInt`/`parseFloat`
+ohne `NaN`-Guard): `toISOString()` kommt nur noch in einem Testkommentar
+vor (Codeverwendung bereits am 28.09. entfernt), alle `Number(...)`-Aufrufe
+in `FlightWizard.tsx`/`HotelWizard.tsx`/`format.ts`/`FlightCard.tsx`/
+`TrainCard.tsx` sind bereits gegen `NaN` abgesichert. Zusätzlich erneut
+die vollständige Liste aller Quelldateien gegen alle Testdateien
+abgeglichen — keine Komponente/kein Hook ohne Testdatei, außer reinen
+Typ-/Konstanten-Dateien ohne Laufzeitlogik (`types/*.ts`,
+`design-tokens.ts`, `routes.tsx`, `App.tsx`).
+
+**Ergebnis:** Kein neuer Bug gefunden, der alle vier Sicherheitskriterien
+erfüllt. Vier aufeinanderfolgende Läufe an einem Tag ohne neuen,
+unabhängigen Fund bestätigen den Befund des dritten Laufs: der über Monate
+autonom erreichbare Teil der Codebasis ist derzeit weitgehend ausgeschöpft.
+Kein Code-Commit für einen neuen Punkt, nur dieser Log-Eintrag.
+
+**Geprüft (Status quo, keine Codeänderung, daher kein Regressionsrisiko):**
+`npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 382
+Tests, alle grün), `npm run build` (kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-09-30 (fünfter Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` war
+gegenüber `origin/main` unverändert um genau den Log-Commit des vierten
+Laufs voraus, `origin/main` selbst seit dem vierten Lauf nicht
+weitergewandert (letzter Commit dort: Support-Chef-Bericht zu PR #25).
+Kein Merge nötig.
+
+**Ausgewählter Punkt:** Erneute, unabhängige gezielte Suche statt bloßem
+Vertrauen auf die vier vorherigen Läufe von heute. `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` durchgesehen — Befund unverändert:
+alle verbliebenen offenen Punkte hängen an Base44/Gemini-Zugangsdaten
+(2.0/4.1-4.3), Architektur-/Datenmodell-Lücken (5.7, 6.2, 6.6/6.7, 7.4,
+7.12), offenen Produktentscheidungen (8.5-8.7, 8.9) oder fehlenden
+Inhalten (8.11). `reports/it-chef.md`, `reports/support-chef.md` und
+`reports/marketing-chef.md` (alle 2026-09-30) erneut geprüft: keine neuen
+Funde gegenüber dem, was der vierte Lauf bereits gesehen hat. Der einzige
+heute gemeldete Bugfund (`formatDuration()` erfundenes "1min" statt "—"
+bei reiner Sekundenangabe) bleibt vollständig auf dem separaten
+Auto-Fix-Kanal (PR #25, `it-chef-autofix/formatduration-fake-1min-2026-09-30`)
+umgesetzt und wartet dort auf Review — weiterhin kein Grund, ihn
+zusätzlich auf `it-chef/auto` zu duplizieren (bestätigt: der Live-Code auf
+diesem Branch zeigt in `FlightCard.tsx`/`TrainCard.tsx` noch das alte
+Verhalten, PR #25 also tatsächlich noch nicht gemerged). Der einzige
+weiterhin offene Fund (`mockAdvisor.ts:171-182`, Flug-Ankündigung im
+Hauptchat-Ablauf löst keine echte Suche aus) bleibt architekturell/
+produktseitig eingestuft, keine neue Einschätzung.
+
+Eigene gezielte Code-Prüfung (nicht bloß Berichte gelesen), um einen
+wirklich neuen, unabhängigen Fund zu suchen: Grep über den gesamten
+`src`-Baum nach `.toFixed(`/`parseInt(`/`parseFloat(`/`Number(` ohne
+`NaN`-Schutz (alle Treffer bereits abgesichert, u. a. `HotelCard.tsx`s
+`offer.rating.toFixed(1)` hinter einem expliziten `!== null`-Check),
+nach ungeschütztem Array-Zugriff (`[0]`, `.find(`) — alle Fundstellen
+(`FlightCard.tsx`, `useChat.ts` `selectFlight`, `mockConcierge.ts`,
+`Reiseentwuerfe.tsx`) nutzen bereits Optional Chaining bzw. Fallback-Werte,
+kein ungeschützter Zugriff gefunden. Zusätzlich alle `<img>`-Tags im
+`src`-Baum auf fehlendes `alt` geprüft (keiner ohne), sowie eine erneute
+TODO/FIXME/XXX-Suche (kein Treffer außerhalb eines Testkommentars).
+
+**Ergebnis:** Kein neuer Bug gefunden, der alle vier Sicherheitskriterien
+erfüllt. Fünf aufeinanderfolgende Läufe an einem Tag ohne neuen,
+unabhängigen Fund bestätigen erneut: der über Monate autonom erreichbare
+Teil der Codebasis ist derzeit ausgeschöpft — die verbleibenden offenen
+Punkte brauchen echte Entscheidungen oder Zugangsdaten von Ni. Kein
+Code-Commit für einen neuen Punkt, nur dieser Log-Eintrag.
+
+**Geprüft (Status quo, keine Codeänderung, daher kein Regressionsrisiko):**
+`npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`), volle Suite `npx vitest run` (59 Testdateien, 382
+Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-09-30 (sechster Lauf desselben Tages)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` war
+gegenüber `origin/main` genau um die fünf heutigen Log-Commits voraus,
+`origin/main` selbst seit dem fünften Lauf nicht weitergewandert. Kein
+Merge nötig.
+
+**Ausgewählter Punkt:** Erneute, unabhängige Suche nach einem neuen
+Bugfund — `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` durchgesehen
+(Befund unverändert zu den fünf vorherigen Läufen: alle verbliebenen
+offenen Punkte hängen an Base44/Gemini-Zugangsdaten, Architektur-/
+Datenmodell-Lücken oder offenen Produktentscheidungen), `reports/*.md`
+auf neue Funde geprüft (keine neuen gegenüber dem, was der fünfte Lauf
+bereits gesehen hat). Eigene gezielte Prüfung bisher nicht in diesem Licht
+untersuchter Bereiche (Preisformatierung in `Angebote.tsx`/`Warenkorb.tsx`/
+`Preisalarme.tsx`/`Dashboard.tsx`/`Aktivitaeten.tsx`, `cartTotals.ts`,
+Preisalarm-Schwellenwert-Vergleich, mögliche Race Conditions in
+`useChat.ts`s Flug-/Unterkunftssuche, `tripStorage.ts` erneut) ergab
+keinen neuen Code-Bug — alle Stellen bereits defensiv/korrekt. Punkt 8.13
+(Unit-Tests für `calculateProgress`/`calculateCosts`/`checklistRules`/
+Schema-Validierung) erneut geprüft, aber laut diesem Log bereits über
+mehrere frühere Läufe hinweg exakt in diesem Teilzustand
+(`calculateProgress.test.ts`/`checklistRules.test.ts` existieren bereits,
+die beiden anderen Teile bleiben an 4.1/6.7 blockiert) dokumentiert — kein
+neuer Fund, keine Dopplung vorgenommen.
+
+Stattdessen `npm audit` laufen lassen (gleiches etabliertes Vorgehen wie
+in früheren Läufen, siehe die `fast-uri`/`nanoid`/`qs`-Einträge weiter
+oben in diesem Log): 4 Schwachstellen in transitiven Dev-Abhängigkeiten
+(2 hoch: `undici` über `jsdom`/`shadcn`-CLI sowie `brace-expansion` über
+`@ts-morph`/`@typescript-eslint`; 2 mittel: `ip-address` über die
+`shadcn`-CLI, `fast-uri`). Alle vier ausschließlich in Dev-/Tooling-
+Abhängigkeiten (Testlaufzeit `jsdom`, CLI-Tool `shadcn`, Lint-Tooling),
+keine davon im produktiven Bundle (`dist/`) — kein Nutzerdaten-/Auth-/
+Zahlungsbezug, keine offene Entscheidung nötig. Behoben über `npm audit
+fix` (ohne `--force`, ausschließlich Patch-Versionssprünge: `undici`
+7.29.0→7.30.0 und 8.10.0→8.11.2, `ip-address` 10.4.0→10.7.2, `fast-uri`
+3.1.7→3.1.8, `brace-expansion` 1.1.18→1.1.21/5.0.9→5.0.12). Nur
+`package-lock.json` geändert, kein Quellcode betroffen.
+
+**Ergebnis:** Kein neuer Code-Bug gefunden (sechster Lauf in Folge ohne
+unabhängigen neuen Fund), aber eine echte, objektiv geschlossene
+Sicherheitslücke in den Dev-Abhängigkeiten behoben.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npm audit` vorher: 4
+Schwachstellen (2 hoch, 2 mittel); nachher: 0 Schwachstellen. `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen in `src/components/ui/`), volle
+Suite `npx vitest run` (59 Testdateien, 382 Tests, alle grün), `npm run
+build` (kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-01
+
+**Ausgangslage:** `it-chef/auto` lag seit dem letzten Lauf (30.09.,
+sechster Lauf) 3 Commits vor `main`, noch ungemerged — darauf
+weitergearbeitet, `main` unberührt gelassen. `npm ci` erstmals in dieser
+Session nötig (frischer Checkout), lief diesmal ohne Netzwerkprobleme
+durch; `npm audit` direkt danach: 0 Schwachstellen (bestätigt den
+sechsten Lauf vom 30.09.). Lint/Build/Tests vor jeder Änderung geprüft:
+alle grün (0 Lint-Fehler, nur die vier vorbestehenden Fast-Refresh-
+Warnungen; `tsc -b` + `vite build` fehlerfrei; 59 Testdateien, 382 Tests
+grün).
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte (4.1-4.3,
+6.2, 6.6/6.7, 7.4, 7.12, 8.2-8.7, 8.9/8.11/8.12, 8.13) bleiben wie in
+den letzten ~15 Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden — kein neuer, eigenständig umsetzbarer Punkt dort. Stattdessen
+wie in den meisten vorherigen Läufen gezielt nach einem neuen,
+eigenständigen Bug gesucht: ein Explore-Agent beauftragt, bewusst
+außerhalb der am häufigsten schon durchleuchteten Dateien
+(`mockAdvisor.ts`, `tripStorage.ts`, `useChat.ts`, `FlightCard.tsx`,
+`TrainCard.tsx`, `EditMode.tsx`, `KiChat.tsx` u. a.) zu suchen.
+
+**Gefundener und behobener Bug:** `Reiseentwuerfe.tsx` — die Lösch- und
+Abschließen-Bestätigungsdialoge zeigten bei duplizierten Entwürfen
+weiterhin den mehrdeutigen rohen `destination`-Namen ("Der Entwurf für
+Lissabon wird gelöscht."), obwohl dieselben Buttons seit dem
+17.09./20.09.-Fix in ihren aria-labels bereits disambiguiert sind
+("Lissabon (Eintrag 2) löschen"). Reproduzierbar mit einem einzigen Klick
+auf "Duplizieren": beide resultierenden Lissabon-Karten zeigen danach im
+*sichtbaren* Dialogtext exakt denselben Satz — für alle Nutzer:innen
+(nicht nur Screenreader) nicht erkennbar, welcher der beiden Entwürfe
+tatsächlich betroffen ist (die zugrunde liegende Aktion selbst arbeitete
+weiterhin korrekt über die jeweilige `id`, kein Datenverlust-Risiko,
+aber ein echter Vertrauens-/Verwechslungs-Bug). Fund erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Rechtsbezug, keine offene
+Produktentscheidung, rein mechanischer Fix nach bereits etabliertem
+Muster, objektiv prüfbar.
+
+**Fix:** Die bereits bestehende Disambiguierungslogik
+(`hasDuplicates`/`occurrence`) aus der Kartenliste in eine
+wiederverwendbare `getDraftLabel(draft, allDrafts)`-Hilfsfunktion
+ausgelagert, die jetzt sowohl die Kartenliste (aria-labels) als auch
+beide Dialogtexte (`pendingRemoval`/`pendingFinalize`) nutzt — keine
+Verhaltensänderung für nicht-duplizierte Entwürfe, keine neue
+Design-Entscheidung. Zwei neue Regressionstests in
+`Reiseentwuerfe.test.tsx` (Lösch- bzw. Abschließen-Dialogtext zeigt
+"Lissabon (Eintrag N)" statt des mehrdeutigen "Lissabon") — vor dem Fix
+durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert (beide neuen Tests
+schlugen fehl, da `getByText` den disambiguierten Text nicht fand).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` + `npm run build` (kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung), volle Suite `npm
+test` (59 Testdateien, 384 Tests — 2 neue gegenüber vorher, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-10-01 (zweiter Lauf)
+
+**Ausgangslage:** `it-chef/auto` lag bereits einen Commit vor `main`
+(heutiger erster Lauf, Reiseentwuerfe-Dialogtexte), `main` unberührt.
+Frischer `npm ci`: 0 Schwachstellen. Vor jeder Änderung geprüft: Lint 0
+Fehler (nur die vier vorbestehenden Fast-Refresh-Warnungen), `tsc -b`
+fehlerfrei, volle Suite `npx vitest run` (59 Testdateien, 384 Tests,
+alle grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten ~15 Berichten dokumentiert an offene Backend-/
+Produktentscheidungen gebunden, kein neuer eigenständig umsetzbarer
+Punkt dort. Stattdessen zwei Explore-Agenten beauftragt, gezielt in den
+bisher am wenigsten durchleuchteten Dateien nach einem neuen,
+eigenständigen Bug zu suchen (u. a. `Kalender.tsx`/`calendarUtils.ts`,
+`Preisalarme.tsx`, `Warenkorb.tsx`/`cartTotals.ts`, `HotelWizard.tsx`/
+`FlightWizard.tsx`, `speech.ts`, `duffel/client.ts`, `AppShell.tsx`,
+`ChatInput.tsx`, `ChatMessage.tsx`, `TravixAvatar.tsx`, `Home.tsx`,
+`Hotelsuche.tsx`, `MeineReisen.tsx`, `Urlaubsmodus.tsx` u. a. — volle
+Liste in den Agent-Prompts). Erster Durchgang (19 Dateien) ergab keinen
+Fund. Zweiter Durchgang (verbleibende, bisher unberührte Dateien) fand
+einen echten Bug.
+
+**Gefundener und behobener Bug:** `ChatInput.tsx` stoppte eine laufende
+Spracherkennung nicht beim Unmount der Komponente — nur ein zweiter
+Klick auf den Mikrofon-Button (`handleMicClick`) rief
+`recognitionRef.current?.stop()` auf, es gab kein `useEffect`-Cleanup
+analog zum bereits etablierten Muster für Sprachausgabe in
+`KiChat.tsx:77` (`useEffect(() => stopSpeaking, [])`). Da `ChatInput`
+auf gerouteten Seiten (`/ki-chat`, `/urlaubsmodus`) eingebunden ist,
+blieb die Browser-`SpeechRecognition`-Instanz (inkl. aktivem
+Mikrofon-Hardware-Indikator) weiter aktiv, wenn Nutzer:innen nach dem
+Start der Aufnahme auf eine andere Seite navigierten — danach gab es
+keine Möglichkeit mehr, sie zu stoppen, und ihre `onresult`/`onend`-
+Callbacks konnten später gegen eine bereits abgebaute Komponente
+feuern. Erfüllt die Sicherheitskriterien: kein Auth-/Zahlungs-/
+Rechtsbezug, keine offene Produktentscheidung, rein mechanischer Fix
+nach bereits etabliertem Muster (Sprachausgabe-Pendant), objektiv
+prüfbar.
+
+**Fix:** `useEffect(() => () => recognitionRef.current?.stop(), [])`
+in `ChatInput.tsx` ergänzt (spiegelt `KiChat.tsx:77` für Spracherkennung
+statt Sprachausgabe) — keine Verhaltensänderung für den bestehenden
+Start/Stop-per-Klick-Ablauf. Neuer Regressionstest in
+`ChatInput.test.tsx` (Aufnahme starten, Komponente unmounten, `stop()`
+auf der laufenden Instanz erwarten) — vor dem Fix durch temporäres
+Zurücknehmen nur der Quelländerung (`git stash` nur `ChatInput.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: `stop()` 0 statt
+1 Aufrufe).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` + `npm run build` (kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung), volle Suite `npx
+vitest run` (59 Testdateien, 385 Tests — 1 neu gegenüber vorher, alle
+grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-01 (dritter Lauf)
+
+**Vorlauf:** `it-chef/auto` hatte bereits zwei unmergete Läufe von heute
+(Details oben). Branch neu von `origin/it-chef/auto` ausgecheckt und
+`origin/main` eingemergt (Fast-Forward, keine Konflikte) — `main` war seit
+dem letzten Merge um mehrere Freigabe-Chef-Merges weitergewandert, `main`
+selbst blieb dabei unberührt.
+
+**Ausgewählter Punkt:** Kein offener, klar abgegrenzter Punkt aus
+`ZEITPLAN.md`/`tasks-prd-travix-platform.md` erfüllte alle vier
+Sicherheitskriterien (die verbleibenden offenen Punkte — 8.9 Premium
+(OQ-03 Feature-/Preis-Entscheidung offen), 8.12 Rewards/Loyalty (OQ-04
+offen), 8.2-8.7 (KI-Vision/Deal-Finder, blockiert auf fehlende
+LLM-Zugangsdaten wie 4.1-4.3), 8.11 Hilfe (blockiert auf FAQ-Inhalte von
+Support-Chef), 6.6/6.7/7.12 (Kostenaufschlüsselung, blockiert auf
+fehlende Preisfelder im `TripDraft`-Datenmodell) — brauchen entweder eine
+Produktentscheidung oder hängen an einer externen Abhängigkeit). Stattdessen,
+wie an den Vortagen üblich, einen Explore-Agenten mit gezielter Bug-Suche
+in bisher an diesem Tag noch nicht angefassten Bereichen beauftragt.
+
+**Gefundener und behobener Bug:** `src/hooks/useChat.ts`, `sendMessage()`
+— drei `window.setTimeout(..., 700)`-Aufrufe (Flughafen-Rückfrage beim
+Flug-Edit, Bearbeiten-Rückfrage für andere Felder, Haupt-Chat-Ablauf)
+hielten ihre Timeout-ID nirgends und räumten sie beim Unmount nicht ab.
+Exakt dasselbe, am selben Tag bereits zweimal gefixte Muster wie in
+`ChatInput.tsx` (Spracherkennung, erster Lauf heute) und `useConcierge.ts`
+(600ms-Antwort-Timeout, PR #26, noch nicht gemerged). Verlässt man
+`/ki-chat` innerhalb der 700ms-"Denk"-Verzögerung nach einer Nachricht
+(z. B. Klick auf eine andere Sidebar-Seite), feuert der Timeout trotzdem
+gegen die bereits unmountete Hook-Instanz und ruft `setMessages`/
+`setTrip`/`setStayOffers`/`setStayErrors` usw. unnötig auf einer
+verworfenen Instanz auf — plus ggf. einen nachträglich startenden,
+nicht mehr gebrauchten `runFlightSearch`/`searchStays`-Netzwerkaufruf.
+Geprüft, dass `useChat.ts` von keinem der beiden anderen heutigen Fixes
+erfasst ist (weder auf `main`, `it-chef/auto` noch in einem
+`it-chef-autofix/*`-Branch) — kein Duplikat. Erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug,
+keine offene Produkt-/Architekturentscheidung (rein mechanischer Fix
+1:1 nach dem bereits etablierten `useConcierge.ts`-Muster), klar isoliert
+auf drei Stellen in einer Funktion, objektiv prüfbar.
+
+**Fix:** Neuer `replyTimeoutRef` (`useRef<number | null>`) hält die
+jeweils aktive Timeout-ID; ein neuer `useEffect(() => () =>
+window.clearTimeout(...), [])` clearet sie beim Unmount — identisch zum
+`useConcierge.ts`-Fix von heute. Keine Verhaltensänderung am bestehenden
+700ms-Delay-Ablauf. Neuer Regressionstest in `useChat.test.ts`
+("clears the pending reply timeout on unmount so it cannot fire against
+a stale instance", Muster 1:1 aus `useConcierge.test.ts` übernommen) —
+vor dem Fix durch temporäres Zurücknehmen nur der Quelländerung (`git
+stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Test schlug
+fehl: `clearTimeout` wurde nicht aufgerufen).
+
+**Geprüft:** `npm install` (frisches Environment ohne `node_modules`,
+Install erfolgreich, keine Sicherheitslücken), `npm run build` (`tsc -b`
++ `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen in shadcn/ui-Dateien), volle Suite
+`npm test` (59 Testdateien, 386 Tests — 1 neu gegenüber vorher, alle
+grün).
+
+**Dokumentation aktualisiert:** `ZEITPLAN.md` (Phase-4-Eintrag im
+Ist-Stand-Abschnitt) und `tasks/tasks-prd-travix-platform.md` (Anmerkung
+an Task 4.10) um den Fund/Fix ergänzt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-01 (vierter Lauf)
+
+**Ausgangslage:** `it-chef/auto` lag bereits drei Commits vor `main`
+(heutige Läufe eins bis drei, Details oben), `main` unberührt. Branch neu
+von `origin/it-chef/auto` ausgecheckt (bereits aktuell, kein Merge von
+`origin/main` nötig). Frischer `npm ci`: 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), `npm run build` (`tsc -b` + `vite build`)
+fehlerfrei, volle Suite `npx vitest run` (59 Testdateien, 386 Tests, alle
+grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben
+weiterhin an offene Backend-/Produktentscheidungen oder externe
+Abhängigkeiten gebunden (Base44 vs. Alternative, LLM-Zugangsdaten,
+fehlende Preisfelder im `TripDraft`-Datenmodell, FAQ-Inhalte von
+Support-Chef), kein neuer eigenständig umsetzbarer Punkt dort. Statt einer
+neuen Bug-Suche (die drei heutigen Läufe sowie der parallele,
+plattform-verwaltete IT-Chef-Kanal haben den Code bereits mehrfach
+durchleuchtet) zuerst geprüft, ob einer der noch offenen Auto-Fix-PRs
+einen bereits vollständig diagnostizierten, aber noch nicht übernommenen
+Fund enthält — genau wie an mehreren Tagen zuvor (z. B. 26.09./28.09.).
+
+**Ausgewählter Punkt:** PR #26 (`useConcierge()` räumt ausstehenden
+Antwort-Timeout beim Unmount nicht auf, siehe `reports/it-chef.md`,
+01.10.) ist zwar bereits auf seiner eigenen Auto-Fix-PR-Branch
+(`it-chef-autofix/useconcierge-timeout-cleanup-2026-10-01`) vollständig
+diagnostiziert, gefixt und sogar nachträglich um einen Typfix ergänzt
+(`window.setTimeout()`-Overload-Konflikt mit `@types/node`), steckte aber
+weder in `main` noch in `it-chef/auto` — verifiziert über `grep` auf
+`replyTimeout`/`clearTimeout` in `src/hooks/useConcierge.ts` vor der
+Änderung (kein Treffer). Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug, keine offene Produkt-/
+Architekturentscheidung (rein mechanischer Fix 1:1 nach dem bereits
+zweimal heute etablierten `ChatInput.tsx`/`useChat.ts`-Muster), bereits
+vollständig beschrieben und objektiv prüfbar.
+
+**Fix:** Identisch zur Auto-Fix-PR-Branch übernommen: neuer
+`replyTimeoutRef` (`useRef<number | null>`) hält die aktive Timeout-ID,
+ein neuer `useEffect(() => () => window.clearTimeout(...), [])` clearet
+sie beim Unmount, inkl. des auf der Branch bereits korrigierten Typs
+(`number | null` statt über `ReturnType<typeof window.setTimeout>`
+inferiert, da das sonst mit `@types/node` kollidiert). Keine
+Verhaltensänderung am bestehenden 600ms-Delay-Ablauf. Neuer
+Regressionstest in `useConcierge.test.ts` (1:1 aus der Auto-Fix-PR-Branch
+übernommen: unmounten mit ausstehendem Timeout, `clearTimeout` erwarten)
+— vor dem Fix durch temporäres Zurücknehmen nur der Quelländerung (`git
+stash` nur `useConcierge.ts`) reproduzierbar rot verifiziert (neuer Test
+schlug fehl: `clearTimeout` 0 statt 1 Aufrufe).
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung), volle
+Suite `npx vitest run` (59 Testdateien, 387 Tests — 1 neu gegenüber
+vorher, alle grün).
+
+**Dokumentation aktualisiert:** `ZEITPLAN.md` (Phase-4-Eintrag im
+Ist-Stand-Abschnitt) und `tasks/tasks-prd-travix-platform.md` (Anmerkung
+an Task 8.1) um den Fund/Fix ergänzt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-10-02
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto` lag
+gegenüber `origin/main` um die beiden Commits vom 01.10. (dritter/vierter
+Lauf, Timeout-Cleanups in `useChat.ts`/`useConcierge.ts`) voraus, noch
+ungemerged — darauf weitergearbeitet, `main` unberührt gelassen. Kein
+Merge nötig. `npm ci` (frischer Checkout): 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen in `src/components/ui/`), `npx tsc -b` fehlerfrei,
+volle Suite `npx vitest run` (59 Testdateien, 387 Tests, alle grün) —
+Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden, kein neuer eigenständig umsetzbarer Punkt dort. Danach
+`reports/support-chef.md` auf offene, noch nicht umgesetzte Funde
+geprüft (dort wird unabhängig nach Reibungspunkten gesucht) — Vorschlag 2
+vom 01.10. war noch nicht behoben. Parallel dazu einen Explore-Agenten
+beauftragt, unabhängig in bisher seltener angefassten Dateien
+(`DealFinderChat`/`Premium`-Platzhalter, `Einstellungen.tsx`,
+`Profil.tsx`, `Angebote.tsx`, `Favoriten.tsx`, `Aktivitaeten.tsx`,
+`nav-config.ts`, `routes.tsx`, `EditMode.tsx`, `ChecklistPanel.tsx`,
+`TripSummaryCard.tsx`, `QuickReplies.tsx`, `FlightCard.tsx`,
+`TrainCard.tsx`, `HotelCard.tsx`, `NoResultsMessage.tsx`, `format.ts`,
+`checklistRules.ts`, `calculateProgress.ts`, `Buchung.tsx`) nach einem
+neuen, unabhängigen Bug zu suchen. Der Agent fand dort nichts mit
+ausreichender Sicherheit (ein mögliches Finding zu stale Draft-Text in
+`EditMode.tsx`s "Neue Aktivität"-Formular nach Dialog-Schließen wurde
+genannt, aber als nur ein Punkt pro Lauf gewählt bewusst
+zurückgestellt — kleiner als das unten gewählte, bereits von Support-Chef
+diagnostizierte Finding, bleibt Kandidat für einen künftigen Lauf).
+
+**Ausgewählter und behobener Punkt:** `reports/support-chef.md`
+(01.10.), Vorschlag 2 — `src/pages/Reiseentwuerfe.tsx:373`. Der "Details
+ansehen"-Dialog zeigte als Titel weiterhin
+`{detailsDraft?.destination}`, den rohen, nicht disambiguierten
+Zielnamen — obwohl der Lösch- und der Abschließen-Dialog auf derselben
+Seite seit dem 01.10.-Fix (erster Lauf) bereits die wiederverwendbare
+`getDraftLabel(draft, allDrafts)`-Hilfsfunktion nutzen. Reproduzierbar
+mit einem Klick auf "Duplizieren": beide resultierenden
+"Lissabon"-Karten werden (einmal abgeschlossen) im Details-Dialog mit
+exakt demselben, nicht unterscheidbaren Titel "Lissabon" angezeigt,
+obwohl der zugehörige Button per Screenreader bereits korrekt
+"Lissabon (Eintrag 2) Details ansehen" ankündigt — der Dialog selbst
+macht den Unterschied danach für alle Nutzer:innen (nicht nur
+Screenreader) wieder unsichtbar. Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Rechtsbezug, keine offene Produktentscheidung, bereits
+von Support-Chef bis auf die exakte Zeile diagnostiziert und als reine
+Wiederverwendung eines etablierten Musters beschrieben, objektiv
+prüfbar.
+
+**Fix:** `<DialogTitle>{detailsDraft?.destination}</DialogTitle>` zu
+`<DialogTitle>{detailsDraft && getDraftLabel(detailsDraft, drafts)}</DialogTitle>`
+geändert — dieselbe Hilfsfunktion, die Lösch- und Abschließen-Dialog
+bereits nutzen, keine Verhaltensänderung für nicht-duplizierte Entwürfe.
+Neuer Regressionstest in `Reiseentwuerfe.test.tsx` (zwei duplizierte,
+beide abgeschlossene "Lissabon"-Entwürfe, Details-Dialog für "Eintrag 2"
+zeigt den disambiguierten Titel "Lissabon (Eintrag 2)" statt des
+mehrdeutigen "Lissabon") — vor dem Fix durch temporäres Zurücknehmen nur
+der Quelländerung (`git stash push -- src/pages/Reiseentwuerfe.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: `getByText`
+fand "Lissabon (Eintrag 2)" nicht, nur das mehrdeutige "Lissabon").
+
+`ZEITPLAN.md` (Eintrag bei Task 7.2) um den Fund/Fix ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, 0 Schwachstellen), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx vitest run` (59
+Testdateien, 388 Tests — 1 neu gegenüber vorher, alle grün), `npm run
+build` (kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-02 (weiterer Lauf)
+
+**Ausgangslage:** Erneuter geplanter Cloud-Lauf, frischer Checkout,
+`it-chef/auto` lag bereits beim ersten heutigen Lauf drei Commits vor
+`origin/main` (01.10., dritter/vierter Lauf) plus dem Fix vom ersten
+heutigen Lauf (Details-Dialog-Titel bei Reiseentwürfen) — vier Commits
+insgesamt, `main` weiterhin Vorfahr, kein Merge nötig, `main` unberührt
+gelassen. `npm ci` (frischer Checkout): 0 Schwachstellen. Vor jeder
+Änderung geprüft: Lint 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` fehlerfrei, volle Suite `npx vitest
+run` (59 Testdateien, 388 Tests, alle grün) — Ausgangszustand bestätigt
+grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie
+in den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden. Der erste heutige Lauf hatte bereits einen Kandidaten für einen
+künftigen Lauf notiert (Explore-Agent-Fund, bewusst zurückgestellt, weil
+an dem Tag schon ein anderer Punkt gewählt war): stale Entwurfstext im
+"Neue Aktivität"-Formular von `EditMode.tsx` nach Schließen des Dialogs.
+Diesen Kandidaten zunächst unabhängig am Code verifiziert (nicht blind
+übernommen): `src/components/trip/EditMode.tsx` — der Haupt-`<Dialog>`
+(Zeile 58) hatte kein `onOpenChange`, anders als der direkt darunter
+stehende Lösch-Bestätigungsdialog (`onOpenChange={(open) => !open &&
+setPendingRemoval(null)}`); `name`/`price`-State wird nur in
+`addActivity()` zurückgesetzt, nicht beim Schließen über "Fertig",
+Escape oder Klick auf das Overlay. Bestätigt reproduzierbar. Erfüllt die
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug,
+keine offene Produkt-/Architekturentscheidung (reine State-Cleanup-Lücke,
+identisches Muster bereits für den Lösch-Dialog in derselben Datei
+etabliert), klar beschrieben und objektiv prüfbar.
+
+**Fix:** `src/components/trip/EditMode.tsx` — Haupt-`<Dialog>` bekam
+`onOpenChange={(open) => { if (!open) { setName(''); setPrice('') } }}`.
+Radix' `Dialog.Root` feuert `onOpenChange` bei jeder Zustandsänderung
+auch ohne kontrolliertes `open`-Prop, daher genügte diese Ergänzung ohne
+den Dialog komplett auf kontrollierten State umzustellen. Keine
+Verhaltensänderung beim Öffnen oder beim tatsächlichen Hinzufügen einer
+Aktivität. Neuer Regressionstest in `EditMode.test.tsx` (Text in beide
+Felder eintippen, Dialog über "Fertig" schließen, erneut öffnen, beide
+Felder leer erwarten) — vor dem Fix durch temporäres Zurücknehmen nur der
+Quelländerung (`git stash push -- src/components/trip/EditMode.tsx`)
+reproduzierbar rot verifiziert (neuer Test schlug fehl: Namensfeld zeigte
+weiterhin "Stadtführung" statt des erwarteten leeren Werts).
+
+`ZEITPLAN.md` (Eintrag bei Task 6.12) und
+`tasks/tasks-prd-travix-platform.md` (Anmerkung an Task 6.12) um den
+Fund/Fix ergänzt.
+
+**Geprüft:** `npm run lint` (0 Fehler, dieselben vier vorbestehenden
+Fast-Refresh-Warnungen), `npx tsc -b` (kein Typfehler), volle Suite `npx
+vitest run` (59 Testdateien, 389 Tests — 1 neu gegenüber vorher, alle
+grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-10-02 (dritter Lauf)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` lag gegenüber `origin/main` bereits um vier
+Commits vom 01.10./02.10. voraus (Timeout-Cleanups in
+`useChat.ts`/`useConcierge.ts`, Details-Dialog-Disambiguierung bei
+Reiseentwürfen, EditMode-Entwurf-Reset) — darauf weitergearbeitet, `main`
+unberührt gelassen, kein Merge nötig. `npm ci` (frischer Checkout): 0
+Schwachstellen. Vor jeder Änderung geprüft: `npx tsc -b` fehlerfrei,
+`npm run lint` 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), volle Suite `npx vitest run` (59 Testdateien, 389
+Tests, alle grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie in
+den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden. `reports/support-chef.md` und `reports/it-chef.md` (beide
+01.10.) enthielten keinen neuen, noch nicht umgesetzten Punkt (Vorschlag 2
+aus dem Support-Chef-Bericht war bereits der erste heutige Lauf; die
+übrigen offenen Vorschläge dort — PR #25 mergen, Flugsuche-Ankündigung im
+Hauptchat — sind entweder nicht autonom umsetzbar (Merge-Entscheidung) oder
+bereits mehrfach als Produktentscheidung eingestuft). Einen Explore-Agenten
+beauftragt, unabhängig in bisher seltener angefassten Bereichen
+(Dashboard/Kalender/Warenkorb/Buchung/Profil/Einstellungen/Angebote/
+Favoriten/Aktivitaeten/Kartenansicht/Preisalarme/Urlaubsmodus, restliche
+`src/components/trip`/`src/components/search`, `src/lib/*`, `src/hooks/*`
+außerhalb der schon mehrfach geprüften `useChat`/`useConcierge`) nach einem
+neuen, isolierten Bug zu suchen — Ergebnis: keinen qualifizierenden neuen
+Bug gefunden (Codebase in diesen Bereichen bereits durchgehend mit
+korrekten Guards/Resets/aria-labels). Einzige vom Agenten genannte
+Auffälligkeit: `formatEuro()` war in `Warenkorb.tsx`, `Preisalarme.tsx` und
+`Dashboard.tsx` byte-identisch dreifach definiert — selbst verifiziert
+(nicht blind übernommen): alle drei Definitionen tatsächlich identisch
+(`` `${amount.toLocaleString('de-DE')} €` ``); die ähnlich benannten
+`formatPrice()`-Funktionen in `Aktivitaeten.tsx` (optionales
+`null`-Preisfeld) und `Angebote.tsx` (Mehrwährungsunterstützung) haben
+jeweils eine andere Signatur/Logik und sind bewusst unverändert geblieben
+— kein echtes Duplikat.
+
+**Ausgewählter Punkt:** Die dreifache `formatEuro()`-Duplikation
+zusammenführen. Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Anzeige-Formatierung,
+keine echte Zahlungsabwicklung), keine offene Produkt-/Architektur-
+entscheidung (rein mechanische Wiederverwendung identischen,
+unveränderten Verhaltens), klar beschrieben, objektiv prüfbar (Tests/
+Build/Lint).
+
+**Fix:** Neue exportierte `formatEuro(amount: number): string` in
+`src/lib/format.ts` (neben der bestehenden `formatOfferPrice()`), exakt
+dieselbe Implementierung wie die drei bisherigen lokalen Funktionen.
+`Warenkorb.tsx`, `Preisalarme.tsx` und `Dashboard.tsx` importieren sie
+jetzt aus `@/lib/format` statt sie selbst zu definieren — keine
+Verhaltensänderung, alle bestehenden Aufrufstellen unverändert. Drei neue
+Unit-Tests in `format.test.ts` (ganzzahliger Betrag, vierstelliger Betrag
+mit Tausenderpunkt, Null).
+
+`ZEITPLAN.md` (neuer Eintrag im Ist-Stand-Abschnitt vor Sprint 4) und
+`tasks/tasks-prd-travix-platform.md` (Anmerkung an Task 7.6) um den
+Fund/Fix ergänzt.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx
+vitest run` (59 Testdateien, 392 Tests — 3 neu gegenüber vorher, alle
+grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

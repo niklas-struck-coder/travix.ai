@@ -1,53 +1,60 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-09-30
+**Datum:** 2026-10-01
 
-## Was ist seit dem letzten Eintrag (2026-09-29) passiert?
+## Was ist seit dem letzten Eintrag (2026-09-30) passiert?
 
-Auf der Fix-Seite: Support-Chef hat einen neuen Ehrlichkeits-Bug gefunden —
-`formatDuration()` rundete reine Sekundenwerte zu einer erfundenen
-"1min"-Anzeige hoch, statt ehrlich einen Platzhalter zu zeigen. IT-Chef hat
-das noch am selben Tag automatisch gefixt (PR #25, gemergt). Die
-Marketing-Auto-Spur (`marketing-chef/auto`) hat den Fund parallel schon als
-Tier-4-Kandidat für den nächsten Mini-Changelog vorgemerkt — dieser Teil
-läuft also bereits von selbst, ich muss ihn hier nicht doppelt anstoßen.
+Auf der Fix-Seite war heute einiges los: Drei kleine Ehrlichkeits-/UX-Bugs
+sind über die Auto-Spuren gefunden, automatisch gefixt und von Freigabe-Chef
+schon in `main` gemergt — der Lösch-/Abschließen-Dialog bei doppelten
+Reiseentwürfen zeigte bisher einen mehrdeutigen rohen Zielnamen statt des
+disambiguierten Texts (jetzt gefixt), und `ChatInput` stoppte eine laufende
+Spracherkennung nicht beim Verlassen der Seite. Ein dritter Fund
+(`useConcierge`-Timeout-Cleanup) wartet noch als PR #26 auf Review.
 
-Der wichtigere Punkt von gestern bleibt unverändert offen: Die Flugsuche im
-normalen Chat-Ablauf verspricht wörtlich "Ich suche jetzt nach echten
-Flug-Verbindungen ... Nichts wird erfunden", löst aber laut Code-Kommentar
-in `src/lib/ai/mockAdvisor.ts` (Zeile ~166) weiterhin keine echte Suche aus
-— nur der separate "Bearbeiten"-Pfad tut das. Mehrere IT-Chef-Läufe seit
-gestern fanden dazu keinen sicheren Automatik-Fix; es ist also bewusst noch
-offen, nicht vergessen.
+Der gestern gemeldete `formatDuration`-Fix (PR #25, fake "1min" bei reinen
+Sekundenwerten) ist weiterhin **nicht live** — ich habe das heute direkt im
+Code (`FlightCard.tsx`) gegengecheckt, der alte Rundungs-Bug steht dort
+unverändert drin. Das korrigiert meinen eigenen Eintrag von gestern, wo ich
+den Fix schon als fertiges Material eingestuft hatte.
 
-Die Kanal-/Zielgruppen-Entscheidung (Sprint 1) ist weiterhin offen, jetzt
-über neun Wochen. Keine neuen Nutzungs- oder Erfolgszahlen bekannt.
+Der wichtigste offene Punkt bleibt unverändert: Die Flugsuche im normalen
+Chat-Ablauf verspricht wörtlich "Ich suche jetzt nach echten
+Flug-Verbindungen … Nichts wird erfunden", löst aber laut
+`src/lib/ai/mockAdvisor.ts` weiterhin keine echte Suche aus. Jetzt seit
+mehreren Tagen ohne sicheren Automatik-Fix offen.
+
+Die Kanal-/Zielgruppen-Entscheidung (Sprint 1) steht jetzt über zehn Wochen
+still. Keine neuen Nutzungs- oder Erfolgszahlen bekannt.
 
 ## Vorschläge
 
-1. **formatDuration-Fix ist fertiges Rohmaterial für den nächsten
-   Mini-Changelog** — läuft schon über die Auto-Spur, hier nur als
-   Bestätigung: genau das richtige kleine, ehrliche Beispiel für die
-   "sagt, was es tut"-Serie, kein neuer Aufwand nötig.
+1. **Noch nichts an die Öffentlichkeit zu `formatDuration` oder den
+   Mini-Fixes von heute** — Dialog-Disambiguierung und Voice-Cleanup sind
+   zwar nette, ehrliche kleine Beispiele fürs "sagt, was es tut"-Format,
+   aber `formatDuration` hängt seit zwei Tagen unmerged fest. Bevor wir
+   dazu kommunizieren, sollte das erst wirklich in `main` landen — sonst
+   erzählen wir eine Geschichte, die noch nicht stimmt.
 
-2. **Bei der Flugsuche weiterhin Zurückhaltung:** Solange der
-   "verspricht Suche, löst keine aus"-Fund offen ist, sollte keine
-   Kommunikation aktiv mit "wir suchen ehrlich echte Flüge für dich"
-   werben — das wäre nach mehreren offenen Läufen ohne Fix inzwischen
-   ein Risiko, keine Randnotiz mehr. Sobald gefixt: prädestiniert für ein
-   eigenes, etwas größeres Content-Stück (nicht nur Mini-Changelog-Zeile),
-   weil es der bisher greifbarste Beweis für "Ehrlichkeit als Feature"
-   wäre.
+2. **Bei der Flugsuche jetzt aktiv warnen statt nur beobachten:** Der Fund
+   ist über mehrere Tage ungefixt geblieben. Solange das offen ist, bitte
+   in keinem Kanal (Landingpage, Social, Ads) mit "wir finden dir echte
+   Flüge" werben — das Risiko eines Widerspruchs zwischen Werbeversprechen
+   und tatsächlichem Verhalten ist inzwischen real, nicht mehr theoretisch.
 
-3. **Ehrlich gesagt: an der großen Linie hat sich seit gestern nichts
-   bewegt.** Die Kanal-Frage steht seit Wochen still, während sich
-   auf der Fix-Seite inzwischen ein kleines, wiederkehrendes Muster
-   zeigt: Support-Chef findet einen Ehrlichkeits-Bug, IT-Chef fixt ihn
-   noch am selben Tag. Das ist an sich schon eine Geschichte ("wir
-   reagieren live auf unsere eigenen Fehler") — mein Vorschlag von
-   gestern (ein risikoarmer Build-in-public-Kanal nur für
-   Changelog-/Fix-Content) würde genau das ohne Vorgriff auf die
-   Sprint-1-Entscheidung sichtbar machen. Bleibt unverändert als
-   niedrigschwellige Idee im Raum stehen.
+3. **Kanal-Entscheidung lösen statt weiter aussitzen:** Zehn Wochen Stillstand
+   sind lang genug, dass das Warten selbst zum Problem wird. Statt auf die
+   "große" Sprint-1-Entscheidung zu warten, würde ich einen minimalen,
+   jederzeit rückbaubaren Zwischenschritt vorschlagen: ein einzelner,
+   risikoarmer Kanal (z. B. nur ein Build-Log/Changelog-Feed auf der Seite
+   selbst, kein Social-Media-Commitment) — damit wenigstens das wachsende
+   Fix-Material von IT-/Support-Chef nicht länger ungenutzt liegen bleibt,
+   ohne der eigentlichen Zielgruppen-Entscheidung vorzugreifen.
 
-_Letztes Update: 2026-09-30_
+4. **Das wiederkehrende Muster ist selbst eine Geschichte:** Support-Chef
+   findet Ehrlichkeits-Bugs, IT-Chef fixt sie oft am selben Tag — heute
+   gleich drei Stück. Sobald ein echter Kanal steht (siehe Punkt 3), ist
+   "wir reagieren live auf unsere eigenen Fehler" ein glaubwürdigerer
+   Markenkern als jede einzelne Fix-Meldung für sich.
+
+_Letztes Update: 2026-10-01_

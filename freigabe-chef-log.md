@@ -5359,3 +5359,158 @@ gepusht).
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-01, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (die drei
+  09-30-Commits ohne neuen Fund waren noch unverändert ungemerged
+  liegengeblieben; zwei neue mit Code-Änderung vom 01.10.).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`, `package-lock.json`,
+  `ChatInput.tsx`/`.test.tsx`, `Reiseentwuerfe.tsx`/`.test.tsx`,
+  `tasks/tasks-prd-travix-platform.md` — genau zwei inhaltliche Punkte,
+  beide im Log beschrieben:
+  1. `Reiseentwuerfe.tsx`: Lösch-/Abschließen-Bestätigungsdialoge
+     zeigten bei duplizierten Entwürfen weiterhin den mehrdeutigen
+     rohen `destination`-Namen, obwohl die aria-labels derselben
+     Buttons seit dem 17.09./20.09.-Fix bereits disambiguiert sind.
+     Fix lagert die bestehende Disambiguierungslogik in eine
+     wiederverwendbare `getDraftLabel()`-Hilfsfunktion aus, die jetzt
+     Kartenliste UND beide Dialogtexte nutzt — mechanische
+     Wiederverwendung, keine neue Design-Entscheidung geprüft:
+     Diff zeigt wirklich nur Extraktion + Aufruf, Verhalten für
+     nicht-duplizierte Entwürfe unverändert.
+  2. `ChatInput.tsx`: laufende Spracherkennung wurde beim Unmount der
+     Komponente nicht gestoppt (kein Cleanup, anders als das etablierte
+     Pendant für Sprachausgabe in `KiChat.tsx:77`) — jetzt per
+     `useEffect(() => () => recognitionRef.current?.stop(), [])`
+     behoben, spiegelt exakt das bestehende Muster, keine
+     Verhaltensänderung für Start/Stop-per-Klick.
+  `package-lock.json`-Änderung stammt aus dem bereits vom vorletzten
+  Lauf (30.09., sechster Lauf) committeten `npm audit fix` und wird
+  durch den heutigen `npm install` (0 Schwachstellen) bestätigt.
+  Beide neuen Fixes scoped, kein Scope-Creep, keine Berührung von
+  Auth/Zahlungen/rechtlichen Texten. Keine UI/Design-Änderung im Sinne
+  von `MARKENDESIGN.md` (reine Logik-/Text-Korrektur nach etabliertem
+  Muster).
+- **Unabhängig selbst verifiziert** (frischer `npm install`, danach
+  tatsächlich selbst ausgeführt, nicht nur Log geglaubt):
+  `npm install` → 0 Schwachstellen. `npx tsc -b` → 0 Fehler.
+  `npx eslint .` → 0 Fehler, dieselben vier vorbestehenden
+  Fast-Refresh-Warnungen in `src/components/ui/`. `npx vitest run` →
+  59 Testdateien, 385 Tests, alle grün. Deckt sich exakt mit den
+  Angaben im `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward
+`e39f9a6..79335d7`, gepusht). `it-chef/auto` war danach bereits
+deckungsgleich mit `main`, kein separater Reset nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
+
+## 2026-10-01, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits beim früheren
+  Nacht-Check heute vollständig gemergt), planmäßig übersprungen.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`3960d39`).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`e240516`).
+
+**Prüfung `marketing-chef/auto`:** Diff gegen `main` zunächst
+irreführend groß (Branch war 14 Commits hinter `main` zurück, Diff
+zeigte u. a. Löschungen von `ZEITPLAN.md`/`it-chef-auto-log.md`/
+`support-chef-auto-log.md`-Inhalten, die real nur daher kamen, dass der
+Branch diese neueren `main`-Commits noch nicht hatte). Deshalb stattdessen
+gezielt nur den eigenen neuen Commit (`3960d39`) einzeln angeschaut:
+betrifft ausschließlich `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Hinweis auf tatsächliches Posten/Versenden. Inhalt: Kandidat 28
+(formatDuration-"1min"-Fix) wird mit Code-Beleg zurückgezogen (verstößt
+selbst gegen das eigene "ehrlicher Platzhalter statt erfundener Wert"-
+Kriterium), neuer Kandidat 29 (Reiseentwürfe-Dialogtexte bei Duplikaten)
+kommt dazu. Keine erfundenen Kennzahlen/Nutzerzahlen. Zentrale Behauptung
+selbst nachverifiziert: `src/components/search/FlightCard.tsx:18-29`
+zeigt tatsächlich `totalMinutes = 1`, wenn Stunden/Minuten 0 sind aber
+Sekunden > 0 — Befund stimmt.
+→ **Passt, nach `main` gemergt** (`git merge`, sauberer Merge, nur die
+zwei erwarteten Dateien geändert).
+
+**Prüfung `support-chef/auto`:** Einziger neuer Commit (`e240516`)
+ändert nur `support-chef-auto-log.md` (+64 Zeilen, reine Analyse, kein
+Code geändert). Behauptung: Details-Dialog bei Reiseentwürfen
+(`Reiseentwuerfe.tsx:373`) nutzt weiterhin den rohen `destination`-Namen
+statt der heute (`8e0016b`) eingeführten `getDraftLabel()`-Funktion, die
+Karten-aria-labels sowie Lösch-/Abschließen-Dialoge bereits
+disambiguiert — bei Duplikaten zeigt der Dialog für beide denselben
+Titel. Stichprobe direkt im Code nachvollzogen: Zeile 373 lautet
+`<DialogTitle>{detailsDraft?.destination}</DialogTitle>`, tatsächlich
+ohne `getDraftLabel()`-Aufruf — Fund stimmt, nicht erfunden.
+→ **Passt, nach `main` gemergt** (`git merge`, sauberer Merge, nur die
+eine erwartete Datei geändert).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, gemergt. `it-chef/auto` planmäßig übersprungen
+(kein neuer Stand seit dem früheren Nacht-Check). Alle drei Branches
+jetzt deckungsgleich mit `main`. `main` gepusht
+(`b853b0e..a90e4c4`).
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
+
+## 2026-10-02, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (drei von heute, zwei vom
+  01.10. nachts), alle noch ungemergt.
+- `marketing-chef/auto` — 0 Commits vor `main` (bereits deckungsgleich,
+  nichts Neues von heute). Planmäßig übersprungen.
+- `support-chef/auto` — 0 Commits vor `main` (bereits deckungsgleich,
+  nichts Neues von heute). Planmäßig übersprungen.
+
+**Prüfung `it-chef/auto`:**
+Diff zu `main` über alle 5 Commits angeschaut (16 geänderte Dateien,
+Produktcode in `src/components/trip/EditMode.tsx`, `src/hooks/useChat.ts`,
+`src/hooks/useConcierge.ts`, `src/lib/format.ts`,
+`src/pages/Dashboard.tsx`, `src/pages/Preisalarme.tsx`,
+`src/pages/Reiseentwuerfe.tsx`, `src/pages/Warenkorb.tsx`, Rest
+Tests/Doku). Keine Berührung von Auth, Zahlungsabwicklung oder
+rechtlichen Texten — `Warenkorb.tsx`/`Preisalarme.tsx` sind nur
+Preis-*Anzeige* (lokale `formatEuro()`-Hilfsfunktion dedupliziert,
+keine Preislogik geändert). UI-Änderungen (`EditMode.tsx`,
+`Reiseentwuerfe.tsx`) sind rein funktional (Dialog-State-Reset bzw.
+Titel-Disambiguierung über bereits bestehendes `getDraftLabel()`), keine
+neuen visuellen Elemente — kein Abgleich mit `MARKENDESIGN.md` nötig.
+Jeder Commit ist klar auf einen Punkt begrenzt (kein Scope-Creep), passt
+zu seinem jeweiligen `it-chef-auto-log.md`-Eintrag.
+
+Unabhängig selbst verifiziert (nicht nur den Log-Einträgen geglaubt):
+- `npm install` sauber durchgelaufen (nur eine harmlose
+  `EBADENGINE`-Warnung bei `jsdom`, kein Fehler).
+- `npx tsc -b` — keine Ausgabe, keine Fehler.
+- `npx eslint .` — 0 Fehler, nur 4 vorbestehende Warnungen
+  (`react-refresh/only-export-components`) in unveränderten
+  `src/components/ui/*`-Dateien, nicht Teil dieses Branches.
+- `npx vitest run` — 59 Testdateien, 392 Tests, alle grün.
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward,
+`7dd3792..a920f6c`). `it-chef/auto` zeigt danach auf denselben Stand wie
+`main` — kein separater Branch-Update-Push nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(keine neuen Commits seit dem letzten Check, laufen erst um 6 Uhr neu —
+dafür gibt es den separaten späteren Freigabe-Chef-Lauf). `main`
+gepusht (`7dd3792..a920f6c`).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.

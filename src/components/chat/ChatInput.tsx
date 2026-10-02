@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Mic, MicOff, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,8 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
   const [listening, setListening] = useState(false)
   const [micError, setMicError] = useState<string | null>(null)
   const recognitionRef = useRef<ReturnType<typeof startListening>>(null)
+
+  useEffect(() => () => recognitionRef.current?.stop(), [])
 
   const handleSend = () => {
     const trimmed = value.trim()

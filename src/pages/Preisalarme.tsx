@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { formatEuro } from '@/lib/format'
 
 interface PriceAlert {
   id: string
@@ -43,10 +44,6 @@ const initialAlerts: PriceAlert[] = [
     previousPrice: 610,
   },
 ]
-
-function formatEuro(amount: number) {
-  return `${amount.toLocaleString('de-DE')} €`
-}
 
 export function Preisalarme() {
   const [alerts, setAlerts] = useState(initialAlerts)

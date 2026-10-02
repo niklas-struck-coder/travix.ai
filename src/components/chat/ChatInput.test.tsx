@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ChatInput } from './ChatInput'
 
@@ -123,6 +123,20 @@ describe('ChatInput microphone stop', () => {
     act(() => lastInstance?.onend?.())
 
     expect(screen.getByLabelText('Spracheingabe starten')).toBeInTheDocument()
+  })
+
+  it('stops a running recognition when the component unmounts', () => {
+    // @ts-expect-error test-only global stub
+    window.SpeechRecognition = FakeSpeechRecognition
+
+    render(<ChatInput onSend={vi.fn()} />)
+
+    fireEvent.click(screen.getByLabelText('Spracheingabe starten'))
+    const runningInstance = lastInstance
+
+    cleanup()
+
+    expect(runningInstance?.stop).toHaveBeenCalledTimes(1)
   })
 })
 

@@ -594,3 +594,25 @@ describe('useChat selectFlight confirmation message', () => {
     expect(confirmation).not.toContain('249.00 EUR')
   })
 })
+
+describe('useChat reply timeout cleanup on unmount', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('clears the pending reply timeout on unmount so it cannot fire against a stale instance', () => {
+    const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+    const { result, unmount } = renderHook(() => useChat(false))
+
+    act(() => {
+      result.current.sendMessage('Rom')
+    })
+    unmount()
+
+    expect(clearTimeoutSpy).toHaveBeenCalled()
+  })
+})

@@ -55,7 +55,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
 
   return (
     <Fragment>
-      <Dialog>
+      <Dialog onOpenChange={(open) => { if (!open) { setName(''); setPrice('') } }}>
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent>
           <DialogHeader>

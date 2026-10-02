@@ -106,6 +106,20 @@ const initialDrafts: Draft[] = [
   },
 ]
 
+// Duplizieren (siehe duplicateDraft) kann zwei Karten mit identischem
+// destination hinterlassen — ohne diese Ergänzung wären weder ihre
+// aria-labels (reports/support-chef.md, 17.09., Vorschlag 1) noch die
+// Lösch-/Abschließen-Bestätigungstexte für Nutzer:innen unterscheidbar.
+function getDraftLabel(draft: Draft, allDrafts: Draft[]): string {
+  const hasDuplicates = allDrafts.filter((other) => other.destination === draft.destination).length > 1
+  if (!hasDuplicates) return draft.destination
+  const index = allDrafts.findIndex((other) => other.id === draft.id)
+  const occurrence = allDrafts
+    .slice(0, index + 1)
+    .filter((other) => other.destination === draft.destination).length
+  return `${draft.destination} (Eintrag ${occurrence})`
+}
+
 export function Reiseentwuerfe() {
   const [drafts, setDrafts] = useState(initialDrafts)
   const [pendingRemoval, setPendingRemoval] = useState<Draft | null>(null)
@@ -199,20 +213,9 @@ export function Reiseentwuerfe() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {drafts.map((draft, index) => {
+        {drafts.map((draft) => {
           const progress = calculateProgress(draft.trip)
-          // Duplizieren (siehe duplicateDraft) kann zwei Karten mit
-          // identischem destination hinterlassen — ohne diese Ergänzung
-          // wären ihre aria-labels für Screenreader nicht unterscheidbar
-          // (reports/support-chef.md, 17.09., Vorschlag 1).
-          const hasDuplicates =
-            drafts.filter((other) => other.destination === draft.destination).length > 1
-          const occurrence =
-            drafts.slice(0, index + 1).filter((other) => other.destination === draft.destination)
-              .length
-          const draftLabel = hasDuplicates
-            ? `${draft.destination} (Eintrag ${occurrence})`
-            : draft.destination
+          const draftLabel = getDraftLabel(draft, drafts)
           return (
             <Card key={draft.id} className="overflow-hidden py-0">
               <div className={`h-28 bg-gradient-to-br ${draft.gradient}`} />
@@ -329,7 +332,8 @@ export function Reiseentwuerfe() {
           <DialogHeader>
             <DialogTitle>Entwurf löschen?</DialogTitle>
             <DialogDescription>
-              Der Entwurf für {pendingRemoval?.destination} wird gelöscht. Das lässt sich nicht rückgängig machen.
+              Der Entwurf für {pendingRemoval && getDraftLabel(pendingRemoval, drafts)} wird gelöscht. Das
+              lässt sich nicht rückgängig machen.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -348,7 +352,8 @@ export function Reiseentwuerfe() {
           <DialogHeader>
             <DialogTitle>Entwurf abschließen?</DialogTitle>
             <DialogDescription>
-              Der Entwurf für {pendingFinalize?.destination} wird abgeschlossen. Das lässt sich nicht rückgängig machen.
+              Der Entwurf für {pendingFinalize && getDraftLabel(pendingFinalize, drafts)} wird abgeschlossen.
+              Das lässt sich nicht rückgängig machen.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -365,7 +370,7 @@ export function Reiseentwuerfe() {
       <Dialog open={detailsDraft !== null} onOpenChange={(open) => !open && setDetailsDraft(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{detailsDraft?.destination}</DialogTitle>
+            <DialogTitle>{detailsDraft && getDraftLabel(detailsDraft, drafts)}</DialogTitle>
             <DialogDescription>Abgeschlossener Reiseentwurf — nur zum Ansehen.</DialogDescription>
           </DialogHeader>
           {detailsDraft && (
