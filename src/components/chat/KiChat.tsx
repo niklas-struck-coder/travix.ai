@@ -50,6 +50,7 @@ export function KiChat() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const editHandled = useRef(false)
+  const destinationHandled = useRef(false)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -70,6 +71,23 @@ export function KiChat() {
     startEdit(editParam as EditableTripField)
     setSearchParams({}, { replace: true })
   }, [searchParams, trip, startEdit, setSearchParams])
+
+  // Coming from a Favoriten-Karte (?destination=Kapstadt etc.) — pre-fill the
+  // destination exactly as if it had been typed as the first chat message.
+  // Only fires while there's no trip of our own yet (hasTripData false), so
+  // it never overwrites an already-running planning conversation, and waits
+  // for the greeting message so the destination appears as a reply to it
+  // instead of racing ahead of it.
+  useEffect(() => {
+    const destinationParam = searchParams.get('destination')
+    if (!destinationParam || destinationHandled.current) return
+    if (messages.length === 0) return
+    if (hasTripData(trip)) return
+
+    destinationHandled.current = true
+    sendMessage(destinationParam)
+    setSearchParams({}, { replace: true })
+  }, [searchParams, messages, trip, sendMessage, setSearchParams])
 
   // Ohne das läuft eine bereits gestartete Vorlesung weiter, auch wenn die
   // Sprachausgabe abgeschaltet, der Chat neu gestartet oder die Seite

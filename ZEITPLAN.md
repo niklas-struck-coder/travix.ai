@@ -1271,6 +1271,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Muster (dortiger `sr-only`-Zusatz ", bearbeiten"). Neuer
   Regressionstest in `Kalender.test.tsx` (bei fixierter Systemzeit trägt
   genau eine Zelle `aria-current="date"` und den "(Heute)"-Text).
+  Vom autonomen IT-Chef-Lauf am 02.10. (fünfter Lauf) einen von
+  `reports/support-chef.md` (02.10., Vorschlag 1) gemeldeten
+  Reibungspunkt behoben: Der Button "Reise mit KI planen" auf jeder
+  Favoriten-Karte (7.9) verlinkte unabhängig vom angeklickten Ziel
+  pauschal auf `/ki-chat` — ohne eigenen Entwurf landete man bei der
+  generischen Begrüßung und musste das Ziel erneut eintippen, obwohl man
+  gerade gezielt draufgeklickt hatte; lief bereits eine andere Planung,
+  öffnete der Klick unverändert diese, ohne jeden Hinweis, dass er
+  wirkungslos war. Fix nach dem bereits etablierten `?edit=`-Muster
+  (`Buchung.tsx`/`ChecklistPanel.tsx` → `KiChat.tsx`): Jede Karte verlinkt
+  jetzt auf `/ki-chat?destination={Ziel}`; ein neuer Effekt in
+  `KiChat.tsx` übernimmt den Parameter als allerersten Chat-Beitrag —
+  exakt wie manuelles Eintippen über `sendMessage()` — aber nur, solange
+  noch kein eigener Entwurf läuft (`hasTripData(trip)` false), sonst
+  bleibt die laufende Planung unberührt. Neue Tests in
+  `Favoriten.test.tsx` (Linkziel je Karte) und `KiChat.test.tsx` (Param
+  wird ohne Entwurf übernommen, mit laufendem Entwurf ignoriert, ohne
+  Parameter passiert nichts).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

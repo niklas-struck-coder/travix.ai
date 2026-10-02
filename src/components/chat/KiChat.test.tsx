@@ -5,6 +5,7 @@ import { KiChat } from './KiChat'
 import { useChat } from '@/hooks/useChat'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 import { stopSpeaking } from '@/lib/ai/speech'
+import type { ChatMessage } from '@/types/chat'
 
 vi.mock('@/hooks/useChat')
 vi.mock('@/lib/ai/speech', () => ({
@@ -20,7 +21,7 @@ beforeAll(() => {
 })
 
 const baseChatState = {
-  messages: [],
+  messages: [] as ChatMessage[],
   trip: emptyTrip,
   quickReplies: [],
   avatarState: 'idle' as const,
@@ -39,10 +40,10 @@ const baseChatState = {
   startEdit: vi.fn(),
 }
 
-function renderKiChat(overrides: Partial<typeof baseChatState> = {}) {
+function renderKiChat(overrides: Partial<typeof baseChatState> = {}, initialEntries = ['/ki-chat']) {
   vi.mocked(useChat).mockReturnValue({ ...baseChatState, ...overrides })
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <KiChat />
     </MemoryRouter>,
   )
@@ -116,6 +117,34 @@ describe('KiChat speech synthesis stop', () => {
     unmount()
 
     expect(stopSpeaking).toHaveBeenCalled()
+  })
+})
+
+describe('KiChat destination query param', () => {
+  const greetingMessage = { id: '1', role: 'assistant' as const, content: 'Hallo!', timestamp: 0 }
+
+  it('sends the destination from a Favoriten-Karte as the first chat message when there is no trip yet', () => {
+    const sendMessage = vi.fn()
+    renderKiChat({ sendMessage, messages: [greetingMessage], trip: emptyTrip }, ['/ki-chat?destination=Kapstadt'])
+
+    expect(sendMessage).toHaveBeenCalledWith('Kapstadt')
+  })
+
+  it('ignores the destination param once a trip is already in progress, so it never overwrites it', () => {
+    const sendMessage = vi.fn()
+    renderKiChat(
+      { sendMessage, messages: [greetingMessage], trip: { ...emptyTrip, destination: 'Lissabon' } },
+      ['/ki-chat?destination=Kapstadt'],
+    )
+
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
+  it('does nothing without a destination param', () => {
+    const sendMessage = vi.fn()
+    renderKiChat({ sendMessage, messages: [greetingMessage], trip: emptyTrip })
+
+    expect(sendMessage).not.toHaveBeenCalled()
   })
 })
 

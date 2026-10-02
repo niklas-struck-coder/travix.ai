@@ -110,7 +110,7 @@ export function Favoriten() {
               {favorite.notes && <p className="text-sm text-muted-foreground">{favorite.notes}</p>}
 
               <Button asChild size="sm" className="w-fit bg-teal text-navy hover:bg-teal/90">
-                <Link to="/ki-chat">
+                <Link to={`/ki-chat?destination=${encodeURIComponent(favorite.destination)}`}>
                   <MessageCircle className="size-4" />
                   Reise mit KI planen
                 </Link>

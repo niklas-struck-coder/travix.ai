@@ -15460,3 +15460,69 @@ werden.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-02 (fünfter Lauf)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war zu diesem Zeitpunkt ein Commit vor
+`origin/main` voraus (der vierte Lauf von heute, formatDuration-Fix, wartet
+noch auf die Prüfung/Merge durch Freigabe-Chef) — auf diesem Stand
+weitergearbeitet, kein Merge von `main` nötig, `main` unberührt. `npm ci`
+(frischer Checkout): 0 Schwachstellen.
+
+**Vorgehen:** `reports/support-chef.md` (02.10., Vorschlag 1) auf einen
+neuen, noch offenen und sicheren Kandidaten geprüft, da dieser Fund im
+vierten Lauf von heute noch nicht berücksichtigt war (der behandelte nur
+den `formatDuration`-Fund).
+
+**Befund:** `src/pages/Favoriten.tsx:112-117` — der Button "Reise mit KI
+planen" auf jeder Favoriten-Karte verlinkte unabhängig vom angeklickten
+Ziel pauschal auf `/ki-chat`, ohne jeden Bezug zu `favorite.destination`.
+Ohne laufenden Entwurf landete man bei der generischen Begrüßung und
+musste das Ziel erneut eintippen, obwohl man gerade gezielt draufgeklickt
+hatte; lief bereits eine Planung für ein anderes Ziel, öffnete der Klick
+stattdessen unverändert diese Konversation — ohne jeden Hinweis, dass der
+Klick wirkungslos war. Bestätigt im aktuellen Code vor dem Fix.
+
+**Ausgewählter Punkt:** Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Chat-Navigation mit
+bereits vorhandenen Demo-Favoriten), keine offene Produkt-/
+Architekturentscheidung (Support-Chef hat bereits ein konkretes, am
+Code bestehendes Muster vorgeschlagen — das `?edit=`-Pattern, über das
+`Buchung.tsx`/`ChecklistPanel.tsx` schon heute gezielt einzelne Felder im
+Chat anspringen), klar beschrieben (exakte Datei/Zeilen plus konkreter
+Lösungsvorschlag), objektiv prüfbar (Tests/Build/Lint).
+
+**Fix:** `Favoriten.tsx` verlinkt jetzt auf
+`/ki-chat?destination={encodeURIComponent(favorite.destination)}` statt
+pauschal auf `/ki-chat`. Neuer Effekt in `KiChat.tsx` (analog zum
+bestehenden `?edit=`-Effekt direkt daneben): liest den
+`destination`-Parameter und übergibt ihn unverändert an das bereits
+bestehende `sendMessage()` — exakt dasselbe, was passiert, wenn die
+Nutzerin das Ziel selbst als ersten Chat-Beitrag eintippt (keine neue
+Logik in `useChat.ts`/`mockAdvisor.ts` nötig). Feuert nur einmal pro
+Aufruf (Ref-Guard wie beim `?edit=`-Effekt), erst sobald die Begrüßung
+geladen ist, und ausschließlich solange noch kein eigener Entwurf läuft
+(`hasTripData(trip)` false) — eine bereits laufende Planung für ein
+anderes Ziel bleibt dadurch unangetastet, genau wie von Support-Chef
+vorgeschlagen. Der Parameter wird danach per `setSearchParams({},
+{ replace: true })` aus der URL entfernt (gleiches Verhalten wie beim
+`?edit=`-Parameter).
+
+Drei neue Tests in `KiChat.test.tsx` (Ziel wird ohne laufenden Entwurf als
+erste Nachricht übernommen; wird bei bereits laufendem Entwurf ignoriert;
+ohne Parameter passiert nichts), ein neuer Test in `Favoriten.test.tsx`
+(jede Karte verlinkt auf ihr eigenes Ziel).
+
+`ZEITPLAN.md` (neuer Eintrag im Ist-Stand-Abschnitt von Phase 7) und
+`tasks/tasks-prd-travix-platform.md` (Anmerkung an Task 7.9) um den
+Fund/Fix ergänzt.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx
+vitest run` (59 Testdateien, 396 Tests — 4 neu gegenüber vorher, alle
+grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

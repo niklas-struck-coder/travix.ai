@@ -17,6 +17,18 @@ describe('Favoriten', () => {
     expect(screen.getByText('Island')).toBeInTheDocument()
   })
 
+  it('links each "Reise mit KI planen" button to the chat with its own card\'s destination', () => {
+    render(
+      <MemoryRouter>
+        <Favoriten />
+      </MemoryRouter>,
+    )
+
+    const links = screen.getAllByRole('link', { name: 'Reise mit KI planen' })
+    expect(links[0]).toHaveAttribute('href', '/ki-chat?destination=Kapstadt')
+    expect(links[1]).toHaveAttribute('href', '/ki-chat?destination=Reykjavik')
+  })
+
   it('asks for confirmation before removing a favorite, and keeps it if cancelled', () => {
     render(
       <MemoryRouter>
