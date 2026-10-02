@@ -5514,3 +5514,65 @@ gepusht (`7dd3792..a920f6c`).
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-02, später Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits beim früheren
+  Nacht-Check heute gemergt, `a920f6c`). Planmäßig übersprungen.
+- `marketing-chef/auto` — 3 neue Commits vor `main` (zwei Merge-Commits
+  `main`→Branch, ein eigener Inhalts-Commit `ce5be21`).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`ed58595`).
+
+**Prüfung `marketing-chef/auto`:**
+Diff zu `main` ändert nur `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Produktcode betroffen, kein Build/Lint/Test nötig. Inhalt: ein neuer 30.
+Tier-4-Kandidat (Details-Dialog bei Reiseentwürfen disambiguiert jetzt
+ebenfalls über `getDraftLabel()`), zwei Commits vom selben Tag bewusst
+ausgeschlossen (EditMode-Formular-Reset, formatEuro-Dedup), Kandidat 28
+erneut geprüft und weiter zurückgezogen, Kandidatentopf bei zwei.
+Unabhängig gegengeprüft, nicht nur den Log-Einträgen geglaubt:
+- `Reiseentwuerfe.tsx:373` nutzt tatsächlich `getDraftLabel()` im
+  `DialogTitle` des Details-Dialogs — Fund stimmt.
+- `EditMode.tsx:58` setzt Name/Preis im `onOpenChange`-Handler
+  tatsächlich zurück — Ausschluss als reiner Formular-Fix nachvollziehbar.
+- `format.ts` exportiert `formatEuro()`, `Warenkorb.tsx`/
+  `Preisalarme.tsx`/`Dashboard.tsx` importieren es tatsächlich von dort
+  — Ausschluss als interne Code-Qualitäts-Änderung ohne Nutzer-Sichtbarkeit
+  nachvollziehbar.
+- `FlightCard.tsx:26`/`TrainCard.tsx:21` haben weiterhin
+  `totalMinutes = 1` — Kandidat 28 zu Recht weiter als offen/blockiert
+  geführt, kein neuer Fix untergeschlagen.
+Keine erfundenen Kennzahlen, kein Hinweis auf tatsächliches
+Posten/Versenden. Vollständiger, kohärenter Text, keine Stichpunkt-Skizze.
+→ **Passt, nach `main` gemergt** (`git merge --no-ff`, saubere Merges,
+nur die zwei erwarteten Dateien geändert).
+
+**Prüfung `support-chef/auto`:**
+Diff zu `main` ändert nur `support-chef-auto-log.md` — reiner
+Analyse-Bericht, keine Code-Änderung. Neuer Eintrag: Favoriten-Karten
+("Reise mit KI planen") verlinken unabhängig vom jeweiligen
+`favorite.destination` immer pauschal auf `/ki-chat`. Stichprobenartig
+gegengeprüft:
+- `Favoriten.tsx` verlinkt tatsächlich pauschal auf `<Link to="/ki-chat">`
+  ohne Zielbezug — stimmt.
+- `useChat.ts` lädt beim Mount tatsächlich nur `loadStoredChat()` oder
+  zeigt die generische `getGreeting()` — kein Mechanismus, der ein Ziel
+  übernimmt.
+- `KiChat.tsx` hat ein `editableFields`-Array für den `?edit=`-Parameter,
+  das `destination` tatsächlich nicht enthält — Fund stimmt, nicht
+  erfunden, Datei-/Zeilenangaben nachvollziehbar.
+→ **Passt, nach `main` gemergt** (`git merge --no-ff`, sauberer Merge,
+nur die eine erwartete Datei geändert).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, gemergt. `it-chef/auto` planmäßig übersprungen
+(kein neuer Stand seit dem früheren Nacht-Check). `main` gepusht
+(`6326b89..116779b`). Alle drei Branches danach per Fast-Forward auf den
+neuen `main`-Stand gebracht (deckungsgleich), damit der nächste
+Marketing-Chef-Lauf nicht wie heute morgen zwei zusätzliche
+`main`-Merges braucht, um auf aktuellem Stand zu sein.
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
