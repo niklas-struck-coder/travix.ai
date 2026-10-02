@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-09-28):**
-- IT-Chef hat weitere Lücken in der Transportmittel-Erkennung behoben (u.a.
-  "Bahnfahrt"/"Bahnticket" nicht als Zug erkannt, wörtlich übernommenes
-  "Überrasch mich!" als Reiseziel, unnatürliche Mietwagen-/Fähre-Formulierung)
-  sowie begleitende Tests für mehrere Komponenten ergänzt
-- Freigabe-Chef hat die IT-, Marketing- und Support-Änderungen des Tages
-  wieder eigenständig geprüft und nach main gemergt
-- Marketing-Chef und Support-Chef haben ihre Tagesläufe fortgesetzt (Mini-
-  Changelog-Kandidaten, Beobachtung bestehender Formulierungs-Funde)
+**Seit letztem Update (2026-09-29):**
+- Support-Chef hat einen Rundungsfehler in formatDuration() behoben (reine
+  Sekundenwerte wurden fälschlich als "1min" statt ehrlichem Platzhalter
+  angezeigt); von Freigabe-Chef geprüft und gemergt
+- IT-Chef hat mehrere Läufe ohne neuen sicheren Fund abgeschlossen (bereits
+  behobene Punkte gegengeprüft, gezielt in bisher weniger untersuchten
+  Bereichen gesucht)
+- Freigabe-Chef hat die Tagesänderungen von Marketing- und Support-Chef
+  wie gewohnt eigenständig geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-09-29_
+_Letztes Update: 2026-09-30_

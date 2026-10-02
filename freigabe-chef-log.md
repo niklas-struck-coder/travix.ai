@@ -1,5 +1,55 @@
 # Freigabe-Chef-Log
 
+## 2026-09-30, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (bereits im heutigen "früheren
+  Nacht-Check" geprüft und gemergt, `eccc167`). Planmäßig übersprungen,
+  keine neue Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`63fd197`).
+- `support-chef/auto` — 1 neuer Commit (`e48c9a9`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+  Produktcode betroffen, kein Build/Lint/Test nötig.
+- Ordnet einen bereits auf `main` gelandeten IT-Chef-Commit
+  (`formatDuration()`-Sekundenlücke) als 28. Tier-4-Kandidaten ein,
+  schließt einen zweiten Commit (Sprach-/Grammatikkorrektur
+  "Mietwagen-Verbindungen") nachvollziehbar begründet aus (gleiche Logik
+  wie ein früherer, strukturell identischer Ausschluss). Kandidatentopf
+  steht bei eins, keine sechste Mini-Changelog-Ausgabe — konsistent mit
+  der eigenen Achter-Schwelle.
+- Dokumentiert transparent einen offenen Nebenbefund (Flugsuche
+  kündigt Suche an, löst laut Support-/Marketing-Chef-Berichten aber
+  keine aus) als bewusst nicht content-relevant, solange ungeklärt —
+  keine Positionierungs-Entscheidung vorweggenommen.
+- Keine erfundenen Kennzahlen, kein Hinweis auf tatsächliches
+  Posten/Versenden. Vollständiger, kohärenter Text, keine
+  Stichpunkt-Skizze.
+→ **Alles passt, nach `main` gemergt** (`40ce25b`, gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen):
+- Ändert ausschließlich `support-chef-auto-log.md` (68 neue Zeilen) —
+  reine Markdown-Ergänzung, kein Produktcode betroffen, kein
+  Build/Lint/Test nötig.
+- Neuer Fund: `formatDuration()` in `FlightCard.tsx`/`TrainCard.tsx`
+  rundet bei einer reinen Sekundenangabe (Tage/Stunden/Minuten alle 0,
+  Sekunden > 0) neuerdings fest auf "1min" auf statt wie zuvor den
+  ehrlichen Platzhalter "—" zu zeigen — unabhängig gegengeprüft:
+  `src/components/search/FlightCard.tsx:17-27` zeigt exakt dieses
+  Verhalten (`if (totalHours === 0 && totalMinutes === 0 &&
+  Number(seconds || 0) > 0) { totalMinutes = 1 }`), Datei-/Zeilenangabe
+  und Verhalten stimmen mit dem Fund überein.
+- Vorschlag im Fund (bei Tage/Stunden/Minuten = 0 weiterhin "—" statt
+  "1min" zurückgeben) ist eine reine Empfehlung, keine Code-Änderung —
+  bleibt Aufgabe von IT-Chef bzw. Ni.
+→ **Nachvollziehbar, nach `main` gemergt** (`e2e086f`, gepusht).
+
+**Kein Anlass, Ni gesondert zu informieren** — beide Prüfungen bestanden
+im ersten Anlauf, kein wiederholtes Scheitern, kein Regelverstoß.
+
 ## 2026-09-16, 6-Uhr-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
