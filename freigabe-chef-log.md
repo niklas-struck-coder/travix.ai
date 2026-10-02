@@ -5466,3 +5466,51 @@ jetzt deckungsgleich mit `main`. `main` gepusht
 
 **Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-02, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (drei von heute, zwei vom
+  01.10. nachts), alle noch ungemergt.
+- `marketing-chef/auto` — 0 Commits vor `main` (bereits deckungsgleich,
+  nichts Neues von heute). Planmäßig übersprungen.
+- `support-chef/auto` — 0 Commits vor `main` (bereits deckungsgleich,
+  nichts Neues von heute). Planmäßig übersprungen.
+
+**Prüfung `it-chef/auto`:**
+Diff zu `main` über alle 5 Commits angeschaut (16 geänderte Dateien,
+Produktcode in `src/components/trip/EditMode.tsx`, `src/hooks/useChat.ts`,
+`src/hooks/useConcierge.ts`, `src/lib/format.ts`,
+`src/pages/Dashboard.tsx`, `src/pages/Preisalarme.tsx`,
+`src/pages/Reiseentwuerfe.tsx`, `src/pages/Warenkorb.tsx`, Rest
+Tests/Doku). Keine Berührung von Auth, Zahlungsabwicklung oder
+rechtlichen Texten — `Warenkorb.tsx`/`Preisalarme.tsx` sind nur
+Preis-*Anzeige* (lokale `formatEuro()`-Hilfsfunktion dedupliziert,
+keine Preislogik geändert). UI-Änderungen (`EditMode.tsx`,
+`Reiseentwuerfe.tsx`) sind rein funktional (Dialog-State-Reset bzw.
+Titel-Disambiguierung über bereits bestehendes `getDraftLabel()`), keine
+neuen visuellen Elemente — kein Abgleich mit `MARKENDESIGN.md` nötig.
+Jeder Commit ist klar auf einen Punkt begrenzt (kein Scope-Creep), passt
+zu seinem jeweiligen `it-chef-auto-log.md`-Eintrag.
+
+Unabhängig selbst verifiziert (nicht nur den Log-Einträgen geglaubt):
+- `npm install` sauber durchgelaufen (nur eine harmlose
+  `EBADENGINE`-Warnung bei `jsdom`, kein Fehler).
+- `npx tsc -b` — keine Ausgabe, keine Fehler.
+- `npx eslint .` — 0 Fehler, nur 4 vorbestehende Warnungen
+  (`react-refresh/only-export-components`) in unveränderten
+  `src/components/ui/*`-Dateien, nicht Teil dieses Branches.
+- `npx vitest run` — 59 Testdateien, 392 Tests, alle grün.
+
+→ **Alles grün + passt, nach `main` gemergt** (Fast-Forward,
+`7dd3792..a920f6c`). `it-chef/auto` zeigt danach auf denselben Stand wie
+`main` — kein separater Branch-Update-Push nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(keine neuen Commits seit dem letzten Check, laufen erst um 6 Uhr neu —
+dafür gibt es den separaten späteren Freigabe-Chef-Lauf). `main`
+gepusht (`7dd3792..a920f6c`).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
