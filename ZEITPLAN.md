@@ -2325,6 +2325,14 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `border`-Utilities nutzt (vom Support-Chef am 23.08. gemeldet) — durch
   ein sichtbares "Empfohlen"-Badge ersetzt, analog dem bestehenden
   Badge-Muster in `Preisalarme.tsx`/`Buchung.tsx`.
+- Vom autonomen IT-Chef-Lauf am 02.10. (dritter Lauf) aufgeräumt (betrifft
+  7.6, 7.7, 7.10): `Warenkorb.tsx`, `Preisalarme.tsx` und `Dashboard.tsx`
+  definierten alle drei byte-identisch eine lokale `formatEuro()`-Funktion.
+  Jetzt eine einzige exportierte `formatEuro()` in `src/lib/format.ts`
+  (neben `formatOfferPrice()`), von allen drei Seiten importiert. Reine
+  Wiederverwendung, keine Verhaltensänderung, drei neue Unit-Tests in
+  `format.test.ts`. `formatPrice()` in `Aktivitaeten.tsx`/`Angebote.tsx`
+  bewusst unverändert gelassen (andere Signatur/Logik, kein echtes Duplikat).
 
 ### Sprint 4 — Urlaubsmodus & Konto (KW40-42, 29. Sep - 19. Okt)
 - [ ] 8.2 Foto-Upload + Vision-Analyse

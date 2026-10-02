@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { groupCartItems, calculateCartTotal, type CartItem, type CartItemType } from '@/lib/trip/cartTotals'
+import { formatEuro } from '@/lib/format'
 
 const TYPE_META: Record<CartItemType, { label: string; icon: LucideIcon }> = {
   flight: { label: 'Flüge', icon: Plane },
@@ -33,10 +34,6 @@ const initialItems: CartItem[] = [
   { id: '4', type: 'activity', label: 'Tagesausflug nach Sintra', price: 58 },
   { id: '5', type: 'insurance', label: 'Reise-Krankenversicherung, 10 Tage', price: 24 },
 ]
-
-function formatEuro(amount: number) {
-  return `${amount.toLocaleString('de-DE')} €`
-}
 
 export function Warenkorb() {
   const [items, setItems] = useState(initialItems)

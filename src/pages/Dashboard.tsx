@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { calculateProgress } from '@/lib/trip/calculateProgress'
 import { calculateCartTotal, type CartItem } from '@/lib/trip/cartTotals'
+import { formatEuro } from '@/lib/format'
 import type { TripDraft } from '@/types/chat'
 
 // Same demo "world" as the other trip-lifecycle pages (MeineReisen.tsx,
@@ -41,10 +42,6 @@ const cartItems: CartItem[] = [
 ]
 
 const favoritesCount = 2 // Kapstadt, Reykjavik — siehe Favoriten.tsx
-
-function formatEuro(amount: number) {
-  return `${amount.toLocaleString('de-DE')} €`
-}
 
 interface StatTileProps {
   icon: LucideIcon

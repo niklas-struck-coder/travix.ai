@@ -1,3 +1,8 @@
+/** Formats a plain EUR amount in German locale, e.g. "1.200 €". */
+export function formatEuro(amount: number): string {
+  return `${amount.toLocaleString('de-DE')} €`
+}
+
 /** Formats a Duffel-style offer price ("249.00", "EUR") in German locale, e.g. "249,00 €". */
 export function formatOfferPrice(amount: string, currency: string): string {
   const value = Number(amount)

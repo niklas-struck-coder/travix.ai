@@ -15315,3 +15315,74 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-10-02 (dritter Lauf)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` lag gegenüber `origin/main` bereits um vier
+Commits vom 01.10./02.10. voraus (Timeout-Cleanups in
+`useChat.ts`/`useConcierge.ts`, Details-Dialog-Disambiguierung bei
+Reiseentwürfen, EditMode-Entwurf-Reset) — darauf weitergearbeitet, `main`
+unberührt gelassen, kein Merge nötig. `npm ci` (frischer Checkout): 0
+Schwachstellen. Vor jeder Änderung geprüft: `npx tsc -b` fehlerfrei,
+`npm run lint` 0 Fehler (nur die vier vorbestehenden
+Fast-Refresh-Warnungen), volle Suite `npx vitest run` (59 Testdateien, 389
+Tests, alle grün) — Ausgangszustand bestätigt grün.
+
+**Vorgehen:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+geprüft — alle verbleibenden offenen Programmierungs-Punkte bleiben wie in
+den letzten Berichten dokumentiert an die offene Backend-Entscheidung,
+fehlende Preisfelder in `TripDraft` oder andere Produktentscheidungen
+gebunden. `reports/support-chef.md` und `reports/it-chef.md` (beide
+01.10.) enthielten keinen neuen, noch nicht umgesetzten Punkt (Vorschlag 2
+aus dem Support-Chef-Bericht war bereits der erste heutige Lauf; die
+übrigen offenen Vorschläge dort — PR #25 mergen, Flugsuche-Ankündigung im
+Hauptchat — sind entweder nicht autonom umsetzbar (Merge-Entscheidung) oder
+bereits mehrfach als Produktentscheidung eingestuft). Einen Explore-Agenten
+beauftragt, unabhängig in bisher seltener angefassten Bereichen
+(Dashboard/Kalender/Warenkorb/Buchung/Profil/Einstellungen/Angebote/
+Favoriten/Aktivitaeten/Kartenansicht/Preisalarme/Urlaubsmodus, restliche
+`src/components/trip`/`src/components/search`, `src/lib/*`, `src/hooks/*`
+außerhalb der schon mehrfach geprüften `useChat`/`useConcierge`) nach einem
+neuen, isolierten Bug zu suchen — Ergebnis: keinen qualifizierenden neuen
+Bug gefunden (Codebase in diesen Bereichen bereits durchgehend mit
+korrekten Guards/Resets/aria-labels). Einzige vom Agenten genannte
+Auffälligkeit: `formatEuro()` war in `Warenkorb.tsx`, `Preisalarme.tsx` und
+`Dashboard.tsx` byte-identisch dreifach definiert — selbst verifiziert
+(nicht blind übernommen): alle drei Definitionen tatsächlich identisch
+(`` `${amount.toLocaleString('de-DE')} €` ``); die ähnlich benannten
+`formatPrice()`-Funktionen in `Aktivitaeten.tsx` (optionales
+`null`-Preisfeld) und `Angebote.tsx` (Mehrwährungsunterstützung) haben
+jeweils eine andere Signatur/Logik und sind bewusst unverändert geblieben
+— kein echtes Duplikat.
+
+**Ausgewählter Punkt:** Die dreifache `formatEuro()`-Duplikation
+zusammenführen. Erfüllt die Sicherheitskriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Anzeige-Formatierung,
+keine echte Zahlungsabwicklung), keine offene Produkt-/Architektur-
+entscheidung (rein mechanische Wiederverwendung identischen,
+unveränderten Verhaltens), klar beschrieben, objektiv prüfbar (Tests/
+Build/Lint).
+
+**Fix:** Neue exportierte `formatEuro(amount: number): string` in
+`src/lib/format.ts` (neben der bestehenden `formatOfferPrice()`), exakt
+dieselbe Implementierung wie die drei bisherigen lokalen Funktionen.
+`Warenkorb.tsx`, `Preisalarme.tsx` und `Dashboard.tsx` importieren sie
+jetzt aus `@/lib/format` statt sie selbst zu definieren — keine
+Verhaltensänderung, alle bestehenden Aufrufstellen unverändert. Drei neue
+Unit-Tests in `format.test.ts` (ganzzahliger Betrag, vierstelliger Betrag
+mit Tausenderpunkt, Null).
+
+`ZEITPLAN.md` (neuer Eintrag im Ist-Stand-Abschnitt vor Sprint 4) und
+`tasks/tasks-prd-travix-platform.md` (Anmerkung an Task 7.6) um den
+Fund/Fix ergänzt.
+
+**Geprüft:** `npx tsc -b` (kein Typfehler), `npm run lint` (0 Fehler,
+dieselben vier vorbestehenden Fast-Refresh-Warnungen), volle Suite `npx
+vitest run` (59 Testdateien, 392 Tests — 3 neu gegenüber vorher, alle
+grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

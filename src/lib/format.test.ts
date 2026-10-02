@@ -1,9 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { formatOfferPrice } from '@/lib/format'
+import { formatEuro, formatOfferPrice } from '@/lib/format'
 
 // Intl.NumberFormat separates the amount from the currency symbol with a
 // non-breaking space (U+00A0), not a regular space.
 const NBSP = ' '
+
+describe('formatEuro', () => {
+  it('formats a whole-number amount with the euro sign', () => {
+    expect(formatEuro(249)).toBe('249 €')
+  })
+
+  it('formats a four-digit amount with the German thousands separator', () => {
+    expect(formatEuro(1200)).toBe('1.200 €')
+  })
+
+  it('formats zero', () => {
+    expect(formatEuro(0)).toBe('0 €')
+  })
+})
 
 describe('formatOfferPrice', () => {
   it('formats a EUR amount in German locale', () => {
