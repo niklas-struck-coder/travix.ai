@@ -4,6 +4,87 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-02
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3960d39`, 01.10.) war noch **nicht** von
+Freigabe-Chef geprüft/gemergt — anders als an den Vortagen also kein
+veralteter, sondern ein noch offener eigener Commit. Deshalb nicht neu
+von `main` angelegt, sondern `origin/main` zweimal per Merge-Commit
+eingebracht: ein erster `git fetch origin main` lieferte kurzzeitig einen
+veralteten Stand (`e39f9a6`, derselbe bereits am 10.08. dokumentierte
+Cache-Effekt), ein zweiter Fetch direkt danach zeigte den tatsächlich
+aktuellen Stand (`6326b89`, inkl. der drei neuesten IT-Chef-Auto-Läufe
+von heute). Beide Merges sauber, keine Konflikte.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für das
+Mini-Changelog-Format), kein neues eigenständiges Content-Stück.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 01.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 01.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+Danach `git log 3960d39..origin/main` geprüft (Basislinie: der eigene
+Stand vom 01.10., auf dem dieser Lauf aufsetzt): mehrere neue Commits,
+davon drei mit echter Produkt-Codeänderung, jeder einzeln per `git show`
+und direkter Code-Prüfung verifiziert.
+
+Ein neuer, echter 30. Kandidat kommt dazu (`e964825`, 02.10.: der
+"Details ansehen"-Dialog bei Reiseentwürfen zeigt bei Duplikaten jetzt
+ebenfalls den disambiguierten Namen, nicht nur Lösch-/
+Abschließen-Dialog) — schließt denselben Fund wie Kandidat 29 (01.10.)
+jetzt vollständig ab, ist aber ein eigener, separat verifizierter Commit
+und wird deshalb einzeln gezählt statt in Kandidat 29 einsortiert. Zwei
+weitere echte Fixes vom selben Tag (`2274f4e`: EditMode-Formular-Reset
+beim Schließen; `a920f6c`: `formatEuro()`-Dreifachduplikation
+zusammengeführt) bewusst **nicht** aufgenommen — beide ohne sichtbar
+falsche oder verschwiegene Information gegenüber der Nutzerin (reiner
+Formular-/Robustheits-Fix bzw. reine interne Code-Qualitäts-Änderung
+ohne jede Nutzer-Sichtbarkeit), gleiche Ausschlussgruppen wie an den
+Vortagen etabliert.
+
+Kandidat 28 (`formatDuration()`-"1min"-Problem) erneut geprüft: im Code
+(`FlightCard.tsx:26`, `TrainCard.tsx:21`) weiterhin unverändert, bleibt
+zurückgezogen/blockiert. Der "Flugsuche verspricht/löst nicht aus"-Fund
+(`mockAdvisor.ts`) ebenfalls erneut geprüft und weiterhin unverändert
+offen.
+
+**Kandidatentopf: 29 unverändert, 30 neu dazugekommen — Topf steht jetzt
+bei zwei**, weiterhin weit unter der Achter-Schwelle. Keine sechste
+Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus
+einem einzeln per `git show` und Code-Prüfung verifizierten, bereits in
+`main` gemergten Commit. Die beiden Ausschlüsse sind die konsequente
+Anwendung der längst etablierten Kriterien, keine neue inhaltliche
+Entscheidung. Keine offene Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei zwei,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- `ZEITPLAN.md` bewusst nicht angefasst — betrifft nur die laufende
+  Kandidaten-/Freigabe-Verwaltung, kein eigenständiges neues
+  Content-Stück und keine neue Mini-Changelog-Ausgabe.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` um einen neuen
+  "Update 2026-10-02"-Abschnitt ergänzt (Kandidat 30, zwei bewusste
+  Ausschlüsse, erneute Prüfung von Kandidat 28 und dem
+  Flugsuche-Fund, Kandidatentopf-Stand).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-01
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`

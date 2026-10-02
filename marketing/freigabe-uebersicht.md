@@ -1,10 +1,108 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-01)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-02)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-02: ein neuer 30. Tier-4-Kandidat (Details-Dialog bei Reiseentwürfen disambiguiert jetzt ebenfalls, schließt denselben Fund wie Kandidat 29 vollständig ab), zwei weitere Commits bewusst ausgeschlossen (EditMode-Formular-Reset, formatEuro-Dedup), Kandidat 28 weiterhin unverändert zurückgezogen/blockiert, Kandidatentopf bei zwei, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3960d39`, 01.10.) war noch nicht von
+Freigabe-Chef geprüft/gemergt — der eigene Commit vom 01.10. war also
+noch unmerged, nicht veraltet. Deshalb nicht neu angelegt, sondern
+`origin/main` per Merge-Commit in diesen Branch eingebracht (zwei
+Merges nötig, weil ein erster `git fetch origin main` einen kurzzeitig
+veralteten Stand lieferte, siehe bereits bekannter Cache-Effekt vom
+10.08. — ein zweiter Fetch zeigte den korrekten, aktuellen Stand
+`6326b89`), bevor der eigentliche Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 01.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen
+— die Kanal-/Mini-Changelog-Frage jetzt seit über neun Wochen.
+
+**`git log 3960d39..origin/main` zeigt neue Commits seit dem eigenen
+Lauf vom 01.10.**, darunter drei mit echter Produkt-Codeänderung, jeder
+einzeln per `git show` geprüft (die übrigen sind Freigabe-Chef-/
+Support-Chef-/Marketing-Chef-Berichte und Merge-Commits ohne eigene
+Code-Änderung):
+
+- **`e964825` (02.10., IT-Chef Auto):** Der "Details ansehen"-Dialog auf
+  `/entwuerfe` zeigte bei duplizierten, abgeschlossenen Entwürfen
+  weiterhin den rohen, mehrdeutigen `destination`-Namen als Titel statt
+  der seit 01.10. etablierten `getDraftLabel()`-Disambiguierung, die
+  Lösch- und Abschließen-Dialog bereits nutzen — von Support-Chef bereits
+  am 01.10. bis zur exakten Zeile diagnostiziert (`e240516`). Live im
+  Code nachvollzogen (`Reiseentwuerfe.tsx`, Zeile 373: `getDraftLabel()`
+  jetzt auch im `DialogTitle` des Details-Dialogs), neuer
+  Regressionstest. Schließt damit denselben Fund wie Kandidat 29
+  vollständig ab — vorher hätte eine Nutzerin mit zwei "Lissabon"-
+  Entwürfen beim bloßen Ansehen (nicht nur beim Löschen/Abschließen)
+  nicht sicher wissen können, welcher Entwurf gemeint ist. Gleiche
+  Fundgruppe wie Kandidat 29 ("Reiseentwürfe-Konsistenz"), aber ein
+  eigener, separat verifizierter Commit — **dreißigster Tier-4-Kandidat.**
+- **`2274f4e` (02.10., IT-Chef Auto):** `EditMode.tsx` setzt die Felder
+  für einen neuen Aktivitäts-Entwurf (Name, Preis) jetzt beim Schließen
+  des Dialogs zurück, statt sie beim nächsten Öffnen stehen zu lassen.
+  Live im Code bestätigt (`onOpenChange`-Handler, Zeile 58). **Bewusst
+  nicht** als Tier-4-Kandidat aufgenommen: ein reiner Formular-/
+  Robustheits-Fix ohne sichtbar falsche oder verschwiegene Information
+  gegenüber der Nutzerin — gleiche Ausschlussgruppe wie der
+  ChatInput-Unmount-Fix vom 01.10. (`79335d7`).
+- **`a920f6c` (02.10., IT-Chef Auto):** `formatEuro()` war identisch in
+  `Warenkorb.tsx`, `Preisalarme.tsx` und `Dashboard.tsx` dupliziert und
+  wurde in `src/lib/format.ts` zusammengeführt. Live im Code bestätigt
+  (`format.ts`, neue Exportfunktion; alle drei Seiten importieren jetzt
+  von dort). Reine interne Code-Qualitäts-Änderung ohne jede
+  Nutzer-Sichtbarkeit (identisches Rendering vorher/nachher) — **kein
+  Kandidat**, gleiche Begründung wie bei jeder bisherigen reinen
+  Dependency-/Tooling-Änderung.
+
+**Kandidat 28 erneut geprüft, weiterhin unverändert:** `FlightCard.tsx`
+(Zeile 26) und `TrainCard.tsx` (Zeile 21) runden Dauern unter einer
+Minute weiterhin fest auf die erfundene Anzeige "1min" auf (`grep` nach
+`totalMinutes = 1` bestätigt beide Fundstellen unverändert, inklusive der
+zugehörigen Tests, die genau dieses Verhalten erwarten). Kein neuer Fix
+seit der Zurückziehung am 01.10. gelandet — **Kandidat 28 bleibt
+zurückgezogen/blockiert.**
+
+**"Flugsuche verspricht/löst nicht aus"-Fund erneut geprüft**
+(`mockAdvisor.ts`, Zeile ~170-178): Der Chat verspricht weiterhin "Ich
+suche jetzt nach echten Flug-Verbindungen...", obwohl der
+Haupt-Chat-Ablauf die echte Suche laut Code-Kommentar weiterhin nicht
+auslöst (nur der separate "Bearbeiten"-Pfad in `useChat.ts` tut das).
+Unverändert seit letzter Prüfung — weiterhin offen, kein Content dazu.
+
+**Kandidatentopf:** 29 unverändert, 30 neu dazugekommen — der aktive
+Topf steht damit bei **zwei**, weiterhin weit unter der
+Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht, kein Live-Vorgang — nichts gepostet,
+versendet oder verändert. Keine erfundenen Kennzahlen: der neue Kandidat
+stammt aus einem einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commit. Die beiden
+Ausschlüsse (EditMode, formatEuro) sind die konsequente Anwendung der
+längst etablierten Kriterien, keine neue inhaltliche Entscheidung. Keine
+offene Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei zwei,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- Content rund um "ehrliche Flugsuche" oder "ehrliche Dauer-Anzeige"
+  (Kandidat 28) — beide Funde bleiben offen/blockiert, kein Content über
+  einen Fix, der noch nicht existiert.
+- `ZEITPLAN.md` nicht angefasst — dieses Update betrifft nur die
+  Kandidaten-/Freigabe-Verwaltung, kein neues eigenständiges
+  Content-Stück und keine neue Mini-Changelog-Ausgabe, die dort einen
+  eigenen Eintrag bräuchte.
 
 ## Update 2026-10-01: Kandidat 28 zurückgezogen (eigener "Fix" rundet auf erfundene "1min"-Anzeige, "automatisch gefixt"-Behauptung in zwei Berichten vom 30.09. stimmt nicht), ein neuer 29. Tier-4-Kandidat (Reiseentwürfe-Dialogtexte disambiguiert), ein Robustheits-Fix bewusst ausgeschlossen, Kandidatentopf bei eins, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
 
