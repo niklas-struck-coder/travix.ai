@@ -13,17 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-01):**
-- IT-Chef hat zwei weitere Funde behoben: uneindeutige Titel im Details-Dialog
-  bei doppelten Reiseentwürfen, sowie eine dreifach duplizierte Euro-Formatierung
-  (Warenkorb/Preisalarme/Dashboard) zu einer gemeinsamen Funktion zusammengeführt
-- Support-Chef hat einen neuen Fund gemeldet: Favoriten "Reise mit KI planen"
-  verliert das gespeicherte Ziel (noch offen)
-- Marketing-Chef hat einen weiteren Verbesserungskandidaten vorgeschlagen,
-  zwei andere Fixes bewusst ausgeschlossen
+**Seit letztem Update (2026-10-02):**
+- Support-Chef hat einen neuen, noch offenen Fund gemeldet: Über die Favoriten
+  kann nach einem Reset bzw. "Neue Reise planen" versehentlich eine fremde
+  Reise übernommen werden (Zielparameter-Problem)
+- Marketing-Chef hat einen zurückgestellten Verbesserungskandidaten wieder
+  aufgenommen und einen weiteren neuen Kandidaten vorgeschlagen
+- IT-Chef hat an mehreren Läufen keinen sicheren Umsetzungspunkt gefunden,
+  aber eine Dependency-Advisory gemeldet; die Branch-Gesundheit wurde bestätigt
 - Freigabe-Chef hat die Tagesänderungen wie gewohnt eigenständig geprüft und
   mehrfach nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-02_
+_Letztes Update: 2026-10-03_
