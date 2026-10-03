@@ -5576,3 +5576,58 @@ Marketing-Chef-Lauf nicht wie heute morgen zwei zusätzliche
 
 **Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-03, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (zwei mit
+  Code-Änderung vom 02.10., vierter/fünfter Lauf; drei weitere vom 03.10.
+  ohne neuen Fund, nur Log-Einträge).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`,
+  `FlightCard.tsx`/`.test.tsx`, `TrainCard.tsx`/`.test.tsx`,
+  `KiChat.tsx`/`.test.tsx`, `Favoriten.tsx`/`.test.tsx`,
+  `tasks/tasks-prd-travix-platform.md` — genau zwei inhaltliche Punkte,
+  beide im Log beschrieben, die drei 03.10.-Commits ändern nur
+  `it-chef-auto-log.md` (kein Code):
+  1. `formatDuration()` (`FlightCard.tsx`/`TrainCard.tsx`): rundete eine
+     Sekunden-only-ISO-8601-Dauer (z. B. `"PT45S"`) bisher künstlich auf
+     `"1min"` hoch statt ehrlich `—` zu zeigen — Sonderbehandlung
+     ersatzlos entfernt, mechanisch identisch in beiden Dateien, exakt
+     wie der bereits diagnostizierte, aber ungemergt liegende
+     Auto-Fix-PR #25. Bestehende Tests entsprechend umgedreht.
+  2. `Favoriten.tsx`/`KiChat.tsx`: der Button "Reise mit KI planen"
+     verlinkte unabhängig vom angeklickten Ziel pauschal auf `/ki-chat`
+     statt das Ziel zu übernehmen — jetzt `?destination=`-Parameter nach
+     dem bestehenden `?edit=`-Muster, der nur greift, solange
+     `hasTripData(trip)` false ist (läuft schon ein Entwurf, bleibt er
+     unangetastet). Drei neue Tests in `KiChat.test.tsx`, einer in
+     `Favoriten.test.tsx`.
+  Beide Fixes scoped, kein Scope-Creep, keine Berührung von
+  Auth/Zahlungen/rechtlichen Texten. Keine neue UI/Design-Entscheidung im
+  Sinne von `MARKENDESIGN.md` (reine URL-Parameter-Verdrahtung bzw.
+  Entfernen einer erfundenen Rundung).
+- **Unabhängig selbst verifiziert** (frischer Checkout in separatem
+  Worktree, `npm install`, danach tatsächlich selbst ausgeführt, nicht
+  nur Log geglaubt): `npm install` → 650 Pakete, 6 vorbestehende High-
+  Advisories (unverändert, nicht durch diesen Branch verursacht).
+  `npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben vier
+  vorbestehenden Fast-Refresh-Warnungen in `src/components/ui/`.
+  `npx vitest run` → 59 Testdateien, 396 Tests, alle grün. Deckt sich
+  exakt mit den Angaben im `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `960156b..5fcf14e`,
+gepusht). `it-chef/auto` war danach bereits deckungsgleich mit `main`,
+kein separater Reset nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
