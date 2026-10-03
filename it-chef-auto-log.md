@@ -15526,3 +15526,66 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-03
+
+**Ausgangslage:** `it-chef/auto` war beim Start dieses Laufs 0 Commits
+hinter `main` (letzter Freigabe-Chef-Merge am 02.10. früh) und 2 Commits
+davor (vierter/fünfter Lauf vom 02.10., formatDuration-Sekundenfall und
+Favoriten-Button-Ziel-Übergabe) — kein Merge von `main` nötig.
+
+**Gesucht, aber nichts gefunden:** Zuerst `reports/it-chef.md`,
+`reports/support-chef.md` und `reports/marketing-chef.md` (jeweils
+02.10.) auf offene Funde geprüft — beide dort gemeldeten konkreten
+Bugs (Favoriten-Button ignoriert Ziel; `formatDuration` zeigt
+erfundenes "1min" bei reinen Sekundenwerten) sind bereits über den
+vierten/fünften Lauf vom 02.10. direkt auf `it-chef/auto` behoben und
+im Code gegengeprüft (`src/components/chat/KiChat.tsx`, `?destination=`-
+Effekt vorhanden; `src/components/search/FlightCard.tsx` nutzt die
+korrigierte Regex ohne Pflicht-"T"). Der einzige verbleibende bekannte
+Punkt (Flugsuche-Ankündigung im Hauptchat löst keine echte Suche aus,
+`mockAdvisor.ts:172`) verstößt weiterhin gegen Kriterium 2 (offene
+Backend-Verdrahtungsentscheidung).
+
+Zusätzlich einen eigenen Explore-Agenten mit einer unabhängigen,
+dateibasierten Suche in bisher weniger geprüften Bereichen beauftragt
+(`HotelWizard.tsx`/`FlightWizard.tsx`, `Angebote.tsx`/`Preisalarme.tsx`/
+`Dashboard.tsx`/`Warenkorb.tsx`/`Aktivitaeten.tsx`/`Favoriten.tsx`/
+`Reiseentwuerfe.tsx`/`MeineReisen.tsx`/`Urlaubsmodus.tsx`/`ReiseSuche.tsx`/
+`Buchung.tsx`, `calendarUtils.ts`/`checklistRules.ts`/
+`calculateProgress.ts`/`cartTotals.ts`/`tripStorage.ts`, `Profil.tsx`/
+`Einstellungen.tsx`/`Kalender.tsx`/`Kartenansicht.tsx`,
+`ChatInput.tsx`/`ChatMessage.tsx`/`QuickReplies.tsx`/`TravixAvatar.tsx`/
+`TripSummaryCard.tsx`, `format.ts`, sowie `EditMode.tsx`/
+`ChecklistPanel.tsx`/`useConcierge.ts`/`mockConcierge.ts`/`Sidebar.tsx`/
+`MobileNav.tsx`/`AppShell.tsx`/`PageTransition.tsx`). Ergebnis: kein
+neuer Bug, der alle vier Sicherheitskriterien erfüllt. Ein paar
+Verdachtsstellen (u. a. `Sidebar.tsx`-NavLinks im eingeklappten Zustand
+nur mit `title` statt `aria-label`) erwiesen sich bei genauerer Prüfung
+als funktional korrekt (Accessible-Name-Fallback über `title` greift
+laut Accname-Spec) oder als bewusst unabhängige Demo-Datensätze
+zwischen Seiten (z. B. abweichendes Jahr bei der Kyoto-Demo-Reise in
+`Dashboard.tsx` vs. `Kalender.tsx`/`MeineReisen.tsx` — getrennte
+Platzhalter-"Welten", kein Logikfehler).
+
+Zusätzlich eigenständig auf Testabdeckungslücken geprüft (Muster aus
+früheren Läufen): jede `.ts`/`.tsx`-Datei unter `src/components`,
+`src/lib`, `src/pages`, `src/hooks` (außer `src/components/ui/*`, dort
+testen bestehende Dateien wie `dialog.test.tsx`/`sheet.test.tsx` gezielt
+App-Verhalten statt der reinen shadcn-Vendor-Primitive) hat inzwischen
+eine eigene Testdatei — einzige Ausnahme `src/lib/design-tokens.ts`
+(reine Farb-/Schrift-/Abstands-Konstanten ohne Logik, kein sinnvolles
+Testziel).
+
+**Ergebnis:** Heute kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt. Kein Code-Commit für einen neuen Punkt —
+nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout, `node_modules` fehlte zunächst), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`sheet.tsx`/`tabs.tsx`), `npx
+vitest run` (59 Testdateien, 396 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
