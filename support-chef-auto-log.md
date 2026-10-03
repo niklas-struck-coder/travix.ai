@@ -3893,3 +3893,36 @@ ebenfalls der Parameter vor einem frühen `return` nicht konsumiert wird.
 Der bereits am 02.10. gemeldete, hier bestätigt weiterhin offene Teil
 (stiller Klick ohne jede Rückmeldung bei laufender anderer Planung) wurde
 hier nicht erneut als eigener Punkt ausgeführt, da inhaltlich unverändert.
+
+---
+
+## 2026-10-03 (zweiter Lauf) — Nachkontrolle meines eigenen Funds von heute
+
+**Geprüft:** Ob sich seit meinem obigen Eintrag von heute (Favoriten-
+Zielparameter kann nach Reset eine fremde Reise kapern) etwas geändert
+hat, sowie ein kurzer Blick auf alle seither auf `main` gelandeten
+Commits.
+
+**Ergebnis:** IT-Chef hat den Fund heute bereits aufgegriffen und
+gefixt — [PR #27](https://github.com/niklas-struck-coder/travix.ai/pull/27),
+Branch `it-chef-autofix/stale-destination-after-reset-2026-10-03`, noch
+nicht nach `main` gemergt. Den Diff selbst geprüft
+(`src/components/chat/KiChat.tsx`): `destinationHandled.current` wird
+jetzt auch gesetzt, wenn `hasTripData(trip)` beim Eintreffen des
+Parameters bereits `true` ist, und der Parameter wird dann sofort per
+`setSearchParams({}, { replace: true })` aus der URL entfernt — genau
+der von mir vorgeschlagene Fix. Das behebt die Resurrection: ein
+Favoriten-Klick während einer laufenden Planung kann nach einem späteren
+Reset nicht mehr unbemerkt als "Geisternachricht" auftauchen.
+
+Bewusst **nicht** mitgefixt (und von PR #27 auch nicht behauptet): Der
+Klick auf die Favoriten-Karte bleibt bei laufender anderer Planung
+weiterhin wirkungslos, ohne jede Rückmeldung an die Nutzerin — mein
+Fund vom 02.10. Das ist unverändert ein eigener, offener
+Reibungspunkt und keine Dopplung des heutigen Funds.
+
+Die übrigen seit heute Morgen auf `main` gelandeten Commits (IT-Chef:
+drei weitere Läufe ohne neuen sicheren Punkt; Marketing-Chef: neuer
+Kandidat 31 zur selben Favoriten-Ziel-Übergabe) bringen keine weitere,
+für Support relevante Codeänderung. Kein neuer Bereich für diesen Lauf
+— nichts Nennenswertes über das oben bereits Gemeldete hinaus.
