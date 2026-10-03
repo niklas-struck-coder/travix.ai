@@ -3787,3 +3787,109 @@ bereits gemeldet. Ob derselbe generische „Reise mit KI planen“-Link ohne
 Zielbezug auch bei `Angebote.tsx`/`Preisalarme.tsx` vorliegt (strukturell
 ähnliche Karten mit Ziel/Angebot-Bezug), wurde nicht mitgeprüft und
 bleibt ein naheliegender Kandidat für einen künftigen Lauf.
+
+---
+
+## 2026-10-03 — Favoriten → KI-Chat Zielübergabe (`Favoriten.tsx` / `KiChat.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil das heute Nacht per Freigabe-Chef nach `main` gemergte
+`it-chef/auto` genau das am 02.10. von Support-Chef gemeldete Favoriten-
+Problem behoben hat (Commit `94b0194`, "Favoriten-Button 'Reise mit KI
+planen' übergibt jetzt das angeklickte Ziel an den Chat") — eine frisch
+gebaute, noch nicht eigenständig geprüfte Funktionalität, kein
+wahllos erneut geprüfter Altbestand. `Favoriten.tsx` verlinkt jetzt auf
+`/ki-chat?destination={Ziel}`, ein neuer Effekt in `KiChat.tsx` übernimmt
+den Parameter per `sendMessage()`.
+
+### Reibungspunkt
+
+**Alter `?destination=`-Parameter kann Tage später unbemerkt einen
+komplett anderen, frisch gestarteten Reiseplan kapern**
+
+Der neue Effekt in `src/components/chat/KiChat.tsx:81-90` konsumiert den
+`destination`-Parameter nur, wenn `hasTripData(trip)` gerade `false` ist:
+
+```
+useEffect(() => {
+  const destinationParam = searchParams.get('destination')
+  if (!destinationParam || destinationHandled.current) return
+  if (messages.length === 0) return
+  if (hasTripData(trip)) return
+
+  destinationHandled.current = true
+  sendMessage(destinationParam)
+  setSearchParams({}, { replace: true })
+}, [searchParams, messages, trip, sendMessage, setSearchParams])
+```
+
+Läuft bereits eine andere Reiseplanung (`hasTripData(trip)` ist `true`,
+z. B. weil man schon mitten in einer Lissabon-Planung steckt und nur
+neugierig auf die Kapstadt-Karte in `Favoriten.tsx:113` geklickt hat),
+greift der frühe `return` in Zeile 85 — und zwar *bevor* `setSearchParams`
+aufgerufen wird. Der Parameter bleibt also unverändert in der URL stehen,
+`destinationHandled.current` wird nie auf `true` gesetzt. Das ist exakt
+der von mir am 02.10. gemeldete Reibungspunkt (stiller Klick ohne
+Wirkung) — der bleibt also weiterhin bestehen, nur jetzt als Randfall des
+neuen Codes. Der eigentlich neue, schwerwiegendere Teil:
+
+Da derselbe `KiChat.tsx`-Effekt bei jedem Re-Render erneut prüft (Deps
+u. a. `trip`), feuert er automatisch nach, sobald `hasTripData(trip)`
+später doch `false` wird — ohne jede neue Nutzerinteraktion mit den
+Favoriten. Das passiert über zwei sehr gängige, auf derselben Seite
+liegende Wege:
+1. Klick auf den Zurücksetzen-Button im Chat-Header und Bestätigung von
+   "Ja, neu starten" (`handleResetClick`/`confirmReset`,
+   `KiChat.tsx:102-118`), oder
+2. Klick auf den Quick-Reply-Chip "Neue Reise planen"
+   (`handleQuickReply`, `KiChat.tsx:120-126`) — dieser Chip erscheint
+   nach praktisch jedem abgeschlossenen oder abgebrochenen Schritt
+   (`mockAdvisor.ts:178/190/200`, mehrfach in `useChat.ts`), ist also der
+   normale, von der App selbst vorgeschlagene Weg, eine neue Reise zu
+   beginnen.
+
+Beide rufen `resetChat()` (`useChat.ts:393-408`) auf, das `trip` auf
+`emptyTrip` zurücksetzt (`hasTripData` damit wieder `false`,
+siehe `tripStorage.ts:91-94: Object.values(fields).some(Boolean)`), aber
+weder `resetChat()` noch die beiden Klick-Handler fassen `searchParams`
+an. Im nächsten Render ist die Bedingung in Zeile 85 plötzlich erfüllt,
+`destinationHandled.current` ist immer noch `false` (wurde beim frühen
+`return` nie gesetzt) — der Effekt feuert jetzt, mit dem alten,
+möglicherweise Tage zurückliegenden Favoriten-Klick als Inhalt.
+
+Konkret durchgespielt: Nutzerin plant gerade Lissabon, klickt aus
+Neugier auf die Kapstadt-Karte in Favoriten (landet unverändert im
+Lissabon-Chat, URL zeigt aber weiterhin `?destination=Kapstadt`),
+chattet weiter, schließt die Lissabon-Planung ab oder bricht sie ab und
+klickt den angebotenen Chip "Neue Reise planen" — statt der erwarteten
+Begrüßungsfrage "Wohin soll es gehen?" sendet die App sofort "Kapstadt"
+als Nutzer-Nachricht und antwortet "Kapstadt klingt nach einer
+großartigen Idee! Wie möchtest du anreisen?", ohne dass die Nutzerin das
+je eingegeben oder in diesem Moment gewollt hat. Wirkt wie ein Bug in der
+KI selbst ("woher weiß er das?") und überspringt die eigentlich
+vorgesehene Ziel-Frage komplett.
+
+*Vorschlag:* `destinationHandled.current` unabhängig vom Ergebnis von
+`hasTripData(trip)` setzen (und den Parameter per `setSearchParams({},
+{replace: true})` entfernen), sobald der Parameter einmal gesehen wurde —
+nicht erst, wenn er auch tatsächlich an `sendMessage()` übergeben wird.
+Der Parameter soll ohnehin nur unmittelbar nach dem Klick auf der
+Favoriten-Karte wirken, nicht potenziell beliebig viel später nach einem
+Reset. Läuft bereits eine andere Planung, bliebe der Klick weiterhin
+wirkungslos (unverändert mein 02.10.-Fund), aber wenigstens einmalig und
+ohne Nachwirkung auf einen künftigen Neustart.
+
+### Nicht geprüft
+Der strukturell ähnliche `?edit=`-Parameter (`KiChat.tsx:64-73`) prüft in
+die jeweils andere Richtung (`if (!hasTripData(trip)) return`, feuert
+also nur solange bereits ein Trip existiert) und wurde nicht im Detail
+gegen dasselbe Resurrection-Muster durchgespielt — die Links dorthin
+(`Buchung.tsx`/`ChecklistPanel.tsx`) setzen in der Praxis immer schon
+einen bestehenden Trip voraus, daher wahrscheinlich seltener reproduzierbar,
+aber bleibt ein naheliegender Kandidat für einen künftigen Lauf, falls dort
+ebenfalls der Parameter vor einem frühen `return` nicht konsumiert wird.
+Der bereits am 02.10. gemeldete, hier bestätigt weiterhin offene Teil
+(stiller Klick ohne jede Rückmeldung bei laufender anderer Planung) wurde
+hier nicht erneut als eigener Punkt ausgeführt, da inhaltlich unverändert.
