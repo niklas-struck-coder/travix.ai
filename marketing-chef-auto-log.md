@@ -4,6 +4,76 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-03
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3fa8ab5`, 02.10.) war bereits vollständig
+in `main` gemergt (Freigabe-Chef, früher Nacht-Check 03.10., Commit
+`4796649`) — der Branch war also nur noch veraltet, nicht mehr in Arbeit.
+Wie in den Session-Regeln für bereits gemergte Branches vorgesehen neu
+von aktuellem `origin/main` aus angelegt, statt auf dem alten Stand
+weiterzumachen.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für das
+Mini-Changelog-Format), kein neues eigenständiges Content-Stück.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 02.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 02.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 3fa8ab5..origin/main` geprüft (Basislinie: der eigene
+Stand vom 02.10.): die drei IT-Chef-Auto-Läufe vom 03.10. selbst
+("kein sicherer Punkt gefunden") sowie der Freigabe-Chef-Merge brachten
+keine neue Produkt-Codeänderung. Zwei echte Codeänderungen stammen aber
+noch vom späten 02.10. (nach dem letzten eigenen Lauf entstanden) und
+waren deshalb noch nicht eingeordnet:
+
+- `8a97393` (IT-Chef Auto, vierter Lauf 02.10.): der am 01.10.
+  zurückgezogene Kandidat 28 (`formatDuration()` zeigt bei
+  Sekunden-only-Dauer jetzt ehrlich "—" statt erfundener "1min") ist
+  jetzt tatsächlich im Code gelandet — live gegen `FlightCard.tsx`/
+  `TrainCard.tsx` verifiziert, Rundungs-Sonderfall vollständig entfernt.
+  Kandidat 28 wird damit wieder aufgenommen (keine neue inhaltliche
+  Entscheidung, nur die Feststellung, dass der Code diesmal stimmt).
+- `94b0194` (IT-Chef Auto, fünfter Lauf 02.10.): behebt genau den von
+  mir selbst im Bericht vom 02.10. benannten Favoriten-Fund — der
+  ziel-beschriftete Button "Reise mit KI planen" übergibt das
+  angeklickte Ziel jetzt wirklich an den Chat (`?destination=`-Parameter,
+  analog zum `?edit=`-Muster), statt es stillschweigend zu ignorieren.
+  Live im Code verifiziert (`Favoriten.tsx`, `KiChat.tsx`). Neuer
+  31. Tier-4-Kandidat — passt in dieselbe Fundgruppe wie die bisherigen
+  Kandidaten (stille Lücke zwischen Versprechen und Verhalten), nicht in
+  die Ausschlussgruppe reiner Robustheits-Fixes.
+
+**Kandidatentopf: 28 wieder aufgenommen, 29/30 unverändert, 31 neu
+dazugekommen — Topf steht jetzt bei vier**, weiterhin weit unter der
+Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: beide Einordnungen stammen aus
+einzeln per `git show` und Code-Prüfung verifizierten, bereits in `main`
+gemergten Commits. Keine offene Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei vier,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- `ZEITPLAN.md` bewusst nicht angefasst — betrifft nur die laufende
+  Kandidaten-/Freigabe-Verwaltung, kein eigenständiges neues
+  Content-Stück und keine neue Mini-Changelog-Ausgabe.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-02
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`

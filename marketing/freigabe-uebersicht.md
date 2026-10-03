@@ -1,10 +1,116 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-02)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-03)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-03: Kandidat 28 wieder aufgenommen (echter Fix jetzt gemergt, "1min" verschwunden), ein neuer 31. Tier-4-Kandidat (Favoriten-Button übergibt jetzt wirklich das angeklickte Ziel), Kandidatentopf von zwei auf vier, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `3fa8ab5`, 02.10.) war bereits vollständig
+in `main` gemergt (Freigabe-Chef, früher Nacht-Check 03.10.) — der Branch
+war also nur noch veraltet, nicht mehr in Arbeit. Neu von aktuellem
+`origin/main` (`4796649`) aus angelegt, wie in den Session-Regeln für
+bereits gemergte Branches vorgesehen.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 02.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+die Kanal-/Mini-Changelog-Frage jetzt seit über zehn Wochen.
+
+**`git log 3fa8ab5..origin/main` zeigt die seit dem eigenen Lauf vom
+02.10. neu dazugekommenen Commits**, darunter zwei mit echter
+Produkt-Codeänderung (die übrigen sind IT-Chef-Läufe ohne Fund und
+Freigabe-Chef-/Merge-Commits ohne eigene Code-Änderung), beide einzeln
+per `git show` geprüft:
+
+- **`8a97393` (02.10., vierter IT-Chef-Auto-Lauf):** `formatDuration()`
+  rundet eine Sekunden-only-Dauer (z. B. `PT45S`) nicht mehr künstlich
+  auf "1min" hoch, sondern zeigt wie jede andere unbrauchbare Dauer den
+  ehrlichen Platzhalter-Strich "—". Live im Code verifiziert
+  (`FlightCard.tsx`, Zeile 19-25, und identisch `TrainCard.tsx`: die
+  Rundungs-Sonderbehandlung `if (totalHours === 0 && totalMinutes === 0
+  && Number(seconds || 0) > 0) { totalMinutes = 1 }` ist vollständig
+  entfernt), zugehörige Tests entsprechend umgedreht (erwarten jetzt "—"
+  statt "1min"). Das ist exakt der am 01.10. zurückgezogene Kandidat 28 —
+  damals war die Rundungslogik trotz zweier gegenteiliger
+  Berichtsbehauptungen noch unverändert im Code. Dieses Mal stimmt der
+  Code tatsächlich: **Kandidat 28 wird hiermit wieder aufgenommen**, kein
+  neuer eigenständiger Kandidat. Nebenbei bemerkt (keine Aktion dieses
+  Laufs): der alte, unmerged Branch `it-chef-autofix/formatduration-fake-
+  1min-2026-09-30` (PR #25) ist durch diesen direkt auf `main`
+  umgesetzten Fix inhaltlich redundant geworden.
+- **`94b0194` (02.10., fünfter IT-Chef-Auto-Lauf):** Der Button "Reise
+  mit KI planen" auf einer Favoriten-Karte (z. B. "Kapstadt") verlinkte
+  bisher unabhängig vom angeklickten Ziel immer pauschal auf
+  `/ki-chat` — die Nutzerin musste ihr Ziel erneut eintippen, oder der
+  Klick landete sogar wirkungslos in einer bereits laufenden Planung für
+  ein ganz anderes Ziel. Live im Code verifiziert (`Favoriten.tsx`, Zeile
+  110: Link zeigt jetzt auf `/ki-chat?destination={Ziel}`; `KiChat.tsx`,
+  neuer `useEffect`: übernimmt den Parameter als ersten Chat-Beitrag über
+  `sendMessage()`, aber nur solange `hasTripData(trip)` falsch ist — exakt
+  nach dem bereits etablierten `?edit=`-Muster), neue Tests für alle drei
+  Fälle (kein Trip → Ziel wird übernommen; laufender Trip → Parameter wird
+  ignoriert statt die laufende Planung zu überschreiben; kein Parameter →
+  nichts passiert). Behebt genau die Lücke zwischen Versprechen
+  (ziel-beschrifteter Button) und Verhalten (generischer Link), die der
+  eigene Bericht vom 02.10. (`reports/marketing-chef.md`) ausdrücklich als
+  "genau die Art Lücke ... vor der ich in den letzten Berichten schon beim
+  Flugsuche-Fund gewarnt habe" benannt hatte — passt damit klar in die
+  etablierte Fundgruppe (stille, den Nutzerinnen nicht erkennbare
+  Fehlaktion statt des versprochenen Verhaltens), nicht in die
+  Ausschlussgruppe reiner Formular-/Robustheits-Fixes. **Einunddreißigster
+  Tier-4-Kandidat.**
+
+**Kandidat 28 zur Sicherheit noch einmal gegen die eigene Rückziehungs-
+Begründung vom 01.10. geprüft:** damals war explizit eine falsche
+"automatisch gefixt"-Behauptung in zwei Berichten der Rückziehungsgrund,
+nicht das Prinzip des Fixes selbst — die jetzt tatsächlich gelandete
+Umsetzung entspricht exakt der ursprünglich für Kandidat 28 beschriebenen
+Fundgruppe (`formatDuration()`-Ehrlichkeit, dieselbe wie Kandidat 14/23).
+Keine neue inhaltliche Entscheidung, nur die Feststellung, dass der Code
+diesmal wirklich stimmt.
+
+**"Flugsuche verspricht/löst nicht aus"-Fund erneut geprüft**
+(`mockAdvisor.ts`, Zeile ~170-178): Kommentar und Verhalten unverändert —
+der Hauptchat-Ablauf verspricht weiterhin eine Flugsuche, die er laut
+eigenem Code-Kommentar nicht auslöst. Weiterhin offen, kein Content dazu.
+
+**Kandidatentopf:** 28 wieder aufgenommen, 29/30 unverändert, 31 neu
+dazugekommen — der aktive Topf steht damit bei **vier**, weiterhin weit
+unter der Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht, kein Live-Vorgang — nichts gepostet,
+versendet oder verändert. Keine erfundenen Kennzahlen: beide Einordnungen
+stammen aus einzeln per `git show` und direkter Code-Prüfung verifizierten,
+bereits in `main` gemergten Commits, und die Favoriten-Einordnung stützt
+sich zusätzlich auf die exakte Formulierung aus dem eigenen Bericht vom
+02.10. statt auf eine neue Interpretation. Keine offene
+Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei vier,
+  weiterhin weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- Content rund um "ehrliche Flugsuche" — Fund bleibt offen, kein Content
+  über einen Fix, der noch nicht existiert.
+- `ZEITPLAN.md` nicht angefasst — dieses Update betrifft nur die
+  Kandidaten-/Freigabe-Verwaltung, kein neues eigenständiges
+  Content-Stück und keine neue Mini-Changelog-Ausgabe, die dort einen
+  eigenen Eintrag bräuchte.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-02: ein neuer 30. Tier-4-Kandidat (Details-Dialog bei Reiseentwürfen disambiguiert jetzt ebenfalls, schließt denselben Fund wie Kandidat 29 vollständig ab), zwei weitere Commits bewusst ausgeschlossen (EditMode-Formular-Reset, formatEuro-Dedup), Kandidat 28 weiterhin unverändert zurückgezogen/blockiert, Kandidatentopf bei zwei, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
 
@@ -3051,7 +3157,19 @@ Anfang-bis-Ende-Weg im Code.
    Ausschlussbegründung wie bei `538bb25`. **Kandidatentopf damit bei
    zehn (Kandidaten 18-27) — deutlich über der Achter-Schwelle, alle zehn
    seit dem 29.09. in Ausgabe 5 verarbeitet.** Der Kandidatentopf ist
-   damit wieder leer.
+   damit wieder leer. Am 29./30.09. kurzzeitig ein elfter Eintrag
+   (Kandidat 28, `formatDuration()` bei Sekunden-only-Dauer), am 01.10.
+   aber wieder zurückgezogen, weil der zugrundeliegende Fix trotz
+   gegenteiliger Berichtsbehauptungen noch nicht im Code war — siehe
+   Update 2026-10-01 oben. Am 01./02.10. ein zwölfter Eintrag (Kandidat
+   29, Details-Dialog bei Reiseentwürfen disambiguiert) und am 02.10. ein
+   dreizehnter (Kandidat 30, derselbe Fund im zweiten verbliebenen
+   Dialog) — Topf bei zwei. Seit dem 02./03.10. (siehe Update 2026-10-03
+   oben) wird Kandidat 28 wieder aufgenommen, diesmal mit tatsächlich
+   gelandetem Fix, und ein neuer vierzehnter Eintrag kommt dazu (Kandidat
+   31, Favoriten-Button übergibt jetzt das angeklickte Ziel an den Chat)
+   — **Kandidatentopf damit bei vier (Kandidaten 28-31)**, weiterhin weit
+   unter der Achter-Schwelle.
 
 ### Tier 5 — anderer Kanal als Social, eigene Freigabe-Frage
 
