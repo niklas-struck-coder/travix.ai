@@ -1,5 +1,62 @@
 # Freigabe-Chef-Log
 
+## 2026-10-03, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main` (Stand deckungsgleich mit
+  `main`, `4796649` nach dem heutigen früheren Nacht-Check). Laut
+  Vorgabe ("jeweils nur, falls sie existieren und neue Commits gegenüber
+  main haben") planmäßig übersprungen, keine neue Prüfung nötig.
+- `marketing-chef/auto` — 1 neuer Commit (`cfb5eb3`).
+- `support-chef/auto` — 1 neuer Commit (`2b3c51d`).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Ändert ausschließlich `marketing-chef-auto-log.md` und
+  `marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+  Live-Vorgang, nichts gepostet/versendet/verändert.
+- Inhalt: Kandidat 28 wird wieder aufgenommen, weil der zugrundeliegende
+  Fix diesmal tatsächlich im Code gelandet ist (`8a97393`,
+  `formatDuration()` zeigt bei Sekunden-only-Dauer "—" statt "1min"),
+  plus ein neuer 31. Kandidat (`94b0194`, Favoriten-Button übergibt das
+  angeklickte Ziel jetzt an den Chat). Beide Commits in `git log` auf
+  `origin/main` verifiziert — existieren wirklich, bereits gemergt.
+  Keine erfundenen Kennzahlen/Nutzerzahlen, kein Hinweis auf tatsächliches
+  Posten, Text vollständig und kohärent, kein Stichpunkt-Skizzencharakter.
+→ **Alles passt, nach `main` gemergt.**
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen):
+- Ändert ausschließlich `support-chef-auto-log.md` — reine
+  Analyse, kein Code geändert.
+- Inhalt: neuer Reibungspunkt zur frisch gemergten
+  `?destination=`-Zielübergabe (`Favoriten.tsx`/`KiChat.tsx`,
+  Commit `94b0194`) — der alte `destination`-Parameter kann nach einem
+  Chat-Reset oder Klick auf "Neue Reise planen" unbemerkt eine neue,
+  komplett andere Reiseplanung kapern, weil `destinationHandled.current`
+  beim frühen `return` (laufender Trip) nie gesetzt wird und
+  `resetChat()` den Parameter nicht entfernt.
+- Stichprobenartig nachvollzogen: `KiChat.tsx` Zeilen 71-86 (beide
+  `useEffect`-Hooks), `hasTripData()` in `tripStorage.ts:91-93`,
+  `resetChat()` in `useChat.ts:393-408` (setzt `trip` zurück, fasst
+  `searchParams` nicht an), `getGreeting().trip = emptyTrip` in
+  `mockAdvisor.ts`, sowie die "Neue Reise planen"-Vorkommen in
+  `mockAdvisor.ts`/`useChat.ts` und der Link in `Favoriten.tsx:113`.
+  Datei/Zeilenangaben stimmen, das beschriebene Verhalten ist im Code
+  tatsächlich nachvollziehbar — kein erfundener Fund.
+→ **Alles passt, nach `main` gemergt.**
+
+**Merge-Reihenfolge:** erst `support-chef/auto` (Fast-Forward), danach
+`marketing-chef/auto` (regulärer Merge-Commit, da `support-chef/auto`
+inzwischen in `main` war) — beide nach `main` gepusht. Anschließend
+beide Branches auf den neuen `main`-Stand gebracht.
+
+**Ergebnis:** `it-chef/auto` planmäßig übersprungen (kein neuer Stand).
+`marketing-chef/auto` und `support-chef/auto` geprüft, unabhängig
+verifiziert, beide gemergt.
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
+
 ## 2026-09-30, Tages-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
