@@ -77,12 +77,21 @@ export function KiChat() {
   // Only fires while there's no trip of our own yet (hasTripData false), so
   // it never overwrites an already-running planning conversation, and waits
   // for the greeting message so the destination appears as a reply to it
-  // instead of racing ahead of it.
+  // instead of racing ahead of it. When a trip is already in progress, the
+  // param is discarded right away instead of just skipped — otherwise it
+  // would stay in the URL and fire later as a stale destination once the
+  // user resets the chat (trip data becomes empty) without them having
+  // clicked a Favoriten-Karte again.
   useEffect(() => {
     const destinationParam = searchParams.get('destination')
     if (!destinationParam || destinationHandled.current) return
+
+    if (hasTripData(trip)) {
+      destinationHandled.current = true
+      setSearchParams({}, { replace: true })
+      return
+    }
     if (messages.length === 0) return
-    if (hasTripData(trip)) return
 
     destinationHandled.current = true
     sendMessage(destinationParam)
