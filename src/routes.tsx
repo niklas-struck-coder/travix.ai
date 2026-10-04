@@ -22,6 +22,7 @@ import { Einstellungen } from '@/pages/Einstellungen'
 import { ReiseSuche } from '@/pages/ReiseSuche'
 import { Dashboard } from '@/pages/Dashboard'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { NichtGefunden } from '@/pages/NichtGefunden'
 import { allRoutes } from '@/lib/nav-config'
 
 const builtRoutes = new Set([
@@ -85,6 +86,7 @@ export function AppRoutes() {
                 }
               />
             ))}
+          <Route path="*" element={<PageTransition><NichtGefunden /></PageTransition>} />
         </Routes>
       </AnimatePresence>
     </AppShell>

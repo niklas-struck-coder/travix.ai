@@ -15761,3 +15761,68 @@ Warnungen), `npx vitest run` (59 Testdateien, 396 Tests, alle grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-04 (zweiter Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start 1 Commit vor `main` (erster Lauf
+heute, Favoriten-Ziel-Reset-Fund) und 0 Commits dahinter — kein Merge von
+`main` nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Wie im ersten Lauf heute festgestellt —
+alle offenen Checkboxen hängen weiterhin an Backend-/Auth-Entscheidung,
+einer noch nicht getroffenen Architektur-/Produktentscheidung oder
+Folgearbeit, die selbst wieder darauf aufbaut. Kein neuer, eigenständig
+umsetzbarer Punkt dort.
+
+**Alte Auto-Fix-PRs geprüft:** Alle zehn `it-chef-autofix/*`-Branches, die
+in keinem bisherigen Log-Eintrag/ZEITPLAN-Eintrag erwähnt waren
+(`duffel-network-error-message`, `flightwizard-passengers-nan`,
+`flugsuche-missing-search-reset`, `flugsuche-stale-results`,
+`mainflow-accommodation-quickreplies`, `past-date-departure-checkin`,
+`preisformat-de`, `stay-search-resolved-errors`,
+`ueberrasch-mich-literal-destination`, `unhandled-stay-search-promise`)
+einzeln per `git show` gegen den aktuellen Code auf `main`/`it-chef/auto`
+geprüft: in jedem Fall ist der dort beschriebene Bug längst unabhängig
+(oft mit einer saubereren Lösung) gefixt — alle zehn sind stale und können
+bei der nächsten PR-Hygiene-Aufräumung geschlossen werden.
+
+**Eigene Bug-Suche:** Da die üblichen Kanäle (Reports, offene Checkboxen,
+alte Auto-Fix-PRs) nichts Neues lieferten, einen eigens beauftragten
+Explore-Agenten gezielt auf seltener angefasste Bereiche angesetzt
+(`src/lib/trip/`, Hooks, länger nicht erwähnte Seiten, Datums-/
+Pluralisierungs-Randfälle, Routing). Fund: `src/routes.tsx` (`AppRoutes`)
+registriert 19 feste Routen plus alle Platzhalter-Seiten aus
+`nav-config.ts`, hatte aber keine `<Route path="*">`. Eine unbekannte URL
+(Tippfehler, alter/kaputter Link) lässt React Router `null` rendern —
+`AppShell.tsx` setzt das ungeprüft in `<main>{children}</main>` ein, es
+gibt sonst nirgends im Baum ein Fallback/ErrorBoundary. Live reproduziert:
+unter `/does-not-exist` bleibt nur Sidebar/Hamburger-Header sichtbar,
+der Inhaltsbereich komplett leer, ohne jede Erklärung oder Weg zurück.
+
+**Fix:** Neue Seite `src/pages/NichtGefunden.tsx` nach dem bereits
+etablierten Empty-State-Muster (`Favoriten.tsx`/`Warenkorb.tsx`: Icon,
+ehrlicher Text ohne erfundenes Funktionsversprechen, `Button asChild`-Link
+zurück zu `/`) — keine neue Design-Entscheidung, reine Übernahme des
+bestehenden Musters. Als letzter Eintrag `<Route path="*" element={...}>`
+in `routes.tsx` ergänzt. Neue `NichtGefunden.test.tsx` sowie neue
+`routes.test.tsx` (bisher gab es für `AppRoutes`/`routes.tsx` überhaupt
+keinen Test) — vor dem Fix durch temporäres Zurücknehmen der
+Routenänderung (`git stash` nur `routes.tsx`) reproduzierbar rot
+verifiziert (kein `<h1>` im Dokument unter `/does-not-exist`).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (das richtige Bauteil — Empty-State-Muster —
+existiert bereits, nur die Verdrahtung als Catch-all fehlte), klar genug
+lokalisiert (fehlender `<Route path="*">`-Eintrag), objektiv prüfbar
+(neuer Regressionstest, vor dem Fix reproduzierbar rot).
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
+Warnungen), `npx vitest run` (61 Testdateien, 399 Tests, alle grün),
+`npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

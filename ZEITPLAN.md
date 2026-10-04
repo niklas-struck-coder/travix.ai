@@ -94,6 +94,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Annahme über nicht vorhandene Fakten. Bleibt offener Punkt für 8.11.
   `PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
   entfernten Satz).
+  Vom autonomen IT-Chef-Lauf am 04.10. (zweiter Lauf) einen über einen
+  eigens dafür beauftragten Explore-Agenten gefundenen, eigenständigen Bug
+  behoben: `src/routes.tsx` (`AppRoutes`) registrierte 19 feste Routen plus
+  alle Platzhalter-Seiten aus `nav-config.ts`, aber keine
+  `<Route path="*">` — eine unbekannte URL (Tippfehler, alter/kaputter
+  Link) ließ React Router `null` rendern, `AppShell.tsx` setzt das
+  ungeprüft in `<main>{children}</main>` ein, Nutzer:innen sahen also nur
+  Sidebar/Hamburger-Header und einen komplett leeren Inhaltsbereich statt
+  jeder Fehlermeldung. Live reproduzierbar unter jeder nicht registrierten
+  Adresse. Fix: neue `src/pages/NichtGefunden.tsx` nach dem etablierten
+  Empty-State-Muster (`Favoriten.tsx`/`Warenkorb.tsx`: Icon, ehrlicher
+  Text ohne erfundenes Funktionsversprechen, `Button asChild`-Link zurück
+  zu `/`), als `<Route path="*">` am Ende der Routenliste in `routes.tsx`
+  ergänzt — keine neue Design-Entscheidung, reine Übernahme des
+  bestehenden Musters. Neue `NichtGefunden.test.tsx` sowie neue
+  `routes.test.tsx` (erster Test für `AppRoutes` überhaupt) — vor dem Fix
+  durch temporäres Zurücknehmen der Routenänderung (`git stash` nur
+  `routes.tsx`) reproduzierbar rot verifiziert (kein `<h1>` im Dokument
+  unter `/does-not-exist`).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
