@@ -365,9 +365,9 @@ function renderCart() {
     ? cart.map((l) => {
       const p = findProduct(l.id);
       return `<li class="line" style="--a:${p.accent};--soft:${p.soft}">
-        <a class="line__img" href="produkt.html?sorte=${p.id}">${packSVG(p)}</a>
+        <a class="line__img" href="produkt.html#${p.id}">${packSVG(p)}</a>
         <div class="line__info">
-          <a href="produkt.html?sorte=${p.id}"><strong>${p.title}</strong></a>
+          <a href="produkt.html#${p.id}"><strong>${p.title}</strong></a>
           <span class="muted small">90 g · ${euro(p.price)}</span>
           <div class="qty qty--sm">
             <button type="button" data-qty="${p.id}" data-d="-1" aria-label="Weniger">−</button>
@@ -422,7 +422,7 @@ function productVars(p) {
 /* "Meet the Bros." flavour card on the home page */
 function flavourCard(p) {
   return `
-  <a class="fcard reveal" href="produkt.html?sorte=${p.id}" style="${productVars(p)}">
+  <a class="fcard reveal" href="produkt.html#${p.id}" style="${productVars(p)}">
     ${p.badge ? `<span class="tag">${p.badge}</span>` : ''}
     <div class="fcard__media">${packSVG(p)}</div>
     <div class="fcard__body">
@@ -437,13 +437,13 @@ function flavourCard(p) {
 function shopCard(p) {
   return `
   <article class="scard reveal" style="${productVars(p)}">
-    <a class="scard__media" href="produkt.html?sorte=${p.id}" aria-label="${p.title} ansehen">
+    <a class="scard__media" href="produkt.html#${p.id}" aria-label="${p.title} ansehen">
       ${p.badge ? `<span class="tag">${p.badge}</span>` : ''}
       ${packSVG(p)}
     </a>
     <div class="scard__body">
       <div>
-        <h3><a href="produkt.html?sorte=${p.id}">${p.title}</a></h3>
+        <h3><a href="produkt.html#${p.id}">${p.title}</a></h3>
         <p class="muted">${p.short}</p>
       </div>
       <div class="scard__row">
@@ -522,7 +522,8 @@ function renderShop() {
 function renderProduct() {
   const root = document.querySelector('[data-product]');
   if (!root) return;
-  const id = new URLSearchParams(location.search).get('sorte');
+  const id = location.hash.slice(1) || new URLSearchParams(location.search).get('sorte');
+  window.addEventListener('hashchange', () => location.reload(), { once: true });
   const p = findProduct(id) || PRODUCTS[0];
   const n = p.nutrition;
   const num = (v) => v.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });

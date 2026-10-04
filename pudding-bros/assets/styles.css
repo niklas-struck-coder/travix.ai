@@ -118,7 +118,7 @@ p:last-child { margin-bottom: 0; }
 .logo--light .logo__mark { color: #fff; }
 
 .nav {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
   transition: background .3s, box-shadow .3s, backdrop-filter .3s;
 }
 .nav.scrolled { background: rgba(251, 244, 230, .82); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); box-shadow: 0 1px 0 var(--line); }

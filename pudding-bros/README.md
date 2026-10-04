@@ -15,7 +15,7 @@ python3 -m http.server 8000   # dann http://localhost:8000
 |---|---|
 | `index.html` | Hero, Meet the Bros., Why Pudding Bros.?, Zubereitung, Über uns, Join the Bros., FAQ |
 | `shop.html` | Produktkarten mit Warenkorb, Bros Box (Coming Soon) |
-| `produkt.html?sorte=<id>` | Produktseite (Tabs: Beschreibung, Zubereitung, Zutaten, Allergene, Nährwerte) |
+| `produkt.html#<id>` (alternativ `?sorte=<id>`) | Produktseite (Tabs: Beschreibung, Zubereitung, Zutaten, Allergene, Nährwerte) |
 
 Sorten-IDs: `vanilla-marshmallow`, `chocolate-cookie`, `vanilla-coconut`, `strawberry-marshmallow`.
 
