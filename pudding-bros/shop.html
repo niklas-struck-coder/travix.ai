@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop – Pudding Bros.</title>
+  <meta name="description" content="Alle Sorten von Pudding Bros. online kaufen: Vanilla Marshmallow, Chocolate Cookie, Vanilla Coconut und Strawberry Marshmallow.">
+  <meta name="theme-color" content="#FBF4E6">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/site.js" defer></script>
+</head>
+<body>
+  <div data-header></div>
+
+  <main id="main">
+    <header class="page-head wrap">
+      <p class="eyebrow">Online-Shop</p>
+      <div class="page-head__row">
+        <h1>SHOP</h1>
+        <p>Alle Sorten, ein Anspruch: nicht langweilig. Jede Packung mit Loaded-Beutel, für 500 ml Milch.</p>
+      </div>
+    </header>
+
+    <section class="wrap" aria-label="Produkte">
+      <div class="shop-grid" data-shop></div>
+
+      <article class="box reveal" aria-labelledby="box-title">
+        <div class="box__copy">
+          <span class="box__soon">COMING SOON</span>
+          <h2 id="box-title">BROS BOX</h2>
+          <p>Alle vier Sorten in einer Box. Perfekt zum Durchprobieren, Verschenken oder für einen sehr ehrlichen Pudding-Abend.</p>
+          <div class="box__row">
+            <span class="price price--lg">10,99 €<small>4 × 90 g · statt 12,26 €</small></span>
+            <a class="btn btn--accent btn--lg" href="#" data-notify style="--hover-bg:#fff">Benachrichtige mich <span class="btn__arrow" data-icon="arrow"></span></a>
+          </div>
+        </div>
+        <div class="box__visual" data-box-packs aria-hidden="true"></div>
+      </article>
+
+      <div class="trust">
+        <div class="reveal"><strong>Versand in 1–2 Tagen</strong><span>Klimaneutral verpackt, direkt von den Bros.</span></div>
+        <div class="reveal"><strong>Ab 25 € gratis</strong><span>Versandkostenfrei innerhalb Deutschlands.</span></div>
+        <div class="reveal"><strong>Bro-Garantie</strong><span>Schmeckt nicht? Schreib uns – wir finden eine Lösung.</span></div>
+      </div>
+    </section>
+
+    <div style="height:clamp(80px,10vw,140px)"></div>
+  </main>
+
+  <div data-footer></div>
+</body>
+</html>
