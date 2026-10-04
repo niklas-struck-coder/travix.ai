@@ -15646,6 +15646,69 @@ Chunk-Size-Warnung).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
 
+## 2026-10-04
+
+**Ausgangslage:** Neuer geplanter Cloud-Lauf, frischer, isolierter
+Checkout. `it-chef/auto` war seit dem letzten Lauf (03.10., dritter Lauf)
+bereits vollständig in `main` gelandet (Freigabe-Chef-Merge), `main`
+selbst aber seither um 8 weitere Commits gewachsen (u. a. Auto-Fix-PR
+#27-Report, Freigabe-Chef- und Marketing-Chef-Berichte) — Branch frisch
+von aktuellem `main` neu aufgesetzt statt alter, bereits gemergter
+Historie, `main` bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Alle noch offenen Punkte in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` (Programmierung)
+hängen weiterhin an einer der ausgeschlossenen Kategorien: Backend-/
+Auth-Entscheidung (2.0, 4.1-4.3), einer noch nicht getroffenen
+Architektur-/Produktentscheidung (6.2/6.6/6.7/7.4/7.12, fehlende
+Preis-/Provider-Felder im Datenmodell) oder Folgearbeit, die selbst
+wieder auf 2.0/4.x aufbaut (8.2/8.3/8.5-8.7/8.9/8.12). Kein neuer,
+eigenständig umsetzbarer Punkt dort.
+
+**Eigene Bug-Suche:** `reports/it-chef.md` (03.10.) gelesen — dort als
+"automatisch gefixt (PR wartet auf Review)" vermerkt: PR #27
+(`it-chef-autofix/stale-destination-after-reset-2026-10-03`), Fix für
+einen von Support-Chef gemeldeten Folgefehler des Favoriten→Chat-
+Ziel-Handoffs (02.10., fünfter Lauf). Beim Gegencheck gegen den
+tatsächlichen Code in `main`/`it-chef/auto` zeigte sich: Der Bericht lag
+falsch — der Fix steckte nur im offenen, noch ungemergten Auto-Fix-PR,
+nicht im `main`-Code. `KiChat.tsx`s Favoriten-Destination-Effekt prüfte
+weiterhin zuerst `messages.length`, dann `hasTripData(trip)`, und gab bei
+laufender Planung einfach zurück, ohne den Parameter als erledigt zu
+markieren oder die URL zu bereinigen — exakt der im Bericht
+beschriebene, aber angeblich schon gefixte Bug: Nach einem späteren
+Reset ("Neu starten"/"Neue Reise planen") feuerte derselbe Effekt erneut
+und schickte den alten, womöglich tagealten Favoriten-Klick ohne jede
+neue Nutzerinteraktion als Chat-Nachricht.
+
+**Fix (Diagnose vollständig aus dem Auto-Fix-PR übernommen, Code direkt
+auf `it-chef/auto` angewendet statt auf Ni's Review zu warten, gleiches
+Muster wie bei mehreren früheren Funden):** `KiChat.tsx` prüft im
+Destination-Effekt jetzt `hasTripData(trip)` zuerst; ist das `true`,
+wird der Parameter sofort als erledigt markiert (`destinationHandled`
+gesetzt, `setSearchParams({}, { replace: true })`) und zurückgekehrt,
+statt den `messages.length`-Check zuerst zu prüfen und bei laufender
+Planung stillschweigend nichts zu tun. Reiner Übernahme-Fix 1:1 aus dem
+bereits verifizierten Auto-Fix-PR, keine eigene Design-Entscheidung.
+Neuer Regressionstest in `KiChat.test.tsx` (Reset nach laufender Planung
+mit noch gesetztem `destination`-Parameter sendet die veraltete
+Destination nicht erneut) — vor dem Fix durch den unveränderten alten
+Effekt-Code reproduzierbar rot (Test schlug fehl, `sendMessage` wurde
+nach dem Reset mit dem alten Parameter aufgerufen).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung, klar genug beschrieben (identisch zur
+Diagnose im bereits vorliegenden Auto-Fix-PR), objektiv prüfbar
+(Regressionstest plus volle Suite).
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
+Warnungen), `npx vitest run` (59 Testdateien, 397 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
 ## 2026-10-03 (dritter Lauf)
 
 **Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer,

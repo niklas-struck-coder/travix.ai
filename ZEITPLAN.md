@@ -1289,6 +1289,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Favoriten.test.tsx` (Linkziel je Karte) und `KiChat.test.tsx` (Param
   wird ohne Entwurf übernommen, mit laufendem Entwurf ignoriert, ohne
   Parameter passiert nichts).
+  Vom autonomen IT-Chef-Lauf am 04.10. einen Folgefehler genau dieses
+  Favoriten→Chat-Handoffs behoben, der bereits über den separaten
+  Auto-Fix-Kanal vollständig diagnostiziert war (Auto-Fix-PR #27,
+  `it-chef-autofix/stale-destination-after-reset-2026-10-03`, von
+  Support-Chef am 03.10. gemeldet) — der zugehörige
+  `reports/it-chef.md`-Eintrag vom 03.10. hatte den Fix fälschlich schon
+  als "live" beschrieben, tatsächlich steckte er aber nur im offenen,
+  noch ungemergten PR: Lief schon eine Planung, wenn jemand über eine
+  Favoriten-Karte kam, wurde der `?destination=`-Parameter im Effekt in
+  `KiChat.tsx` bisher nur übersprungen statt verworfen — er blieb in der
+  URL stehen. Setzte man die Planung danach zurück ("Neu starten"/"Neue
+  Reise planen"), feuerte derselbe Effekt erneut und schickte den alten,
+  womöglich tagealten Favoriten-Klick ohne jede neue Nutzerinteraktion
+  als Chat-Nachricht. Fix direkt aus dem Auto-Fix-PR übernommen statt auf
+  Ni's Review zu warten, gleiches Muster wie bei mehreren früheren
+  Funden: Der `hasTripData(trip)`-Check steht jetzt vor dem
+  `messages.length`-Check und markiert den Parameter in diesem Fall
+  sofort als erledigt (URL bereinigt), statt ihn nur zu ignorieren. Neuer
+  Regressionstest in `KiChat.test.tsx` (Reset nach laufender Planung mit
+  noch gesetztem Parameter sendet die veraltete Destination nicht erneut).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
