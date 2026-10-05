@@ -249,11 +249,26 @@ export function useChat(speechEnabled: boolean) {
           return
         }
 
+        const known = findKnownDestination(trip.destination ?? '')
+
+        // Same guard as FlightWizard.tsx's `sameAirport` check — an
+        // identical origin/destination can only ever error out or come
+        // back empty from the search, so catch it here too instead of
+        // letting the user send a nonsensical "von LIS nach LIS" request.
+        if (known && origin === known.iataCode) {
+          setMessages((prev) => [
+            ...prev,
+            makeMessage('assistant', 'Start und Ziel dürfen nicht gleich sein — welcher Flughafen ist dein Abflugort?'),
+          ])
+          setAvatarState('thinking')
+          setIsThinking(false)
+          return
+        }
+
         setAwaitingFlightOrigin(false)
         setEditingField(null)
         setTrip((prev) => ({ ...prev, transportMode: 'flight' }))
 
-        const known = findKnownDestination(trip.destination ?? '')
         if (!known) {
           const notice = `Danke! Für ${trip.destination ?? 'dein Ziel'} kenne ich noch keinen Flughafen für die automatische Suche — nutze dafür kurz die manuelle Flugsuche. Das Transportmittel hab ich trotzdem auf Flug gesetzt.`
           setMessages((prev) => [...prev, makeMessage('assistant', notice)])

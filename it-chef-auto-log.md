@@ -15898,3 +15898,88 @@ Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05 (zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Weiterer geplanter Cloud-Lauf, frischer, isolierter
+Checkout, nur 44 Minuten nach dem ersten Lauf desselben Tages (siehe
+Eintrag oben). `it-chef/auto` war beim Start identisch mit dem
+Zwischenstand des ersten Laufs — kein Merge von `main` nötig, `main`
+bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Unverändert seit den
+Läufen vom 03.–05.10. — alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die
+selbst wieder darauf aufbaut. `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` (Stand
+02./03.10.) erneut geprüft — keine neuen, bisher ungefixten Funde außer
+der weiterhin bewusst offenen Flugsuche-Architekturgrenze.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf Bereiche angesetzt, die in den vorangegangenen ~fünfzig Läufen
+(siehe restliche Einträge dieser Datei) am wenigsten Aufmerksamkeit
+bekommen hatten (`useConcierge.ts`/`mockConcierge.ts`,
+`ChecklistPanel.tsx`/`checklistRules.ts`, `calculateProgress.ts`,
+`format.ts`, `HotelWizard.tsx`/`FlightWizard.tsx`, `HotelCard.tsx`, sowie
+Konsistenzvergleiche zwischen strukturell ähnlichen Komponenten),
+ausdrücklich mit dem Hinweis, bereits mehrfach gefixte Bug-Kategorien
+(instabile Keys, fehlende ARIA-Rollen, `localStorage`-Normalisierung,
+Wortgrenzen in `detectTransportMode()`, Zeitzonen, IME-Komposition,
+fehlende Bestätigungsdialoge) nicht erneut zu melden.
+
+Fund: `useChat.ts` (`sendMessage()`, Zweig
+`editingField === 'transportMode' && awaitingFlightOrigin`) prüfte den
+vom Nutzer eingegebenen Abflug-IATA-Code bisher nur gegen das
+3-Buchstaben-Muster, nie gegen das bekannte Ziel selbst. Wählt man über
+"Bearbeiten" → Transportmittel → Flug ein kuratiertes Ziel (z. B.
+Lissabon, `LIS`) und tippt als Abflughafen zufällig denselben Code ein,
+schickte der Chat anstandslos die Nachricht "Ich suche jetzt echte
+Flüge von LIS nach LIS (Lissabon) für dich" und löste
+`runFlightSearch('LIS', 'LIS')` aus — eine Anfrage an die Duffel-Mock-
+API, die nur leer oder mit Fehler zurückkommen kann. Das strukturell
+identische, eigenständige Flugformular `FlightWizard.tsx` schützt exakt
+denselben Fall bereits seit Längerem über eine `sameAirport`-Prüfung
+("Start und Ziel dürfen nicht gleich sein") — nur der parallele
+Chat-Pfad in `useChat.ts` hatte dieses Gegenstück nie bekommen. Im Code
+nachvollzogen (keine Live-Reproduktion nötig, da reine Mock-Umgebung
+ohne Netzwerkzugriff): `useChat.test.ts`s eigener Test-Helfer
+`switchToFlightAndEnterOrigin` wird in sämtlichen bestehenden Tests
+ausschließlich mit `'BER'` aufgerufen, nie mit dem Code des Ziels
+selbst — die Lücke war bisher durch keinen Test abgedeckt.
+
+**Fix:** Dieselbe Prüfung wie in `FlightWizard.tsx` ergänzt — bevor
+`awaitingFlightOrigin`/`editingField` zurückgesetzt und die Suche
+gestartet wird, wird jetzt geprüft, ob der eingegebene Code mit
+`known.iataCode` übereinstimmt; bei Übereinstimmung bleibt der Chat im
+"wartet auf Abflughafen"-Zustand (wie schon beim ungültigen
+3-Buchstaben-Muster) und antwortet mit "Start und Ziel dürfen nicht
+gleich sein — welcher Flughafen ist dein Abflugort?" statt die
+nonsensische Suche auszulösen. Keine neue Design-Entscheidung, reine
+Übernahme des bereits in `FlightWizard.tsx` etablierten Musters. Neuer
+Regressionstest in `useChat.test.ts` (Eingabe von `'LIS'` bei Ziel
+Lissabon löst `searchFlights` nicht aus und zeigt die Hinweismeldung;
+ein anschließender gültiger, abweichender Code wie `'BER'` funktioniert
+danach normal weiter) — vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+verifiziert (`searchFlights` wurde tatsächlich mit `origin: 'LIS',
+destination: 'LIS'` aufgerufen).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (mechanische Übernahme eines bereits an anderer
+Stelle etablierten Musters), klar lokalisiert (ein zusätzlicher
+Prüfzweig in einer Funktion), objektiv prüfbar (Regressionstest
+reproduzierbar rot vor dem Fix, grün danach, volle Suite weiterhin
+grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+401 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

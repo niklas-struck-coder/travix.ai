@@ -713,6 +713,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   "Demo drafts until real multi-draft storage exists") — sobald echte
   Mehrfach-Entwurf-Speicherung (Base44) kommt, gilt dort dieselbe Lücke.
   Bestehende `Reiseentwuerfe.test.tsx`-Suite bleibt unverändert grün.
+  Vom autonomen IT-Chef-Lauf am 05.10. (zweiter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug im Flugsuche-Teilpfad des Chats
+  behoben: `useChat.ts` (`sendMessage()`, Zweig "Bearbeiten" →
+  Transportmittel → Flug → Abflug-IATA-Code) prüfte den eingegebenen
+  Code bisher nur gegen das 3-Buchstaben-Muster, nie gegen den bereits
+  bekannten Zielcode selbst. Tippte man bei einem kuratierten Ziel (z. B.
+  Lissabon, `LIS`) versehentlich denselben Code als Abflughafen ein,
+  kündigte der Chat anstandslos "Ich suche jetzt echte Flüge von LIS nach
+  LIS" an und löste `runFlightSearch('LIS', 'LIS')` aus — eine Anfrage,
+  die nur leer oder mit Fehler zurückkommen kann. Das strukturell
+  identische, eigenständige `FlightWizard.tsx` schützt genau diesen Fall
+  bereits über eine `sameAirport`-Prüfung ("Start und Ziel dürfen nicht
+  gleich sein") — nur dieser parallele Chat-Pfad hatte das Gegenstück nie
+  bekommen. Fix: dieselbe Prüfung ergänzt, bei Übereinstimmung bleibt der
+  Chat im "wartet auf Abflughafen"-Zustand (wie beim ungültigen Muster)
+  statt die nonsensische Suche zu starten, mechanische Übernahme des
+  bereits etablierten Musters, keine neue Design-Entscheidung. Neuer
+  Regressionstest in `useChat.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
+  reproduzierbar rot verifiziert (`searchFlights` wurde tatsächlich mit
+  `origin: 'LIS', destination: 'LIS'` aufgerufen).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

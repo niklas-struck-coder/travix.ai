@@ -400,6 +400,31 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
   })
 
+  it('rejects an origin airport identical to the destination\'s own airport instead of searching "from LIS to LIS"', async () => {
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'LIS')
+
+    expect(searchFlights).not.toHaveBeenCalled()
+    expect(result.current.flightLoading).toBe(false)
+    const lastMessage = result.current.messages.at(-1)
+    expect(lastMessage?.role).toBe('assistant')
+    expect(lastMessage?.content).toContain('Start und Ziel dürfen nicht gleich sein')
+
+    // still awaiting the origin — a different, valid code now proceeds as usual
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+    act(() => {
+      result.current.sendMessage('BER')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(searchFlights).toHaveBeenCalledWith(expect.objectContaining({ origin: 'BER', destination: 'LIS' }))
+  })
+
   it('clears a stale flight error once the chat moves on with a normal message', async () => {
     vi.mocked(searchFlights).mockRejectedValue(new Error('network down'))
 
