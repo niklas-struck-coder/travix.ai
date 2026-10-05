@@ -16139,3 +16139,67 @@ Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05 (fünfter Lauf desselben Tages)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen, der vierte Lauf war bereits via
+Freigabe-Chef nach `main` gemergt) — kein Merge nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` weiterhin an der Base44-/
+Auth-Backend-Entscheidung oder Folgearbeit blockiert. `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` (Stand 05.10.)
+gelesen — Support-Chefs Vorschlag 2 (ehrliche Formulierung auch für Flug)
+ist durch den vierten Lauf heute bereits erledigt, auch wenn der Bericht
+selbst das noch nicht widerspiegelt. Support-Chefs Vorschlag 1
+(Lösch-Warnungen nach Schwere differenzieren, fünf Dateien) bewusst
+**nicht** umgesetzt: Er verlangt neue, pro Kontext unterschiedliche
+Formulierungen ("Du kannst [X] jederzeit wieder hinzufügen" o. ä.) statt
+Übernahme eines bereits im Code etablierten Musters — `MARKENDESIGN.md`
+trifft dazu keine Aussage, und laut der eigenen Skill-Regel
+("fehlt für einen sonst sicheren UI-Punkt eine wichtige Design-Vorgabe,
+das im Bericht vermerken statt zu raten") wird hier bewusst nicht
+geraten. Bleibt offener Hinweis für Ni oder einen Lauf mit Marketing-Chef-
+Abstimmung.
+
+**Fund (`reports/it-chef.md`, 05.10., "Weitere Vorschläge", Punkt 3):**
+`formatDuration()` lag identisch dupliziert in `src/components/search/
+FlightCard.tsx` und `TrainCard.tsx` vor — dieselbe Code-Hygiene-Situation
+wie zuvor bei `formatEuro()`/`formatOfferPrice()`, die bereits nach
+`src/lib/format.ts` konsolidiert sind.
+
+**Fix:** `formatDuration()` 1:1 nach `src/lib/format.ts` verschoben
+(gleiches Dokumentationskommentar-Muster wie die beiden dortigen
+Nachbarfunktionen), beide lokalen Kopien in `FlightCard.tsx`/
+`TrainCard.tsx` entfernt und durch einen Import aus `@/lib/format`
+ersetzt (zusammengeführt mit dem bereits bestehenden
+`formatOfferPrice`-Import). Keine Verhaltensänderung. Neue, direkte
+`formatDuration`-Testgruppe in `format.test.ts` (7 Tests, deckt dieselben
+Fälle ab, die bisher nur indirekt über `FlightCard.test.tsx`/
+`TrainCard.test.tsx` geprüft wurden: Stunden+Minuten, ganze Stunde ohne
+"0min", Tagesanteil mit Zeitteil, reiner Tagesanteil ohne Zeitteil,
+Sekunden-only als Platzhalter-Strich, fehlende Dauer als Strich,
+unparsbare Eingabe als Rohstring) — bestehende Komponenten-Tests
+unverändert grün, bestätigt die reine Verschiebung ohne Logikänderung.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Konsolidierung identischen Codes, gleiches
+bereits etabliertes Muster wie bei `formatEuro`/`formatOfferPrice`), klar
+lokalisiert und von `reports/it-chef.md` selbst als "reine Code-Hygiene"
+beschrieben, objektiv prüfbar (Typecheck/Lint/Tests/Build grün, neue
+Tests decken das Verhalten jetzt direkt statt nur indirekt ab).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+408 Tests, alle grün — 7 neu durch die direkte `formatDuration`-Testgruppe),
+`npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

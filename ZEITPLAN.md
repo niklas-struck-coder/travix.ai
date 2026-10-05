@@ -1138,6 +1138,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   entsprechend umgedreht (erwarten jetzt "—" statt "1min"). Der
   ursprüngliche Auto-Fix-PR #25 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 05.10. (fünfter Lauf desselben Tages) einen
+  in `reports/it-chef.md` (05.10., "Weitere Vorschläge", Punkt 3)
+  gemeldeten Hygiene-Punkt umgesetzt: `formatDuration()` lag identisch
+  dupliziert in `FlightCard.tsx` und `TrainCard.tsx` vor (gleiche Ursache
+  wie bei `formatEuro()`/`formatOfferPrice()` zuvor, die bereits nach
+  `src/lib/format.ts` konsolidiert sind). Reine Konsolidierung, keine
+  Verhaltensänderung: Funktion 1:1 nach `src/lib/format.ts` verschoben
+  (gleiches Dokumentationskommentar-Muster wie die beiden dortigen
+  Nachbarfunktionen), beide Kopien in `FlightCard.tsx`/`TrainCard.tsx`
+  entfernt, stattdessen aus `@/lib/format` importiert (gemeinsam mit dem
+  bereits bestehenden `formatOfferPrice`-Import). Neue, direkte
+  `formatDuration`-Testgruppe in `format.test.ts` (7 Tests: Stunden+
+  Minuten, ganze Stunde ohne "0min", Tagesanteil, reiner Tagesanteil ohne
+  Zeitteil, Sekunden-only als Platzhalter-Strich, fehlende Dauer als
+  Strich, unparsbare Eingabe als Rohstring) — bestehende
+  `FlightCard.test.tsx`/`TrainCard.test.tsx`-Tests zur Dauer-Anzeige
+  unverändert grün, da reine Verschiebung ohne Logikänderung.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

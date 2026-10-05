@@ -2,7 +2,7 @@ import { Plane, ArrowRight, Clock, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatOfferPrice } from '@/lib/format'
+import { formatOfferPrice, formatDuration } from '@/lib/format'
 import type { FlightOffer } from '@/types/duffel'
 
 function formatTime(isoString: string) {
@@ -13,16 +13,6 @@ function formatTime(isoString: string) {
 function formatDate(isoString: string) {
   if (!isoString) return '—'
   return new Date(isoString).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
-}
-
-function formatDuration(isoDuration: string) {
-  if (!isoDuration) return '—'
-  const match = /P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/.exec(isoDuration)
-  if (!match) return isoDuration
-  const [, days, hours, minutes] = match
-  const totalHours = Number(days || 0) * 24 + Number(hours || 0)
-  const totalMinutes = Number(minutes || 0)
-  return [totalHours && `${totalHours}h`, totalMinutes > 0 && `${totalMinutes}min`].filter(Boolean).join(' ') || '—'
 }
 
 function formatLocation(name: string, iata: string) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatEuro, formatOfferPrice } from '@/lib/format'
+import { formatEuro, formatOfferPrice, formatDuration } from '@/lib/format'
 
 // Intl.NumberFormat separates the amount from the currency symbol with a
 // non-breaking space (U+00A0), not a regular space.
@@ -42,5 +42,35 @@ describe('formatOfferPrice', () => {
 
   it('falls back to the raw amount and currency for an invalid currency code instead of throwing', () => {
     expect(formatOfferPrice('249.00', 'XXXX')).toBe('249.00 XXXX')
+  })
+})
+
+describe('formatDuration', () => {
+  it('formats hours and minutes', () => {
+    expect(formatDuration('PT3H15M')).toBe('3h 15min')
+  })
+
+  it('omits the minutes part for a whole-hour duration instead of showing "0min"', () => {
+    expect(formatDuration('PT4H0M')).toBe('4h')
+  })
+
+  it('formats a duration with a days component instead of showing the raw ISO string', () => {
+    expect(formatDuration('P1DT2H30M')).toBe('26h 30min')
+  })
+
+  it('formats a duration with only a days component (no explicit time part)', () => {
+    expect(formatDuration('P1D')).toBe('24h')
+  })
+
+  it('shows a placeholder dash instead of a fabricated minute for a sub-minute (seconds-only) duration', () => {
+    expect(formatDuration('PT45S')).toBe('—')
+  })
+
+  it('shows a placeholder dash for a missing duration', () => {
+    expect(formatDuration('')).toBe('—')
+  })
+
+  it('returns the raw string for an unparseable duration', () => {
+    expect(formatDuration('not-a-duration')).toBe('not-a-duration')
   })
 })
