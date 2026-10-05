@@ -1792,6 +1792,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `MobileNav.test.tsx`: Fokus landet nach einem Navigationslink auf der
   `<h1>` der neuen Seite; Fokus kehrt beim Schließen ohne Navigation
   weiterhin zum Menü-Button zurück.
+  Vom autonomen IT-Chef-Lauf am 05.10. (vierter Lauf desselben Tages)
+  Vorschlag 2 aus `reports/support-chef.md` (05.10.) umgesetzt: Die
+  Flug-Ankündigung im Hauptchat-Ablauf (`getNextAdvisorStep()` in
+  `mockAdvisor.ts`, bisher eigener `if (next.transportMode === 'flight')`-
+  Zweig) versprach "Ich suche jetzt nach echten Flug-Verbindungen …
+  Nichts wird erfunden" — der Hauptchat-Ablauf löst die echte Flugsuche
+  aber nie aus (nur der separate "Bearbeiten"-Pfad in `useChat.ts` tut
+  das, laut Code-Kommentar an derselben Stelle bewusst so). Die anderen
+  vier Modi (Zug/Bus/Fähre/Mietwagen) nutzen für exakt diese Lücke bereits
+  seit dem 29.09.-Fix die ehrliche `noAutoSearchPhraseDe`-Formulierung
+  ("hab ich noch keine automatische Suche — dein Reiseplan steht
+  trotzdem!"). Fix: reiner Text-Fix, keine Änderung an der Suchlogik
+  selbst — der Flug-Sonderzweig entfernt, Flug fällt jetzt durch dieselbe
+  bereits etablierte, ehrliche Formulierung wie die anderen vier Modi
+  (`noAutoSearchPhraseDe.flight` existierte bereits, war aber durch den
+  Sonderzweig nie erreichbar). Die dadurch komplett ungenutzte
+  `transportLabelsDe`-Map (einzige Verwendung war der entfernte Zweig)
+  ebenfalls entfernt, Begleitkommentar entsprechend angepasst. Bestehender
+  Test in `mockAdvisor.test.ts` umgestellt (prüft jetzt dieselbe ehrliche
+  Formulierung wie der Zug-Test statt des alten Suchversprechens) — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockAdvisor.ts`) reproduzierbar rot verifiziert (alter Test erwartete
+  "Ich suche jetzt nach echten Flug-Verbindungen", neuer erwartet das
+  Gegenteil). Der im selben Bericht sowie in `reports/it-chef.md`
+  weiterhin offen gemeldete, größere Punkt — dass die echte Flugsuche im
+  Hauptchat-Ablauf überhaupt nie ausgelöst wird — bleibt bewusst
+  unangetastet, das wäre eine eigene Backend-Verdrahtungsentscheidung,
+  keine reine Text-/Logikkorrektur.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

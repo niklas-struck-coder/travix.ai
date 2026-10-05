@@ -16061,3 +16061,81 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05 (vierter Lauf desselben Tages)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit dem dritten Lauf
+desselben Tages, lag aber hinter `main` zurück (der dritte Lauf fand keinen
+Punkt und committete nichts, Freigabe-Chef hatte zwischenzeitlich einen
+Log-Eintrag auf `main` ergänzt). Per `git merge --ff-only origin/main`
+aktualisiert — reiner Fast-Forward ohne Konflikt, `main` dabei unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut (Sprint 3/4: 7.4, 7.12, 8.2-8.7, 8.9, 8.11-8.13 —
+allesamt blockiert oder Produktentscheidung). `reports/support-chef.md`
+(05.10.) gezielt gelesen, da neuer Stand seit dem letzten Merge.
+
+**Fund (Vorschlag 2 aus `reports/support-chef.md`, 05.10.):** Die
+Flug-Ankündigung im Hauptchat-Ablauf (`getNextAdvisorStep()` in
+`src/lib/ai/mockAdvisor.ts`, Zweig für den letzten offenen Trip-Schritt)
+versprach bisher "Ich suche jetzt nach echten Flug-Verbindungen für
+{Ziel} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir.
+Nichts wird erfunden." — der Hauptchat-Ablauf löst die echte Flugsuche
+aber nie aus (laut eigenem Code-Kommentar an derselben Stelle: nur der
+separate "Bearbeiten"-Pfad in `useChat.ts`, der nach dem Startflughafen
+fragt, tut das). Support-Chef merkte an: Die anderen vier Modi
+(Zug/Bus/Fähre/Mietwagen) haben für exakt diese Lücke bereits seit dem
+29.09.-Fix eine andere, ehrliche Formulierung ("hab ich noch keine
+automatische Suche — dein Reiseplan steht trotzdem!") — nur Flug behält
+das nicht einlösbare Suchversprechen. `reports/it-chef.md` listet das
+grundlegende Problem (echte Suche wird im Hauptchat nie ausgelöst) zwar
+schon länger als bewusste, nicht automatisch fixbare Architekturgrenze —
+Support-Chefs Vorschlag 2 ist aber ausdrücklich enger: kein Eingriff in
+die Suchlogik, nur dieselbe bereits etablierte ehrliche Formulierung auch
+für Flug verwenden, exakt wie bei den anderen vier Modi.
+
+**Fix:** In `mockAdvisor.ts` den eigenen `if (next.transportMode ===
+'flight')`-Sonderzweig entfernt — Flug fällt jetzt durch dieselbe,
+bereits bestehende `noAutoSearchPhraseDe`-Formulierung wie die anderen
+vier Modi (`noAutoSearchPhraseDe.flight` existierte bereits als
+ungenutzter Map-Eintrag, da der Sonderzweig ihn nie erreichen ließ).
+Keine neue Design-Entscheidung, reine Wiederverwendung des bereits
+etablierten Musters. Die dadurch komplett ungenutzte `transportLabelsDe`-
+Map (einzige Verwendung war der entfernte Zweig) mitentfernt, erklärender
+Begleitkommentar entsprechend angepasst. Bestehender Test in
+`mockAdvisor.test.ts` ("promises a real search when the final step
+completes a flight trip …") umbenannt und umgestellt, prüft jetzt dieselbe
+ehrliche Formulierung wie der strukturell identische Zug-Test — vor dem
+Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`src/lib/ai/mockAdvisor.ts`) reproduzierbar rot verifiziert (alter Test
+erwartete weiterhin "Ich suche jetzt nach echten Flug-Verbindungen", neuer
+Test erwartet explizit das Gegenteil sowie die Flug-spezifische ehrliche
+Formulierung).
+
+Der größere, von Support-Chef unverändert gemeldete Punkt — dass die echte
+Flugsuche im Hauptchat-Ablauf überhaupt nie ausgelöst wird — bleibt bewusst
+unangetastet: das wäre eine eigene Backend-Verdrahtungsentscheidung
+(welcher Pfad löst wann die echte Duffel-Suche aus), keine reine
+Text-/Logikkorrektur, und verletzt damit Sicherheitskriterium 2.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Wiederverwendung eines bereits an vier
+anderen Stellen etablierten Textmusters, keine Änderung der Suchlogik),
+klar lokalisiert (ein entfernter Sonderzweig plus eine entfernte, dadurch
+ungenutzte Konstante in einer Datei), objektiv prüfbar (Regressionstest
+reproduzierbar rot vor dem Fix, grün danach, volle Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+401 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

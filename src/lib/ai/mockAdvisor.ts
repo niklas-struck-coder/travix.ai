@@ -17,19 +17,10 @@ const transportKeywords: Record<TransportMode, string[]> = {
   car: ['auto', 'mietwagen', 'roadtrip', 'autovermietung'],
 }
 
-const transportLabelsDe: Record<TransportMode, string> = {
-  train: 'Zug',
-  flight: 'Flug',
-  bus: 'Bus',
-  ferry: 'Fähre',
-  car: 'Mietwagen',
-}
-
-// Eigene Formulierung für den "noch keine automatische Suche"-Satz: anders
-// als transportLabelsDe (reines Nomen für "nur X, wie gewünscht") braucht
-// dieser Satz eine vollständige, grammatisch passende Ergänzung nach "Für
-// …" — "Mietwagen" ist keine "Verbindung" (impliziert eine Fahrplan-Route)
-// und "Fähre-Verbindungen" ist keine idiomatische Zusammensetzung (siehe
+// Formulierung für den "noch keine automatische Suche"-Satz: braucht eine
+// vollständige, grammatisch passende Ergänzung nach "Für …" — "Mietwagen"
+// ist keine "Verbindung" (impliziert eine Fahrplan-Route) und
+// "Fähre-Verbindungen" ist keine idiomatische Zusammensetzung (siehe
 // reports/support-chef.md, 2026-09-28, Fund 2).
 const noAutoSearchPhraseDe: Record<TransportMode, string> = {
   train: 'Zug-Verbindungen',
@@ -161,26 +152,15 @@ export function getNextAdvisorStep(trip: TripDraft, userMessage: string): Adviso
   if (!next.accommodation) {
     next.accommodation = userMessage
 
-    // Flug ist der einzige Modus mit echter automatischer Suche (über den
-    // "Bearbeiten"-Pfad in useChat.ts, der nach dem Startflughafen fragt).
-    // Für die anderen Modi gibt es noch keine angebundene Verbindungssuche
-    // (Duffel bietet keine Zug-/Bus-/Fähr-/Mietwagen-Verbindungen an) — das
-    // hier zu versprechen würde die Nutzer:innen mit einer "Suche", die nie
-    // endet, hängen lassen, und widerspräche der "nichts wird erfunden"-
-    // Zusage oben in der Begrüßung.
-    if (next.transportMode === 'flight') {
-      return {
-        content: `Ich suche jetzt nach echten ${transportLabelsDe[next.transportMode]}-Verbindungen für ${next.destination} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir. Nichts wird erfunden.`,
-        avatarState: 'searching',
-        // Der Hauptchat-Ablauf löst die echte Flugsuche aktuell nicht aus
-        // (nur der separate "Bearbeiten"-Pfad in useChat.ts tut das) — ohne
-        // Quick-Reply bliebe die Nutzerin ohne jeden nächsten Schritt hängen.
-        quickReplies: ['Neue Reise planen'],
-        trip: next,
-        nextField: null,
-      }
-    }
-
+    // Auch für Flug gibt es im Hauptchat-Ablauf keine echte automatische
+    // Suche (nur der separate "Bearbeiten"-Pfad in useChat.ts, der nach dem
+    // Startflughafen fragt, löst die echte Duffel-Suche aus) — ein "ich
+    // suche jetzt" hier würde also eine Suche versprechen, die nie startet,
+    // und widerspräche der "nichts wird erfunden"-Zusage oben in der
+    // Begrüßung (siehe reports/support-chef.md, 2026-10-05, Vorschlag 2).
+    // Für die anderen Modi gilt dieselbe Lücke (Duffel bietet keine Zug-/
+    // Bus-/Fähr-/Mietwagen-Verbindungen an) — alle Modi nutzen deshalb
+    // dieselbe ehrliche Formulierung.
     const noAutoSearchPhrase = next.transportMode
       ? noAutoSearchPhraseDe[next.transportMode]
       : 'deine Verbindung'
