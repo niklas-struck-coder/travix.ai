@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TripSummaryCard } from './TripSummaryCard'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 
@@ -59,5 +59,24 @@ describe('TripSummaryCard', () => {
     expect(screen.getByText('12.–19. Okt.')).toBeInTheDocument()
     expect(screen.getByText('Hotel Kyoto')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Speichern & ansehen/ })).toHaveAttribute('href', '/buchung')
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('does not warn about duplicate keys when two free-text fields happen to have the same value', () => {
+    // destination and budget are both free text typed in the chat (useChat.ts/mockAdvisor.ts) —
+    // nothing stops a user from answering the budget question with the same text as the destination.
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    render(
+      <MemoryRouter>
+        <TripSummaryCard trip={{ ...emptyTrip, destination: 'Lissabon', budget: 'Lissabon' }} />
+      </MemoryRouter>,
+    )
+
+    expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining('same key'), expect.anything())
+    expect(screen.getAllByText('Lissabon')).toHaveLength(2)
   })
 })

@@ -25,12 +25,12 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
   const TransportIcon = trip.transportMode ? transportIcons[trip.transportMode] : MapPin
 
   const rows = [
-    trip.destination && { icon: MapPin, label: trip.destination },
-    trip.transportMode && { icon: TransportIcon, label: transportLabels[trip.transportMode] },
-    trip.dates && { icon: CalendarDays, label: trip.dates },
-    trip.budget && { icon: Wallet, label: trip.budget },
-    trip.accommodation && { icon: BedDouble, label: trip.accommodation },
-  ].filter(Boolean) as { icon: typeof Plane; label: string }[]
+    trip.destination && { key: 'destination', icon: MapPin, label: trip.destination },
+    trip.transportMode && { key: 'transportMode', icon: TransportIcon, label: transportLabels[trip.transportMode] },
+    trip.dates && { key: 'dates', icon: CalendarDays, label: trip.dates },
+    trip.budget && { key: 'budget', icon: Wallet, label: trip.budget },
+    trip.accommodation && { key: 'accommodation', icon: BedDouble, label: trip.accommodation },
+  ].filter(Boolean) as { key: string; icon: typeof Plane; label: string }[]
 
   if (rows.length === 0) return null
 
@@ -41,7 +41,7 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-navy">Deine Reise bisher</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {rows.map((row) => (
-              <div key={row.label} className="flex items-center gap-1.5 text-sm text-foreground">
+              <div key={row.key} className="flex items-center gap-1.5 text-sm text-foreground">
                 <row.icon className="size-4 text-navy" />
                 {row.label}
               </div>

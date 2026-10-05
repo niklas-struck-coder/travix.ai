@@ -15826,3 +15826,75 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05
+
+**Ausgangslage:** Neuer geplanter Cloud-Lauf, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `origin/main` plus
+den beiden eigenen Commits vom 04.10. (erster und zweiter Lauf) — kein
+Merge von `main` nötig, `main` bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Weiterhin wie in den Läufen vom 03./
+04.10. festgestellt — alle offenen Checkboxen hängen an Backend-/
+Auth-Entscheidung, einer noch nicht getroffenen Architektur-/
+Produktentscheidung oder Folgearbeit, die selbst wieder darauf aufbaut.
+Kein neuer, eigenständig umsetzbarer Punkt dort.
+
+**Reports geprüft:** `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (alle Stand 02./03.10.) gelesen — jeder dort
+genannte, noch nicht automatisch gefixte Punkt ist entweder bereits
+unabhängig gefixt (Favoriten-Ziel-Reset, s. Eintrag 04.10.) oder
+ausdrücklich architekturell/blockiert (Flugsuche-Ankündigung im
+Hauptchat ohne echte Suche — bewusste, dokumentierte Grenze, keine
+isolierte Korrektur). Keine neuen, bisher ungefixten Funde.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf bisher weniger untersuchte Bereiche angesetzt (`src/pages/*.tsx`
+einzeln, `src/components/` außerhalb chat/search, `src/lib/format.ts`,
+`src/lib/duffel/client.ts`, Inkonsistenzen zwischen strukturell
+ähnlichen Komponenten). Fund: `TripSummaryCard.tsx` (Zusammenfassungskarte
+im Chat) baute den React-`key` jeder Zeile aus dem angezeigten Freitext
+(`key={row.label}`) — `destination`, `dates` und `budget` sind aber alle
+vom Nutzer frei eingetippter Text, der zufällig identisch sein kann (z. B.
+Antwort auf die Budget-Frage lautet zufällig wie das zuvor genannte
+Reiseziel). Live mit `destination: 'Lissabon', budget: 'Lissabon'`
+reproduziert: React protokolliert "Encountered two children with the
+same key, `Lissabon`" — bei späteren Re-Renders (Feld kommt hinzu/fällt
+weg) kann die falsche Zeile ihre Identität/ihr Icon "erben" statt
+korrekt neu gemountet zu werden.
+
+**Fix:** `key` von `row.label` auf einen vom Feldinhalt unabhängigen,
+festen Feldnamen pro Zeile umgestellt (`'destination'`, `'transportMode'`,
+`'dates'`, `'budget'`, `'accommodation'`) — keine neue
+Design-Entscheidung, keine sichtbare Verhaltensänderung. Neuer
+Regressionstest in `TripSummaryCard.test.tsx` (`console.error`-Spy
+erwartet keine "same key"-Warnung bei `destination === budget`) — vor
+dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`TripSummaryCard.tsx`) reproduzierbar rot verifiziert (Spy fing die
+React-Warnung tatsächlich ab), nach dem Fix grün. Dieselbe Ursache lag
+identisch im Details-Dialog von `Reiseentwuerfe.tsx:378-394` vor (fünf
+Zeilen mit denselben Freitext-Feldern, dort `key={row.label}`) —
+mechanisch gleichgezogen (feste Feldnamen statt Freitext als Key). Dort
+aktuell nicht live reproduzierbar (die Seite zeigt noch feste
+Demo-Entwürfe ohne echte Nutzereingabe, siehe Kommentar im Code "Demo
+drafts until real multi-draft storage exists"), daher kein eigener
+Regressionstest dafür — bestehende `Reiseentwuerfe.test.tsx`-Suite bleibt
+unverändert grün, bestätigt keine Verhaltensänderung.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Implementierungsdetail-Korrektur), klar
+lokalisiert (ein `key`-Ausdruck pro Datei), objektiv prüfbar
+(Regressionstest reproduzierbar rot vor dem Fix, grün danach, volle
+Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+400 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -682,6 +682,37 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   verifiziert (Test schlug fehl: `clearTimeout` wurde nicht aufgerufen).
   Der ursprüngliche Auto-Fix-PR #26 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 05.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `TripSummaryCard.tsx` (Zusammenfassungskarte im Chat, zeigt Reiseziel/
+  Transportmittel/Daten/Budget/Unterkunft) baute den React-`key` für jede
+  Zeile bisher aus dem angezeigten Freitext selbst (`key={row.label}`) —
+  `destination`, `dates` und `budget` sind aber alle vom Nutzer frei im
+  Chat eingetippter Text (`useChat.ts`/`mockAdvisor.ts` übernehmen
+  `userMessage` unverändert). Tippt jemand z. B. als Antwort auf die
+  Budget-Frage denselben Text wie zuvor als Reiseziel (reproduzierbar:
+  `destination: 'Lissabon', budget: 'Lissabon'`), erhalten zwei
+  verschiedene Zeilen denselben Key — React protokolliert "Encountered
+  two children with the same key" und kann bei späteren Re-Renders (z. B.
+  wenn ein weiteres Feld hinzukommt/wegfällt) die falsche Zeile ihre
+  Identität/ihr Icon "erben" lassen. Fix: `key` von `row.label` auf einen
+  vom Feldinhalt unabhängigen, festen Feldnamen pro Zeile umgestellt
+  (`'destination'`/`'transportMode'`/`'dates'`/`'budget'`/
+  `'accommodation'`), keine neue Design-Entscheidung, keine
+  Verhaltensänderung für sehende Nutzer:innen. Neuer Regressionstest in
+  `TripSummaryCard.test.tsx` (`console.error`-Spy erwartet keine "same
+  key"-Warnung bei `destination === budget`) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `TripSummaryCard.tsx`) reproduzierbar rot verifiziert (Spy fing die
+  React-Warnung ab). Dieselbe Ursache lag identisch im Details-Dialog von
+  `Reiseentwuerfe.tsx:378-394` vor (dort alle fünf Zeilen fix, nicht
+  gefiltert, aber mit denselben Freitext-Feldern) — mechanisch
+  gleichgezogen (`key: 'destination'` usw. statt `key={row.label}`).
+  Dort aktuell nicht live reproduzierbar, weil die Seite noch feste
+  Demo-Entwürfe ohne Nutzereingabe zeigt (siehe Kommentar in der Datei:
+  "Demo drafts until real multi-draft storage exists") — sobald echte
+  Mehrfach-Entwurf-Speicherung (Base44) kommt, gilt dort dieselbe Lücke.
+  Bestehende `Reiseentwuerfe.test.tsx`-Suite bleibt unverändert grün.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

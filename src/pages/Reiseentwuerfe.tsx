@@ -376,22 +376,24 @@ export function Reiseentwuerfe() {
           {detailsDraft && (
             <div className="flex flex-col gap-3">
               {[
-                { icon: MapPin, label: detailsDraft.destination },
+                { key: 'destination', icon: MapPin, label: detailsDraft.destination },
                 {
+                  key: 'transportMode',
                   icon: detailsDraft.trip.transportMode ? transportIcons[detailsDraft.trip.transportMode] : Plane,
                   label: detailsDraft.trip.transportMode
                     ? transportLabels[detailsDraft.trip.transportMode]
                     : 'Noch kein Transport ausgewählt',
                 },
-                { icon: CalendarDays, label: detailsDraft.trip.dates || 'Noch keine Daten gewählt' },
-                { icon: Wallet, label: detailsDraft.trip.budget || 'Noch kein Budget angegeben' },
+                { key: 'dates', icon: CalendarDays, label: detailsDraft.trip.dates || 'Noch keine Daten gewählt' },
+                { key: 'budget', icon: Wallet, label: detailsDraft.trip.budget || 'Noch kein Budget angegeben' },
                 {
+                  key: 'accommodation',
                   icon: BedDouble,
                   label: detailsDraft.trip.accommodation || 'Noch keine Unterkunft ausgewählt',
                 },
               ]
                 .map((row) => (
-                  <div key={row.label} className="flex items-center gap-2 text-sm text-foreground">
+                  <div key={row.key} className="flex items-center gap-2 text-sm text-foreground">
                     <row.icon className="size-4 text-teal" />
                     {row.label}
                   </div>
