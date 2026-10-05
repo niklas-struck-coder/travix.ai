@@ -1,10 +1,128 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-03)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-05)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-05: zwei neue Tier-4-Kandidaten (32: Favoriten-Ziel-Reset-Fund tatsächlich gefixt, schließt Fundgruppe 31 ab; 33: fehlende 404-Route/komplett leere Seite behoben), zwei Commits bewusst ausgeschlossen (React-Key-Stabilität, Start=Ziel-Validierung im Flug-Chat), Kandidatentopf von vier auf sechs, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a065db5`, 03.10.) war bereits vollständig
+in `main` gemergt (Freigabe-Chef, früher Nacht-Check 05.10., Commit
+`4cfcafd`) — der Branch war also nur noch veraltet, nicht mehr in Arbeit.
+Neu von aktuellem `origin/main` (`4cfcafd`) aus angelegt, wie in den
+Session-Regeln für bereits gemergte Branches vorgesehen.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 02./03.10.),
+`ZEITPLAN.md` (6.2, Zeile 2001, weiterhin `[ ]`) oder diesem Dokument.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen
+Treffer), kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen
+bleiben offen — die Kanal-/Mini-Changelog-Frage jetzt seit über zehn
+Wochen.
+
+**`git log cfb5eb3..origin/main` zeigt die seit dem eigenen Lauf vom
+03.10. neu dazugekommenen Commits**, darunter vier mit echter
+Produkt-Codeänderung (die übrigen sind ein Support-Chef-Analysebericht
+ohne eigene Codeänderung, Berichte, ein Daily-Status-Update, ein
+Freigabe-Chef-Tages-Check und Merge-Commits), jeder einzeln per
+`git show` geprüft:
+
+- **`698be1e` (04.10., IT-Chef Auto):** Der Favoriten→Chat-Zielübergabe-
+  Effekt (`KiChat.tsx`, Kandidat 31 vom 03.10.) prüfte bisher zuerst
+  `messages.length`, erst danach `hasTripData(trip)` — lief bereits eine
+  Planung, gab der Effekt einfach zurück, ohne den Parameter als erledigt
+  zu markieren oder die URL zu bereinigen. Ein späterer Reset ("Neu
+  starten"/"Neue Reise planen") ließ denselben Effekt erneut feuern und
+  schickte den alten, womöglich tagealten Favoriten-Klick ohne jede neue
+  Nutzerinteraktion als Chat-Nachricht — genau der von Support-Chef am
+  03.10. gemeldete Fund ("Favoriten-Zielparameter kann nach Reset eine
+  fremde Reise kapern"). Live im Code verifiziert (`KiChat.tsx`: Effekt
+  prüft jetzt `hasTripData(trip)` zuerst und markiert den Parameter sofort
+  als erledigt), neuer Regressionstest. Schließt dieselbe Fundgruppe wie
+  Kandidat 31 vollständig ab (stille Lücke zwischen Versprechen und
+  Verhalten bei derselben Funktion), aber ein eigener, separat
+  verifizierter Commit — **zweiunddreißigster Tier-4-Kandidat.**
+- **`21ef1a7` (04.10., IT-Chef Auto, zweiter Lauf):** `routes.tsx`
+  (`AppRoutes`) hatte keine `<Route path="*">` — eine unbekannte URL
+  (Tippfehler, alter/kaputter Link) ließ React Router `null` rendern,
+  `AppShell.tsx` setzt das ungeprüft in `<main>` ein. Live reproduziert:
+  unter einer nicht registrierten Adresse blieb nur Sidebar/Header
+  sichtbar, der Inhaltsbereich komplett leer, ohne jeden Hinweis oder Weg
+  zurück. Fix: neue `NichtGefunden.tsx` nach dem etablierten
+  Empty-State-Muster, als Catch-all-Route verdrahtet. Genau dieselbe
+  Fundgruppe wie `8e52f6f` (04.09., bereits als Tier-4-relevant eingestuft:
+  "komplett leere Seite ohne jeden Hinweis" statt einer ehrlichen
+  Fehlermeldung) — nur ein anderer Auslöser (fehlende Route statt
+  ungeprüfter Alt-Daten), gleiches Prinzip. **Dreiunddreißigster
+  Tier-4-Kandidat.**
+- **`5da0058` (05.10., IT-Chef Auto):** `TripSummaryCard.tsx` (und
+  mechanisch gleichgezogen `Reiseentwuerfe.tsx`) nutzte den angezeigten
+  Freitext selbst als React-`key` — bei zufällig identischem Text in zwei
+  Feldern (z. B. Budget == Reiseziel) kollidierten zwei Keys. **Bewusst
+  nicht** als Tier-4-Kandidat aufgenommen: keine sichtbare Verhaltens-
+  änderung, keine falsche oder verschwiegene Information gegenüber der
+  Nutzerin — reine interne Implementierungsdetail-Korrektur, gleiche
+  Ausschlussgruppe wie frühere reine Stabilitäts-/Cleanup-Fixes (z. B.
+  EditMode-Formular-Reset, ChatInput-Unmount-Cleanup).
+- **`06f485b` (05.10., IT-Chef Auto, zweiter Lauf):** Der Chat-
+  "Bearbeiten"-Pfad für den Flug-Abflughafen prüfte den eingegebenen
+  IATA-Code bisher nicht gegen das bereits bekannte Ziel — bei
+  identischem Code (z. B. Ziel und Abflug beide "LIS") kündigte der Chat
+  eine Suche "von LIS nach LIS" an und löste sie auch aus, statt
+  nachzufragen. **Bewusst nicht** als Tier-4-Kandidat aufgenommen: reine
+  Validierungskorrektur (verhindert eine unsinnige, aber ehrlich
+  angekündigte Suche), keine "falsche Information ohne Erkennbarkeit"-
+  Erzählung — exakt dieselbe Einstufung wie der bereits am 05.09.
+  ausgeschlossene `26f7edd` (identische Start-/Zielflughafen-Prüfung im
+  eigenständigen Flugformular).
+
+**"Flugsuche verspricht/löst nicht aus"-Fund erneut geprüft**
+(`mockAdvisor.ts`, Zeile ~170-182): Kommentar und Verhalten unverändert —
+der Hauptchat-Ablauf verspricht weiterhin eine Flugsuche, die er laut
+eigenem Code-Kommentar nicht auslöst. Weiterhin offen, kein Content dazu.
+
+**Kandidatentopf:** 28-31 unverändert, 32 und 33 neu dazugekommen — der
+aktive Topf steht damit bei **sechs**, weiterhin unter der
+Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht, kein Live-Vorgang — nichts gepostet,
+versendet oder verändert. Keine erfundenen Kennzahlen: beide neuen
+Kandidaten stammen aus einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commits, beide Ausschlüsse
+stützen sich auf bereits etablierte, hier nur konsequent angewendete
+Kriterien (keine neue inhaltliche Entscheidung). Keine offene
+Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei sechs,
+  weiterhin unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- Content rund um "ehrliche Flugsuche" — Fund bleibt offen, kein Content
+  über einen Fix, der noch nicht existiert.
+- `ZEITPLAN.md` nicht angefasst — dieses Update betrifft nur die
+  Kandidaten-/Freigabe-Verwaltung, kein neues eigenständiges
+  Content-Stück und keine neue Mini-Changelog-Ausgabe, die dort einen
+  eigenen Eintrag bräuchte.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 05.10. (Prüfung
+  der vier Fragen, vier neue Commits einzeln geprüft, zwei als
+  Tier-4-Kandidaten 32/33, zwei bewusst ausgeschlossen, Kandidatentopf-
+  Stand auf "sechs" gesetzt), Datum im Titel auf 05.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung. Vor dem Schreiben `KiChat.tsx`, `routes.tsx`,
+`TripSummaryCard.tsx` und `useChat.ts` direkt im aktuellen Code gelesen,
+nicht nur aus Commit-/Logtexten übernommen.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-03: Kandidat 28 wieder aufgenommen (echter Fix jetzt gemergt, "1min" verschwunden), ein neuer 31. Tier-4-Kandidat (Favoriten-Button übergibt jetzt wirklich das angeklickte Ziel), Kandidatentopf von zwei auf vier, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
 

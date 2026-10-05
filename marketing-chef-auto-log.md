@@ -4,6 +4,100 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-05
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a065db5`, 03.10.) war bereits vollständig
+in `main` gemergt (Freigabe-Chef, früher Nacht-Check 05.10., Commit
+`4cfcafd`) — der Branch war also nur noch veraltet, nicht mehr in Arbeit.
+Neu von aktuellem `origin/main` aus angelegt, wie in den Session-Regeln
+für bereits gemergte Branches vorgesehen.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für das
+Mini-Changelog-Format), kein neues eigenständiges Content-Stück.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 03.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 02./03.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log cfb5eb3..origin/main` geprüft (Basislinie: der eigene
+Stand vom 03.10.): vier Commits mit echter Produkt-Codeänderung, jeder
+einzeln per `git show` und direkter Code-Prüfung verifiziert (die übrigen
+sind ein Support-Chef-Analysebericht ohne eigene Codeänderung, Berichte,
+ein Daily-Status-Update, ein Freigabe-Chef-Tages-Check und
+Merge-Commits):
+
+- `698be1e` (04.10., IT-Chef Auto): behebt den von Support-Chef am 03.10.
+  gemeldeten Favoriten-Ziel-Reset-Fund (stiller, erneuter Versand eines
+  alten Favoriten-Ziels nach Reset/"Neue Reise planen", ohne neue
+  Nutzerinteraktion) — live im Code bestätigt (`KiChat.tsx`). Schließt
+  dieselbe Fundgruppe wie Kandidat 31 (02.10.) ab, eigener, separat
+  verifizierter Commit. **32. Tier-4-Kandidat.**
+- `21ef1a7` (04.10., IT-Chef Auto, zweiter Lauf): fehlende
+  `<Route path="*">` behoben — unbekannte URLs zeigten bisher eine
+  komplett leere Seite ohne jeden Hinweis, jetzt eine ehrliche
+  "Nicht gefunden"-Seite mit Weg zurück. Live im Code bestätigt
+  (`routes.tsx`). Gleiche Fundgruppe wie der bereits am 04.09. gezählte
+  `8e52f6f` ("komplett leere Seite ohne jeden Hinweis"), nur anderer
+  Auslöser. **33. Tier-4-Kandidat.**
+- `5da0058` (05.10., IT-Chef Auto): instabiler React-Key in
+  `TripSummaryCard.tsx`/`Reiseentwuerfe.tsx`. Bewusst nicht aufgenommen —
+  keine sichtbare Verhaltensänderung, reine interne Implementierungs-
+  korrektur, gleiche Ausschlussgruppe wie frühere Stabilitäts-/
+  Cleanup-Fixes.
+- `06f485b` (05.10., IT-Chef Auto, zweiter Lauf): Start=Ziel-Prüfung für
+  den Flug-Abflughafen im Chat-"Bearbeiten"-Pfad. Bewusst nicht
+  aufgenommen — reine Validierungskorrektur ohne "falsche Information
+  ohne Erkennbarkeit"-Erzählung, exakt dieselbe Einstufung wie der bereits
+  am 05.09. ausgeschlossene `26f7edd` (identische Prüfung im
+  eigenständigen Flugformular).
+
+Der "Flugsuche verspricht/löst nicht aus"-Fund (`mockAdvisor.ts`) erneut
+geprüft, weiterhin unverändert offen — kein Content dazu.
+
+**Kandidatentopf:** 28-31 unverändert, 32 und 33 neu dazugekommen — Topf
+steht jetzt bei **sechs**, weiterhin unter der Achter-Schwelle. Keine
+sechste Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Reine Markdown-Ergänzung einer bestehenden
+Übersicht, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: beide neuen Kandidaten stammen
+aus einzeln per `git show` und direkter Code-Prüfung verifizierten,
+bereits in `main` gemergten Commits; beide Ausschlüsse wenden nur
+bereits etablierte Kriterien an. Klar genug beschrieben, keine offene
+Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei sechs,
+  weiterhin unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/components/chat/KiChat.tsx` (Effekt prüft `hasTripData(trip)` vor
+`destinationHandled`-Markierung) und `src/routes.tsx` (`<Route
+path="*">` vorhanden, verweist auf `NichtGefunden`) direkt im aktuellen
+Code gelesen, nicht nur aus Commit-Texten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 05.10. (Prüfung
+  der vier Fragen, vier neue Commits einzeln geprüft, zwei als
+  Tier-4-Kandidaten 32/33, zwei bewusst ausgeschlossen, Kandidatentopf-
+  Stand auf "sechs" gesetzt, Datum im Titel aktualisiert).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-03
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
