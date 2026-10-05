@@ -1,5 +1,74 @@
 # Freigabe-Chef-Log
 
+## 2026-10-05, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (letzter eigener Check am
+  03.10., seitdem zwei Läufe am 04.10. und drei Läufe am 05.10., davon
+  vier mit Code-Änderung und einer ohne Fund/Commit).
+- `marketing-chef/auto` — 0 Commits vor `main`. Planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 1 Commit vor `main` (`efe2ae9`), aber vom 03.10.
+  (zweiter Lauf), nicht von heute. Laut Vorgabe für diesen frühen Lauf
+  planmäßig übersprungen (kein neuer Stand von heute) — bleibt für den
+  6-Uhr-Lauf bzw. den nächsten Check offen, falls der dann zuständige
+  Lauf ihn nicht ohnehin mitnimmt.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur die
+Log-Einträge geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`, `KiChat.tsx`/
+  `.test.tsx`, `TripSummaryCard.tsx`/`.test.tsx`, `useChat.ts`/
+  `.test.ts`, `Reiseentwuerfe.tsx`, `routes.tsx`, neue
+  `NichtGefunden.tsx`/`.test.tsx`, neue `routes.test.tsx` — vier
+  inhaltliche Punkte, jeweils exakt wie in `it-chef-auto-log.md`
+  beschrieben:
+  1. Favoriten→Chat-Ziel-Handoff (`KiChat.tsx`): Reset während laufender
+     Planung markierte den `destination`-Parameter nie als erledigt und
+     bereinigte die URL nicht — nach einem späteren "Neu starten" feuerte
+     derselbe Effekt erneut mit dem alten, womöglich tagealten Ziel.
+  2. Fehlende `<Route path="*">` (`routes.tsx` + neue `NichtGefunden.tsx`):
+     unbekannte URL rendert sonst nur leeren Inhaltsbereich ohne jede
+     Erklärung.
+  3. Instabiler React-Key in `TripSummaryCard.tsx`/`Reiseentwuerfe.tsx`
+     (`key={row.label}` statt fester Feldname) — kollidiert, wenn
+     Nutzer:in z. B. als Budget-Antwort denselben Text wie das Reiseziel
+     eintippt.
+  4. Fehlende Start=Ziel-Prüfung beim Flug-Abflughafen im Chat
+     (`useChat.ts`) — Gegenstück zur bereits bestehenden `sameAirport`-
+     Prüfung in `FlightWizard.tsx`, hatte der parallele Chat-Pfad nie
+     bekommen.
+  Alle vier scoped, kein Scope-Creep über die beschriebenen Punkte
+  hinaus, keine Berührung von Auth/Zahlungen/rechtlichen Texten. Einzige
+  UI-Neuerung (`NichtGefunden.tsx`) folgt nachweislich dem bestehenden
+  Empty-State-Muster (Icon, ehrlicher Text, `Button asChild`-Link) wie
+  `Favoriten.tsx`/`Warenkorb.tsx`, Farben (`teal`/`navy`) stimmen mit
+  `MARKENDESIGN.md` überein — keine eigene Design-Entscheidung. Der
+  fünfte Commit (dritter Lauf 05.10.) ist reiner Log-Eintrag ohne
+  Code-Änderung (MeineReisen-Demo-Status-Kandidat zu Recht als eigene
+  Produktentscheidung verworfen, nicht automatisch gefixt).
+- **Unabhängig selbst verifiziert** (separater Worktree, frischer
+  `npm install`, danach tatsächlich selbst ausgeführt statt nur den Log
+  zu glauben): `npm install` → 650 Pakete, dieselben 6 vorbestehenden
+  High-Severity-Advisories (shadcn-CLI-Kette, unverändert). `npx tsc -b`
+  → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben vier vorbestehenden
+  Fast-Refresh-Warnungen in `src/components/ui/`. `npx vitest run` → 61
+  Testdateien, 401 Tests, alle grün. Deckt sich exakt mit den Angaben im
+  letzten `it-chef-auto-log.md`-Eintrag.
+→ **Alles passt, nach `main` gemergt** (`git merge --no-ff`, saubere
+Zusammenführung ohne Konflikte).
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` planmäßig übersprungen (kein neuer Stand).
+`support-chef/auto` planmäßig übersprungen (einziger neuer Commit ist
+vom 03.10., nicht von heute) — bleibt offen für den nächsten
+zuständigen Lauf.
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. Einziger Hinweis (kein Grund für aktive
+Benachrichtigung): `support-chef/auto`s einziger offener Commit ist
+bereits zwei Tage alt (03.10.) und wartet weiterhin auf einen Lauf, der
+ihn mitnimmt.
+
 ## 2026-10-03, Tages-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
