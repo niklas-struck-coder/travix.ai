@@ -140,6 +140,28 @@ describe('KiChat destination query param', () => {
     expect(sendMessage).not.toHaveBeenCalled()
   })
 
+  it('discards the destination param while a trip is in progress, so it cannot resurface as a stale message after a later reset', () => {
+    const sendMessage = vi.fn()
+    const { rerender } = renderKiChat(
+      { sendMessage, messages: [greetingMessage], trip: { ...emptyTrip, destination: 'Lissabon' } },
+      ['/ki-chat?destination=Kapstadt'],
+    )
+
+    vi.mocked(useChat).mockReturnValue({
+      ...baseChatState,
+      sendMessage,
+      messages: [greetingMessage],
+      trip: emptyTrip,
+    })
+    rerender(
+      <MemoryRouter initialEntries={['/ki-chat?destination=Kapstadt']}>
+        <KiChat />
+      </MemoryRouter>,
+    )
+
+    expect(sendMessage).not.toHaveBeenCalled()
+  })
+
   it('does nothing without a destination param', () => {
     const sendMessage = vi.fn()
     renderKiChat({ sendMessage, messages: [greetingMessage], trip: emptyTrip })

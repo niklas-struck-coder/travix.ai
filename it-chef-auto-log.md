@@ -15646,6 +15646,69 @@ Chunk-Size-Warnung).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
 
+## 2026-10-04
+
+**Ausgangslage:** Neuer geplanter Cloud-Lauf, frischer, isolierter
+Checkout. `it-chef/auto` war seit dem letzten Lauf (03.10., dritter Lauf)
+bereits vollständig in `main` gelandet (Freigabe-Chef-Merge), `main`
+selbst aber seither um 8 weitere Commits gewachsen (u. a. Auto-Fix-PR
+#27-Report, Freigabe-Chef- und Marketing-Chef-Berichte) — Branch frisch
+von aktuellem `main` neu aufgesetzt statt alter, bereits gemergter
+Historie, `main` bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Alle noch offenen Punkte in
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` (Programmierung)
+hängen weiterhin an einer der ausgeschlossenen Kategorien: Backend-/
+Auth-Entscheidung (2.0, 4.1-4.3), einer noch nicht getroffenen
+Architektur-/Produktentscheidung (6.2/6.6/6.7/7.4/7.12, fehlende
+Preis-/Provider-Felder im Datenmodell) oder Folgearbeit, die selbst
+wieder auf 2.0/4.x aufbaut (8.2/8.3/8.5-8.7/8.9/8.12). Kein neuer,
+eigenständig umsetzbarer Punkt dort.
+
+**Eigene Bug-Suche:** `reports/it-chef.md` (03.10.) gelesen — dort als
+"automatisch gefixt (PR wartet auf Review)" vermerkt: PR #27
+(`it-chef-autofix/stale-destination-after-reset-2026-10-03`), Fix für
+einen von Support-Chef gemeldeten Folgefehler des Favoriten→Chat-
+Ziel-Handoffs (02.10., fünfter Lauf). Beim Gegencheck gegen den
+tatsächlichen Code in `main`/`it-chef/auto` zeigte sich: Der Bericht lag
+falsch — der Fix steckte nur im offenen, noch ungemergten Auto-Fix-PR,
+nicht im `main`-Code. `KiChat.tsx`s Favoriten-Destination-Effekt prüfte
+weiterhin zuerst `messages.length`, dann `hasTripData(trip)`, und gab bei
+laufender Planung einfach zurück, ohne den Parameter als erledigt zu
+markieren oder die URL zu bereinigen — exakt der im Bericht
+beschriebene, aber angeblich schon gefixte Bug: Nach einem späteren
+Reset ("Neu starten"/"Neue Reise planen") feuerte derselbe Effekt erneut
+und schickte den alten, womöglich tagealten Favoriten-Klick ohne jede
+neue Nutzerinteraktion als Chat-Nachricht.
+
+**Fix (Diagnose vollständig aus dem Auto-Fix-PR übernommen, Code direkt
+auf `it-chef/auto` angewendet statt auf Ni's Review zu warten, gleiches
+Muster wie bei mehreren früheren Funden):** `KiChat.tsx` prüft im
+Destination-Effekt jetzt `hasTripData(trip)` zuerst; ist das `true`,
+wird der Parameter sofort als erledigt markiert (`destinationHandled`
+gesetzt, `setSearchParams({}, { replace: true })`) und zurückgekehrt,
+statt den `messages.length`-Check zuerst zu prüfen und bei laufender
+Planung stillschweigend nichts zu tun. Reiner Übernahme-Fix 1:1 aus dem
+bereits verifizierten Auto-Fix-PR, keine eigene Design-Entscheidung.
+Neuer Regressionstest in `KiChat.test.tsx` (Reset nach laufender Planung
+mit noch gesetztem `destination`-Parameter sendet die veraltete
+Destination nicht erneut) — vor dem Fix durch den unveränderten alten
+Effekt-Code reproduzierbar rot (Test schlug fehl, `sendMessage` wurde
+nach dem Reset mit dem alten Parameter aufgerufen).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung, klar genug beschrieben (identisch zur
+Diagnose im bereits vorliegenden Auto-Fix-PR), objektiv prüfbar
+(Regressionstest plus volle Suite).
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
+Warnungen), `npx vitest run` (59 Testdateien, 397 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
 ## 2026-10-03 (dritter Lauf)
 
 **Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer,
@@ -15695,6 +15758,306 @@ Checkout, `node_modules` fehlte zunächst; dieselben 6 High-Severity-
 Advisories in der shadcn-CLI-Kette, s.o.), `npx tsc -b` (kein Typfehler),
 `npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
 Warnungen), `npx vitest run` (59 Testdateien, 396 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-04 (zweiter Lauf)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start 1 Commit vor `main` (erster Lauf
+heute, Favoriten-Ziel-Reset-Fund) und 0 Commits dahinter — kein Merge von
+`main` nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Wie im ersten Lauf heute festgestellt —
+alle offenen Checkboxen hängen weiterhin an Backend-/Auth-Entscheidung,
+einer noch nicht getroffenen Architektur-/Produktentscheidung oder
+Folgearbeit, die selbst wieder darauf aufbaut. Kein neuer, eigenständig
+umsetzbarer Punkt dort.
+
+**Alte Auto-Fix-PRs geprüft:** Alle zehn `it-chef-autofix/*`-Branches, die
+in keinem bisherigen Log-Eintrag/ZEITPLAN-Eintrag erwähnt waren
+(`duffel-network-error-message`, `flightwizard-passengers-nan`,
+`flugsuche-missing-search-reset`, `flugsuche-stale-results`,
+`mainflow-accommodation-quickreplies`, `past-date-departure-checkin`,
+`preisformat-de`, `stay-search-resolved-errors`,
+`ueberrasch-mich-literal-destination`, `unhandled-stay-search-promise`)
+einzeln per `git show` gegen den aktuellen Code auf `main`/`it-chef/auto`
+geprüft: in jedem Fall ist der dort beschriebene Bug längst unabhängig
+(oft mit einer saubereren Lösung) gefixt — alle zehn sind stale und können
+bei der nächsten PR-Hygiene-Aufräumung geschlossen werden.
+
+**Eigene Bug-Suche:** Da die üblichen Kanäle (Reports, offene Checkboxen,
+alte Auto-Fix-PRs) nichts Neues lieferten, einen eigens beauftragten
+Explore-Agenten gezielt auf seltener angefasste Bereiche angesetzt
+(`src/lib/trip/`, Hooks, länger nicht erwähnte Seiten, Datums-/
+Pluralisierungs-Randfälle, Routing). Fund: `src/routes.tsx` (`AppRoutes`)
+registriert 19 feste Routen plus alle Platzhalter-Seiten aus
+`nav-config.ts`, hatte aber keine `<Route path="*">`. Eine unbekannte URL
+(Tippfehler, alter/kaputter Link) lässt React Router `null` rendern —
+`AppShell.tsx` setzt das ungeprüft in `<main>{children}</main>` ein, es
+gibt sonst nirgends im Baum ein Fallback/ErrorBoundary. Live reproduziert:
+unter `/does-not-exist` bleibt nur Sidebar/Hamburger-Header sichtbar,
+der Inhaltsbereich komplett leer, ohne jede Erklärung oder Weg zurück.
+
+**Fix:** Neue Seite `src/pages/NichtGefunden.tsx` nach dem bereits
+etablierten Empty-State-Muster (`Favoriten.tsx`/`Warenkorb.tsx`: Icon,
+ehrlicher Text ohne erfundenes Funktionsversprechen, `Button asChild`-Link
+zurück zu `/`) — keine neue Design-Entscheidung, reine Übernahme des
+bestehenden Musters. Als letzter Eintrag `<Route path="*" element={...}>`
+in `routes.tsx` ergänzt. Neue `NichtGefunden.test.tsx` sowie neue
+`routes.test.tsx` (bisher gab es für `AppRoutes`/`routes.tsx` überhaupt
+keinen Test) — vor dem Fix durch temporäres Zurücknehmen der
+Routenänderung (`git stash` nur `routes.tsx`) reproduzierbar rot
+verifiziert (kein `<h1>` im Dokument unter `/does-not-exist`).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (das richtige Bauteil — Empty-State-Muster —
+existiert bereits, nur die Verdrahtung als Catch-all fehlte), klar genug
+lokalisiert (fehlender `<Route path="*">`-Eintrag), objektiv prüfbar
+(neuer Regressionstest, vor dem Fix reproduzierbar rot).
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-
+Warnungen), `npx vitest run` (61 Testdateien, 399 Tests, alle grün),
+`npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-05
+
+**Ausgangslage:** Neuer geplanter Cloud-Lauf, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `origin/main` plus
+den beiden eigenen Commits vom 04.10. (erster und zweiter Lauf) — kein
+Merge von `main` nötig, `main` bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Weiterhin wie in den Läufen vom 03./
+04.10. festgestellt — alle offenen Checkboxen hängen an Backend-/
+Auth-Entscheidung, einer noch nicht getroffenen Architektur-/
+Produktentscheidung oder Folgearbeit, die selbst wieder darauf aufbaut.
+Kein neuer, eigenständig umsetzbarer Punkt dort.
+
+**Reports geprüft:** `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (alle Stand 02./03.10.) gelesen — jeder dort
+genannte, noch nicht automatisch gefixte Punkt ist entweder bereits
+unabhängig gefixt (Favoriten-Ziel-Reset, s. Eintrag 04.10.) oder
+ausdrücklich architekturell/blockiert (Flugsuche-Ankündigung im
+Hauptchat ohne echte Suche — bewusste, dokumentierte Grenze, keine
+isolierte Korrektur). Keine neuen, bisher ungefixten Funde.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf bisher weniger untersuchte Bereiche angesetzt (`src/pages/*.tsx`
+einzeln, `src/components/` außerhalb chat/search, `src/lib/format.ts`,
+`src/lib/duffel/client.ts`, Inkonsistenzen zwischen strukturell
+ähnlichen Komponenten). Fund: `TripSummaryCard.tsx` (Zusammenfassungskarte
+im Chat) baute den React-`key` jeder Zeile aus dem angezeigten Freitext
+(`key={row.label}`) — `destination`, `dates` und `budget` sind aber alle
+vom Nutzer frei eingetippter Text, der zufällig identisch sein kann (z. B.
+Antwort auf die Budget-Frage lautet zufällig wie das zuvor genannte
+Reiseziel). Live mit `destination: 'Lissabon', budget: 'Lissabon'`
+reproduziert: React protokolliert "Encountered two children with the
+same key, `Lissabon`" — bei späteren Re-Renders (Feld kommt hinzu/fällt
+weg) kann die falsche Zeile ihre Identität/ihr Icon "erben" statt
+korrekt neu gemountet zu werden.
+
+**Fix:** `key` von `row.label` auf einen vom Feldinhalt unabhängigen,
+festen Feldnamen pro Zeile umgestellt (`'destination'`, `'transportMode'`,
+`'dates'`, `'budget'`, `'accommodation'`) — keine neue
+Design-Entscheidung, keine sichtbare Verhaltensänderung. Neuer
+Regressionstest in `TripSummaryCard.test.tsx` (`console.error`-Spy
+erwartet keine "same key"-Warnung bei `destination === budget`) — vor
+dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`TripSummaryCard.tsx`) reproduzierbar rot verifiziert (Spy fing die
+React-Warnung tatsächlich ab), nach dem Fix grün. Dieselbe Ursache lag
+identisch im Details-Dialog von `Reiseentwuerfe.tsx:378-394` vor (fünf
+Zeilen mit denselben Freitext-Feldern, dort `key={row.label}`) —
+mechanisch gleichgezogen (feste Feldnamen statt Freitext als Key). Dort
+aktuell nicht live reproduzierbar (die Seite zeigt noch feste
+Demo-Entwürfe ohne echte Nutzereingabe, siehe Kommentar im Code "Demo
+drafts until real multi-draft storage exists"), daher kein eigener
+Regressionstest dafür — bestehende `Reiseentwuerfe.test.tsx`-Suite bleibt
+unverändert grün, bestätigt keine Verhaltensänderung.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Implementierungsdetail-Korrektur), klar
+lokalisiert (ein `key`-Ausdruck pro Datei), objektiv prüfbar
+(Regressionstest reproduzierbar rot vor dem Fix, grün danach, volle
+Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+400 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-05 (zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Weiterer geplanter Cloud-Lauf, frischer, isolierter
+Checkout, nur 44 Minuten nach dem ersten Lauf desselben Tages (siehe
+Eintrag oben). `it-chef/auto` war beim Start identisch mit dem
+Zwischenstand des ersten Laufs — kein Merge von `main` nötig, `main`
+bleibt unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Unverändert seit den
+Läufen vom 03.–05.10. — alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die
+selbst wieder darauf aufbaut. `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` (Stand
+02./03.10.) erneut geprüft — keine neuen, bisher ungefixten Funde außer
+der weiterhin bewusst offenen Flugsuche-Architekturgrenze.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf Bereiche angesetzt, die in den vorangegangenen ~fünfzig Läufen
+(siehe restliche Einträge dieser Datei) am wenigsten Aufmerksamkeit
+bekommen hatten (`useConcierge.ts`/`mockConcierge.ts`,
+`ChecklistPanel.tsx`/`checklistRules.ts`, `calculateProgress.ts`,
+`format.ts`, `HotelWizard.tsx`/`FlightWizard.tsx`, `HotelCard.tsx`, sowie
+Konsistenzvergleiche zwischen strukturell ähnlichen Komponenten),
+ausdrücklich mit dem Hinweis, bereits mehrfach gefixte Bug-Kategorien
+(instabile Keys, fehlende ARIA-Rollen, `localStorage`-Normalisierung,
+Wortgrenzen in `detectTransportMode()`, Zeitzonen, IME-Komposition,
+fehlende Bestätigungsdialoge) nicht erneut zu melden.
+
+Fund: `useChat.ts` (`sendMessage()`, Zweig
+`editingField === 'transportMode' && awaitingFlightOrigin`) prüfte den
+vom Nutzer eingegebenen Abflug-IATA-Code bisher nur gegen das
+3-Buchstaben-Muster, nie gegen das bekannte Ziel selbst. Wählt man über
+"Bearbeiten" → Transportmittel → Flug ein kuratiertes Ziel (z. B.
+Lissabon, `LIS`) und tippt als Abflughafen zufällig denselben Code ein,
+schickte der Chat anstandslos die Nachricht "Ich suche jetzt echte
+Flüge von LIS nach LIS (Lissabon) für dich" und löste
+`runFlightSearch('LIS', 'LIS')` aus — eine Anfrage an die Duffel-Mock-
+API, die nur leer oder mit Fehler zurückkommen kann. Das strukturell
+identische, eigenständige Flugformular `FlightWizard.tsx` schützt exakt
+denselben Fall bereits seit Längerem über eine `sameAirport`-Prüfung
+("Start und Ziel dürfen nicht gleich sein") — nur der parallele
+Chat-Pfad in `useChat.ts` hatte dieses Gegenstück nie bekommen. Im Code
+nachvollzogen (keine Live-Reproduktion nötig, da reine Mock-Umgebung
+ohne Netzwerkzugriff): `useChat.test.ts`s eigener Test-Helfer
+`switchToFlightAndEnterOrigin` wird in sämtlichen bestehenden Tests
+ausschließlich mit `'BER'` aufgerufen, nie mit dem Code des Ziels
+selbst — die Lücke war bisher durch keinen Test abgedeckt.
+
+**Fix:** Dieselbe Prüfung wie in `FlightWizard.tsx` ergänzt — bevor
+`awaitingFlightOrigin`/`editingField` zurückgesetzt und die Suche
+gestartet wird, wird jetzt geprüft, ob der eingegebene Code mit
+`known.iataCode` übereinstimmt; bei Übereinstimmung bleibt der Chat im
+"wartet auf Abflughafen"-Zustand (wie schon beim ungültigen
+3-Buchstaben-Muster) und antwortet mit "Start und Ziel dürfen nicht
+gleich sein — welcher Flughafen ist dein Abflugort?" statt die
+nonsensische Suche auszulösen. Keine neue Design-Entscheidung, reine
+Übernahme des bereits in `FlightWizard.tsx` etablierten Musters. Neuer
+Regressionstest in `useChat.test.ts` (Eingabe von `'LIS'` bei Ziel
+Lissabon löst `searchFlights` nicht aus und zeigt die Hinweismeldung;
+ein anschließender gültiger, abweichender Code wie `'BER'` funktioniert
+danach normal weiter) — vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+verifiziert (`searchFlights` wurde tatsächlich mit `origin: 'LIS',
+destination: 'LIS'` aufgerufen).
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (mechanische Übernahme eines bereits an anderer
+Stelle etablierten Musters), klar lokalisiert (ein zusätzlicher
+Prüfzweig in einer Funktion), objektiv prüfbar (Regressionstest
+reproduzierbar rot vor dem Fix, grün danach, volle Suite weiterhin
+grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+401 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-05 (dritter Lauf desselben Tages)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen) — kein Merge nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Unverändert seit den Läufen
+vom 03.–05.10. — alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut. `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (Stand 02./03.10.) erneut geprüft — keine
+neuen, bisher ungefixten Funde.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf Dateien angesetzt, die weder von den beiden heutigen Vorläufen noch in
+den letzten Wochen besonders im Fokus standen: `calendarUtils.ts`,
+`cartTotals.ts`, `speech.ts`, `duffel/client.ts`, `EditMode.tsx`,
+`TrainCard`/`TrainResults`/`FlightResults`/`HotelResults`/
+`NoResultsMessage`, `ChatInput`/`ChatMessage`/`QuickReplies`,
+`AppShell`/`MobileNav`/`PageTransition`, sowie praktisch alle restlichen
+Seiten (`Kalender`, `Warenkorb`, `Preisalarme`, `Angebote`,
+`Kartenansicht`, `Aktivitaeten`, `Profil`, `Einstellungen`, `MeineReisen`,
+`Buchung`, `ReiseSuche`, `Dashboard`, `Flugsuche`, `Hotelsuche`) —
+ausdrücklich mit dem Hinweis, die heute und in den letzten Läufen bereits
+mehrfach gefixten Kategorien (instabile Keys, Start=Ziel-Prüfung,
+fehlende 404-Route, ARIA, `localStorage`-Normalisierung, Wortgrenzen in
+`detectTransportMode()`, Zeitzonen, IME-Komposition, fehlende
+Bestätigungsdialoge, `formatDuration`/`formatEuro`, Favoriten-Ziel-Reset)
+nicht erneut zu melden.
+
+Der Agent bestätigte Kalendermathematik (Schaltjahre, Monatsgrenzen),
+Warenkorb-Summen/-Gruppierung und die Duffel-Response-Abbildung als
+korrekt und entkräftete zwei zunächst verdächtig wirkende Befunde nach
+genauerem Nachverfolgen (fehlendes `selected`-Prop bei
+`FlightResults`/`HotelResults` — ohne Wirkung, da `useChat.ts` die
+Angebotsliste bei jeder neuen Nachricht ohnehin leert; unterschiedliches
+Kyoto-Datum 2026 vs. 2027 zwischen `MeineReisen.tsx` und
+`Dashboard.tsx`/`Reiseentwuerfe.tsx` — zwei bewusst verschiedene
+Demo-Reisen, kein Tippfehler, von bestehenden Tests so verifiziert).
+
+Einziger verbleibender Kandidat: `src/pages/MeineReisen.tsx:16-21` trägt
+den Status (`upcoming`/`past`) der beiden Demo-Reisen als festes Literal
+ein, nicht abgeleitet aus den Reisedaten — die Lissabon-Demo-Reise
+("15.–22. September 2026") liegt vor dem heutigen Datum
+(05.10.2026) in der Vergangenheit, wird aber weiterhin als "Bevorstehend"
+mit aktiver "Urlaubsmodus aktivieren"-CTA angezeigt, und
+`Dashboard.tsx:15` zählt sie entsprechend in der
+"Bevorstehende Reisen"-Kachel mit. Bewusst **nicht** automatisch
+gefixt: Die Datei kommentiert selbst ausdrücklich "Demo trips until real
+bookings are wired up" — die beiden Demo-Reisen sind offenbar bewusst so
+gewählt, dass eine den "Bevorstehend"-Zustand samt Urlaubsmodus-CTA zeigt
+und die andere den "Abgeschlossen"-Zustand, unabhängig vom
+Kalenderdatum. Eine Ableitung aus dem tatsächlichen Datum (wie es z. B.
+`calculateProgress`/`calendarUtils.ts` für echte Reisedaten tun) würde
+dafür sorgen, dass die Demo nach Ablauf des 22.09.2026 dauerhaft keinen
+"Bevorstehend"-Fall mehr zeigt, bis echte Buchungen (Base44) existieren —
+das ist eine eigene Produktentscheidung darüber, wie sich befristete
+Demo-/Platzhalterdaten verhalten sollen, keine reine Logikkorrektur, und
+verletzt damit Sicherheitskriterium 2. Bleibt offener Hinweis für einen
+Lauf mit Rücksprache oder bis echte Buchungsdaten existieren.
+
+**Ergebnis:** Heute (dritter Lauf) kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt. Kein Code-Commit für einen neuen Punkt —
+nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout; weiterhin dieselben 6 High-Severity-Advisories in der
+shadcn-CLI-Kette, unverändert seit mehreren Läufen, betrifft nur das
+Dev-Tool, kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen),
+`npx vitest run` (61 Testdateien, 401 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).

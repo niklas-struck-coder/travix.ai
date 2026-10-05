@@ -94,6 +94,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Annahme über nicht vorhandene Fakten. Bleibt offener Punkt für 8.11.
   `PlaceholderPage.test.tsx` entsprechend angepasst (Assertion ohne den
   entfernten Satz).
+  Vom autonomen IT-Chef-Lauf am 04.10. (zweiter Lauf) einen über einen
+  eigens dafür beauftragten Explore-Agenten gefundenen, eigenständigen Bug
+  behoben: `src/routes.tsx` (`AppRoutes`) registrierte 19 feste Routen plus
+  alle Platzhalter-Seiten aus `nav-config.ts`, aber keine
+  `<Route path="*">` — eine unbekannte URL (Tippfehler, alter/kaputter
+  Link) ließ React Router `null` rendern, `AppShell.tsx` setzt das
+  ungeprüft in `<main>{children}</main>` ein, Nutzer:innen sahen also nur
+  Sidebar/Hamburger-Header und einen komplett leeren Inhaltsbereich statt
+  jeder Fehlermeldung. Live reproduzierbar unter jeder nicht registrierten
+  Adresse. Fix: neue `src/pages/NichtGefunden.tsx` nach dem etablierten
+  Empty-State-Muster (`Favoriten.tsx`/`Warenkorb.tsx`: Icon, ehrlicher
+  Text ohne erfundenes Funktionsversprechen, `Button asChild`-Link zurück
+  zu `/`), als `<Route path="*">` am Ende der Routenliste in `routes.tsx`
+  ergänzt — keine neue Design-Entscheidung, reine Übernahme des
+  bestehenden Musters. Neue `NichtGefunden.test.tsx` sowie neue
+  `routes.test.tsx` (erster Test für `AppRoutes` überhaupt) — vor dem Fix
+  durch temporäres Zurücknehmen der Routenänderung (`git stash` nur
+  `routes.tsx`) reproduzierbar rot verifiziert (kein `<h1>` im Dokument
+  unter `/does-not-exist`).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
@@ -663,6 +682,58 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   verifiziert (Test schlug fehl: `clearTimeout` wurde nicht aufgerufen).
   Der ursprüngliche Auto-Fix-PR #26 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 05.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `TripSummaryCard.tsx` (Zusammenfassungskarte im Chat, zeigt Reiseziel/
+  Transportmittel/Daten/Budget/Unterkunft) baute den React-`key` für jede
+  Zeile bisher aus dem angezeigten Freitext selbst (`key={row.label}`) —
+  `destination`, `dates` und `budget` sind aber alle vom Nutzer frei im
+  Chat eingetippter Text (`useChat.ts`/`mockAdvisor.ts` übernehmen
+  `userMessage` unverändert). Tippt jemand z. B. als Antwort auf die
+  Budget-Frage denselben Text wie zuvor als Reiseziel (reproduzierbar:
+  `destination: 'Lissabon', budget: 'Lissabon'`), erhalten zwei
+  verschiedene Zeilen denselben Key — React protokolliert "Encountered
+  two children with the same key" und kann bei späteren Re-Renders (z. B.
+  wenn ein weiteres Feld hinzukommt/wegfällt) die falsche Zeile ihre
+  Identität/ihr Icon "erben" lassen. Fix: `key` von `row.label` auf einen
+  vom Feldinhalt unabhängigen, festen Feldnamen pro Zeile umgestellt
+  (`'destination'`/`'transportMode'`/`'dates'`/`'budget'`/
+  `'accommodation'`), keine neue Design-Entscheidung, keine
+  Verhaltensänderung für sehende Nutzer:innen. Neuer Regressionstest in
+  `TripSummaryCard.test.tsx` (`console.error`-Spy erwartet keine "same
+  key"-Warnung bei `destination === budget`) — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `TripSummaryCard.tsx`) reproduzierbar rot verifiziert (Spy fing die
+  React-Warnung ab). Dieselbe Ursache lag identisch im Details-Dialog von
+  `Reiseentwuerfe.tsx:378-394` vor (dort alle fünf Zeilen fix, nicht
+  gefiltert, aber mit denselben Freitext-Feldern) — mechanisch
+  gleichgezogen (`key: 'destination'` usw. statt `key={row.label}`).
+  Dort aktuell nicht live reproduzierbar, weil die Seite noch feste
+  Demo-Entwürfe ohne Nutzereingabe zeigt (siehe Kommentar in der Datei:
+  "Demo drafts until real multi-draft storage exists") — sobald echte
+  Mehrfach-Entwurf-Speicherung (Base44) kommt, gilt dort dieselbe Lücke.
+  Bestehende `Reiseentwuerfe.test.tsx`-Suite bleibt unverändert grün.
+  Vom autonomen IT-Chef-Lauf am 05.10. (zweiter Lauf desselben Tages)
+  einen eigenständig gefundenen Bug im Flugsuche-Teilpfad des Chats
+  behoben: `useChat.ts` (`sendMessage()`, Zweig "Bearbeiten" →
+  Transportmittel → Flug → Abflug-IATA-Code) prüfte den eingegebenen
+  Code bisher nur gegen das 3-Buchstaben-Muster, nie gegen den bereits
+  bekannten Zielcode selbst. Tippte man bei einem kuratierten Ziel (z. B.
+  Lissabon, `LIS`) versehentlich denselben Code als Abflughafen ein,
+  kündigte der Chat anstandslos "Ich suche jetzt echte Flüge von LIS nach
+  LIS" an und löste `runFlightSearch('LIS', 'LIS')` aus — eine Anfrage,
+  die nur leer oder mit Fehler zurückkommen kann. Das strukturell
+  identische, eigenständige `FlightWizard.tsx` schützt genau diesen Fall
+  bereits über eine `sameAirport`-Prüfung ("Start und Ziel dürfen nicht
+  gleich sein") — nur dieser parallele Chat-Pfad hatte das Gegenstück nie
+  bekommen. Fix: dieselbe Prüfung ergänzt, bei Übereinstimmung bleibt der
+  Chat im "wartet auf Abflughafen"-Zustand (wie beim ungültigen Muster)
+  statt die nonsensische Suche zu starten, mechanische Übernahme des
+  bereits etablierten Musters, keine neue Design-Entscheidung. Neuer
+  Regressionstest in `useChat.test.ts` — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
+  reproduzierbar rot verifiziert (`searchFlights` wurde tatsächlich mit
+  `origin: 'LIS', destination: 'LIS'` aufgerufen).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -1289,6 +1360,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Favoriten.test.tsx` (Linkziel je Karte) und `KiChat.test.tsx` (Param
   wird ohne Entwurf übernommen, mit laufendem Entwurf ignoriert, ohne
   Parameter passiert nichts).
+  Vom autonomen IT-Chef-Lauf am 04.10. einen Folgefehler genau dieses
+  Favoriten→Chat-Handoffs behoben, der bereits über den separaten
+  Auto-Fix-Kanal vollständig diagnostiziert war (Auto-Fix-PR #27,
+  `it-chef-autofix/stale-destination-after-reset-2026-10-03`, von
+  Support-Chef am 03.10. gemeldet) — der zugehörige
+  `reports/it-chef.md`-Eintrag vom 03.10. hatte den Fix fälschlich schon
+  als "live" beschrieben, tatsächlich steckte er aber nur im offenen,
+  noch ungemergten PR: Lief schon eine Planung, wenn jemand über eine
+  Favoriten-Karte kam, wurde der `?destination=`-Parameter im Effekt in
+  `KiChat.tsx` bisher nur übersprungen statt verworfen — er blieb in der
+  URL stehen. Setzte man die Planung danach zurück ("Neu starten"/"Neue
+  Reise planen"), feuerte derselbe Effekt erneut und schickte den alten,
+  womöglich tagealten Favoriten-Klick ohne jede neue Nutzerinteraktion
+  als Chat-Nachricht. Fix direkt aus dem Auto-Fix-PR übernommen statt auf
+  Ni's Review zu warten, gleiches Muster wie bei mehreren früheren
+  Funden: Der `hasTripData(trip)`-Check steht jetzt vor dem
+  `messages.length`-Check und markiert den Parameter in diesem Fall
+  sofort als erledigt (URL bereinigt), statt ihn nur zu ignorieren. Neuer
+  Regressionstest in `KiChat.test.tsx` (Reset nach laufender Planung mit
+  noch gesetztem Parameter sendet die veraltete Destination nicht erneut).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen
