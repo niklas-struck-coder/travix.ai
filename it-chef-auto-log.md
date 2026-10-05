@@ -15983,3 +15983,81 @@ Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05 (dritter Lauf desselben Tages)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen) — kein Merge nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Unverändert seit den Läufen
+vom 03.–05.10. — alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut. `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (Stand 02./03.10.) erneut geprüft — keine
+neuen, bisher ungefixten Funde.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten gezielt
+auf Dateien angesetzt, die weder von den beiden heutigen Vorläufen noch in
+den letzten Wochen besonders im Fokus standen: `calendarUtils.ts`,
+`cartTotals.ts`, `speech.ts`, `duffel/client.ts`, `EditMode.tsx`,
+`TrainCard`/`TrainResults`/`FlightResults`/`HotelResults`/
+`NoResultsMessage`, `ChatInput`/`ChatMessage`/`QuickReplies`,
+`AppShell`/`MobileNav`/`PageTransition`, sowie praktisch alle restlichen
+Seiten (`Kalender`, `Warenkorb`, `Preisalarme`, `Angebote`,
+`Kartenansicht`, `Aktivitaeten`, `Profil`, `Einstellungen`, `MeineReisen`,
+`Buchung`, `ReiseSuche`, `Dashboard`, `Flugsuche`, `Hotelsuche`) —
+ausdrücklich mit dem Hinweis, die heute und in den letzten Läufen bereits
+mehrfach gefixten Kategorien (instabile Keys, Start=Ziel-Prüfung,
+fehlende 404-Route, ARIA, `localStorage`-Normalisierung, Wortgrenzen in
+`detectTransportMode()`, Zeitzonen, IME-Komposition, fehlende
+Bestätigungsdialoge, `formatDuration`/`formatEuro`, Favoriten-Ziel-Reset)
+nicht erneut zu melden.
+
+Der Agent bestätigte Kalendermathematik (Schaltjahre, Monatsgrenzen),
+Warenkorb-Summen/-Gruppierung und die Duffel-Response-Abbildung als
+korrekt und entkräftete zwei zunächst verdächtig wirkende Befunde nach
+genauerem Nachverfolgen (fehlendes `selected`-Prop bei
+`FlightResults`/`HotelResults` — ohne Wirkung, da `useChat.ts` die
+Angebotsliste bei jeder neuen Nachricht ohnehin leert; unterschiedliches
+Kyoto-Datum 2026 vs. 2027 zwischen `MeineReisen.tsx` und
+`Dashboard.tsx`/`Reiseentwuerfe.tsx` — zwei bewusst verschiedene
+Demo-Reisen, kein Tippfehler, von bestehenden Tests so verifiziert).
+
+Einziger verbleibender Kandidat: `src/pages/MeineReisen.tsx:16-21` trägt
+den Status (`upcoming`/`past`) der beiden Demo-Reisen als festes Literal
+ein, nicht abgeleitet aus den Reisedaten — die Lissabon-Demo-Reise
+("15.–22. September 2026") liegt vor dem heutigen Datum
+(05.10.2026) in der Vergangenheit, wird aber weiterhin als "Bevorstehend"
+mit aktiver "Urlaubsmodus aktivieren"-CTA angezeigt, und
+`Dashboard.tsx:15` zählt sie entsprechend in der
+"Bevorstehende Reisen"-Kachel mit. Bewusst **nicht** automatisch
+gefixt: Die Datei kommentiert selbst ausdrücklich "Demo trips until real
+bookings are wired up" — die beiden Demo-Reisen sind offenbar bewusst so
+gewählt, dass eine den "Bevorstehend"-Zustand samt Urlaubsmodus-CTA zeigt
+und die andere den "Abgeschlossen"-Zustand, unabhängig vom
+Kalenderdatum. Eine Ableitung aus dem tatsächlichen Datum (wie es z. B.
+`calculateProgress`/`calendarUtils.ts` für echte Reisedaten tun) würde
+dafür sorgen, dass die Demo nach Ablauf des 22.09.2026 dauerhaft keinen
+"Bevorstehend"-Fall mehr zeigt, bis echte Buchungen (Base44) existieren —
+das ist eine eigene Produktentscheidung darüber, wie sich befristete
+Demo-/Platzhalterdaten verhalten sollen, keine reine Logikkorrektur, und
+verletzt damit Sicherheitskriterium 2. Bleibt offener Hinweis für einen
+Lauf mit Rücksprache oder bis echte Buchungsdaten existieren.
+
+**Ergebnis:** Heute (dritter Lauf) kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt. Kein Code-Commit für einen neuen Punkt —
+nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout; weiterhin dieselben 6 High-Severity-Advisories in der
+shadcn-CLI-Kette, unverändert seit mehreren Läufen, betrifft nur das
+Dev-Tool, kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben vier vorbestehenden Fast-Refresh-Warnungen),
+`npx vitest run` (61 Testdateien, 401 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
