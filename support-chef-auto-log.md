@@ -3926,3 +3926,83 @@ drei weitere Läufe ohne neuen sicheren Punkt; Marketing-Chef: neuer
 Kandidat 31 zur selben Favoriten-Ziel-Übergabe) bringen keine weitere,
 für Support relevante Codeänderung. Kein neuer Bereich für diesen Lauf
 — nichts Nennenswertes über das oben bereits Gemeldete hinaus.
+
+---
+
+## 2026-10-05 — Flug-Abflughafen-Kollisionsprüfung im Chat (`useChat.ts`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `it-chef/auto` heute (05.10., zweiter Lauf, Commit
+`06f485b`, seither per Merge `1e206e3` auf `main`) genau hier einen neu
+eingeführten Schutz ergänzt hat: Der Chat-Pfad "Bearbeiten" →
+Transportmittel → Flug → Abflughafen eingeben prüft den eingetippten
+IATA-Code jetzt zusätzlich gegen den bereits bekannten Zielcode, um eine
+sinnlose "von LIS nach LIS"-Suche zu verhindern — bisher ungeprüfte,
+frisch gebaute Logik, kein wahllos erneut angeschauter Altbestand.
+
+### Reibungspunkt
+
+**Ablehnungsnachricht nennt nicht, welcher Code/Name kollidiert ist —
+Nutzerin kann den Fehler nicht nachvollziehen**
+
+`src/hooks/useChat.ts:256-264`:
+
+```
+const known = findKnownDestination(trip.destination ?? '')
+
+if (known && origin === known.iataCode) {
+  setMessages((prev) => [
+    ...prev,
+    makeMessage('assistant', 'Start und Ziel dürfen nicht gleich sein — welcher Flughafen ist dein Abflugort?'),
+  ])
+  setAvatarState('thinking')
+  setIsThinking(false)
+  return
+}
+```
+
+Die ganze bisherige Konversation mit der Nutzerin läuft über den
+Stadtnamen (z. B. "Lissabon") — der dreistellige IATA-Code des Ziels
+(`known.iataCode`, hier `LIS`) wird ihr an keiner Stelle vorher genannt.
+Tippt sie als Abflughafen zufällig genau diesen Code ein (realistisch
+z. B. bei Verwechslung mit einem anderen, ähnlich kurzen Code, oder
+schlicht Zufall), bekommt sie nur "Start und Ziel dürfen nicht gleich
+sein" zu lesen — ohne zu wissen, *welcher* Code gemeint ist, da der von
+ihr selbst eingegebene Code im Chat-Verlauf zwar sichtbar ist, der
+interne Zielcode aber nirgends auftaucht. Anders als die strukturell
+identische Prüfung in `FlightWizard.tsx:46-48/105-107`: Dort stehen
+Abflug- und Zielfeld gleichzeitig sichtbar nebeneinander auf dem
+Bildschirm — die Kollision ist für die Nutzerin sofort optisch
+erkennbar, ohne dass die Fehlermeldung selbst etwas erklären müsste. Im
+Chat gibt es dieses Nebeneinander nicht; die einzige Textzeile muss die
+ganze Erklärung tragen, tut das aber nicht.
+
+Konkret: Plant eine Nutzerin eine Reise nach Lissabon und tippt beim
+Abflughafen aus Versehen "LIS" (z. B. weil sie bereits in Lissabon lebt
+und ihren Heimatflughafen eingeben wollte, ohne zu wissen, dass das
+zufällig der Zielcode ist), bekommt sie eine Ablehnung, die ihr nicht
+sagt, dass genau *dieser* Code schon ihr Ziel ist — wirkt wie eine
+unbegründete Zurückweisung eines scheinbar gültigen, dreistelligen
+Codes.
+
+*Vorschlag:* Zielname/-code in die Nachricht aufnehmen, analog zum
+direkt darunter bereits etablierten Muster (Zeile 282: `` `Danke! Für
+${trip.destination ?? 'dein Ziel'} kenne ich noch...` ``), z. B.:
+`` `${known.name} (${known.iataCode}) ist bereits dein Ziel — Start und
+Ziel dürfen nicht gleich sein. Welcher Flughafen ist dein Abflugort?` ``.
+`known.name`/`known.iataCode` sind an dieser Stelle bereits vorhanden,
+keine zusätzliche Abfrage nötig.
+
+### Nicht geprüft
+Ob die Nutzerin nach dieser Ablehnung einen Ausweg hat, falls sie gar
+keinen anderen Abflughafen kennt (keine Quick-Replies wie "Neue Reise
+planen" werden hier angeboten) — das gilt aber identisch bereits für die
+direkt darüberliegende, unveränderte Prüfung des 3-Buchstaben-Musters
+(`useChat.ts:242-250`) und ist damit kein neuer, durch den heutigen Fix
+entstandener Reibungspunkt, sondern vorbestehendes Verhalten des ganzen
+`awaitingFlightOrigin`-Teilablaufs. Die übrigen heute auf `main`
+gelandeten Fixes (404-Route, React-Key in `TripSummaryCard`, Favoriten-
+Reset) wurden nicht im Detail mitgeprüft, da dieser Lauf sich laut Skill
+auf einen Bereich konzentrieren soll.
