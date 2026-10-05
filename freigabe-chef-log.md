@@ -1,5 +1,53 @@
 # Freigabe-Chef-Log
 
+## 2026-10-05, zweiter früher Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main`. Bereits beim Lauf von vor
+  rund anderthalb Stunden (03:15 UTC) vollständig gemergt, per
+  `git merge-base --is-ancestor` bestätigt: Branch ist identisch mit
+  `main`, nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`e79566f`,
+  05.10.): Update der `marketing/freigabe-uebersicht.md`
+  (Kandidaten 32/33 aufgenommen, zwei Commits bewusst ausgeschlossen).
+  Geprüft: reine Markdown-Ergänzung, keine erfundenen Kennzahlen/
+  Nutzerzahlen/Kampagnenergebnisse — beide neuen Kandidaten stammen
+  laut Log aus einzeln per `git show` verifizierten, bereits in `main`
+  gemergten Commits, kein Hinweis auf tatsächliches Posten/Versenden.
+  Text vollständig und kohärent. **Passt — zum Mergen freigegeben.**
+- `support-chef/auto` — 2 neue Commits vor `main` (`efe2ae9` vom 03.10.,
+  zweiter Lauf, bisher liegengeblieben; `8254216` vom 05.10.): beide
+  reine Analyse-Einträge in `support-chef-auto-log.md`, keine
+  Code-Änderung. Stichprobe: `efe2ae9` verweist auf PR #27
+  (`KiChat.tsx`, Favoriten-Ziel-Reset) — Fix tatsächlich wie beschrieben
+  in `main` (`698be1e`) gelandet. `8254216` verweist auf
+  `src/hooks/useChat.ts:256-264` — Zeilen/Code direkt gegengelesen,
+  Fund (fehlender Zielcode in der Kollisions-Fehlermeldung) stimmt mit
+  dem aktuellen Code überein. Nichts wirkt erfunden. **Passt — zum
+  Mergen freigegeben.**
+
+**Merge nicht durchführbar:** Der `git merge --no-ff origin/marketing-chef/auto …`-Befehl
+wurde von der Auto-Mode-Berechtigungsprüfung dieser Session blockiert
+("Blocked by classifier" — Merges nach `main` scheinen in diesem Lauf
+generell als zu riskant eingestuft zu werden, unabhängig vom Ergebnis
+der inhaltlichen Prüfung). Ein Workaround (anderer Git-Befehl,
+Cherry-Pick, direktes Schreiben der Zieldateien) wurde bewusst nicht
+versucht, da die Blockierung sich laut Systemvorgabe auf das Ergebnis
+bezieht, nicht nur auf den exakten Befehl. `support-chef/auto` wurde
+aus demselben Grund gar nicht erst zum Mergen versucht.
+
+**Ergebnis:** Beide Branches inhaltlich geprüft und für gut befunden,
+aber **nicht gemergt** — technische Blockade durch die
+Session-Berechtigungen, kein inhaltliches Problem. Bleiben für Ni
+selbst (`git merge origin/marketing-chef/auto` bzw.
+`origin/support-chef/auto` nach `main`) oder einen Lauf mit anderen
+Rechten offen.
+
+**Info an Ni:** Ja — das ist keine normale "nichts zu melden"-Situation.
+Die Kernfunktion dieses Skills (eigenständig nach `main` mergen) ist in
+dieser Session blockiert. Zwei geprüfte, saubere Branches liegen bereit
+und warten nur noch auf den eigentlichen Merge.
+
 ## 2026-10-05, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
