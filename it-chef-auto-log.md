@@ -16061,3 +16061,356 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-05 (vierter Lauf desselben Tages)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit dem dritten Lauf
+desselben Tages, lag aber hinter `main` zurück (der dritte Lauf fand keinen
+Punkt und committete nichts, Freigabe-Chef hatte zwischenzeitlich einen
+Log-Eintrag auf `main` ergänzt). Per `git merge --ff-only origin/main`
+aktualisiert — reiner Fast-Forward ohne Konflikt, `main` dabei unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut (Sprint 3/4: 7.4, 7.12, 8.2-8.7, 8.9, 8.11-8.13 —
+allesamt blockiert oder Produktentscheidung). `reports/support-chef.md`
+(05.10.) gezielt gelesen, da neuer Stand seit dem letzten Merge.
+
+**Fund (Vorschlag 2 aus `reports/support-chef.md`, 05.10.):** Die
+Flug-Ankündigung im Hauptchat-Ablauf (`getNextAdvisorStep()` in
+`src/lib/ai/mockAdvisor.ts`, Zweig für den letzten offenen Trip-Schritt)
+versprach bisher "Ich suche jetzt nach echten Flug-Verbindungen für
+{Ziel} — sobald ich etwas Verifiziertes gefunden habe, zeige ich es dir.
+Nichts wird erfunden." — der Hauptchat-Ablauf löst die echte Flugsuche
+aber nie aus (laut eigenem Code-Kommentar an derselben Stelle: nur der
+separate "Bearbeiten"-Pfad in `useChat.ts`, der nach dem Startflughafen
+fragt, tut das). Support-Chef merkte an: Die anderen vier Modi
+(Zug/Bus/Fähre/Mietwagen) haben für exakt diese Lücke bereits seit dem
+29.09.-Fix eine andere, ehrliche Formulierung ("hab ich noch keine
+automatische Suche — dein Reiseplan steht trotzdem!") — nur Flug behält
+das nicht einlösbare Suchversprechen. `reports/it-chef.md` listet das
+grundlegende Problem (echte Suche wird im Hauptchat nie ausgelöst) zwar
+schon länger als bewusste, nicht automatisch fixbare Architekturgrenze —
+Support-Chefs Vorschlag 2 ist aber ausdrücklich enger: kein Eingriff in
+die Suchlogik, nur dieselbe bereits etablierte ehrliche Formulierung auch
+für Flug verwenden, exakt wie bei den anderen vier Modi.
+
+**Fix:** In `mockAdvisor.ts` den eigenen `if (next.transportMode ===
+'flight')`-Sonderzweig entfernt — Flug fällt jetzt durch dieselbe,
+bereits bestehende `noAutoSearchPhraseDe`-Formulierung wie die anderen
+vier Modi (`noAutoSearchPhraseDe.flight` existierte bereits als
+ungenutzter Map-Eintrag, da der Sonderzweig ihn nie erreichen ließ).
+Keine neue Design-Entscheidung, reine Wiederverwendung des bereits
+etablierten Musters. Die dadurch komplett ungenutzte `transportLabelsDe`-
+Map (einzige Verwendung war der entfernte Zweig) mitentfernt, erklärender
+Begleitkommentar entsprechend angepasst. Bestehender Test in
+`mockAdvisor.test.ts` ("promises a real search when the final step
+completes a flight trip …") umbenannt und umgestellt, prüft jetzt dieselbe
+ehrliche Formulierung wie der strukturell identische Zug-Test — vor dem
+Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`src/lib/ai/mockAdvisor.ts`) reproduzierbar rot verifiziert (alter Test
+erwartete weiterhin "Ich suche jetzt nach echten Flug-Verbindungen", neuer
+Test erwartet explizit das Gegenteil sowie die Flug-spezifische ehrliche
+Formulierung).
+
+Der größere, von Support-Chef unverändert gemeldete Punkt — dass die echte
+Flugsuche im Hauptchat-Ablauf überhaupt nie ausgelöst wird — bleibt bewusst
+unangetastet: das wäre eine eigene Backend-Verdrahtungsentscheidung
+(welcher Pfad löst wann die echte Duffel-Suche aus), keine reine
+Text-/Logikkorrektur, und verletzt damit Sicherheitskriterium 2.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Wiederverwendung eines bereits an vier
+anderen Stellen etablierten Textmusters, keine Änderung der Suchlogik),
+klar lokalisiert (ein entfernter Sonderzweig plus eine entfernte, dadurch
+ungenutzte Konstante in einer Datei), objektiv prüfbar (Regressionstest
+reproduzierbar rot vor dem Fix, grün danach, volle Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+401 Tests, alle grün), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-05 (fünfter Lauf desselben Tages)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen, der vierte Lauf war bereits via
+Freigabe-Chef nach `main` gemergt) — kein Merge nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` weiterhin an der Base44-/
+Auth-Backend-Entscheidung oder Folgearbeit blockiert. `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md` (Stand 05.10.)
+gelesen — Support-Chefs Vorschlag 2 (ehrliche Formulierung auch für Flug)
+ist durch den vierten Lauf heute bereits erledigt, auch wenn der Bericht
+selbst das noch nicht widerspiegelt. Support-Chefs Vorschlag 1
+(Lösch-Warnungen nach Schwere differenzieren, fünf Dateien) bewusst
+**nicht** umgesetzt: Er verlangt neue, pro Kontext unterschiedliche
+Formulierungen ("Du kannst [X] jederzeit wieder hinzufügen" o. ä.) statt
+Übernahme eines bereits im Code etablierten Musters — `MARKENDESIGN.md`
+trifft dazu keine Aussage, und laut der eigenen Skill-Regel
+("fehlt für einen sonst sicheren UI-Punkt eine wichtige Design-Vorgabe,
+das im Bericht vermerken statt zu raten") wird hier bewusst nicht
+geraten. Bleibt offener Hinweis für Ni oder einen Lauf mit Marketing-Chef-
+Abstimmung.
+
+**Fund (`reports/it-chef.md`, 05.10., "Weitere Vorschläge", Punkt 3):**
+`formatDuration()` lag identisch dupliziert in `src/components/search/
+FlightCard.tsx` und `TrainCard.tsx` vor — dieselbe Code-Hygiene-Situation
+wie zuvor bei `formatEuro()`/`formatOfferPrice()`, die bereits nach
+`src/lib/format.ts` konsolidiert sind.
+
+**Fix:** `formatDuration()` 1:1 nach `src/lib/format.ts` verschoben
+(gleiches Dokumentationskommentar-Muster wie die beiden dortigen
+Nachbarfunktionen), beide lokalen Kopien in `FlightCard.tsx`/
+`TrainCard.tsx` entfernt und durch einen Import aus `@/lib/format`
+ersetzt (zusammengeführt mit dem bereits bestehenden
+`formatOfferPrice`-Import). Keine Verhaltensänderung. Neue, direkte
+`formatDuration`-Testgruppe in `format.test.ts` (7 Tests, deckt dieselben
+Fälle ab, die bisher nur indirekt über `FlightCard.test.tsx`/
+`TrainCard.test.tsx` geprüft wurden: Stunden+Minuten, ganze Stunde ohne
+"0min", Tagesanteil mit Zeitteil, reiner Tagesanteil ohne Zeitteil,
+Sekunden-only als Platzhalter-Strich, fehlende Dauer als Strich,
+unparsbare Eingabe als Rohstring) — bestehende Komponenten-Tests
+unverändert grün, bestätigt die reine Verschiebung ohne Logikänderung.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Konsolidierung identischen Codes, gleiches
+bereits etabliertes Muster wie bei `formatEuro`/`formatOfferPrice`), klar
+lokalisiert und von `reports/it-chef.md` selbst als "reine Code-Hygiene"
+beschrieben, objektiv prüfbar (Typecheck/Lint/Tests/Build grün, neue
+Tests decken das Verhalten jetzt direkt statt nur indirekt ab).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, dieselben vier
+vorbestehenden Fast-Refresh-Warnungen), `npx vitest run` (61 Testdateien,
+408 Tests, alle grün — 7 neu durch die direkte `formatDuration`-Testgruppe),
+`npm run build` (`tsc -b` + `vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-06
+
+**Ausgangslage:** Erster geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen, der fünfte Lauf vom 05.10. war bereits
+via Freigabe-Chef nach `main` gemergt) — kein Merge nötig, `main`
+unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut. `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (Stand 05.10., kein neuerer Eintrag) gelesen
+— keiner der dort offenen Punkte war neu und sicher genug: Support-Chefs
+Vorschlag 2 (ehrliche Formulierung auch für Flug) bereits durch den
+vierten Lauf am 05.10. erledigt, dessen Vorschlag 1 (Lösch-Warnungen
+differenzieren) weiterhin bewusst nicht umgesetzt (fehlende
+Design-Vorgabe, siehe Begründung im 05.10.-Eintrag, fünfter Lauf). Von
+IT-Chefs eigenen "Weiteren Vorschlägen" ist `formatDuration()`-
+Konsolidierung bereits erledigt (05.10., fünfter Lauf), Abhängigkeits-
+änderungen (`recharts`) sind für diesen Kanal ausgeschlossen, PR-
+Aufräumung kann nur Ni selbst machen, `TrainCard`/`TrainResults`-Verdrahtung
+bleibt eine Produktentscheidung.
+
+Da die Berichte keinen neuen Fund hatten, zusätzlich einen eigens
+beauftragten Explore-Agenten auf eine gezielte Suche nach einem neuen,
+eigenständigen Fund angesetzt (gleiches Vorgehen wie an mehreren
+Vortagen) — mit der expliziten Vorgabe, nichts bereits Bekanntes oder
+Architektur-/Produktentscheidungen zu melden.
+
+**Fund (eigenständig, vom Explore-Agenten identifiziert):** Die
+"Fokussiere die Seiten-`<h1>`"-Fallback-Logik beim Schließen eines
+Dialogs/Sheets, wenn das ursprünglich fokussierte Element nicht mehr im
+DOM ist (z. B. ein "entfernen"-Button, dessen Karte gerade gelöscht
+wurde), lag byte-identisch doppelt vor: inline in `DialogContent`s
+`onCloseAutoFocus` (`src/components/ui/dialog.tsx`, vormals Zeile 87-98)
+sowie als eigene, aus `SheetContent` bereits extrahierte und exportierte
+`focusPageHeading()`-Funktion in `src/components/ui/sheet.tsx` (vormals
+Zeile 19-32, zusätzlich von `MobileNav.tsx` genutzt). Laut diesem Log
+(18.09.-Einträge) wurde der Fallback zuerst in `dialog.tsx` eingeführt,
+dann wortgleich nach `sheet.tsx` kopiert, und nur die `sheet.tsx`-Kopie
+später in eine gemeinsam nutzbare Funktion extrahiert — `dialog.tsx`s
+ursprüngliche Kopie wurde nie auf die gemeinsame Funktion umgestellt.
+Gleiche Code-Hygiene-Kategorie wie die bereits konsolidierten
+`formatEuro()`/`formatOfferPrice()`/`formatDuration()`.
+
+**Fix:** `focusPageHeading()` nach `src/lib/utils.ts` verschoben (neben
+dem bereits dort etablierten `cn()`), da beide betroffenen Dateien
+dieses Modul bereits importieren. `sheet.tsx` importiert die Funktion
+jetzt von dort statt sie selbst zu definieren, der bisherige Re-Export
+aus `sheet.tsx` entfällt; `MobileNav.tsx`s Import entsprechend auf
+`@/lib/utils` umgestellt. `dialog.tsx` ruft an der betroffenen Stelle
+jetzt ebenfalls `focusPageHeading()` auf statt die Logik zu duplizieren.
+Keine Verhaltensänderung. Neue, direkte `focusPageHeading`-Testgruppe in
+`utils.test.ts` (3 Tests: Fokus plus temporäres `tabindex` mit Entfernen
+beim Blur, unverändertes Verhalten bei bereits vorhandenem `tabindex`,
+kein Fehler ohne vorhandene `<h1>`) — der bereits bestehende
+Verhaltenstest in `dialog.test.tsx` ("moves focus to the page heading
+when confirming removes the element that opened the dialog") blieb
+unverändert grün und bestätigt, dass die Umstellung auf die gemeinsame
+Funktion das Verhalten nicht verändert hat.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Konsolidierung bereits identischen, an
+anderer Stelle schon extrahierten Codes, kein neues Verhalten), klar
+lokalisiert (zwei benannte Dateien, eine gemeinsame Funktion), objektiv
+prüfbar (bestehender Verhaltenstest bleibt grün, neue direkte Testgruppe
+für die verschobene Funktion, volle Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, nur noch 3 statt bisher 4
+vorbestehende Fast-Refresh-Warnungen — die vierte betraf exakt den jetzt
+entfernten Re-Export von `focusPageHeading` aus `sheet.tsx`), `npx vitest
+run` (61 Testdateien, 411 Tests, alle grün — 3 neu durch die direkte
+`focusPageHeading`-Testgruppe), `npm run build` (`tsc -b` + `vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-06 (zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` enthielt bereits den Commit des ersten Laufs
+heute (`focusPageHeading()`-Konsolidierung zwischen `dialog.tsx`/
+`sheet.tsx`, siehe Eintrag oben) und war ansonsten identisch mit `main`
+(`main` lag nicht weiter voraus) — kein Merge nötig, `main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Unverändert seit dem
+ersten Lauf heute — alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder an Folgearbeit, die
+selbst wieder darauf aufbaut, oder an offenen Produktentscheidungen
+(u. a. `/premium`-Inhalte an OQ-03, Rewards/Loyalty an OQ-04,
+Zug/Bus/Fähre-Suche an fehlender Datenquelle). `reports/it-chef.md`
+(Stand 05.10.) erneut geprüft — keine neuen, bisher ungefixten Funde;
+die dort gelisteten "Weiteren Vorschläge" sind entweder bereits erledigt
+(`formatDuration`-Konsolidierung), für diesen Kanal ausgeschlossen
+(`recharts`-Abhängigkeit entfernen), nur von Ni selbst machbar
+(Auto-Fix-PR-Aufräumung) oder eine Produktentscheidung
+(`TrainCard`/`TrainResults` verdrahten oder entfernen).
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit einer
+gezielten, auf Vollständigkeit ausgelegten Suche angesetzt — explizit mit
+der Vorgabe, nichts aus dem heutigen ersten Lauf, aus
+`reports/it-chef.md` (05.10.) oder aus den dort als bewusst offen
+gelassen markierten Punkten erneut zu melden. Der Agent las (nicht nur
+grep) praktisch alle `src/lib/`- und `src/hooks/`-Dateien, alle Seiten
+sowie alle Chat-/Such-/Trip-Komponenten, verglich strukturell identische
+Geschwister-Komponenten auf Drift (u. a. `FlightWizard`/`HotelWizard`,
+`FlightCard`/`HotelCard`/`TrainCard`, `FlightResults`/`HotelResults`/
+`TrainResults`, sowie alle sechs "Entfernen mit Bestätigungsdialog"-Seiten:
+Favoriten/Preisalarme/Angebote/Aktivitaeten/Warenkorb/Reiseentwuerfe) und
+prüfte gezielt auf ungeschützte Array-/Objekt-Zugriffe sowie fehlende
+Testdateien.
+
+**Ergebnis:** Kein Drift zwischen den verglichenen Geschwister-
+Komponenten gefunden — alle folgen bereits demselben etablierten Muster
+(aria-label/title am Icon-Button, Dialog-Bestätigung mit "Abbrechen"/
+"Ja, entfernen", ehrlicher deutscher Text). Keine fehlenden Testdateien
+außer bei Einstiegspunkten/reinen Typdateien, die keine eigene Testdatei
+brauchen. Die wenigen vorhandenen ungeschützten Array-/Objekt-Zugriffe
+sind bereits abgesichert (Duffel-Response-Mapping, `tripStorage.ts`s
+Legacy-Daten-Schutz) oder durch erschöpfende Union-Types von vornherein
+sicher. Heute (zweiter Lauf) **kein Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt.** Kein Code-Commit für einen neuen
+Programmierpunkt — nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout; weiterhin dieselben 6 High-Severity-Advisories in der
+shadcn-CLI-Kette, unverändert seit mehreren Läufen, betrifft nur das
+Dev-Tool, kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run
+lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen,
+seit dem ersten Lauf heute eine weniger als zuvor), `npx vitest run` (61
+Testdateien, 411 Tests, alle grün), `npm run build` (`tsc -b` + `vite
+build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-06 (dritter Lauf desselben Tages)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` enthielt bereits beide Commits der ersten zwei
+Läufe heute (`focusPageHeading()`-Konsolidierung; "kein sicherer Punkt
+gefunden"-Log-Eintrag vom zweiten Lauf) und war ansonsten identisch mit
+`main` (0 Commits zurück zu `origin/main`) — kein Merge nötig, `main`
+unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Unverändert seit den ersten beiden
+Läufen heute. Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der
+Base44-/Auth-Backend-Entscheidung, an fehlenden Datenquellen
+(Zug/Bus/Fähre-Suche), an einer noch fehlenden Architektur für
+Transport-/Unterkunfts-Preisfelder (`TripDraft`, blockiert 6.6/6.7/7.12)
+oder an offenen Produktentscheidungen (`/premium` an OQ-03,
+Rewards/Loyalty an OQ-04). Punkt 8.13 ("Unit tests für
+calculateProgress, calculateCosts, checklistRules, schema validation")
+eigens geprüft: `calculateProgress` und `checklistRules` haben bereits
+eigene Testdateien; `calculateCosts.ts` existiert mangels 6.7 noch gar
+nicht und die Schema-Validierung hängt an 4.1 (Base44/Gemini-Zugangsdaten)
+— beide Teile von 8.13 bleiben also an denselben offenen Punkten
+blockiert wie ihre jeweiligen Haupt-Tasks.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit einer
+dritten, auf Vollständigkeit ausgelegten Suche angesetzt — explizit mit
+der Vorgabe, nichts aus den ersten beiden Läufen heute oder aus
+`reports/it-chef.md` (05.10.) erneut zu melden, und gezielt auf
+bisher noch nicht geprüfte Bereiche gerichtet. Der Agent deckte
+zusätzlich ab: alle bisher nicht einzeln genannten Seiten (Buchung,
+Profil, Einstellungen, Urlaubsmodus, Kalender, Kartenansicht, Dashboard,
+PlaceholderPage), `src/components/trip/*`, `src/components/chat/*`,
+`src/components/layout/*`, `src/lib/trip/*`, `src/lib/ai/*`
+(mockConcierge, speech), den Duffel-Adapter (`src/lib/duffel/client.ts`,
+`vite-plugins/duffel-proxy.ts`), `src/lib/utils.ts`,
+`src/lib/design-tokens.ts`, Routen-Abdeckung (`nav-config.ts` gegen
+`routes.tsx`), `useChat.ts`/`useConcierge.ts`, alle `src/types/*`, sowie
+einen Demo-Daten-Konsistenzvergleich zwischen Dashboard/Reiseentwuerfe/
+MeineReisen/Favoriten/Kalender.
+
+**Ergebnis:** Kein neuer, eindeutiger und sicherer Bug gefunden. Vier
+Kandidaten geprüft und verworfen: (1) `formatDuration()`s Regex matcht
+theoretisch auch auf ein bloßes "P" in einem sonst ungültigen String und
+liefert dann "—" statt den Rohstring zurückzugeben — nicht erreichbar, da
+der einzige Aufrufer echte Duffel-ISO-8601-Dauern liefert, also ein
+erfundener statt ein echter Edge Case; (2) fehlende React-`ErrorBoundary`
+— bereits mehrfach in diesem Log diskutiert, die konkrete Instanz davon
+(fehlende 404-Route) ist bereits behoben, eine allgemeine ErrorBoundary
+wäre eine größere Architekturentscheidung statt eines kleinen,
+eindeutigen Fixes; (3) `design-tokens.ts` ohne Imports in `src/` —
+bereits mehrfach als bewusste, dokumentierte Konstanten-Datei
+eingeordnet, gleiche Kategorie wie `App.tsx`/`main.tsx`; (4) `/hilfe` als
+`PlaceholderPage` statt echter Seite — laut Kommentar in `nav-config.ts`
+bewusst so, gleiches Muster wie Deal-Finder/Premium/Budget. Kein
+Code-Commit für einen neuen Programmierpunkt — nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout, dieselben 9 Advisories wie zuletzt, betrifft nur Dev-Tooling,
+kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run lint` (0
+Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen), `npx
+vitest run` (61 Testdateien, 411 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

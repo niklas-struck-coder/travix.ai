@@ -197,7 +197,11 @@ describe('getNextAdvisorStep', () => {
     expect(reply.nextField).toBeNull()
   })
 
-  it('promises a real search when the final step completes a flight trip, since flights are actually searched', () => {
+  it('does not promise a search it cannot start for flight either, since the main chat flow never triggers the real Duffel search', () => {
+    // Bis 2026-10-05 versprach dieser Zweig "Ich suche jetzt nach echten
+    // Flug-Verbindungen" — der Hauptchat-Ablauf löst die echte Flugsuche
+    // aber nie aus (nur der separate "Bearbeiten"-Pfad in useChat.ts tut
+    // das), siehe reports/support-chef.md, 2026-10-05, Vorschlag 2.
     const trip = {
       ...emptyTrip,
       destination: 'Lissabon',
@@ -206,11 +210,10 @@ describe('getNextAdvisorStep', () => {
       budget: 'bis 1.000 €',
     }
     const reply = getNextAdvisorStep(trip, 'Hotel Lissabon')
-    expect(reply.content).toContain('Ich suche jetzt nach echten Flug-Verbindungen')
-    expect(reply.avatarState).toBe('searching')
-    // Der Hauptchat-Ablauf löst die echte Flugsuche nicht aus, also braucht
-    // es hier einen Ausweg statt einer leeren Quick-Reply-Liste (siehe
-    // reports/support-chef.md, 2026-08-29, Fund 1).
+    expect(reply.content).not.toContain('Ich suche jetzt')
+    expect(reply.content).toContain('Flug-Verbindungen')
+    expect(reply.content).toContain('Reiseplan steht')
+    expect(reply.avatarState).toBe('happy')
     expect(reply.quickReplies).toEqual(['Neue Reise planen'])
   })
 
