@@ -1,10 +1,107 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-05)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-06)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-06: ein neuer 34. Tier-4-Kandidat (Flugsuche-Versprechen im Hauptchat-Ablauf jetzt durch die etablierte ehrliche Formulierung ersetzt — der seit 29.09. verfolgte "Flugsuche verspricht/löst nicht aus"-Fund ist damit behoben), zwei Commits bewusst ausgeschlossen (reine interne Konsolidierungen ohne Verhaltensänderung), Kandidatentopf von sechs auf sieben, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `e79566f`, 05.10.) war nicht veraltet,
+aber einen Merge-Commit hinter `origin/main` (`a4c2fc0`, früher
+Nacht-Check 06.10.). `origin/main` per Merge-Commit in diesen Branch
+eingebracht, bevor der eigentliche Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 05.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+die Kanal-/Mini-Changelog-Frage jetzt seit über zehn Wochen.
+
+**`git log 4cfcafd..origin/main` zeigt die seit dem letzten Check (05.10.,
+Commit `4cfcafd`) neu dazugekommenen Commits**, darunter drei mit echter
+Produkt-Codeänderung (die übrigen sind Berichte, ein Daily-Status-Update
+und Merge-Commits), jeder einzeln per `git show` geprüft:
+
+- **`1493a5f` (05.10., IT-Chef Auto, vierter Lauf):** `getNextAdvisorStep()`
+  versprach im Hauptchat-Ablauf für Flug eine echte Suche ("Ich suche
+  jetzt nach echten Flug-Verbindungen ... Nichts wird erfunden"), die dort
+  nie ausgelöst wird (nur der separate "Bearbeiten"-Pfad in `useChat.ts`
+  tut das) — genau der seit 29.09. verfolgte "Flugsuche verspricht/löst
+  nicht aus"-Fund, zuletzt am 05.10. von Support-Chef als konkreter
+  Textvorschlag eingereicht. Live im Code verifiziert: der
+  Flug-Sonderzweig ist entfernt, Flug fällt jetzt durch dieselbe bereits
+  etablierte ehrliche `noAutoSearchPhraseDe`-Formulierung wie Zug/Bus/
+  Fähre/Mietwagen, bestehender Test entsprechend umgestellt. Schließt eine
+  Lücke, die mehrfach explizit als Grund genannt wurde, keinen Content zur
+  Flugsuche zu schreiben — **vierunddreißigster Tier-4-Kandidat**, und
+  zugleich der wichtigste bisherige, weil er direkt eine zuvor offene
+  Content-Sperre auflöst.
+- **`4a2eb94` (05.10., IT-Chef Auto, fünfter Lauf):** `formatDuration()`
+  von `FlightCard.tsx`/`TrainCard.tsx` nach `src/lib/format.ts`
+  konsolidiert. **Bewusst nicht** als Tier-4-Kandidat aufgenommen:
+  Commit-Text und Code bestätigen ausdrücklich "keine Verhaltensänderung"
+  — reine interne Konsolidierung, gleiche Ausschlussgruppe wie die
+  frühere `formatEuro()`/`formatOfferPrice()`-Zusammenführung.
+- **`75a7cc8` (06.10., IT-Chef Auto):** `focusPageHeading()`-Duplikat
+  zwischen `dialog.tsx`/`sheet.tsx` nach `utils.ts` konsolidiert.
+  **Bewusst nicht** als Tier-4-Kandidat aufgenommen: gleiche Begründung
+  wie oben, reine interne Konsolidierung ohne sichtbare
+  Verhaltensänderung.
+
+Zwei weitere IT-Chef-Läufe am 06.10. (`623d570`, `28d0604`) fanden laut
+eigenem Bericht keinen sicheren Punkt — keine Codeänderung, nichts zu
+prüfen.
+
+**Kandidatentopf:** 28-33 unverändert, 34 neu dazugekommen — der aktive
+Topf steht damit bei **sieben**, weiterhin knapp unter der
+Achter-Schwelle. Keine sechste Mini-Changelog-Ausgabe heute; der nächste
+Lauf sollte als Erstes prüfen, ob seitdem ein weiterer Kandidat
+dazukommt, bevor er die Schwelle für erreicht erklärt — gleiche Vorsicht
+wie bei früheren Siebenern/Vierern (z. B. 11.09., 13.09.).
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht, kein Live-Vorgang — nichts gepostet,
+versendet oder verändert. Keine erfundenen Kennzahlen: der neue Kandidat
+stammt aus einem einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commit, beide Ausschlüsse
+stützen sich auf den bereits etablierten "keine Verhaltensänderung"-
+Maßstab. Keine offene Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei sieben,
+  noch unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- Content rund um "ehrliche Flugsuche" — der Fund selbst ist jetzt
+  behoben, aber ohne freigegebenen Kanal (Frage 1 weiterhin offen) bliebe
+  ein eigenständiger Post dazu ohnehin unveröffentlichbar; der Fund fließt
+  stattdessen als Kandidat 34 in den Mini-Changelog-Topf ein, das dafür
+  vorgesehene Format.
+- `ZEITPLAN.md` nicht angefasst — dieses Update betrifft nur die
+  Kandidaten-/Freigabe-Verwaltung.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/ai/mockAdvisor.ts` (Flug-Sonderzweig tatsächlich entfernt,
+`noAutoSearchPhraseDe` jetzt für alle Modi genutzt) und
+`src/lib/format.ts`/`src/lib/utils.ts` (beide Konsolidierungen ohne
+erkennbare Verhaltensänderung) direkt im aktuellen Code gelesen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 06.10. (Prüfung
+  der vier Fragen, drei neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 34, zwei bewusst ausgeschlossen, Kandidatentopf-Stand
+  auf "sieben" gesetzt), Datum im Titel auf 06.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-05: zwei neue Tier-4-Kandidaten (32: Favoriten-Ziel-Reset-Fund tatsächlich gefixt, schließt Fundgruppe 31 ab; 33: fehlende 404-Route/komplett leere Seite behoben), zwei Commits bewusst ausgeschlossen (React-Key-Stabilität, Start=Ziel-Validierung im Flug-Chat), Kandidatentopf von vier auf sechs, alle vier Fragen weiterhin offen, "Flugsuche verspricht/löst nicht aus"-Fund weiterhin offen
 

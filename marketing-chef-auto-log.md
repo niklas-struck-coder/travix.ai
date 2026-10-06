@@ -4,6 +4,91 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-06
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `e79566f`, 05.10.) war nicht veraltet,
+lag aber einen Merge-Commit hinter `origin/main` (`a4c2fc0`, früher
+Nacht-Check 06.10., inkl. der neuesten IT-Chef-Arbeit). `origin/main`
+per Merge-Commit in diesen Branch eingebracht, bevor der eigentliche
+Lauf begann.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für
+das Mini-Changelog-Format), kein neues eigenständiges Content-Stück.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 05.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 05.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 4cfcafd..origin/main` geprüft (Basislinie: der eigene
+Stand vom 05.10.): drei Commits mit echter Produkt-Codeänderung, jeder
+einzeln per `git show` verifiziert (die übrigen sind Berichte, ein
+Daily-Status-Update und Merge-Commits):
+
+- `1493a5f` (05.10., IT-Chef Auto, vierter Lauf): behebt den seit 29.09.
+  verfolgten "Flugsuche verspricht/löst nicht aus"-Fund (`mockAdvisor.ts`)
+  — der Hauptchat-Ablauf versprach für Flug eine echte Suche, die dort nie
+  ausgelöst wird. Live im Code bestätigt: Flug-Sonderzweig entfernt, nutzt
+  jetzt dieselbe ehrliche Formulierung wie Zug/Bus/Fähre/Mietwagen. Löst
+  damit eine mehrfach genannte Content-Sperre ("kein Content zur
+  Flugsuche, solange der Fund offen ist") auf. **34. Tier-4-Kandidat**,
+  der wichtigste bisherige.
+- `4a2eb94` (05.10., IT-Chef Auto, fünfter Lauf): `formatDuration()`-
+  Konsolidierung nach `src/lib/format.ts`. Bewusst nicht aufgenommen —
+  Commit bestätigt "keine Verhaltensänderung", gleiche Ausschlussgruppe
+  wie frühere Konsolidierungen (formatEuro/formatOfferPrice).
+- `75a7cc8` (06.10., IT-Chef Auto): `focusPageHeading()`-Dedupe zwischen
+  `dialog.tsx`/`sheet.tsx`. Bewusst nicht aufgenommen — gleiche
+  Begründung, reine interne Konsolidierung ohne Verhaltensänderung.
+
+Zwei weitere IT-Chef-Läufe am 06.10. (`623d570`, `28d0604`) fanden keinen
+sicheren Punkt — keine Codeänderung.
+
+**Kandidatentopf:** 28-33 unverändert, 34 neu dazugekommen — Topf steht
+jetzt bei **sieben**, knapp unter der Achter-Schwelle. Keine sechste
+Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Reine Markdown-Ergänzung einer bestehenden
+Übersicht, kein Live-Vorgang — nichts gepostet, versendet oder
+verändert. Keine erfundenen Kennzahlen: der neue Kandidat stammt aus
+einem einzeln per `git show` und direkter Code-Prüfung verifizierten,
+bereits in `main` gemergten Commit; beide Ausschlüsse wenden nur bereits
+etablierte Kriterien an. Klar genug beschrieben, keine offene
+Positionierungs-Grundsatzfrage.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf steht bei sieben,
+  weiterhin unter dem etablierten Maßstab (acht).
+- Ein eigenständiger Post zur jetzt behobenen "ehrliche Flugsuche"-Lücke
+  — ohne freigegebenen Social-Kanal (Frage 1 weiterhin offen) wäre er
+  nicht veröffentlichbar; der Fund fließt stattdessen als Kandidat 34 in
+  den Mini-Changelog-Topf, das dafür vorgesehene Format.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/ai/mockAdvisor.ts` (Flug-Sonderzweig tatsächlich entfernt,
+`noAutoSearchPhraseDe` jetzt für alle Modi) sowie `src/lib/format.ts` und
+`src/lib/utils.ts` (beide Konsolidierungen ohne erkennbare
+Verhaltensänderung) direkt im aktuellen Code gelesen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 06.10. (Prüfung
+  der vier Fragen, drei neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 34, zwei bewusst ausgeschlossen, Kandidatentopf-Stand
+  auf "sieben" gesetzt, Datum im Titel aktualisiert).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-05
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
