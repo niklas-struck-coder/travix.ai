@@ -16473,3 +16473,64 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-06 (fünfter Lauf desselben Tages)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war identisch mit dem Stand nach dem vierten
+Lauf, lag aber 4 Commits hinter `origin/main` zurück (Marketing-Chef-/
+Support-Chef-Berichte sowie ein IT-Chef-Bericht, alle reine
+Report-Dateien unter `reports/`, kein Code). Reinen Merge-Commit von
+`origin/main` nach `it-chef/auto` gemacht (`git merge origin/main`,
+keine Konflikte, nur `reports/*.md`/`status.md` betroffen) und sofort
+gepusht — `main` dabei unberührt, nur der Auto-Branch aktualisiert.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Unverändert seit den ersten vier
+Läufen heute. Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der
+Base44-/Auth-Backend-Entscheidung, an fehlenden Datenquellen, an der
+Preisfeld-Architektur (`TripDraft`) oder an offenen Produktentscheidungen
+(OQ-03/OQ-04) — siehe dritter/vierter Lauf für Details.
+
+**Eigene Bug-Suche:** Statt eine fünfte vollständige Repo-Durchsicht zu
+wiederholen, einen eigens beauftragten Explore-Agenten mit fünf engen,
+bisher nicht abgedeckten Angriffswinkeln angesetzt (explizit angewiesen,
+nichts aus den ersten vier Läufen heute erneut zu prüfen): (1)
+Icon-only-Buttons ohne erreichbaren Namen, (2) `vite-plugins/duffel-proxy.ts`
+und `src/lib/duffel/client.ts` vollständig gelesen auf neue, echte Bugs,
+(3) `<img>` ohne `alt`, (4) Formularfelder ohne verknüpftes Label, (5)
+unformatierte Zahlen statt `formatEuro`/`formatOfferPrice`/
+`toLocaleString`. Zusätzlich selbst geprüft: Abgleich aller `.ts`/`.tsx`-
+Quelldateien gegen ihre `.test.`-Gegenstücke (`comm`) — identische
+Lücken-Liste wie im vierten Lauf, keine neue; `grep -rn
+"TODO|FIXME|XXX" src/` weiterhin ohne Treffer.
+
+**Ergebnis:** Vier der fünf Angriffswinkel ohne jeden Fund (Icon-Buttons,
+`<img>`, Formular-Labels, Zahlenformatierung — alles bereits korrekt).
+Im fünften (`duffel/client.ts`) ein echter, aber nicht sicher genug
+eingestufter Kandidat: `client.ts` parst die Antwort (`response.json()`)
+vor der `!response.ok`-Prüfung — bei einem Nicht-JSON-Fehlerkörper (z. B.
+502/504 eines vorgeschalteten Proxys) würde der daraus resultierende
+`SyntaxError` von der äußeren Catch-Klammer auf die generische
+Netzwerk-/Parse-Fehlermeldung statt die genauere Status-basierte
+Fehlermeldung abgebildet. Laut Agent über den eigenen Dev-Proxy
+(`vite-plugins/duffel-proxy.ts`, liefert bei jedem Fehler selbst JSON
+zurück) nicht reproduzierbar, nur aus der Codeform abgeleitet — kein live
+beobachtetes Verhalten. Erfüllt damit Kriterium 4 (objektiv prüfbares
+Ergebnis durch tatsächlich reproduziertes Verhalten) nicht sicher genug;
+**nichts erfinden** statt eines spekulativen Fixes. Kein Code-Commit für
+einen neuen Programmierpunkt — nur dieser Log-Eintrag. Bleibt als
+Vorschlag für einen künftigen Lauf vermerkt, der ihn zuerst tatsächlich
+live reproduziert (z. B. über einen Test, der eine Nicht-JSON-Antwort mit
+Fehlerstatus simuliert), bevor er behoben wird.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout, 10 Advisories wie beim vierten Lauf, ausschließlich
+Dev-Tooling-Kette), `npx tsc -b` (kein Typfehler), `npm run lint` (0
+Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen), `npx
+vitest run` (61 Testdateien, 411 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
