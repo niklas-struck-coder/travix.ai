@@ -4006,3 +4006,64 @@ entstandener Reibungspunkt, sondern vorbestehendes Verhalten des ganzen
 gelandeten Fixes (404-Route, React-Key in `TripSummaryCard`, Favoriten-
 Reset) wurden nicht im Detail mitgeprüft, da dieser Lauf sich laut Skill
 auf einen Bereich konzentrieren soll.
+
+---
+
+## 2026-10-06 — 404-Seite (`NichtGefunden.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `NichtGefunden.tsx` laut `ZEITPLAN.md`/Commit-Historie
+die zuletzt neu angelegte Seite ist (04.10., zweiter Lauf, Commit
+`21ef1a7`: fehlende `<Route path="*">` ergänzt). Der 05.10.-Eintrag
+oben nennt die 404-Route selbst ausdrücklich als "nicht im Detail
+mitgeprüft" — dieser Lauf holt das nach.
+
+### Reibungspunkt
+
+**1. Beim Landen auf der 404-Seite bekommen Screenreader-Nutzer:innen
+keine Rückmeldung, dass sich überhaupt etwas geändert hat**
+
+`focusPageHeading()` (`src/lib/utils.ts:14-27`, verschiebt den Fokus auf
+die Seiten-`<h1>`) wird im ganzen Code nur von zwei Stellen aufgerufen:
+dem Dialog-/Sheet-Schließen-Fallback (`dialog.tsx`/`sheet.tsx`) und dem
+Schließen des mobilen Menüs nach einem Linkklick (`MobileNav.tsx:53`).
+Der Desktop-`Sidebar.tsx` (Zeile 34-50, `NavLink`) ruft sie beim Klick
+nicht auf, und `routes.tsx`/`AppShell.tsx` haben keinen
+`useLocation`-Effekt, der bei jedem Routenwechsel pauschal dorthin
+fokussiert. Für fast jede andere Seite federt das sehende Layout die
+Lücke zumindest teilweise ab (Sidebar-Hervorhebung ändert sich
+sichtbar, Seiteninhalt sieht offensichtlich anders aus) — genau auf der
+404-Seite trifft es aber am härtesten: Sie wird typischerweise über
+einen kaputten/veralteten Link oder eine falsch eingegebene Adresse
+erreicht, nicht über einen bewussten Sidebar-Klick, bei dem man ohnehin
+schon weiß, wohin man wollte. Für eine Screenreader-Nutzerin, die einen
+Link anklickt oder eine Adresse eintippt, bleibt der Fokus nach der
+Navigation einfach dort stehen, wo er vorher war (meist auf dem jetzt
+nicht mehr vorhandenen Link-Element) oder springt kommentarlos auf
+`<body>` — ohne jede automatische Ansage, dass "Seite nicht gefunden"
+jetzt der neue Inhalt ist. Das ist keine Design-Entscheidung, sondern
+schlicht die bereits vorhandene Fallback-Logik, die hier (und bei jeder
+Navigation außerhalb von Mobile-Menü/Dialog-Schließen) einfach nicht
+verdrahtet ist.
+
+*Vorschlag:* Einen zentralen `useEffect`, der bei jedem `useLocation()`
+-Wechsel `focusPageHeading()` aufruft (z. B. in `AppShell.tsx` oder
+direkt in `routes.tsx`, wo `useLocation()` bereits importiert ist,
+Zeile 1/51) — das deckt die 404-Seite automatisch mit ab und schließt
+dieselbe Lücke für jede andere In-App-Navigation über Sidebar/`Link`
+gleich mit, statt nur für diese eine Seite einen Sonderfall zu bauen.
+
+### Nicht geprüft
+Der Seitentitel im Browser-Tab (`document.title`) ändert sich bei
+keiner Route im gesamten `src`-Baum (kein einziger Treffer für
+`document.title` o. Ä.) — die 404-Seite ist davon nicht anders
+betroffen als jede andere Seite, deshalb hier nur als Randnotiz und
+nicht als eigener, seitenspezifischer Fund aufgeführt. Inhaltlich
+(Text, "Zur Startseite"-Button, Teal/Navy-Button-Styling) ist die Seite
+konsistent mit dem bereits etablierten Empty-State-Muster (`Favoriten.tsx`,
+`Warenkorb.tsx` u. a.) — keine Abweichung gefunden. Die Sidebar-
+Aktiv-Hervorhebung wurde ebenfalls geprüft: `Sidebar.tsx:37`
+(`end={item.path === '/'}`) verhindert bereits korrekt, dass "Start" auf
+der 404-Seite fälschlich als aktiv markiert wird — kein Bug.
