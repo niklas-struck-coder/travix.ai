@@ -16347,3 +16347,70 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-06 (dritter Lauf desselben Tages)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` enthielt bereits beide Commits der ersten zwei
+Läufe heute (`focusPageHeading()`-Konsolidierung; "kein sicherer Punkt
+gefunden"-Log-Eintrag vom zweiten Lauf) und war ansonsten identisch mit
+`main` (0 Commits zurück zu `origin/main`) — kein Merge nötig, `main`
+unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Unverändert seit den ersten beiden
+Läufen heute. Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der
+Base44-/Auth-Backend-Entscheidung, an fehlenden Datenquellen
+(Zug/Bus/Fähre-Suche), an einer noch fehlenden Architektur für
+Transport-/Unterkunfts-Preisfelder (`TripDraft`, blockiert 6.6/6.7/7.12)
+oder an offenen Produktentscheidungen (`/premium` an OQ-03,
+Rewards/Loyalty an OQ-04). Punkt 8.13 ("Unit tests für
+calculateProgress, calculateCosts, checklistRules, schema validation")
+eigens geprüft: `calculateProgress` und `checklistRules` haben bereits
+eigene Testdateien; `calculateCosts.ts` existiert mangels 6.7 noch gar
+nicht und die Schema-Validierung hängt an 4.1 (Base44/Gemini-Zugangsdaten)
+— beide Teile von 8.13 bleiben also an denselben offenen Punkten
+blockiert wie ihre jeweiligen Haupt-Tasks.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit einer
+dritten, auf Vollständigkeit ausgelegten Suche angesetzt — explizit mit
+der Vorgabe, nichts aus den ersten beiden Läufen heute oder aus
+`reports/it-chef.md` (05.10.) erneut zu melden, und gezielt auf
+bisher noch nicht geprüfte Bereiche gerichtet. Der Agent deckte
+zusätzlich ab: alle bisher nicht einzeln genannten Seiten (Buchung,
+Profil, Einstellungen, Urlaubsmodus, Kalender, Kartenansicht, Dashboard,
+PlaceholderPage), `src/components/trip/*`, `src/components/chat/*`,
+`src/components/layout/*`, `src/lib/trip/*`, `src/lib/ai/*`
+(mockConcierge, speech), den Duffel-Adapter (`src/lib/duffel/client.ts`,
+`vite-plugins/duffel-proxy.ts`), `src/lib/utils.ts`,
+`src/lib/design-tokens.ts`, Routen-Abdeckung (`nav-config.ts` gegen
+`routes.tsx`), `useChat.ts`/`useConcierge.ts`, alle `src/types/*`, sowie
+einen Demo-Daten-Konsistenzvergleich zwischen Dashboard/Reiseentwuerfe/
+MeineReisen/Favoriten/Kalender.
+
+**Ergebnis:** Kein neuer, eindeutiger und sicherer Bug gefunden. Vier
+Kandidaten geprüft und verworfen: (1) `formatDuration()`s Regex matcht
+theoretisch auch auf ein bloßes "P" in einem sonst ungültigen String und
+liefert dann "—" statt den Rohstring zurückzugeben — nicht erreichbar, da
+der einzige Aufrufer echte Duffel-ISO-8601-Dauern liefert, also ein
+erfundener statt ein echter Edge Case; (2) fehlende React-`ErrorBoundary`
+— bereits mehrfach in diesem Log diskutiert, die konkrete Instanz davon
+(fehlende 404-Route) ist bereits behoben, eine allgemeine ErrorBoundary
+wäre eine größere Architekturentscheidung statt eines kleinen,
+eindeutigen Fixes; (3) `design-tokens.ts` ohne Imports in `src/` —
+bereits mehrfach als bewusste, dokumentierte Konstanten-Datei
+eingeordnet, gleiche Kategorie wie `App.tsx`/`main.tsx`; (4) `/hilfe` als
+`PlaceholderPage` statt echter Seite — laut Kommentar in `nav-config.ts`
+bewusst so, gleiches Muster wie Deal-Finder/Premium/Budget. Kein
+Code-Commit für einen neuen Programmierpunkt — nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout, dieselben 9 Advisories wie zuletzt, betrifft nur Dev-Tooling,
+kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run lint` (0
+Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen), `npx
+vitest run` (61 Testdateien, 411 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
