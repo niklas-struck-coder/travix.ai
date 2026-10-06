@@ -16203,3 +16203,86 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-06
+
+**Ausgangslage:** Erster geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war beim Start identisch mit `main` (0 Commits
+Unterschied in beide Richtungen, der fünfte Lauf vom 05.10. war bereits
+via Freigabe-Chef nach `main` gemergt) — kein Merge nötig, `main`
+unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste und Reports:** Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der noch nicht
+getroffenen Base44-/Auth-Backend-Entscheidung oder Folgearbeit, die selbst
+wieder darauf aufbaut. `reports/it-chef.md`, `reports/support-chef.md`,
+`reports/marketing-chef.md` (Stand 05.10., kein neuerer Eintrag) gelesen
+— keiner der dort offenen Punkte war neu und sicher genug: Support-Chefs
+Vorschlag 2 (ehrliche Formulierung auch für Flug) bereits durch den
+vierten Lauf am 05.10. erledigt, dessen Vorschlag 1 (Lösch-Warnungen
+differenzieren) weiterhin bewusst nicht umgesetzt (fehlende
+Design-Vorgabe, siehe Begründung im 05.10.-Eintrag, fünfter Lauf). Von
+IT-Chefs eigenen "Weiteren Vorschlägen" ist `formatDuration()`-
+Konsolidierung bereits erledigt (05.10., fünfter Lauf), Abhängigkeits-
+änderungen (`recharts`) sind für diesen Kanal ausgeschlossen, PR-
+Aufräumung kann nur Ni selbst machen, `TrainCard`/`TrainResults`-Verdrahtung
+bleibt eine Produktentscheidung.
+
+Da die Berichte keinen neuen Fund hatten, zusätzlich einen eigens
+beauftragten Explore-Agenten auf eine gezielte Suche nach einem neuen,
+eigenständigen Fund angesetzt (gleiches Vorgehen wie an mehreren
+Vortagen) — mit der expliziten Vorgabe, nichts bereits Bekanntes oder
+Architektur-/Produktentscheidungen zu melden.
+
+**Fund (eigenständig, vom Explore-Agenten identifiziert):** Die
+"Fokussiere die Seiten-`<h1>`"-Fallback-Logik beim Schließen eines
+Dialogs/Sheets, wenn das ursprünglich fokussierte Element nicht mehr im
+DOM ist (z. B. ein "entfernen"-Button, dessen Karte gerade gelöscht
+wurde), lag byte-identisch doppelt vor: inline in `DialogContent`s
+`onCloseAutoFocus` (`src/components/ui/dialog.tsx`, vormals Zeile 87-98)
+sowie als eigene, aus `SheetContent` bereits extrahierte und exportierte
+`focusPageHeading()`-Funktion in `src/components/ui/sheet.tsx` (vormals
+Zeile 19-32, zusätzlich von `MobileNav.tsx` genutzt). Laut diesem Log
+(18.09.-Einträge) wurde der Fallback zuerst in `dialog.tsx` eingeführt,
+dann wortgleich nach `sheet.tsx` kopiert, und nur die `sheet.tsx`-Kopie
+später in eine gemeinsam nutzbare Funktion extrahiert — `dialog.tsx`s
+ursprüngliche Kopie wurde nie auf die gemeinsame Funktion umgestellt.
+Gleiche Code-Hygiene-Kategorie wie die bereits konsolidierten
+`formatEuro()`/`formatOfferPrice()`/`formatDuration()`.
+
+**Fix:** `focusPageHeading()` nach `src/lib/utils.ts` verschoben (neben
+dem bereits dort etablierten `cn()`), da beide betroffenen Dateien
+dieses Modul bereits importieren. `sheet.tsx` importiert die Funktion
+jetzt von dort statt sie selbst zu definieren, der bisherige Re-Export
+aus `sheet.tsx` entfällt; `MobileNav.tsx`s Import entsprechend auf
+`@/lib/utils` umgestellt. `dialog.tsx` ruft an der betroffenen Stelle
+jetzt ebenfalls `focusPageHeading()` auf statt die Logik zu duplizieren.
+Keine Verhaltensänderung. Neue, direkte `focusPageHeading`-Testgruppe in
+`utils.test.ts` (3 Tests: Fokus plus temporäres `tabindex` mit Entfernen
+beim Blur, unverändertes Verhalten bei bereits vorhandenem `tabindex`,
+kein Fehler ohne vorhandene `<h1>`) — der bereits bestehende
+Verhaltenstest in `dialog.test.tsx` ("moves focus to the page heading
+when confirming removes the element that opened the dialog") blieb
+unverändert grün und bestätigt, dass die Umstellung auf die gemeinsame
+Funktion das Verhalten nicht verändert hat.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/
+echten Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Konsolidierung bereits identischen, an
+anderer Stelle schon extrahierten Codes, kein neues Verhalten), klar
+lokalisiert (zwei benannte Dateien, eine gemeinsame Funktion), objektiv
+prüfbar (bestehender Verhaltenstest bleibt grün, neue direkte Testgruppe
+für die verschobene Funktion, volle Suite weiterhin grün).
+
+**Geprüft:** `npm ci` (frischer Checkout; weiterhin dieselben 6
+High-Severity-Advisories in der shadcn-CLI-Kette, unverändert seit
+mehreren Läufen, betrifft nur das Dev-Tool, kein Laufzeit-Code), `npx tsc
+-b` (kein Typfehler), `npm run lint` (0 Fehler, nur noch 3 statt bisher 4
+vorbestehende Fast-Refresh-Warnungen — die vierte betraf exakt den jetzt
+entfernten Re-Export von `focusPageHeading` aus `sheet.tsx`), `npx vitest
+run` (61 Testdateien, 411 Tests, alle grün — 3 neu durch die direkte
+`focusPageHeading`-Testgruppe), `npm run build` (`tsc -b` + `vite build`,
+kein Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { cn } from '@/lib/utils'
+import { afterEach, describe, expect, it } from 'vitest'
+import { cn, focusPageHeading } from '@/lib/utils'
 
 describe('cn', () => {
   it('merges plain class name strings', () => {
@@ -25,5 +25,39 @@ describe('cn', () => {
 
   it('returns an empty string when given no usable input', () => {
     expect(cn()).toBe('')
+  })
+})
+
+describe('focusPageHeading', () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('focuses the page h1, adding a temporary tabindex it removes on blur', () => {
+    document.body.innerHTML = '<h1>Testseite</h1>'
+    const heading = document.querySelector('h1') as HTMLElement
+
+    focusPageHeading()
+
+    expect(document.activeElement).toBe(heading)
+    expect(heading.getAttribute('tabindex')).toBe('-1')
+
+    heading.blur()
+    expect(heading.hasAttribute('tabindex')).toBe(false)
+  })
+
+  it('leaves an existing tabindex on the heading untouched after blur', () => {
+    document.body.innerHTML = '<h1 tabindex="0">Testseite</h1>'
+    const heading = document.querySelector('h1') as HTMLElement
+
+    focusPageHeading()
+    heading.blur()
+
+    expect(heading.getAttribute('tabindex')).toBe('0')
+  })
+
+  it('does nothing when the page has no h1', () => {
+    document.body.innerHTML = '<p>Keine Überschrift</p>'
+    expect(() => focusPageHeading()).not.toThrow()
   })
 })

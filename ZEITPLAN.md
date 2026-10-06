@@ -113,6 +113,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   durch temporäres Zurücknehmen der Routenänderung (`git stash` nur
   `routes.tsx`) reproduzierbar rot verifiziert (kein `<h1>` im Dokument
   unter `/does-not-exist`).
+  Vom autonomen IT-Chef-Lauf am 06.10. einen eigenständig (über einen
+  eigens beauftragten Explore-Agenten) gefundenen Hygiene-Punkt behoben:
+  Die "Fokussiere die Seiten-`<h1>`"-Fallback-Logik beim Schließen eines
+  Dialogs/Sheets (greift, wenn das ursprünglich fokussierte Element nicht
+  mehr im DOM ist, z. B. nach einem "entfernen"-Klick auf dessen eigene
+  Karte) lag byte-identisch doppelt vor: inline in `DialogContent`
+  (`src/components/ui/dialog.tsx`) sowie als bereits aus `SheetContent`
+  extrahierte, exportierte `focusPageHeading()`-Funktion in
+  `src/components/ui/sheet.tsx` (zusätzlich von `MobileNav.tsx` genutzt)
+  — laut diesem Log (18.09.) wurde der Fallback zuerst in `dialog.tsx`
+  eingeführt, dann wortgleich nach `sheet.tsx` kopiert, aber nur dort
+  später extrahiert. Fix: `focusPageHeading()` nach `src/lib/utils.ts`
+  verschoben (beide Dateien importieren dieses Modul bereits), `sheet.tsx`
+  und `dialog.tsx` nutzen jetzt dieselbe gemeinsame Funktion,
+  `MobileNav.tsx`s Import entsprechend umgestellt. Keine
+  Verhaltensänderung, gleiche Konsolidierungs-Kategorie wie zuvor
+  `formatEuro()`/`formatOfferPrice()`/`formatDuration()`. Neue, direkte
+  `focusPageHeading`-Testgruppe in `utils.test.ts` (3 Tests) — bestehender
+  Verhaltenstest in `dialog.test.tsx` blieb unverändert grün.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
