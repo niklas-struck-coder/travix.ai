@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-03):**
-- IT-Chef hat mehrere kleine Fixes nach main gemergt: fehlende 404-Route,
-  ein instabiler React-Key bei kollidierendem Freitext, eine fehlende
-  Start=Ziel-Prüfung beim Flug-Abflughafen im Chat
-- Der zuvor offene Favoriten-Ziel-Reset-Fund wurde tatsächlich behoben
-- Marketing-Chef und Support-Chef haben neue Kandidaten/Befunde gesammelt;
-  diese sind fachlich geprüft und freigegeben, konnten beim letzten
-  automatischen Lauf aber aus technischen Gründen (Berechtigungsprüfung)
-  noch nicht nach main gemergt werden — steht noch aus
+**Seit letztem Update (2026-10-05):**
+- IT-Chef hat Code-Konsolidierungen gemergt: doppelte focusPageHeading()-Logik
+  zwischen Dialog/Sheet zusammengeführt, formatDuration() zentralisiert
+- Ehrlichere Formulierung im Haupt-Chat-Ablauf (kein Flugsuche-Versprechen
+  mehr, das noch nicht eingehalten werden kann) ist jetzt live
+- Support-Chef hat einen neuen Befund zur 404-Seite gemeldet: fehlende
+  Fokus-Ankündigung für Screenreader
+- Freigabe-Chef hat beide Tages-Läufe (IT-Chef, Marketing-/Support-Chef)
+  heute erfolgreich geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-05_
+_Letztes Update: 2026-10-06_
