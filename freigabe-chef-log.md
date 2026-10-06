@@ -1,5 +1,69 @@
 # Freigabe-Chef-Log
 
+## 2026-10-06, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (lag nur noch einen Commit
+  *hinter* `main`, nämlich den eigenen Merge aus dem heutigen früheren
+  Nacht-Check). Planmäßig übersprungen, kein neuer Stand.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`ee9392f`, 06.10.,
+  plus ein bereits vorher gemergter Merge-Commit von `main`).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`8bde856`, 06.10.).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur
+Log-Eintrag geglaubt): Ändert nur `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — neuer 34. Tier-4-Kandidat
+("Flugsuche verspricht/löst nicht aus"-Fund jetzt behoben, Commit
+`1493a5f` bereits in `main`), zwei Commits (`formatDuration`- und
+`focusPageHeading`-Konsolidierung) bewusst als reine interne
+Änderungen ohne Verhaltensänderung ausgeschlossen. Unabhängig
+gegengeprüft: `src/lib/ai/mockAdvisor.ts` auf `main` tatsächlich ohne
+Flug-Sonderzweig, `flight` nutzt jetzt dieselbe
+`noAutoSearchPhraseDe`-Formulierung wie die anderen Transportmodi —
+Fund stimmt. Keine erfundenen Kennzahlen/Nutzerzahlen, reiner
+Markdown-Entwurf ohne jeden Hinweis auf tatsächliches
+Posten/Versenden/Veröffentlichen, Text vollständig und kohärent.
+→ **Passt, nach `main` gemergt** (`git merge --no-ff`, saubere Merges,
+nur die zwei erwarteten Dateien geändert).
+
+**Prüfung `support-chef/auto`:** Ändert nur `support-chef-auto-log.md`
+— zwei neue Analyse-Einträge (Flug-Abflughafen-Kollisionsprüfung im
+Chat: Ablehnungsnachricht nennt den kollidierenden Zielcode nicht;
+404-Seite: fehlende Fokus-Ankündigung für Screenreader bei
+Navigation). Stichprobenartig gegengeprüft:
+- `src/hooks/useChat.ts` enthält tatsächlich die beschriebene
+  Ablehnungsnachricht ohne `known.name`/`known.iataCode` — Fund
+  stimmt.
+- `focusPageHeading()` liegt auf `main` tatsächlich in
+  `src/lib/utils.ts:14-27`, aufgerufen nur von `dialog.tsx`,
+  `sheet.tsx` und `MobileNav.tsx:53` — exakt wie im Log behauptet.
+  `Sidebar.tsx` (dort `NavLink`) ruft sie tatsächlich nicht auf,
+  `routes.tsx`/`AppShell.tsx` haben tatsächlich keinen
+  `useLocation`-Fokus-Effekt — Fund stimmt, nicht erfunden.
+  Auffälligkeit dabei: Der eigene Commit-Stand von `support-chef/auto`
+  war zu diesem Zeitpunkt noch *hinter* `main` (die
+  `focusPageHeading`-Konsolidierung von heute Nacht fehlte dort noch
+  im Baum) — der Bericht selbst wurde also korrekt gegen den
+  aktuellen `main`-Stand geschrieben, nur der eigene Branch war noch
+  nicht nachgezogen. Kein Konflikt beim Merge, da `main` seit der
+  Branch-Abspaltung keine der betroffenen Dateien geändert hat.
+→ **Passt, nach `main` gemergt** (`git merge --no-ff`, sauberer Merge,
+nur die eine erwartete Datei geändert, reine Analyse ohne
+Code-Änderung — niedrigstes Risiko der drei).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, gemergt (`main` `a4c2fc0..0e4f8fb`, gepusht).
+`it-chef/auto` planmäßig übersprungen (kein neuer Stand). Alle drei
+Branches danach per Fast-Forward auf den neuen `main`-Stand gebracht
+(deckungsgleich), damit der nächste Lauf ohne zusätzlichen
+Main-Merge auf aktuellem Stand startet.
+
+**Info an Ni:** Nein — saubere Merges, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. Die oben genannte Branch-Rückstand-Beobachtung
+bei `support-chef/auto` ist rein organisatorisch (durch das
+Fast-Forwarding aller drei Branches jetzt behoben) und keine
+inhaltliche Auffälligkeit.
+
 ## 2026-10-06, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
