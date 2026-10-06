@@ -1,5 +1,73 @@
 # Freigabe-Chef-Log
 
+## 2026-10-06, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (drei mit Code-Änderung:
+  "ehrliche Formulierung statt Flugsuche-Versprechen" (05.10., vierter
+  Lauf), "formatDuration-Konsolidierung nach format.ts" (05.10., fünfter
+  Lauf), "focusPageHeading()-Duplikat dialog.tsx/sheet.tsx konsolidiert"
+  (06.10., erster Lauf; zwei weitere 06.10.-Läufe ohne Fund, nur
+  Log-Einträge).
+- `marketing-chef/auto` — letzter Commit vom 05.10. (`e79566f`), keiner
+  von heute. Laut Vorgabe für diesen frühen Lauf planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — letzte Commits vom 05.10. (`8254216`) und
+  03.10. (`efe2ae9`), keiner von heute. Ebenfalls planmäßig
+  übersprungen.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur die
+Log-Einträge geglaubt, jeden der drei Code-Commits einzeln per
+`git show` gegengelesen):
+1. `mockAdvisor.ts`/`.test.ts`: Flug-Sonderzweig in `getNextAdvisorStep()`
+   entfernt, der im Hauptchat-Ablauf ein "Ich suche jetzt nach echten
+   Flug-Verbindungen" versprach, das dort nie ausgelöst wird (nur der
+   separate Bearbeiten-Pfad in `useChat.ts` tut das) — fällt jetzt durch
+   dieselbe ehrliche Formulierung wie Zug/Bus/Fähre/Mietwagen. Ungenutzte
+   `transportLabelsDe`-Map mitentfernt, Test entsprechend umgestellt.
+   Deckt sich exakt mit dem Log-Eintrag.
+2. `format.ts`/`FlightCard.tsx`/`TrainCard.tsx`: `formatDuration()` lag
+   identisch dupliziert vor, jetzt nach `src/lib/format.ts` verschoben,
+   beide Kopien durch Import ersetzt, keine Verhaltensänderung (per
+   Diff bestätigt — reine Verschiebung, mechanisch identisch). Neue
+   direkte Testgruppe in `format.test.ts`.
+3. `utils.ts`/`dialog.tsx`/`sheet.tsx`/`MobileNav.tsx`:
+   `focusPageHeading()` lag identisch dupliziert zwischen `dialog.tsx`
+   und `sheet.tsx` vor, jetzt nach `src/lib/utils.ts` verschoben, beide
+   Call-Sites plus `MobileNav.tsx`-Import angepasst, keine
+   Verhaltensänderung (reine Funktionsverschiebung).
+Alle drei Fixes scoped, kein Scope-Creep, keine Berührung von
+Auth/Zahlungen/rechtlichen Texten. Keine neue UI/Design-Entscheidung im
+Sinne von `MARKENDESIGN.md` (reine Code-Dedupe bzw. Formulierungs-
+Korrektur, kein neues Verhalten).
+
+**Unabhängig selbst verifiziert** (frischer Checkout in separatem
+Worktree, nicht im Hauptarbeitsverzeichnis): `npm install` → 650 Pakete,
+9 vorbestehende Advisories (unverändert, nicht durch diesen Branch
+verursacht, nur Dev-Tooling). `npx tsc -b` → 0 Fehler. `npx eslint .` →
+0 Fehler, dieselben 3 vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`. `npx vitest run` → 61 Testdateien, 411 Tests,
+alle grün. `npm run build` → erfolgreich, unveränderte
+Chunk-Size-Warnung. Deckt sich exakt mit den Angaben im
+`it-chef-auto-log.md`.
+
+→ **Alles passt, nach `main` gemergt** (`git merge --no-ff`, gepusht
+`c29ad50..c37aeb4`). `it-chef/auto` danach per Fast-Forward auf den
+neuen `main`-Stand gebracht (`28d0604..c37aeb4`), damit der nächste
+IT-Chef-Lauf nicht extra mergen muss.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand von heute vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. (Hinweis zur Kenntnis, nicht akut: der
+Log-Eintrag vom 05.10., "zweiter früher Check", meldete einen durch die
+Auto-Mode-Berechtigungsprüfung blockierten `git merge` für
+marketing-chef/auto/support-chef/auto — in diesem Lauf lief der Merge
+für `it-chef/auto` ohne Blockade durch, scheint also kein dauerhaftes
+Problem gewesen zu sein.)
+
 ## 2026-10-05, zweiter früher Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
