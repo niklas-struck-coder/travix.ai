@@ -8,9 +8,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  focusPageHeading,
 } from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
+import { cn, focusPageHeading } from '@/lib/utils'
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)

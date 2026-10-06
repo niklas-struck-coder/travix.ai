@@ -113,6 +113,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   durch temporäres Zurücknehmen der Routenänderung (`git stash` nur
   `routes.tsx`) reproduzierbar rot verifiziert (kein `<h1>` im Dokument
   unter `/does-not-exist`).
+  Vom autonomen IT-Chef-Lauf am 06.10. einen eigenständig (über einen
+  eigens beauftragten Explore-Agenten) gefundenen Hygiene-Punkt behoben:
+  Die "Fokussiere die Seiten-`<h1>`"-Fallback-Logik beim Schließen eines
+  Dialogs/Sheets (greift, wenn das ursprünglich fokussierte Element nicht
+  mehr im DOM ist, z. B. nach einem "entfernen"-Klick auf dessen eigene
+  Karte) lag byte-identisch doppelt vor: inline in `DialogContent`
+  (`src/components/ui/dialog.tsx`) sowie als bereits aus `SheetContent`
+  extrahierte, exportierte `focusPageHeading()`-Funktion in
+  `src/components/ui/sheet.tsx` (zusätzlich von `MobileNav.tsx` genutzt)
+  — laut diesem Log (18.09.) wurde der Fallback zuerst in `dialog.tsx`
+  eingeführt, dann wortgleich nach `sheet.tsx` kopiert, aber nur dort
+  später extrahiert. Fix: `focusPageHeading()` nach `src/lib/utils.ts`
+  verschoben (beide Dateien importieren dieses Modul bereits), `sheet.tsx`
+  und `dialog.tsx` nutzen jetzt dieselbe gemeinsame Funktion,
+  `MobileNav.tsx`s Import entsprechend umgestellt. Keine
+  Verhaltensänderung, gleiche Konsolidierungs-Kategorie wie zuvor
+  `formatEuro()`/`formatOfferPrice()`/`formatDuration()`. Neue, direkte
+  `focusPageHeading`-Testgruppe in `utils.test.ts` (3 Tests) — bestehender
+  Verhaltenstest in `dialog.test.tsx` blieb unverändert grün.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
@@ -1138,6 +1157,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   entsprechend umgedreht (erwarten jetzt "—" statt "1min"). Der
   ursprüngliche Auto-Fix-PR #25 bleibt als überholt zurück (kann bei
   nächster PR-Hygiene-Aufräumung geschlossen werden).
+  Vom autonomen IT-Chef-Lauf am 05.10. (fünfter Lauf desselben Tages) einen
+  in `reports/it-chef.md` (05.10., "Weitere Vorschläge", Punkt 3)
+  gemeldeten Hygiene-Punkt umgesetzt: `formatDuration()` lag identisch
+  dupliziert in `FlightCard.tsx` und `TrainCard.tsx` vor (gleiche Ursache
+  wie bei `formatEuro()`/`formatOfferPrice()` zuvor, die bereits nach
+  `src/lib/format.ts` konsolidiert sind). Reine Konsolidierung, keine
+  Verhaltensänderung: Funktion 1:1 nach `src/lib/format.ts` verschoben
+  (gleiches Dokumentationskommentar-Muster wie die beiden dortigen
+  Nachbarfunktionen), beide Kopien in `FlightCard.tsx`/`TrainCard.tsx`
+  entfernt, stattdessen aus `@/lib/format` importiert (gemeinsam mit dem
+  bereits bestehenden `formatOfferPrice`-Import). Neue, direkte
+  `formatDuration`-Testgruppe in `format.test.ts` (7 Tests: Stunden+
+  Minuten, ganze Stunde ohne "0min", Tagesanteil, reiner Tagesanteil ohne
+  Zeitteil, Sekunden-only als Platzhalter-Strich, fehlende Dauer als
+  Strich, unparsbare Eingabe als Rohstring) — bestehende
+  `FlightCard.test.tsx`/`TrainCard.test.tsx`-Tests zur Dauer-Anzeige
+  unverändert grün, da reine Verschiebung ohne Logikänderung.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
@@ -1792,6 +1828,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `MobileNav.test.tsx`: Fokus landet nach einem Navigationslink auf der
   `<h1>` der neuen Seite; Fokus kehrt beim Schließen ohne Navigation
   weiterhin zum Menü-Button zurück.
+  Vom autonomen IT-Chef-Lauf am 05.10. (vierter Lauf desselben Tages)
+  Vorschlag 2 aus `reports/support-chef.md` (05.10.) umgesetzt: Die
+  Flug-Ankündigung im Hauptchat-Ablauf (`getNextAdvisorStep()` in
+  `mockAdvisor.ts`, bisher eigener `if (next.transportMode === 'flight')`-
+  Zweig) versprach "Ich suche jetzt nach echten Flug-Verbindungen …
+  Nichts wird erfunden" — der Hauptchat-Ablauf löst die echte Flugsuche
+  aber nie aus (nur der separate "Bearbeiten"-Pfad in `useChat.ts` tut
+  das, laut Code-Kommentar an derselben Stelle bewusst so). Die anderen
+  vier Modi (Zug/Bus/Fähre/Mietwagen) nutzen für exakt diese Lücke bereits
+  seit dem 29.09.-Fix die ehrliche `noAutoSearchPhraseDe`-Formulierung
+  ("hab ich noch keine automatische Suche — dein Reiseplan steht
+  trotzdem!"). Fix: reiner Text-Fix, keine Änderung an der Suchlogik
+  selbst — der Flug-Sonderzweig entfernt, Flug fällt jetzt durch dieselbe
+  bereits etablierte, ehrliche Formulierung wie die anderen vier Modi
+  (`noAutoSearchPhraseDe.flight` existierte bereits, war aber durch den
+  Sonderzweig nie erreichbar). Die dadurch komplett ungenutzte
+  `transportLabelsDe`-Map (einzige Verwendung war der entfernte Zweig)
+  ebenfalls entfernt, Begleitkommentar entsprechend angepasst. Bestehender
+  Test in `mockAdvisor.test.ts` umgestellt (prüft jetzt dieselbe ehrliche
+  Formulierung wie der Zug-Test statt des alten Suchversprechens) — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockAdvisor.ts`) reproduzierbar rot verifiziert (alter Test erwartete
+  "Ich suche jetzt nach echten Flug-Verbindungen", neuer erwartet das
+  Gegenteil). Der im selben Bericht sowie in `reports/it-chef.md`
+  weiterhin offen gemeldete, größere Punkt — dass die echte Flugsuche im
+  Hauptchat-Ablauf überhaupt nie ausgelöst wird — bleibt bewusst
+  unangetastet, das wäre eine eigene Backend-Verdrahtungsentscheidung,
+  keine reine Text-/Logikkorrektur.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

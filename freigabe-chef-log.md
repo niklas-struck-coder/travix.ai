@@ -1,5 +1,121 @@
 # Freigabe-Chef-Log
 
+## 2026-10-06, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `main` (drei mit Code-Änderung:
+  "ehrliche Formulierung statt Flugsuche-Versprechen" (05.10., vierter
+  Lauf), "formatDuration-Konsolidierung nach format.ts" (05.10., fünfter
+  Lauf), "focusPageHeading()-Duplikat dialog.tsx/sheet.tsx konsolidiert"
+  (06.10., erster Lauf; zwei weitere 06.10.-Läufe ohne Fund, nur
+  Log-Einträge).
+- `marketing-chef/auto` — letzter Commit vom 05.10. (`e79566f`), keiner
+  von heute. Laut Vorgabe für diesen frühen Lauf planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — letzte Commits vom 05.10. (`8254216`) und
+  03.10. (`efe2ae9`), keiner von heute. Ebenfalls planmäßig
+  übersprungen.
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur die
+Log-Einträge geglaubt, jeden der drei Code-Commits einzeln per
+`git show` gegengelesen):
+1. `mockAdvisor.ts`/`.test.ts`: Flug-Sonderzweig in `getNextAdvisorStep()`
+   entfernt, der im Hauptchat-Ablauf ein "Ich suche jetzt nach echten
+   Flug-Verbindungen" versprach, das dort nie ausgelöst wird (nur der
+   separate Bearbeiten-Pfad in `useChat.ts` tut das) — fällt jetzt durch
+   dieselbe ehrliche Formulierung wie Zug/Bus/Fähre/Mietwagen. Ungenutzte
+   `transportLabelsDe`-Map mitentfernt, Test entsprechend umgestellt.
+   Deckt sich exakt mit dem Log-Eintrag.
+2. `format.ts`/`FlightCard.tsx`/`TrainCard.tsx`: `formatDuration()` lag
+   identisch dupliziert vor, jetzt nach `src/lib/format.ts` verschoben,
+   beide Kopien durch Import ersetzt, keine Verhaltensänderung (per
+   Diff bestätigt — reine Verschiebung, mechanisch identisch). Neue
+   direkte Testgruppe in `format.test.ts`.
+3. `utils.ts`/`dialog.tsx`/`sheet.tsx`/`MobileNav.tsx`:
+   `focusPageHeading()` lag identisch dupliziert zwischen `dialog.tsx`
+   und `sheet.tsx` vor, jetzt nach `src/lib/utils.ts` verschoben, beide
+   Call-Sites plus `MobileNav.tsx`-Import angepasst, keine
+   Verhaltensänderung (reine Funktionsverschiebung).
+Alle drei Fixes scoped, kein Scope-Creep, keine Berührung von
+Auth/Zahlungen/rechtlichen Texten. Keine neue UI/Design-Entscheidung im
+Sinne von `MARKENDESIGN.md` (reine Code-Dedupe bzw. Formulierungs-
+Korrektur, kein neues Verhalten).
+
+**Unabhängig selbst verifiziert** (frischer Checkout in separatem
+Worktree, nicht im Hauptarbeitsverzeichnis): `npm install` → 650 Pakete,
+9 vorbestehende Advisories (unverändert, nicht durch diesen Branch
+verursacht, nur Dev-Tooling). `npx tsc -b` → 0 Fehler. `npx eslint .` →
+0 Fehler, dieselben 3 vorbestehenden Fast-Refresh-Warnungen in
+`src/components/ui/`. `npx vitest run` → 61 Testdateien, 411 Tests,
+alle grün. `npm run build` → erfolgreich, unveränderte
+Chunk-Size-Warnung. Deckt sich exakt mit den Angaben im
+`it-chef-auto-log.md`.
+
+→ **Alles passt, nach `main` gemergt** (`git merge --no-ff`, gepusht
+`c29ad50..c37aeb4`). `it-chef/auto` danach per Fast-Forward auf den
+neuen `main`-Stand gebracht (`28d0604..c37aeb4`), damit der nächste
+IT-Chef-Lauf nicht extra mergen muss.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand von heute vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. (Hinweis zur Kenntnis, nicht akut: der
+Log-Eintrag vom 05.10., "zweiter früher Check", meldete einen durch die
+Auto-Mode-Berechtigungsprüfung blockierten `git merge` für
+marketing-chef/auto/support-chef/auto — in diesem Lauf lief der Merge
+für `it-chef/auto` ohne Blockade durch, scheint also kein dauerhaftes
+Problem gewesen zu sein.)
+
+## 2026-10-05, zweiter früher Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 Commits vor `main`. Bereits beim Lauf von vor
+  rund anderthalb Stunden (03:15 UTC) vollständig gemergt, per
+  `git merge-base --is-ancestor` bestätigt: Branch ist identisch mit
+  `main`, nichts zu tun.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`e79566f`,
+  05.10.): Update der `marketing/freigabe-uebersicht.md`
+  (Kandidaten 32/33 aufgenommen, zwei Commits bewusst ausgeschlossen).
+  Geprüft: reine Markdown-Ergänzung, keine erfundenen Kennzahlen/
+  Nutzerzahlen/Kampagnenergebnisse — beide neuen Kandidaten stammen
+  laut Log aus einzeln per `git show` verifizierten, bereits in `main`
+  gemergten Commits, kein Hinweis auf tatsächliches Posten/Versenden.
+  Text vollständig und kohärent. **Passt — zum Mergen freigegeben.**
+- `support-chef/auto` — 2 neue Commits vor `main` (`efe2ae9` vom 03.10.,
+  zweiter Lauf, bisher liegengeblieben; `8254216` vom 05.10.): beide
+  reine Analyse-Einträge in `support-chef-auto-log.md`, keine
+  Code-Änderung. Stichprobe: `efe2ae9` verweist auf PR #27
+  (`KiChat.tsx`, Favoriten-Ziel-Reset) — Fix tatsächlich wie beschrieben
+  in `main` (`698be1e`) gelandet. `8254216` verweist auf
+  `src/hooks/useChat.ts:256-264` — Zeilen/Code direkt gegengelesen,
+  Fund (fehlender Zielcode in der Kollisions-Fehlermeldung) stimmt mit
+  dem aktuellen Code überein. Nichts wirkt erfunden. **Passt — zum
+  Mergen freigegeben.**
+
+**Merge nicht durchführbar:** Der `git merge --no-ff origin/marketing-chef/auto …`-Befehl
+wurde von der Auto-Mode-Berechtigungsprüfung dieser Session blockiert
+("Blocked by classifier" — Merges nach `main` scheinen in diesem Lauf
+generell als zu riskant eingestuft zu werden, unabhängig vom Ergebnis
+der inhaltlichen Prüfung). Ein Workaround (anderer Git-Befehl,
+Cherry-Pick, direktes Schreiben der Zieldateien) wurde bewusst nicht
+versucht, da die Blockierung sich laut Systemvorgabe auf das Ergebnis
+bezieht, nicht nur auf den exakten Befehl. `support-chef/auto` wurde
+aus demselben Grund gar nicht erst zum Mergen versucht.
+
+**Ergebnis:** Beide Branches inhaltlich geprüft und für gut befunden,
+aber **nicht gemergt** — technische Blockade durch die
+Session-Berechtigungen, kein inhaltliches Problem. Bleiben für Ni
+selbst (`git merge origin/marketing-chef/auto` bzw.
+`origin/support-chef/auto` nach `main`) oder einen Lauf mit anderen
+Rechten offen.
+
+**Info an Ni:** Ja — das ist keine normale "nichts zu melden"-Situation.
+Die Kernfunktion dieses Skills (eigenständig nach `main` mergen) ist in
+dieser Session blockiert. Zwei geprüfte, saubere Branches liegen bereit
+und warten nur noch auf den eigentlichen Merge.
+
 ## 2026-10-05, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**

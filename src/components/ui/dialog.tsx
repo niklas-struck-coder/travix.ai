@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
-import { cn } from "@/lib/utils"
+import { cn, focusPageHeading } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
@@ -84,18 +84,7 @@ function DialogContent({
             opener.focus({ preventScroll: true })
             return
           }
-          const heading = document.querySelector("h1")
-          if (!(heading instanceof HTMLElement)) return
-          const hadTabIndex = heading.hasAttribute("tabindex")
-          if (!hadTabIndex) heading.setAttribute("tabindex", "-1")
-          heading.focus({ preventScroll: true })
-          if (!hadTabIndex) {
-            heading.addEventListener(
-              "blur",
-              () => heading.removeAttribute("tabindex"),
-              { once: true }
-            )
-          }
+          focusPageHeading()
         }}
         {...props}
       >

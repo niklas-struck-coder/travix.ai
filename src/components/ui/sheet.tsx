@@ -3,32 +3,12 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
-import { cn } from "@/lib/utils"
+import { cn, focusPageHeading } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
-}
-
-// Moves focus to the current page's <h1>, adding a temporary tabindex if it
-// doesn't have one. Used as the close-focus fallback below, and exported so
-// callers that need to redirect close-focus themselves (e.g. MobileNav
-// closing after an actual navigation, not just a cancel) can reuse it
-// instead of duplicating the DOM dance.
-function focusPageHeading() {
-  const heading = document.querySelector("h1")
-  if (!(heading instanceof HTMLElement)) return
-  const hadTabIndex = heading.hasAttribute("tabindex")
-  if (!hadTabIndex) heading.setAttribute("tabindex", "-1")
-  heading.focus({ preventScroll: true })
-  if (!hadTabIndex) {
-    heading.addEventListener(
-      "blur",
-      () => heading.removeAttribute("tabindex"),
-      { once: true }
-    )
-  }
 }
 
 function SheetTrigger({
@@ -189,5 +169,4 @@ export {
   SheetFooter,
   SheetTitle,
   SheetDescription,
-  focusPageHeading,
 }

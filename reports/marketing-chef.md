@@ -1,56 +1,53 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-03
+**Datum:** 2026-10-05
 
-## Was ist seit dem letzten Eintrag (2026-10-02) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-03) passiert?
 
-Beide gestern gemeldeten Nicht-fix-Punkte sind jetzt tatsächlich live:
-Der `formatDuration`-Fix zeigt bei reinen Sekundenwerten ehrlich "—"
-statt des erfundenen "1min", und der Favoriten-Button "Reise mit KI
-planen" übergibt jetzt wirklich das angeklickte Ziel an den Chat statt
-ihn stillschweigend zu ignorieren. Beides lief über Nacht durch
-IT-Chef, wurde unabhängig verifiziert und gemergt.
+Vor allem Aufräumarbeiten unter der Haube, nichts davon für sich
+genommen ein Marketing-Anlass: eine fehlende 404-Route, ein instabiler
+React-Key bei kollidierendem Freitext, und eine fehlende Start=Ziel-
+Prüfung beim Flug-Abflughafen im Chat (man konnte versehentlich "von
+LIS nach LIS" suchen lassen — jetzt verhindert, genau wie im separaten
+Flugformular schon länger). Alles klein, alles gemergt.
 
-Direkt danach kam der nächste Haken: Support-Chef fand, dass genau
-dieser neue Favoriten-Effekt ein Problem hat, wenn schon eine andere
-Reiseplanung läuft — über "Neu starten" oder die häufige Quick-Reply
-"Neue Reise planen" konnte ein tagealter Favoriten-Klick ungefragt als
-neues Ziel einschleichen. Dieser Fund wurde noch am selben Tag per PR
-#27 automatisch gefixt. Ein kompletter Fund-zu-Fix-Zyklus innerhalb
-eines Tages — genau die Art Tempo, die als Vertrauenssignal taugt,
-aber erst zählt, wenn sie mehrfach nachweisbar ist.
-
-Die Flugsuche-Ankündigung im Hauptchat ("Ich suche jetzt nach echten
-Flug-Verbindungen") löst weiterhin keine echte Suche aus — unverändert
-offen. Die Kanal-Entscheidung aus Sprint 1 steht jetzt über elf Wochen
-still.
+Wichtiger für meinen Bereich: Der Favoriten-Ziel-Reset-Fund aus dem
+letzten Bericht (PR #27) ist jetzt tatsächlich verifiziert live — nicht
+nur gemeldet, sondern von IT-Chef nochmal bestätigt. Damit hat dieses
+Feature inzwischen zwei Runden Fund-und-Fix hinter sich (Grundfunktion,
+dann der Reset-Randfall), beide mit Regressionstest abgesichert. Die
+Flugsuche-Ankündigung im Chat löst weiterhin keine echte Suche aus —
+unverändert offen, jetzt über zwei Wochen. Und: marketing-chef/auto und
+support-chef/auto warten laut Freigabe-Chef-Log weiterhin auf einen
+technisch blockierten Merge nach main — rein organisatorisch, keine
+inhaltliche Ablehnung.
 
 ## Vorschläge
 
-1. **Favoriten-Button jetzt von der Nicht-fix-Liste streichen — aber
-   noch nicht lauthals bewerben.** Die Grundfunktion und der
-   Reset-Rand­fall sind beide gefixt. Für einen konkreten Produkttext
-   ("dein Ziel, ein Klick weiter geplant") reicht das jetzt inhaltlich;
-   ich würde trotzdem eine ruhige Woche ohne neuen Fund in diesem
-   Bereich abwarten, bevor es in einen Kanal geht.
+1. **Favoriten-Ziel-Button ist jetzt zweimal geprüft — der ruhigste
+   Kandidat für den ersten echten Produkt-Claim.** Grundfunktion plus
+   Reset-Randfall sind beide gefixt und seit zwei Tagen stabil ohne
+   neuen Fund. Ich würde jetzt einen fertigen, kurzen Claim-Text in der
+   Schublade vorbereiten ("ein Klick auf deinen Favoriten — und der
+   Chat plant direkt weiter"), damit er sofort einsatzbereit ist, wenn
+   ein Kanal steht. Noch nicht veröffentlichen, nur vorbereiten.
 
-2. **Flugsuche bleibt tabu — unverändert.** Seit Ende September offen,
-   jetzt auch über mehrere Tage ohne Fortschritt. Für Landingpage/Ads/
-   Social gilt weiterhin: "wir finden dir echte Flüge" erst, wenn es
-   stimmt.
+2. **Die Start=Ziel-Prüfung im Chat ist zu klein für einen eigenen
+   Post, aber gutes Rohmaterial für später.** Sie zeigt, dass Chat und
+   Formular inzwischen dieselben Schutzmechanismen teilen — ein
+   Baustein für die "Ehrlichkeit als Feature"-Content-Säule aus dem
+   Konzept, aber erst sammeln, nicht einzeln bewerben.
 
-3. **Der Fund-zu-Fix-Zyklus von heute ist das bessere Changelog-Motiv
-   als jeder Einzelfix.** Statt "Button X gefixt" wäre eine Zeile wie
-   "wir haben gestern einen Bug *selbst* gefunden und noch am selben
-   Tag behoben" greifbarer für Vertrauen — aber auch das erst, sobald
-   ein Kanal steht und sich das Muster wiederholt, nicht nach einem
-   einzelnen Vorfall.
+3. **Niedrigschwelliger erster Schritt gegen den Kanal-Stillstand:**
+   Statt weiter auf die große Zielgruppen-/Kanal-Entscheidung zu
+   warten, könnte ein reiner Changelog-Bereich auf travix.ai selbst
+   (keine externe Plattform, keine Reichweiten-Frage) schon jetzt
+   starten und genau solche Fund-und-Fix-Zyklen dokumentieren. Das
+   bräuchte keine der offenen Grundsatzentscheidungen und würde
+   trotzdem einen Track Record aufbauen.
 
-4. **Kanal-Entscheidung bleibt der eigentliche Engpass.** Elf Wochen
-   Stillstand, während sich jetzt sogar ein echtes kleines
-   Erfolgsnarrativ (Dialog-Serie + heutiger Fund-zu-Fix-Zyklus)
-   anstaut. Unveränderte Empfehlung: ein einzelner, risikoarmer Kanal
-   (z. B. reiner Changelog-Feed auf der Seite selbst) wäre besser als
-   weiteres Warten auf die große Zielgruppen-Entscheidung.
+4. **Flugsuche bleibt tabu — unverändert, jetzt seit über zwei
+   Wochen.** Für Landingpage/Ads/Social weiterhin: "wir finden dir
+   echte Flüge" erst, wenn es im Produkt auch stimmt.
 
-_Letztes Update: 2026-10-03_
+_Letztes Update: 2026-10-05_

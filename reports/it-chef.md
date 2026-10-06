@@ -1,57 +1,64 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-03
+**Datum:** 2026-10-05
 
-## Was ist seit dem letzten Eintrag (2026-10-02) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-03) passiert?
 
-Der parallele Autonomie-Kanal `it-chef/auto` war seit dem letzten Eintrag
-mehrfach aktiv und hat fünf eigenständig gefixte Punkte eingebracht
-(Details in `it-chef-auto-log.md`, nicht hier) — alle von Freigabe-Chef
-geprüft und bereits in `main`: Details-Dialog bei Reiseentwürfen
-disambiguiert Titel bei Duplikaten, das "Neue Aktivität"-Formular im
-Bearbeiten-Dialog setzt seinen Entwurf beim Schließen zurück, die
-dreifach duplizierte `formatEuro()` wurde in `src/lib/format.ts`
-zusammengeführt, `formatDuration()` zeigt bei Sekunden-only-Dauer jetzt
-ehrlich "—" statt erfundener "1min", und der Favoriten-Button "Reise mit
-KI planen" übergibt das angeklickte Ziel an den Chat statt es zu
-ignorieren.
+Der Favoriten-Ziel-Reset-Fund aus PR #27 ist inzwischen live in `main`
+(Commit 698be1e, 04.10.) — der vorherige Bericht hatte das fälschlich
+schon gemeldet, bevor der Fix tatsächlich gemergt war. Außerdem kamen aus
+dem parallelen Autonomie-Kanal `it-chef/auto` seither drei weitere, von
+Freigabe-Chef bereits geprüfte und gemergte Fixes in `main`: eine
+fehlende 404-Route (`AppRoutes`/`NichtGefunden.tsx`), ein instabiler
+React-Key in `TripSummaryCard` bei kollidierendem Freitext, und eine
+fehlende Start=Ziel-Prüfung beim Flug-Abflughafen im Chat-Bearbeiten-Pfad
+(Details siehe `it-chef-auto-log.md`, nicht hier).
 
 **Eigene gezielte Bug-Suche in dieser Session:** Code-Stand, Branch- und
-PR-Historie durchgesehen, anschließend gezielt die zuletzt geänderten
-Kern-Dateien gelesen (`KiChat.tsx`, `useChat.ts`, `tripStorage.ts`,
-`duffel/client.ts`, `mockAdvisor.ts`) sowie Promise-/Storage-Fehler-
-behandlung und offene TODO/FIXME-Marker im gesamten `src/` geprüft.
+offene-PR-Liste durchgesehen, danach gezielt Kern-Dateien einzeln
+gelesen statt nur gegrept — u. a. `useChat.ts`, `useConcierge.ts`,
+`mockAdvisor.ts`, `mockConcierge.ts`, `duffel/client.ts`,
+`tripStorage.ts`, `calendarUtils.ts`, `cartTotals.ts`,
+`checklistRules.ts`, `speech.ts`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+`FlightCard.tsx`, `TrainCard.tsx`, `EditMode.tsx`, `KiChat.tsx`,
+`Buchung.tsx`, `Warenkorb.tsx`, `Preisalarme.tsx`, `MeineReisen.tsx`,
+`NichtGefunden.tsx`, `routes.tsx` — inklusive Promise-/Storage-
+Fehlerbehandlung und TODO/FIXME-Suche (keine offenen Marker gefunden).
 
-**Fund:** Der zuletzt gebaute Favoriten→Chat-Ziel-Handoff
-(`src/components/chat/KiChat.tsx`, Commit 94b0194) hatte einen echten
-Folgefehler, den Support-Chef heute bereits als Analyse gemeldet hatte
-(Commit 2b3c51d): Lief schon eine Planung, wenn jemand über eine
-Favoriten-Karte kam, wurde der `?destination=`-Parameter nur übersprungen
-statt verworfen — er blieb in der URL stehen. Setzte man die Planung
-danach zurück ("Neu starten" / "Neue Reise planen"), feuerte derselbe
-Effekt erneut und schickte den alten, womöglich tagealten Favoriten-Klick
-ohne jede neue Nutzerinteraktion als Chat-Nachricht. Mit Regressionstest
-reproduziert (schlägt gegen den alten Code fehl) und gefixt — siehe unten.
+**Fund:** Keiner, der sicher genug für einen automatischen Fix wäre.
+Der parallele `it-chef/auto`-Kanal hatte heute bereits drei eigene Läufe
+mit genau derselben Zielsetzung und einen eigens beauftragten
+Explore-Agenten auf praktisch alle übrigen Dateien angesetzt — beide
+Durchgänge kommen unabhängig voneinander zum selben Ergebnis: aktuell
+kein neuer, eindeutiger und risikoarmer Bug offen.
+
+Hinweis: `npx tsc -b`, `npm run lint` und `npx vitest run` ließen sich in
+dieser Session nicht ausführen — die Node-Abhängigkeiten in diesem
+Container sind unvollständig (u. a. `vite`, `@eslint/js`, `@types/node`
+fehlen). Da `npm install` laut Sicherheitsregeln hier nicht ausgeführt
+werden darf, bleibt das unvalidiert; reine Umgebungs-Besonderheit dieses
+Laufs, kein Code-Fund.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-1. **[PR #27](https://github.com/niklas-struck-coder/travix.ai/pull/27)
-   — Branch `it-chef-autofix/stale-destination-after-reset-2026-10-03`.**
-   `KiChat.tsx`: Der `destination`-Query-Parameter aus einer Favoriten-
-   Karte wird jetzt auch dann sofort verworfen (URL bereinigt, als
-   "erledigt" markiert), wenn schon eine Planung läuft — vorher blieb er
-   stehen und konnte nach einem späteren Reset unbemerkt erneut gesendet
-   werden. Kleine, isolierte Änderung an einem einzelnen Effect, plus
-   Regressionstest. Volle Test-Suite (397 Tests), Lint und Typecheck
-   laufen fehlerfrei durch.
+Keine. Kein Fund war heute sicher genug für einen eigenständigen Fix.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine neuen, die nicht sicher genug für einen automatischen Fix wären.
-Weiterhin bekannt, aber bewusst nicht automatisch gefixt
-(architekturell/produktseitig, kein isolierter Kleinfix):
+Keine neuen. Weiterhin bekannt, aber bewusst nicht automatisch gefixt
+(Produktentscheidung, kein isolierter Kleinfix):
 
-1. **`src/lib/ai/mockAdvisor.ts:171-182` — Flug-Ankündigung im
+1. **`src/pages/MeineReisen.tsx:16-21` — Reise-Status (`upcoming`/`past`)
+   ist festes Literal, nicht aus dem Reisedatum abgeleitet.** Die
+   Lissabon-Demo-Reise ("15.–22. September 2026") liegt vor dem heutigen
+   Datum, wird aber weiterhin als "Bevorstehend" mit aktiver
+   "Urlaubsmodus aktivieren"-CTA gezeigt und fließt so in
+   `Dashboard.tsx`s "Bevorstehende Reisen"-Zähler ein. Die Datei
+   kommentiert selbst, dass beide Demo-Reisen bewusst je einen Zustand
+   zeigen sollen, unabhängig vom Kalenderdatum — eine Ableitung aus dem
+   echten Datum wäre eine Produktentscheidung über das Demo-Verhalten,
+   keine reine Logikkorrektur.
+2. **`src/lib/ai/mockAdvisor.ts:171-182` — Flug-Ankündigung im
    Hauptchat-Ablauf löst keine echte Suche aus.** Im Code klar als
    bewusste Grenze kommentiert (nur der separate "Bearbeiten"-Pfad in
    `useChat.ts` löst die echte Duffel-Suche aus) — offene
@@ -60,21 +67,22 @@ Weiterhin bekannt, aber bewusst nicht automatisch gefixt
 
 ## Weitere Vorschläge
 
-1. **Alle 21 offenen alten Auto-Fix-PRs können jetzt geschlossen
-   werden** (#1, #4–#18 ohne #2/#3/#19, #20–#22, #25, #26). Mit der
-   heutigen Landung von PR #25 (`formatDuration`) im `main`-Code ist jetzt
-   auch der letzte zuvor noch offene Fix eingetroffen — jeder Fix steckt
-   inzwischen identisch oder gleichwertig in `main`. Reine Aufräumarbeit
-   ohne Coderisiko, aber nur Ni kann PRs schließen.
+1. **Alle offenen Auto-Fix-PRs (aktuell 21, u. a. #1–#27) können jetzt
+   geschlossen werden.** Jeder Fix steckt identisch oder gleichwertig
+   bereits in `main` — reine Aufräumarbeit ohne Coderisiko, aber nur Ni
+   kann PRs schließen.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json`, kein Import in `src/`. Entfernen reduziert die
-   Bundle-Größe; reine Aufräumarbeit, kein Bugfix, daher hier nur als
-   Vorschlag (Abhängigkeitsänderungen sind für diesen Kanal
-   ausgeschlossen).
-3. **`TrainCard`/`TrainResults` bleiben unverdrahteter toter Code.**
+   Bundle-Größe; reine Aufräumarbeit, kein Bugfix, daher nur Vorschlag
+   (Abhängigkeitsänderungen sind für diesen Kanal ausgeschlossen).
+3. **`formatDuration()` steckt identisch doppelt** in `FlightCard.tsx`
+   und `TrainCard.tsx` (beide Kopien korrekt und deckungsgleich, kein
+   Logikfehler). Ließe sich wie `formatEuro()` zuvor nach
+   `src/lib/format.ts` konsolidieren — reine Code-Hygiene.
+4. **`TrainCard`/`TrainResults` bleiben unverdrahteter toter Code.**
    Unverändert seit mehreren Berichten: vollständig implementiert mit
    eigener Testabdeckung, aber keine Zugsuche-Seite, kein Nav-Eintrag,
-   keine echte Datenquelle angebunden — nur in der eigenen Testdatei
-   referenziert. Entweder verdrahten oder entfernen — Produktentscheidung.
+   keine echte Datenquelle angebunden. Entweder verdrahten oder
+   entfernen — Produktentscheidung.
 
-_Letztes Update: 2026-10-03_
+_Letztes Update: 2026-10-05_
