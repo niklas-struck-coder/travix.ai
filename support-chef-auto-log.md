@@ -3893,3 +3893,177 @@ ebenfalls der Parameter vor einem frühen `return` nicht konsumiert wird.
 Der bereits am 02.10. gemeldete, hier bestätigt weiterhin offene Teil
 (stiller Klick ohne jede Rückmeldung bei laufender anderer Planung) wurde
 hier nicht erneut als eigener Punkt ausgeführt, da inhaltlich unverändert.
+
+---
+
+## 2026-10-03 (zweiter Lauf) — Nachkontrolle meines eigenen Funds von heute
+
+**Geprüft:** Ob sich seit meinem obigen Eintrag von heute (Favoriten-
+Zielparameter kann nach Reset eine fremde Reise kapern) etwas geändert
+hat, sowie ein kurzer Blick auf alle seither auf `main` gelandeten
+Commits.
+
+**Ergebnis:** IT-Chef hat den Fund heute bereits aufgegriffen und
+gefixt — [PR #27](https://github.com/niklas-struck-coder/travix.ai/pull/27),
+Branch `it-chef-autofix/stale-destination-after-reset-2026-10-03`, noch
+nicht nach `main` gemergt. Den Diff selbst geprüft
+(`src/components/chat/KiChat.tsx`): `destinationHandled.current` wird
+jetzt auch gesetzt, wenn `hasTripData(trip)` beim Eintreffen des
+Parameters bereits `true` ist, und der Parameter wird dann sofort per
+`setSearchParams({}, { replace: true })` aus der URL entfernt — genau
+der von mir vorgeschlagene Fix. Das behebt die Resurrection: ein
+Favoriten-Klick während einer laufenden Planung kann nach einem späteren
+Reset nicht mehr unbemerkt als "Geisternachricht" auftauchen.
+
+Bewusst **nicht** mitgefixt (und von PR #27 auch nicht behauptet): Der
+Klick auf die Favoriten-Karte bleibt bei laufender anderer Planung
+weiterhin wirkungslos, ohne jede Rückmeldung an die Nutzerin — mein
+Fund vom 02.10. Das ist unverändert ein eigener, offener
+Reibungspunkt und keine Dopplung des heutigen Funds.
+
+Die übrigen seit heute Morgen auf `main` gelandeten Commits (IT-Chef:
+drei weitere Läufe ohne neuen sicheren Punkt; Marketing-Chef: neuer
+Kandidat 31 zur selben Favoriten-Ziel-Übergabe) bringen keine weitere,
+für Support relevante Codeänderung. Kein neuer Bereich für diesen Lauf
+— nichts Nennenswertes über das oben bereits Gemeldete hinaus.
+
+---
+
+## 2026-10-05 — Flug-Abflughafen-Kollisionsprüfung im Chat (`useChat.ts`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `it-chef/auto` heute (05.10., zweiter Lauf, Commit
+`06f485b`, seither per Merge `1e206e3` auf `main`) genau hier einen neu
+eingeführten Schutz ergänzt hat: Der Chat-Pfad "Bearbeiten" →
+Transportmittel → Flug → Abflughafen eingeben prüft den eingetippten
+IATA-Code jetzt zusätzlich gegen den bereits bekannten Zielcode, um eine
+sinnlose "von LIS nach LIS"-Suche zu verhindern — bisher ungeprüfte,
+frisch gebaute Logik, kein wahllos erneut angeschauter Altbestand.
+
+### Reibungspunkt
+
+**Ablehnungsnachricht nennt nicht, welcher Code/Name kollidiert ist —
+Nutzerin kann den Fehler nicht nachvollziehen**
+
+`src/hooks/useChat.ts:256-264`:
+
+```
+const known = findKnownDestination(trip.destination ?? '')
+
+if (known && origin === known.iataCode) {
+  setMessages((prev) => [
+    ...prev,
+    makeMessage('assistant', 'Start und Ziel dürfen nicht gleich sein — welcher Flughafen ist dein Abflugort?'),
+  ])
+  setAvatarState('thinking')
+  setIsThinking(false)
+  return
+}
+```
+
+Die ganze bisherige Konversation mit der Nutzerin läuft über den
+Stadtnamen (z. B. "Lissabon") — der dreistellige IATA-Code des Ziels
+(`known.iataCode`, hier `LIS`) wird ihr an keiner Stelle vorher genannt.
+Tippt sie als Abflughafen zufällig genau diesen Code ein (realistisch
+z. B. bei Verwechslung mit einem anderen, ähnlich kurzen Code, oder
+schlicht Zufall), bekommt sie nur "Start und Ziel dürfen nicht gleich
+sein" zu lesen — ohne zu wissen, *welcher* Code gemeint ist, da der von
+ihr selbst eingegebene Code im Chat-Verlauf zwar sichtbar ist, der
+interne Zielcode aber nirgends auftaucht. Anders als die strukturell
+identische Prüfung in `FlightWizard.tsx:46-48/105-107`: Dort stehen
+Abflug- und Zielfeld gleichzeitig sichtbar nebeneinander auf dem
+Bildschirm — die Kollision ist für die Nutzerin sofort optisch
+erkennbar, ohne dass die Fehlermeldung selbst etwas erklären müsste. Im
+Chat gibt es dieses Nebeneinander nicht; die einzige Textzeile muss die
+ganze Erklärung tragen, tut das aber nicht.
+
+Konkret: Plant eine Nutzerin eine Reise nach Lissabon und tippt beim
+Abflughafen aus Versehen "LIS" (z. B. weil sie bereits in Lissabon lebt
+und ihren Heimatflughafen eingeben wollte, ohne zu wissen, dass das
+zufällig der Zielcode ist), bekommt sie eine Ablehnung, die ihr nicht
+sagt, dass genau *dieser* Code schon ihr Ziel ist — wirkt wie eine
+unbegründete Zurückweisung eines scheinbar gültigen, dreistelligen
+Codes.
+
+*Vorschlag:* Zielname/-code in die Nachricht aufnehmen, analog zum
+direkt darunter bereits etablierten Muster (Zeile 282: `` `Danke! Für
+${trip.destination ?? 'dein Ziel'} kenne ich noch...` ``), z. B.:
+`` `${known.name} (${known.iataCode}) ist bereits dein Ziel — Start und
+Ziel dürfen nicht gleich sein. Welcher Flughafen ist dein Abflugort?` ``.
+`known.name`/`known.iataCode` sind an dieser Stelle bereits vorhanden,
+keine zusätzliche Abfrage nötig.
+
+### Nicht geprüft
+Ob die Nutzerin nach dieser Ablehnung einen Ausweg hat, falls sie gar
+keinen anderen Abflughafen kennt (keine Quick-Replies wie "Neue Reise
+planen" werden hier angeboten) — das gilt aber identisch bereits für die
+direkt darüberliegende, unveränderte Prüfung des 3-Buchstaben-Musters
+(`useChat.ts:242-250`) und ist damit kein neuer, durch den heutigen Fix
+entstandener Reibungspunkt, sondern vorbestehendes Verhalten des ganzen
+`awaitingFlightOrigin`-Teilablaufs. Die übrigen heute auf `main`
+gelandeten Fixes (404-Route, React-Key in `TripSummaryCard`, Favoriten-
+Reset) wurden nicht im Detail mitgeprüft, da dieser Lauf sich laut Skill
+auf einen Bereich konzentrieren soll.
+
+---
+
+## 2026-10-06 — 404-Seite (`NichtGefunden.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `NichtGefunden.tsx` laut `ZEITPLAN.md`/Commit-Historie
+die zuletzt neu angelegte Seite ist (04.10., zweiter Lauf, Commit
+`21ef1a7`: fehlende `<Route path="*">` ergänzt). Der 05.10.-Eintrag
+oben nennt die 404-Route selbst ausdrücklich als "nicht im Detail
+mitgeprüft" — dieser Lauf holt das nach.
+
+### Reibungspunkt
+
+**1. Beim Landen auf der 404-Seite bekommen Screenreader-Nutzer:innen
+keine Rückmeldung, dass sich überhaupt etwas geändert hat**
+
+`focusPageHeading()` (`src/lib/utils.ts:14-27`, verschiebt den Fokus auf
+die Seiten-`<h1>`) wird im ganzen Code nur von zwei Stellen aufgerufen:
+dem Dialog-/Sheet-Schließen-Fallback (`dialog.tsx`/`sheet.tsx`) und dem
+Schließen des mobilen Menüs nach einem Linkklick (`MobileNav.tsx:53`).
+Der Desktop-`Sidebar.tsx` (Zeile 34-50, `NavLink`) ruft sie beim Klick
+nicht auf, und `routes.tsx`/`AppShell.tsx` haben keinen
+`useLocation`-Effekt, der bei jedem Routenwechsel pauschal dorthin
+fokussiert. Für fast jede andere Seite federt das sehende Layout die
+Lücke zumindest teilweise ab (Sidebar-Hervorhebung ändert sich
+sichtbar, Seiteninhalt sieht offensichtlich anders aus) — genau auf der
+404-Seite trifft es aber am härtesten: Sie wird typischerweise über
+einen kaputten/veralteten Link oder eine falsch eingegebene Adresse
+erreicht, nicht über einen bewussten Sidebar-Klick, bei dem man ohnehin
+schon weiß, wohin man wollte. Für eine Screenreader-Nutzerin, die einen
+Link anklickt oder eine Adresse eintippt, bleibt der Fokus nach der
+Navigation einfach dort stehen, wo er vorher war (meist auf dem jetzt
+nicht mehr vorhandenen Link-Element) oder springt kommentarlos auf
+`<body>` — ohne jede automatische Ansage, dass "Seite nicht gefunden"
+jetzt der neue Inhalt ist. Das ist keine Design-Entscheidung, sondern
+schlicht die bereits vorhandene Fallback-Logik, die hier (und bei jeder
+Navigation außerhalb von Mobile-Menü/Dialog-Schließen) einfach nicht
+verdrahtet ist.
+
+*Vorschlag:* Einen zentralen `useEffect`, der bei jedem `useLocation()`
+-Wechsel `focusPageHeading()` aufruft (z. B. in `AppShell.tsx` oder
+direkt in `routes.tsx`, wo `useLocation()` bereits importiert ist,
+Zeile 1/51) — das deckt die 404-Seite automatisch mit ab und schließt
+dieselbe Lücke für jede andere In-App-Navigation über Sidebar/`Link`
+gleich mit, statt nur für diese eine Seite einen Sonderfall zu bauen.
+
+### Nicht geprüft
+Der Seitentitel im Browser-Tab (`document.title`) ändert sich bei
+keiner Route im gesamten `src`-Baum (kein einziger Treffer für
+`document.title` o. Ä.) — die 404-Seite ist davon nicht anders
+betroffen als jede andere Seite, deshalb hier nur als Randnotiz und
+nicht als eigener, seitenspezifischer Fund aufgeführt. Inhaltlich
+(Text, "Zur Startseite"-Button, Teal/Navy-Button-Styling) ist die Seite
+konsistent mit dem bereits etablierten Empty-State-Muster (`Favoriten.tsx`,
+`Warenkorb.tsx` u. a.) — keine Abweichung gefunden. Die Sidebar-
+Aktiv-Hervorhebung wurde ebenfalls geprüft: `Sidebar.tsx:37`
+(`end={item.path === '/'}`) verhindert bereits korrekt, dass "Start" auf
+der 404-Seite fälschlich als aktiv markiert wird — kein Bug.
