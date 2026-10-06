@@ -16414,3 +16414,62 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-06 (vierter Lauf desselben Tages)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer, isolierter
+Checkout. `it-chef/auto` war identisch mit `origin/main` (Freigabe-Chef
+hatte seit dem dritten Lauf bereits `it-chef/auto` sowie
+`marketing-chef/auto`/`support-chef/auto` nach `main` gemerged und alle
+drei Branches wieder auf `main`-Stand synchronisiert) — kein Merge nötig,
+`main` unberührt.
+
+**Geprüft, ZEITPLAN/Tasks-Liste:** Unverändert seit den ersten drei
+Läufen heute. Alle offenen Checkboxen in
+`tasks/tasks-prd-travix-platform.md` hängen weiterhin an der
+Base44-/Auth-Backend-Entscheidung, an fehlenden Datenquellen, an der noch
+fehlenden Preisfeld-Architektur (`TripDraft`) oder an offenen
+Produktentscheidungen (OQ-03/OQ-04) — siehe dritter Lauf für Details,
+keine davon hat sich seitdem geändert.
+
+**Eigene Bug-Suche:** Statt eine vierte vollständige Repo-Durchsicht zu
+wiederholen (die ersten drei Läufe heute sowie `reports/it-chef.md`
+05.10. haben bereits praktisch jede Datei einzeln geprüft), gezielt die
+noch offenen Vorschläge aus `reports/it-chef.md` (05.10., "Weitere
+Vorschläge") gegen den aktuellen Code-Stand nachgeprüft: Vorschlag 3
+(`formatDuration()`-Duplikat zwischen `FlightCard.tsx`/`TrainCard.tsx`)
+ist durch den fünften Lauf vom 05.10. bereits erledigt — beide
+Komponenten importieren jetzt `formatDuration` aus `src/lib/format.ts`,
+keine Duplikate mehr in `src/`. Vorschlag 1 (offene Auto-Fix-PRs
+schließen) und 4 (TrainCard/TrainResults verdrahten oder entfernen)
+bleiben wie dokumentiert außerhalb des Zuständigkeitsbereichs dieses
+Kanals (PR-Verwaltung bzw. Produktentscheidung). Vorschlag 2 (`recharts`
+entfernen) bleibt ausgeschlossen (Abhängigkeitsänderungen sind für diesen
+Kanal explizit tabu). Zusätzlich eigenständig geprüft: `grep -rn
+"TODO|FIXME" src/` liefert keinen Treffer; ein Komponenten-/
+Testdatei-Abgleich (`comm` zwischen allen `.tsx`/`.ts`-Dateien und ihren
+`.test.`-Gegenstücken) findet keine neue Lücke — die einzigen Dateien
+ohne eigene Testdatei sind weiterhin Einstiegspunkte (`App.tsx`,
+`main.tsx`), die reine Konstanten-Datei `design-tokens.ts` sowie die
+unveränderten shadcn/ui-Primitiven ohne eigene Logik (`badge.tsx`,
+`button.tsx`, `card.tsx`, `input.tsx`, `label.tsx`, `progress.tsx`,
+`select.tsx`, `tabs.tsx`) — dieselbe bereits in früheren Läufen
+etablierte Kategorie wie `dialog.tsx`/`sheet.tsx` vor deren eigener
+`focusPageHeading()`-Logik. Kein neuer, eindeutiger und sicherer Bug
+gefunden. Kein Code-Commit für einen neuen Programmierpunkt — nur dieser
+Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout; jetzt 10 Advisories statt zuvor 9, neu u. a. eine
+"critical"-Meldung zu `proxy-addr` — alle weiterhin ausschließlich in der
+Dev-Tooling-Kette von `shadcn`/`@modelcontextprotocol/sdk`/PostCSS-
+Tooling, keine davon in den Laufzeit-Abhängigkeiten der App;
+Abhängigkeitsänderungen bleiben für diesen Kanal tabu, daher nur
+beobachtet, nicht behoben), `npx tsc -b` (kein Typfehler), `npm run lint`
+(0 Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen), `npx
+vitest run` (61 Testdateien, 411 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
