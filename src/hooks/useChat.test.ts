@@ -641,3 +641,39 @@ describe('useChat reply timeout cleanup on unmount', () => {
     expect(clearTimeoutSpy).toHaveBeenCalled()
   })
 })
+
+describe('useChat resetChat clears a still-pending reply timeout', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('does not let a stale pending reply land after resetChat() mid-thinking', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    act(() => {
+      result.current.sendMessage('Lissabon')
+    })
+    expect(result.current.isThinking).toBe(true)
+
+    act(() => {
+      result.current.resetChat()
+    })
+
+    expect(result.current.isThinking).toBe(false)
+
+    const messagesAfterReset = result.current.messages.length
+    const tripAfterReset = result.current.trip
+
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.messages.length).toBe(messagesAfterReset)
+    expect(result.current.trip).toEqual(tripAfterReset)
+  })
+})

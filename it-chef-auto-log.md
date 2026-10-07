@@ -16594,3 +16594,80 @@ Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-07 (zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Weiterer geplanter Cloud-Lauf heute, frischer,
+isolierter Checkout. `it-chef/auto` war identisch mit `origin/main`
+(`origin/main` = `12990ee`, bereits vollständig in `it-chef/auto`
+enthalten) — kein Merge nötig, `main` unberührt. Der erste Lauf heute
+(`3e2946f`, Duffel-Proxy-Fehlerbehandlung) war bereits erledigt und
+gepusht.
+
+**Eigene Bug-Suche:** Die naheliegenden, bereits mehrfach durchgekämmten
+Kategorien (Icon-Buttons ohne Label, `<img>` ohne `alt`, Formularfelder
+ohne Label, unformatierte Zahlen, `role="status"`/`role="alert"`,
+Transportmittel-Keywords, `toISOString()`-Zeitzonenfehler,
+ungeschütztes `localStorage`, TODO/FIXME, fehlende Testdateien,
+IME-Komposition, Lösch-Bestätigungsdialoge) sind laut `ZEITPLAN.md`/
+diesem Log durchgängig bereits abgearbeitet. Statt sie erneut zu
+wiederholen, einen eigens beauftragten Explore-Agenten mit gezielt
+weniger beackerten Angriffswinkeln angesetzt: Race Conditions bei
+schnellen Doppel-Aktionen/parallelen async-Aufrufen, `useEffect`-
+Cleanup-Lücken, fehlende/falsche `key`-Props in Listen, verbleibende
+Code-Duplikation zwischen Dateien, deutsche Pluralisierungsfehler,
+Zahlen-Grenzfälle, fehlende Eingabevalidierung, weitere ARIA-Lücken.
+
+**Ausgewählter Punkt:** `resetChat()` in `src/hooks/useChat.ts`
+(Zeile 408 ff.) räumte den noch laufenden `replyTimeoutRef`-Timeout
+(gesetzt von `sendMessage()`, Zeilen 240/295/344, Verzögerung 700ms für
+die "Travix denkt nach …"-Phase) nicht ab und setzte `isThinking`
+nicht zurück — obwohl exakt dieses Aufräumen bereits beim Unmount
+(Zeilen 92-98) etabliert ist. Live reproduzierbar: Erste Nachricht im
+frischen Chat senden (→ `isThinking=true`, Timeout läuft 700ms), noch
+innerhalb dieser 700ms auf "Neu starten" klicken (bei `emptyTrip` löst
+`handleResetClick` in `KiChat.tsx` den Reset ohne Bestätigungsdialog
+sofort aus) — der "denkt nach"-Indikator blieb danach fälschlich
+sichtbar, und rund 700ms später überschrieb der alte, nicht
+abgebrochene Timeout den frisch zurückgesetzten Chat erneut mit der
+veralteten Antwort samt altem `trip`/`quickReplies`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten — reine Aufräum-/Zustandslogik in
+einem bestehenden Hook. Keine offene Produkt-/Architekturentscheidung:
+dass `resetChat()` auch anstehende asynchrone Seiteneffekte abräumt,
+ist kein Designtradeoff, sondern ein Versehen (das Muster existiert
+bereits identisch für den Unmount-Fall). Klar genug beschrieben (exakte
+Zeilen, exaktes fehlendes Verhalten). Objektiv prüfbar: neuer Test
+zuerst rot verifiziert, dann grün nach dem Fix.
+
+**Umgesetzt:**
+- Neuer Regressionstest in `src/hooks/useChat.test.ts` ("does not let a
+  stale pending reply land after resetChat() mid-thinking"): sendet eine
+  erste Nachricht, ruft `resetChat()` noch innerhalb der 700ms auf,
+  erwartet `isThinking === false` direkt danach und erwartet nach
+  `vi.advanceTimersByTime(700)` unveränderte `messages.length`/`trip`.
+  Vor dem Fix rot verifiziert (`isThinking` blieb `true`, der veraltete
+  Reply landete trotzdem nach 700ms).
+- Fix in `src/hooks/useChat.ts` (`resetChat`): zu Beginn der Funktion
+  `if (replyTimeoutRef.current !== null) { window.clearTimeout(...);
+  replyTimeoutRef.current = null }` ergänzt (identisches Muster wie im
+  bestehenden Unmount-Effekt) sowie `setIsThinking(false)` ergänzt.
+  Keine Verhaltensänderung für alle bereits bestehenden Tests — alle
+  blieben unverändert grün.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 4 KI-Chat) um den
+  entsprechenden Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` betroffen — reiner Bugfix in
+  bereits bestehendem Code, keine neue Funktion.
+
+**Geprüft:** `npm ci` (frischer Checkout, 10 Advisories, ausschließlich
+Dev-Tooling-Kette, deckungsgleich mit vorherigen Läufen), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben drei
+vorbestehenden Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` (61 Testdateien, 413 Tests — 412
+bestehende plus 1 neuer — alle grün), `npm run build` (`tsc -b` +
+`vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

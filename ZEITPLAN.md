@@ -1880,6 +1880,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Duffel-Fehler mit JSON-Body, abgelehntes `fetch()`, kaputtes JSON bei
   Erfolg) — alle vier bestehenden Tests in `client.test.ts` blieben
   unverändert grün.
+  Vom autonomen IT-Chef-Lauf am 07.10. (zweiter Lauf desselben Tages) einen
+  über einen eigens beauftragten Explore-Agenten gefundenen Bug in
+  `resetChat()` (`useChat.ts`) behoben: `sendMessage()` plant bei jeder
+  Nutzer-Nachricht einen 700ms-`setTimeout` (`replyTimeoutRef`), der am
+  Ende u. a. `setMessages`/`setTrip`/`setQuickReplies`/`setAvatarState`/
+  `setIsThinking(false)` aufruft — mit dem `trip`/`content` aus dem
+  Moment, als die Nachricht abgeschickt wurde. `resetChat()` setzte bisher
+  weder diesen Timeout zurück (obwohl genau das bereits beim Unmount in
+  Zeile 92-98 etabliert ist) noch `isThinking` selbst. Wurde "Neu starten"
+  innerhalb dieser 700ms geklickt (z. B. direkt nach der ersten Nachricht,
+  wo `hasTripData(trip)` noch `false` ist und der Reset ohne
+  Bestätigungsdialog sofort auslöst), blieb der "Travix denkt nach …"-
+  Status-Indikator fälschlich sichtbar, und der alte Timeout überschrieb
+  rund 700ms später den frisch zurückgesetzten Chat erneut mit der
+  veralteten Antwort samt altem `trip`/`quickReplies`. Fix: `resetChat()`
+  räumt den noch laufenden `replyTimeoutRef` jetzt genauso ab wie der
+  bestehende Unmount-Effekt und setzt zusätzlich `isThinking` auf `false`
+  — zwei Zeilen, kein neues Verhalten, nur dieselbe bereits etablierte
+  Aufräum-Logik auch beim Reset angewendet. Neuer Regressionstest in
+  `useChat.test.ts` ("does not let a stale pending reply land after
+  resetChat() mid-thinking") vor dem Fix reproduzierbar rot verifiziert
+  (`isThinking` blieb `true`, der veraltete Reply landete nach 700ms
+  trotzdem).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

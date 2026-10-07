@@ -406,12 +406,17 @@ export function useChat(speechEnabled: boolean) {
   }
 
   const resetChat = () => {
+    if (replyTimeoutRef.current !== null) {
+      window.clearTimeout(replyTimeoutRef.current)
+      replyTimeoutRef.current = null
+    }
     clearStoredChat()
     const greeting = getGreeting()
     setMessages([makeMessage('assistant', greeting.content)])
     setTrip(greeting.trip)
     setQuickReplies(greeting.quickReplies)
     setAvatarState(greeting.avatarState)
+    setIsThinking(false)
     setStayOffers(null)
     setStayLoading(false)
     setStayErrors([])
