@@ -5937,3 +5937,70 @@ kein separater Reset nötig.
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-07, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 6 neue Commits vor `origin/main` (drei mit
+  Code-Änderung: Duffel-Proxy-Fehlerbehandlung, `resetChat()`-Timeout-
+  Cleanup, Scroll-Position-Reset; zwei reine Log-Einträge ohne Fund
+  05./06.10.; ein Merge-Commit `main` in `it-chef/auto`).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`, `useChat.ts`/
+  `.test.ts`, `duffel/client.ts`/`.test.ts`, `routes.tsx`/`.test.tsx` —
+  genau drei inhaltliche Punkte, jeder einzeln im Log beschrieben:
+  1. `callDuffelProxy()` (`duffel/client.ts`): parste `response.json()`
+     bisher vor der `!response.ok`-Prüfung — ein Fehler-Status mit
+     Nicht-JSON-Body (z. B. 502/504 vom Proxy) warf dadurch einen
+     `SyntaxError`, der zur generischen Netzwerk-Meldung statt zur
+     treffenderen Status-Meldung führte. JSON-Parsing im `!ok`-Zweig
+     jetzt in eigenem try/catch, fällt bei Fehlschlag ehrlich auf die
+     status-basierte deutsche Meldung zurück. Neuer Test reproduziert
+     genau diesen Fall (502, `json()` wirft).
+  2. `resetChat()` (`useChat.ts`): räumte den bei jeder Nachricht
+     gesetzten 700ms-`replyTimeoutRef` bisher nicht ab und setzte
+     `isThinking` nicht zurück — klickte man "Neu starten" innerhalb der
+     700ms, blieb der "denkt nach"-Indikator sichtbar und der alte
+     Timeout überschrieb den frisch zurückgesetzten Chat ~700ms später
+     erneut mit der veralteten Antwort. Jetzt `clearTimeout` +
+     `setIsThinking(false)` wie beim bereits etablierten Unmount-Cleanup.
+     Neuer Test mit Fake-Timern prüft genau dieses Szenario.
+  3. `AppRoutes` (`routes.tsx`): Scroll-Position wurde beim Routenwechsel
+     nicht zurückgesetzt (React Router tauscht nur den Routen-Inhalt,
+     der Browser behält `window.scrollY`) — auf einer langen Seite weit
+     nach unten scrollen und zu einer kürzeren wechseln öffnete die neue
+     Seite dort, wo die alte endete. Neuer `useEffect` mit
+     `window.scrollTo(0, 0)` auf `location.pathname`. Neuer Test spyt auf
+     `window.scrollTo`, klickt einen Link und prüft den Aufruf.
+  Alle drei Fixes scoped, kein Scope-Creep, keine Berührung von
+  Auth/Zahlungen/rechtlichen Texten. Keine neue UI/Design-Entscheidung im
+  Sinne von `MARKENDESIGN.md` (reines Verhalten, keine visuelle
+  Änderung).
+- **Unabhängig selbst verifiziert** (`npm install`, danach `npx tsc -b`,
+  `npx eslint .`, `npx vitest run` tatsächlich selbst ausgeführt, nicht
+  nur Log geglaubt): `npm install` → 650 Pakete, 10 vorbestehende
+  Advisories (1 moderate, 8 high, 1 critical — unverändert, nicht durch
+  diesen Branch verursacht). `npx tsc -b` → 0 Fehler. `npx eslint .` →
+  0 Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen in
+  `src/components/ui/` (badge, button, tabs — von diesem Branch nicht
+  berührt). `npx vitest run` → 61 Testdateien, 414 Tests, alle grün
+  (eine jsdom-Stderr-Notiz "Not implemented: Window's scrollTo()" ist
+  reines jsdom-Rauschen, kein Testfehler — der neue Scroll-Test selbst
+  mockt `window.scrollTo` korrekt und prüft den Aufruf). Deckt sich mit
+  den Angaben im `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `12990ee..b1170f6`,
+gepusht). `it-chef/auto` war danach bereits deckungsgleich mit `main`,
+kein separater Reset nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
