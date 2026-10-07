@@ -18,10 +18,19 @@ async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<Duf
       ...init,
       headers: { 'Content-Type': 'application/json', ...init?.headers },
     })
-    const json = await response.json()
 
     if (!response.ok) {
-      const rawErrors: { message?: string; code?: string }[] = json?.errors ?? []
+      // A non-JSON error body (e.g. an upstream proxy's HTML error page) must
+      // not fall through to the generic network/parse-error message below —
+      // we still know the real HTTP status here, so fall back to the
+      // status-based message instead.
+      let rawErrors: { message?: string; code?: string }[] = []
+      try {
+        const json = await response.json()
+        rawErrors = json?.errors ?? []
+      } catch {
+        rawErrors = []
+      }
       if (rawErrors.length > 0) {
         // Duffel's own error text is English API jargon, not something to show
         // travellers directly — log it for debugging, show an honest, concrete
@@ -37,6 +46,7 @@ async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<Duf
           : [{ message: `Duffel-Anfrage fehlgeschlagen (${response.status}) — bitte versuche es gleich noch einmal.` }]
       return { data: null, errors }
     }
+    const json = await response.json()
     return { data: json?.data ?? null, errors: [] }
   } catch (error) {
     // Same principle as the !response.ok branch above (see MARKENDESIGN.md

@@ -16534,3 +16534,63 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-07
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout.
+`it-chef/auto` war identisch mit `origin/main` (Freigabe-Chef hatte den
+Branch zuletzt synchronisiert) — kein Merge nötig, `main` unberührt.
+
+**Ausgewählter Punkt:** Der im Lauf vom 06.10. (fünfter Lauf desselben
+Tages) bewusst zurückgestellte Kandidat in `callDuffelProxy()`
+(`src/lib/duffel/client.ts`, gemeinsam genutzt von `searchFlights`/
+`searchStays`): `response.json()` wurde bisher aufgerufen, bevor
+`!response.ok` geprüft wurde. Liefert ein Fehler-Status (z. B. 502/504
+eines vorgeschalteten Proxys) einen Nicht-JSON-Antwortkörper, wirft das
+einen `SyntaxError`, der von der äußeren `catch`-Klammer aufgefangen wird
+— Nutzerin sieht die generische Netzwerk-/Parse-Fehlermeldung statt der
+treffenderen Status-basierten Meldung, obwohl die echte Ursache ein
+Server-/Proxy-Fehler ist.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine Fehlerbehandlung in einer bestehenden
+Netzwerk-Hilfsfunktion. Keine offene Produkt-/Architekturentscheidung
+nötig. Klar genug beschrieben (der Lauf vom 06.10. hatte den exakten
+Reproduktionsweg bereits benannt: "ein Test, der eine Nicht-JSON-Antwort
+mit Fehlerstatus simuliert"). Objektiv prüfbar: neuer Test zuerst rot
+verifiziert, dann grün nach dem Fix — kein spekulativer Fix mehr, anders
+als am 06.10.
+
+**Umgesetzt:**
+- Neuer Regressionstest in `src/lib/duffel/client.test.ts` ("falls back
+  to a status-based German message when an error response has no JSON
+  body"): mockt eine Antwort mit `ok: false`, `status: 502` und einem
+  `json()`, das einen `SyntaxError` wirft. Vor dem Fix rot verifiziert —
+  lieferte die generische "Internetverbindung"-Meldung statt der
+  erwarteten "(502)"-Meldung.
+- Fix in `src/lib/duffel/client.ts` (`callDuffelProxy`): Im
+  `!response.ok`-Zweig wird `response.json()` jetzt in einem eigenen
+  `try`/`catch` geparst; schlägt das Parsen fehl, bleibt `rawErrors` leer
+  und der bestehende Status-basierte Fallback-Text greift wie gewohnt. Der
+  Erfolgsfall (`response.ok`) parst JSON weiterhin unverändert direkt
+  danach — eine kaputte JSON-Antwort bei Status 200 landet wie zuvor im
+  äußeren `catch` (bereits bestehender Test dafür unverändert grün).
+- Keine Verhaltensänderung für die vier bereits bestehenden Tests in
+  `client.test.ts` (echter Duffel-Fehler mit JSON-Body, Status ohne
+  Fehlerdetails, abgelehntes `fetch()`, kaputtes JSON bei Erfolg) — alle
+  blieben unverändert grün.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt) um den entsprechenden Eintrag
+  ergänzt. Keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+  betroffen — 5.10 war bereits als erledigt markiert, dies ist ein reiner
+  Bugfix in bereits bestehendem Code, keine neue Funktion.
+
+**Geprüft:** `npm ci` (frischer Checkout, 10 Advisories, ausschließlich
+Dev-Tooling-Kette, deckungsgleich mit dem Lauf vom 06.10.), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (61 Testdateien, 412 Tests — 411 bestehende plus 1 neuer —
+alle grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

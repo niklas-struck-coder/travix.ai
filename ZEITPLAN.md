@@ -1856,6 +1856,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Hauptchat-Ablauf überhaupt nie ausgelöst wird — bleibt bewusst
   unangetastet, das wäre eine eigene Backend-Verdrahtungsentscheidung,
   keine reine Text-/Logikkorrektur.
+  Vom autonomen IT-Chef-Lauf am 07.10. einen am 06.10. (fünfter Lauf)
+  bewusst zurückgestellten Kandidaten jetzt live reproduziert und behoben:
+  `callDuffelProxy()` (`src/lib/duffel/client.ts`, gemeinsam genutzt von
+  `searchFlights`/`searchStays`) rief bisher `response.json()` auf, noch
+  bevor `!response.ok` geprüft wurde. Lieferte ein Fehler-Status (z. B.
+  502/504 eines vorgeschalteten Proxys) einen Nicht-JSON-Antwortkörper
+  (z. B. eine HTML-Fehlerseite), warf dieses `response.json()` einen
+  `SyntaxError`, der von der äußeren Catch-Klammer aufgefangen wurde — die
+  Nutzerin sah dann die generische Netzwerk-/Parse-Fehlermeldung ("bitte
+  prüfe deine Internetverbindung") statt der treffenderen, Status-basierten
+  Meldung ("Duffel-Anfrage fehlgeschlagen (502) …"), obwohl die echte
+  Ursache ein Server-/Proxy-Fehler war, kein Netzwerkproblem auf
+  Nutzerseite. Neuer Regressionstest in `client.test.ts` (Fehler-Status mit
+  werfendem `response.json()`) vor dem Fix reproduzierbar rot verifiziert.
+  Fix: `!response.ok`-Zweig prüft den Status jetzt zuerst und parst den
+  JSON-Körper erst danach in einem eigenen `try`/`catch` — schlägt das
+  Parsen fehl, bleibt `rawErrors` leer und der bestehende Status-basierte
+  Fallback greift wie gewohnt; der Erfolgsfall (`response.ok`) parst JSON
+  weiterhin wie zuvor (eine kaputte JSON-Antwort bei Status 200 landet
+  unverändert im äußeren `catch`, siehe bereits bestehender Test dafür).
+  Keine Verhaltensänderung für alle vorher schon abgedeckten Fälle (echter
+  Duffel-Fehler mit JSON-Body, abgelehntes `fetch()`, kaputtes JSON bei
+  Erfolg) — alle vier bestehenden Tests in `client.test.ts` blieben
+  unverändert grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

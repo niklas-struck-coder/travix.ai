@@ -70,6 +70,27 @@ describe('searchFlights error handling', () => {
     ])
   })
 
+  it('falls back to a status-based German message when an error response has no JSON body', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON at position 0')
+        },
+      }),
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = await searchFlights(baseParams)
+
+    expect(result.offers).toEqual([])
+    expect(result.errors).toEqual([
+      { message: 'Duffel-Anfrage fehlgeschlagen (502) — bitte versuche es gleich noch einmal.' },
+    ])
+  })
+
   it('replaces a broken JSON response with an honest German fallback', async () => {
     vi.stubGlobal(
       'fetch',
