@@ -44,6 +44,8 @@ describe('getConciergeReply', () => {
   it('does not answer with a fact when a question keyword only occurs inside another word', () => {
     expect(getConciergeReply('Kyoto', 'Wo finde ich gutes Sushi?').matched).toBe(false)
     expect(getConciergeReply('Rom', 'Wann fliegen wir nach Europa?').text).not.toContain('Euro (€)')
+    expect(getConciergeReply('Rom', 'Ich brauche Hilfestellung beim Packen meines Koffers.').matched).toBe(false)
+    expect(getConciergeReply('Rom', 'Kannst du mir mithilfe geben beim Einchecken?').matched).toBe(false)
   })
 
   it('still answers when the keyword is a real word', () => {

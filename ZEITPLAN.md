@@ -1936,6 +1936,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   resetChat() mid-thinking") vor dem Fix reproduzierbar rot verifiziert
   (`isThinking` blieb `true`, der veraltete Reply landete nach 700ms
   trotzdem).
+  Vom autonomen IT-Chef-Lauf am 07.10. (fünfter Lauf desselben Tages) einen
+  über einen eigens beauftragten Explore-Agenten gefundenen Bug in
+  `getConciergeReply()` (`mockConcierge.ts`) behoben: Das Keyword `hilfe`
+  in der Notfall-Erkennung (`/notruf|notfall|polizei|hilfe|unfall/`) hatte
+  anders als die direkt benachbarten kurzen Keywords `\beuros?\b`/`\bhi\b`
+  keine Wortgrenze, obwohl der Kommentar direkt darüber genau dieses
+  Wortgrenzen-Muster für kurze, kompositionsfreudige Wörter vorschreibt.
+  Dadurch matchte es als Teilwort in harmlosen deutschen Komposita wie
+  "Hilfestellung" oder "Mithilfe" — eine Concierge-Frage im Urlaubsmodus
+  wie "Ich brauche Hilfestellung beim Packen meines Koffers" löste
+  fälschlich "Die Notrufnummer lautet: 112." statt der generischen
+  Fallback-Antwort aus. Fix: `\bhilfe\b` statt `hilfe`, identisches Muster
+  wie bei `euro`/`hi` in derselben Datei, keine neue Design-Entscheidung.
+  Zwei neue Assertions in `mockConcierge.test.ts` (bestehender
+  "nur als Teilwort"-Test um die Fälle "Hilfestellung"/"mithilfe" ergänzt)
+  — vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash` nur `mockConcierge.ts`) reproduzierbar rot verifiziert (beide
+  Fälle lösten `matched: true` mit der Notrufnummer-Antwort aus).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

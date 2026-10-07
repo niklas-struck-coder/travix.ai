@@ -77,7 +77,7 @@ export function getConciergeReply(destination: string | null, userMessage: strin
   if (/währung|geld|bezahl|\beuros?\b|preis/.test(lower)) {
     return { text: `Vor Ort zahlst du in ${facts.currency}. Am besten mit Karte oder etwas Bargeld für Kleinigkeiten.`, matched: true }
   }
-  if (/notruf|notfall|polizei|hilfe|unfall/.test(lower)) {
+  if (/notruf|notfall|polizei|\bhilfe\b|unfall/.test(lower)) {
     return { text: `Die Notrufnummer lautet: ${facts.emergencyNumber}.`, matched: true }
   }
   if (/sprache|begrüß|hallo|\bhi\b/.test(lower)) {

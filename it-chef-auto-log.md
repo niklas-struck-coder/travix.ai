@@ -16797,3 +16797,84 @@ Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-07 (fünfter Lauf desselben Tages)
+
+**Ausgangslage:** Vier frühere Läufe liefen heute bereits auf
+`it-chef/auto` (Duffel-Proxy-Fehlerbehandlung, `resetChat()`-Timeout-Leak,
+Scroll-Reset bei Routenwechsel, Testlücke `design-tokens.ts`) und wurden
+von Freigabe-Chef unabhängig geprüft und nach `main` gemergt. Branch war
+bei Laufbeginn identisch mit `main` (Fast-Forward, keine Konflikte, kein
+Merge nötig).
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit der
+vollständigen Liste der in den letzten vier Läufen heute bereits
+ausgeschöpften Kategorien beauftragt (Icon-Buttons/Labels, unformatierte
+Zahlen, role="status"/"alert", Transportmittel-Keywords, toISOString(),
+localStorage-Absicherung, TODO/FIXME, fehlende Testdateien,
+IME-Komposition, Lösch-Bestätigungsdialoge, setTimeout/useEffect-Cleanup,
+Preis-/Warenkorb-Mathematik, speech.ts, Scroll-Reset, Duffel-Proxy,
+formatDuration, FlightCard/TrainCard-Namensfallback), mit der expliziten
+Anweisung, in bisher wenig beackerten Dateien zu suchen (u. a.
+Kartenansicht.tsx, Kalender.tsx, Profil.tsx, Einstellungen.tsx,
+Warenkorb.tsx, Angebote.tsx, Preisalarme.tsx, FlightWizard.tsx/
+HotelWizard.tsx, nav-config.ts, AppShell.tsx, MobileNav.tsx,
+useConcierge.ts). Diese Dateien wurden vollständig gelesen, dort kein
+weiterer Fund. Der eigentliche Fund lag in `src/lib/ai/mockConcierge.ts`
+— bisher nur über bestehende Tests, nicht aber gezielt auf
+Wortgrenzen-Lücken hin gelesen.
+
+**Ausgewählter Punkt:** `getConciergeReply()` (`src/lib/ai/mockConcierge.ts`,
+Zeile 80) erkennt Notfall-Fragen über
+`/notruf|notfall|polizei|hilfe|unfall/`. Anders als die beiden direkt
+benachbarten kurzen Keywords `\beuros?\b` (Zeile 77) und `\bhi\b` (Zeile
+83) hatte `hilfe` keine Wortgrenze — der Kommentar direkt über Zeile 77
+beschreibt exakt dieses Problem ("kurze, vollständige Wörter brauchen
+Wortgrenzen, sonst matchen sie mitten in unbeteiligten Wörtern") und
+wurde für `euro`/`hi` korrekt umgesetzt, bei `hilfe` aber vergessen.
+
+**Warum real statt theoretisch:** Live reproduzierbar (verifiziert mit
+Node vor dem Fix): Die Frage "Ich brauche Hilfestellung beim Packen
+meines Koffers" oder "Kannst du mir mithilfe geben beim Einchecken?" an
+den Urlaubsmodus-Concierge (`Urlaubsmodus.tsx`) matchte fälschlich das
+Notfall-Keyword und antwortete mit "Die Notrufnummer lautet: 112."
+statt der generischen Fallback-Antwort für unerkannte Fragen — keine
+Rand-Eingabe, sondern alltägliche deutsche Wortzusammensetzung mit
+"Hilfe".
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten — reine Client-seitige
+String-Matching-Logik in einer Demo-Funktion. Keine offene Produkt-/
+Architekturentscheidung: der Fix folgt 1:1 dem bereits im selben File
+etablierten Wortgrenzen-Muster. Klar genug beschrieben (exakte
+Datei/Zeile, exaktes fehlerhaftes Verhalten). Objektiv prüfbar: neuer
+Testfall zuerst rot verifiziert, dann grün nach dem Fix.
+
+**Umgesetzt:**
+- Fix in `src/lib/ai/mockConcierge.ts` (`getConciergeReply`): Regex von
+  `/notruf|notfall|polizei|hilfe|unfall/` auf
+  `/notruf|notfall|polizei|\bhilfe\b|unfall/` geändert — einzige
+  Änderung, keine Verhaltensänderung für alle anderen Keywords.
+- Bestehenden Test "does not answer with a fact when a question keyword
+  only occurs inside another word" (`mockConcierge.test.ts`) um zwei
+  Fälle ergänzt ("Hilfestellung", "mithilfe") — geprüft über `matched:
+  false`, da die generische Fallback-Antwort selbst legitim das Wort
+  "Notrufnummer" als Themenvorschlag enthält und ein reiner
+  Text-Enthält-Check daher falsch-negativ gewesen wäre. Vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockConcierge.ts`) reproduzierbar rot verifiziert (beide Fälle lösten
+  `matched: true` mit der Notrufnummer-Antwort aus).
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 8) um den entsprechenden
+  Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` betroffen — reiner Bugfix in
+  bereits bestehendem Code, keine neue Funktion.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62
+Testdateien, 417 Tests — alle grün, davon 2 neue Assertions im
+bestehenden Test), `npm run build` (`tsc -b` + `vite build`, kein
+Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
