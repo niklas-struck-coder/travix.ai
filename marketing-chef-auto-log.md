@@ -4,6 +4,97 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-07
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `fafdf8a`, 06.10., Freigabe-Chef-Merge)
+war nicht veraltet, lag aber per Fast-Forward hinter `origin/main`
+(`239f79c`, früher Nacht-Check 07.10., inkl. der neuesten IT-Chef-
+Arbeit). `origin/main` per Fast-Forward-Merge in diesen Branch
+eingebracht, bevor der eigentliche Lauf begann.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen zunächst die
+laufende Pflege von `marketing/freigabe-uebersicht.md`
+(Kandidaten-Prüfung für das Mini-Changelog-Format), die heute aber die
+etablierte Achter-Schwelle überschritten und damit tatsächlich eine neue
+Ausgabe des bestehenden Mini-Changelog-Entwurfs ausgelöst hat — kein
+komplett neues eigenständiges Content-Stück, sondern die nächste Ausgabe
+eines bereits laufenden, mehrfach genutzten Formats.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 06.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 06.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log a4c2fc0..origin/main` geprüft (Basislinie: der eigene
+Stand vom 06.10.): drei Commits mit echter Produkt-Codeänderung, jeder
+einzeln per `git show` und direkt im aktuellen Code verifiziert (die
+übrigen sind Berichte, ein Daily-Status-Update und Merge-/Freigabe-Chef-
+Commits):
+
+- `3e2946f` (07.10., IT-Chef Auto): Duffel-Proxy-Fehlerbehandlung —
+  ein Fehler-Status mit Nicht-JSON-Body zeigte bisher die generische
+  Netzwerkmeldung statt der treffenderen status-basierten Meldung. Live
+  im Code bestätigt (`src/lib/duffel/client.ts`). **35. Tier-4-
+  Kandidat.**
+- `1bbdab4` (07.10., IT-Chef Auto, zweiter Lauf): `resetChat()` räumte
+  den noch laufenden Antwort-Timeout bisher nicht ab — ein schneller
+  Reset ließ wenig später kommentarlos die veraltete Antwort wieder
+  auftauchen. Live im Code bestätigt (`src/hooks/useChat.ts`). **36.
+  Tier-4-Kandidat.**
+- `b1170f6` (07.10., IT-Chef Auto, dritter Lauf): Scroll-Position wird
+  jetzt bei Routenwechsel zurückgesetzt. Bewusst nicht aufgenommen —
+  sichtbare Verhaltensänderung, aber ohne Ehrlichkeits-/Vertrauens-
+  Erzählung, reines SPA-Standardverhalten statt eines gebrochenen
+  Versprechens oder einer falschen Angabe.
+
+**Kandidatentopf:** 28-34 unverändert, 35 und 36 neu dazugekommen — Topf
+erreicht damit **neun**, deutlich über der Achter-Schwelle. **Sechste
+Mini-Changelog-Ausgabe geschrieben** (alle neun Kandidaten 28-36
+verarbeitet), Topf danach wieder leer.
+
+**Warum sicher genug:** Ergebnis ist eine neue Ausgabe im bereits
+etablierten Mini-Changelog-Entwurfsdokument plus die laufende
+Kandidaten-Übersicht — kein Live-Vorgang, nichts gepostet, versendet
+oder im Produkt verändert. Keine erfundenen Kennzahlen: beide neuen
+Kandidaten stammen aus einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commits; der Ausschluss
+wendet nur die bereits etablierte "Ehrlichkeits-Erzählung nötig"-Grenze
+an. Klar genug beschrieben, keine offene Positionierungs-
+Grundsatzfrage — die sechste Ausgabe wendet nur dieselbe, bereits in
+`MARKENDESIGN.md` festgelegte Positionierung und denselben Tonfall wie
+Ausgabe 1-5 an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle drei fließen stattdessen in die Mini-Changelog-Pflege.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/duffel/client.ts`, `src/hooks/useChat.ts` und `src/routes.tsx`
+direkt im aktuellen Code gelesen, nicht nur aus Commit-/Logtexten
+übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 07.10. (Prüfung
+  der vier Fragen, drei neue Commits einzeln geprüft, zwei als
+  Tier-4-Kandidaten 35/36, einer bewusst ausgeschlossen, Kandidatentopf-
+  Stand auf "neun" gesetzt, Datum im Titel aktualisiert).
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 6" mit allen
+  neun gesammelten Kandidaten (28-36), gleiche Struktur/Tonfall wie
+  Ausgabe 1-5.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-06
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`

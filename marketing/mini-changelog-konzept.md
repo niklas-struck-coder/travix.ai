@@ -742,3 +742,127 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
 (siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
 jetzt für eine mögliche sechste Ausgabe.
+
+## Ausgabe 6 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-10-07
+
+Wie Ausgabe 1-5: **nichts davon ist live.** Reiner Textentwurf für
+dieselbe, noch nicht gebaute Footer-Seite — hängt an derselben vierten
+Frage wie Ausgabe 1-5 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine sechste Ausgabe
+
+Dieselbe Selbstauflage wie bei Ausgabe 2-5: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue,
+einzeln verifizierte Tier-4-Kandidaten angesammelt haben — Richtwert
+bleibt der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst).
+Der Kandidatentopf war laut `marketing/freigabe-uebersicht.md` seit
+Ausgabe 5 (29.09.) auf sieben gewachsen (Kandidaten 28-34: ehrliche
+Dauer-Anzeige statt erfundener "1min", Reiseentwürfe-Dialogtexte bei
+Duplikaten in Lösch- und Details-Dialog disambiguiert, Favoriten-Button
+übergibt das tatsächlich angeklickte Ziel, kein stiller Versand eines
+alten Favoriten-Ziels mehr nach einem Reset, eine ehrliche
+"Nicht gefunden"-Seite statt einer komplett leeren Seite, und die
+Flugsuche verspricht im Hauptchat-Ablauf keine Suche mehr, die sie nicht
+auslöst).
+
+Vor der Auswahl `git log a4c2fc0..origin/main` geprüft (letzter
+Marketing-Lauf, 06.10., dessen Inhalt laut Branch-Vergleich bereits
+vollständig in `main` gemergt war). Drei neue Commits mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` und direkt im Code
+geprüft:
+
+- **`3e2946f` (07.10.):** Zeigte `callDuffelProxy()` bisher bei einem
+  Fehler-Status mit Nicht-JSON-Antwortkörper (z. B. ein 502/504 eines
+  vorgeschalteten Proxys) die generische Netzwerk-/Parse-Fehlermeldung,
+  obwohl die echte Ursache ein Server-/Proxy-Fehler war — jetzt zeigt
+  genau dieser Fall die treffendere, status-basierte Meldung.
+- **`1bbdab4` (07.10.):** Klickte man innerhalb der ersten 700ms nach
+  einer Chat-Nachricht auf "Neu starten", blieb der "denkt nach"-
+  Indikator fälschlich sichtbar und der frisch zurückgesetzte Chat wurde
+  wenig später kommentarlos wieder mit der veralteten, eigentlich schon
+  verworfenen Antwort überschrieben — jetzt räumt der Reset den noch
+  laufenden Timeout zuverlässig ab.
+
+Ein weiterer geprüfter Commit **nicht** aufgenommen (eine echte,
+verifizierte Verhaltensänderung, aber ohne die "Ehrlichkeit/Vertrauen"-
+Erzählung, die dieses Format trägt — gleiche Einstufung wie frühere
+reine UX-/Stabilitäts-Ausschlüsse, z. B. den EditMode-Formular-Reset):
+- **`b1170f6` (07.10.):** Die Scroll-Position wird beim Wechsel zwischen
+  Seiten jetzt auf den Seitenanfang zurückgesetzt, statt an der alten
+  Scroll-Position der vorherigen Seite zu bleiben. Universell erwartetes
+  SPA-Standardverhalten, kein Fall von etwas Versprochenem, das nicht
+  eingehalten wurde, oder einer falschen/verschwiegenen Information.
+
+Zusammen mit den sieben bereits im Topf wartenden Kandidaten (28-34,
+siehe `marketing/freigabe-uebersicht.md`) ergeben sich **neun**
+Kandidaten — über der Achter-Schwelle, die bereits Ausgabe 2-5
+ausgelöst hat.
+
+### Sechste Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 30.09. bis 07.10.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-5, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Du wirst nicht mit einer erfundenen Angabe abgespeist**
+- Eine sehr kurze Flug- oder Zugdauer unter einer Minute zeigte bisher
+  pauschal "1min" an, auch wenn die tatsächliche Dauer das nicht war —
+  jetzt steht dort wie bei jeder anderen unbrauchbaren Dauer ein
+  ehrlicher Platzhalter-Strich "—".
+
+**Eindeutig statt mehrdeutig, wenn zwei Einträge gleich aussehen**
+- Hattest du zwei Reiseentwürfe mit demselben Reiseziel, war im
+  Lösch-Dialog nicht klar zu erkennen, welcher der beiden gemeint ist —
+  seit Ende September löst eine eindeutige Zusatzkennzeichnung das auf.
+  Jetzt gilt dieselbe eindeutige Kennzeichnung auch im "Details
+  ansehen"-Dialog, nicht nur beim Löschen oder Abschließen.
+
+**Ein Klick tut tatsächlich das, was er verspricht**
+- Der Button "Reise mit KI planen" auf einer Favoriten-Karte verlinkte
+  bisher unabhängig vom angeklickten Ziel immer auf den allgemeinen
+  KI-Chat — jetzt übernimmt der Chat wirklich das Ziel, auf das du
+  geklickt hast.
+- Nach einem Reset ("Neu starten"/"Neue Reise planen") konnte
+  unbemerkt noch ein altes, womöglich tagealtes Favoriten-Ziel als Chat-
+  Nachricht nachgereicht werden, ohne dass du irgendetwas angeklickt
+  hattest — das passiert jetzt nicht mehr.
+- Startest du den Chat innerhalb der ersten 700ms nach einer Nachricht
+  neu, blieb bisher kommentarlos die inzwischen veraltete, eigentlich
+  schon verworfene Antwort stehen — jetzt verhindert der Reset das
+  zuverlässig.
+
+**Eine unbekannte Adresse bekommt eine ehrliche Antwort**
+- Eine falsch getippte oder veraltete Adresse zeigte bisher nur eine
+  komplett leere Seite ohne jeden Hinweis — jetzt eine Seite, die
+  ehrlich sagt, dass hier nichts gefunden wurde, mit einem Weg zurück.
+
+**Ein Fehler nennt die richtige Ursache**
+- Lag ein technisches Problem bei der Flug- oder Hotelsuche am
+  vorgeschalteten Server statt an deiner Internetverbindung, bekamst du
+  bisher trotzdem die Meldung "prüf deine Internetverbindung" — jetzt
+  zeigt genau dieser Fall die zutreffende, status-basierte Fehlermeldung.
+
+**Ein Versprechen, das jetzt für jedes Verkehrsmittel eingehalten wird**
+- Der Hauptchat-Ablauf versprach für die Flugsuche bisher eine echte
+  Suche ("Ich suche jetzt nach echten Flug-Verbindungen"), die dort nie
+  ausgelöst wurde — jetzt sagt der Chat für Flug genauso ehrlich wie
+  seit Ende September schon für Zug/Bus/Fähre/Mietwagen: "dafür hab ich
+  noch keine automatische Suche — dein Reiseplan steht trotzdem!"
+
+---
+
+*Wie in Ausgabe 1-5: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig, nicht zuverlässig
+oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 6 hängt an derselben vierten Frage wie Ausgabe 1-5 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche siebte Ausgabe.

@@ -1,10 +1,140 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-06)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-07)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-07: zwei neue Tier-4-Kandidaten (35: Duffel-Proxy zeigt bei Fehler-Status mit Nicht-JSON-Body jetzt die treffende Status-Meldung statt einer generischen Netzwerkmeldung; 36: `resetChat()` räumt den noch laufenden Antwort-Timeout jetzt ab, kein veralteter Chat-Inhalt mehr nach einem schnellen Reset), ein Commit bewusst ausgeschlossen (Scroll-Position-Reset — reine SPA-Standard-UX ohne Ehrlichkeits-/Vertrauens-Erzählung), Kandidatentopf von sieben auf **neun** — damit über der Achter-Schwelle: sechste Mini-Changelog-Ausgabe geschrieben (siehe `marketing/mini-changelog-konzept.md`), Kandidatentopf danach wieder leer, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `fafdf8a`, 06.10., Freigabe-Chef-Merge)
+war einen Fast-Forward-Merge hinter `origin/main` (`239f79c`, früher
+Nacht-Check 07.10.). `origin/main` per Fast-Forward-Merge in diesen
+Branch eingebracht, bevor der eigentliche Lauf begann.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 06.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen —
+die Kanal-/Mini-Changelog-Frage jetzt seit über elf Wochen.
+
+**`git log a4c2fc0..origin/main` zeigt die seit dem letzten Check (06.10.,
+Commit `a4c2fc0`) neu dazugekommenen Commits**, darunter drei mit echter
+Produkt-Codeänderung (die übrigen sind Berichte, ein Daily-Status-Update
+und Merge-/Freigabe-Chef-Commits ohne eigene Codeänderung), jeder einzeln
+per `git show` sowie direkt im aktuellen Code geprüft:
+
+- **`3e2946f` (07.10., IT-Chef Auto):** `callDuffelProxy()`
+  (`src/lib/duffel/client.ts`, gemeinsam genutzt von `searchFlights`/
+  `searchStays`) parste `response.json()` bisher, bevor `!response.ok`
+  geprüft wurde. Lieferte ein Fehler-Status (z. B. 502/504 eines
+  vorgeschalteten Proxys) einen Nicht-JSON-Antwortkörper, warf das einen
+  `SyntaxError`, der von der äußeren `catch`-Klammer aufgefangen wurde —
+  die Nutzerin sah die generische Netzwerk-/Parse-Fehlermeldung statt der
+  treffenderen, status-basierten Meldung, obwohl die echte Ursache ein
+  Server-/Proxy-Fehler war. Live im Code verifiziert
+  (`src/lib/duffel/client.ts`, Zeilen 16-51: das JSON-Parsing im
+  `!response.ok`-Zweig steckt jetzt in einem eigenen `try`/`catch`; bleibt
+  das Parsen erfolglos, greift unverändert der bestehende
+  Status-basierte Fallback-Text), neuer Regressionstest zuerst rot, dann
+  grün verifiziert. Eine Nutzerin, die bisher bei einem Server-/
+  Proxy-Fehler nur "prüf deine Internetverbindung" las, obwohl ihre
+  Verbindung einwandfrei war, bekommt jetzt die richtige, status-basierte
+  Erklärung — passt klar in die etablierte "Echte statt verschwiegene
+  oder verwirrende Angaben"-Fundgruppe. **Fünfunddreißigster
+  Tier-4-Kandidat.**
+- **`1bbdab4` (07.10., IT-Chef Auto, zweiter Lauf):** `resetChat()`
+  (`src/hooks/useChat.ts`, Zeile 408 ff.) räumte den noch laufenden
+  `replyTimeoutRef`-Timeout (gesetzt von `sendMessage()`, 700ms
+  Verzögerung für die "Travix denkt nach …"-Phase) bisher nicht ab und
+  setzte `isThinking` nicht zurück — obwohl exakt dieses Aufräumen bereits
+  beim Unmount etabliert ist. Klickte man innerhalb dieser 700ms auf
+  "Neu starten", blieb der "denkt nach"-Indikator fälschlich sichtbar,
+  und rund 700ms später überschrieb der alte, nicht abgebrochene Timeout
+  den frisch zurückgesetzten Chat erneut mit der veralteten Antwort samt
+  altem `trip`/`quickReplies`. Live im Code verifiziert
+  (`src/hooks/useChat.ts`, Zeilen 408-411: `resetChat()` räumt den
+  Timeout jetzt identisch zum bestehenden Unmount-Muster ab und setzt
+  `isThinking` zurück), neuer Regressionstest zuerst rot, dann grün
+  verifiziert. Eine Nutzerin, die bewusst neu startet, bekam bisher ohne
+  jede eigene Aktion kommentarlos eine veraltete Antwort zurück — genau
+  die "stille, nicht erkennbare Fehlaktion statt des versprochenen
+  Verhaltens"-Fundgruppe wie bei den Favoriten-Kandidaten 31/32.
+  **Sechsunddreißigster Tier-4-Kandidat.**
+- **`b1170f6` (07.10., IT-Chef Auto, dritter Lauf):** `AppRoutes`
+  (`src/routes.tsx`) setzte beim Routenwechsel die Scroll-Position nicht
+  zurück — wer auf einer langen Seite weit nach unten scrollte und zu
+  einer kürzeren Seite wechselte, landete dort, wo die alte Seite endete,
+  statt an deren eigener Überschrift. Live im Code verifiziert (neuer
+  `useEffect` mit `window.scrollTo(0, 0)` auf `location.pathname`).
+  **Bewusst nicht** als Tier-4-Kandidat aufgenommen: eine sichtbare
+  Verhaltensänderung liegt zwar vor, aber ohne die für dieses Format
+  nötige Ehrlichkeits-/Vertrauens-Erzählung — hier wurde nichts versprochen
+  und nicht eingehalten, keine Information war falsch oder verschwiegen,
+  nur universell erwartetes SPA-Standardverhalten fehlte bisher. Gleiche
+  Einstufungslogik wie frühere reine UX-/Stabilitäts-Fixes ohne
+  Ehrlichkeits-Bezug (z. B. EditMode-Formular-Reset, React-Key-Stabilität).
+
+**"Flugsuche verspricht/löst nicht aus"-Fund:** bereits seit Kandidat 34
+(06.10.) behoben, keine erneute Prüfung nötig — kein offener Fund mehr in
+dieser Kategorie.
+
+**Kandidatentopf:** 28-34 unverändert, 35 und 36 neu dazugekommen — der
+aktive Topf erreicht damit **neun**, deutlich über der etablierten
+Achter-Schwelle (zuletzt bei zehn Kandidaten in Ausgabe 5 am 29.09.
+ausgelöst). **Sechste Mini-Changelog-Ausgabe damit fällig** — alle neun
+Kandidaten (28-36) sind in `marketing/mini-changelog-konzept.md`
+verarbeitet. Der Kandidatentopf ist mit dieser Ausgabe wieder leer, der
+nächste Lauf sammelt neue Funde von vorn.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht plus eine neue Ausgabe im bereits
+etablierten Mini-Changelog-Entwurf — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: beide
+neuen Kandidaten stammen aus einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commits; der
+Ausschluss wendet nur die bereits etablierte "Ehrlichkeits-Erzählung
+nötig"-Grenze konsequent an. Keine offene Positionierungs-
+Grundsatzfrage — die sechste Ausgabe wendet nur dieselbe, bereits in
+`MARKENDESIGN.md` festgelegte Positionierung und denselben Tonfall wie
+Ausgabe 1-5 an, ohne etwas inhaltlich neu zu entscheiden.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle drei fließen stattdessen (zwei als Kandidaten, einer als
+  bewusster Ausschluss) in die bereits laufende Mini-Changelog-Pflege.
+- `ZEITPLAN.md` nicht angefasst — dieses Update betrifft nur die
+  Kandidaten-/Freigabe-Verwaltung und die bereits bestehende
+  Mini-Changelog-Konzeptdatei, keinen neuen Sprint-Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/duffel/client.ts`, `src/hooks/useChat.ts` und `src/routes.tsx`
+direkt im aktuellen Code gelesen, nicht nur aus Commit-/Logtexten
+übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 07.10. (Prüfung
+  der vier Fragen, drei neue Commits einzeln geprüft, zwei als
+  Tier-4-Kandidaten 35/36, einer bewusst ausgeschlossen,
+  Kandidatentopf-Stand auf "neun" und damit über der Schwelle gesetzt),
+  Datum im Titel auf 07.10. gesetzt.
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 6" mit allen neun
+  gesammelten Kandidaten (28-36), gleiche Struktur/Tonfall wie
+  Ausgabe 1-5.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-06: ein neuer 34. Tier-4-Kandidat (Flugsuche-Versprechen im Hauptchat-Ablauf jetzt durch die etablierte ehrliche Formulierung ersetzt — der seit 29.09. verfolgte "Flugsuche verspricht/löst nicht aus"-Fund ist damit behoben), zwei Commits bewusst ausgeschlossen (reine interne Konsolidierungen ohne Verhaltensänderung), Kandidatentopf von sechs auf sieben, alle vier Fragen weiterhin offen
 
