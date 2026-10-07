@@ -16740,3 +16740,60 @@ Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-07 (vierter Lauf desselben Tages)
+
+**Ausgangslage:** Drei frühere Läufe liefen heute bereits auf
+`it-chef/auto` (Duffel-Proxy-Fehlerbehandlung, `resetChat()`-Timeout-Leak,
+Scroll-Reset bei Routenwechsel) und wurden von Freigabe-Chef unabhängig
+geprüft und nach `main` gemergt. Branch frisch mit `main` synchronisiert
+(Fast-Forward, keine Konflikte).
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten
+angesetzt mit dem Auftrag, explizit nicht mit den drei heutigen Themen
+zu überlappen. Er prüfte (a) alle `.ts`/`.tsx`-Dateien in
+`src/components`, `src/lib`, `src/hooks`, `src/pages` auf fehlende
+Testdateien samt Trivialitäts-Einschätzung, und (b) durch echtes Lesen
+`calendarUtils.ts`, `cartTotals.ts`, `format.ts`, `useConcierge.ts`,
+`mockConcierge.ts`, `src/lib/duffel/*`, `Flugsuche.tsx`, `Hotelsuche.tsx`
+auf isolierte Logikfehler. Ergebnis: kein neuer, eindeutig isolierter Bug
+(ein Beobachtungs-Kandidat in `useConcierge.ts`s `sendMessage` — fehlendes
+`clearTimeout` vor dem Überschreiben von `replyTimeoutRef.current` — ist
+laut UI-Verdrahtung in `Urlaubsmodus.tsx` praktisch nicht erreichbar,
+daher kein belastbarer Fund). Saubere Testabdeckungslücke stattdessen:
+`src/lib/design-tokens.ts` (Farben, Fonts, Spacing) war die einzige Datei
+ganz ohne Komponenten-/Render-Aufwand — rein datenbasierte Konstanten,
+keine Radix-/Router-/Fetch-Abhängigkeit.
+
+**Ausgewählter Punkt:** Testdatei für `src/lib/design-tokens.ts`
+ergänzen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten — reine Konstanten-Datei. Keine
+offene Produkt-/Architekturentscheidung: die Werte bleiben unverändert,
+nur die bisher fehlende Testabdeckung wird nachgezogen. Klar genug
+beschrieben (eindeutige Lücke, keine Interpretation nötig). Objektiv
+prüfbar: Tests laufen grün oder nicht.
+
+**Umgesetzt:**
+- Neue `src/lib/design-tokens.test.ts` (3 Tests, Muster analog
+  `calculateProgress.test.ts`): die drei Markenfarben (`navy`/`teal`/
+  `gold`), die beiden Font-Stacks (`heading`/`body`) samt
+  `system-ui`-Fallback, sowie die vollständige Spacing-Skala (`xs` bis
+  `2xl`). Keine Code-Änderung an `design-tokens.ts` selbst — reine
+  Testabdeckung für bestehendes, unverändertes Verhalten.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 3) um den entsprechenden
+  Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` betroffen (8.13 bezieht sich auf
+  `calculateProgress`/`calculateCosts`/`checklistRules`/Schema-Validierung,
+  nicht auf `design-tokens.ts` — bleibt unverändert offen).
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 417 Tests — 414 bestehende plus 3 neue —
+alle grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

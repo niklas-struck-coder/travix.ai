@@ -155,6 +155,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
   nur `routes.tsx`) reproduzierbar rot verifiziert (kein `scrollTo`-Aufruf
   beim Routenwechsel).
+  Vom autonomen IT-Chef-Lauf am 07.10. (vierter Lauf desselben Tages) eine
+  weitere Testabdeckungslücke geschlossen: `src/lib/design-tokens.ts`
+  (Farben, Fonts, Spacing-Skala) hatte bisher keine eigene Testdatei. Über
+  einen eigens dafür beauftragten Explore-Agenten als sauberste verbleibende
+  Lücke identifiziert (einzige Datei ganz ohne Komponenten-/Render-Aufwand,
+  rein datenbasierte Konstanten). Reine Testabdeckung für bestehende,
+  unveränderte Werte, kein neuer Bug gefunden. Neue `design-tokens.test.ts`
+  (3 Tests, Muster analog `calculateProgress.test.ts`): die drei
+  Markenfarben, die beiden Font-Stacks samt `system-ui`-Fallback, sowie die
+  vollständige Spacing-Skala von `xs` bis `2xl`.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
