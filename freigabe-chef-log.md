@@ -1,5 +1,65 @@
 # Freigabe-Chef-Log
 
+## 2026-10-07, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (deckungsgleich mit
+  `main` nach dem früheren Nacht-Check desselben Tages). Planmäßig
+  übersprungen, kein neuer Stand.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`a35e7f7`, 07.10.).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`1cf0a60`, 07.10.).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur
+Log-Eintrag geglaubt): Ändert nur `marketing-chef-auto-log.md`,
+`marketing/freigabe-uebersicht.md` und `marketing/mini-changelog-konzept.md`
+— sechste Mini-Changelog-Ausgabe, ausgelöst durch zwei neue
+Tier-4-Kandidaten (35: Duffel-Proxy zeigt bei Fehler-Status mit
+Nicht-JSON-Body jetzt die treffende Status-Meldung statt einer
+generischen Netzwerkmeldung; 36: `resetChat()` räumt den noch
+laufenden Antwort-Timeout jetzt ab). Ein dritter Commit
+(Scroll-Position-Reset in `routes.tsx`) bewusst nicht aufgenommen
+("reines SPA-Standardverhalten ohne Ehrlichkeits-/Vertrauens-
+Erzählung") — nachvollziehbare Einstufung. Unabhängig gegengeprüft:
+alle drei zugrundeliegenden Commits (`3e2946f`, `1bbdab4`, `b1170f6`)
+tatsächlich in `main`, Commit-Messages decken sich mit den im
+Marketing-Log beschriebenen Funden. Keine erfundenen Kennzahlen/
+Nutzerzahlen, reiner Textentwurf, kein Hinweis auf tatsächliches
+Posten/Versenden. Text vollständig und kohärent, keine Stichpunkt-
+Skizze.
+→ **Passt, nach `main` gemergt** (Fast-Forward `239f79c..a35e7f7`,
+gepusht).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen): Ändert nur
+`support-chef-auto-log.md` — neuer Analyse-Eintrag zu `AppRoutes`
+(`src/routes.tsx`), ausgelöst durch den heutigen IT-Chef-Fix
+("Scroll-Position wird bei Routenwechsel zurückgesetzt"). Zwei
+Reibungspunkte: (1) der seit 06.10. offene Vorschlag, bei Routenwechsel
+zusätzlich `focusPageHeading()` aufzurufen, wurde an der jetzt neu
+gebauten Stelle nicht mit umgesetzt; (2) der neue Scroll-Sprung
+passiert im selben Render wie die Navigation, nicht erst nach der
+0,2s-Exit-Animation der alten Seite. Stichprobenartig nachvollzogen:
+`src/routes.tsx` (Zeilen 51-56, `useEffect`/`scrollTo`), `src/lib/
+utils.ts` (`focusPageHeading`, Zeilen 14-27, inkl. `preventScroll:
+true`), `src/components/layout/PageTransition.tsx` (0,2s-`easeInOut`-
+Exit-Animation), `MobileNav.tsx:53`/`Sidebar.tsx:37` — alle Datei-/
+Zeilenangaben und Verhaltensbeschreibungen stimmen mit dem Code auf
+`main` überein, nichts wirkt erfunden. Reine Analyse, kein Code
+geändert, daher kein Build/Lint/Test nötig.
+→ **Passt, nach `main` gemergt** (echter Merge-Commit `c25575a`, da
+Branch auf einem älteren `main`-Stand vor dem Marketing-Merge
+basierte — Marketing-Dateien nach dem Merge als unberührt verifiziert,
+gepusht).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, beide gemergt. `it-chef/auto` planmäßig
+übersprungen (kein neuer Stand).
+
+**Info an Ni:** Nein — beide Merges saubere Analyse-/Entwurfs-
+Branches ohne Code-Risiko, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. Der offene Fokus-Sprung-Punkt aus dem
+Support-Chef-Fund ist kein neuer Fund, sondern eine bereits seit
+06.10. bekannte, weiterhin offene Empfehlung.
+
 ## 2026-10-06, Tages-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
