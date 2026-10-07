@@ -13,16 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-05):**
-- IT-Chef hat Code-Konsolidierungen gemergt: doppelte focusPageHeading()-Logik
-  zwischen Dialog/Sheet zusammengeführt, formatDuration() zentralisiert
-- Ehrlichere Formulierung im Haupt-Chat-Ablauf (kein Flugsuche-Versprechen
-  mehr, das noch nicht eingehalten werden kann) ist jetzt live
-- Support-Chef hat einen neuen Befund zur 404-Seite gemeldet: fehlende
-  Fokus-Ankündigung für Screenreader
-- Freigabe-Chef hat beide Tages-Läufe (IT-Chef, Marketing-/Support-Chef)
-  heute erfolgreich geprüft und nach main gemergt
+**Seit letztem Update (2026-10-06):**
+- IT-Chef hat einen Fehler in der Duffel-Proxy-Fehlerbehandlung behoben sowie
+  ein Timeout-Leck beim Zurücksetzen des Chats (resetChat()) und einen
+  Scroll-Positions-Bug bei Routenwechseln gefunden und behoben
+- Support-Chef hat beim Routing/Scroll-Reset weitere Befunde gemeldet
+  (fehlender Fokus-Sprung, Timing-Konflikt mit Exit-Animation)
+- Marketing-Chef hat weitere kleinere Verbesserungs-Kandidaten gesammelt
+  (Mini-Changelog, zwei neue Kandidaten)
+- Freigabe-Chef hat die Tages-Läufe von IT-Chef und Support-Chef geprüft
+  und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-06_
+_Letztes Update: 2026-10-07_
