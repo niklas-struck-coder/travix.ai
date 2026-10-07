@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from './routes'
 
 describe('AppRoutes', () => {
@@ -12,5 +12,20 @@ describe('AppRoutes', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'Seite nicht gefunden' })).toBeInTheDocument()
+  })
+
+  it('scrolls back to the top when navigating to a new route', () => {
+    const scrollToSpy = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+    scrollToSpy.mockClear()
+
+    fireEvent.click(screen.getAllByRole('link', { name: 'Profil' })[0])
+
+    expect(scrollToSpy).toHaveBeenCalledWith(0, 0)
+    scrollToSpy.mockRestore()
   })
 })

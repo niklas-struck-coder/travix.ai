@@ -16671,3 +16671,72 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-07 (dritter Lauf desselben Tages)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer,
+isolierter Checkout. `it-chef/auto` enthielt bereits beide Commits der
+ersten zwei Läufe heute (Duffel-Proxy-Fehlerbehandlung;
+`resetChat()`-Timeout-Cleanup) und war ansonsten identisch mit
+`origin/main` — kein Merge nötig, `main` unberührt.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit
+einer gezielt auf bisher wenig beackerte Angriffswinkel ausgelegten
+Suche angesetzt, explizit mit der Liste der bereits ausgeschöpften
+Kategorien (Icon-Buttons ohne Label, fehlende `alt`-Texte,
+Formularfelder ohne Label, unformatierte Zahlen, `role="status"`/
+`role="alert"`, Transportmittel-Keyword-Wortgrenzen, `toISOString()`-
+Zeitzonenfehler, ungeschütztes `localStorage`, TODO/FIXME, fehlende
+Testdateien, IME-Komposition, Lösch-Bestätigungsdialoge,
+`setTimeout`/`useEffect`-Cleanup-Race-Conditions). Der Agent deckte
+zusätzlich ab: Preis-/Warenkorb-Mathematik (`cartTotals.ts`,
+`checklistRules.ts`, `calendarUtils.ts`), `speech.ts`, strukturellen
+Vergleich weiterer Geschwister-Komponenten/-Seiten, die
+Konversationslogik in `mockAdvisor.ts` jenseits der Keyword-Erkennung,
+Demo-Datenkonsistenz über mehrere Seiten, typunsichere `as`-Casts sowie
+verbleibende Code-Duplikation.
+
+**Ausgewählter Punkt:** `AppRoutes` (`src/routes.tsx`) setzte beim
+Routenwechsel die Scroll-Position nicht zurück — ein bisher in diesem
+Log nie erwähnter Bereich (Routing/Layout), anders als die bereits
+mehrfach durchgekämmten Kategorien oben. Details siehe
+`ZEITPLAN.md` (Phase 3, heutiger Eintrag).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten — reine Client-seitige Navigations-
+/UX-Mechanik. Keine offene Produkt-/Architekturentscheidung: das
+Zurücksetzen der Scroll-Position bei einem Routenwechsel ist das
+universell erwartete SPA-Standardverhalten, kein Designtradeoff.
+Klar genug beschrieben (exakte Datei/Zeile, exaktes fehlendes
+Verhalten). Objektiv prüfbar: neuer Test zuerst rot verifiziert, dann
+grün nach dem Fix.
+
+**Umgesetzt:**
+- Fix in `src/routes.tsx` (`AppRoutes`): neuer
+  `useEffect(() => window.scrollTo(0, 0), [location.pathname])` direkt
+  neben der bereits bestehenden `useLocation()`-Nutzung.
+- Neuer Regressionstest in `src/routes.test.tsx` ("scrolls back to the
+  top when navigating to a new route"): rendert `AppRoutes` auf
+  `/dashboard`, mockt `window.scrollTo`, klickt per `fireEvent.click`
+  auf den Sidebar-Link "Profil" und erwartet `scrollTo(0, 0)`. Vor dem
+  Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `routes.tsx`) reproduzierbar rot verifiziert (kein `scrollTo`-Aufruf).
+  Bestand zunächst einen Zwischenschritt über `createMemoryRouter`/
+  `router.navigate()`, der einen `act()`-Warnhinweis auslöste — auf das
+  im Repo bereits etablierte Muster (`fireEvent.click` auf einen echten
+  gerenderten Link innerhalb `MemoryRouter`, siehe `sheet.test.tsx`)
+  umgestellt, seitdem ohne Warnung.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 3) um den entsprechenden
+  Eintrag ergänzt. Keine Checkbox in
+  `tasks/tasks-prd-travix-platform.md` betroffen — reiner Bugfix in
+  bereits bestehendem Code, keine neue Funktion.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (61 Testdateien, 414 Tests — 413 bestehende plus 1 neuer —
+alle grün), `npm run build` (`tsc -b` + `vite build`, kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

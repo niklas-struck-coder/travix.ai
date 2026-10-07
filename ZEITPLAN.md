@@ -132,6 +132,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `formatEuro()`/`formatOfferPrice()`/`formatDuration()`. Neue, direkte
   `focusPageHeading`-Testgruppe in `utils.test.ts` (3 Tests) — bestehender
   Verhaltenstest in `dialog.test.tsx` blieb unverändert grün.
+  Vom autonomen IT-Chef-Lauf am 07.10. (dritter Lauf desselben Tages)
+  einen über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug in `routes.tsx` (`AppRoutes`) behoben: Beim
+  Routenwechsel gab es nirgends im Code (geprüft: einzige
+  `useLocation()`-Verwendung, kein `scrollTo`/`ScrollRestoration` im
+  gesamten `src`-Baum außer dem unrelated Chat-Auto-Scroll) eine
+  Zurücksetzung der Scroll-Position — React Router tauscht beim
+  Seitenwechsel nur den Inhalt der `<Routes>`, der Browser behält den
+  bisherigen `window.scrollY`. Live nachvollziehbar: Auf einer langen
+  Seite (z. B. `/entwuerfe`) weit nach unten scrollen, dann über
+  Sidebar/MobileNav zu einer kürzeren Seite wechseln (z. B.
+  `/dashboard`) — die neue Seite öffnet dort, wo die vorherige endete,
+  statt oben an ihrer eigenen Überschrift, bei Bedarf sogar komplett
+  leer, wenn die neue Seite kürzer ist als der bisherige Scroll-Offset.
+  Kein Designtradeoff, sondern der in jeder SPA erwartete Standard
+  (entspricht dem Verhalten eines echten Seitenaufrufs). Fix: neuer
+  `useEffect(() => window.scrollTo(0, 0), [location.pathname])` in
+  `AppRoutes` direkt neben der bereits bestehenden
+  `useLocation()`-Nutzung. Neuer Regressionstest in `routes.test.tsx`
+  (Klick auf einen Sidebar-Link löst `window.scrollTo(0, 0)` aus) — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+  nur `routes.tsx`) reproduzierbar rot verifiziert (kein `scrollTo`-Aufruf
+  beim Routenwechsel).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein

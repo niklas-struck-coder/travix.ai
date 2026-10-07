@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { AppShell } from '@/components/layout/AppShell'
@@ -49,6 +50,10 @@ const builtRoutes = new Set([
 
 export function AppRoutes() {
   const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   return (
     <AppShell>
