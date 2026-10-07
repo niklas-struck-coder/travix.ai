@@ -4067,3 +4067,87 @@ konsistent mit dem bereits etablierten Empty-State-Muster (`Favoriten.tsx`,
 Aktiv-Hervorhebung wurde ebenfalls geprüft: `Sidebar.tsx:37`
 (`end={item.path === '/'}`) verhindert bereits korrekt, dass "Start" auf
 der 404-Seite fälschlich als aktiv markiert wird — kein Bug.
+
+---
+
+## 2026-10-07 — Routing/Scroll-Reset (`AppRoutes`, `src/routes.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil der heutige IT-Chef-Auto-Lauf (dritter Lauf desselben
+Tages, siehe `it-chef-auto-log.md`/`ZEITPLAN.md`) in `AppRoutes`
+(`src/routes.tsx:51-56`) einen neuen, zentralen `useEffect` ergänzt hat,
+der bei jedem `useLocation()`-Wechsel `window.scrollTo(0, 0)` aufruft —
+genau die Stelle (gleiche Datei, gleicher Hook), die dieser Log am
+06.10. für eine andere, noch offene Empfehlung vorgeschlagen hatte.
+Damit ist das eine kürzlich neu gebaute, noch nicht im Detail geprüfte
+Stelle.
+
+### Reibungspunkte
+
+**1. Der empfohlene Fokus-Sprung fehlt weiterhin — und die neue Stelle,
+an der er jetzt am naheliegendsten wäre, macht genau daneben etwas
+anderes**
+
+Der Eintrag vom 06.10. zur 404-Seite hatte vorgeschlagen, bei jedem
+Routenwechsel zusätzlich `focusPageHeading()` (`src/lib/utils.ts:14-27`)
+aufzurufen, und als sinnvollsten Ort dafür explizit "`AppShell.tsx` oder
+direkt in `routes.tsx`, wo `useLocation()` bereits importiert ist"
+genannt. Der heutige Fix hat jetzt exakt diesen `useEffect` an exakt
+dieser Stelle angelegt (`src/routes.tsx:54-56`) — aber nur für
+`window.scrollTo(0, 0)`, ohne den Fokus-Aufruf. `focusPageHeading` wird
+weiterhin nur von `dialog.tsx`/`sheet.tsx` (Schließen-Fallback) und
+`MobileNav.tsx:53` (Sheet-Schließen nach Linkklick) genutzt — für jede
+Desktop-Navigation über `Sidebar.tsx` sowie jeden direkten Linkaufruf/
+Tippfehler bleibt die am 06.10. beschriebene Lücke für
+Screenreader-Nutzer:innen unverändert bestehen, inklusive der 404-Seite
+selbst. Der neue `useEffect` ist technisch der richtige Ort, erledigt
+aber nur die Hälfte der schon länger bekannten Aufgabe.
+
+*Vorschlag:* `focusPageHeading()` (bereits mit `preventScroll: true`
+implementiert, kollidiert also nicht mit dem neuen `scrollTo`) direkt
+neben `window.scrollTo(0, 0)` in denselben `useEffect` aufnehmen. Der
+separate Aufruf in `MobileNav.tsx` kann unverändert bleiben (ruft die
+Funktion nur ein zweites Mal für denselben Fall auf, keine
+Verhaltensänderung, `focusPageHeading` ist dafür bereits idempotent
+gebaut).
+
+**2. Der Sprung zum Seitenanfang passiert sofort, bevor die
+0,2s-Ausblend-Animation der alten Seite überhaupt beginnt**
+
+`PageTransition.tsx:25` lässt die verlassene Seite 0,2s lang nach oben
+ausblenden (`exit: { opacity: 0, y: -8 }`), gesteuert über
+`AnimatePresence mode="wait"` in `routes.tsx:60-61`. Der neue
+`useEffect` in `AppRoutes` reagiert aber direkt auf
+`location.pathname`, das sich schon beim Klick selbst ändert — der
+Scroll-Sprung passiert also im selben Render-Durchlauf wie die
+Navigation, nicht erst nachdem die alte Seite ausgeblendet ist. Auf
+einer langen, weit nach unten gescrollten Seite (z. B. `/entwuerfe`
+oder `/aktivitaeten`) bedeutet das: Ein Klick auf einen Sidebar-Link
+lässt den Viewport abrupt nach oben springen, während die gerade
+verlassene, jetzt fehlplatzierte alte Seite noch sichtbar ausblendet,
+statt dass der Sprung erst mit dem Erscheinen der neuen Seite
+zusammenfällt. Kein Blocker (die alte Seite verschwindet ohnehin gleich
+und ist durch die geplante Opacity-Animation schon "im Abgang"), aber
+ein kleiner visueller Ruck, der bei der sonst sehr sanften
+Seitenübergangs-Animation (0,2s, `easeInOut`) auffällt.
+
+*Vorschlag:* Keine fertige Lösung vorgeschlagen (eine Verzögerung des
+Scrolls bis zum `onExitComplete` von `AnimatePresence` wäre denkbar,
+bräuchte aber eine eigene Design-Entscheidung, ob der kurze
+Zwischenzustand — alte Seite verschwindet an alter Scrollposition,
+Sprung erst danach — tatsächlich ruhiger wirkt als heute). Als reinen
+Beobachtungspunkt für einen künftigen Lauf festgehalten.
+
+### Nicht geprüft
+Verhalten bei `prefers-reduced-motion` wurde nicht separat geprüft —
+`PageTransition.tsx` deaktiviert dann zwar die Fade-Bewegung
+(`reducedMotionVariants`, Opacity bleibt konstant 1), der
+`scrollTo`-Sprung selbst ist davon unabhängig und bliebe unverändert
+sofort sichtbar; da es ohnehin kein `scroll-behavior: smooth` im Code
+gibt (kein Treffer im gesamten `src`-Baum), ist das kein zusätzlicher,
+durch den heutigen Fix neu entstandener Unterschied. Die übrigen beiden
+heutigen IT-Chef-Fixes (`resetChat()`-Timeout-Cleanup in `useChat.ts`,
+Duffel-Proxy-Fehlerbehandlung in `client.ts`) wurden nicht mitgeprüft,
+da dieser Lauf sich laut Skill auf einen Bereich konzentrieren soll.
