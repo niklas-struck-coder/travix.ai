@@ -1,10 +1,148 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-07)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-08)
 
 Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-08: drei neue Tier-4-Kandidaten (37: Wortgrenzen-Bug im Notfall-Keyword "hilfe" des Urlaubsmodus-Concierge behoben, gleiche Fehlerklasse wie der bereits gezählte "euro"/"hi"-Fund vom 06.09.; 38: `isTripComplete()` zählt Aktivitäten jetzt mit, zeigt nicht mehr "Reiseplan vollständig" während die Checkliste direkt darunter "Aktivitäten geplant" noch offen ausweist; 39: Lösch-Dialog in `EditMode.tsx` disambiguiert gleichnamige Aktivitäten jetzt auch im sichtbaren Dialogtext, nicht nur im `aria-label`), ein Commit bewusst ausgeschlossen (Kyoto-Demo-Jahr-Korrektur — reiner Werte-Drift in fest codierten Demo-Daten ohne Ehrlichkeits-/Vertrauens-Erzählung), eine reine Testabdeckungs-Ergänzung ohne Verhaltensänderung übersprungen, Kandidatentopf von null auf **drei**, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a35e7f7`, 07.10., eigener letzter Commit)
+war bereits vollständig in `main` gemergt (`git merge-base --is-ancestor
+a35e7f7 origin/main` bestätigt das) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für bereits
+gemergte Branches vorgesehen neu von aktuellem `origin/main` (`55cec45`,
+früher Nacht-Check 08.10.) aus angelegt, statt auf dem alten Stand
+weiterzumachen.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 06.10.),
+`ZEITPLAN.md` (6.2, Zeile 2135, weiterhin `[ ]`) oder diesem Dokument.
+Keine neuen Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/` und `index.html` liefert weiterhin keinen
+Treffer), kein `changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen
+bleiben offen — die Kanal-/Mini-Changelog-Frage jetzt seit über zwölf
+Wochen.
+
+**`git log 239f79c..origin/main` zeigt die seit dem letzten Check (07.10.,
+Commit `239f79c`, Basislinie der sechsten Mini-Changelog-Ausgabe) neu
+dazugekommenen Commits**, darunter fünf mit echter Produkt-Codeänderung
+bzw. Testabdeckung (die übrigen sind Berichte, ein Daily-Status-Update und
+Merge-/Freigabe-Chef-Commits ohne eigene Codeänderung), jeder einzeln per
+`git show` sowie direkt im aktuellen Code geprüft:
+
+- **`f10c28c` (07.10., IT-Chef Auto, fünfter Lauf):** `getConciergeReply()`
+  (`src/lib/ai/mockConcierge.ts`) erkannte Notfall-Fragen bisher über
+  `/notruf|notfall|polizei|hilfe|unfall/` ohne Wortgrenze beim Keyword
+  "hilfe" — harmlose Komposita wie "Hilfestellung" oder "mithilfe" lösten
+  dadurch fälschlich die Notrufnummer-Antwort aus, obwohl niemand nach
+  einem Notfall gefragt hatte. Live im Code verifiziert
+  (`src/lib/ai/mockConcierge.ts`, Zeile 80: jetzt `\bhilfe\b`, exakt
+  dasselbe Muster wie bei den direkt benachbarten Keywords `euro`/`hi`).
+  Genau dieselbe Fehlerklasse (Wortgrenzen-Bug im Concierge) wurde am
+  06.09. bereits einmal als Tier-4-Kandidat gezählt (`bf20ae3`,
+  "euro"/"hi" matchte fälschlich mitten in "Europa"/"Sushi") — hier nur
+  ein weiteres Keyword in derselben Funktion, gleiche Einstufung. Eine
+  Nutzerin, die im Urlaubsmodus-Concierge nach Packhilfe fragt, bekam
+  bisher ungefragt und ohne jeden Bezug die Notrufnummer angezeigt.
+  **Siebenunddreißigster Tier-4-Kandidat.**
+- **`6607950` (08.10., IT-Chef Auto):** Der Lösch-Bestätigungsdialog in
+  `EditMode.tsx` (Aktivität im Bearbeiten-Dialog entfernen) zeigte bei
+  gleichnamigen Aktivitäten (z. B. zwei "Spaziergang"-Einträgen)
+  weiterhin den mehrdeutigen rohen Namen im sichtbaren Dialogtext, obwohl
+  genau dieselbe Liste in ihren `aria-label`s bereits seit dem 17.09.
+  disambiguiert ist ("Spaziergang (Eintrag 2)"). Live im Code verifiziert
+  (`src/components/trip/EditMode.tsx`, Zeile 28 ff.: neue
+  `getActivityLabel()`-Hilfsfunktion, von Kartenliste und Dialogtext
+  gemeinsam genutzt). Exakt dieselbe Fundgruppe wie Kandidat 29 (01.10.,
+  `Reiseentwuerfe.tsx`-Dialogtexte) — dort wurde der sichtbare
+  Dialogtext disambiguiert, hier passiert das Gleiche für Aktivitäten:
+  eine Nutzerin mit zwei gleichnamigen Aktivitäten konnte beim Löschen
+  nicht sicher wissen, welche der beiden gemeint ist. **Achtunddreißigster
+  Tier-4-Kandidat.**
+- **`1f6cb32` (08.10., IT-Chef Auto, zweiter Lauf):** `isTripComplete()`
+  (`src/lib/trip/tripStorage.ts`) zählte Aktivitäten bisher nicht zu den
+  Vollständigkeits-Feldern — `Buchung.tsx` konnte deshalb "Reiseplan
+  vollständig" samt Urlaubsmodus-CTA anzeigen, während die
+  `ChecklistPanel`-Checkliste direkt darunter "Aktivitäten geplant"
+  weiterhin als offenen Punkt auswies, obwohl beide Anzeigen über
+  denselben Trip sprechen. Live im Code verifiziert
+  (`src/lib/trip/tripStorage.ts`, Zeile 85-93: `trip.activities.length >
+  0` jetzt Teil der Prüfung, wie `checklistRules.ts`/`calculateProgress.ts`
+  es bereits tun). Eine direkte Widerspruchs-Erzählung — zwei
+  nebeneinander sichtbare Elemente derselben Seite behaupteten bisher
+  Gegenteiliges über denselben Reiseplan, passt klar in die etablierte
+  Ehrlichkeits-/Vertrauens-Fundgruppe (vgl. Kandidat 36, `resetChat()`
+  zeigte ebenfalls einen in sich widersprüchlichen Zustand).
+  **Neununddreißigster Tier-4-Kandidat.**
+- **`6f05531` (08.10., IT-Chef Auto, dritter Lauf):** Der fest codierte
+  Kyoto-Demo-Reiseentwurf zeigte in `Dashboard.tsx` und
+  `Reiseentwuerfe.tsx` bisher "3. – 10. März 2027", während
+  `MeineReisen.tsx`/`Kalender.tsx` für denselben Demo-Trip "3. – 10. März
+  2026" zeigen. Live im Code verifiziert (beide Stellen jetzt auf 2026
+  korrigiert). **Bewusst nicht** als Tier-4-Kandidat aufgenommen: reiner
+  Werte-Drift zwischen fest codierten Demo-/Platzhalterdaten, keine
+  Ehrlichkeits-/Vertrauens-Erzählung — hier wurde nichts versprochen und
+  nicht eingehalten, keine echte (Nutzer-)Information war falsch oder
+  verschwiegen, nur ein kopierter Beispielwert stimmte an zwei von vier
+  Stellen nicht mit den anderen beiden überein. Gleiche Einstufungslogik
+  wie frühere reine Konsistenz-/Stabilitäts-Fixes ohne Ehrlichkeits-Bezug
+  (z. B. React-Key-Stabilität vom 05.10., Scroll-Position-Reset vom
+  07.10.).
+- **`26f31ba` (07.10., IT-Chef Auto, vierter Lauf):** reine
+  Testabdeckungslücke für `design-tokens.ts` geschlossen, laut Commit
+  keine Verhaltensänderung an bestehendem Code. **Kein Kandidat** — exakt
+  dieselbe Ausschlussgruppe wie jede bisherige reine Testdatei-Ergänzung
+  (z. B. `PageHeader.test.tsx`, `utils.test.ts`).
+
+**Kandidatentopf:** vom sechsten Mini-Changelog-Reset (07.10.) auf null
+gestartet, jetzt 37-39 neu dazugekommen — der aktive Topf steht damit bei
+**drei**, weit unter der etablierten Achter-Schwelle. Keine siebte
+Mini-Changelog-Ausgabe heute; der nächste Lauf sammelt weiter.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: alle
+drei neuen Kandidaten stammen aus einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commits; der
+Ausschluss der Kyoto-Jahreskorrektur und der Testdatei-Ergänzung wendet
+nur bereits etablierte Kriterien konsequent an (kein Live-Vorgang,
+keine neue inhaltliche Entscheidung). Keine offene Positionierungs-
+Grundsatzfrage — diese Übersichts-Pflege wendet nur dieselbe, bereits in
+`MARKENDESIGN.md`/`content-plan.md` festgelegte Positionierung an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine siebte Mini-Changelog-Ausgabe — Kandidatentopf steht bei drei,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück — bleibt an die seit
+  20.08. geltende Selbstbeschränkung gebunden.
+- `ZEITPLAN.md` bewusst nicht angefasst — dieses Update betrifft nur die
+  laufende Kandidaten-/Freigabe-Verwaltung, kein neues eigenständiges
+  Content-Stück und keine neue Mini-Changelog-Ausgabe, die dort einen
+  eigenen Eintrag bräuchte.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/ai/mockConcierge.ts`, `src/components/trip/EditMode.tsx` und
+`src/lib/trip/tripStorage.ts` direkt im aktuellen Code gelesen, nicht nur
+aus Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 08.10. (Prüfung
+  der vier Fragen, fünf neue Commits einzeln geprüft, drei als
+  Tier-4-Kandidaten 37/38/39, ein Commit bewusst ausgeschlossen, eine
+  reine Testdatei-Ergänzung übersprungen, Kandidatentopf-Stand auf "drei"
+  gesetzt, Datum im Titel auf 08.10. gesetzt).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-07: zwei neue Tier-4-Kandidaten (35: Duffel-Proxy zeigt bei Fehler-Status mit Nicht-JSON-Body jetzt die treffende Status-Meldung statt einer generischen Netzwerkmeldung; 36: `resetChat()` räumt den noch laufenden Antwort-Timeout jetzt ab, kein veralteter Chat-Inhalt mehr nach einem schnellen Reset), ein Commit bewusst ausgeschlossen (Scroll-Position-Reset — reine SPA-Standard-UX ohne Ehrlichkeits-/Vertrauens-Erzählung), Kandidatentopf von sieben auf **neun** — damit über der Achter-Schwelle: sechste Mini-Changelog-Ausgabe geschrieben (siehe `marketing/mini-changelog-konzept.md`), Kandidatentopf danach wieder leer, alle vier Fragen weiterhin offen
 

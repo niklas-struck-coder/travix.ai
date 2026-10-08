@@ -4,6 +4,110 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-08
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `a35e7f7`, 07.10., eigener letzter Commit)
+war bereits vollständig in `main` gemergt (`git merge-base
+--is-ancestor a35e7f7 origin/main` bestätigt das) — der Branch war also
+nur noch veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für
+bereits gemergte Branches vorgesehen neu von aktuellem `origin/main`
+(`55cec45`, früher Nacht-Check 08.10.) aus angelegt, statt auf dem alten
+Stand weiterzumachen.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für
+das Mini-Changelog-Format), kein neues eigenständiges Content-Stück und
+keine neue Mini-Changelog-Ausgabe (Kandidatentopf erreicht die
+Achter-Schwelle nicht).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 07.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 06.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 239f79c..origin/main` geprüft (Basislinie: der eigene
+Stand vom 07.10., auf dem die sechste Mini-Changelog-Ausgabe aufgebaut
+hat): fünf Commits mit echter Produkt-Codeänderung bzw. Testabdeckung
+(die übrigen sind Berichte, ein Daily-Status-Update und Merge-/
+Freigabe-Chef-Commits), jeder einzeln per `git show` und direkt im
+aktuellen Code verifiziert:
+
+- `f10c28c` (07.10., IT-Chef Auto, fünfter Lauf): Wortgrenzen-Bug im
+  Notfall-Keyword "hilfe" des Urlaubsmodus-Concierge behoben — exakt
+  dieselbe Fehlerklasse wie der bereits am 06.09. gezählte "euro"/"hi"-
+  Fund. Live im Code bestätigt (`src/lib/ai/mockConcierge.ts:80`,
+  `\bhilfe\b`). **37. Tier-4-Kandidat.**
+- `6607950` (08.10., IT-Chef Auto): Lösch-Dialog in `EditMode.tsx`
+  disambiguiert gleichnamige Aktivitäten jetzt auch im sichtbaren
+  Dialogtext, nicht mehr nur im `aria-label`. Live im Code bestätigt
+  (`src/components/trip/EditMode.tsx`, neue `getActivityLabel()`).
+  Gleiche Fundgruppe wie Kandidat 29 (01.10., Reiseentwürfe-Dialogtexte).
+  **38. Tier-4-Kandidat.**
+- `1f6cb32` (08.10., IT-Chef Auto, zweiter Lauf): `isTripComplete()`
+  zählt Aktivitäten jetzt mit — zeigt nicht mehr "Reiseplan vollständig"
+  samt Urlaubsmodus-CTA, während die Checkliste direkt darunter
+  "Aktivitäten geplant" noch als offen ausweist. Live im Code bestätigt
+  (`src/lib/trip/tripStorage.ts:85-93`). Direkter Widerspruch zweier
+  nebeneinander sichtbarer Elemente über denselben Reiseplan, passt in
+  die etablierte Ehrlichkeits-/Vertrauens-Fundgruppe. **39.
+  Tier-4-Kandidat.**
+- `6f05531` (08.10., IT-Chef Auto, dritter Lauf): Kyoto-Demo-Reiseentwurf
+  zeigte in `Dashboard.tsx`/`Reiseentwuerfe.tsx` "2027" statt des in
+  `MeineReisen.tsx`/`Kalender.tsx` für denselben Demo-Trip gezeigten
+  "2026". Live im Code bestätigt (beide Stellen jetzt auf 2026
+  korrigiert). Bewusst nicht aufgenommen — reiner Werte-Drift in fest
+  codierten Demo-Daten, keine Ehrlichkeits-/Vertrauens-Erzählung.
+- `26f31ba` (07.10., IT-Chef Auto, vierter Lauf): reine
+  Testabdeckungslücke für `design-tokens.ts` geschlossen, keine
+  Verhaltensänderung. Kein Kandidat, gleiche Ausschlussgruppe wie jede
+  bisherige reine Testdatei-Ergänzung.
+
+**Kandidatentopf:** vom sechsten Mini-Changelog-Reset (07.10.) auf null
+gestartet, 37-39 neu dazugekommen — Topf steht jetzt bei **drei**, weit
+unter der Achter-Schwelle. Keine siebte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung der
+bestehenden Freigabe-Übersicht, kein Live-Vorgang — nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: alle
+drei neuen Kandidaten stammen aus einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commits; die
+beiden Ausschlüsse wenden nur bereits etablierte Kriterien an. Klar
+genug beschrieben, keine offene Positionierungs-Grundsatzfrage — dieser
+Lauf wendet nur dieselbe, bereits in `MARKENDESIGN.md` festgelegte
+Positionierung und denselben Tonfall wie die bisherigen Ausgaben an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine siebte Mini-Changelog-Ausgabe — Kandidatentopf steht bei drei,
+  weit unter dem etablierten Maßstab (acht).
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle drei fließen stattdessen in die laufende
+  Mini-Changelog-Pflege.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/lib/ai/mockConcierge.ts`, `src/components/trip/EditMode.tsx` und
+`src/lib/trip/tripStorage.ts` direkt im aktuellen Code gelesen, nicht nur
+aus Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 08.10. (Prüfung
+  der vier Fragen, fünf neue Commits einzeln geprüft, drei als
+  Tier-4-Kandidaten 37/38/39, ein Commit bewusst ausgeschlossen, eine
+  reine Testdatei-Ergänzung übersprungen, Kandidatentopf-Stand auf "drei"
+  gesetzt, Datum im Titel aktualisiert).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-07
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
