@@ -78,11 +78,19 @@ export function updateStoredTrip(patch: Partial<TripDraft>): (StoredChatState & 
   return { ...updated, saved }
 }
 
-// activities is a list (not a slot-filling field), so it's excluded from
-// the completeness/emptiness checks below — an empty array is falsy here,
-// not truthy like Boolean([]) would normally treat it.
+// Same field catalog as calculateProgress.ts / checklistRules.ts
+// (AUTO_CHECKLIST_ITEMS) — activities counts here too, so this can't say
+// "vollständig" on Buchung.tsx while the checklist right below it still
+// shows "Aktivitäten geplant" as an open item.
 export function isTripComplete(trip: TripDraft): boolean {
-  return Boolean(trip.destination && trip.transportMode && trip.dates && trip.budget && trip.accommodation)
+  return Boolean(
+    trip.destination &&
+      trip.transportMode &&
+      trip.dates &&
+      trip.budget &&
+      trip.accommodation &&
+      trip.activities.length > 0,
+  )
 }
 
 // `activities` is cast, not validated, when a stored trip is loaded from

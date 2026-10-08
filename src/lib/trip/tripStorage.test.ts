@@ -3,6 +3,7 @@ import {
   CHAT_STORAGE_KEY,
   clearStoredChat,
   hasTripData,
+  isTripComplete,
   loadStoredChat,
   saveStoredChat,
   updateStoredTrip,
@@ -261,5 +262,32 @@ describe('hasTripData', () => {
     const trip = { ...emptyTrip, activities: [{ id: '1', name: 'Museum', price: null }] }
 
     expect(hasTripData(trip)).toBe(true)
+  })
+})
+
+describe('isTripComplete', () => {
+  const filledExceptActivities = {
+    ...emptyTrip,
+    destination: 'Lissabon',
+    transportMode: 'flight' as const,
+    dates: '12.–19. Sept.',
+    budget: '1.500 €',
+    accommodation: 'Hotel Lissabon',
+  }
+
+  it('is not complete when every slot is filled but no activity is planned', () => {
+    expect(isTripComplete(filledExceptActivities)).toBe(false)
+  })
+
+  it('is complete once an activity is added, matching calculateProgress/checklistRules', () => {
+    const trip = { ...filledExceptActivities, activities: [{ id: '1', name: 'Museum', price: '10 €' }] }
+
+    expect(isTripComplete(trip)).toBe(true)
+  })
+
+  it('is not complete when a non-activity slot is still missing', () => {
+    const trip = { ...filledExceptActivities, activities: [{ id: '1', name: 'Museum', price: '10 €' }], budget: '' }
+
+    expect(isTripComplete(trip)).toBe(false)
   })
 })

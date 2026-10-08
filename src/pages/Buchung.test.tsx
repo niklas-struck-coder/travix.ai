@@ -253,4 +253,24 @@ describe('Buchung – Reise-Checkliste', () => {
     )
     expect(screen.getByText('1/13 erledigt')).toBeInTheDocument()
   })
+
+  it('does not claim "Reiseplan vollständig" while the checklist right below still shows an open item', () => {
+    seedStoredChat({
+      transportMode: 'train',
+      dates: '12.–19. Sept.',
+      budget: '1.500 €',
+      accommodation: 'Hotel Lissabon',
+      // activities deliberately left empty — the checklist's "Aktivitäten
+      // geplant" row stays unchecked, so the page-level badge/CTA must agree.
+    })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('In Planung')).toBeInTheDocument()
+    expect(screen.queryByText('Reiseplan vollständig')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Urlaubsmodus aktivieren' })).not.toBeInTheDocument()
+  })
 })

@@ -16964,3 +16964,84 @@ Tests — alle grün, davon 1 neuer Test).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-08, zweiter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Frischer, isolierter Checkout. `it-chef/auto` identisch
+mit `origin/it-chef/auto` (letzter Commit: der erste Lauf von heute,
+EditMode.tsx-Dialogtext-Fix), `main` weiterhin unverändert Vorfahre —
+kein Merge nötig.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit der
+vollständigen Liste der bereits ausgeschöpften Fund-Kategorien (siehe
+erster Lauf heute) beauftragt, gezielt nach NEUEN Kategorien zu suchen
+(Logikfehler, inkonsistentes Verhalten zwischen strukturell ähnlichen
+Komponenten/Seiten, fehlende Formular-Validierung, Typos,
+Formatierungs-Inkonsistenzen, Accessibility-Lücken abseits der bereits
+gefundenen, Race-Conditions). Ergebnis: ein konkreter, live
+nachvollziehbarer Fund in `tripStorage.ts`/`checklistRules.ts`.
+
+**Ausgewählter Punkt:** `isTripComplete()` (`tripStorage.ts:84-86`, vor
+dem Fix) prüfte laut eigenem Kommentar bewusst nur Transport/Reisedaten/
+Budget/Unterkunft und klammerte `activities` ausdrücklich aus. Die
+"automatisch erkannten" Punkte in `checklistRules.ts`
+(`AUTO_CHECKLIST_ITEMS`/`isAutoItemChecked()`, Grundlage für 6.9) sowie
+`calculateProgress.ts` (7.1) zählen `activities` dagegen als
+gleichwertigen fünften Punkt mit — zwei von drei Vollständigkeits-
+Berechnungen für denselben Trip stimmten bereits überein, nur
+`isTripComplete()` war der Ausreißer.
+
+**Warum real statt theoretisch:** `Buchung.tsx` rendert beide Anzeigen
+direkt übereinander: das Badge "Reiseplan vollständig"/"In Planung"
+(Zeile 204, aus `complete = isTripComplete(trip)`) sowie direkt darunter
+`<ChecklistPanel trip={trip} />` (Zeile 279), zusätzlich gated durch
+dasselbe `complete` die "Bereit für die Reise? Urlaubsmodus
+aktivieren"-Karte (Zeile 281). Live reproduzierbar: im KI-Chat Transport,
+Reisedaten, Budget und Unterkunft ausfüllen, aber die
+Aktivitäten-Nachfrage überspringen, dann `/buchung` öffnen — Badge zeigt
+"Reiseplan vollständig" und die Urlaubsmodus-Karte erscheint, während die
+Checkliste direkt darunter "Aktivitäten geplant" weiterhin unabgehakt mit
+< 100 % Fortschritt zeigt. Ein bereits am 15./16.09. dokumentierter
+Freigabe-Chef-Lauf hatte genau diese Feld-Abweichung schon einmal
+bemerkt, aber als reine Design-Entscheidung eingestuft, weil "beide
+Anzeigen nie gleichzeitig auf derselben Seite erscheinen" — das trifft auf
+den aktuellen Code nicht zu, beide Elemente sitzen seit mindestens dieser
+Dateiversion unverändert nebeneinander in `Buchung.tsx`.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: mechanische Angleichung von `isTripComplete()`
+an ein in diesem Repo für dieselben Felder bereits zweifach etabliertes
+Muster (`checklistRules.ts`/`calculateProgress.ts`), keine neue
+Design-Entscheidung über die bestehende Mehrheit hinaus. Klar genug
+beschrieben (exakte Datei/Zeilen, exakter Widerspruch). Objektiv
+prüfbar: neue Testfälle zuerst rot verifiziert, dann grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/lib/trip/tripStorage.ts`: `isTripComplete()` prüft jetzt
+  zusätzlich `trip.activities.length > 0`, exakt dasselbe Feld-Set wie
+  `AUTO_CHECKLIST_ITEMS`/`calculateProgress.ts`. Kommentar entsprechend
+  korrigiert.
+- Drei neue Regressionstests in `tripStorage.test.ts` (vollständig außer
+  Aktivitäten → `false`; mit Aktivität ergänzt → `true`; ein anderes Feld
+  fehlt weiterhin → `false`) — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `tripStorage.ts`) reproduzierbar rot
+  verifiziert.
+- Ein neuer Test in `Buchung.test.tsx`, der den beschriebenen
+  Seiten-Widerspruch direkt prüft: Badge zeigt "In Planung" statt
+  "Reiseplan vollständig", keine "Urlaubsmodus aktivieren"-Karte, solange
+  nur die Aktivität fehlt — ebenfalls vor dem Fix reproduzierbar rot
+  verifiziert.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 6) sowie
+  `tasks/tasks-prd-travix-platform.md` (Checkbox 6.9, Zusatz) um den
+  entsprechenden Eintrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62
+Testdateien, 422 Tests — alle grün, davon 4 neue Tests), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

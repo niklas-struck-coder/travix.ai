@@ -1237,6 +1237,39 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   rot verifiziert). Der ursprüngliche Auto-Fix-PR #19 bleibt als überholt
   zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen werden, wie
   in `reports/it-chef.md` bereits für andere Altbranches vorgeschlagen).
+  Vom autonomen IT-Chef-Lauf am 08.10. (zweiter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen
+  Widerspruch zwischen zwei Vollständigkeits-Berechnungen für denselben
+  Trip behoben: `isTripComplete()` (`tripStorage.ts`) prüfte Transport/
+  Reisedaten/Budget/Unterkunft, klammerte `activities` aber laut eigenem
+  Kommentar bewusst aus — während `AUTO_CHECKLIST_ITEMS`/
+  `isAutoItemChecked()` (`checklistRules.ts`, 6.9) sowie `calculateProgress.ts`
+  (7.1) `activities` als gleichwertigen fünften Punkt mitzählen. Beide
+  Anzeigen erscheinen auf `Buchung.tsx` direkt übereinander: Waren
+  Transport/Daten/Budget/Unterkunft gesetzt, aber noch keine Aktivität
+  geplant, zeigte das Badge oben "Reiseplan vollständig" (plus die
+  "Bereit für die Reise? Urlaubsmodus aktivieren"-Karte), während die
+  `ChecklistPanel`-Checkliste direkt darunter "Aktivitäten geplant"
+  weiterhin unabgehakt mit < 100 % Fortschritt zeigte — ein für
+  Nutzer:innen live sichtbarer Widerspruch auf ein und derselben Seite.
+  Dieselbe Beobachtung war bereits am 15./16.09. als reine
+  Design-Abweichung eingestuft worden ("beide Anzeigen erscheinen nie
+  gleichzeitig auf derselben Seite") — das stimmt inzwischen nicht mehr
+  (oder war damals schon falsch), beide Elemente sitzen unverändert
+  nebeneinander in `Buchung.tsx`. Fix: `isTripComplete()` zählt
+  `activities.length > 0` jetzt als sechste Bedingung mit, exakt
+  dasselbe Feld-Set wie in `checklistRules.ts`/`calculateProgress.ts` —
+  mechanische Angleichung an das dort bereits etablierte Muster (2 von 3
+  Berechnungen stimmten bereits überein), keine neue Design-Entscheidung.
+  Drei neue Regressionstests in `tripStorage.test.ts`
+  (vollständig außer Aktivitäten → `false`; mit Aktivität → `true`;
+  fehlendes anderes Feld bleibt weiterhin `false`) sowie ein neuer Test in
+  `Buchung.test.tsx`, der genau den beschriebenen Seiten-Widerspruch prüft
+  (Badge "In Planung" statt "Reiseplan vollständig", keine
+  "Urlaubsmodus aktivieren"-Karte, solange die Checkliste noch einen
+  offenen Punkt zeigt) — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `tripStorage.ts`) für beide Testdateien
+  reproduzierbar rot verifiziert.
 - ⚪ Phase 2 Auth/Backend — nicht begonnen, blockiert von Backend-Entscheidung
 - 🟡 Phase 7 Trip-Lifecycle — Meine-Reisen mit Demo-Daten (7.5),
   `calculateProgress.ts` (7.1) und die Entwürfe-Seite (7.2) stehen;
