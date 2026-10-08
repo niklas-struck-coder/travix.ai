@@ -99,7 +99,7 @@ const initialDrafts: Draft[] = [
       destination: 'Kyoto',
       transportMode: null,
       budget: null,
-      dates: '3. – 10. März 2027',
+      dates: '3. – 10. März 2026',
       accommodation: null,
       activities: [],
     },

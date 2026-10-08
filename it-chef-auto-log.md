@@ -17045,3 +17045,67 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-08, dritter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Kein offener Checklisten-Punkt aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`, sondern ein über einen
+eigens dafür beauftragten Explore-Agenten gefundener, eigenständiger Bug:
+ein Datums-Drift im Kyoto-Demo-Reiseentwurf.
+
+**Befund:** Derselbe Demo-Reiseentwurf (Kyoto, 3.-10. März) taucht in vier
+Dateien auf. `Dashboard.tsx` (Zeile 11-14) hält ausdrücklich im Kommentar
+fest, dass es dieselbe Demo-"Welt" wie `MeineReisen.tsx`/`Reiseentwuerfe.tsx`
+wiederverwendet, "not a separate invented dataset". `MeineReisen.tsx:21` und
+`Kalender.tsx:24` zeigen dafür Jahr **2026** — `Kalender.tsx` zusätzlich mit
+maschinenlesbaren `startDate`/`endDate` ('2026-03-03'/'2026-03-10'), die 2026
+als kanonischen Wert bestätigen. `Dashboard.tsx:30` und
+`Reiseentwuerfe.tsx:102` zeigten dagegen bisher **2027** — ein reiner
+Werte-Drift zwischen den Dateien, der dem im Code selbst festgehaltenen
+Anspruch ("reuses those exact demo values") widerspricht.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung: der
+Code selbst erklärt den Anspruch auf identische Werte, zwei von vier Stellen
+stimmen bereits überein (inkl. der einzigen maschinenlesbaren Form in
+`Kalender.tsx`) — reine mechanische Angleichung an den bereits etablierten,
+mehrheitlichen Wert, keine neue Design-Entscheidung. Klar genug beschrieben
+(exakte Datei/Zeilen, exakter Widerspruch zum eigenen Code-Kommentar).
+Objektiv prüfbar: bestehender Test sperrte bereits den falschen Wert fest,
+reproduzierbar rot vor dem Fix, grün danach.
+
+Explizit nicht verwechselt mit dem bereits bekannten, bewusst unangetasteten
+Fall in `MeineReisen.tsx` (Reise-Status `upcoming`/`past` als festes Literal,
+laut `reports/it-chef.md` eine bewusste Produktentscheidung) — dort geht es
+um einen Status, hier um ein reines Datums-Literal ohne jede
+Design-Implikation.
+
+**Umgesetzt:**
+- `src/pages/Dashboard.tsx:30`: `'3. – 10. März 2027'` → `'3. – 10. März
+  2026'`.
+- `src/pages/Reiseentwuerfe.tsx:102`: `'3. – 10. März 2027'` → `'3. – 10.
+  März 2026'`.
+- `src/pages/Reiseentwuerfe.test.tsx:255`: bestehende Assertion von
+  `'3. – 10. März 2027'` auf `'3. – 10. März 2026'` angepasst.
+- `Dashboard.test.tsx` prüfte den Datums-String nicht direkt, keine Änderung
+  nötig dort.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 7) um den entsprechenden Eintrag
+  ergänzt.
+
+**Geprüft:**
+- `npm ci` (frischer Checkout).
+- `npx tsc -b` → kein Typfehler.
+- `npm run lint` → 0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+  Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx` (nicht durch diesen
+  Change verursacht).
+- `npx vitest run` → 62 Testdateien, 422 Tests, alle grün.
+- Vor dem Fix durch temporäres Zurücknehmen beider Quelländerungen (`git
+  stash` nur `Dashboard.tsx`/`Reiseentwuerfe.tsx`) reproduzierbar rot
+  verifiziert: `Reiseentwuerfe.test.tsx` schlug mit genau der erwarteten
+  Fehlermeldung (gesuchter Text '3. – 10. März 2026' nicht im Dialog
+  gefunden) fehl. Danach Fix wiederhergestellt, erneut grün verifiziert.
+- `npm run build` (`tsc -b` + `vite build`) → kein Typfehler, Build
+  erfolgreich, unveränderte Chunk-Size-Warnung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

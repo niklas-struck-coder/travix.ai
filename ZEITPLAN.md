@@ -1482,6 +1482,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   sofort als erledigt (URL bereinigt), statt ihn nur zu ignorieren. Neuer
   Regressionstest in `KiChat.test.tsx` (Reset nach laufender Planung mit
   noch gesetztem Parameter sendet die veraltete Destination nicht erneut).
+  Vom autonomen IT-Chef-Lauf am 08.10. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen
+  Datums-Widerspruch im Kyoto-Demo-Reiseentwurf behoben: Derselbe
+  Demo-Entwurf (Kyoto, 3.-10. März) steht laut eigenem Kommentar in
+  `Dashboard.tsx` ("Same demo 'world' as the other trip-lifecycle pages
+  (MeineReisen.tsx, Reiseentwuerfe.tsx, …) … reuses those exact demo
+  values") für dieselben Werte wie `MeineReisen.tsx`/`Kalender.tsx` — dort
+  aber mit Jahr 2026 (`Kalender.tsx` zusätzlich mit maschinenlesbaren
+  `startDate`/`endDate` '2026-03-03'/'2026-03-10', die 2026 als
+  kanonischen Wert bestätigen), während `Dashboard.tsx` und
+  `Reiseentwuerfe.tsx` bisher 2027 zeigten — ein reiner Werte-Drift
+  zwischen vier Dateien, kein Designunterschied (anders als der bereits
+  bekannte, bewusst unangetastete Status-Literal in `MeineReisen.tsx`).
+  Fix: beide abweichenden Stellen (`Dashboard.tsx:30`,
+  `Reiseentwuerfe.tsx:102`) von '3. – 10. März 2027' auf '3. – 10. März
+  2026' korrigiert, mechanische Angleichung an die bereits dreifach
+  etablierten Werte, keine neue Design-Entscheidung. Bestehender Test in
+  `Reiseentwuerfe.test.tsx:255` entsprechend angepasst — vor dem Fix durch
+  temporäres Zurücknehmen beider Quelländerungen (`git stash` nur
+  `Dashboard.tsx`/`Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

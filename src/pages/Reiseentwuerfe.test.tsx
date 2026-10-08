@@ -252,7 +252,7 @@ describe('Reiseentwuerfe', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Kyoto Details ansehen' }))
     const dialog = within(screen.getByRole('dialog'))
-    expect(dialog.getByText('3. – 10. März 2027')).toBeInTheDocument()
+    expect(dialog.getByText('3. – 10. März 2026')).toBeInTheDocument()
     expect(dialog.getByText('Noch kein Transport ausgewählt')).toBeInTheDocument()
     expect(dialog.getByText('Noch kein Budget angegeben')).toBeInTheDocument()
     expect(dialog.getByText('Noch keine Unterkunft ausgewählt')).toBeInTheDocument()
