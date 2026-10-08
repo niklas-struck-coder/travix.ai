@@ -6138,3 +6138,55 @@ kein separater Reset nötig.
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-08, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (deckungsgleich mit `main`
+  nach dem früheren Nacht-Check desselben Tages, Commit `55cec45`).
+  Planmäßig übersprungen, kein neuer Stand.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`cfd3b66`, 08.10.).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`44cb938`, 08.10.).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur
+Log-Eintrag geglaubt): Ändert nur `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — drei neue Tier-4-Kandidaten
+(37: Wortgrenzen-Fix beim Notfall-Keyword "hilfe" im Concierge; 38:
+`isTripComplete()` zählt Aktivitäten jetzt mit; 39: Lösch-Dialog in
+`EditMode.tsx` disambiguiert gleichnamige Aktivitäten jetzt auch im
+sichtbaren Dialogtext), Kandidatentopf von null auf drei, keine neue
+Mini-Changelog-Ausgabe (Schwelle acht nicht erreicht). Alle drei
+referenzierten Code-Stellen selbst im aktuellen Code gegengeprüft
+(`mockConcierge.ts:80` → `\bhilfe\b`; `tripStorage.ts:85-93` →
+`activities.length > 0` Teil der Prüfung; `EditMode.tsx` →
+`getActivityLabel()` existiert und wird im Lösch-Dialog verwendet) —
+alle drei Behauptungen stimmen mit dem Code überein. Keine erfundenen
+Kennzahlen, kein Hinweis auf tatsächliches Posten/Versenden, reiner
+Markdown-Entwurf, vollständig und kohärent formuliert.
+→ **Passt, nach `main` gemergt** (Fast-Forward `55cec45..cfd3b66`).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen): Ändert nur
+`support-chef-auto-log.md` — neuer Analyse-Eintrag zu `EditMode.tsx`:
+die heute von IT-Chef eingeführte `getActivityLabel()`-Disambiguierung
+wird nur für aria-labels und den Lösch-Dialog verwendet, die sichtbare
+Zeile selbst (`<span>{activity.name}</span>`) zeigt weiterhin den
+rohen, nicht disambiguierten Namen. Stichprobe im Code bestätigt:
+`src/components/trip/EditMode.tsx` zeigt exakt `{activity.name}` in der
+Listenzeile, während `activityLabel` nur in den beiden `aria-label`s
+und im Dialogtext verwendet wird — Fund ist nachvollziehbar, Datei/Zeile
+stimmen. Reine Analyse ohne Code-Änderung.
+→ **Passt, nach `main` gemergt** (Merge-Commit, da `main` durch den
+vorherigen Merge inzwischen divergiert war).
+
+**Ergebnis:** `it-chef/auto` planmäßig übersprungen (kein neuer Stand).
+`marketing-chef/auto` und `support-chef/auto` geprüft, unabhängig
+verifiziert, beide gemergt.
+
+**Hinweis zum Ablauf:** Ein erster Versuch, beide Merges in einem
+zusammengesetzten Befehl (`git merge ... && git merge ...`) auszuführen,
+wurde von der Auto-Mode-Berechtigungsprüfung abgelehnt ("Merge Without
+Review"). Einzeln ausgeführt liefen beide Merges ohne weitere Rückfrage
+durch.
+
+**Info an Ni:** Nein — beide Prüfungen sauber, keine Auffälligkeit, die
+seine Aufmerksamkeit bräuchte.
