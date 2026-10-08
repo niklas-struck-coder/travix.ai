@@ -82,7 +82,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
                 const activityLabel = getActivityLabel(activity, activities)
                 return (
                   <li key={activity.id} className="flex items-center gap-2">
-                    <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
+                    <span className="flex-1 truncate text-sm text-foreground">{activityLabel}</span>
                     <Input
                       aria-label={`Preis für ${activityLabel}`}
                       className="w-24"
