@@ -786,6 +786,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
   reproduzierbar rot verifiziert (`searchFlights` wurde tatsächlich mit
   `origin: 'LIS', destination: 'LIS'` aufgerufen).
+  Vom autonomen IT-Chef-Lauf am 08.10. (fünfter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (08.10., Fund 1) gemeldeten Fund behoben: Die
+  "Start = Ziel"-Fehlermeldung im Flugsuche-Teilpfad des Chats
+  (`useChat.ts`, direkt neben dem am 05.10. ergänzten `sameAirport`-Guard)
+  antwortete nur mit "Start und Ziel dürfen nicht gleich sein — welcher
+  Flughafen ist dein Abflugort?", ohne das gerade bestätigte Reiseziel zu
+  nennen — anders als die unmittelbar danach folgende "searching"-Meldung
+  in derselben Funktion, die bereits `known.name` einbaut ("… nach
+  ${known.iataCode} (${known.name})"). Fix: `known.name` (zu diesem
+  Zeitpunkt bereits berechnet, keine neue Abfrage nötig) in die
+  Fehlermeldung übernommen ("… dein Abflugort nach ${known.name}?"),
+  mechanische Übernahme des im selben Block bereits etablierten Musters,
+  keine neue Design-Entscheidung. Bestehender Regressionstest in
+  `useChat.test.ts` um eine Prüfung auf den jetzt enthaltenen Zielnamen
+  ergänzt — vor dem Fix durch temporäres Zurücknehmen der Quelländerung
+  (`git stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Meldung
+  enthielt "Lissabon" nicht).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

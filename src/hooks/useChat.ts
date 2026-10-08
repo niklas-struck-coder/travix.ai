@@ -258,7 +258,7 @@ export function useChat(speechEnabled: boolean) {
         if (known && origin === known.iataCode) {
           setMessages((prev) => [
             ...prev,
-            makeMessage('assistant', 'Start und Ziel dürfen nicht gleich sein — welcher Flughafen ist dein Abflugort?'),
+            makeMessage('assistant', `Start und Ziel dürfen nicht gleich sein — welcher Flughafen ist dein Abflugort nach ${known.name}?`),
           ])
           setAvatarState('thinking')
           setIsThinking(false)

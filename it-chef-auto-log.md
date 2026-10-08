@@ -17175,3 +17175,57 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-08 (fünfter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Fund 1 aus `reports/it-chef.md` (08.10.) — die
+"Start = Ziel"-Fehlermeldung im Flugsuche-Teilpfad des Chats nennt den
+Zielort nicht.
+
+**Befund:** In `useChat.ts` (`sendMessage()`, Zweig "Bearbeiten" →
+Transportmittel → Flug → Abflug-IATA-Code) antwortet der Chat bei
+identischem Abflug- und Zielflughafen (`sameAirport`-Guard, ergänzt am
+05.10.) nur mit "Start und Ziel dürfen nicht gleich sein — welcher
+Flughafen ist dein Abflugort?", ohne das bereits bekannte Reiseziel zu
+nennen. Die unmittelbar danach im selben Funktionszweig stehende
+"searching"-Meldung baut an derselben Stelle bereits `known.name` ein
+("… nach ${known.iataCode} (${known.name})") — nur die Fehlermeldung
+direkt daneben hatte dieses Muster nicht übernommen, obwohl `known`
+(und damit `known.name`) zum Zeitpunkt der Fehlermeldung bereits
+berechnet vorliegt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: `known.name` liegt bereits vor, keine neue
+Abfrage/Herleitung nötig — mechanische Übernahme des im selben
+Funktionszweig unmittelbar danebenstehenden, bereits etablierten
+Musters, keine neue Design-Entscheidung über die reine Ergänzung hinaus.
+Klar genug beschrieben (exakte Datei/Zeile, exakter Fehlertext, bereits
+von Support-Chef analysiert). Objektiv prüfbar: bestehender
+Regressionstest um eine Prüfung auf den jetzt enthaltenen Zielnamen
+ergänzt, vorab rot verifiziert.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts:261`: Fehlermeldung von "Start und Ziel dürfen
+  nicht gleich sein — welcher Flughafen ist dein Abflugort?" auf "…
+  welcher Flughafen ist dein Abflugort nach ${known.name}?" erweitert.
+- Bestehender Test in `useChat.test.ts` ("rejects an origin airport
+  identical to the destination's own airport …") um die Assertion
+  `expect(lastMessage?.content).toContain(KNOWN_DESTINATION)` ergänzt —
+  vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Meldung
+  enthielt "Lissabon" nicht).
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 4) um den entsprechenden
+  Eintrag ergänzt.
+- `reports/it-chef.md`: Fund 1 aus "Gefundene Bugs (nicht automatisch
+  gefixt)" in die "Automatisch gefixt"-Liste verschoben.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc --noEmit` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 422 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

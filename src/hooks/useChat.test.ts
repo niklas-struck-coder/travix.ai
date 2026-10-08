@@ -409,6 +409,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     const lastMessage = result.current.messages.at(-1)
     expect(lastMessage?.role).toBe('assistant')
     expect(lastMessage?.content).toContain('Start und Ziel dürfen nicht gleich sein')
+    expect(lastMessage?.content).toContain(KNOWN_DESTINATION)
 
     // still awaiting the origin — a different, valid code now proceeds as usual
     vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })

@@ -51,18 +51,23 @@ sind weiterhin sorgfältig mit Begründungskommentaren abgesichert.
    `{activityLabel}`); ich habe das nachvollzogen, umgesetzt und mit
    einem neuen Regressionstest abgesichert. Lint, Typecheck und die
    volle Testsuite (423 Tests) laufen grün.
+2. **`src/hooks/useChat.ts:261` — Fehlermeldung bei "Start = Ziel" im
+   Flug-Chat nannte den Zielort nicht.** Bei gleichem Abflug- und
+   Zielflughafen antwortete der Chat nur mit "Start und Ziel dürfen nicht
+   gleich sein — welcher Flughafen ist dein Abflugort?", ohne den
+   gerade genannten Zielort zu wiederholen — obwohl `known.name` an
+   dieser Stelle bereits vorliegt und direkt danach für die
+   "searching"-Meldung genutzt wird. Von Support-Chef am 06.10. gemeldet,
+   im eigenen Bericht vom 08.10. zunächst als Copy-Entscheidung
+   zurückgestellt — bei genauerem Hinsehen reine mechanische Übernahme
+   des unmittelbar danebenstehenden, bereits etablierten Musters. Fix
+   umgesetzt, bestehender Regressionstest um eine Prüfung auf den
+   enthaltenen Zielnamen ergänzt, vorab rot verifiziert. Lint, Typecheck,
+   Build und die volle Testsuite (422 Tests) laufen grün.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-1. **`src/hooks/useChat.ts:261` — Fehlermeldung bei "Start = Ziel" im
-   Flug-Chat nennt den Zielort nicht.** Bei gleichem Abflug- und
-   Zielflughafen antwortet der Chat nur mit "Start und Ziel dürfen nicht
-   gleich sein — welcher Flughafen ist dein Abflugort?", ohne den
-   gerade genannten Zielort zu wiederholen. Von Support-Chef bereits am
-   06.10. gemeldet, weiterhin unverändert offen. Kein Einzeiler-Fix im
-   engeren Sinn (Formulierung/Copy-Entscheidung), daher nicht automatisch
-   gefixt.
-2. **`src/routes.tsx:54-56` — fehlende Fokus-Ankündigung bei
+1. **`src/routes.tsx:54-56` — fehlende Fokus-Ankündigung bei
    Routenwechsel, naiver Fix wäre selbst fehlerhaft.** `AnimatePresence
    mode="wait"` hält die alte Seite bis zum Ende ihrer 0,2s-Animation im
    DOM; der Scroll-`useEffect` feuert aber sofort bei Pfadwechsel.
@@ -70,7 +75,7 @@ sind weiterhin sorgfältig mit Begründungskommentaren abgesichert.
    Überschrift fokussieren. Bräuchte den Fokus-Aufruf nach
    `onExitComplete` von `AnimatePresence` — eine kleine Timing-
    Entscheidung, kein Einzeiler. Weiterhin unverändert seit 07.10.
-3. **`src/components/trip/EditMode.tsx:86-92` — Preisfeld ohne
+2. **`src/components/trip/EditMode.tsx:86-92` — Preisfeld ohne
    Währungssymbol/Format.** Reines Freitextfeld ohne €-Symbol oder
    Zahlenformat, seit 18.08. dokumentiert, durch den heutigen Fix nicht
    berührt.
