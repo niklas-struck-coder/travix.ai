@@ -46,6 +46,7 @@ describe('getConciergeReply', () => {
     expect(getConciergeReply('Rom', 'Wann fliegen wir nach Europa?').text).not.toContain('Euro (€)')
     expect(getConciergeReply('Rom', 'Ich brauche Hilfestellung beim Packen meines Koffers.').matched).toBe(false)
     expect(getConciergeReply('Rom', 'Kannst du mir mithilfe geben beim Einchecken?').matched).toBe(false)
+    expect(getConciergeReply('Rom', 'Brauche ich eine Unfallversicherung für die Reise?').matched).toBe(false)
   })
 
   it('still answers when the keyword is a real word', () => {

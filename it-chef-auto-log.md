@@ -17109,3 +17109,69 @@ Design-Implikation.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-08, vierter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Branch `it-chef/auto` war bei Laufbeginn bereits
+vollständig in `main` gemergt (Freigabe-Chef hatte den dritten Lauf von
+heute früh noch in der Nacht geprüft und gemergt). Branch gemäß
+`.claude/skills/it-chef-eigen/SKILL.md` frisch von `main` neu aufgesetzt,
+dann auf `origin/it-chef/auto` gepusht (reine Branch-Hygiene, kein neuer
+Code).
+
+**Ausgewählter Punkt:** Kein offener Checklisten-Punkt aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` passte (alle offenen
+Punkte dort sind Architektur-/Produktentscheidungen oder durch fehlende
+Backend-Credentials blockiert). Stattdessen ein über einen eigens dafür
+beauftragten Explore-Agenten gefundener, eigenständiger Bug: eine
+übersehene Instanz derselben Wortgrenzen-Bug-Klasse, die bereits am 07.10.
+(fünfter Lauf) einmal in derselben Zeile gefixt wurde.
+
+**Befund:** `getConciergeReply()` (`src/lib/ai/mockConcierge.ts:80`)
+erkennt Notfall-Fragen im Urlaubsmodus-Concierge über
+`/notruf|notfall|polizei|\bhilfe\b|unfall/`. Der 07.10.-Fix hatte dem
+Keyword `hilfe` eine Wortgrenze gegeben (`\bhilfe\b`), weil es sonst in
+Komposita wie "Hilfestellung" mitmatcht — der Kommentar direkt über der
+Zeile beschreibt dieses Prinzip ausdrücklich für "kurze, vollständige
+Wörter". Das direkt danebenstehende Keyword `unfall` in derselben Regex
+unterliegt exakt demselben Problem, wurde beim 07.10.-Fix aber übersehen
+und blieb ohne Wortgrenze. Mit Node verifiziert:
+`/notruf|notfall|polizei|\bhilfe\b|unfall/.test('brauche ich für meine
+reise eine unfallversicherung?')` → `true` (Bug), mit `\bunfall\b` statt
+`unfall` → `false` (korrekt). Eine Nutzerfrage wie "Brauche ich eine
+Unfallversicherung für die Reise?" bekommt dadurch fälschlich "Die
+Notrufnummer lautet: 112." statt der generischen Fallback-Antwort — kein
+Randfall, die App hat mit "Reiseversicherung abgeschlossen"
+(`checklistRules.ts`) selbst einen passenden Checklistenpunkt für dieses
+Thema.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine clientseitige String-Matching-Logik einer
+Demo-Funktion. Keine offene Produkt-/Architekturentscheidung: mechanische
+Übernahme des im selben File bereits etablierten, kommentierten
+Wortgrenzen-Musters (identisch zum 07.10.-Fix derselben Zeile), keine neue
+Design-Entscheidung. Klar genug beschrieben (exakte Datei/Zeile, exaktes
+Eingabe-Beispiel, mit Node vorab verifiziert). Objektiv prüfbar: neuer
+Testfall zuerst rot verifiziert, dann grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/lib/ai/mockConcierge.ts:80`: `unfall` → `\bunfall\b` in der
+  Notfall-Erkennungs-Regex.
+- Neue Assertion im bestehenden "nur als Teilwort"-Test in
+  `mockConcierge.test.ts` (Fall `getConciergeReply('Rom', 'Brauche ich
+  eine Unfallversicherung für die Reise?').matched` → `false`) — vor dem
+  Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockConcierge.ts`) reproduzierbar rot verifiziert (lieferte
+  `matched: true` mit der Notrufnummer-Antwort).
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 8) um den entsprechenden
+  Eintrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62
+Testdateien, 422 Tests, alle grün), `npm run build` (`tsc -b` + `vite
+build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

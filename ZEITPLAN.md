@@ -2033,6 +2033,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `EditMode.tsx`) reproduzierbar rot verifiziert (Dialogtext zeigte den
   mehrdeutigen rohen Namen ohne "(Eintrag 2)").
+  Vom autonomen IT-Chef-Lauf am 08.10. (vierter Lauf desselben Tages) eine
+  übersehene Instanz derselben Wortgrenzen-Bug-Klasse behoben, die der
+  dritte Lauf vom 07.10. bereits einmal in derselben Zeile fixte: In
+  `getConciergeReply()` (`mockConcierge.ts`) bekam beim 07.10.-Fix nur das
+  Keyword `hilfe` eine Wortgrenze (`\bhilfe\b`), das direkt danebenstehende
+  `unfall` in derselben Regex (`/notruf|notfall|polizei|\bhilfe\b|unfall/`)
+  wurde dabei übersehen, obwohl es exakt demselben, im Kommentar direkt
+  darüber festgehaltenen Muster unterliegt. Dadurch matchte es als
+  Teilwort in "Unfallversicherung" — eine naheliegende Frage im
+  Urlaubsmodus-Concierge ("Brauche ich eine Unfallversicherung für die
+  Reise?") löste fälschlich "Die Notrufnummer lautet: 112." statt der
+  generischen Fallback-Antwort aus, obwohl die App mit "Reiseversicherung
+  abgeschlossen" (`checklistRules.ts`) selbst einen passenden
+  Checklistenpunkt dafür hat. Fix: `\bunfall\b` statt `unfall`, identisches
+  Muster wie beim `hilfe`-Fix vom 07.10., keine neue Design-Entscheidung.
+  Neue Assertion im bestehenden "nur als Teilwort"-Test in
+  `mockConcierge.test.ts` (Fall "Unfallversicherung") — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockConcierge.ts`) reproduzierbar rot verifiziert (löste `matched: true`
+  mit der Notrufnummer-Antwort aus).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
