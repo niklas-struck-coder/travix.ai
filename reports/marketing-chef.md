@@ -1,48 +1,33 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-07
+**Datum:** 2026-10-08
 
-## Was ist seit dem letzten Eintrag (2026-10-06) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-07) passiert?
 
-Kein neuer Positionierungs-Anlass, aber ein kleiner Baustein, der zur
-"Ehrlichkeit als Feature"-Linie aus dem letzten Bericht passt: Wenn die
-Flug-/Unterkunftssuche wegen eines Server-/Proxy-Fehlers (z.B. 502/504)
-scheitert, bekam die Nutzerin bisher die falsche Meldung "bitte prüfe
-deine Internetverbindung" angezeigt — obwohl gar nicht ihre Verbindung
-das Problem war. Das ist jetzt gefixt: Die Fehlermeldung benennt korrekt
-den Server-/Statusfehler statt dem Internet der Nutzerin die Schuld zu
-geben. Kein neuer Claim-Baustein, aber ein weiteres kleines Beispiel
-dafür, dass wir lieber präzise als bequem formulieren.
+Seit gestern ist vor allem IT-Chef unterwegs gewesen: Der Lösch-Dialog in
+EditMode.tsx disambiguiert jetzt gleichnamige Aktivitäten (laut
+Support-Chef aber bisher nur in Screenreader-Label und Dialog, nicht in
+der sichtbaren Liste – also noch nicht fertig), die Reisecheckliste und
+`isTripComplete()` widersprachen sich bei der Vollständigkeits-Anzeige
+und wurden synchronisiert, und ein Demo-Datensatz (Kyoto-Reise) hatte
+versehentlich Jahr 2027 statt 2026. Alles solide Qualitätsarbeit, aber
+reine Politur ohne neuen Positionierungs-Anlass.
 
-Zwei weitere Fixes seit gestern sind rein technisch ohne Marketing-Bezug
-(Scroll-Position springt beim Seitenwechsel jetzt korrekt nach oben,
-ein Race-Condition-Bug beim schnellen Neustarten des Chats wurde
-behoben) — beides sinnvolle Qualitätsarbeit, aber kein Content-Anlass.
-Support-Chef hat zusätzlich zwei neue UX-Punkte gefunden (Fokus-Sprung,
-Scroll-Timing bei Routenwechsel), die noch offen sind.
+Ein Fund passt dagegen gut in unsere "Ehrlichkeit als Feature"-Linie:
+Der Urlaubsmodus-Concierge hat Notruf-Fragen bisher über das Stichwort
+"hilfe" ohne Wortgrenze erkannt – wer "Hilfestellung" oder "mithilfe"
+schrieb, bekam ungefragt die Notrufnummer vorgesetzt. Jetzt erkennt er
+nur noch echte Hilferufe. Klein, aber ein weiterer Beleg dafür, dass wir
+bei Details genau hinschauen statt grob drüberzugehen.
 
 ## Vorschläge
 
-1. **Den Fehlermeldungs-Fix als zusätzlichen Mini-Beleg zur bereits
-   vorbereiteten Ehrlichkeits-Idee einsammeln, nicht separat
-   vermarkten.** Für den Blog-/Changelog-Entwurf aus dem letzten
-   Bericht ("Warum wir lieber ehrlich sagen, was Sache ist") passt eine
-   kurze Ergänzung: Auch technische Fehlermeldungen sollen die echte
-   Ursache nennen, statt pauschal "dein Internet" zu unterstellen. Macht
-   den Beitrag konkreter, ohne einen zweiten Post zu brauchen.
+1. **Den Concierge-Fix als eigenen kleinen Content-Baustein nutzen, nicht nur als Fußnote.** Anders als der Fehlermeldungs-Fix von gestern hat dieser hier einen eigenen, leicht erzählbaren Haken ("unser Assistent verwechselt 'Hilfestellung' nicht mit einem Notruf") – gut geeignet als kurzer, humorvoller Social-Post oder Mini-Changelog-Eintrag zur Präzisions-Säule, unabhängig von gestriger Idee.
 
-2. **Noch keinen neuen Claim formulieren — die aktuellen Änderungen
-   sind Politur, keine Positionierungs-Substanz.** Ich würde den
-   bereits fertigen Claim-Text und den Changelog-Plan aus dem letzten
-   Bericht unverändert in der Schublade lassen, statt wegen kleinerer
-   Fixes neue Texte zu produzieren. Lieber warten, bis ein Fund mit
-   echtem Nutzer-Nutzen (wie der Flugsuche-Fix neulich) ansteht.
+2. **Den Urlaubsmodus-Concierge selbst als Feature-Spotlight vorschlagen.** Der Bug zeigt nebenbei ein Feature, das bisher kaum beworben wurde: Ein KI-Begleiter, der auch *während* der Reise hilft (Währung, Sprache, Notfallnummer) – nicht nur bei der Planung davor. Das ist ein Differenzierungspunkt gegenüber reinen Reiseplaner-Apps und würde sich für ein eigenständiges Content-Stück lohnen ("travix.ai bleibt auch vor Ort an deiner Seite").
 
-3. **Changelog-Start weiterhin der niedrigschwelligste nächste
-   Schritt**, jetzt mit drei statt zwei guten Eröffnungs-Einträgen
-   (Favoriten-Fix, Flugsuche-Konsistenz, ehrliche Fehlermeldungen). Je
-   länger wir warten, desto mehr sammelt sich an, ohne dass es
-   komplizierter wird — der Start selbst bleibt eine reine
-   Text-/Redaktionsentscheidung ohne Backend-Abhängigkeit.
+3. **Keinen neuen Positionierungs-Claim formulieren.** EditMode-Disambiguierung, Checklisten-Fix und Jahreszahl-Korrektur sind interne Konsistenzarbeit ohne direkten Nutzer-Story-Wert. Bestehende Claim-Texte und Content-Pläne aus früheren Berichten unverändert lassen, statt wegen kleiner Fixes neue Texte zu produzieren.
 
-_Letztes Update: 2026-10-07_
+4. **Changelog-Kandidatentopf (separater Auto-Tracker) steht seit mehreren Tagen bei 3 von 8 – Schwelle ggf. überdenken.** Wenn der Topf wochenlang nicht die Achter-Schwelle erreicht, verschwinden kleine, sympathische Funde (wie der Concierge-Fix) im Nirgendwo. Vorschlag: Schwelle senken (z.B. auf 5) oder feste zeitliche Taktung statt reiner Stückzahl-Schwelle, damit Momentum nach außen sichtbar bleibt.
+
+_Letztes Update: 2026-10-08_
