@@ -6064,3 +6064,77 @@ kein separater Reset nötig.
 
 **Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-08, früher Nacht-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 5 neue Commits vor `origin/main` (zwei vom
+  07.10.: "vierter Lauf" Testabdeckungslücke `design-tokens.ts`,
+  "fünfter Lauf" Wortgrenzen-Fix `\bhilfe\b` im Notfall-Keyword des
+  Concierge; drei vom 08.10.: `EditMode.tsx`-Lösch-Dialogtext zeigte bei
+  gleichnamigen Aktivitäten weiterhin den rohen statt dem
+  disambiguierten Namen, `isTripComplete()` zählte `activities` anders
+  als `checklistRules.ts`/`calculateProgress.ts`, Kyoto-Demo-Reiseentwurf
+  hatte in `Dashboard.tsx`/`Reiseentwuerfe.tsx` Jahr 2027 statt dem in
+  `MeineReisen.tsx`/`Kalender.tsx` kanonischen 2026).
+- `marketing-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (läuft erst um 6 Uhr, separater späterer Lauf zuständig).
+- `support-chef/auto` — 0 Commits vor `main`, planmäßig übersprungen
+  (dito).
+
+**Prüfung `it-chef/auto`** (Diff zu `main` gelesen, nicht nur den
+Log-Eintrag geglaubt):
+- Diff-Stat: `ZEITPLAN.md`, `it-chef-auto-log.md`,
+  `tasks/tasks-prd-travix-platform.md`, `mockConcierge.ts`/`.test.ts`,
+  `design-tokens.test.ts` (neu), `EditMode.tsx`/`.test.tsx`,
+  `tripStorage.ts`/`.test.ts`, `Buchung.test.tsx`, `Dashboard.tsx`,
+  `Reiseentwuerfe.tsx`/`.test.tsx` — genau fünf inhaltliche Punkte,
+  jeder einzeln im Log beschrieben und mit dem tatsächlichen Diff
+  abgeglichen:
+  1. `mockConcierge.ts`: Notfall-Keyword-Regex `hilfe` → `\bhilfe\b`,
+     damit "Hilfestellung"/"mithilfe" nicht fälschlich als
+     Notfall-Frage erkannt werden. Zwei neue Testfälle genau dafür.
+  2. `design-tokens.test.ts` (neu): deckt `colors`/`fonts`/`spacing` aus
+     `design-tokens.ts` ab, reiner Werte-Abgleich, keine Quelländerung.
+  3. `EditMode.tsx`: die bereits für aria-labels vorhandene
+     Disambiguierung gleichnamiger Aktivitäten in eine Hilfsfunktion
+     `getActivityLabel()` extrahiert und jetzt auch im
+     Lösch-Bestätigungsdialog verwendet (vorher roher, mehrdeutiger
+     Name). Berechnung der Vorkommen-Nummer selbst nachvollzogen:
+     `sameName.indexOf(activity) + 1` liefert dieselbe Zahl wie die
+     vorherige `slice(0, index+1).filter(...)`-Logik — reine
+     Extraktion, kein Verhaltensunterschied für Nicht-Duplikate.
+  4. `tripStorage.ts`: `isTripComplete()` zieht jetzt `activities.length
+     > 0` mit ein, exakt dasselbe Feld-Set wie `AUTO_CHECKLIST_ITEMS`/
+     `calculateProgress.ts`. Einzige Verwendungsstelle laut `git grep`
+     ist `Buchung.tsx` (Badge + "Urlaubsmodus aktivieren"-Gate) — dort
+     genau das vom Log beschriebene Problem behoben (Badge zeigte
+     "vollständig", während die Checkliste direkt darunter
+     "Aktivitäten geplant" noch offen zeigte).
+  5. `Dashboard.tsx`/`Reiseentwuerfe.tsx`: Kyoto-Demo-Datum `'3. – 10.
+     März 2027'` → `'...2026'`, passend zum bereits bestehenden
+     kanonischen Wert in `MeineReisen.tsx`/`Kalender.tsx` (dort auch
+     maschinenlesbar `2026-03-03`/`2026-03-10`).
+  Alle fünf Punkte scoped, kein Scope-Creep, keine Berührung von
+  Auth/Zahlungen/rechtlichen Texten. Keine neue UI/Design-Entscheidung im
+  Sinne von `MARKENDESIGN.md` (Dialogtext-Änderung ist reine
+  Text-/Logik-Korrektur, keine visuelle Änderung).
+- **Unabhängig selbst verifiziert** (`npm install`, danach `npx tsc -b`,
+  `npx eslint .`, `npx vitest run` tatsächlich selbst ausgeführt, nicht
+  nur Log geglaubt): `npm install` → 650 Pakete, dieselben 10
+  vorbestehenden Advisories (1 moderate, 8 high, 1 critical, unverändert).
+  `npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Fehler, dieselben drei
+  vorbestehenden Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/
+  `tabs.tsx` (von diesem Branch nicht berührt). `npx vitest run` → 62
+  Testdateien, 422 Tests, alle grün. Deckt sich exakt mit den Angaben im
+  `it-chef-auto-log.md`.
+→ **Alles passt, nach `main` gemergt** (Fast-Forward `945433d..6f05531`,
+gepusht). `it-chef/auto` war danach bereits deckungsgleich mit `main`,
+kein separater Reset nötig.
+
+**Ergebnis:** `it-chef/auto` geprüft, unabhängig verifiziert, gemergt.
+`marketing-chef/auto` und `support-chef/auto` planmäßig übersprungen
+(kein neuer Stand vor dem 6-Uhr-Lauf).
+
+**Info an Ni:** Nein — sauberer Merge, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
