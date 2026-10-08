@@ -21,6 +21,17 @@ interface EditModeProps {
   children: ReactNode
 }
 
+// Zwei Aktivitäten können denselben frei getippten Namen tragen
+// (addActivity prüft nicht auf Eindeutigkeit) — ohne diese Ergänzung wären
+// sie weder für Screenreader noch im Lösch-Dialogtext unterscheidbar
+// (analog Reiseentwuerfe.tsx' getDraftLabel(), 30.09.).
+function getActivityLabel(activity: TripActivity, activities: TripActivity[]) {
+  const sameName = activities.filter((other) => other.name === activity.name)
+  if (sameName.length <= 1) return activity.name
+  const occurrence = sameName.indexOf(activity) + 1
+  return `${activity.name} (Eintrag ${occurrence})`
+}
+
 /** Dialog for manually adding/removing trip activities and adjusting their price. */
 export function EditMode({ activities, onChange, children }: EditModeProps) {
   const [name, setName] = useState('')
@@ -67,16 +78,8 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
             <p className="text-sm text-muted-foreground">Noch keine Aktivitäten hinzugefügt.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {activities.map((activity, index) => {
-                // Zwei Aktivitäten können denselben frei getippten Namen tragen
-                // (addActivity prüft nicht auf Eindeutigkeit) — ohne diese
-                // Ergänzung wären ihre aria-labels für Screenreader nicht
-                // unterscheidbar (analog Reiseentwuerfe.tsx, 17.09.).
-                const hasDuplicates =
-                  activities.filter((other) => other.name === activity.name).length > 1
-                const occurrence =
-                  activities.slice(0, index + 1).filter((other) => other.name === activity.name).length
-                const activityLabel = hasDuplicates ? `${activity.name} (Eintrag ${occurrence})` : activity.name
+              {activities.map((activity) => {
+                const activityLabel = getActivityLabel(activity, activities)
                 return (
                   <li key={activity.id} className="flex items-center gap-2">
                     <span className="flex-1 truncate text-sm text-foreground">{activity.name}</span>
@@ -144,7 +147,8 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
           <DialogHeader>
             <DialogTitle>Aktivität entfernen?</DialogTitle>
             <DialogDescription>
-              {pendingRemoval?.name} wird aus dieser Reise entfernt. Das lässt sich nicht rückgängig machen.
+              {pendingRemoval && getActivityLabel(pendingRemoval, activities)} wird aus dieser Reise entfernt. Das
+              lässt sich nicht rückgängig machen.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -16878,3 +16878,89 @@ Typfehler, Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-08
+
+**Ausgangslage:** Branch `it-chef/auto` war bei Laufbeginn identisch mit
+`main` (letzter Lauf, 07.10. fünfter Lauf, bereits von Freigabe-Chef
+geprüft und gemergt). Kein Merge nötig.
+
+**Eigene Bug-Suche:** Einen eigens beauftragten Explore-Agenten mit der
+vollständigen Liste der bereits ausgeschöpften Fund-Kategorien
+beauftragt (Wortgrenzen-Keywords in `mockAdvisor.ts`/`mockConcierge.ts`,
+fehlende `role="status"`/`role="alert"`, fehlende
+Lösch-Bestätigungsdialoge, ungeschützter localStorage-Zugriff,
+fehlende `setTimeout`/`useEffect`-Cleanups, fehlende Testdateien,
+`toISOString()`-Zeitzonenfehler, duplizierte Hilfsfunktionen, fehlende
+aria-label-Disambiguierung bei gleichnamigen Einträgen), mit der
+Anweisung, gezielt nach neuen, bisher nicht gemeldeten Instanzen
+dieser Kategorien sowie nach Logik-Abweichungen zwischen strukturell
+ähnlichen Komponenten zu suchen. Ergebnis: alle Test-Dateien vollständig
+vorhanden, keine neue Transportmittel-/Wortgrenzen-Lücke, keine neue
+strukturelle Abweichung zwischen Flight-/Hotel-/TrainCard bzw. deren
+Results-Komponenten. Der Fund lag in `EditMode.tsx` — einer bereits
+zweimal in diesem Repo aufgetretenen Bug-Klasse (Dialogtext hinkt
+hinter einer bereits an anderer Stelle derselben Datei vorhandenen
+Disambiguierung her), die hier noch eine unbehobene Instanz hatte.
+
+**Ausgewählter Punkt:** `EditMode.tsx` (6.12) berechnet seit dem
+20.09.-Lauf eine Disambiguierung für gleichnamige Aktivitäten
+(`hasDuplicates`/`occurrence` → "{name} (Eintrag N)") und wendet sie auf
+die aria-labels von Preis-Input und Entfernen-Button an. Der
+Lösch-Bestätigungsdialog (`DialogDescription`, Zeile 147 vor dem Fix)
+zeigte dagegen weiterhin ungeprüft `pendingRemoval?.name` — bei zwei
+gleichnamigen Aktivitäten (z. B. zwei "Spaziergang"-Einträgen) stand im
+Dialog nach Klick auf "Spaziergang (Eintrag 2) entfernen" nur
+"Spaziergang wird aus dieser Reise entfernt.", ohne erkennbar zu
+machen, welcher der beiden Einträge gemeint ist.
+
+**Warum real statt theoretisch:** Live nachvollziehbar: Zwei Aktivitäten
+mit identischem, frei getipptem Namen anlegen (`addActivity()` prüft
+nicht auf Eindeutigkeit), auf den Entfernen-Button der zweiten klicken
+— der sich öffnende Bestätigungsdialog nennt nur den rohen, für beide
+Einträge identischen Namen. Die eigentliche Löschung selbst war nie
+betroffen (sie griff über `pendingRemoval.id`, nicht über den Namen),
+nur der angezeigte Text war irreführend — für alle Nutzer:innen, nicht
+nur für Screenreader. Exakt dieselbe Bug-Klasse (Dialogtext zeigt
+rohen statt disambiguiertem Namen) wurde bereits einmal in
+`Reiseentwuerfe.tsx` gefunden und über eine gemeinsame
+`getDraftLabel()`-Hilfsfunktion behoben (01.10.-Eintrag) — in
+`EditMode.tsx` war 20.09. nur die aria-label-Hälfte desselben Musters
+nachgezogen worden, der Dialogtext blieb unangetastet.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten — reine Client-seitige
+Aktivitäten-Listen-UI. Keine offene Produkt-/Architekturentscheidung:
+mechanische Übernahme eines in diesem Repo bereits für denselben
+Bug-Typ gebauten, getesteten und gemergten Musters (`getDraftLabel()`).
+Klar genug beschrieben (exakte Datei/Zeile, exaktes fehlerhaftes
+Verhalten). Objektiv prüfbar: neuer Testfall zuerst rot verifiziert,
+dann grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/components/trip/EditMode.tsx`: die bisher inline in der
+  Kartenliste berechnete Disambiguierung (`hasDuplicates`/`occurrence`)
+  in eine gemeinsame, modulweite `getActivityLabel(activity,
+  activities)`-Hilfsfunktion extrahiert (Form analog `getDraftLabel()`
+  in `Reiseentwuerfe.tsx`). Kartenliste nutzt sie wie zuvor für die
+  aria-labels; der `pendingRemoval`-Dialogtext ruft sie jetzt ebenfalls
+  auf, statt den rohen `pendingRemoval?.name` anzuzeigen. Keine
+  Verhaltensänderung für Aktivitäten ohne Namensduplikat.
+- Neuer Regressionstest in `EditMode.test.tsx` ("shows the disambiguated
+  label in the removal confirmation for same-named activities") — vor
+  dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+  nur `EditMode.tsx`) reproduzierbar rot verifiziert (Dialogtext zeigte
+  den mehrdeutigen rohen Namen ohne "(Eintrag 2)").
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 4/Programmierung) sowie
+  `tasks/tasks-prd-travix-platform.md` (Checkbox 6.12) um den
+  entsprechenden Eintrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich,
+unveränderte Chunk-Size-Warnung), `npx vitest run` (62 Testdateien, 418
+Tests — alle grün, davon 1 neuer Test).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

@@ -1954,6 +1954,32 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   — vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
   stash` nur `mockConcierge.ts`) reproduzierbar rot verifiziert (beide
   Fälle lösten `matched: true` mit der Notrufnummer-Antwort aus).
+  Vom autonomen IT-Chef-Lauf am 08.10. einen über einen eigens beauftragten
+  Explore-Agenten gefundenen Bug in `EditMode.tsx` (6.12) behoben: Der
+  Lösch-Bestätigungsdialog ("Aktivität entfernen?") zeigte im Beschreibungs-
+  text weiterhin den rohen, mehrdeutigen `activity.name`, obwohl genau
+  dieselbe Datei seit dem 20.09.-Lauf eine Disambiguierung für gleichnamige
+  Aktivitäten in den aria-labels von Preis-Input und Entfernen-Button nutzt
+  (`hasDuplicates`/`occurrence` → "{name} (Eintrag N)"). Bei zwei
+  gleichnamigen Aktivitäten (z. B. zwei "Spaziergang"-Einträgen) stand im
+  Dialog nach Klick auf "Spaziergang (Eintrag 2) entfernen" trotzdem nur
+  "Spaziergang wird aus dieser Reise entfernt." — für alle Nutzer:innen
+  mehrdeutig, welcher der beiden Einträge gemeint ist (die eigentliche
+  Löschung selbst traf über `pendingRemoval`s `id` zuverlässig den
+  richtigen Eintrag, nur der angezeigte Text war irreführend). Exakt
+  dieselbe Bug-Klasse wurde bereits einmal in `Reiseentwuerfe.tsx` gefunden
+  und behoben (01.10.-Eintrag: gemeinsame `getDraftLabel()`-Hilfsfunktion
+  für Kartenliste und beide Dialogtexte) — in `EditMode.tsx` hatte der
+  20.09.-Fix aber nur die aria-labels nachgezogen, nicht den Dialogtext.
+  Fix: die bisher inline berechnete Disambiguierung in eine gemeinsame
+  `getActivityLabel(activity, activities)`-Hilfsfunktion extrahiert (analog
+  `getDraftLabel()`), jetzt sowohl von der Kartenliste als auch vom
+  `pendingRemoval`-Dialogtext genutzt — keine neue Design-Entscheidung,
+  mechanische Übernahme eines in diesem Repo bereits etablierten Musters.
+  Neuer Regressionstest in `EditMode.test.tsx` — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `EditMode.tsx`) reproduzierbar rot verifiziert (Dialogtext zeigte den
+  mehrdeutigen rohen Namen ohne "(Eintrag 2)").
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
