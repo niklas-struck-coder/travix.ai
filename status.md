@@ -13,17 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-06):**
-- IT-Chef hat einen Fehler in der Duffel-Proxy-Fehlerbehandlung behoben sowie
-  ein Timeout-Leck beim Zurücksetzen des Chats (resetChat()) und einen
-  Scroll-Positions-Bug bei Routenwechseln gefunden und behoben
-- Support-Chef hat beim Routing/Scroll-Reset weitere Befunde gemeldet
-  (fehlender Fokus-Sprung, Timing-Konflikt mit Exit-Animation)
-- Marketing-Chef hat weitere kleinere Verbesserungs-Kandidaten gesammelt
-  (Mini-Changelog, zwei neue Kandidaten)
-- Freigabe-Chef hat die Tages-Läufe von IT-Chef und Support-Chef geprüft
-  und nach main gemergt
+**Seit letztem Update (2026-10-07):**
+- IT-Chef hat mehrere kleinere Bugs behoben: Wortgrenzen-Fehler beim
+  Notfall-Keyword "hilfe" im Urlaubsmodus, mehrdeutige Namen im Lösch-Dialog
+  (EditMode.tsx), falscher Aktivitäten-Zähler in isTripComplete() und ein
+  falsches Jahr (2027 statt 2026) im Kyoto-Demo-Reiseentwurf
+- Support-Chef hat gemeldet, dass die Disambiguierung im Lösch-Dialog die
+  sichtbare Aktivitätenliste noch nicht erreicht, nur Screenreader-Labels
+- Marketing-Chef hat drei weitere kleinere Verbesserungs-Kandidaten gesammelt
+- Freigabe-Chef hat die Tages-Läufe von IT-Chef, Marketing-Chef und
+  Support-Chef geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-07_
+_Letztes Update: 2026-10-08_
