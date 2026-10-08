@@ -4151,3 +4151,78 @@ durch den heutigen Fix neu entstandener Unterschied. Die übrigen beiden
 heutigen IT-Chef-Fixes (`resetChat()`-Timeout-Cleanup in `useChat.ts`,
 Duffel-Proxy-Fehlerbehandlung in `client.ts`) wurden nicht mitgeprüft,
 da dieser Lauf sich laut Skill auf einen Bereich konzentrieren soll.
+
+---
+
+## 2026-10-08 — Aktivitäten-Bearbeiten-Dialog (`EditMode.tsx`, `Buchung.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil `src/components/trip/EditMode.tsx` heute gleich zweimal
+von autonomen Läufen angefasst wurde: Der IT-Chef-Auto-Lauf vom
+08.10. (erster Lauf, Commit `6607950`) hat die Disambiguierung
+gleichnamiger Aktivitäten (`getActivityLabel()`) aus dem bisherigen
+Inline-Code in eine eigene Funktion gezogen und sie zusätzlich auf den
+Lösch-Bestätigungsdialog angewendet — vorher zeigte dieser bei zwei
+Aktivitäten mit demselben Namen weiterhin den mehrdeutigen rohen Namen,
+obwohl Screenreader-Labels bereits disambiguiert waren. Der zweite Lauf
+desselben Tages (`1f6cb32`) hat direkt daneben `Buchung.tsx`s
+Vollständigkeits-Badge korrigiert. Damit ist das eine kürzlich
+geänderte, noch nicht im Detail auf UX geprüfte Stelle.
+
+### Reibungspunkte
+
+**1. Die heute erweiterte Disambiguierung erreicht die sichtbare Liste selbst nicht — nur ihre Screenreader-Labels**
+
+`src/components/trip/EditMode.tsx:82` berechnet pro Aktivität bereits
+`const activityLabel = getActivityLabel(activity, activities)` — bei
+zwei gleichnamigen Aktivitäten liefert das z. B. "Stadtführung (Eintrag
+1)"/"Stadtführung (Eintrag 2)". Dieses `activityLabel` wird direkt danach
+nur für die `aria-label`s des Preisfelds (Zeile 87: `Preis für
+${activityLabel}`) und des Löschen-Buttons (Zeile 96: `${activityLabel}
+entfernen`) verwendet, sowie — seit dem heutigen Fix — im
+Lösch-Bestätigungsdialog (Zeile 150). Der sichtbare Zeilentext selbst
+(Zeile 85: `<span ...>{activity.name}</span>`) zeigt weiterhin den
+rohen, nicht disambiguierten Namen.
+
+Live nachvollziehbar: Im KI-Chat oder über "+ Suchen" zwei Aktivitäten
+mit identischem, frei getipptem Namen anlegen (z. B. zweimal
+"Stadtführung" mit unterschiedlichem Preis), dann über den Stift-Button
+bei "Aktivitäten" in `Buchung.tsx` den Bearbeiten-Dialog öffnen
+(`EditMode.tsx`, `addActivity()` prüft laut eigenem Kommentar in Zeile
+24 bewusst nicht auf Eindeutigkeit). Für sehende Nutzer:innen erscheinen
+zwei optisch identische Zeilen ("Stadtführung" / "Stadtführung"),
+jede mit eigenem Preisfeld und eigenem Löschen-Button direkt daneben —
+ohne die Zeile selbst anzuklicken oder zu fokussieren, ist nicht zu
+erkennen, welches Preisfeld zu welcher der beiden Aktivitäten gehört.
+Nur wer das Löschen antippt, sieht die Unterscheidung überhaupt (dann
+erst im Bestätigungsdialog). Die Lücke betrifft also genau die Zielgruppe,
+für die heute gezielt nachgebessert wurde (gleichnamige Aktivitäten),
+nur an einer Stelle, die der heutige Fix nicht mitgenommen hat.
+
+*Vorschlag:* In Zeile 85 `{activity.name}` durch das bereits berechnete
+`{activityLabel}` ersetzen — keine neue Logik, nur Wiederverwendung der
+schon vorhandenen Variable an der einen Stelle, die bisher übersprungen
+wurde. Bei eindeutigen Namen liefert `getActivityLabel()` ohnehin
+unverändert `activity.name` zurück, also keine Verhaltensänderung für
+den Normalfall ohne Duplikate.
+
+### Bestätigt (bereits bekannt, weiterhin offen)
+Der am 18.08. gemeldete und am 16.09. erneut bestätigte Fund 3 (Preisfeld
+ohne Währungssymbol/Format, jetzt `EditMode.tsx:86-92`) besteht
+unverändert: `<Input placeholder="Preis" value={activity.price ?? ''}
+.../>` ist weiterhin ein reines Freitextfeld ohne €-Symbol oder
+Zahlenformat. Hier nicht erneut vertieft, da bereits dokumentiert und
+durch die heutigen Änderungen nicht berührt.
+
+### Nicht geprüft
+`Buchung.tsx`s heutiger `isTripComplete()`-Fix (zweiter IT-Chef-Lauf,
+`1f6cb32`) selbst wurde nicht gesondert auf UX geprüft, da dieser Lauf
+sich auf den `EditMode.tsx`-Dialog konzentriert hat — die neue Checklisten-
+Konsistenz wirkte beim Durchklicken korrekt (Badge und Checkliste zeigen
+jetzt übereinstimmend "In Planung", solange Aktivitäten fehlen). Der in
+`ChecklistPanel.tsx` rein lokale, nicht persistente Zustand der manuell
+abzuhakenden Punkte (`checkedManual`, Zeile 35) ist laut Code-Kommentar
+(Zeile 28-32) eine bewusste, bereits dokumentierte Zwischenlösung bis zu
+einer Nutzerkonten-/Backend-Entscheidung — kein neuer Fund.
