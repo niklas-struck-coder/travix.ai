@@ -17440,3 +17440,69 @@ nur dieser Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-09 (vierter Lauf)
+
+**Vorbereitung:** `it-chef/auto` war beim Start identisch mit `main` (0
+Commits Unterschied in beide Richtungen, alle drei heutigen Vorläufe
+bereits von Freigabe-Chef gemergt) — Branch frisch von `origin/main`
+ausgecheckt, `main` unberührt.
+
+**Suche:** Da die drei bisherigen Läufe heute bereits sehr breit gesucht
+haben (siehe Einträge oben), diesmal gezielt Dateien gelesen, die in
+keinem der bisherigen Log-Einträge einzeln genannt waren:
+`Einstellungen.tsx`, `Sidebar.tsx`, `PageHeader.tsx`, `TravixAvatar.tsx`,
+`speech.ts` (inkl. Nutzung in `ChatInput.tsx`), `KiChat.tsx`,
+`select.tsx`, `card.tsx`, `mockAdvisor.ts`, `useConcierge.ts`,
+`ChatMessage.tsx`, `mockConcierge.ts`, `format.ts`, `Urlaubsmodus.tsx`,
+`FlightResults.tsx`, `HotelResults.tsx`, `NoResultsMessage.tsx`,
+`FlightWizard.tsx`, `Profil.tsx`. Zusätzlich projektweit nach
+TODO/FIXME/XXX/HACK, nach `.then(` ohne `.catch(` und nach
+`console.log/warn/error` gesucht.
+
+**Ergebnis:** Keine offenen TODOs/FIXMEs. Alle drei `.then(`-Aufrufe in
+`useChat.ts` (Flug- und zwei Unterkunftssuchen) haben bereits ein
+`.catch(`. Alle vier `console.error`-Aufrufe (`duffel/client.ts`,
+`tripStorage.ts`) sind bewusste, bereits begründete Fallback-Logs, keine
+stillen Fehler. Die gelesenen Dateien selbst zeigten keine Logikfehler,
+fehlenden Edge-Case-Schutz, Tippfehler in Nutzertexten oder kaputten
+Importe/Links — `FlightWizard.tsx` deckt Start=Ziel, NaN-Passagierzahl
+und Mindestdatum bereits ab, `format.ts`/`mockConcierge.ts` decken die in
+früheren Läufen gefundenen Randfälle weiterhin korrekt ab.
+
+**Eine Beobachtung ohne Auto-Fix:** `src/hooks/useChat.ts:384-388` (der
+`else if (!reply.accommodationNoticeHandled)`-Zweig direkt nach der
+echten Unterkunftssuche) scheint beim aktuellen Code nicht mehr
+erreichbar zu sein: `getNextAdvisorStep()` in `mockAdvisor.ts` setzt
+`nextField: 'accommodation'` nur in der Budget-Stufe, und dort wird
+`accommodationNoticeHandled: true` immer genau dann gesetzt, wenn das
+Ziel nicht via `findKnownDestination()` auflösbar ist — die beiden Fälle
+("Ziel bekannt" vs. "Ziel unbekannt") deckt sich damit lückenlos mit den
+beiden Zweigen direkt darüber (`if (destination) …` /
+`else if (!reply.accommodationNoticeHandled) …`), sodass der zweite
+Zweig nie mehr zum Zug kommt. Kein Nutzer sieht aktuell einen falschen
+Text dadurch — nur toter Code mit einer älteren, nicht mehr verwendeten
+Formulierung ("nutze dafür kurz die manuelle Hotelsuche"). Bewusst
+**nicht** automatisch entfernt: Um sicher zu sein, dass der Zweig
+tatsächlich nie mehr erreicht wird (statt nur "aktuell nicht in den
+gelesenen Pfaden"), bräuchte es entweder eine vollständige Diagramm-
+Prüfung aller Aufrufer von `getNextAdvisorStep()`/`startEdit()` oder
+Rücksprache — Entfernen toten Codes ist risikoarm, aber die Verifikation
+"wirklich unerreichbar" ist keine reine Logikkorrektur, die ich ohne
+Rückfrage objektiv absichern kann. Bleibt Hinweis für einen Lauf mit
+Rücksprache oder für Ni direkt.
+
+**Ergebnis: kein Punkt umgesetzt.** Heute (vierter Lauf) kein neuer Punkt
+gefunden, der alle vier Sicherheitskriterien erfüllt. Kein Code-Commit
+für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft (Branch-Gesundheit, keine Änderung):** `npm ci` (frischer
+Checkout; 650 Pakete, weiterhin dieselben zehn High-/Critical-Severity-
+Advisories, unverändert seit mehreren Läufen, betrifft nur Dev-Tooling,
+kein Laufzeit-Code), `npx tsc -b` (kein Typfehler), `npm run lint` (0
+Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen in
+`badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62 Testdateien,
+423 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
