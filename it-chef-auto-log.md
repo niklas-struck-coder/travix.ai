@@ -17553,3 +17553,64 @@ vitest run` (62 Testdateien, 424 Tests, alle grün), `npm run build`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-09 (sechster Lauf)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start bereits auf dem Stand des
+fünften Laufs heute (Commit `5d8277f`), `origin/main` lag auf demselben
+Commit wie `it-chef/auto` (kein Merge nötig, `git log
+origin/it-chef/auto..origin/main` leer). `main` nicht angefasst.
+
+**Suche:** Alle offenen Checkboxen in `tasks/tasks-prd-travix-platform.md`
+hängen laut eigenen Kommentaren weiterhin an fehlenden Backend-
+Credentials (Base44/Gemini) oder echten Produktentscheidungen (Premium,
+Rewards, Deal-Finder-Agent, WhatsApp-Integration). Einen eigens dafür
+beauftragten Explore-Agenten auf eigenständige Bug-Suche angesetzt. Der
+Agent schlug zunächst einen vermeintlichen Fund vor: Lösch-Dialoge auf
+den fünf Listenseiten (Warenkorb/Favoriten/Preisalarme/Angebote/
+Aktivitaeten) könnten beim Entfernen des letzten Elements den Fokus
+verlieren, weil die komponenteneigene `if (items.length === 0) return
+<Leerzustand/>` den gesamten `<Dialog>` mitsamt Inhalt aus dem Baum
+nimmt, nicht nur den Trigger — anders als der in `dialog.test.tsx`
+bereits abgedeckte Fall (Trigger verschwindet, Dialog bleibt gemountet).
+**Vor dem Umsetzen empirisch mit einem eigenen Vitest-Reproduktionstest
+geprüft** (Harness mit genau einem Element, Löschen auf den Leerzustand
+reduziert) — der Verdacht hat sich nicht bestätigt: Radix' `onCloseAutoFocus`
+feuert auch dann korrekt, wenn der gesamte `<Dialog>` im selben Render
+mitentfernt wird, der Fokus landete im Test zuverlässig auf der `<h1>`.
+Kein Bug, Repro-Testdatei wieder verworfen, kein Fund aus diesem Kandidaten.
+
+**Gefunden und behoben:** Stattdessen den seit mehreren Tagen in
+`reports/it-chef.md` (zuletzt 08.10.) und `support-chef-auto-log.md`
+wiederholt gemeldeten, aber bisher explizit als "keine Einzeiler-Lösung"
+zurückgestellten Fund tatsächlich umgesetzt: `AppRoutes` (`src/routes.tsx`)
+kündigte Routenwechsel Screenreader-Nutzer:innen bisher nicht an — der
+bereits etablierte `focusPageHeading()`-Fallback (3.7, siehe
+`dialog.tsx`/`sheet.tsx`/`MobileNav.tsx`) wurde hier nie aufgerufen.
+Details, Reproduktionsschritte und die genaue Fix-Begründung (warum der
+naheliegende Einzeiler selbst fehlerhaft gewesen wäre) siehe
+`ZEITPLAN.md` (09.10.-Eintrag, sechster Lauf, Phase 3). Kurzfassung: Fix
+über einen neuen `onExitComplete`-Handler auf `<AnimatePresence>`
+(`src/routes.tsx`), zusätzlich einen Frame über `requestAnimationFrame()`
+verzögert, damit die neue Seite bereits gemountet ist, bevor
+`focusPageHeading()` läuft. Neuer Regressionstest in `routes.test.tsx` —
+vor dem endgültigen Fix durch temporäres Zurücknehmen der Quelländerung
+(`git stash` nur `routes.tsx`) reproduzierbar rot verifiziert; eine
+Zwischenfassung ohne `requestAnimationFrame` wurde dabei ebenfalls
+empirisch als weiterhin rot verifiziert (fokussierte nachweisbar die
+alte, zu diesem Zeitpunkt noch allein im DOM stehende Überschrift),
+bevor die jetzt grüne Endfassung committet wurde.
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben drei
+vorbestehenden Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` (62 Testdateien, 425 Tests, alle grün),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

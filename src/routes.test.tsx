@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from './routes'
@@ -27,5 +27,20 @@ describe('AppRoutes', () => {
 
     expect(scrollToSpy).toHaveBeenCalledWith(0, 0)
     scrollToSpy.mockRestore()
+  })
+
+  it('announces the new page to screen readers by focusing its heading after navigating', async () => {
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getAllByRole('link', { name: 'Profil' })[0])
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Profil' }))
+    })
   })
 })

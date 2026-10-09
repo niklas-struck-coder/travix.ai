@@ -165,6 +165,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (3 Tests, Muster analog `calculateProgress.test.ts`): die drei
   Markenfarben, die beiden Font-Stacks samt `system-ui`-Fallback, sowie die
   vollständige Spacing-Skala von `xs` bis `2xl`.
+  Vom autonomen IT-Chef-Lauf am 09.10. (sechster Lauf desselben Tages)
+  einen seit mehreren Tagen in `reports/it-chef.md`/`support-chef-auto-log.md`
+  wiederholt gemeldeten, aber bisher als "keine Einzeiler-Lösung" zurückgestellten
+  Barrierefreiheits-Fund tatsächlich behoben: `AppRoutes` (`src/routes.tsx`)
+  setzte bei jedem Routenwechsel per `window.scrollTo(0, 0)` zwar die
+  Scroll-Position zurück, kündigte Screenreader-Nutzer:innen die neue Seite
+  aber nie an (kein Fokuswechsel) — das etablierte `focusPageHeading()`-Muster
+  (3.7, bereits in `dialog.tsx`/`sheet.tsx`/`MobileNav.tsx` genutzt) fehlte
+  hier komplett. Der naheliegende Fix (den Aufruf direkt neben `scrollTo`
+  in denselben, bei jedem Pfadwechsel sofort feuernden `useEffect` setzen)
+  wäre selbst fehlerhaft gewesen: `AnimatePresence mode="wait"` hält die
+  alte Seite bis zum Ende ihrer 0,2s-Exit-Animation im DOM, der Effekt
+  feuert aber augenblicklich bei Pfadwechsel — er hätte also die alte,
+  gerade verschwindende Überschrift fokussiert statt der neuen. Fix: neuer
+  `onExitComplete`-Handler auf `<AnimatePresence>`, der erst feuert, wenn
+  die alte Seite tatsächlich entfernt ist; da React die neue Seite erst im
+  Commit direkt danach mountet (zum Zeitpunkt des Callbacks selbst steht im
+  DOM empirisch nachweisbar noch kein neues `<h1>`), wird `focusPageHeading()`
+  zusätzlich einen Frame über `requestAnimationFrame()` verzögert aufgerufen.
+  Neuer Regressionstest in `routes.test.tsx` (Klick auf einen Sidebar-Link
+  prüft per `waitFor`, dass der Fokus auf der `<h1>` der neuen Seite landet)
+  — vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git stash`
+  nur `routes.tsx`) reproduzierbar rot verifiziert; die Zwischenstufe ohne
+  `requestAnimationFrame` (Fokus direkt in `onExitComplete`) wurde ebenfalls
+  empirisch als weiterhin rot verifiziert (fokussierte nachweisbar noch die
+  alte, alleinige im DOM verbleibende Überschrift), bevor die endgültige,
+  jetzt grüne Fassung committet wurde.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein

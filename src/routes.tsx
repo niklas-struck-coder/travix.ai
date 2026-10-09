@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { AppShell } from '@/components/layout/AppShell'
 import { PageTransition } from '@/components/layout/PageTransition'
+import { focusPageHeading } from '@/lib/utils'
 import { Home } from '@/pages/Home'
 import { KiChat } from '@/pages/KiChat'
 import { Flugsuche } from '@/pages/Flugsuche'
@@ -57,7 +58,19 @@ export function AppRoutes() {
 
   return (
     <AppShell>
-      <AnimatePresence mode="wait">
+      {/* Screen readers get no "new page" announcement from a client-side
+          route change on their own. `onExitComplete` fires once the old
+          page has finished exiting and been removed from the DOM, but
+          React only mounts the new page in the commit right after that —
+          so the new <h1> isn't in the DOM yet when this callback itself
+          runs. Deferring one frame lets that mount happen first; firing
+          this from the `scrollTo` effect above instead would focus the
+          *old*, still-exiting heading, since that effect runs immediately
+          on path change. */}
+      <AnimatePresence
+        mode="wait"
+        onExitComplete={() => requestAnimationFrame(focusPageHeading)}
+      >
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Home /></PageTransition>} />
           <Route path="/ki-chat" element={<PageTransition><KiChat /></PageTransition>} />
