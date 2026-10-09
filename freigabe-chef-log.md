@@ -1,5 +1,63 @@
 # Freigabe-Chef-Log
 
+## 2026-10-09, Tages-Check (autonomer Lauf, kein Ni live dabei)
+
+**Geprüfte Branches:**
+- `it-chef/auto` — 0 neue Commits vor `main` (deckungsgleich, bereits
+  heute früh gemergt). Planmäßig übersprungen, kein neuer Stand.
+- `marketing-chef/auto` — 1 neuer Commit vor `main` (`2e881ca`, 09.10.).
+  Branch-Basis (`cfd3b66`) lag 14 Commits hinter aktuellem `main`
+  zurück, war aber laut eigenem Log-Eintrag bewusst neu von aktuellem
+  `main` aufgesetzt und nur um diesen einen Commit erweitert — vor dem
+  Merge per `git log origin/marketing-chef/auto..main --name-only`
+  geprüft, dass keiner der 14 main-seitigen Commits dieselben Dateien
+  berührt (kein Konfliktrisiko).
+- `support-chef/auto` — 1 neuer Commit vor `main` (`0f64b33`, 09.10.).
+
+**Prüfung `marketing-chef/auto`** (Diff zu `main` gelesen, nicht nur
+Log-Eintrag geglaubt): Ändert nur `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — drei neue Tier-4-Kandidaten
+(40: fehlende Wortgrenze bei "unfall" in `mockConcierge.ts` behoben;
+41: sichtbarer Aktivitäten-Zeilentext in `EditMode.tsx` nutzt jetzt das
+disambiguierte Label; 42: Lissabon-Demo-Trip-Datumsdrift behoben),
+Kandidatentopf jetzt bei sechs, kein neuer Mini-Changelog (Schwelle
+acht nicht erreicht). Unabhängig gegengeprüft: `src/lib/ai/
+mockConcierge.ts:80` zeigt tatsächlich `\bunfall\b`, `EditMode.tsx:85`
+zeigt tatsächlich `getActivityLabel(activity, activities)` im
+sichtbaren Zeilentext, Lissabon-Demotrip in `MeineReisen.tsx` zeigt
+tatsächlich November 2026 statt September — alle drei Funde decken
+sich mit dem Code auf `main`. Keine erfundenen Kennzahlen/Nutzerzahlen,
+reiner Textentwurf, kein Hinweis auf tatsächliches Posten/Versenden.
+→ **Passt, nach `main` gemergt** (Merge-Commit `5c76da0`, da Branch-
+Basis älter als aktueller `main`-Stand war; nur die zwei erwarteten
+Dateien geändert, keine Konflikte).
+
+**Prüfung `support-chef/auto`** (Diff zu `main` gelesen): Ändert nur
+`support-chef-auto-log.md` — neuer Analyse-Eintrag: die Lissabon-
+Demokarte auf `/meine-reisen` zeigt einen aktiven "Urlaubsmodus
+aktivieren"-Button, der aber nicht zum angezeigten Lissabon-Trip führt,
+sondern zu `Urlaubsmodus.tsx`, das seinen Trip ausschließlich aus
+`loadStoredChat()?.trip` (echtem KI-Chat-Trip aus `tripStorage.ts`)
+liest — beide Datenquellen sind komplett getrennt. Stichprobenartig
+nachvollzogen: `src/pages/MeineReisen.tsx` (Zeilen ~19-22, lokales
+`trips`-Array mit Lissabon `upcoming`, Button `Link to="/urlaubsmodus"`)
+und `src/pages/Urlaubsmodus.tsx` (Zeile 12, `loadStoredChat()?.trip ??
+null`) stimmen mit der Beschreibung überein, nichts wirkt erfunden.
+Reine Analyse, kein Code geändert, daher kein Build/Lint/Test nötig.
+→ **Passt, nach `main` gemergt** (Merge-Commit `929bcea`).
+
+**Ergebnis:** `marketing-chef/auto` und `support-chef/auto` geprüft,
+unabhängig verifiziert, beide gemergt und nach `origin/main` gepusht
+(`1af293c..929bcea`). `it-chef/auto` planmäßig übersprungen (kein
+neuer Stand).
+
+**Info an Ni:** Nein — beide Merges saubere Analyse-/Entwurfs-Branches
+ohne Code-Risiko, keine Auffälligkeit, die seine Aufmerksamkeit
+bräuchte. Der neue Support-Chef-Fund (Lissabon-Demokarte →
+Urlaubsmodus-Datenquelle) ist ein echter, nachvollziehbarer neuer
+Reibungspunkt, aber reine Analyse ohne Dringlichkeit — landet ganz
+normal im nächsten IT-Chef-Lauf als Kandidat.
+
 ## 2026-10-07, Tages-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
