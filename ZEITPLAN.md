@@ -803,6 +803,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   ergänzt — vor dem Fix durch temporäres Zurücknehmen der Quelländerung
   (`git stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Meldung
   enthielt "Lissabon" nicht).
+  Vom autonomen IT-Chef-Lauf am 09.10. (fünfter Lauf) einen über einen
+  eigens dafür beauftragten Explore-Agenten gefundenen, eigenständigen Bug
+  in `startEdit()` (`useChat.ts`) behoben: Das Flag `awaitingFlightOrigin`
+  (steuert, ob die nächste Nutzereingabe als IATA-Abflugcode statt als
+  normale Transportmittel-Antwort gelesen wird) wurde beim Start eines
+  neuen Feld-Edits nicht zurückgesetzt — anders als `stayOffers`/
+  `stayErrors`/`editingField` direkt daneben, die `startEdit()` bereits für
+  jedes Feld zurücksetzt. Reproduzierbare Kette: Über "Bearbeiten" das
+  Transportmittel ändern, "Flug" wählen (fragt nach dem Abflughafen,
+  `awaitingFlightOrigin=true`), dann ohne diesen zu beantworten ein anderes
+  Feld bearbeiten (z. B. Reisedaten) und normal abschließen — das verwaiste
+  Flag bleibt `true`. Bearbeitet man danach erneut das Transportmittel und
+  antwortet z. B. mit "Zug" (3 Buchstaben, erfüllt zufällig dasselbe
+  Muster wie ein IATA-Code), überspringt der Chat `detectTransportMode()`
+  komplett, interpretiert "Zug" als Abflughafen-Code, setzt das
+  Transportmittel unbemerkt auf "Flug" statt des gewählten "Zug" und startet
+  eine Flugsuche mit dem erfundenen Code "ZUG" — bei anderen Wörtern
+  erscheint statt dessen fälschlich die Fehlermeldung zum Flughafencode.
+  Fix: `setAwaitingFlightOrigin(false)` in `startEdit()` ergänzt, direkt
+  neben den bestehenden Resets der anderen Edit-Felder, keine neue
+  Design-Entscheidung. Neuer Regressionstest in `useChat.test.ts` (Edit
+  "Transportmittel" → "Flug" abbrechen → Edit "Reisedaten" abschließen →
+  erneut Edit "Transportmittel" → "Zug": `searchFlights` wird nicht
+  aufgerufen, `trip.transportMode` wird korrekt `'train'`) — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `useChat.ts`) reproduzierbar rot verifiziert (Testlauf warf stattdessen
+  beim unbeabsichtigten Flugsuche-Aufruf).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -456,6 +456,54 @@ describe('useChat flight search failure vs. real zero results', () => {
 
     expect(result.current.flightLoading).toBe(false)
   })
+
+  // startEdit() resets stayOffers/stayErrors/editingField for every field,
+  // but used to leave a stale awaitingFlightOrigin=true behind when the
+  // user abandoned an in-progress "edit transport mode -> Flug -> (never
+  // enters an origin)" flow for a different field edit. A later, unrelated
+  // transportMode edit then wrongly took the IATA-origin branch instead of
+  // detectTransportMode(), misreading e.g. "Zug" (3 letters, passes
+  // IATA_CODE_PATTERN) as a flight origin code and silently switching the
+  // trip to transportMode: 'flight' instead of 'train'.
+  it('does not let an abandoned flight-origin prompt leak into a later, unrelated transport mode edit', () => {
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+
+    act(() => {
+      result.current.startEdit('transportMode')
+    })
+    act(() => {
+      result.current.sendMessage('Flug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    // Abandon the flight-origin prompt by switching to a different field
+    // edit instead of answering it.
+    act(() => {
+      result.current.startEdit('dates')
+    })
+    act(() => {
+      result.current.sendMessage('Im Sommer')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    // Revisit the transport mode field and pick "Zug" this time.
+    act(() => {
+      result.current.startEdit('transportMode')
+    })
+    act(() => {
+      result.current.sendMessage('Zug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(searchFlights).not.toHaveBeenCalled()
+    expect(result.current.trip.transportMode).toBe('train')
+  })
 })
 
 describe('useChat default search dates use the local calendar day, not UTC', () => {

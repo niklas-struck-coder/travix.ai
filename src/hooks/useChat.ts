@@ -163,6 +163,11 @@ export function useChat(speechEnabled: boolean) {
     setStayOffers(null)
     setStayErrors([])
     setEditingField(field)
+    // Abandoning an in-progress "transportMode -> Flug -> (never enters an
+    // origin)" edit for a different field must not leave this flag behind —
+    // otherwise a later, unrelated transportMode edit would wrongly take the
+    // IATA-origin branch in sendMessage() instead of detectTransportMode().
+    setAwaitingFlightOrigin(false)
 
     if (field === 'accommodation') {
       const destination = findKnownDestination(trip.destination ?? '')

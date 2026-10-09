@@ -17506,3 +17506,50 @@ Fehler, dieselben drei vorbestehenden Fast-Refresh-Warnungen in
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-09 (fünfter Lauf)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` lag beim Start zwei Commits hinter `main`
+(zwei Berichts-Commits von Marketing-Chef/Support-Chef vom 09.10.) —
+`origin/main` sauber in `it-chef/auto` gemergt (reiner Doku-Merge, keine
+Konflikte) und sofort gepusht, bevor am eigentlichen Punkt gearbeitet
+wurde. `main` selbst blieb unberührt.
+
+**Suche:** Da die vier bisherigen Läufe von heute (siehe oben) bereits
+sehr breit gesucht haben, einen eigens dafür beauftragten Explore-Agenten
+gezielt auf Dateien/Aspekte angesetzt, die in den heutigen Einträgen noch
+nicht einzeln genannt waren bzw. mit der Auflage, bereits verworfene
+Kandidaten (Fokus-Timing in `routes.tsx`, Lösch-Warnungstexte,
+"Urlaubsmodus aktivieren" auf der Lissabon-Demokarte, toter
+`accommodationNoticeHandled`-Zweig, `recharts`, `TrainCard`/
+`TrainResults`, Preisformat in `EditMode.tsx`) nicht erneut
+vorzuschlagen.
+
+**Gefunden und behoben:** Ein eigenständiger Bug in `startEdit()`
+(`src/hooks/useChat.ts`): Das Flag `awaitingFlightOrigin` wurde beim
+Start eines neuen Feld-Edits nicht zurückgesetzt, anders als
+`stayOffers`/`stayErrors`/`editingField` direkt daneben. Wer über
+"Bearbeiten" das Transportmittel auf "Flug" ändert, dann den
+angeforderten Abflughafen nicht einträgt, sondern ein anderes Feld
+bearbeitet, und später erneut das Transportmittel bearbeitet, bekam seine
+Eingabe (z. B. "Zug", zufällig 3 Buchstaben wie ein IATA-Code) als
+Abflughafen-Code fehlinterpretiert — das Transportmittel wurde dabei
+unbemerkt auf "Flug" statt des gewählten Werts gesetzt und eine
+Flugsuche mit erfundenem Code gestartet. Details, Reproduktionsschritte
+und Fix siehe `ZEITPLAN.md` (09.10.-Eintrag, Phase 4). Vor dem Fix durch
+temporäres Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
+reproduzierbar rot verifiziert; neuer Regressionstest in
+`useChat.test.ts`.
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 424 Tests, alle grün), `npm run build`
+(erfolgreich).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
