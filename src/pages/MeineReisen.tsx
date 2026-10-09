@@ -17,7 +17,7 @@ interface Trip {
 // Urlaubsmodus is intentionally not in the sidebar — it's only reachable
 // here, from an actual trip, once that trip is upcoming or active.
 const trips: Trip[] = [
-  { id: '1', destination: 'Lissabon', dates: '15. – 22. September 2026', gradient: 'from-teal to-navy', status: 'upcoming' },
+  { id: '1', destination: 'Lissabon', dates: '15. – 22. November 2026', gradient: 'from-teal to-navy', status: 'upcoming' },
   { id: '2', destination: 'Kyoto', dates: '3. – 10. März 2026', gradient: 'from-gold to-navy', status: 'past' },
 ]
 

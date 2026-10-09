@@ -2091,6 +2091,31 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Name war im Dokument). Der ursprüngliche Auto-Fix-PR #28 bleibt als
   überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
   werden).
+  Vom autonomen IT-Chef-Lauf am 09.10. (zweiter Lauf desselben Tages) einen
+  über einen eigens beauftragten Explore-Agenten gefundenen Fund behoben:
+  Der Demo-Trip "Lissabon" (7.9/8.8, u. a. in `MeineReisen.tsx`,
+  `Dashboard.tsx`, `Kalender.tsx`, `Reiseentwuerfe.tsx`) war fest auf "15.
+  – 22. September 2026" datiert und trug in `MeineReisen.tsx` weiterhin
+  `status: 'upcoming'` — real lief der Container bereits am 09.10.2026,
+  die Reise war also schon seit über zwei Wochen vorbei, zeigte aber
+  weiterhin den teal "Bevorstehend"-Badge und einen aktiven "Urlaubsmodus
+  aktivieren"-Button auf `/meine-reisen`. Gleicher Bug-Typus wie der am
+  08.10. (dritter Lauf) behobene Kyoto-Jahres-Drift, nur diesmal nicht
+  zwischen Dateien uneinheitlich, sondern einheitlich gegenüber der realen
+  Uhrzeit veraltet — alle vier Dateien dokumentieren im eigenen Kommentar
+  explizit, dieselbe Demo-"Welt" zu teilen. Fix: reine Datumskorrektur
+  (keine neue Logik) auf "15. – 22. November 2026" in allen vier Dateien
+  (inkl. der maschinenlesbaren `startDate`/`endDate` in `Kalender.tsx`),
+  identischer 8-Tage-Zeitraum wie vorher. `MeineReisen.test.tsx`,
+  `Reiseentwuerfe.test.tsx` und `Kalender.test.tsx` entsprechend angepasst
+  (in `Kalender.test.tsx` zusätzlich die fest gesetzte Systemzeit von
+  August auf Oktober 2026 verschoben, damit Testlogik/Monatsnamen mit dem
+  neuen Novemberdatum konsistent bleiben). `Kartenansicht.test.tsx`
+  bewusst unverändert gelassen — nutzt denselben Datumsstring nur als
+  beliebigen Testwert für einen separat gespeicherten Trip, nicht Teil der
+  gemeinsamen Demo-Welt. Wie bei Kyoto bleibt das eine Datenkorrektur, die
+  sich bei fortschreitender Zeit wiederholen wird, solange `TripDraft`
+  keine echte Buchungs-/Backend-Anbindung hat (siehe Phase 2).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

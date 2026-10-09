@@ -20,7 +20,7 @@ import {
 // and display dates as MeineReisen.tsx, with an added structured date
 // range so this page can actually place them on the calendar grid.
 const trips: (CalendarTripRange & { dates: string })[] = [
-  { id: '1', destination: 'Lissabon', startDate: '2026-09-15', endDate: '2026-09-22', dates: '15. – 22. September 2026' },
+  { id: '1', destination: 'Lissabon', startDate: '2026-11-15', endDate: '2026-11-22', dates: '15. – 22. November 2026' },
   { id: '2', destination: 'Kyoto', startDate: '2026-03-03', endDate: '2026-03-10', dates: '3. – 10. März 2026' },
 ]
 

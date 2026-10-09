@@ -17306,3 +17306,91 @@ grün nach dem Fix.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-10-09 (zweiter Lauf desselben Tages, geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md` hatte für den aktuellen Sprint
+(Sprint 4, Urlaubsmodus & Konto) keinen Punkt, der alle vier
+Sicherheitskriterien erfüllt (8.2/8.3/8.4/8.5-8.7 sind größere Features
+mit offenen Fragen, 8.11 ist explizit auf FAQ-Inhalte von Support-Chef
+blockiert, 8.9/8.12 sind Platzhalterseiten ohne klaren Umsetzungsrahmen).
+Die beiden einzigen in `reports/it-chef.md` noch offenen Bugs
+(`routes.tsx`-Fokus-Timing, `EditMode.tsx`-Preisformat) sind dort selbst
+explizit als "kein Einzeiler"/Design-Entscheidung markiert. Deshalb einen
+eigens beauftragten Explore-Agenten auf gezielte, über die bereits
+bekannten Funde hinausgehende Bug-Suche angesetzt (gelesen, nicht nur
+gegrept: `cartTotals.ts`, `calendarUtils.ts`, `checklistRules.ts`,
+`calculateProgress.ts`, `tripStorage.ts`, `format.ts`, `mockAdvisor.ts`,
+`mockConcierge.ts`, `nav-config.ts`, `utils.ts`,
+Preisalarme/Favoriten/Warenkorb/Angebote/Aktivitaeten/Kartenansicht/
+Reiseentwuerfe/Profil/Urlaubsmodus/ChecklistPanel) — fündig geworden bei
+den vier Demo-Trip-Dateien.
+
+**Befund:** Der Demo-Trip "Lissabon" ist in `MeineReisen.tsx`,
+`Dashboard.tsx`, `Kalender.tsx` und `Reiseentwuerfe.tsx` fest auf "15. –
+22. September 2026" datiert (alle vier Dateien dokumentieren im eigenen
+Kommentar, dieselbe geteilte Demo-"Welt" zu nutzen). `MeineReisen.tsx`
+setzt zusätzlich `status: 'upcoming'` für diesen Trip. Realer
+Container-Zeitstempel zu Beginn dieses Laufs: 2026-10-09 (per `date -u`
+verifiziert) — der Reisezeitraum liegt damit bereits über zwei Wochen in
+der Vergangenheit. `/meine-reisen` zeigte die Reise trotzdem weiterhin
+mit dem teal "Bevorstehend"-Badge und einem aktiven "Urlaubsmodus
+aktivieren"-Button (verlinkt auf `/urlaubsmodus`) an — für eine bereits
+abgeschlossene Reise eine irreführende, tatsächlich anklickbare
+Falschdarstellung. Gleicher Bug-Typus wie der am 08.10. (dritter Lauf)
+behobene Kyoto-Jahres-Drift (reiner Werte-Drift in hartcodierten
+Demo-Daten), nur diesmal nicht als Uneinheitlichkeit zwischen Dateien
+(alle vier stimmten intern überein), sondern als Uneinheitlichkeit
+gegenüber der realen Uhrzeit.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: reine Korrektur eines Datumswerts in
+hartcodierten Demo-Arrays, keine neue Logik, identisches Muster zum
+bereits etablierten und von Freigabe-Chef gemergten Kyoto-Jahres-Fix.
+Klar genug beschrieben (konkreter, über `date -u` objektiv verifizierter
+Widerspruch zwischen Realzeit und UI-Zustand). Objektiv prüfbar: nach dem
+Fix liegt das neue Datum (November 2026) nach dem Laufzeitpunkt, der
+"Bevorstehend"-Zustand ist damit wieder tatsächlich zutreffend; bestehende
+Tests, die den exakten Datumsstring prüfen, decken das ab.
+
+**Umgesetzt:**
+- `src/pages/MeineReisen.tsx:20`, `src/pages/Dashboard.tsx` (Lissabon-
+  Eintrag in `draftTrips`), `src/pages/Kalender.tsx:23` (inkl.
+  maschinenlesbarer `startDate`/`endDate`) und
+  `src/pages/Reiseentwuerfe.tsx:88`: Datum von "15. – 22. September 2026"
+  auf "15. – 22. November 2026" korrigiert (identischer 8-Tage-Zeitraum
+  wie vorher, `status: 'upcoming'` in `MeineReisen.tsx` unverändert
+  gelassen, da jetzt wieder zutreffend).
+- `src/pages/MeineReisen.test.tsx`, `src/pages/Reiseentwuerfe.test.tsx`:
+  erwarteten Datumsstring entsprechend angepasst.
+- `src/pages/Kalender.test.tsx`: fest gesetzte Systemzeit von
+  `new Date(2026, 7, 20)` (20. August) auf `new Date(2026, 9, 20)` (20.
+  Oktober) verschoben, damit der bestehende "einen Monat vor/nach dem
+  Trip"-Testaufbau mit dem neuen Novemberdatum konsistent bleibt;
+  Monatsnamen in den Assertions entsprechend von August/September/Juli
+  auf Oktober/November/September angepasst. Anzahl der erwarteten
+  Lissabon-Tageszellen (9, für den 8-Tage-Zeitraum plus den Listeneintrag)
+  unverändert, da der Zeitraum weiterhin 8 Tage umfasst.
+- `src/pages/Kartenansicht.test.tsx` bewusst unverändert gelassen: nutzt
+  denselben Datumsstring nur als beliebigen Testwert für einen separat in
+  `tripStorage.ts` gespeicherten Trip, nicht Teil der gemeinsamen
+  Demo-"Welt" der vier oben genannten Seiten.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt) um den entsprechenden Eintrag
+  ergänzt, inkl. Hinweis, dass sich diese Art von Datenkorrektur bei
+  fortschreitender Zeit wiederholen wird, solange `TripDraft` keine echte
+  Buchungs-/Backend-Anbindung hat.
+
+**Geprüft:**
+- `npm ci` (frischer Checkout).
+- `npx tsc -b` → kein Typfehler.
+- `npm run lint` → 0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+  Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx` (nicht durch diesen
+  Change verursacht).
+- `npx vitest run` → 62 Testdateien, 423 Tests, alle grün.
+- `npm run build` (`tsc -b` + `vite build`) → kein Typfehler, Build
+  erfolgreich, unveränderte Chunk-Size-Warnung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

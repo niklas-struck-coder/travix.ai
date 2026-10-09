@@ -12,7 +12,7 @@ describe('MeineReisen', () => {
     )
 
     expect(screen.getByText('Lissabon')).toBeInTheDocument()
-    expect(screen.getByText('15. – 22. September 2026')).toBeInTheDocument()
+    expect(screen.getByText('15. – 22. November 2026')).toBeInTheDocument()
     expect(screen.getByText('Bevorstehend')).toBeInTheDocument()
 
     expect(screen.getByText('Kyoto')).toBeInTheDocument()
