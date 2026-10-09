@@ -1,74 +1,67 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-08
+**Datum:** 2026-10-09
 
-## Was ist seit dem letzten Eintrag (2026-10-07) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-08) passiert?
 
-Einiges, vor allem an der Stelle, die ich am 07.10. selbst als offen
-markiert hatte: Der neue Seitenwechsel-Sprung (`src/routes.tsx:54-56`,
-seit 07.10. da) macht weiterhin nur `window.scrollTo(0, 0)` — der von
-mir vorgeschlagene `focusPageHeading()`-Aufruf direkt daneben fehlt noch
-unverändert. Gleicher Code, gleiche Lücke.
+Zwei meiner länger offenen Punkte sind heute tatsächlich live gegangen.
+PR #28 ist gemergt: `src/components/trip/EditMode.tsx:85` zeigt bei zwei
+gleichnamigen Aktivitäten jetzt das disambiguierte Label statt des rohen
+Namens — die Zweideutigkeit beim Löschen ist weg. Und IT-Chef hat die
+Fehlermeldung bei "Start = Ziel" im Flug-Chat ergänzt:
+`src/hooks/useChat.ts:261` nennt den Zielort jetzt im Satz, man muss
+nicht mehr zurückscrollen.
 
-Der parallele, branch-basierte Support-Chef-Lauf hat heute den
-Aktivitäten-Bearbeiten-Dialog (`EditMode.tsx`) genauer angeschaut, weil
-IT-Chef dort zweimal nachgebessert hat: einmal die Disambiguierung
-gleichnamiger Aktivitäten (`getActivityLabel()`) auf den
-Lösch-Bestätigungsdialog ausgeweitet, einmal `isTripComplete()` so
-korrigiert, dass Badge und Checkliste bei offenen Aktivitäten wieder
-übereinstimmen. Dabei kam ein neuer, echter Fund heraus (siehe
-Vorschlag 1) — IT-Chef hat ihn als Einzeiler bereits umgesetzt, der Fix
-wartet aber noch als offener PR auf Review/Merge, ist also im Moment
-live noch **nicht** sichtbar.
+Der parallele, branch-basierte Support-Chef-Lauf hat heute außerdem einen
+neuen, echten Fund dokumentiert, den ich selbst im Code nachvollzogen
+habe: Die Demo-Karte "Lissabon" auf `/meine-reisen`
+(`src/pages/MeineReisen.tsx:19`) hat einen aktiven Button "Urlaubsmodus
+aktivieren", der aber nicht zu dieser Reise führt — `Urlaubsmodus.tsx:12`
+liest das Reiseziel ausschließlich aus dem im KI-Chat gespeicherten Trip
+(`loadStoredChat()`), nicht aus der Demo-Liste. Ohne eigenen Chat-Trip
+landet man auf einer leeren Begrüßung, mit einem anderen Chat-Trip auf
+dem falschen Reiseziel. Das ist bereits im autonomen Log festgehalten,
+ich greife es hier nicht erneut als eigenen Vorschlag auf, sondern
+erwähne es, weil es ein echter, anklickbarer Reibungspunkt auf einer
+zentralen Seite ist.
 
-Meine Vorschläge 2 und 3 vom 07.10. (Zielname fehlt in "Start=Ziel"-
-Meldung; uneinheitliche Lösch-Warnungen) sind unverändert offen, ich
-habe sie heute im Code erneut nachgeprüft — gleiche Zeilen, gleicher
-Stand.
+Meine beiden übrigen Vorschläge vom 08.10. (Fokus-Sprung,
+Lösch-Warnungen) sind unverändert offen — gleiche Zeilen, gleicher Stand.
+Bei den Lösch-Warnungen habe ich heute zusätzlich zwei weitere Stellen
+gefunden, die ich bisher nicht aufgelistet hatte.
 
 ## Meine Vorschläge
 
-1. **Der heute gefundene Fix für mehrdeutige Aktivitätennamen ist fertig,
-   aber noch nicht gemergt — lohnt sich, ihn zügig durchzuwinken.**
-   `src/components/trip/EditMode.tsx:85` zeigt bei zwei gleichnamigen
-   Aktivitäten (z. B. zweimal "Stadtführung") weiterhin den rohen Namen
-   in der sichtbaren Zeile, obwohl das bereits berechnete, disambiguierte
-   Label (`activityLabel`, Zeile 82) seit heute schon für den
-   Lösch-Dialog und die `aria-label`s verwendet wird. Ich habe das
-   selbst im laufenden Code nachvollzogen: Zwei Zeilen sehen optisch
-   identisch aus, man erkennt erst beim Löschen, welche welche ist.
-   [PR #28](https://github.com/niklas-struck-coder/travix.ai/pull/28)
-   behebt genau das mit einem risikolosen Einzeiler
-   (`{activity.name}` → `{activityLabel}`), ist aber noch offen (nicht
-   gemergt). *Vorschlag:* PR #28 zeitnah mergen, dann ist diese Lücke
-   geschlossen.
+1. **Lösch-Warnungen sind jetzt an sieben Stellen unnötig einheitlich
+   scharf formuliert — zwei neue Fundstellen.** Zusätzlich zu
+   `EditMode.tsx:151`, `Preisalarme.tsx:137`, `Warenkorb.tsx:134` und
+   `Reiseentwuerfe.tsx:336/356` nutzen auch `Favoriten.tsx:128` (Favorit
+   entfernen) und `Aktivitaeten.tsx:118` (Aktivität entfernen) wortgleich
+   "Das lässt sich nicht rückgängig machen." Für eine Reise löschen mag
+   das passen — für einen Favoriten oder eine Preisalarm-Entfernung wirkt
+   es unnötig alarmierend, weil beides sich ja einfach wieder anlegen
+   lässt. *Vorschlag:* die scharfe Formulierung auf `Reiseentwuerfe.tsx`
+   begrenzen, bei den anderen sechs Stellen eine ruhigere Formulierung
+   wie "Du kannst [X] jederzeit wieder hinzufügen" verwenden.
 
-2. **Fokus-Sprung bei Seitenwechsel fehlt weiterhin — betrifft jetzt auch
-   die neue Scroll-Stelle.** `src/routes.tsx:54-56` springt bei jedem
-   Routenwechsel per `window.scrollTo(0, 0)` an den Seitenanfang, ruft
-   aber nicht zusätzlich `focusPageHeading()`
-   (`src/lib/utils.ts:14-27`, bereits mit `preventScroll: true` gebaut,
-   würde also nicht kollidieren) auf. Wer über die Sidebar navigiert
-   oder einen Link direkt aufruft, bekommt per Screenreader weiterhin
-   keine Ansage, dass eine neue Seite da ist. *Vorschlag:* unverändert
-   — `focusPageHeading()` direkt neben `window.scrollTo(0, 0)` in
-   denselben `useEffect` aufnehmen.
+2. **Fokus-Sprung bei Seitenwechsel fehlt weiterhin.**
+   `src/routes.tsx:54-56` springt bei jedem Routenwechsel per
+   `window.scrollTo(0, 0)` an den Seitenanfang, ruft aber nicht
+   zusätzlich `focusPageHeading()` (`src/lib/utils.ts:14-27`, bereits mit
+   `preventScroll: true` gebaut, würde also nicht kollidieren) auf. Wer
+   über die Sidebar navigiert oder einen Link direkt aufruft, bekommt per
+   Screenreader weiterhin keine Ansage, dass eine neue Seite da ist.
+   *Vorschlag:* unverändert — `focusPageHeading()` direkt neben
+   `window.scrollTo(0, 0)` in denselben `useEffect` aufnehmen.
 
-3. **Fehlermeldung bei "Start = Ziel" im Flug-Chat nennt den Zielort
-   nicht.** `src/hooks/useChat.ts:261` antwortet bei gleichem Abflug-
-   und Zielflughafen weiterhin nur mit "Start und Ziel dürfen nicht
-   gleich sein — welcher Flughafen ist dein Abflugort?". Die Nutzerin
-   muss selbst zurückscrollen, um zu sehen, welchen Ort sie eingegeben
-   hat. *Vorschlag:* Zielname/-code in die Nachricht aufnehmen.
+3. **"Urlaubsmodus aktivieren" auf der Lissabon-Demokarte führt ins
+   Leere oder zum falschen Ziel.** Siehe Einordnung oben —
+   `MeineReisen.tsx:19-53` verlinkt auf `/urlaubsmodus`, dessen Inhalt
+   aber aus einer komplett getrennten Datenquelle kommt
+   (`tripStorage.ts` statt der lokalen `trips`-Liste). Das ist der
+   naheliegendste Klickpfad auf einer zentralen Seite, nicht nur ein
+   Randfall. *Vorschlag:* kurzfristig entweder den Button auf der
+   Demo-Karte deaktivieren, oder `MeineReisen.tsx` dieselbe Datenquelle
+   nutzen lassen wie `Buchung.tsx`.
 
-4. **Lösch-Warnungen weiterhin unnötig einheitlich scharf.** Dieselbe
-   scharfe "Das lässt sich nicht rückgängig machen"-Formulierung steht
-   wortgleich in `Preisalarme.tsx:137`, `Warenkorb.tsx:134`,
-   `Reiseentwuerfe.tsx:336/356` und `EditMode.tsx:151` — auch für leicht
-   rückholbare Aktionen wie einen Preisalarm oder eine Warenkorb-Position
-   entfernen. *Vorschlag:* die scharfe Formulierung für
-   `Reiseentwuerfe.tsx` reservieren, bei den anderen eine ruhigere
-   Formulierung wie "Du kannst [X] jederzeit wieder hinzufügen"
-   verwenden.
-
-_Letztes Update: 2026-10-08_
+_Letztes Update: 2026-10-09_
