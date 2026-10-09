@@ -17229,3 +17229,80 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-10-09 (geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Bereits über den separaten Auto-Fix-Kanal
+vollständig diagnostizierter Fund (offener PR #28,
+`it-chef-autofix/editmode-sichtbares-label-2026-10-08`, von Support-Chef
+am 08.10. im Detail analysiert, siehe `reports/support-chef.md`,
+08.10., Fund 1) — direkt auf `it-chef/auto` übernommen statt auf Ni's
+Review des PRs zu warten, exakt nach demselben bereits mehrfach
+etablierten Muster (siehe z. B. 26.09./28.09.-Einträge oben).
+
+**Befund:** `EditMode.tsx` (6.12) berechnet seit dem 08.10.-Fix für jede
+Aktivität bereits ein disambiguiertes Label (`getActivityLabel()`, z. B.
+"Spaziergang (Eintrag 2)") und nutzt es für die `aria-label`s von
+Preis-Input und Entfernen-Button sowie für den Lösch-Dialogtext — der
+sichtbare Zeilentext selbst (Zeile 85, `{activity.name}`) zeigte aber
+weiterhin den rohen, nicht disambiguierten Namen. Zwei gleichnamige
+Aktivitäten (kein Eindeutigkeits-Check in `addActivity()`) erschienen
+dadurch weiterhin als zwei optisch identische Zeilen mit je eigenem
+Preisfeld/Löschen-Button — erst beim Löschen über die aria-label-Angabe
+erkennbar, welche Zeile zu welchem Eintrag gehört.
+
+Randnotiz zur eigenen Historie: `reports/it-chef.md` (Eintrag vom
+08.10., "Automatisch gefixt", Punkt 1) beschreibt genau diesen Fix
+bereits als erledigt ("ich habe das nachvollzogen, umgesetzt und mit
+einem neuen Regressionstest abgesichert") — der Code-Stand auf
+`it-chef/auto` (letzter Commit vor diesem Lauf: `233c8a6`, fünfter Lauf
+vom 08.10.) enthielt diese Änderung aber nicht, Zeile 85 zeigte
+weiterhin unverändert `{activity.name}`. Der Berichtstext war demnach
+verfrüht geschrieben, ohne dass der zugehörige Code-Fix tatsächlich im
+selben Commit gelandet ist. Mit diesem Lauf stimmt Bericht und Code
+jetzt überein; keine weitere Korrektur an `reports/it-chef.md` nötig, da
+der beschriebene Zustand jetzt zutrifft.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: `activityLabel` liegt an dieser Stelle bereits
+berechnet vor (Zeile 82), keine neue Herleitung nötig — mechanische
+Übernahme des in derselben Zeilen-Komponente (aria-labels zwei Zeilen
+darunter) bereits etablierten Musters, keine neue Design-Entscheidung.
+Klar genug beschrieben (exakte Datei/Zeile, exakter Einzeiler, bereits
+von Support-Chef analysiert und als risikoloser Einzeiler eingestuft).
+Objektiv prüfbar: neuer Regressionstest zuerst rot verifiziert, dann
+grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/components/trip/EditMode.tsx:85`: `{activity.name}` →
+  `{activityLabel}`.
+- Neuer Regressionstest in `EditMode.test.tsx` ("shows the disambiguated
+  label in the visible row text for same-named activities") — prüft den
+  sichtbaren Zeilentext direkt (nicht nur die aria-labels, die der
+  bestehende Test "gives same-named activities distinguishable labels"
+  bereits abdeckt). Vor dem Fix durch den neuen Test selbst reproduzierbar
+  rot verifiziert: `screen.getByText('Spaziergang (Eintrag 1)')` fand kein
+  Element, da nur der rohe, nicht disambiguierte Name im Dokument stand.
+  Nach dem Fix grün.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 6/8-Bereich direkt nach dem
+  08.10.-`unfall`-Eintrag) um den entsprechenden Eintrag ergänzt.
+- `tasks/tasks-prd-travix-platform.md` (Checkbox 6.12, Zusatz) um den
+  entsprechenden Eintrag ergänzt.
+- `reports/it-chef.md` unverändert gelassen (siehe Randnotiz oben —
+  Bericht beschrieb den Fix bereits korrekt, nur der Code fehlte bisher).
+
+**Geprüft:**
+- `npm ci` (frischer Checkout).
+- `npx tsc -b` → kein Typfehler.
+- `npm run lint` → 0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+  Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx` (nicht durch diesen
+  Change verursacht).
+- `npx vitest run` → 62 Testdateien, 423 Tests, alle grün (davon 1 neuer
+  Test).
+- `npm run build` (`tsc -b` + `vite build`) → kein Typfehler, Build
+  erfolgreich, unveränderte Chunk-Size-Warnung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

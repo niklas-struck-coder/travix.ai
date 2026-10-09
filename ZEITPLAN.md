@@ -2070,6 +2070,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `mockConcierge.ts`) reproduzierbar rot verifiziert (löste `matched: true`
   mit der Notrufnummer-Antwort aus).
+  Vom autonomen IT-Chef-Lauf am 09.10. einen bereits über den separaten
+  Auto-Fix-Kanal vollständig diagnostizierten Fund (offener PR #28,
+  `it-chef-autofix/editmode-sichtbares-label-2026-10-08`, von Support-Chef
+  am 08.10. im Detail analysiert) direkt auf `it-chef/auto` übernommen,
+  statt auf Ni's Review des PRs zu warten: `EditMode.tsx` (6.12) berechnet
+  seit dem 08.10.-Fix (s.o.) für jede Aktivität bereits ein disambiguiertes
+  Label (`getActivityLabel()`, z. B. "Spaziergang (Eintrag 2)") und nutzt
+  es für die aria-labels und den Lösch-Dialogtext — der sichtbare
+  Zeilentext selbst (`{activity.name}`) zeigte aber weiterhin den rohen,
+  nicht disambiguierten Namen. Zwei gleichnamige Aktivitäten erschienen
+  dadurch weiterhin als zwei optisch identische Zeilen, erst beim Löschen
+  erkennbar, welche welche ist. Fix: risikoloser Einzeiler
+  (`{activity.name}` → `{activityLabel}`), keine neue Design-Entscheidung,
+  mechanische Übernahme des in derselben Zeilen-Komponente bereits
+  etablierten Musters. Neuer Regressionstest in `EditMode.test.tsx` (prüft
+  den sichtbaren Zeilentext direkt, nicht nur die aria-labels) — vor dem
+  Fix durch die neue Assertion selbst reproduzierbar rot verifiziert
+  (`getByText('Spaziergang (Eintrag 1)')` fand kein Element, nur der rohe
+  Name war im Dokument). Der ursprüngliche Auto-Fix-PR #28 bleibt als
+  überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
+  werden).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
