@@ -786,6 +786,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
   reproduzierbar rot verifiziert (`searchFlights` wurde tatsächlich mit
   `origin: 'LIS', destination: 'LIS'` aufgerufen).
+  Vom autonomen IT-Chef-Lauf am 08.10. (fünfter Lauf desselben Tages) einen
+  von `reports/it-chef.md` (08.10., Fund 1) gemeldeten Fund behoben: Die
+  "Start = Ziel"-Fehlermeldung im Flugsuche-Teilpfad des Chats
+  (`useChat.ts`, direkt neben dem am 05.10. ergänzten `sameAirport`-Guard)
+  antwortete nur mit "Start und Ziel dürfen nicht gleich sein — welcher
+  Flughafen ist dein Abflugort?", ohne das gerade bestätigte Reiseziel zu
+  nennen — anders als die unmittelbar danach folgende "searching"-Meldung
+  in derselben Funktion, die bereits `known.name` einbaut ("… nach
+  ${known.iataCode} (${known.name})"). Fix: `known.name` (zu diesem
+  Zeitpunkt bereits berechnet, keine neue Abfrage nötig) in die
+  Fehlermeldung übernommen ("… dein Abflugort nach ${known.name}?"),
+  mechanische Übernahme des im selben Block bereits etablierten Musters,
+  keine neue Design-Entscheidung. Bestehender Regressionstest in
+  `useChat.test.ts` um eine Prüfung auf den jetzt enthaltenen Zielnamen
+  ergänzt — vor dem Fix durch temporäres Zurücknehmen der Quelländerung
+  (`git stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Meldung
+  enthielt "Lissabon" nicht).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
@@ -2033,6 +2050,72 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `EditMode.tsx`) reproduzierbar rot verifiziert (Dialogtext zeigte den
   mehrdeutigen rohen Namen ohne "(Eintrag 2)").
+  Vom autonomen IT-Chef-Lauf am 08.10. (vierter Lauf desselben Tages) eine
+  übersehene Instanz derselben Wortgrenzen-Bug-Klasse behoben, die der
+  dritte Lauf vom 07.10. bereits einmal in derselben Zeile fixte: In
+  `getConciergeReply()` (`mockConcierge.ts`) bekam beim 07.10.-Fix nur das
+  Keyword `hilfe` eine Wortgrenze (`\bhilfe\b`), das direkt danebenstehende
+  `unfall` in derselben Regex (`/notruf|notfall|polizei|\bhilfe\b|unfall/`)
+  wurde dabei übersehen, obwohl es exakt demselben, im Kommentar direkt
+  darüber festgehaltenen Muster unterliegt. Dadurch matchte es als
+  Teilwort in "Unfallversicherung" — eine naheliegende Frage im
+  Urlaubsmodus-Concierge ("Brauche ich eine Unfallversicherung für die
+  Reise?") löste fälschlich "Die Notrufnummer lautet: 112." statt der
+  generischen Fallback-Antwort aus, obwohl die App mit "Reiseversicherung
+  abgeschlossen" (`checklistRules.ts`) selbst einen passenden
+  Checklistenpunkt dafür hat. Fix: `\bunfall\b` statt `unfall`, identisches
+  Muster wie beim `hilfe`-Fix vom 07.10., keine neue Design-Entscheidung.
+  Neue Assertion im bestehenden "nur als Teilwort"-Test in
+  `mockConcierge.test.ts` (Fall "Unfallversicherung") — vor dem Fix durch
+  temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockConcierge.ts`) reproduzierbar rot verifiziert (löste `matched: true`
+  mit der Notrufnummer-Antwort aus).
+  Vom autonomen IT-Chef-Lauf am 09.10. einen bereits über den separaten
+  Auto-Fix-Kanal vollständig diagnostizierten Fund (offener PR #28,
+  `it-chef-autofix/editmode-sichtbares-label-2026-10-08`, von Support-Chef
+  am 08.10. im Detail analysiert) direkt auf `it-chef/auto` übernommen,
+  statt auf Ni's Review des PRs zu warten: `EditMode.tsx` (6.12) berechnet
+  seit dem 08.10.-Fix (s.o.) für jede Aktivität bereits ein disambiguiertes
+  Label (`getActivityLabel()`, z. B. "Spaziergang (Eintrag 2)") und nutzt
+  es für die aria-labels und den Lösch-Dialogtext — der sichtbare
+  Zeilentext selbst (`{activity.name}`) zeigte aber weiterhin den rohen,
+  nicht disambiguierten Namen. Zwei gleichnamige Aktivitäten erschienen
+  dadurch weiterhin als zwei optisch identische Zeilen, erst beim Löschen
+  erkennbar, welche welche ist. Fix: risikoloser Einzeiler
+  (`{activity.name}` → `{activityLabel}`), keine neue Design-Entscheidung,
+  mechanische Übernahme des in derselben Zeilen-Komponente bereits
+  etablierten Musters. Neuer Regressionstest in `EditMode.test.tsx` (prüft
+  den sichtbaren Zeilentext direkt, nicht nur die aria-labels) — vor dem
+  Fix durch die neue Assertion selbst reproduzierbar rot verifiziert
+  (`getByText('Spaziergang (Eintrag 1)')` fand kein Element, nur der rohe
+  Name war im Dokument). Der ursprüngliche Auto-Fix-PR #28 bleibt als
+  überholt zurück (kann bei nächster PR-Hygiene-Aufräumung geschlossen
+  werden).
+  Vom autonomen IT-Chef-Lauf am 09.10. (zweiter Lauf desselben Tages) einen
+  über einen eigens beauftragten Explore-Agenten gefundenen Fund behoben:
+  Der Demo-Trip "Lissabon" (7.9/8.8, u. a. in `MeineReisen.tsx`,
+  `Dashboard.tsx`, `Kalender.tsx`, `Reiseentwuerfe.tsx`) war fest auf "15.
+  – 22. September 2026" datiert und trug in `MeineReisen.tsx` weiterhin
+  `status: 'upcoming'` — real lief der Container bereits am 09.10.2026,
+  die Reise war also schon seit über zwei Wochen vorbei, zeigte aber
+  weiterhin den teal "Bevorstehend"-Badge und einen aktiven "Urlaubsmodus
+  aktivieren"-Button auf `/meine-reisen`. Gleicher Bug-Typus wie der am
+  08.10. (dritter Lauf) behobene Kyoto-Jahres-Drift, nur diesmal nicht
+  zwischen Dateien uneinheitlich, sondern einheitlich gegenüber der realen
+  Uhrzeit veraltet — alle vier Dateien dokumentieren im eigenen Kommentar
+  explizit, dieselbe Demo-"Welt" zu teilen. Fix: reine Datumskorrektur
+  (keine neue Logik) auf "15. – 22. November 2026" in allen vier Dateien
+  (inkl. der maschinenlesbaren `startDate`/`endDate` in `Kalender.tsx`),
+  identischer 8-Tage-Zeitraum wie vorher. `MeineReisen.test.tsx`,
+  `Reiseentwuerfe.test.tsx` und `Kalender.test.tsx` entsprechend angepasst
+  (in `Kalender.test.tsx` zusätzlich die fest gesetzte Systemzeit von
+  August auf Oktober 2026 verschoben, damit Testlogik/Monatsnamen mit dem
+  neuen Novemberdatum konsistent bleiben). `Kartenansicht.test.tsx`
+  bewusst unverändert gelassen — nutzt denselben Datumsstring nur als
+  beliebigen Testwert für einen separat gespeicherten Trip, nicht Teil der
+  gemeinsamen Demo-Welt. Wie bei Kyoto bleibt das eine Datenkorrektur, die
+  sich bei fortschreitender Zeit wiederholen wird, solange `TripDraft`
+  keine echte Buchungs-/Backend-Anbindung hat (siehe Phase 2).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

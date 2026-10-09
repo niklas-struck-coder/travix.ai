@@ -19,7 +19,7 @@ const draftTrips: TripDraft[] = [
     destination: 'Lissabon',
     transportMode: 'flight',
     budget: 'bis 1.200 €',
-    dates: '15. – 22. September 2026',
+    dates: '15. – 22. November 2026',
     accommodation: null,
     activities: [],
   },

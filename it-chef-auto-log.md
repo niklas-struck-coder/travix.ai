@@ -17109,3 +17109,334 @@ Design-Implikation.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-08, vierter Lauf (geplanter autonomer Tagesmodus)
+
+**Ausgangslage:** Branch `it-chef/auto` war bei Laufbeginn bereits
+vollständig in `main` gemergt (Freigabe-Chef hatte den dritten Lauf von
+heute früh noch in der Nacht geprüft und gemergt). Branch gemäß
+`.claude/skills/it-chef-eigen/SKILL.md` frisch von `main` neu aufgesetzt,
+dann auf `origin/it-chef/auto` gepusht (reine Branch-Hygiene, kein neuer
+Code).
+
+**Ausgewählter Punkt:** Kein offener Checklisten-Punkt aus
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` passte (alle offenen
+Punkte dort sind Architektur-/Produktentscheidungen oder durch fehlende
+Backend-Credentials blockiert). Stattdessen ein über einen eigens dafür
+beauftragten Explore-Agenten gefundener, eigenständiger Bug: eine
+übersehene Instanz derselben Wortgrenzen-Bug-Klasse, die bereits am 07.10.
+(fünfter Lauf) einmal in derselben Zeile gefixt wurde.
+
+**Befund:** `getConciergeReply()` (`src/lib/ai/mockConcierge.ts:80`)
+erkennt Notfall-Fragen im Urlaubsmodus-Concierge über
+`/notruf|notfall|polizei|\bhilfe\b|unfall/`. Der 07.10.-Fix hatte dem
+Keyword `hilfe` eine Wortgrenze gegeben (`\bhilfe\b`), weil es sonst in
+Komposita wie "Hilfestellung" mitmatcht — der Kommentar direkt über der
+Zeile beschreibt dieses Prinzip ausdrücklich für "kurze, vollständige
+Wörter". Das direkt danebenstehende Keyword `unfall` in derselben Regex
+unterliegt exakt demselben Problem, wurde beim 07.10.-Fix aber übersehen
+und blieb ohne Wortgrenze. Mit Node verifiziert:
+`/notruf|notfall|polizei|\bhilfe\b|unfall/.test('brauche ich für meine
+reise eine unfallversicherung?')` → `true` (Bug), mit `\bunfall\b` statt
+`unfall` → `false` (korrekt). Eine Nutzerfrage wie "Brauche ich eine
+Unfallversicherung für die Reise?" bekommt dadurch fälschlich "Die
+Notrufnummer lautet: 112." statt der generischen Fallback-Antwort — kein
+Randfall, die App hat mit "Reiseversicherung abgeschlossen"
+(`checklistRules.ts`) selbst einen passenden Checklistenpunkt für dieses
+Thema.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten
+oder rechtlichen Texten — reine clientseitige String-Matching-Logik einer
+Demo-Funktion. Keine offene Produkt-/Architekturentscheidung: mechanische
+Übernahme des im selben File bereits etablierten, kommentierten
+Wortgrenzen-Musters (identisch zum 07.10.-Fix derselben Zeile), keine neue
+Design-Entscheidung. Klar genug beschrieben (exakte Datei/Zeile, exaktes
+Eingabe-Beispiel, mit Node vorab verifiziert). Objektiv prüfbar: neuer
+Testfall zuerst rot verifiziert, dann grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/lib/ai/mockConcierge.ts:80`: `unfall` → `\bunfall\b` in der
+  Notfall-Erkennungs-Regex.
+- Neue Assertion im bestehenden "nur als Teilwort"-Test in
+  `mockConcierge.test.ts` (Fall `getConciergeReply('Rom', 'Brauche ich
+  eine Unfallversicherung für die Reise?').matched` → `false`) — vor dem
+  Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `mockConcierge.ts`) reproduzierbar rot verifiziert (lieferte
+  `matched: true` mit der Notrufnummer-Antwort).
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 8) um den entsprechenden
+  Eintrag ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (kein Typfehler),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62
+Testdateien, 422 Tests, alle grün), `npm run build` (`tsc -b` + `vite
+build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-08 (fünfter Lauf desselben Tages)
+
+**Ausgewählter Punkt:** Fund 1 aus `reports/it-chef.md` (08.10.) — die
+"Start = Ziel"-Fehlermeldung im Flugsuche-Teilpfad des Chats nennt den
+Zielort nicht.
+
+**Befund:** In `useChat.ts` (`sendMessage()`, Zweig "Bearbeiten" →
+Transportmittel → Flug → Abflug-IATA-Code) antwortet der Chat bei
+identischem Abflug- und Zielflughafen (`sameAirport`-Guard, ergänzt am
+05.10.) nur mit "Start und Ziel dürfen nicht gleich sein — welcher
+Flughafen ist dein Abflugort?", ohne das bereits bekannte Reiseziel zu
+nennen. Die unmittelbar danach im selben Funktionszweig stehende
+"searching"-Meldung baut an derselben Stelle bereits `known.name` ein
+("… nach ${known.iataCode} (${known.name})") — nur die Fehlermeldung
+direkt daneben hatte dieses Muster nicht übernommen, obwohl `known`
+(und damit `known.name`) zum Zeitpunkt der Fehlermeldung bereits
+berechnet vorliegt.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: `known.name` liegt bereits vor, keine neue
+Abfrage/Herleitung nötig — mechanische Übernahme des im selben
+Funktionszweig unmittelbar danebenstehenden, bereits etablierten
+Musters, keine neue Design-Entscheidung über die reine Ergänzung hinaus.
+Klar genug beschrieben (exakte Datei/Zeile, exakter Fehlertext, bereits
+von Support-Chef analysiert). Objektiv prüfbar: bestehender
+Regressionstest um eine Prüfung auf den jetzt enthaltenen Zielnamen
+ergänzt, vorab rot verifiziert.
+
+**Umgesetzt:**
+- `src/hooks/useChat.ts:261`: Fehlermeldung von "Start und Ziel dürfen
+  nicht gleich sein — welcher Flughafen ist dein Abflugort?" auf "…
+  welcher Flughafen ist dein Abflugort nach ${known.name}?" erweitert.
+- Bestehender Test in `useChat.test.ts` ("rejects an origin airport
+  identical to the destination's own airport …") um die Assertion
+  `expect(lastMessage?.content).toContain(KNOWN_DESTINATION)` ergänzt —
+  vor dem Fix durch temporäres Zurücknehmen der Quelländerung (`git
+  stash` nur `useChat.ts`) reproduzierbar rot verifiziert (Meldung
+  enthielt "Lissabon" nicht).
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 4) um den entsprechenden
+  Eintrag ergänzt.
+- `reports/it-chef.md`: Fund 1 aus "Gefundene Bugs (nicht automatisch
+  gefixt)" in die "Automatisch gefixt"-Liste verschoben.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc --noEmit` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 422 Tests, alle grün), `npm run build`
+(`tsc -b` + `vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-10-09 (geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** Bereits über den separaten Auto-Fix-Kanal
+vollständig diagnostizierter Fund (offener PR #28,
+`it-chef-autofix/editmode-sichtbares-label-2026-10-08`, von Support-Chef
+am 08.10. im Detail analysiert, siehe `reports/support-chef.md`,
+08.10., Fund 1) — direkt auf `it-chef/auto` übernommen statt auf Ni's
+Review des PRs zu warten, exakt nach demselben bereits mehrfach
+etablierten Muster (siehe z. B. 26.09./28.09.-Einträge oben).
+
+**Befund:** `EditMode.tsx` (6.12) berechnet seit dem 08.10.-Fix für jede
+Aktivität bereits ein disambiguiertes Label (`getActivityLabel()`, z. B.
+"Spaziergang (Eintrag 2)") und nutzt es für die `aria-label`s von
+Preis-Input und Entfernen-Button sowie für den Lösch-Dialogtext — der
+sichtbare Zeilentext selbst (Zeile 85, `{activity.name}`) zeigte aber
+weiterhin den rohen, nicht disambiguierten Namen. Zwei gleichnamige
+Aktivitäten (kein Eindeutigkeits-Check in `addActivity()`) erschienen
+dadurch weiterhin als zwei optisch identische Zeilen mit je eigenem
+Preisfeld/Löschen-Button — erst beim Löschen über die aria-label-Angabe
+erkennbar, welche Zeile zu welchem Eintrag gehört.
+
+Randnotiz zur eigenen Historie: `reports/it-chef.md` (Eintrag vom
+08.10., "Automatisch gefixt", Punkt 1) beschreibt genau diesen Fix
+bereits als erledigt ("ich habe das nachvollzogen, umgesetzt und mit
+einem neuen Regressionstest abgesichert") — der Code-Stand auf
+`it-chef/auto` (letzter Commit vor diesem Lauf: `233c8a6`, fünfter Lauf
+vom 08.10.) enthielt diese Änderung aber nicht, Zeile 85 zeigte
+weiterhin unverändert `{activity.name}`. Der Berichtstext war demnach
+verfrüht geschrieben, ohne dass der zugehörige Code-Fix tatsächlich im
+selben Commit gelandet ist. Mit diesem Lauf stimmt Bericht und Code
+jetzt überein; keine weitere Korrektur an `reports/it-chef.md` nötig, da
+der beschriebene Zustand jetzt zutrifft.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: `activityLabel` liegt an dieser Stelle bereits
+berechnet vor (Zeile 82), keine neue Herleitung nötig — mechanische
+Übernahme des in derselben Zeilen-Komponente (aria-labels zwei Zeilen
+darunter) bereits etablierten Musters, keine neue Design-Entscheidung.
+Klar genug beschrieben (exakte Datei/Zeile, exakter Einzeiler, bereits
+von Support-Chef analysiert und als risikoloser Einzeiler eingestuft).
+Objektiv prüfbar: neuer Regressionstest zuerst rot verifiziert, dann
+grün nach dem Fix.
+
+**Umgesetzt:**
+- `src/components/trip/EditMode.tsx:85`: `{activity.name}` →
+  `{activityLabel}`.
+- Neuer Regressionstest in `EditMode.test.tsx` ("shows the disambiguated
+  label in the visible row text for same-named activities") — prüft den
+  sichtbaren Zeilentext direkt (nicht nur die aria-labels, die der
+  bestehende Test "gives same-named activities distinguishable labels"
+  bereits abdeckt). Vor dem Fix durch den neuen Test selbst reproduzierbar
+  rot verifiziert: `screen.getByText('Spaziergang (Eintrag 1)')` fand kein
+  Element, da nur der rohe, nicht disambiguierte Name im Dokument stand.
+  Nach dem Fix grün.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt, Phase 6/8-Bereich direkt nach dem
+  08.10.-`unfall`-Eintrag) um den entsprechenden Eintrag ergänzt.
+- `tasks/tasks-prd-travix-platform.md` (Checkbox 6.12, Zusatz) um den
+  entsprechenden Eintrag ergänzt.
+- `reports/it-chef.md` unverändert gelassen (siehe Randnotiz oben —
+  Bericht beschrieb den Fix bereits korrekt, nur der Code fehlte bisher).
+
+**Geprüft:**
+- `npm ci` (frischer Checkout).
+- `npx tsc -b` → kein Typfehler.
+- `npm run lint` → 0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+  Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx` (nicht durch diesen
+  Change verursacht).
+- `npx vitest run` → 62 Testdateien, 423 Tests, alle grün (davon 1 neuer
+  Test).
+- `npm run build` (`tsc -b` + `vite build`) → kein Typfehler, Build
+  erfolgreich, unveränderte Chunk-Size-Warnung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+
+## 2026-10-09 (zweiter Lauf desselben Tages, geplanter autonomer Tagesmodus)
+
+**Ausgewählter Punkt:** `ZEITPLAN.md` hatte für den aktuellen Sprint
+(Sprint 4, Urlaubsmodus & Konto) keinen Punkt, der alle vier
+Sicherheitskriterien erfüllt (8.2/8.3/8.4/8.5-8.7 sind größere Features
+mit offenen Fragen, 8.11 ist explizit auf FAQ-Inhalte von Support-Chef
+blockiert, 8.9/8.12 sind Platzhalterseiten ohne klaren Umsetzungsrahmen).
+Die beiden einzigen in `reports/it-chef.md` noch offenen Bugs
+(`routes.tsx`-Fokus-Timing, `EditMode.tsx`-Preisformat) sind dort selbst
+explizit als "kein Einzeiler"/Design-Entscheidung markiert. Deshalb einen
+eigens beauftragten Explore-Agenten auf gezielte, über die bereits
+bekannten Funde hinausgehende Bug-Suche angesetzt (gelesen, nicht nur
+gegrept: `cartTotals.ts`, `calendarUtils.ts`, `checklistRules.ts`,
+`calculateProgress.ts`, `tripStorage.ts`, `format.ts`, `mockAdvisor.ts`,
+`mockConcierge.ts`, `nav-config.ts`, `utils.ts`,
+Preisalarme/Favoriten/Warenkorb/Angebote/Aktivitaeten/Kartenansicht/
+Reiseentwuerfe/Profil/Urlaubsmodus/ChecklistPanel) — fündig geworden bei
+den vier Demo-Trip-Dateien.
+
+**Befund:** Der Demo-Trip "Lissabon" ist in `MeineReisen.tsx`,
+`Dashboard.tsx`, `Kalender.tsx` und `Reiseentwuerfe.tsx` fest auf "15. –
+22. September 2026" datiert (alle vier Dateien dokumentieren im eigenen
+Kommentar, dieselbe geteilte Demo-"Welt" zu nutzen). `MeineReisen.tsx`
+setzt zusätzlich `status: 'upcoming'` für diesen Trip. Realer
+Container-Zeitstempel zu Beginn dieses Laufs: 2026-10-09 (per `date -u`
+verifiziert) — der Reisezeitraum liegt damit bereits über zwei Wochen in
+der Vergangenheit. `/meine-reisen` zeigte die Reise trotzdem weiterhin
+mit dem teal "Bevorstehend"-Badge und einem aktiven "Urlaubsmodus
+aktivieren"-Button (verlinkt auf `/urlaubsmodus`) an — für eine bereits
+abgeschlossene Reise eine irreführende, tatsächlich anklickbare
+Falschdarstellung. Gleicher Bug-Typus wie der am 08.10. (dritter Lauf)
+behobene Kyoto-Jahres-Drift (reiner Werte-Drift in hartcodierten
+Demo-Daten), nur diesmal nicht als Uneinheitlichkeit zwischen Dateien
+(alle vier stimmten intern überein), sondern als Uneinheitlichkeit
+gegenüber der realen Uhrzeit.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, echten
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung: reine Korrektur eines Datumswerts in
+hartcodierten Demo-Arrays, keine neue Logik, identisches Muster zum
+bereits etablierten und von Freigabe-Chef gemergten Kyoto-Jahres-Fix.
+Klar genug beschrieben (konkreter, über `date -u` objektiv verifizierter
+Widerspruch zwischen Realzeit und UI-Zustand). Objektiv prüfbar: nach dem
+Fix liegt das neue Datum (November 2026) nach dem Laufzeitpunkt, der
+"Bevorstehend"-Zustand ist damit wieder tatsächlich zutreffend; bestehende
+Tests, die den exakten Datumsstring prüfen, decken das ab.
+
+**Umgesetzt:**
+- `src/pages/MeineReisen.tsx:20`, `src/pages/Dashboard.tsx` (Lissabon-
+  Eintrag in `draftTrips`), `src/pages/Kalender.tsx:23` (inkl.
+  maschinenlesbarer `startDate`/`endDate`) und
+  `src/pages/Reiseentwuerfe.tsx:88`: Datum von "15. – 22. September 2026"
+  auf "15. – 22. November 2026" korrigiert (identischer 8-Tage-Zeitraum
+  wie vorher, `status: 'upcoming'` in `MeineReisen.tsx` unverändert
+  gelassen, da jetzt wieder zutreffend).
+- `src/pages/MeineReisen.test.tsx`, `src/pages/Reiseentwuerfe.test.tsx`:
+  erwarteten Datumsstring entsprechend angepasst.
+- `src/pages/Kalender.test.tsx`: fest gesetzte Systemzeit von
+  `new Date(2026, 7, 20)` (20. August) auf `new Date(2026, 9, 20)` (20.
+  Oktober) verschoben, damit der bestehende "einen Monat vor/nach dem
+  Trip"-Testaufbau mit dem neuen Novemberdatum konsistent bleibt;
+  Monatsnamen in den Assertions entsprechend von August/September/Juli
+  auf Oktober/November/September angepasst. Anzahl der erwarteten
+  Lissabon-Tageszellen (9, für den 8-Tage-Zeitraum plus den Listeneintrag)
+  unverändert, da der Zeitraum weiterhin 8 Tage umfasst.
+- `src/pages/Kartenansicht.test.tsx` bewusst unverändert gelassen: nutzt
+  denselben Datumsstring nur als beliebigen Testwert für einen separat in
+  `tripStorage.ts` gespeicherten Trip, nicht Teil der gemeinsamen
+  Demo-"Welt" der vier oben genannten Seiten.
+- `ZEITPLAN.md` (Ist-Stand-Abschnitt) um den entsprechenden Eintrag
+  ergänzt, inkl. Hinweis, dass sich diese Art von Datenkorrektur bei
+  fortschreitender Zeit wiederholen wird, solange `TripDraft` keine echte
+  Buchungs-/Backend-Anbindung hat.
+
+**Geprüft:**
+- `npm ci` (frischer Checkout).
+- `npx tsc -b` → kein Typfehler.
+- `npm run lint` → 0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+  Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx` (nicht durch diesen
+  Change verursacht).
+- `npx vitest run` → 62 Testdateien, 423 Tests, alle grün.
+- `npm run build` (`tsc -b` + `vite build`) → kein Typfehler, Build
+  erfolgreich, unveränderte Chunk-Size-Warnung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
+
+## 2026-10-09 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` ausgecheckt (`git checkout -B it-chef/auto
+origin/it-chef/auto`), bereits auf dem Stand des heutigen zweiten Laufs
+(Lissabon-Datumsdrift-Fix, Commit `90e8e0f`). `main` nicht angefasst.
+
+**Suche, kein Punkt gefunden:** Da die beiden einzigen in
+`reports/it-chef.md` offen gebliebenen Funde (`routes.tsx`-Fokus-Timing,
+`EditMode.tsx`-Preisformat) explizit als nicht autonom umsetzbar markiert
+sind und alle offenen Checkboxen in `tasks/tasks-prd-travix-platform.md`
+laut eigenen Kommentaren an fehlenden Backend-Credentials (Base44/Gemini)
+oder echten Produktentscheidungen hängen, einen eigens dafür beauftragten
+Explore-Agenten auf gezielte Bug-Suche in Dateien angesetzt, die laut
+diesem Log bisher selten oder nie geprüft wurden: `speech.ts`,
+`QuickReplies.tsx`, `ChatMessage.tsx`, `TripSummaryCard.tsx`,
+`HotelCard.tsx`, `select.tsx`/`input.tsx`/`label.tsx`/`progress.tsx`,
+`ReiseSuche.tsx`, `Home.tsx`, `ChecklistPanel.tsx`, `MobileNav.tsx`,
+`AppShell.tsx`, `PageTransition.tsx`, alle `src/types/*.ts`,
+`checklistRules.ts`, `cartTotals.ts`, `calculateProgress.ts`,
+`calendarUtils.ts`, `duffel/client.ts`, `useConcierge.ts`,
+`mockConcierge.ts`, plus stichprobenhaft `FlightWizard.tsx`,
+`HotelWizard.tsx`, `Buchung.tsx`, `Dashboard.tsx`, `MeineReisen.tsx`,
+`Kalender.tsx`, `mockAdvisor.ts`, `nav-config.ts`, `routes.tsx`. Der Agent
+hat echten Code gelesen (nicht nur gegrept) und zusätzlich alle
+hartcodierten Demo-Datumswerte gegen die reale Containerzeit (`date -u` =
+2026-10-09) geprüft — der Lissabon-Drift aus dem zweiten Lauf war die
+einzige aktuell bestehende Abweichung und ist bereits behoben, der
+Kyoto-Trip (3.-10. März 2026, Status "past") ist weiterhin korrekt
+vergangen.
+
+Ergebnis: keine Division durch 0, keine fehlenden Null-Checks, keine
+Tippfehler in Nutzertexten, keine kaputten Links/Imports, keine neuen
+Barrierefreiheits-Lücken. Eine Beobachtung ohne objektiv prüfbares
+Fehlverhalten: Die Quick-Reply-Buttons in `QuickReplies.tsx` haben kein
+`type="button"` (anders als `ChatInput.tsx`), wirkt sich aber aktuell
+nicht aus, da `QuickReplies` nirgends innerhalb eines `<form>` gerendert
+wird — kein Bug, nur eine Notiz für den Fall, dass sich das künftig
+ändert.
+
+**Ergebnis: kein Punkt umgesetzt.** Heute nichts gefunden, das alle vier
+Sicherheitskriterien erfüllt. Kein Code-Commit für einen neuen Punkt —
+nur dieser Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

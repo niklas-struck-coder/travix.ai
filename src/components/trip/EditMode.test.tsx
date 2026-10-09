@@ -134,6 +134,17 @@ describe('EditMode', () => {
     expect(screen.getByRole('button', { name: 'Museum entfernen' })).toBeInTheDocument()
   })
 
+  it('shows the disambiguated label in the visible row text for same-named activities', () => {
+    renderEditMode([
+      { id: '1', name: 'Spaziergang', price: null },
+      { id: '2', name: 'Spaziergang', price: null },
+    ])
+
+    expect(screen.getByText('Spaziergang (Eintrag 1)')).toBeInTheDocument()
+    expect(screen.getByText('Spaziergang (Eintrag 2)')).toBeInTheDocument()
+    expect(screen.queryByText('Spaziergang', { exact: true })).not.toBeInTheDocument()
+  })
+
   it('shows the disambiguated label in the removal confirmation for same-named activities', () => {
     renderEditMode([
       { id: '1', name: 'Spaziergang', price: null },

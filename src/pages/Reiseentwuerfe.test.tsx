@@ -231,7 +231,7 @@ describe('Reiseentwuerfe', () => {
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByText('Abgeschlossener Reiseentwurf — nur zum Ansehen.')).toBeInTheDocument()
     expect(dialog.getByText('Flug')).toBeInTheDocument()
-    expect(dialog.getByText('15. – 22. September 2026')).toBeInTheDocument()
+    expect(dialog.getByText('15. – 22. November 2026')).toBeInTheDocument()
     expect(dialog.getByText('bis 1.200 €')).toBeInTheDocument()
     expect(dialog.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
 
