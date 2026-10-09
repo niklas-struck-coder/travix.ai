@@ -13,17 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-07):**
-- IT-Chef hat mehrere kleinere Bugs behoben: Wortgrenzen-Fehler beim
-  Notfall-Keyword "hilfe" im Urlaubsmodus, mehrdeutige Namen im Lösch-Dialog
-  (EditMode.tsx), falscher Aktivitäten-Zähler in isTripComplete() und ein
-  falsches Jahr (2027 statt 2026) im Kyoto-Demo-Reiseentwurf
-- Support-Chef hat gemeldet, dass die Disambiguierung im Lösch-Dialog die
-  sichtbare Aktivitätenliste noch nicht erreicht, nur Screenreader-Labels
-- Marketing-Chef hat drei weitere kleinere Verbesserungs-Kandidaten gesammelt
+**Seit letztem Update (2026-10-08):**
+- IT-Chef hat weitere kleinere Bugs behoben: EditMode.tsx zeigte in der
+  Lösch-Liste jetzt das disambiguierte Label statt des rohen Namens, der
+  Demo-Trip Lissabon zeigte fälschlich noch ein "Bevorstehend"-Badge trotz
+  vergangenem Datum
+- Support-Chef hat gemeldet, dass die Demokarte "Urlaubsmodus aktivieren" in
+  MeineReisen.tsx nicht zum eigentlichen Lissabon-Trip führt
+- Marketing-Chef hat drei weitere Verbesserungs-Kandidaten gesammelt
+  (Kandidatentopf jetzt bei sechs)
 - Freigabe-Chef hat die Tages-Läufe von IT-Chef, Marketing-Chef und
   Support-Chef geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-08_
+_Letztes Update: 2026-10-09_
