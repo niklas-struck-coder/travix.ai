@@ -6190,3 +6190,44 @@ durch.
 
 **Info an Ni:** Nein — beide Prüfungen sauber, keine Auffälligkeit, die
 seine Aufmerksamkeit bräuchte.
+
+## 2026-10-09, früher Nacht-Check (nach IT-Chefs stündlichen Läufen zwischen 0 und 4 Uhr)
+
+**Prüfung `it-chef/auto`** (5 Commits gegenüber `main`: Wortgrenze
+`\bunfall\b` in `mockConcierge.ts`, Start=Ziel-Fehlermeldung in
+`useChat.ts` mit Zielnamen ergänzt, sichtbarer Zeilentext in
+`EditMode.tsx` auf `activityLabel` umgestellt, Lissabon-Demo-Datum in
+vier Seiten von September auf November 2026 korrigiert, plus ein
+Lauf ohne Code-Änderung). Diff gegen `main` gelesen, Log-Einträge in
+`it-chef-auto-log.md` mit dem tatsächlichen Diff abgeglichen — passt
+Punkt für Punkt.
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log vertraut):
+frischer `npm install` (650 Pakete, nur das bekannte jsdom-Engine-
+Warning), `npx tsc -b` → keine Fehler, `npx eslint .` → 0 Fehler
+(dieselben 3 vorbestehenden Fast-Refresh-Warnungen in
+`badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` → 62
+Testdateien, 423 Tests, alle grün. Alles deckt sich exakt mit den
+Angaben im Log.
+
+**Scope-Check:** Keiner der fünf Punkte berührt Auth, Zahlungen oder
+rechtliche Texte. Kein Scope-Creep — jeder Commit entspricht genau
+einem beschriebenen Einzelpunkt. UI-Änderungen (`EditMode.tsx`-
+Zeilentext, `useChat.ts`-Meldungstext) sind reine Textänderungen ohne
+Layout-/Farb-/Komponentenauswirkung, daher kein Abgleich mit
+`MARKENDESIGN.md` nötig.
+
+→ **Passt, nach `main` gemergt** (Merge-Commit `a39a4dc`, `main` war
+zuvor per Fast-Forward auf den aktuellen `origin/main`-Stand gebracht).
+Nach dem Merge zur Sicherheit erneut `tsc -b`/`eslint`/`vitest run` auf
+dem gemergten `main`-Stand laufen lassen — weiterhin alles grün.
+Anschließend `it-chef/auto` auf den neuen `main`-Stand zurückgesetzt
+und gepusht.
+
+**`marketing-chef/auto` und `support-chef/auto`:** beide ohne neue
+Commits gegenüber `main` (laufen laut Zeitplan erst um 6 Uhr) —
+planmäßig bei diesem frühen Lauf übersprungen, kein separater späterer
+Freigabe-Chef-Lauf nötig.
+
+**Info an Ni:** Nein — Prüfung sauber, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
