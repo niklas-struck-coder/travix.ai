@@ -4226,3 +4226,92 @@ jetzt übereinstimmend "In Planung", solange Aktivitäten fehlen). Der in
 abzuhakenden Punkte (`checkedManual`, Zeile 35) ist laut Code-Kommentar
 (Zeile 28-32) eine bewusste, bereits dokumentierte Zwischenlösung bis zu
 einer Nutzerkonten-/Backend-Entscheidung — kein neuer Fund.
+
+---
+
+## 2026-10-09 — Demo-Reise „Lissabon" (`MeineReisen.tsx`) vs. echter Urlaubsmodus (`Urlaubsmodus.tsx`)
+
+**Autonomer Cloud-Lauf, kein Code geändert — nur Analyse.**
+
+### Kontext
+Ausgewählt, weil der autonome IT-Chef-Lauf vom 09.10. (zweiter Lauf,
+Commit `90e8e0f`) heute genau die Demo-Reise-Dateien angefasst hat, um
+den „Bevorstehend"-Datumsdrift der Lissabon-Demoreise zu korrigieren
+(15.–22. September → 15.–22. November 2026, analog dem zuvor gemergten
+Kyoto-Jahresdrift): `src/pages/MeineReisen.tsx`, `src/pages/Dashboard.tsx`,
+`src/pages/Kalender.tsx`, `src/pages/Reiseentwuerfe.tsx`. Die reine
+Datumskorrektur selbst ist unstrittig korrekt (Status "Bevorstehend"
+stimmt nach dem Fix wieder mit dem realen Zeitpunkt zusammen). Beim
+Nachvollziehen des Nutzerpfads, den der Fix wieder "richtig" macht — den
+Klick auf "Urlaubsmodus aktivieren" auf dieser Karte —, fällt aber eine
+tiefere, vom heutigen Fix unberührte Dateninkonsistenz auf.
+
+### Reibungspunkt
+
+**„Urlaubsmodus aktivieren" auf der Lissabon-Demokarte führt nicht zum Lissabon-Urlaubsmodus**
+
+`src/pages/MeineReisen.tsx:19-22` zeigt die Demo-Reise „Lissabon" mit
+Status `upcoming` und einem aktiven Button „Urlaubsmodus aktivieren"
+(`:48-53`, `Link to="/urlaubsmodus"`). Die Ziel-Seite
+`src/pages/Urlaubsmodus.tsx:12` liest das anzuzeigende Reiseziel aber
+nicht aus dieser Demo-Liste, sondern ausschließlich aus
+`loadStoredChat()?.trip` — also dem Trip, den der/die Nutzer:in tatsächlich
+selbst im KI-Chat geplant und in `localStorage` gespeichert hat
+(`src/lib/trip/tripStorage.ts`). Diese beiden Datenquellen sind komplett
+getrennt: `MeineReisen.tsx`s `trips`-Array ist eine rein lokale
+Konstante innerhalb der Datei, ohne jede Verbindung zu `tripStorage.ts`.
+
+Live nachvollziehbar: In einem frischen Browser (kein `localStorage`,
+also noch nie im KI-Chat etwas geplant) `/meine-reisen` öffnen — die
+Lissabon-Karte mit teal „Bevorstehend"-Badge und aktivem
+„Urlaubsmodus aktivieren"-Button erscheint sofort, ganz ohne eigene
+Aktion. Klickt man darauf, zeigt `/urlaubsmodus` **keine**
+Lissabon-Begrüßung (der `trip?.destination`-Banner in
+`Urlaubsmodus.tsx:23-34` bleibt ganz weg, da `trip` `null` ist) und der
+Concierge antwortet laut `getConciergeGreeting(null)`
+(`mockConcierge.ts:38-40`) nur allgemein „Sobald eine Reise geplant ist,
+helfe ich dir hier …" — exakt die Aussage, die die Karte, von der man
+gerade kam, bereits widerlegt zu haben schien. Hat die Person stattdessen
+bereits im KI-Chat ein ganz anderes Ziel geplant (z. B. „Thailand"), zeigt
+`/urlaubsmodus` nach demselben Klick dessen Begrüßung/Fakten statt
+Lissabons — ebenfalls nicht das, was die Karte verspricht.
+
+Der zweite, in `src/pages/Buchung.tsx:273-289` vorhandene Einstiegspunkt
+mit demselben Button-Text „Urlaubsmodus aktivieren" verlinkt ebenfalls auf
+`/urlaubsmodus`, übergibt dort aber den echten, aus `tripStorage.ts`
+geladenen Trip (`Buchung.tsx` zeigt ja `trip.activities` etc. aus
+genau dieser Quelle) — dieser Pfad ist in sich konsistent. Es gibt also
+im Produkt zwei Buttons mit identischem Label und identischem Linkziel,
+von denen nur einer tatsächlich zur beworbenen Reise führt; der andere
+führt zu einer Reise, die mit der angeklickten Karte nichts zu tun hat.
+Das ist keine Randbedingung, sondern der direkte, naheliegendste
+Klickpfad für genau die Demo-Reise, die der heutige Fix gerade wieder
+glaubwürdig "bevorstehend" gemacht hat.
+
+*Vorschlag:* Kurzfristig (ohne echte Backend-Anbindung) entweder (a) den
+Button auf der Demo-Karte in `MeineReisen.tsx` entfernen/deaktivieren,
+solange `trips` dort nicht mit `tripStorage.ts` verbunden ist, oder (b)
+`MeineReisen.tsx` dieselbe Datenquelle (`loadStoredChat()`) nutzen lassen
+wie `Buchung.tsx`/`Urlaubsmodus.tsx`, statt einer eigenen, unabhängigen
+Demo-Liste — analog dem bereits in `Dashboard.tsx:11-14` dokumentierten
+Prinzip ("Same demo world … nicht ein separat erfundenes Dataset").
+Variante (b) wäre die nachhaltigere Lösung, da sie auch den unter
+2026-10-02/10-03 bereits gemeldeten, verwandten Favoriten→KI-Chat-
+Zielübergabe-Fund in dieselbe Kategorie einordnet (mehrere Stellen, die
+denselben "echten" Trip eigentlich teilen sollten, es aber technisch
+nicht tun).
+
+### Nicht geprüft
+Die übrigen drei vom heutigen Fix berührten Dateien (`Dashboard.tsx`,
+`Kalender.tsx`, `Reiseentwuerfe.tsx`) wurden gegen dasselbe Datenquellen-
+Problem geprüft, zeigen aber keinen Button, der zu `/urlaubsmodus` führt
+(Reiseentwuerfe.tsx verlinkt bei aktiven Entwürfen auf `/ki-chat`, der
+dort bereits im Code selbst referenzierte, generische „Planung
+fortsetzen"-Fund aus `reports/support-chef.md` (10.09.) bleibt
+unverändert und wird hier nicht erneut vertieft) — die Analyse
+oben betrifft gezielt `MeineReisen.tsx` als einzige der vier Dateien mit
+direktem Link zum Urlaubsmodus. Der von IT-Chef selbst bereits
+dokumentierte, architektonische Punkt, dass sich diese Art Datumsdrift
+wiederholen wird, solange `TripDraft`/`Trip` keine echte Buchungs-/
+Backend-Anbindung haben, ist unverändert bekannt und hier nicht erneut
+als eigener Fund aufgeführt.
