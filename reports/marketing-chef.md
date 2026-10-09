@@ -1,33 +1,39 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-08
+**Datum:** 2026-10-09
 
-## Was ist seit dem letzten Eintrag (2026-10-07) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-08) passiert?
 
-Seit gestern ist vor allem IT-Chef unterwegs gewesen: Der Lösch-Dialog in
-EditMode.tsx disambiguiert jetzt gleichnamige Aktivitäten (laut
-Support-Chef aber bisher nur in Screenreader-Label und Dialog, nicht in
-der sichtbaren Liste – also noch nicht fertig), die Reisecheckliste und
-`isTripComplete()` widersprachen sich bei der Vollständigkeits-Anzeige
-und wurden synchronisiert, und ein Demo-Datensatz (Kyoto-Reise) hatte
-versehentlich Jahr 2027 statt 2026. Alles solide Qualitätsarbeit, aber
-reine Politur ohne neuen Positionierungs-Anlass.
+IT-Chef hat die gestern noch offene Lücke geschlossen: Die
+Disambiguierung gleichnamiger Aktivitäten in EditMode.tsx steckte bisher
+nur in aria-labels und im Lösch-Dialog, jetzt erreicht sie auch den
+sichtbaren Zeilentext. Außerdem wurde ein zweiter Datums-Drift gefunden
+und gefixt – die Lissabon-Demoreise zeigte trotz längst vergangenem
+Zeitraum weiterhin "Bevorstehend" samt aktivem Urlaubsmodus-Button,
+gleiche Fehlerklasse wie der bereits gemergte Kyoto-Jahres-Drift.
 
-Ein Fund passt dagegen gut in unsere "Ehrlichkeit als Feature"-Linie:
-Der Urlaubsmodus-Concierge hat Notruf-Fragen bisher über das Stichwort
-"hilfe" ohne Wortgrenze erkannt – wer "Hilfestellung" oder "mithilfe"
-schrieb, bekam ungefragt die Notrufnummer vorgesetzt. Jetzt erkennt er
-nur noch echte Hilferufe. Klein, aber ein weiterer Beleg dafür, dass wir
-bei Details genau hinschauen statt grob drüberzugehen.
+Spannender für uns: Support-Chef hat beim Nachvollziehen genau dieses
+Fixes einen tieferliegenden Fund gemacht. Die Lissabon-Demokarte und die
+echte Urlaubsmodus-Seite ziehen ihre Reisedaten aus zwei komplett
+getrennten Quellen – wer auf "Urlaubsmodus aktivieren" auf der Demokarte
+klickt, landet auf einer Seite, die gar nicht Lissabon zeigt, sondern
+(falls vorhanden) den selbst im Chat geplanten Trip oder gar nichts.
+Zwei Buttons, identisches Label, nur einer davon hält, was er verspricht.
+Marketing-relevant vor allem als Warnsignal: Noch kein Content-Anlass,
+aber ein Grund, das Feature "Urlaubsmodus" vorerst nicht aktiv zu
+bewerben, bis die Datenquelle vereinheitlicht ist. Der Changelog-
+Kandidatentopf steht jetzt bei sechs von acht (drei neue Kandidaten:
+der "unfall"-Wortgrenzen-Fix, die EditMode-Sichtbarkeits-Lücke, der
+Lissabon-Datums-Drift).
 
 ## Vorschläge
 
-1. **Den Concierge-Fix als eigenen kleinen Content-Baustein nutzen, nicht nur als Fußnote.** Anders als der Fehlermeldungs-Fix von gestern hat dieser hier einen eigenen, leicht erzählbaren Haken ("unser Assistent verwechselt 'Hilfestellung' nicht mit einem Notruf") – gut geeignet als kurzer, humorvoller Social-Post oder Mini-Changelog-Eintrag zur Präzisions-Säule, unabhängig von gestriger Idee.
+1. **Urlaubsmodus vorerst nicht aktiv bewerben, bis die Datenquellen zusammengeführt sind.** Support-Chefs Fund zeigt, dass ein zentraler Klickpfad zum Feature aktuell zu einer inkonsistenten Seite führt. Bevor wir das Feature in Content oder Kampagnen hervorheben ("bleibt auch vor Ort an deiner Seite" – siehe Vorschlag von gestern), sollte dieser Pfad technisch stimmen. Keine neue Idee hier, nur: bestehende Feature-Spotlight-Idee pausieren, nicht verwerfen.
 
-2. **Den Urlaubsmodus-Concierge selbst als Feature-Spotlight vorschlagen.** Der Bug zeigt nebenbei ein Feature, das bisher kaum beworben wurde: Ein KI-Begleiter, der auch *während* der Reise hilft (Währung, Sprache, Notfallnummer) – nicht nur bei der Planung davor. Das ist ein Differenzierungspunkt gegenüber reinen Reiseplaner-Apps und würde sich für ein eigenständiges Content-Stück lohnen ("travix.ai bleibt auch vor Ort an deiner Seite").
+2. **Die "zwei Datums-Drifts in zwei Wochen"-Serie als Build-in-public-Beobachtung nutzen, nicht als Einzelfund.** Kyoto-Jahres-Drift und jetzt Lissabon-Zeit-Drift sind dieselbe Fehlerklasse an zwei verschiedenen Stellen – das ist eher ein Muster als zwei Zufälle. Ein kurzer, selbstironischer Post ("unsere Demo-Reisen altern schneller als wir gucken können – und wir finden's trotzdem") passt zur Ehrlichkeits-Linie besser als jeder Einzelfund für sich.
 
-3. **Keinen neuen Positionierungs-Claim formulieren.** EditMode-Disambiguierung, Checklisten-Fix und Jahreszahl-Korrektur sind interne Konsistenzarbeit ohne direkten Nutzer-Story-Wert. Bestehende Claim-Texte und Content-Pläne aus früheren Berichten unverändert lassen, statt wegen kleiner Fixes neue Texte zu produzieren.
+3. **EditMode-Disambiguierung jetzt als abgeschlossene Mini-Story erzählen.** Gestern war die Geschichte "halb fertig" (nur Screenreader, nicht sichtbar) – das war bewusst kein Content-Anlass. Jetzt ist sie fertig: der sichtbare Text stimmt. Eignet sich als kleiner "wir lassen Baustellen nicht offen" Beleg, aber nur falls wir ohnehin bald einen Mini-Changelog-Post bringen (siehe Punkt 4) – kein eigenständiges Content-Stück nötig.
 
-4. **Changelog-Kandidatentopf (separater Auto-Tracker) steht seit mehreren Tagen bei 3 von 8 – Schwelle ggf. überdenken.** Wenn der Topf wochenlang nicht die Achter-Schwelle erreicht, verschwinden kleine, sympathische Funde (wie der Concierge-Fix) im Nirgendwo. Vorschlag: Schwelle senken (z.B. auf 5) oder feste zeitliche Taktung statt reiner Stückzahl-Schwelle, damit Momentum nach außen sichtbar bleibt.
+4. **Changelog-Kandidatentopf bei sechs von acht – Content für die nächste Ausgabe schon jetzt vorbereiten.** Wir sind nah an der Schwelle. Statt erst bei Erreichen der Acht zu texten, lohnt es sich, die Mini-Changelog-Entwürfe für die ersten sechs Kandidaten jetzt schon zu schreiben, damit die Ausgabe sofort raus kann, sobald die Schwelle fällt – Momentum nicht durch Produktionszeit verlieren.
 
-_Letztes Update: 2026-10-08_
+_Letztes Update: 2026-10-09_
