@@ -4315,3 +4315,93 @@ dokumentierte, architektonische Punkt, dass sich diese Art Datumsdrift
 wiederholen wird, solange `TripDraft`/`Trip` keine echte Buchungs-/
 Backend-Anbindung haben, ist unverändert bekannt und hier nicht erneut
 als eigener Fund aufgeführt.
+
+---
+
+## 2026-10-10 — Reiseplan/"Bearbeiten"-Flug-Flow (`/buchung`, `/flugsuche`)
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` hat der autonome IT-Chef-Lauf
+heute (Commit `14bec55`, zweiter Lauf) `editingField`/`awaitingFlightOrigin`
+persistenzfähig gemacht und dabei u. a. `src/pages/Buchung.tsx`,
+`src/pages/Flugsuche.tsx` und `src/pages/Hotelsuche.tsx` berührt (über
+die gemeinsam genutzten `useChat.ts`/`tripStorage.ts`) — dieser
+"Bearbeiten"-Flug-/Unterkunfts-Flow wurde noch nicht eigenständig aus
+Nutzersicht geprüft:
+
+- `src/pages/Buchung.tsx`
+- `src/pages/Flugsuche.tsx`
+- `src/pages/Hotelsuche.tsx`
+- `src/components/search/FlightWizard.tsx`
+
+### Reibungspunkte
+
+**1. Eine konkret ausgewählte Flugverbindung wird nicht gespeichert —
+nur, dass irgendein Flug gewählt wurde**
+`src/pages/Flugsuche.tsx:31-36` (`handleSelect`): Ein Klick auf eine
+`FlightCard` ruft `updateStoredTrip({ transportMode: 'flight' })` auf —
+es wird ausschließlich das Transportmittel "Flug" im Reiseplan vermerkt,
+keine Angabe dazu, *welche* der angezeigten Verbindungen (Airline,
+Abflug-/Ankunftszeit, Route, Preis) tatsächlich ausgewählt wurde. Die
+sofort angezeigte Erfolgsmeldung "Flug in deinen Reiseplan übernommen"
+(Zeile 67-72) suggeriert aber eine konkrete Übernahme. Auf
+`Buchung.tsx:216-221` zeigt die Transport-Karte danach nur noch das
+generische Label "Flug" (`transportLabels[trip.transportMode]`,
+`Buchung.tsx:46-52`) — identisch zu dem, was dort auch ohne jede Auswahl
+einer bestimmten Verbindung stehen würde. Eine Nutzerin, die aus mehreren
+angezeigten Flügen bewusst z. B. den günstigsten oder den mit
+Zwischenstopp gewählt hat, kann auf der Buchungsseite nicht mehr
+nachvollziehen, welchen Flug sie da eigentlich "übernommen" hat.
+
+Das ist kein theoretischer Fall, sondern eine echte Inkonsistenz
+innerhalb derselben Codebasis: Der strukturell identische Pfad für
+Unterkünfte speichert die Auswahl sehr wohl konkret —
+`src/pages/Hotelsuche.tsx:32-36` ruft
+`updateStoredTrip({ accommodation: offer.accommodationName })` auf, und
+`Buchung.tsx:239` zeigt danach tatsächlich den gewählten Hotelnamen statt
+nur "Unterkunft gebucht". `TripDraft` (`src/types/chat.ts:18-25`) hat für
+`accommodation` bewusst ein freies Textfeld, für `transportMode` aber nur
+die feste Enum `TransportMode` (`flight`/`train`/`bus`/`ferry`/`car`,
+`src/types/chat.ts:3`) ohne begleitendes Detailfeld — dem Flug-Pfad fehlt
+schlicht das Gegenstück zu `accommodation`.
+
+*Vorschlag:* `TripDraft` um ein optionales Detailfeld für die gewählte
+Verbindung ergänzen (z. B. `transportDetail: string | null`, analog zu
+`accommodation`), von `Flugsuche.tsx:32` befüllt mit einer kurzen,
+lesbaren Zusammenfassung der gewählten `FlightCard` (Airline/Route oder
+Uhrzeiten), und auf `Buchung.tsx` zusätzlich zum bisherigen
+`transportLabels`-Text anzeigen — exakt das bereits etablierte Muster
+von `accommodation`, keine neue Design-Entscheidung nötig.
+
+**2. "Bearbeiten" → "Manuell suchen" startet beim erneuten Besuch von
+`/flugsuche` immer komplett leer, auch wenn vorher schon ein Flug
+gewählt war**
+`src/components/search/FlightWizard.tsx:37-40`: `origin`/`destination`/
+`tripType` etc. sind reiner lokaler `useState`, ohne Props zum Vorbefüllen
+aus einem bereits bestehenden Reiseplan. Kommt man über
+`Buchung.tsx:174-177` (`transportEditChoice` → "Manuell suchen" →
+`/flugsuche`) zurück auf die Flugsuche, um die bereits getroffene Wahl zu
+ändern, ist das Formular leer — Von/Nach/Datum/Passagierzahl müssen
+komplett neu eingetippt werden, obwohl all das beim ersten Durchlauf
+schon einmal eingegeben wurde. In Kombination mit Fund 1 (keine
+gespeicherte Flugdetails) gibt es für die Nutzerin an dieser Stelle
+keinerlei Erinnerung mehr daran, was sie zuvor gesucht oder gewählt
+hatte — "Bearbeiten" fühlt sich an wie "von Null anfangen", nicht wie
+eine gezielte Korrektur einer bestehenden Auswahl.
+
+*Vorschlag:* Mittelfristig zusammen mit Fund 1 lösen: Sobald ein
+`transportDetail`/die ursprünglichen Suchparameter im Reiseplan
+vorliegen, könnte `FlightWizard` optionale Initialwerte annehmen und
+`Flugsuche.tsx` sie beim Mount aus `loadStoredChat()` vorbefüllen —
+ähnlich wie `KiChat.tsx:64-73` den `editingField`-State bereits gezielt
+aus der Reiseplan-Quelle wiederherstellt, nur eben für dieses Formular
+statt für den Chat-State. Kein Vorschlag für einen Ein-Zeiler-Fix, da das
+eine neue Datenstruktur voraussetzt (siehe Fund 1).
+
+### Nicht geprüft
+`src/pages/Hotelsuche.tsx`/`HotelWizard.tsx` selbst wurden nur zum
+Vergleich (Fund 1) herangezogen, nicht erneut vollständig auf eigene
+Reibungspunkte geprüft — dort besteht dasselbe "Formular startet leer"-
+Muster wie bei Fund 2, allerdings ohne den Daten-Verlust aus Fund 1, da
+der Hotelname ja tatsächlich gespeichert wird. Kein eigener Fund hier
+aufgeführt, um keine Vermutung ohne genaue Prüfung als Befund
+auszugeben.
