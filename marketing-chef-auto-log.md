@@ -4,6 +4,89 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-10
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `2e881ca`, 09.10., eigener letzter Commit)
+war bereits vollständig in `main` gemergt (`git merge-base --is-ancestor
+2e881ca origin/main` bestätigt das) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für bereits
+gemergte Branches vorgesehen neu von aktuellem `origin/main` (`648f6af`,
+früher Nacht-Check 10.10.) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für
+das Mini-Changelog-Format). Anders als an den Vortagen hat der
+Kandidatentopf die Achter-Schwelle heute überschritten, deshalb zusätzlich
+eine siebte Mini-Changelog-Ausgabe.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 09.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 08.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 2e881ca..origin/main` geprüft (Basislinie: der eigene
+Stand vom 09.10.): fünf Commits mit echter Produkt-Codeänderung (die
+übrigen sind ein Freigabe-Chef-Merge und dessen Log-Eintrag), jeder
+einzeln per `git show` und direkt im aktuellen Code verifiziert:
+
+- `5d8277f` (09.10., fünfter Lauf): `startEdit()` setzte das
+  `awaitingFlightOrigin`-Flag bei einem abgebrochenen Flug-Abflughafen-
+  Edit nicht zurück — ein späterer unabhängiger Transportmittel-Edit
+  interpretierte die Eingabe dadurch fälschlich als IATA-Code und erfand
+  z. B. den Flugcode "ZUG" für "Zug". Live bestätigt
+  (`src/hooks/useChat.ts:180`). **43. Tier-4-Kandidat.**
+- `76e6fc1` (10.10.): `resetChat()` brach eine noch laufende
+  Unterkunfts-/Flugsuche nicht ab, ihr spätes Ergebnis schrieb die
+  Angebote der bereits verworfenen Planung in den frisch gestarteten
+  Chat — Fortsetzung des bereits am 07.10. für den Timeout-Pfad gezählten
+  Kandidaten 36, jetzt für die Promise-Suchpfade. Live bestätigt (neue
+  `searchGenerationRef`). **44. Tier-4-Kandidat.**
+- `14bec55` (10.10., zweiter Lauf): `editingField`/`awaitingFlightOrigin`
+  überlebten bisher keinen Reload, obwohl die Chat-Oberfläche die offene
+  Edit-Frage weiterhin anzeigte — die nächste Antwort lief danach am
+  Edit-Pfad vorbei. Live bestätigt (beide Felder jetzt Teil von
+  `StoredChatState`). **45. Tier-4-Kandidat.**
+- `7eedd7d` (09.10., sechster Lauf): Fokus-Ankündigung bei Routenwechsel
+  für Screenreader. Bewusst nicht aufgenommen — reiner
+  Barrierefreiheits-Fix ohne Ehrlichkeits-/Vertrauens-Erzählung, gleiche
+  Einstufung wie frühere Fokus-Ausschlüsse.
+- `1bd5af1` (10.10., dritter Lauf): reine Testabdeckung für
+  Duffel-Mapping-Funktionen, keine Verhaltensänderung. Kein Kandidat.
+
+**Kandidatentopf:** 37-42 unverändert, 43-45 neu dazugekommen — Topf
+erreicht **neun**, über der Achter-Schwelle. Siebte Mini-Changelog-
+Ausgabe geschrieben (`marketing/mini-changelog-konzept.md`), Topf danach
+wieder leer.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung einer
+bestehenden Übersicht plus eine neue Ausgabe im bereits etablierten
+Mini-Changelog-Entwurf, kein Live-Vorgang — nichts gepostet, versendet
+oder im Produkt verändert. Keine erfundenen Kennzahlen: alle drei neuen
+Kandidaten stammen aus einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commits. Klar genug
+beschrieben, keine offene Positionierungs-Grundsatzfrage — wendet nur die
+bereits in `MARKENDESIGN.md` festgelegte Positionierung und denselben
+Tonfall wie Ausgabe 1-6 an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 10.10.
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 7" (Kandidaten
+  37-45).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-09
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`

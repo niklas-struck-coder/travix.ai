@@ -866,3 +866,127 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
 (siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
 jetzt für eine mögliche siebte Ausgabe.
+
+## Ausgabe 7 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-10-10
+
+Wie Ausgabe 1-6: **nichts davon ist live.** Reiner Textentwurf für
+dieselbe, noch nicht gebaute Footer-Seite — hängt an derselben vierten
+Frage wie Ausgabe 1-6 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine siebte Ausgabe
+
+Dieselbe Selbstauflage wie bei Ausgabe 2-6: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue,
+einzeln verifizierte Tier-4-Kandidaten angesammelt haben — Richtwert
+bleibt der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst).
+Der Kandidatentopf war laut `marketing/freigabe-uebersicht.md` seit
+Ausgabe 6 (07.10.) auf sechs gewachsen (Kandidaten 37-42: Wortgrenzen-Bug
+im Notfall-Keyword "hilfe" des Urlaubsmodus-Concierge, `isTripComplete()`
+zählt Aktivitäten jetzt mit, Lösch-Dialog in `EditMode.tsx` disambiguiert
+gleichnamige Aktivitäten auch im sichtbaren Dialogtext, dieselbe fehlende
+Wortgrenze bei "unfall" behoben, der sichtbare Aktivitäten-Zeilentext
+zeigt jetzt ebenfalls das disambiguierte Label, und der Demo-Trip
+"Lissabon" zeigt kein falsches "Bevorstehend"-Badge mehr für eine längst
+vergangene Reise).
+
+Vor der Auswahl `git log 2e881ca..origin/main` geprüft (letzter
+Marketing-Lauf, 09.10., dessen Inhalt laut Branch-Vergleich bereits
+vollständig in `main` gemergt war). Fünf neue Commits mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` und direkt im Code
+geprüft:
+
+- **`5d8277f` (09.10.):** Ein abgebrochener "Transportmittel → Flug →
+  Abflughafen"-Edit ließ ein internes Flag gesetzt, sodass ein späterer,
+  unabhängiger Transportmittel-Edit die Eingabe fälschlich als IATA-Code
+  interpretierte — z. B. wurde "Zug" zu einem Flug mit erfundenem Code
+  "ZUG". Jetzt wird das Flag beim nächsten Edit zuverlässig zurückgesetzt.
+- **`76e6fc1` (10.10.):** Ein Neustart des Chats brach eine noch laufende
+  Unterkunfts-/Flugsuche bisher nicht ab — ihr später eintreffendes
+  Ergebnis schrieb die Angebote der bereits verworfenen, alten
+  Reiseplanung in den frisch gestarteten Chat. Jetzt verwirft der Reset
+  solche veralteten Antworten zuverlässig.
+- **`14bec55` (10.10.):** Ein Reload mitten in einem "Bearbeiten"-Flow
+  ließ die Edit-Frage zwar weiterhin sichtbar, vergaß im Hintergrund aber,
+  dass gerade auf eine Antwort gewartet wird — die nächste Nachricht ging
+  danach am Edit-Pfad vorbei. Jetzt überlebt dieser Zustand einen Reload.
+
+Zwei weitere geprüfte Commits **nicht** aufgenommen (echte, verifizierte
+Änderungen, aber ohne die "Ehrlichkeit/Vertrauen"-Erzählung, die dieses
+Format trägt):
+- **`7eedd7d` (09.10.):** Ein Routenwechsel kündigt die neue Seite jetzt
+  zusätzlich per Fokuswechsel für Screenreader-Nutzer:innen an. Ein
+  echter, wichtiger Barrierefreiheits-Fix, aber reine
+  Screenreader-Ankündigung ohne falsche oder verschwiegene Information
+  gegenüber sehenden Nutzer:innen — gleiche Einstufung wie frühere
+  Fokus-/Ankündigungs-Ausschlüsse.
+- **`1bd5af1` (10.10.):** reine Testabdeckung für bestehende
+  Duffel-Mapping-Funktionen, laut Commit keine Verhaltensänderung.
+
+Zusammen mit den sechs bereits im Topf wartenden Kandidaten (37-42,
+siehe `marketing/freigabe-uebersicht.md`) ergeben sich **neun**
+Kandidaten — über der Achter-Schwelle, die bereits Ausgabe 2-6 ausgelöst
+hat.
+
+### Siebte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 07.10. bis 10.10.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-6, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Du wirst nicht mit einer erfundenen Angabe abgespeist**
+- Ein abgebrochener Wechsel zum Verkehrsmittel "Flug" mitten im
+  Bearbeiten-Dialog konnte eine spätere, ganz andere Eingabe (z. B.
+  "Zug") fälschlich als Flugcode missverstehen und einen Flugcode
+  erfinden, den es nie gab — das passiert jetzt nicht mehr.
+
+**Eine falsche Notruf-Warnung bleibt aus**
+- Fragen wie "brauche ich eine Unfallversicherung?" oder "kannst du mir
+  bei der Packliste helfen?" lösten im Urlaubsmodus-Concierge bisher
+  ungefragt die Notrufnummer-Antwort aus, weil die Wörter "unfall" und
+  "hilfe" auch mitten in ganz harmlosen Fragen erkannt wurden — das ist
+  jetzt behoben.
+
+**Eindeutig statt mehrdeutig, wenn zwei Einträge gleich aussehen**
+- Zwei gleichnamige Aktivitäten in deinem Reiseplan (z. B. zwei
+  "Spaziergang"-Einträge) waren in der sichtbaren Liste und beim Löschen
+  weiterhin nicht zu unterscheiden, obwohl eine eindeutige Zusatz-
+  kennzeichnung dafür schon existierte — jetzt gilt sie auch hier.
+- Zeigte deine Checkliste "Aktivitäten geplant" noch als offen an, konnte
+  direkt daneben trotzdem "Reiseplan vollständig" stehen — jetzt zählen
+  beide Anzeigen dieselben Aktivitäten.
+
+**Ein Klick tut tatsächlich das, was er verspricht**
+- Ein Neustart des Chats konnte eine noch laufende Unterkunfts- oder
+  Flugsuche nicht wirklich stoppen — ihr Ergebnis tauchte wenig später
+  kommentarlos in deiner neuen, eigentlich unabhängigen Planung auf.
+  Jetzt verwirft ein Neustart solche veralteten Suchergebnisse
+  zuverlässig.
+- Mittendrin in einem "Bearbeiten"-Dialog die Seite neu geladen? Bisher
+  stand die Frage zwar weiterhin da, deine nächste Antwort landete aber
+  nicht mehr dort, wo du sie hingeschickt hast — jetzt merkt sich der
+  Chat auch über einen Reload hinweg, dass er gerade auf deine
+  Bearbeitung wartet.
+
+**Eine veraltete Reise wird nicht mehr als bevorstehend angezeigt**
+- Eine Demo-Reise, die bereits über zwei Wochen zurücklag, zeigte
+  trotzdem noch das Label "Bevorstehend" samt anklickbarem
+  "Urlaubsmodus aktivieren"-Button — jetzt stimmt die Anzeige mit dem
+  tatsächlichen Reisedatum überein.
+
+---
+
+*Wie in Ausgabe 1-6: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig, nicht zuverlässig
+oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 7 hängt an derselben vierten Frage wie Ausgabe 1-6 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche achte Ausgabe.
