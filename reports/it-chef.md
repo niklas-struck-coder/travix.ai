@@ -1,91 +1,105 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-08
+**Datum:** 2026-10-10
 
-## Was ist seit dem letzten Eintrag (2026-10-07) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-08) passiert?
 
-Im parallelen Autonomie-Kanal `it-chef/auto` liefen heute bereits drei
-weitere, von Freigabe-Chef unabhängig geprüfte und gemergte Fixes in
-`main`:
+Seit dem letzten Eintrag dieses Kanals lief der parallele Autonomie-Kanal
+`it-chef/auto` an mehreren Tagen weiter und lieferte, von Freigabe-Chef
+jeweils unabhängig geprüft und in `main` gemergt:
 
-- `EditMode.tsx`: Disambiguierung gleichnamiger Aktivitäten
-  (`getActivityLabel()`) in eine eigene Funktion gezogen und zusätzlich
-  auf den Lösch-Bestätigungsdialog angewendet.
-- `Buchung.tsx`: `isTripComplete()` zählte Aktivitäten bisher nicht mit,
-  obwohl die direkt darunter angezeigte Checkliste sie als offenen Punkt
-  führt — Badge und Checkliste widersprachen sich dadurch.
-- `Dashboard.tsx`/`Reiseentwuerfe.tsx`: Demo-Reiseentwurf "Kyoto" zeigte
-  Jahr 2027 statt 2026, während `MeineReisen.tsx`/`Kalender.tsx` für
-  denselben Trip bereits 2026 zeigten — reiner Werte-Drift, jetzt
-  vereinheitlicht.
+- `EditMode.tsx`: sichtbarer Zeilentext nutzt jetzt das disambiguierte
+  Label statt des rohen Namens — genau der Fund, der hier am 08.10. als
+  **PR #28** eigenständig umgesetzt wurde. Beide Fixes sind inhaltlich
+  identisch; in `main` steckt inzwischen die Fassung aus `it-chef/auto`.
+  **PR #28 ist dadurch überholt und kann geschlossen werden**, ebenso wie
+  weiterhin die älteren offenen Auto-Fix-PRs #1–#27 (siehe Vorschläge).
+- `useChat.ts`: "Start = Ziel"-Meldung im Flug-Chat nennt jetzt den
+  Zielort (zweiter inhaltlich identischer Fix zu demselben, hier am
+  08.10. umgesetzten Fund).
+- `useChat.ts`: `resetChat()` bricht laufende Duffel-Suchen (Flug/
+  Unterkunft) jetzt ab, statt ihr Ergebnis noch in den frisch gestarteten
+  Chat zu schreiben.
+- `useChat.ts`/`tripStorage.ts`: `editingField`/`awaitingFlightOrigin`
+  überleben jetzt einen Seiten-Reload, statt beim Laden aus
+  `localStorage` zu fehlen und den Edit-Ablauf (Budget, Flug-Abflugort)
+  stillschweigend auf den falschen Pfad zu schicken.
+- `useChat.ts`: stale `awaitingFlightOrigin`-Flag in `startEdit()` wird
+  jetzt beim Wechsel auf ein anderes Feld zurückgesetzt.
+- `routes.tsx`: die hier am 08.10. gemeldete fehlende Fokus-Ankündigung
+  bei Routenwechsel ist seit dem 09.10. behoben (`onExitComplete` +
+  `requestAnimationFrame`) — **selbst geprüft, Fix ist korrekt und
+  wirksam.**
+- `src/lib/duffel/client.ts`: fehlende Testabdeckung für die vier
+  Mapping-Funktionen (`mapSegment`/`mapSlice`/`mapOffer`/
+  `mapStayResult`) geschlossen.
 
-**Eigene gezielte Bug-Suche in dieser Session:** Gezielt Dateien
-gelesen (nicht nur gegrept), u. a. `cartTotals.ts`, `calendarUtils.ts`,
-`checklistRules.ts`, `calculateProgress.ts`, `useConcierge.ts`,
-`useChat.ts`, `tripStorage.ts`, `routes.tsx`, `duffel/client.ts`,
-`mockAdvisor.ts`, `FlightWizard.tsx`, `HotelWizard.tsx`,
-`TripSummaryCard.tsx`, `Buchung.tsx`, `Warenkorb.tsx`, `Preisalarme.tsx`,
-`Angebote.tsx`, `MeineReisen.tsx`, `Kartenansicht.tsx`, `EditMode.tsx`
-und `EditMode.test.tsx`.
+**Eigene gezielte Bug-Suche heute:** Gezielt Dateien erneut gelesen
+(nicht nur gegrept) — `tripStorage.ts`, `useChat.ts`, `mockAdvisor.ts`,
+`cartTotals.ts`, `format.ts`, `calendarUtils.ts`, `checklistRules.ts`,
+`calculateProgress.ts`, `routes.tsx` selbst sowie, über einen eigens
+beauftragten Such-Durchlauf, zusätzlich `duffel/client.ts`,
+`useConcierge.ts`, `mockConcierge.ts`, `speech.ts`, `EditMode.tsx`,
+`ChecklistPanel.tsx` und die Seiten Buchung, Warenkorb, Flugsuche,
+Hotelsuche, Preisalarme, Angebote, MeineReisen, Kartenansicht,
+Dashboard, Reiseentwuerfe, Kalender, Urlaubsmodus, Favoriten,
+Aktivitaeten samt den Such-/Wizard- und Chat-Komponenten.
 
-**Ein konkreter, bereits von Support-Chef analysierter Fund war heute
-sicher genug für einen eigenen Auto-Fix** (siehe unten). Darüber hinaus
-keine neuen offenen TODOs/FIXMEs, keine unbehandelten Promise-Ketten und
-keine kaputten Imports/Links gefunden — die übrigen geprüften Stellen
-sind weiterhin sorgfältig mit Begründungskommentaren abgesichert.
+**Ergebnis:** ein neuer, echter Bug gefunden (siehe unten) — aber keiner,
+der die Sicherheits-Kriterien für einen Auto-Fix (klein, isoliert,
+risikoarm) erfüllt, deshalb heute **kein neuer Auto-Fix-PR**. Keine
+offenen TODOs/FIXMEs, keine kaputten Imports/Links gefunden.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-1. **[PR #28](https://github.com/niklas-struck-coder/travix.ai/pull/28)
-   (Branch `it-chef-autofix/editmode-sichtbares-label-2026-10-08`) —
-   Aktivitäten-Bearbeiten-Dialog zeigte bei gleichnamigen Aktivitäten
-   weiterhin mehrdeutigen Zeilentext.** `EditMode.tsx` berechnet pro
-   Aktivität bereits ein disambiguiertes Label (`getActivityLabel()`,
-   z. B. "Stadtführung (Eintrag 1)") und nutzt es für `aria-label`s und
-   den Lösch-Dialog — der sichtbare Zeilentext selbst zeigte aber
-   weiterhin den rohen, nicht disambiguierten Namen. Zwei gleichnamige
-   Aktivitäten erschienen dadurch als zwei optisch identische Zeilen mit
-   je eigenem Preisfeld/Löschen-Button, ohne erkennbar, welches Feld zu
-   welcher gehört. Von Support-Chef heute im Detail analysiert und als
-   risikoloser Einzeiler vorgeschlagen (`{activity.name}` →
-   `{activityLabel}`); ich habe das nachvollzogen, umgesetzt und mit
-   einem neuen Regressionstest abgesichert. Lint, Typecheck und die
-   volle Testsuite (423 Tests) laufen grün.
-2. **`src/hooks/useChat.ts:261` — Fehlermeldung bei "Start = Ziel" im
-   Flug-Chat nannte den Zielort nicht.** Bei gleichem Abflug- und
-   Zielflughafen antwortete der Chat nur mit "Start und Ziel dürfen nicht
-   gleich sein — welcher Flughafen ist dein Abflugort?", ohne den
-   gerade genannten Zielort zu wiederholen — obwohl `known.name` an
-   dieser Stelle bereits vorliegt und direkt danach für die
-   "searching"-Meldung genutzt wird. Von Support-Chef am 06.10. gemeldet,
-   im eigenen Bericht vom 08.10. zunächst als Copy-Entscheidung
-   zurückgestellt — bei genauerem Hinsehen reine mechanische Übernahme
-   des unmittelbar danebenstehenden, bereits etablierten Musters. Fix
-   umgesetzt, bestehender Regressionstest um eine Prüfung auf den
-   enthaltenen Zielnamen ergänzt, vorab rot verifiziert. Lint, Typecheck,
-   Build und die volle Testsuite (422 Tests) laufen grün.
+Keine. Der heutige Fund (siehe unten) betrifft mehrere Codepfade
+gleichzeitig und ist damit kein risikoarmer Einzeiler — bewusst nicht
+selbst angefasst.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-1. **`src/routes.tsx:54-56` — fehlende Fokus-Ankündigung bei
-   Routenwechsel, naiver Fix wäre selbst fehlerhaft.** `AnimatePresence
-   mode="wait"` hält die alte Seite bis zum Ende ihrer 0,2s-Animation im
-   DOM; der Scroll-`useEffect` feuert aber sofort bei Pfadwechsel.
-   `focusPageHeading()` einfach danebensetzen würde die falsche (alte)
-   Überschrift fokussieren. Bräuchte den Fokus-Aufruf nach
-   `onExitComplete` von `AnimatePresence` — eine kleine Timing-
-   Entscheidung, kein Einzeiler. Weiterhin unverändert seit 07.10.
-2. **`src/components/trip/EditMode.tsx:86-92` — Preisfeld ohne
-   Währungssymbol/Format.** Reines Freitextfeld ohne €-Symbol oder
-   Zahlenformat, seit 18.08. dokumentiert, durch den heutigen Fix nicht
-   berührt.
+1. **`src/hooks/useChat.ts` — laufende Duffel-Suchen werden nur bei
+   `resetChat()` als veraltet erkannt, nicht beim normalen Verlassen des
+   Suchschritts.** Der Veraltet-Schutz (`searchGenerationRef`) wird
+   ausschließlich in `resetChat()` hochgezählt (Zeile 434). Wechselt man
+   dagegen z. B. über "Bearbeiten → Unterkunft" in die automatische
+   Suche (`startEdit()`, Zeile ~204) und tippt vor deren Antwort
+   stattdessen Freitext in den Chat (z. B. "Ich übernachte bei
+   Freunden"), übernimmt der generische Edit-Zweig in `sendMessage()`
+   den Freitext sofort als neue Unterkunft und bestätigt das — die
+   inzwischen noch laufende, alte Suche schreibt ihr Ergebnis aber kurz
+   danach trotzdem in den State (`setStayOffers`/`setStayErrors`), weil
+   ihre Generation nicht verändert wurde. Es poppen Hotelkarten oder eine
+   Fehlermeldung unter der bereits gegebenen Bestätigung auf, die ihr
+   widersprechen; ein Klick auf eine dieser Karten führt zu keiner
+   sinnvollen Aktion mehr (Feld ist schon belegt). Derselbe Mechanismus
+   betrifft die Flug-Suche (`runFlightSearch`) und die Unterkunftssuche
+   im Haupt-Chat-Ablauf. Kein Einzeiler: eine korrekte Lösung muss an
+   mehreren Stellen (Feldwechsel in `startEdit()`, Freitext-Zweig in
+   `sendMessage()`) entscheiden, wann eine laufende Suche wirklich
+   verworfen werden soll, ohne versehentlich auch berechtigte, noch
+   erwartete Ergebnisse zu verwerfen — deshalb zur Rücksprache/für einen
+   eigenen, sorgfältigeren Lauf vorgemerkt statt heute blind gefixt.
+2. **`src/pages/Flugsuche.tsx:32` — ausgewählter Flug wird nicht mit
+   Route/Preis/Airline gespeichert, nur `transportMode: 'flight'`.**
+   Bereits heute von Support-Chef gefunden und gemeldet
+   (`support-chef-auto-log.md`, Commit `6f6735a`); von mir unabhängig im
+   Code bestätigt, zusammen mit dem verwandten Fund, dass
+   `FlightWizard`/`HotelWizard` beim Aufruf über "Bearbeiten → Manuell
+   suchen" nicht mit der vorherigen Suche vorbefüllt werden. Nicht
+   erneut im Detail ausgeführt, um Support-Chefs Bericht nicht zu
+   duplizieren — hier nur als technischer Folgepunkt vermerkt.
+3. **`src/components/trip/EditMode.tsx:86-92` — Preisfeld ohne
+   Währungssymbol/Format.** Weiterhin unverändert, seit 18.08.
+   dokumentiert.
 
 ## Weitere Vorschläge
 
-1. **Offene Auto-Fix-PRs (u. a. #1–#27) können größtenteils geschlossen
-   werden.** Jeder Fix steckt identisch oder gleichwertig bereits in
-   `main` (stichprobenhaft heute erneut verifiziert, z. B. #10/#11/#27) —
-   reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs schließen.
+1. **Alle offenen Auto-Fix-PRs (#1–#28) können geschlossen werden.**
+   Jeder Fix steckt identisch oder gleichwertig bereits in `main` —
+   sowohl die drei vorherigen (stichprobenhaft erneut verifiziert) als
+   auch PR #28 (jetzt per `it-chef/auto`-Fix inhaltlich doppelt).
+   Reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs schließen.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json` — kein Import irgendwo in `src/`. Entfernen reduziert
    die Bundle-Größe; Abhängigkeitsänderungen sind für diesen Kanal
@@ -95,4 +109,4 @@ sind weiterhin sorgfältig mit Begründungskommentaren abgesichert.
    Zugsuche-Seite, kein Nav-Eintrag, keine echte Datenquelle angebunden.
    Entweder verdrahten oder entfernen — Produktentscheidung.
 
-_Letztes Update: 2026-10-08_
+_Letztes Update: 2026-10-10_
