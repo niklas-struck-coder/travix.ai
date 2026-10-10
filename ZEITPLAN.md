@@ -1345,6 +1345,36 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Strich, unparsbare Eingabe als Rohstring) — bestehende
   `FlightCard.test.tsx`/`TrainCard.test.tsx`-Tests zur Dauer-Anzeige
   unverändert grün, da reine Verschiebung ohne Logikänderung.
+  Vom autonomen IT-Chef-Lauf am 10.10. (dritter Lauf desselben Tages) eine
+  über einen eigens dafür beauftragten Explore-Agenten gefundene
+  Testabdeckungslücke geschlossen: `src/lib/duffel/client.ts` übersetzt in
+  `mapSegment()`/`mapSlice()`/`mapOffer()` (Flüge) und `mapStayResult()`
+  (Unterkünfte) die rohe Duffel-API-Antwort (snake_case, viele optionale
+  Felder) in die von der App genutzten `FlightOffer`-/`StayOffer`-Shapes —
+  mit nicht-trivialer Logik (verschachteltes Array-Mapping offer→slices→
+  segments bzw. result→accommodation, Feldumbenennung, mehrstufige
+  Fallback-Werte wie `?? 'Unbekannte Fluggesellschaft'`/
+  `?? crypto.randomUUID()`). Keine dieser vier Funktionen wurde bisher von
+  irgendeinem Test tatsächlich ausgeführt: `client.test.ts` deckte
+  ausschließlich die Fehlerzweige von `callDuffelProxy` ab (4xx/5xx,
+  Netzwerk-/Parse-Fehler), nie den Erfolgszweig mit echten Offer-/
+  Stay-Daten; `useChat.test.ts`, `Flugsuche.test.tsx` und
+  `Hotelsuche.test.tsx` mocken `searchFlights`/`searchStays` komplett weg.
+  Ein falscher Feldname oder eine vertauschte Fallback-Reihenfolge in
+  dieser einzigen Stelle, an der die reale Duffel-Antwortform auf die vom
+  Rest der App verwendeten Felder trifft, wäre also durch keinen der
+  bisherigen 430 Tests aufgefallen — erst beim ersten echten Duffel-Key.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer
+  Bug gefunden. Fix: sieben neue Tests in `client.test.ts` (zwei neue
+  Describe-Blöcke `searchFlights mapping`/`searchStays mapping`, exakt das
+  bereits etablierte `vi.stubGlobal('fetch', ...)`-Testmuster aus den
+  bestehenden Fehlerfall-Tests) — je ein Test mit vollständig befüllter
+  Antwort (prüft alle gemappten Felder inkl. verschachtelter Slices/
+  Segmente bzw. Adresse/Rating/Foto), ein Test mit komplett leeren
+  Offer-/Slice-/Segment- bzw. Result-/Accommodation-Objekten (prüft jeden
+  einzelnen Fallback-Wert), sowie je ein Test für die Spezialfälle
+  "keine Offers in der Antwort", "`total_amount`/`total_currency`-Fallback
+  statt `cheapest_rate_*`" und "`accommodations`-Feld statt `results`".
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

@@ -17721,3 +17721,54 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-10 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start bereits auf dem Stand des
+zweiten Laufs heute (Commit `14bec55`), `origin/main` lag dahinter (kein
+Merge nötig, `git log origin/it-chef/auto..origin/main` leer). `main`
+nicht angefasst.
+
+**Suche:** Alle offenen Checkboxen in `tasks/tasks-prd-travix-platform.md`
+hängen laut eigenen Kommentaren weiterhin an fehlenden Backend-
+Credentials (Base44/Gemini), echten Produktentscheidungen oder externen
+Abhängigkeiten (Duffel Stays, Zahlungsprozess). Erneut einen eigens dafür
+beauftragten Explore-Agenten auf eigenständige Bug-/Lücken-Suche
+angesetzt, mit der Auflage, alle bereits bekannten/verworfenen Kandidaten
+aus sämtlichen früheren Läufen (inkl. der beiden heutigen) nicht erneut
+vorzuschlagen.
+
+**Gefunden und behoben:** Eine Testabdeckungslücke in
+`src/lib/duffel/client.ts`. Die vier Mapping-Funktionen
+`mapSegment()`/`mapSlice()`/`mapOffer()` (Flüge) und `mapStayResult()`
+(Unterkünfte) übersetzen die rohe Duffel-API-Antwort in die von der App
+genutzten `FlightOffer`-/`StayOffer`-Shapes — mit nicht-trivialer Logik
+(verschachteltes Array-Mapping, Feldumbenennung, mehrstufige
+Fallback-Werte). Keine davon wurde bisher von einem Test tatsächlich
+ausgeführt: `client.test.ts` deckte nur die Fehlerzweige von
+`callDuffelProxy` ab, nie den Erfolgszweig mit echten Offer-/Stay-Daten;
+`useChat.test.ts`/`Flugsuche.test.tsx`/`Hotelsuche.test.tsx` mocken
+`searchFlights`/`searchStays` komplett weg. Details, Reproduktions-
+Begründung und Fix siehe `ZEITPLAN.md` (10.10.-Eintrag, dritter Lauf,
+Phase 5). Reine Testabdeckung für bestehendes, unverändertes Verhalten,
+kein neuer Bug gefunden. Fix: sieben neue Tests in `client.test.ts`
+(zwei neue Describe-Blöcke, exakt das bereits etablierte
+`vi.stubGlobal('fetch', ...)`-Testmuster aus den bestehenden
+Fehlerfall-Tests) für vollständig befüllte Antworten, komplett leere
+Offer-/Slice-/Segment- bzw. Result-/Accommodation-Objekte (Fallback-
+Werte) sowie die drei Sonderfälle "keine Offers", "`total_amount`-Fallback
+statt `cheapest_rate_*`" und "`accommodations`-Feld statt `results`".
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 437 Tests, alle grün), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
