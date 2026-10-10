@@ -28,7 +28,13 @@ vi.mock('@/components/search/FlightWizard', () => ({
 }))
 
 function seedStoredChat() {
-  const state: StoredChatState = { messages: [], trip: { ...emptyTrip, destination: 'Lissabon' }, quickReplies: [] }
+  const state: StoredChatState = {
+    messages: [],
+    trip: { ...emptyTrip, destination: 'Lissabon' },
+    quickReplies: [],
+    editingField: null,
+    awaitingFlightOrigin: false,
+  }
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
 }
 

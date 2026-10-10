@@ -1,4 +1,4 @@
-import type { ChatMessage, TripDraft } from '@/types/chat'
+import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
 
 export const CHAT_STORAGE_KEY = 'travix.ki-chat.draft'
 
@@ -6,6 +6,8 @@ export interface StoredChatState {
   messages: ChatMessage[]
   trip: TripDraft
   quickReplies: string[]
+  editingField: EditableTripField | null
+  awaitingFlightOrigin: boolean
 }
 
 export function loadStoredChat(): StoredChatState | null {
@@ -21,11 +23,17 @@ export function loadStoredChat(): StoredChatState | null {
     // come back as arrays/objects instead of throwing here and discarding
     // the whole stored state (including the otherwise-guarded messages/
     // quickReplies) in the catch below.
+    // `editingField`/`awaitingFlightOrigin` are also missing from anything
+    // stored before this field existed — default to "not editing" rather
+    // than letting useChat.ts restore a stale edit flag with no matching
+    // `editingField`, or vice versa.
     return {
       ...parsed,
       messages: Array.isArray(parsed.messages) ? parsed.messages : [],
       quickReplies: Array.isArray(parsed.quickReplies) ? parsed.quickReplies : [],
       trip: { ...parsed.trip, activities: Array.isArray(parsed.trip?.activities) ? parsed.trip.activities : [] },
+      editingField: parsed.editingField ?? null,
+      awaitingFlightOrigin: Boolean(parsed.awaitingFlightOrigin),
     }
   } catch {
     return null

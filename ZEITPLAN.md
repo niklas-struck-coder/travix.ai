@@ -888,6 +888,42 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   weiterhin `null` bleibt) — vor dem Fix durch temporäres Zurücknehmen
   der Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
   verifiziert (altes Angebot landete trotz Reset im State).
+  Vom autonomen IT-Chef-Lauf am 10.10. (zweiter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug behoben: `editingField`/`awaitingFlightOrigin`
+  (`useChat.ts`) waren reiner In-Memory-React-State und fehlten in
+  `StoredChatState` (`tripStorage.ts`) — beim Speichern des Chats in
+  localStorage wurden beide Felder nicht mitgespeichert, beim Laden beim
+  Mount folglich auch nicht wiederhergestellt. Reproduzierbare Kette: Über
+  "Bearbeiten" (`Buchung.tsx`) ein bereits gesetztes Feld wie Budget
+  bearbeiten (`startEdit('budget')` zeigt die Edit-Frage samt
+  QuickReplies), vor der Antwort die Seite neu laden. `messages`/
+  `quickReplies`/`trip` werden korrekt aus localStorage wiederhergestellt
+  — die Edit-Frage bleibt sichtbar — aber `editingField` ist wieder
+  `null`. Antwortet man jetzt (z. B. "bis 1.000 €"), nimmt `sendMessage()`
+  den normalen `getNextAdvisorStep()`-Pfad statt des Edit-Pfads: Da
+  `trip.budget` schon gesetzt ist, wird die Eingabe je nach
+  Vervollständigungsgrad der Reise einem falschen, noch offenen Feld
+  zugeordnet oder (wenn alles schon ausgefüllt ist) komplett ignoriert —
+  das Budget bleibt unverändert, der Nutzer bekommt nur "Dein Reiseplan
+  steht!" zu sehen. Derselbe Mechanismus betrifft auch den
+  `awaitingFlightOrigin`-Zwischenschritt (Flug-Bearbeiten → IATA-Code wird
+  nach Reload als neue, normale Eingabe statt als Abflughafen gelesen).
+  Fix: beide Felder neu in `StoredChatState` aufgenommen und in
+  `saveStoredChat`/der `beforeunload`-Persistenz mitgeführt; beim Laden
+  beim Mount jetzt ebenfalls aus dem gespeicherten Objekt gesetzt statt
+  nur `messages`/`trip`/`quickReplies`. `loadStoredChat()` normalisiert
+  fehlende Werte (Alt-Daten von vor diesem Feld) auf `null`/`false`,
+  gleiches Muster wie die bestehende `activities`-Normalisierung direkt
+  darüber. Zwei neue Regressionstests in `useChat.test.ts` (Budget-Edit
+  bzw. Flug-Abflughafen-Edit, jeweils simulierter Reload über eine zweite
+  `renderHook()`-Instanz auf demselben localStorage) sowie zwei in
+  `tripStorage.test.ts` (fehlende Felder normalisieren, Round-Trip über
+  `saveStoredChat`/`loadStoredChat`) — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts` und
+  `tripStorage.ts`) reproduzierbar rot verifiziert (Budget blieb
+  unverändert, `searchFlights` wurde nach dem simulierten Reload nicht
+  aufgerufen).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

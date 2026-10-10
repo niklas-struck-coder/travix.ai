@@ -16,6 +16,8 @@ function seedStoredChat(overrides: Partial<StoredChatState> = {}) {
     messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
     trip: { ...emptyTrip, destination: 'Lissabon' },
     quickReplies: [],
+    editingField: null,
+    awaitingFlightOrigin: false,
     ...overrides,
   }
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
@@ -71,6 +73,8 @@ describe('saveStoredChat', () => {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
       trip: { ...emptyTrip, destination: 'Lissabon' },
       quickReplies: [],
+      editingField: null,
+      awaitingFlightOrigin: false,
     }
 
     expect(() => saveStoredChat(state)).not.toThrow()
@@ -85,6 +89,8 @@ describe('saveStoredChat', () => {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
       trip: { ...emptyTrip, destination: 'Lissabon' },
       quickReplies: [],
+      editingField: null,
+      awaitingFlightOrigin: false,
     }
 
     expect(saveStoredChat(state)).toBe(false)
@@ -95,6 +101,8 @@ describe('saveStoredChat', () => {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
       trip: { ...emptyTrip, destination: 'Lissabon' },
       quickReplies: [],
+      editingField: null,
+      awaitingFlightOrigin: false,
     }
 
     saveStoredChat(state)
@@ -107,6 +115,8 @@ describe('saveStoredChat', () => {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
       trip: { ...emptyTrip, destination: 'Lissabon' },
       quickReplies: [],
+      editingField: null,
+      awaitingFlightOrigin: false,
     }
 
     expect(saveStoredChat(state)).toBe(true)
@@ -136,6 +146,8 @@ describe('clearStoredChat', () => {
       messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
       trip: { ...emptyTrip, destination: 'Lissabon' },
       quickReplies: [],
+      editingField: null,
+      awaitingFlightOrigin: false,
     }
     saveStoredChat(state)
 
@@ -239,6 +251,27 @@ describe('loadStoredChat', () => {
     const loaded = loadStoredChat()
 
     expect(loaded?.quickReplies).toEqual([])
+  })
+
+  it('normalizes missing editingField/awaitingFlightOrigin to "not editing" (stored before these fields existed)', () => {
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({ messages: [], trip: { ...emptyTrip, destination: 'Lissabon' }, quickReplies: [] }),
+    )
+
+    const loaded = loadStoredChat()
+
+    expect(loaded?.editingField).toBeNull()
+    expect(loaded?.awaitingFlightOrigin).toBe(false)
+  })
+
+  it('round-trips a stored editingField/awaitingFlightOrigin through save and load', () => {
+    seedStoredChat({ editingField: 'transportMode', awaitingFlightOrigin: true })
+
+    const loaded = loadStoredChat()
+
+    expect(loaded?.editingField).toBe('transportMode')
+    expect(loaded?.awaitingFlightOrigin).toBe(true)
   })
 })
 

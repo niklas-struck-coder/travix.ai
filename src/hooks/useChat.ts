@@ -134,6 +134,8 @@ export function useChat(speechEnabled: boolean) {
       setMessages(stored.messages)
       setTrip(stored.trip)
       setQuickReplies(stored.quickReplies)
+      setEditingField(stored.editingField)
+      setAwaitingFlightOrigin(stored.awaitingFlightOrigin)
       setAvatarState('idle')
       return
     }
@@ -147,18 +149,18 @@ export function useChat(speechEnabled: boolean) {
 
   useEffect(() => {
     if (messages.length === 0) return
-    const state: StoredChatState = { messages, trip, quickReplies }
+    const state: StoredChatState = { messages, trip, quickReplies, editingField, awaitingFlightOrigin }
     setStorageWarning(!saveStoredChat(state))
-  }, [messages, trip, quickReplies])
+  }, [messages, trip, quickReplies, editingField, awaitingFlightOrigin])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (messages.length === 0) return
-      saveStoredChat({ messages, trip, quickReplies })
+      saveStoredChat({ messages, trip, quickReplies, editingField, awaitingFlightOrigin })
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [messages, trip, quickReplies])
+  }, [messages, trip, quickReplies, editingField, awaitingFlightOrigin])
 
   /**
    * Jumps straight into re-collecting a single already-filled trip field

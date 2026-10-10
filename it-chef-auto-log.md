@@ -17665,3 +17665,59 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-10 (zweiter Lauf desselben Tages)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start bereits auf dem Stand des
+ersten Laufs heute (Commit `76e6fc1`), `origin/main` lag auf demselben
+Commit wie `it-chef/auto` (kein Merge nötig, `git log
+origin/it-chef/auto..origin/main` leer). `main` nicht angefasst.
+
+**Suche:** Alle offenen Checkboxen in `tasks/tasks-prd-travix-platform.md`
+hängen laut eigenen Kommentaren weiterhin an fehlenden Backend-
+Credentials (Base44/Gemini), echten Produktentscheidungen oder externen
+Abhängigkeiten (Duffel Stays, Zahlungsprozess). Erneut einen eigens dafür
+beauftragten Explore-Agenten auf eigenständige Bug-Suche angesetzt, mit
+der Auflage, die bereits bekannten/verworfenen Kandidaten aus allen
+früheren Läufen (inkl. des heutigen ersten Laufs, `resetChat()`) nicht
+erneut vorzuschlagen.
+
+**Gefunden und behoben:** Ein eigenständiger Bug in `useChat.ts`/
+`tripStorage.ts`: `editingField`/`awaitingFlightOrigin` waren reiner
+In-Memory-State und fehlten in `StoredChatState` — beim Speichern des
+Chats in localStorage wurden beide Felder nicht mitgespeichert, beim
+Laden beim Mount folglich auch nicht wiederhergestellt. Über
+"Bearbeiten" (`Buchung.tsx`) ein bereits gesetztes Feld wie Budget
+bearbeiten, dann vor der Antwort neu laden: Die Edit-Frage bleibt dank
+der bereits persistierten `messages`/`quickReplies` sichtbar, aber
+`editingField` ist wieder `null` — die nächste Antwort nimmt den
+normalen `getNextAdvisorStep()`-Pfad statt des Edit-Pfads und das Budget
+bleibt unverändert (bzw. wird einem falschen Feld zugeordnet). Derselbe
+Mechanismus betrifft `awaitingFlightOrigin` beim Flug-Bearbeiten-
+Zwischenschritt. Details, Reproduktionsschritte und Fix-Begründung siehe
+`ZEITPLAN.md` (10.10.-Eintrag, zweiter Lauf, Phase 4). Fix: beide Felder
+in `StoredChatState` aufgenommen, in `saveStoredChat`/der
+`beforeunload`-Persistenz mitgeführt und beim Laden beim Mount ebenfalls
+gesetzt; `loadStoredChat()` normalisiert fehlende Werte (Alt-Daten) auf
+`null`/`false`. Zwei neue Regressionstests in `useChat.test.ts`
+(simulierter Reload über eine zweite `renderHook()`-Instanz auf
+demselben localStorage, einmal für den Budget-Edit, einmal für den
+Flug-Abflughafen-Edit) sowie zwei in `tripStorage.test.ts` — vor dem Fix
+durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`useChat.ts` und `tripStorage.ts`) reproduzierbar rot verifiziert
+(Budget blieb nach dem simulierten Reload unverändert, `searchFlights`
+wurde nicht aufgerufen).
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b`
+(kein Typfehler), `npm run lint` (0 Fehler, dieselben drei
+vorbestehenden Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` (62 Testdateien, 430 Tests, alle grün),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

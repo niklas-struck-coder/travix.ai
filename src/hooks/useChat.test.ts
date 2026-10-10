@@ -671,6 +671,74 @@ describe('useChat persistence resilience', () => {
   })
 })
 
+// editingField/awaitingFlightOrigin used to be pure in-memory state, missing
+// from StoredChatState — a reload mid "Bearbeiten" flow (reachable from
+// Buchung.tsx) kept the edit prompt/quick-replies on screen (those come from
+// `messages`/`quickReplies`, which were already persisted) but silently
+// forgot it was mid-edit. The next answer then fell through to the normal
+// getNextAdvisorStep() path instead of being applied to the field being
+// edited.
+describe('useChat restores an in-progress field edit after a reload', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+    vi.mocked(searchStays).mockReset()
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+    vi.mocked(searchFlights).mockReset()
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('applies the answer to the field being edited, not to the normal advisor flow, after a simulated reload', () => {
+    const before = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    act(() => {
+      before.current.startEdit('budget')
+    })
+    expect(before.current.trip.budget).toBe('bis 500 €')
+
+    // Simulate a reload: a fresh hook instance picks up only what's in
+    // localStorage, the same way a real page load would.
+    const { result: afterReload } = renderHook(() => useChat(false))
+
+    act(() => {
+      afterReload.current.sendMessage('bis 1.000 €')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(afterReload.current.trip.budget).toBe('bis 1.000 €')
+  })
+
+  it('still treats the next message as a flight-origin IATA code, not a fresh destination, after a simulated reload', () => {
+    const before = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    act(() => {
+      before.current.startEdit('transportMode')
+    })
+    act(() => {
+      before.current.sendMessage('Flug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    const { result: afterReload } = renderHook(() => useChat(false))
+
+    act(() => {
+      afterReload.current.sendMessage('BER')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(searchFlights).toHaveBeenCalledWith(expect.objectContaining({ origin: 'BER', destination: 'LIS' }))
+    expect(afterReload.current.trip.transportMode).toBe('flight')
+  })
+})
+
 describe('useChat selectFlight confirmation message', () => {
   const NBSP = ' '
 

@@ -17,6 +17,8 @@ function seedStoredChat(overrides: Partial<StoredChatState['trip']> = {}) {
     messages: [],
     trip: { ...emptyTrip, ...overrides },
     quickReplies: [],
+    editingField: null,
+    awaitingFlightOrigin: false,
   }
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
 }

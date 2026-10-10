@@ -11,6 +11,8 @@ function seedStoredTrip(patch: Partial<StoredChatState['trip']>) {
     messages: [{ id: '1', role: 'assistant', content: 'Hallo', timestamp: 0 }],
     trip: { ...emptyTrip, ...patch },
     quickReplies: [],
+    editingField: null,
+    awaitingFlightOrigin: false,
   }
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
 }
