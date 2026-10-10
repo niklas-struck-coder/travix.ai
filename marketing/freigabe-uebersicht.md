@@ -1,10 +1,147 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-09)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-10)
 
-Dieses Dokument sortiert die inzwischen acht fertigen Entwürfe in
+Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-10: drei neue Tier-4-Kandidaten (43: `startEdit()` setzte das `awaitingFlightOrigin`-Flag bei einem abgebrochenen Flug-Abflughafen-Edit nicht zurück, ein späterer unabhängiger Transportmittel-Edit interpretierte die Eingabe dadurch fälschlich als IATA-Code statt als Verkehrsmittel und erfand z. B. den Flugcode "ZUG" für "Zug"; 44: `resetChat()` brach eine noch laufende Unterkunfts-/Flugsuche nicht ab, ihr spätes Ergebnis schrieb danach die Angebote der bereits verworfenen Reiseplanung in den frisch gestarteten Chat — direkte Fortsetzung des bereits am 07.10. für den Timeout-Pfad gezählten Kandidaten 36, jetzt für alle drei Promise-Suchpfade; 45: `editingField`/`awaitingFlightOrigin` waren reiner In-Memory-Zustand und überlebten einen Reload nicht — die Chat-Oberfläche zeigte nach einem Reload mitten im "Bearbeiten"-Flow weiterhin sichtbar die Edit-Frage, die nächste Antwort lief aber am Edit-Pfad vorbei in den normalen Advisor-Flow und das bearbeitete Feld blieb unverändert oder wurde falsch zugeordnet), zwei Commits bewusst ausgeschlossen (fehlende Fokus-Ankündigung bei Routenwechsel — reiner Barrierefreiheits-Fix ohne Ehrlichkeits-/Vertrauens-Erzählung; reine Testabdeckung für Duffel-Mapping-Funktionen ohne Verhaltensänderung), Kandidatentopf von sechs auf **neun** — damit über der Achter-Schwelle: siebte Mini-Changelog-Ausgabe geschrieben (siehe `marketing/mini-changelog-konzept.md`), Kandidatentopf danach wieder leer, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `2e881ca`, 09.10., eigener letzter Commit)
+war bereits vollständig in `main` gemergt (`git merge-base --is-ancestor
+2e881ca origin/main` bestätigt das) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für bereits
+gemergte Branches vorgesehen neu von aktuellem `origin/main` (`648f6af`,
+früher Nacht-Check 10.10.) aus angelegt, statt auf dem alten Stand
+weiterzumachen.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 08.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+**`git log 2e881ca..origin/main` zeigt die seit dem letzten Check (09.10.,
+Commit `2e881ca`) neu dazugekommenen Commits**, darunter fünf mit echter
+Produkt-Codeänderung (die übrigen sind ein Freigabe-Chef-Merge und dessen
+Log-Eintrag ohne eigene Codeänderung), jeder einzeln per `git show` sowie
+direkt im aktuellen Code geprüft:
+
+- **`5d8277f` (09.10., IT-Chef Auto, fünfter Lauf):** `startEdit()`
+  (`src/hooks/useChat.ts`) setzte `stayOffers`/`stayErrors`/`editingField`
+  für jedes Feld zurück, nicht aber `awaitingFlightOrigin`. Ein
+  abgebrochener "Transportmittel → Flug → Abflughafen"-Edit ließ das Flag
+  gesetzt, sodass ein späterer, unabhängiger Transportmittel-Edit die
+  Eingabe fälschlich als IATA-Code statt über `detectTransportMode()`
+  interpretierte — z. B. wurde "Zug" zu einem Flug mit erfundenem Code
+  "ZUG". Live im Code verifiziert (`src/hooks/useChat.ts`, Zeile 180:
+  `setAwaitingFlightOrigin(false)` jetzt Teil von `startEdit()`). Eine
+  Nutzerin bekam damit ohne jede eigene fehlerhafte Eingabe eine
+  erfundene, nie existierende Information präsentiert — passt klar in die
+  etablierte "Du wirst nicht mit einer erfundenen Angabe abgespeist"-
+  Fundgruppe (vgl. Kandidat 28, "1min"-Dauer). **Dreiundvierzigster
+  Tier-4-Kandidat.**
+- **`76e6fc1` (10.10., IT-Chef Auto):** `resetChat()` (`useChat.ts`) brach
+  eine noch laufende Unterkunfts-/Flugsuche (Duffel) bisher nicht ab —
+  ihr später eintreffendes Ergebnis schrieb die Angebote der bereits
+  verworfenen, alten Reiseplanung in den frisch gestarteten Chat. Live im
+  Code verifiziert (neue `searchGenerationRef`, verwirft veraltete
+  Antworten in allen drei betroffenen Promise-Handlern, Zeilen 95-434).
+  Direkte Fortsetzung desselben Musters, das für den `setTimeout`-Pfad
+  bereits am 07.10. als Kandidat 36 gezählt wurde — hier derselbe Bug für
+  die Promise-basierten Suchpfade, eigener, separat verifizierter Commit.
+  Eine Nutzerin, die bewusst neu startet, bekam bisher ohne jede eigene
+  Aktion kommentarlos eine veraltete, zu einer bereits verworfenen Planung
+  gehörende Antwort zurück. **Vierundvierzigster Tier-4-Kandidat.**
+- **`14bec55` (10.10., IT-Chef Auto, zweiter Lauf):** `editingField`/
+  `awaitingFlightOrigin` (`useChat.ts`) waren bisher reiner
+  In-Memory-Zustand und fehlten in `StoredChatState`
+  (`src/lib/trip/tripStorage.ts`). Ein Reload mitten in einem
+  "Bearbeiten"-Flow (`Buchung.tsx`) ließ die Edit-Frage dank
+  persistierter `messages`/`quickReplies` weiterhin sichtbar, vergaß aber,
+  dass gerade auf eine Edit-Antwort gewartet wird — die nächste Nachricht
+  lief danach am Edit-Pfad vorbei in den normalen Advisor-Flow, das
+  bearbeitete Feld blieb unverändert oder wurde falsch zugeordnet. Live im
+  Code verifiziert (beide Felder jetzt Teil von `StoredChatState`, in
+  `saveStoredChat`/der `beforeunload`-Persistenz mitgeführt und beim Laden
+  gesetzt, `loadStoredChat()` normalisiert fehlende Alt-Werte auf
+  `null`/`false`). Die Chat-Oberfläche behauptete nach dem Reload weiterhin
+  sichtbar etwas (die offene Edit-Frage), das sie im Hintergrund nicht mehr
+  einhielt — dieselbe "stille Lücke zwischen dem, was die Oberfläche zeigt,
+  und dem, was tatsächlich passiert"-Erzählung wie bei den
+  Favoriten-Kandidaten 31/32. **Fünfundvierzigster Tier-4-Kandidat.**
+- **`7eedd7d` (09.10., IT-Chef Auto, sechster Lauf):** `AppRoutes`
+  (`src/routes.tsx`) kündigt einen Routenwechsel jetzt zusätzlich per
+  Fokuswechsel (`focusPageHeading()` über `onExitComplete` plus
+  `requestAnimationFrame`) für Screenreader-Nutzer:innen an. Live im Code
+  verifiziert. **Bewusst nicht** als Tier-4-Kandidat aufgenommen: reiner
+  Barrierefreiheits-Fix (Fokus-Ankündigung), ohne die
+  "Ehrlichkeit/Vertrauen"-Erzählung dieses Formats — exakt dieselbe
+  Begründung wie bei den bereits ausgeschlossenen `2d0f024`/`7b2cf09`/
+  `03a1e6b`/`a21ae7c`/`67b9bdb`/`17b61f5` und den übrigen
+  Accessibility-Ausschlüssen.
+- **`1bd5af1` (10.10., IT-Chef Auto, dritter Lauf):** reine
+  Testabdeckungslücke für die Duffel-Mapping-Funktionen geschlossen, laut
+  Commit keine Verhaltensänderung an bestehendem Code. **Kein Kandidat**
+  — exakt dieselbe Ausschlussgruppe wie jede bisherige reine
+  Testdatei-Ergänzung.
+
+**Kandidatentopf:** 37-42 unverändert, 43-45 neu dazugekommen — der
+aktive Topf erreicht damit **neun**, über der etablierten Achter-Schwelle
+(zuletzt bei neun Kandidaten in Ausgabe 6 am 07.10. ausgelöst). **Siebte
+Mini-Changelog-Ausgabe damit fällig** — alle neun Kandidaten (37-45) sind
+in `marketing/mini-changelog-konzept.md` verarbeitet. Der
+Kandidatentopf ist mit dieser Ausgabe wieder leer, der nächste Lauf
+sammelt neue Funde von vorn.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht plus eine neue Ausgabe im bereits
+etablierten Mini-Changelog-Entwurf — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: alle
+drei neuen Kandidaten stammen aus einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commits; beide
+Ausschlüsse wenden nur bereits etablierte Kriterien konsequent an (keine
+Ehrlichkeits-/Vertrauens-Erzählung bzw. keine Verhaltensänderung). Keine
+offene Positionierungs-Grundsatzfrage — die siebte Ausgabe wendet nur
+dieselbe, bereits in `MARKENDESIGN.md` festgelegte Positionierung und
+denselben Tonfall wie Ausgabe 1-6 an, ohne etwas inhaltlich neu zu
+entscheiden.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei neuen
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle drei fließen stattdessen in die siebte
+  Mini-Changelog-Ausgabe.
+- `ZEITPLAN.md` bewusst nicht angefasst — dieses Update betrifft nur die
+  laufende Kandidaten-/Freigabe-Verwaltung und die bereits bestehende
+  Mini-Changelog-Konzeptdatei, keinen neuen Sprint-Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/hooks/useChat.ts`, `src/lib/trip/tripStorage.ts` und
+`src/routes.tsx` direkt im aktuellen Code gelesen, nicht nur aus
+Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 10.10. (Prüfung
+  der vier Fragen, fünf neue Commits einzeln geprüft, drei als
+  Tier-4-Kandidaten 43/44/45, zwei bewusst ausgeschlossen,
+  Kandidatentopf-Stand auf "neun" und damit über der Schwelle gesetzt),
+  Datum im Titel auf 10.10. gesetzt.
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 7" mit allen neun
+  gesammelten Kandidaten (37-45), gleiche Struktur/Tonfall wie
+  Ausgabe 1-6.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-09: drei neue Tier-4-Kandidaten (40: fehlende Wortgrenze bei "unfall" im Urlaubsmodus-Concierge behoben, exakt dieselbe Fehlerklasse wie der bereits gezählte "hilfe"-Fund vom 07.10.; 41: sichtbarer Aktivitäten-Zeilentext in `EditMode.tsx` zeigt jetzt das disambiguierte Label, nicht mehr nur aria-labels/Lösch-Dialog — schließt dieselbe Fundgruppe wie 38/39 weiter ab; 42: Demo-Trip "Lissabon" zeigte trotz bereits über zwei Wochen vergangenem Reisezeitraum weiterhin einen aktiven "Bevorstehend"-Badge samt klickbarem Urlaubsmodus-Button), ein Commit bewusst ausgeschlossen (Start=Ziel-Fehlermeldung nennt jetzt den Zielort — reine Formulierungs-/Personalisierungsverbesserung einer bereits korrekten Meldung, keine Ehrlichkeits-/Vertrauens-Erzählung), Kandidatentopf von drei auf **sechs**, alle vier Fragen weiterhin offen
 
