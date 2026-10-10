@@ -17847,3 +17847,58 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-10 (fünfter Lauf desselben Tages)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start auf dem Stand des vierten
+Laufs heute (Commit `7dd2ef2`), `origin/main` lag davor (Freigabe-Chef
+hatte den dritten Lauf bereits gemergt, der vierte Lauf wartet noch auf
+Prüfung) — kein Merge nötig, da `main` seit dem vierten Lauf nicht
+weitergewandert ist. `main` selbst nicht angefasst.
+
+**Auswahl:** `npm run lint` lokal ausgeführt, um einen frischen,
+objektiv prüfbaren Ausgangspunkt zu haben, statt erneut einen Explore-
+Agenten auf freie Bug-Suche anzusetzen (der heutige `reports/it-chef.md`-
+Eintrag hatte bereits eine sehr breite Suche über praktisch den gesamten
+`src`-Baum dokumentiert, ohne einen weiteren sicheren Fund). Lint zeigte
+exakt die drei seit mehreren Läufen in den "Geprüft"-Abschnitten dieses
+Logs wiederholt als "dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in badge.tsx/button.tsx/tabs.tsx" protokollierten, aber nie
+behobenen Warnungen. Gegen die vier Sicherheitskriterien geprüft: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug (reine UI-Primitiv-Datei-
+Organisation), keine offene Produkt- oder Architekturentscheidung,
+klar genug beschrieben (ESLint selbst nennt Datei, Zeile und die exakte
+Regel `react-refresh/only-export-components` samt Standardlösung "neue
+Datei"), objektiv prüfbar (Lint-Warnungen verschwinden, Typecheck/Tests/
+Build bleiben grün) → alle vier Kriterien erfüllt. Vorab per Grep
+bestätigt, dass `badgeVariants`/`buttonVariants`/`tabsListVariants`
+nirgends außerhalb der eigenen Datei importiert werden — reine
+Datei-Reorganisation ohne Risiko für andere Konsumenten.
+
+**Gefunden und behoben:** Siehe Begründung oben, Details siehe
+`ZEITPLAN.md` (10.10.-Eintrag, fünfter Lauf, Phase 1). `badge.tsx`,
+`button.tsx` und `tabs.tsx` exportierten je eine `cva()`-Variantenfunktion
+neben ihrer Komponente aus derselben Datei, was React Fast Refresh in
+diesen drei Dateien verhindert. Fix: `badgeVariants`/`buttonVariants`/
+`tabsListVariants` jeweils in eine neue, dedizierte Datei
+(`badge-variants.ts`/`button-variants.ts`/`tabs-variants.ts`) ausgelagert
+— exakt das von shadcn/ui selbst in aktuelleren Versionen genutzte
+Trennungsmuster. Die drei Komponentendateien importieren ihre
+Variantenfunktion jetzt von dort und exportieren nur noch die
+Komponente(n) selbst. Keine Verhaltensänderung für irgendeinen
+Konsumenten, keine neuen Tests nötig (bestehende Komponententests decken
+`Badge`/`Button`/`Tabs*` weiterhin unverändert ab).
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Probleme — die drei vorbestehenden
+Fast-Refresh-Warnungen sind weg, keine neuen Warnungen), `npx vitest run`
+(62 Testdateien, 443 Tests, alle grün, unverändert gegenüber dem vierten
+Lauf heute), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

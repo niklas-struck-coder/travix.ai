@@ -49,6 +49,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Objekten mit Bool-Werten, leerer String ohne Eingabe — jeweils gegen
   das tatsächliche Verhalten von `clsx`/`tailwind-merge` verifiziert statt
   angenommen.
+  Vom autonomen IT-Chef-Lauf am 10.10. (fünfter Lauf desselben Tages) einen
+  seit mehreren Läufen in `npm run lint`/`npm run build` wiederholt als
+  "dieselben drei vorbestehenden Fast-Refresh-Warnungen" protokollierten
+  Befund tatsächlich behoben, statt ihn weiterhin nur zu dokumentieren:
+  `badge.tsx`, `button.tsx` und `tabs.tsx` (von shadcn/ui vorgegebene
+  UI-Primitive) exportierten jeweils neben ihrer Komponente auch eine
+  `cva()`-Variantenfunktion (`badgeVariants`/`buttonVariants`/
+  `tabsListVariants`) aus derselben Datei — React Fast Refresh verlangt,
+  dass eine Datei mit Komponenten-Export ausschließlich Komponenten
+  exportiert, sonst verliert ein Edit an dieser Datei im Dev-Server seinen
+  HMR-Zustand. Geprüft, dass keine andere Datei im `src`-Baum diese drei
+  Variantenfunktionen importiert (nur die jeweils eigene Komponente
+  nutzt sie intern) — reine Hygiene-Korrektur ohne Verhaltensänderung für
+  irgendeinen Konsumenten. Fix: exakt das von shadcn/ui selbst in
+  aktuelleren Versionen verwendete Muster — jede Variantenfunktion in eine
+  eigene Datei ausgelagert (`badge-variants.ts`, `button-variants.ts`,
+  `tabs-variants.ts`, je nur `cva`-Import plus Funktion), die jeweilige
+  Komponentendatei importiert ihre Variantenfunktion jetzt von dort statt
+  sie selbst zu definieren, und exportiert nur noch die Komponente(n)
+  selbst. Keine neuen/geänderten Tests nötig (reine Re-Organisation ohne
+  Verhaltensänderung, bestehende Komponententests decken `Badge`/`Button`/
+  `Tabs*` bereits ab) — `npm run lint` zeigt jetzt 0 Probleme statt der drei
+  Warnungen.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
