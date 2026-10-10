@@ -6,6 +6,7 @@ import { FlightWizard } from '@/components/search/FlightWizard'
 import { FlightCard } from '@/components/search/FlightCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
 import { searchFlights } from '@/lib/duffel/client'
+import { summarizeFlightOffer } from '@/lib/format'
 import { updateStoredTrip } from '@/lib/trip/tripStorage'
 import type { DuffelError, FlightOffer, FlightSearchParams } from '@/types/duffel'
 
@@ -29,7 +30,7 @@ export function Flugsuche() {
   }
 
   const handleSelect = (offer: FlightOffer) => {
-    const updated = updateStoredTrip({ transportMode: 'flight' })
+    const updated = updateStoredTrip({ transportMode: 'flight', transportDetail: summarizeFlightOffer(offer) })
     setSelectedOfferId(offer.id)
     setSelectionHasTrip(updated !== null)
     setStorageWarning(updated !== null && !updated.saved)

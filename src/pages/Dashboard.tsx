@@ -18,6 +18,7 @@ const draftTrips: TripDraft[] = [
   {
     destination: 'Lissabon',
     transportMode: 'flight',
+    transportDetail: null,
     budget: 'bis 1.200 €',
     dates: '15. – 22. November 2026',
     accommodation: null,
@@ -26,6 +27,7 @@ const draftTrips: TripDraft[] = [
   {
     destination: 'Kyoto',
     transportMode: null,
+    transportDetail: null,
     budget: null,
     dates: '3. – 10. März 2026',
     accommodation: null,

@@ -17772,3 +17772,78 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-10 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start auf dem Stand des dritten
+Laufs heute (Commit `1bd5af1`), `origin/main` lag davor (Freigabe-Chef
+hatte den dritten Lauf bereits gemergt) plus neue Berichte von
+IT-Chef/Marketing-Chef/Support-Chef — `git merge origin/main`
+(Fast-Forward, keine Konflikte) geholt, bevor an diesem Punkt gearbeitet
+wurde. `main` selbst nicht angefasst.
+
+**Auswahl:** Statt erneut einen Explore-Agenten auf freie Bug-Suche
+anzusetzen, zuerst den frisch gemergten `reports/it-chef.md`-Eintrag
+(10.10., Commit `fe9fb88`) und den zugehörigen
+`support-chef-auto-log.md`-Eintrag (10.10., "Reiseplan/'Bearbeiten'-
+Flug-Flow") gelesen — beide bereits von den jeweiligen Chefs unabhängig
+analysiert, mit konkretem Dateibezug. Drei dort genannte, noch offene
+Punkte gegen die vier Sicherheitskriterien geprüft:
+
+1. Stale Duffel-Suchergebnisse bei Feldwechsel (`useChat.ts`) — von
+   IT-Chef selbst bereits explizit als "kein Einzeiler, mehrere
+   Codepfade" eingestuft (Timing-Entscheidung an mehreren Stellen
+   gleichzeitig, Risiko versehentlich auch berechtigte Ergebnisse zu
+   verwerfen) → **nicht sicher genug**, übersprungen.
+2. Ausgewählte Flugverbindung wird nicht mit Route/Preis/Airline
+   gespeichert, nur `transportMode: 'flight'` (`Flugsuche.tsx:32`) → kein
+   Auth/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt-
+   entscheidung (von Support-Chef selbst als "exakt das bereits
+   etablierte Muster von `accommodation`, keine neue
+   Design-Entscheidung nötig" beschrieben und von IT-Chef unabhängig
+   bestätigt), klar genug beschrieben (konkreter Vorschlag inkl.
+   Feldname/Befüllung/Anzeigeort), objektiv prüfbar (Typecheck/Tests) →
+   **alle vier Kriterien erfüllt**.
+3. `FlightWizard`/`HotelWizard` starten bei "Bearbeiten → Manuell
+   suchen" leer statt vorbefüllt — von Support-Chef selbst explizit als
+   "kein Vorschlag für einen Ein-Zeiler-Fix, da das eine neue
+   Datenstruktur voraussetzt" markiert, zudem abhängig von Punkt 2 →
+   **nicht sicher genug**, übersprungen (bleibt offener Folgepunkt).
+
+Punkt 2 umgesetzt.
+
+**Gefunden und behoben:** Siehe Punkt 2 oben. `Flugsuche.tsx` (`handleSelect`)
+speicherte beim Auswählen eines Flugs bisher nur, dass überhaupt ein
+Flug gewählt wurde, nicht welcher — `Buchung.tsx` zeigte danach nur das
+generische Label "Flug", obwohl die Erfolgsmeldung auf `/flugsuche` eine
+konkrete Übernahme suggeriert, und der strukturell identische
+Unterkunfts-Pfad (`Hotelsuche.tsx`/`accommodation`) die Auswahl sehr wohl
+konkret zeigt. Details, Reproduktionsschritte und Fix-Begründung siehe
+`ZEITPLAN.md` (10.10.-Eintrag, vierter Lauf, Phase 5). Fix: neues
+optionales `transportDetail`-Feld auf `TripDraft`, neue
+`summarizeFlightOffer()`-Hilfsfunktion in `src/lib/format.ts`
+(Airline/Route/Preis, etabliertes `name || iata || '—'`-Fallback-Muster),
+von `Flugsuche.tsx` beim Auswählen befüllt und auf `Buchung.tsx`
+zusätzlich zum bisherigen Modus-Label angezeigt. Sechs neue
+Regressionstests (drei in `format.test.ts`, einer in
+`Flugsuche.test.tsx`, zwei in `Buchung.test.tsx`) — vor dem Fix durch
+temporäres Zurücknehmen aller Produktions-Quelländerungen (`git stash`,
+Tests blieben gestaged) reproduzierbar rot verifiziert (alle sechs neuen
+Tests schlugen fehl).
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b` (kein
+Typfehler — u. a. drei bestehende Trip-Literale in `Dashboard.tsx`/
+`Reiseentwuerfe.tsx`/`TripSummaryCard.test.tsx` mussten wegen des neuen
+Pflichtfelds `transportDetail` auf `TripDraft` mit angepasst werden),
+`npm run lint` (0 Fehler, dieselben drei vorbestehenden Fast-Refresh-
+Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx vitest run` (62
+Testdateien, 443 Tests, alle grün), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

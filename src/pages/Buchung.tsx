@@ -214,7 +214,13 @@ export function Buchung() {
         <Section
           icon={TransportIcon}
           title="Transport"
-          value={trip.transportMode ? transportLabels[trip.transportMode] : null}
+          value={
+            trip.transportMode
+              ? trip.transportDetail
+                ? `${transportLabels[trip.transportMode]} · ${trip.transportDetail}`
+                : transportLabels[trip.transportMode]
+              : null
+          }
           emptyLabel="Noch kein Transport ausgewählt"
           editHref={transportEditHref}
           editChoice={transportEditChoice}

@@ -1,3 +1,5 @@
+import type { FlightOffer } from '@/types/duffel'
+
 /** Formats a plain EUR amount in German locale, e.g. "1.200 €". */
 export function formatEuro(amount: number): string {
   return `${amount.toLocaleString('de-DE')} €`
@@ -15,6 +17,16 @@ export function formatOfferPrice(amount: string, currency: string): string {
     // one) — fall back to the raw values instead of crashing the render.
     return `${amount} ${currency}`
   }
+}
+
+/** Summarizes a selected flight offer (airline, route, price) for display outside the search results, e.g. on the Reiseplan. */
+export function summarizeFlightOffer(offer: FlightOffer): string {
+  const slice = offer.slices[0]
+  const carrier = slice?.segments[0]?.carrierName || 'Fluggesellschaft unbekannt'
+  const origin = (slice && (slice.originName || slice.originIata)) || '—'
+  const destination = (slice && (slice.destinationName || slice.destinationIata)) || '—'
+  const price = formatOfferPrice(offer.totalAmount, offer.totalCurrency)
+  return `${carrier} · ${origin} → ${destination} · ${price}`
 }
 
 /** Formats an ISO-8601 duration ("PT3H15M", "P1D") as "3h 15min"/"24h", e.g. for flight/train offers. */

@@ -1375,6 +1375,54 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   einzelnen Fallback-Wert), sowie je ein Test für die Spezialfälle
   "keine Offers in der Antwort", "`total_amount`/`total_currency`-Fallback
   statt `cheapest_rate_*`" und "`accommodations`-Feld statt `results`".
+  Vom autonomen IT-Chef-Lauf am 10.10. (vierter Lauf desselben Tages) einen
+  von Support-Chef (`support-chef-auto-log.md`, 10.10., "Reiseplan/
+  'Bearbeiten'-Flug-Flow", Fund 1) sowie unabhängig von IT-Chef selbst
+  (`reports/it-chef.md`, 10.10., Fund 2) gemeldeten, inhaltlich
+  identischen Fund behoben: `Flugsuche.tsx:32` (`handleSelect`) rief bei
+  Auswahl einer `FlightCard` bisher nur `updateStoredTrip({ transportMode:
+  'flight' })` auf — vermerkt wurde ausschließlich, dass irgendein Flug
+  gewählt wurde, nicht welcher (Airline, Route, Preis). `Buchung.tsx`
+  zeigte danach nur das generische Label "Flug", identisch zu dem, was
+  dort auch ganz ohne jede Auswahl stünde — obwohl die Erfolgsmeldung auf
+  `/flugsuche` eine konkrete Übernahme suggeriert. Der strukturell
+  identische Pfad für Unterkünfte speichert die Auswahl dagegen sehr wohl
+  konkret (`Hotelsuche.tsx:33`: `updateStoredTrip({ accommodation:
+  offer.accommodationName })`, danach sichtbar auf `Buchung.tsx`) —
+  `TripDraft` hatte für `transportMode` schlicht kein Gegenstück zu
+  `accommodation`. Support-Chef schlug dafür bereits exakt das
+  etablierte Muster vor (neues optionales Detailfeld, analog zu
+  `accommodation` befüllt), IT-Chef bestätigte den Fund unabhängig im
+  Code. Fix: neues Feld `transportDetail: string | null` auf `TripDraft`
+  (`src/types/chat.ts`, inkl. `emptyTrip` in `mockAdvisor.ts` sowie den
+  Demo-Trip-Literalen in `Dashboard.tsx`/`Reiseentwuerfe.tsx`); neue
+  `summarizeFlightOffer()`-Hilfsfunktion in `src/lib/format.ts` (Airline ·
+  Route · Preis, mit demselben `name || iata || '—'`-Fallback-Muster wie
+  bereits in `FlightCard.tsx`), von `Flugsuche.tsx:32` beim Auswählen
+  befüllt; `Buchung.tsx` zeigt das Detail jetzt zusätzlich zum bisherigen
+  `transportLabels`-Text ("Flug · Lufthansa · Berlin → Lissabon ·
+  149,00 €"), fehlt es (Zug/Bus/Fähre/Mietwagen oder alte Daten ohne
+  Detail), bleibt es beim bisherigen reinen Modus-Label — keine
+  Verhaltensänderung für diese Fälle. `TripSummaryCard.tsx` (Chat-
+  Seitenleiste) bewusst unverändert gelassen, da weder Support-Chefs noch
+  IT-Chefs Fund sich darauf bezog und dort ohnehin nur sehr kompakte
+  Zeilen passen. Fund 2 aus demselben Support-Chef-Bericht (FlightWizard/
+  HotelWizard starten beim "Bearbeiten → Manuell suchen" leer statt
+  vorbefüllt) bewusst nicht mit angefasst — Support-Chef selbst markiert
+  ihn explizit als "kein Ein-Zeiler-Fix", da er eine neue, noch zu
+  entwerfende Vorbefüllungs-Logik voraussetzt, keine reine Übernahme
+  eines bereits etablierten Musters. Sechs neue Regressionstests: drei
+  in `format.test.ts` für `summarizeFlightOffer()` (vollständige Daten,
+  Fallback auf IATA-Code bei fehlendem Namen, Fallback auf
+  "Fluggesellschaft unbekannt" bei fehlendem Carrier-Namen), einer in
+  `Flugsuche.test.tsx` (ausgewählter Flug landet mit Airline/Route/Preis
+  im `localStorage`), zwei in `Buchung.test.tsx` (Detail-Text wird
+  zusätzlich zum Modus-Label angezeigt; reines Modus-Label ohne Detail
+  bleibt unverändert) — vor dem Fix durch temporäres Zurücknehmen aller
+  Quelländerungen (`git stash` nur der Produktionsdateien, nicht der
+  Tests) reproduzierbar rot verifiziert (alle sechs neuen Tests
+  schlugen fehl: `summarizeFlightOffer` war nicht exportiert,
+  `transportDetail` blieb `undefined`).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

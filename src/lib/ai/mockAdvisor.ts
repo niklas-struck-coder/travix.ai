@@ -52,6 +52,7 @@ export function detectTransportMode(text: string): TransportMode | null {
 export const emptyTrip: TripDraft = {
   destination: null,
   transportMode: null,
+  transportDetail: null,
   budget: null,
   dates: null,
   activities: [],

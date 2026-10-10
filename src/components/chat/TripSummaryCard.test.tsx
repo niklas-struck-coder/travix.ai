@@ -44,6 +44,7 @@ describe('TripSummaryCard', () => {
           trip={{
             destination: 'Kyoto',
             transportMode: 'flight',
+            transportDetail: null,
             budget: '2.000 €',
             dates: '12.–19. Okt.',
             accommodation: 'Hotel Kyoto',

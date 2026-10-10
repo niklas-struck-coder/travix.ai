@@ -93,6 +93,28 @@ describe('Buchung – Grundgerüst', () => {
     )
   })
 
+  it('shows the specific flight chosen on /flugsuche alongside the transport mode, not just "Flug"', () => {
+    seedStoredChat({ transportMode: 'flight', transportDetail: 'Test Airline · Berlin → Lissabon · 149,00 €' })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Flug · Test Airline · Berlin → Lissabon · 149,00 €')).toBeInTheDocument()
+  })
+
+  it('falls back to just the transport mode label when no specific flight detail was saved', () => {
+    seedStoredChat({ transportMode: 'flight' })
+    render(
+      <MemoryRouter>
+        <Buchung />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Flug')).toBeInTheDocument()
+  })
+
   it('click-to-edit: Bearbeiten on Unterkunft offers "Mit KI planen", which pre-loads the accommodation context in KI-Chat', () => {
     seedStoredChat({ accommodation: 'Hotel Lissabon' })
     render(

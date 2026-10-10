@@ -90,6 +90,27 @@ describe('Flugsuche', () => {
     expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(1)
   })
 
+  it('saves a readable summary (airline, route, price) of the selected flight, not just that a flight was chosen', async () => {
+    seedStoredChat()
+    const searchFlightsMock = vi.mocked(searchFlights)
+    searchFlightsMock.mockResolvedValueOnce({ offers: [makeOffer('1'), makeOffer('2')], errors: [] })
+
+    render(
+      <MemoryRouter>
+        <Flugsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Flüge suchen'))
+    await waitFor(() => expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(2))
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Auswählen' })[0])
+    await screen.findByRole('button', { name: 'Ausgewählt' })
+
+    const stored = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) ?? '{}') as StoredChatState
+    expect(stored.trip.transportDetail).toBe('Test Airline · Berlin → Lissabon · 100,00 €')
+  })
+
   it('does not mark a flight as selected when there is no active trip to save it into, and keeps the button clickable', async () => {
     const searchFlightsMock = vi.mocked(searchFlights)
     searchFlightsMock.mockResolvedValueOnce({ offers: [makeOffer('1'), makeOffer('2')], errors: [] })

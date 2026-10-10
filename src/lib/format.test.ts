@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { formatEuro, formatOfferPrice, formatDuration } from '@/lib/format'
+import { formatEuro, formatOfferPrice, formatDuration, summarizeFlightOffer } from '@/lib/format'
+import type { FlightOffer } from '@/types/duffel'
 
 // Intl.NumberFormat separates the amount from the currency symbol with a
 // non-breaking space (U+00A0), not a regular space.
@@ -72,5 +73,70 @@ describe('formatDuration', () => {
 
   it('returns the raw string for an unparseable duration', () => {
     expect(formatDuration('not-a-duration')).toBe('not-a-duration')
+  })
+})
+
+function makeOffer(overrides: Partial<FlightOffer> = {}): FlightOffer {
+  return {
+    id: '1',
+    totalAmount: '149.00',
+    totalCurrency: 'EUR',
+    slices: [
+      {
+        originIata: 'BER',
+        originName: 'Berlin',
+        destinationIata: 'LIS',
+        destinationName: 'Lissabon',
+        duration: 'PT2H30M',
+        segments: [
+          {
+            carrierName: 'Test Airline',
+            carrierIata: 'TA',
+            departingAt: '2026-01-01T10:00:00Z',
+            arrivingAt: '2026-01-01T12:30:00Z',
+            originIata: 'BER',
+            destinationIata: 'LIS',
+          },
+        ],
+      },
+    ],
+    ...overrides,
+  }
+}
+
+describe('summarizeFlightOffer', () => {
+  it('summarizes airline, route and price', () => {
+    expect(summarizeFlightOffer(makeOffer())).toBe(`Test Airline · Berlin → Lissabon · 149,00${NBSP}€`)
+  })
+
+  it('falls back to the IATA code when the location name is missing', () => {
+    const offer = makeOffer({
+      slices: [
+        {
+          originIata: 'BER',
+          originName: '',
+          destinationIata: 'LIS',
+          destinationName: '',
+          duration: 'PT2H30M',
+          segments: [
+            {
+              carrierName: 'Test Airline',
+              carrierIata: 'TA',
+              departingAt: '2026-01-01T10:00:00Z',
+              arrivingAt: '2026-01-01T12:30:00Z',
+              originIata: 'BER',
+              destinationIata: 'LIS',
+            },
+          ],
+        },
+      ],
+    })
+    expect(summarizeFlightOffer(offer)).toBe(`Test Airline · BER → LIS · 149,00${NBSP}€`)
+  })
+
+  it('falls back to a generic label when the carrier name is missing', () => {
+    const offer = makeOffer()
+    offer.slices[0].segments[0].carrierName = ''
+    expect(summarizeFlightOffer(offer)).toBe(`Fluggesellschaft unbekannt · Berlin → Lissabon · 149,00${NBSP}€`)
   })
 })

@@ -18,6 +18,8 @@ export interface TripActivity {
 export interface TripDraft {
   destination: string | null
   transportMode: TransportMode | null
+  /** Short summary (airline/route/price) of the specific connection chosen on /flugsuche, if any — distinct from transportMode itself. */
+  transportDetail: string | null
   budget: string | null
   dates: string | null
   accommodation: string | null
