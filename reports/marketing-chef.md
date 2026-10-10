@@ -1,39 +1,35 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-09
+**Datum:** 2026-10-10
 
-## Was ist seit dem letzten Eintrag (2026-10-08) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-09) passiert?
 
-IT-Chef hat die gestern noch offene Lücke geschlossen: Die
-Disambiguierung gleichnamiger Aktivitäten in EditMode.tsx steckte bisher
-nur in aria-labels und im Lösch-Dialog, jetzt erreicht sie auch den
-sichtbaren Zeilentext. Außerdem wurde ein zweiter Datums-Drift gefunden
-und gefixt – die Lissabon-Demoreise zeigte trotz längst vergangenem
-Zeitraum weiterhin "Bevorstehend" samt aktivem Urlaubsmodus-Button,
-gleiche Fehlerklasse wie der bereits gemergte Kyoto-Jahres-Drift.
+Hauptsächlich Bugfixing an der Bearbeiten-Funktion im Chat: resetChat()
+verwirft jetzt laufende Flug-/Unterkunftssuchen korrekt, und ein offener
+Edit-Status (z. B. "wartet auf neuen Abflugort") überlebt jetzt einen
+Seiten-Reload, statt stillschweigend auf den falschen Pfad zu rutschen.
+Solide Handwerks-Fixes, aber kein eigener Content-Anlass.
 
-Spannender für uns: Support-Chef hat beim Nachvollziehen genau dieses
-Fixes einen tieferliegenden Fund gemacht. Die Lissabon-Demokarte und die
-echte Urlaubsmodus-Seite ziehen ihre Reisedaten aus zwei komplett
-getrennten Quellen – wer auf "Urlaubsmodus aktivieren" auf der Demokarte
-klickt, landet auf einer Seite, die gar nicht Lissabon zeigt, sondern
-(falls vorhanden) den selbst im Chat geplanten Trip oder gar nichts.
-Zwei Buttons, identisches Label, nur einer davon hält, was er verspricht.
-Marketing-relevant vor allem als Warnsignal: Noch kein Content-Anlass,
-aber ein Grund, das Feature "Urlaubsmodus" vorerst nicht aktiv zu
-bewerben, bis die Datenquelle vereinheitlicht ist. Der Changelog-
-Kandidatentopf steht jetzt bei sechs von acht (drei neue Kandidaten:
-der "unfall"-Wortgrenzen-Fix, die EditMode-Sichtbarkeits-Lücke, der
-Lissabon-Datums-Drift).
+Spannender ist ein neuer Fund von heute: Wählt man im Flugsuche-Chat
+einen Flug über "Bearbeiten → Manuell suchen" aus, speichert travix.ai
+nur "es ist ein Flug", nicht Route, Preis oder Airline – und das
+Such-Formular startet dabei komplett leer statt mit der vorherigen
+Eingabe vorbefüllt. Noch nicht gefixt. Gleiche Kategorie wie der
+Urlaubsmodus-Datenquellen-Fund von gestern: ein zentraler Klickpfad
+(Flug bearbeiten) tut aktuell nicht ganz, was er verspricht.
+
+Dazu intern schon vorbereitet, aber noch nicht veröffentlicht: der
+Mini-Changelog-Kandidatentopf hat erneut die Achter-Schwelle
+überschritten, eine komplett fertig getextete siebte Ausgabe liegt
+bereits als Entwurf vor (`marketing/mini-changelog-konzept.md`) – reine
+Ehrlichkeits-/Vertrauens-Fixes, keine erfundenen Zahlen.
 
 ## Vorschläge
 
-1. **Urlaubsmodus vorerst nicht aktiv bewerben, bis die Datenquellen zusammengeführt sind.** Support-Chefs Fund zeigt, dass ein zentraler Klickpfad zum Feature aktuell zu einer inkonsistenten Seite führt. Bevor wir das Feature in Content oder Kampagnen hervorheben ("bleibt auch vor Ort an deiner Seite" – siehe Vorschlag von gestern), sollte dieser Pfad technisch stimmen. Keine neue Idee hier, nur: bestehende Feature-Spotlight-Idee pausieren, nicht verwerfen.
+1. **Flug-Bearbeiten-Fund heute: nicht bewerben, bis er behoben ist.** "Bearbeite deine Reise jederzeit" wäre aktuell ein Versprechen, das der Flug-Teil nicht hält (Details gehen verloren, Formular startet leer). Gleiche Linie wie beim Urlaubsmodus-Fund von gestern: Feature-Pfad erst sauber, dann Spotlight.
 
-2. **Die "zwei Datums-Drifts in zwei Wochen"-Serie als Build-in-public-Beobachtung nutzen, nicht als Einzelfund.** Kyoto-Jahres-Drift und jetzt Lissabon-Zeit-Drift sind dieselbe Fehlerklasse an zwei verschiedenen Stellen – das ist eher ein Muster als zwei Zufälle. Ein kurzer, selbstironischer Post ("unsere Demo-Reisen altern schneller als wir gucken können – und wir finden's trotzdem") passt zur Ehrlichkeits-Linie besser als jeder Einzelfund für sich.
+2. **Sieben fertige Mini-Changelog-Ausgaben sind ungenutztes Content-Kapital – einen Testballon starten statt weiter zu sammeln.** Statt auf die große Grundsatzentscheidung "eigene Changelog-Seite ja/nein" zu warten, lohnt sich ein kleiner Versuch: eine der bereits fertigen Ausgaben (z. B. #7) einmalig als kurzen Post auf einem bestehenden Kanal teilen. Günstiger Test der "wir zeigen unsere Fehler und wie wir sie fixen"-Tonalität, bevor Ni die größere Seiten-Frage entscheidet.
 
-3. **EditMode-Disambiguierung jetzt als abgeschlossene Mini-Story erzählen.** Gestern war die Geschichte "halb fertig" (nur Screenreader, nicht sichtbar) – das war bewusst kein Content-Anlass. Jetzt ist sie fertig: der sichtbare Text stimmt. Eignet sich als kleiner "wir lassen Baustellen nicht offen" Beleg, aber nur falls wir ohnehin bald einen Mini-Changelog-Post bringen (siehe Punkt 4) – kein eigenständiges Content-Stück nötig.
+3. **Urlaubsmodus bleibt vorerst außen vor.** Keine Änderung seit gestern am Datenquellen-Mismatch – weiterhin kein aktives Feature-Spotlight dafür, bis der Klickpfad stimmt.
 
-4. **Changelog-Kandidatentopf bei sechs von acht – Content für die nächste Ausgabe schon jetzt vorbereiten.** Wir sind nah an der Schwelle. Statt erst bei Erreichen der Acht zu texten, lohnt es sich, die Mini-Changelog-Entwürfe für die ersten sechs Kandidaten jetzt schon zu schreiben, damit die Ausgabe sofort raus kann, sobald die Schwelle fällt – Momentum nicht durch Produktionszeit verlieren.
-
-_Letztes Update: 2026-10-09_
+_Letztes Update: 2026-10-10_
