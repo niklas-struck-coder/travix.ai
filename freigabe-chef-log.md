@@ -1,5 +1,51 @@
 # Freigabe-Chef-Log
 
+## 2026-10-10, früher Nacht-Check (nach IT-Chefs stündlichen Läufen zwischen 0 und 4 Uhr, autonomer Lauf, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (7 Commits gegenüber dem damaligen `main`-Stand
+`dcedff6`: vierter Lauf 10-09 ohne Code-Änderung, fünfter Lauf 10-09 —
+stale `awaitingFlightOrigin`-Flag in `startEdit()` behoben, sechster Lauf
+10-09 — fehlende Fokus-Ankündigung bei Routenwechsel behoben, dazwischen
+ein Merge-main-in-Branch-Commit, dritter 10-10-Lauf — `resetChat()`
+verwirft laufende Duffel-Suchen nicht mehr, zweiter 10-10-Lauf —
+`editingField`/`awaitingFlightOrigin` überleben jetzt einen Reload,
+dritter 10-10-Lauf — fehlende Testabdeckung für Duffel-Mapping-Funktionen
+geschlossen). Diff gegen `main` gelesen (inkl. `routes.tsx`, `useChat.ts`,
+`tripStorage.ts`), mit den Einträgen in `it-chef-auto-log.md` abgeglichen —
+passt Punkt für Punkt, kein Scope-Creep.
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log vertraut): frischer
+`npm install` (650 Pakete, nur das bekannte npm-Audit-Rauschen),
+`npx tsc -b` → keine Fehler, `npx eslint .` → 0 Fehler (dieselben 3
+vorbestehenden Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/
+`tabs.tsx`), `npx vitest run` → 62 Testdateien, 437 Tests, alle grün,
+`npx vite build` → Build erfolgreich (nur die bekannte Chunk-Size-Warnung).
+
+**Scope-Check:** Keiner der sechs inhaltlichen Commits berührt Auth,
+Zahlungen oder rechtliche Texte (nur `useChat.ts`/`useChat.test.ts`,
+`routes.tsx`/`routes.test.tsx`, `tripStorage.ts`/`tripStorage.test.ts`,
+`duffel/client.test.ts`, diverse Seiten-Tests, `ZEITPLAN.md`,
+`it-chef-auto-log.md`, `tasks-prd-travix-platform.md`). Die
+`routes.tsx`-Änderung (Screenreader-Fokus-Ankündigung per
+`onExitComplete`/`requestAnimationFrame`) ist eine reine
+Accessibility-/Verhaltensänderung ohne sichtbares UI — kein Abgleich mit
+`MARKENDESIGN.md` nötig.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `dcedff6..1bd5af1`, da
+`it-chef/auto` bereits den aktuellen `main`-Stand enthielt). Danach
+`tsc -b`/`eslint`/`vitest run` erneut auf dem gemergten `main`-Stand
+laufen lassen — weiterhin alles grün. `it-chef/auto` zeigt bereits auf
+denselben Commit wie der neue `main`-Stand, kein separater Reset/Push
+nötig.
+
+**`marketing-chef/auto` und `support-chef/auto`:** beide ohne neue
+Commits gegenüber `main` (laufen laut Zeitplan erst um 6 Uhr) —
+planmäßig bei diesem frühen Lauf übersprungen, kein separater späterer
+Freigabe-Chef-Lauf nötig.
+
+**Info an Ni:** Nein — Prüfung sauber, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte.
+
 ## 2026-10-09, Tages-Check (autonomer Lauf, kein Ni live dabei)
 
 **Geprüfte Branches:**
