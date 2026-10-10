@@ -17614,3 +17614,54 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-10
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start bereits auf demselben Stand
+wie `origin/main` (kein Merge nötig, `git log
+origin/it-chef/auto..origin/main` leer). `main` nicht angefasst.
+
+**Suche:** Alle offenen Checkboxen in `tasks/tasks-prd-travix-platform.md`
+hängen laut eigenen Kommentaren weiterhin an fehlenden Backend-
+Credentials (Base44/Gemini) oder echten Produktentscheidungen. Einen
+eigens dafür beauftragten Explore-Agenten auf eigenständige Bug-Suche
+angesetzt, mit der Auflage, bereits bekannte/verworfene Kandidaten aus
+den letzten Läufen nicht erneut vorzuschlagen (Fokus-Timing in
+`routes.tsx`, Lösch-Warnungstexte, "Urlaubsmodus aktivieren" auf der
+Lissabon-Demokarte, toter `accommodationNoticeHandled`-Zweig, `recharts`,
+`TrainCard`/`TrainResults`, Preisformat in `EditMode.tsx`, Dialog-
+Fokusverlust beim Löschen des letzten Listenelements, `awaitingFlightOrigin`
+in `startEdit()`).
+
+**Gefunden und behoben:** Ein eigenständiger Bug in `resetChat()`
+(`src/hooks/useChat.ts`): Eine noch laufende Duffel-Suche (Unterkunft im
+Haupt-Chat-Flow und im `startEdit()`-Pfad, Flug über `runFlightSearch()`)
+wurde beim Zurücksetzen des Chats nicht abgebrochen oder als veraltet
+markiert — weder `AbortController` noch ein "ist diese Antwort noch
+aktuell"-Guard existierten. Klickt man während einer laufenden Suche auf
+"Neu starten", setzt `resetChat()` `stayOffers`/`flightOffers` sofort auf
+`null`, aber die alte Netzwerkanfrage läuft weiter und schreibt ihr
+Ergebnis trotzdem in den State — die Angebote der bereits verworfenen
+Reiseplanung poppen in den frisch gestarteten Chat hinein, samt dazu
+nicht passender Quick-Replies. Direkte Fortsetzung des am 01.10. (dritter
+Lauf) nur für den `setTimeout`-Antwortpfad gefixten Musters — der
+async-Promise-Pfad der drei Duffel-Suchen blieb damals unangetastet.
+Details, Reproduktionsschritte und Fix-Begründung siehe `ZEITPLAN.md`
+(10.10.-Eintrag, Phase 4). Vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+verifiziert (altes Angebot landete trotz Reset im State); neuer
+Regressionstest in `useChat.test.ts`.
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin dieselben
+zehn High-/Critical-Severity-Advisories, unverändert seit mehreren
+Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code), `npx tsc -b` (kein
+Typfehler), `npm run lint` (0 Fehler, dieselben drei vorbestehenden
+Fast-Refresh-Warnungen in `badge.tsx`/`button.tsx`/`tabs.tsx`), `npx
+vitest run` (62 Testdateien, 426 Tests, alle grün), `npm run build`
+(`tsc -b && vite build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

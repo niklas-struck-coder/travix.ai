@@ -88,6 +88,11 @@ export function useChat(speechEnabled: boolean) {
   const [storageWarning, setStorageWarning] = useState(false)
   const initialized = useRef(false)
   const replyTimeoutRef = useRef<number | null>(null)
+  // Bumped by resetChat() so in-flight Duffel search Promises (flight/stay)
+  // can tell they're stale once they resolve and skip applying their result —
+  // without this, a reset while a search is still running lets the old
+  // trip's offers pop into the freshly started chat.
+  const searchGenerationRef = useRef(0)
 
   useEffect(() => {
     return () => {
@@ -100,9 +105,11 @@ export function useChat(speechEnabled: boolean) {
   const runFlightSearch = (origin: string, destinationIata: string) => {
     setFlightLoading(true)
     setFlightErrors([])
+    const generation = searchGenerationRef.current
     const { departureDate, returnDate } = defaultFlightDates()
     searchFlights({ origin, destination: destinationIata, departureDate, returnDate, passengers: 1, cabinClass: 'economy' })
       .then((result) => {
+        if (searchGenerationRef.current !== generation) return
         setFlightOffers(result.offers)
         setFlightErrors(result.errors)
         setFlightLoading(false)
@@ -111,6 +118,7 @@ export function useChat(speechEnabled: boolean) {
         }
       })
       .catch(() => {
+        if (searchGenerationRef.current !== generation) return
         setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
         setFlightLoading(false)
         setQuickReplies(['Neue Reise planen'])
@@ -192,6 +200,7 @@ export function useChat(speechEnabled: boolean) {
       if (speechEnabled) speak(prompt.content)
 
       setStayLoading(true)
+      const generation = searchGenerationRef.current
       const { checkInDate, checkOutDate } = defaultStayDates()
       searchStays({
         latitude: destination.latitude,
@@ -202,6 +211,7 @@ export function useChat(speechEnabled: boolean) {
         guests: 1,
       })
         .then((result) => {
+          if (searchGenerationRef.current !== generation) return
           if (result.errors.length > 0) {
             setStayErrors(result.errors)
             setQuickReplies(['Neue Reise planen'])
@@ -214,6 +224,7 @@ export function useChat(speechEnabled: boolean) {
           setStayLoading(false)
         })
         .catch(() => {
+          if (searchGenerationRef.current !== generation) return
           setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
           setStayLoading(false)
           setQuickReplies(['Neue Reise planen'])
@@ -360,6 +371,7 @@ export function useChat(speechEnabled: boolean) {
         const destination = findKnownDestination(reply.trip.destination ?? '')
         if (destination) {
           setStayLoading(true)
+          const generation = searchGenerationRef.current
           const { checkInDate, checkOutDate } = defaultStayDates()
           searchStays({
             latitude: destination.latitude,
@@ -370,6 +382,7 @@ export function useChat(speechEnabled: boolean) {
             guests: 1,
           })
             .then((result) => {
+              if (searchGenerationRef.current !== generation) return
               if (result.errors.length > 0) {
                 setStayErrors(result.errors)
                 setQuickReplies(['Neue Reise planen'])
@@ -382,6 +395,7 @@ export function useChat(speechEnabled: boolean) {
               setStayLoading(false)
             })
             .catch(() => {
+              if (searchGenerationRef.current !== generation) return
               setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
               setStayLoading(false)
               setQuickReplies(['Neue Reise planen'])
@@ -415,6 +429,7 @@ export function useChat(speechEnabled: boolean) {
       window.clearTimeout(replyTimeoutRef.current)
       replyTimeoutRef.current = null
     }
+    searchGenerationRef.current += 1
     clearStoredChat()
     const greeting = getGreeting()
     setMessages([makeMessage('assistant', greeting.content)])

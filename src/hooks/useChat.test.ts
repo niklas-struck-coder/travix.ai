@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './useChat'
 import { searchFlights, searchStays } from '@/lib/duffel/client'
 import type { FlightOffer } from '@/types/duffel'
+import type { StayOffer } from '@/types/stays'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchFlights: vi.fn(),
@@ -253,6 +254,39 @@ describe('useChat accommodation search failure vs. real zero results', () => {
       result.current.resetChat()
     })
 
+    expect(result.current.stayLoading).toBe(false)
+  })
+
+  it('does not let a stale stay offer from a previous trip land after resetChat() mid-search', async () => {
+    let resolveSearch: (result: { offers: StayOffer[]; errors: [] }) => void = () => {}
+    vi.mocked(searchStays).mockReturnValue(
+      new Promise((resolve) => {
+        resolveSearch = resolve
+      }),
+    )
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    expect(result.current.stayLoading).toBe(true)
+
+    // User clicks "Neu starten" while the Duffel request from the old trip
+    // is still in flight.
+    act(() => {
+      result.current.resetChat()
+    })
+    expect(result.current.stayOffers).toBeNull()
+
+    // The old request now finally resolves — it must not resurrect offers
+    // for a trip the user already abandoned.
+    resolveSearch({
+      offers: [
+        { id: '1', accommodationName: 'Altes Hotel', rating: 4, address: 'Lissabon', totalAmount: '100', totalCurrency: 'EUR', photoUrl: null },
+      ],
+      errors: [],
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })
 })

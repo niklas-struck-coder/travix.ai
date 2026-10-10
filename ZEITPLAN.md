@@ -857,6 +857,37 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `useChat.ts`) reproduzierbar rot verifiziert (Testlauf warf stattdessen
   beim unbeabsichtigten Flugsuche-Aufruf).
+  Vom autonomen IT-Chef-Lauf am 10.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `resetChat()` (`useChat.ts`) brach eine noch laufende Duffel-Suche
+  (Unterkunft, sowohl im Haupt-Chat-Flow als auch im `startEdit()`-Pfad;
+  sowie Flug über `runFlightSearch()`) nicht ab — es gab weder einen
+  `AbortController` noch einen "ist diese Antwort noch aktuell"-Guard.
+  Reproduzierbare Kette: Chat bis zur automatischen Unterkunfts- oder
+  Flugsuche führen (`stayLoading`/`flightLoading=true`), noch während die
+  Anfrage läuft auf "Neu starten" klicken — `resetChat()` setzt
+  `stayOffers`/`flightOffers` sofort auf `null` und zeigt die frische
+  Begrüßung, aber die alte Netzwerkanfrage läuft unbeeindruckt weiter und
+  ruft bei ihrer Antwort trotzdem `setStayOffers()`/`setFlightOffers()`
+  auf — die Angebote der bereits verworfenen Reiseplanung poppten so in
+  den gerade frisch gestarteten Chat hinein, inklusive dazu nicht
+  passender Quick-Replies. Direkte Fortsetzung des am 01.10. (dritter
+  Lauf) für den `setTimeout`-Antwortpfad gefixten Musters (siehe oben,
+  4.10-Eintrag) — dort blieb der async-Promise-Pfad der drei Duffel-Suchen
+  unangetastet. Fix: neue `searchGenerationRef` (wie ein einfacher
+  Zähler), die `resetChat()` erhöht; alle drei betroffenen
+  `.then()`/`.catch()`-Handler (`runFlightSearch()`,
+  `startEdit()`-Unterkunftssuche, Haupt-Flow-Unterkunftssuche) prüfen vor
+  jedem `setState`-Aufruf, ob die beim Start der Suche gespeicherte
+  Generation noch mit der aktuellen übereinstimmt, und überspringen die
+  Anwendung des Ergebnisses sonst — kein `AbortController` nötig, da
+  Duffel-Antworten ohnehin verworfen werden können, ohne den Request
+  selbst abzubrechen. Neuer Regressionstest in `useChat.test.ts` (Suche
+  mit kontrollierbarem Promise starten, `resetChat()` aufrufen, Promise
+  danach mit Angeboten auflösen lassen, prüfen dass `stayOffers`
+  weiterhin `null` bleibt) — vor dem Fix durch temporäres Zurücknehmen
+  der Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+  verifiziert (altes Angebot landete trotz Reset im State).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
