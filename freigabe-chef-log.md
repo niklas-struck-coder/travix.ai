@@ -6392,3 +6392,63 @@ Freigabe-Chef-Lauf nötig.
 
 **Info an Ni:** Nein — Prüfung sauber, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte.
+
+## 2026-10-11, früher Nacht-Check (geplanter täglicher Auto-Lauf nach den stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits seit letztem Merge, zwei vom
+10.10. abends, drei vom 11.10. nachts):
+
+- 7dd2ef2 (vierter Lauf 10.10.): neues `transportDetail`-Feld auf
+  `TripDraft` + `summarizeFlightOffer()`-Helfer, analog zum
+  bestehenden `accommodation`-Muster.
+- 3be7233 (fünfter Lauf 10.10.): `badgeVariants`/`buttonVariants`/
+  `tabsListVariants` in eigene Dateien ausgelagert (Fast-Refresh-Lint-
+  Fix), reine Verschiebung ohne Verhaltensänderung.
+- 3c9dc4a (11.10.): In-Chat-Flugauswahl (`useChat.ts`) nutzt jetzt
+  denselben `summarizeFlightOffer()`-Aufruf wie `Flugsuche.tsx`.
+- 116cd95 (11.10., zweiter Lauf): Race-Condition-Fix in
+  `Flugsuche.tsx`/`Hotelsuche.tsx` — `searchGenerationRef`-Muster
+  übernommen von `useChat.ts`, damit eine spät auflösende ältere
+  Suche nicht ein neueres Ergebnis überschreibt.
+- cd85f4c (11.10., dritter Lauf): Placeholder-Text der Preis-Inputs in
+  `EditMode.tsx` auf "Preis in €"/"optional, z. B. 25 €" geändert,
+  keine Logik-/Datentypänderung.
+
+Diff-für-Diff gegen `main` gelesen (nicht nur den Log-Eintrag
+geglaubt): Änderungen an `TripDraft`/`transportDetail` sind über
+`mockAdvisor.ts`, `Dashboard.tsx`, `Reiseentwuerfe.tsx`,
+`Buchung.tsx`, `format.ts`, `Flugsuche.tsx` und `useChat.ts`
+konsistent durchgezogen — keine verwaiste Stelle gefunden. Badge/
+Button/Tabs-Umbau ist eine reine 1:1-Verschiebung der CVA-Definitionen
+ohne CSS-/Klassenänderung. Race-Condition-Fix ist auf beiden Seiten
+(Flug/Hotel) identisch zum bereits etablierten Muster.
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log vertraut): Branch
+ausgecheckt, `npm install`, dann tatsächlich selbst laufen lassen:
+`npx tsc -b` → 0 Fehler. `npx eslint .` → 0 Probleme. `npx vitest run`
+→ 447/447 Tests grün (62 Dateien). Alles auf dem echten `it-chef/auto`-
+Stand, nicht auf `main`.
+
+Scope-Check: jeder Commit entspricht genau einem im jeweiligen
+`it-chef-auto-log.md`-Eintrag beschriebenen Einzelpunkt, kein
+Scope-Creep über die fünf Commits hinweg. Keine Berührung von Auth,
+Zahlungen oder rechtlichen Texten. Die einzige UI-Änderung
+(`EditMode.tsx`-Placeholder-Text) ist laut Commit-Beschreibung und
+Diff rein textuell, kein neues visuelles Element, kein Layout-/
+Farb-/Komponenten-Unterschied — daher kein Abgleich mit
+`MARKENDESIGN.md` nötig.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `d6dc677..cd85f4c`,
+`main` war vorher bereits exakt auf `origin/main`). Da `it-chef/auto`
+danach identisch zu `main` ist (reiner Fast-Forward, kein Merge-
+Commit), bleibt der Branch unverändert auf dem neuen Stand — kein
+separates Zurücksetzen/Pushen nötig. Nach `origin/main` gepusht.
+
+**`marketing-chef/auto` und `support-chef/auto`:** kurz mitgeprüft wie
+angewiesen — beide weiterhin ohne neue Commits gegenüber `main` (0
+Abstand), laufen laut Zeitplan erst um 6 Uhr. Planmäßig bei diesem
+frühen Lauf übersprungen, kein separater späterer Freigabe-Chef-Lauf
+für sie nötig.
+
+**Info an Ni:** Nein — Prüfung sauber, alle drei Checks eigenständig
+grün, keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
