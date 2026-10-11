@@ -4,6 +4,89 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-11
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `baf5af6`, 10.10., eigener letzter Commit)
+war bereits vollständig in `main` gemergt (`git merge-base --is-ancestor
+baf5af6 origin/main` bestätigt das) — der Branch war also nur noch
+veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für bereits
+gemergte Branches vorgesehen neu von aktuellem `origin/main` (`14541e3`,
+früher Nacht-Check 11.10.) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Kandidaten-Prüfung für
+das Mini-Changelog-Format).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 10.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 10.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log baf5af6..origin/main` geprüft (Basislinie: der eigene
+Stand vom 10.10.): fünf Commits mit echter Produkt-Codeänderung, jeder
+einzeln per `git show` und direkt im aktuellen Code verifiziert:
+
+- `7dd2ef2` (10.10., vierter Lauf): manuelle Flugauswahl in
+  `Flugsuche.tsx` speicherte bisher nur `transportMode: 'flight'`, nie
+  Airline/Route/Preis — `Buchung.tsx` zeigte danach nur das generische
+  Label "Flug". Live bestätigt (`summarizeFlightOffer()`-Aufruf). Deckt
+  sich mit dem im Live-Marketing-Chef-Bericht vom 10.10. genannten
+  Promo-Stopp-Fund. **46. Tier-4-Kandidat.**
+- `3c9dc4a` (11.10.): derselbe Bug auf dem separaten In-Chat-
+  Auswahlpfad (`useChat.ts` `selectFlight()`), eigener Commit, gleiche
+  Fundgruppe wie `7dd2ef2`. **47. Tier-4-Kandidat.**
+- `116cd95` (11.10., zweiter Lauf desselben Tages): `handleSearch()` in
+  `Flugsuche.tsx`/`Hotelsuche.tsx` wandte das Ergebnis der zuletzt
+  aufgelösten statt der zuletzt gestarteten Suche an — überlappende
+  Suchen konnten ein bereits korrekt angezeigtes neueres Ergebnis mit
+  veralteten Daten überschreiben. Live bestätigt (neue
+  `searchGenerationRef` in beiden Dateien). Fortsetzung derselben
+  Race-Condition-Fundgruppe wie die bereits gezählten Kandidaten
+  36/44, jetzt für die direkten Such-Seiten. **48. Tier-4-Kandidat.**
+- `3be7233` (10.10., fünfter Lauf): reine Lint-Bereinigung
+  (Fast-Refresh-Warnungen), keine Verhaltensänderung laut Commit und
+  Code-Prüfung. Kein Kandidat.
+- `cd85f4c` (11.10., dritter Lauf desselben Tages): Preis-Input-
+  Platzhalter in `EditMode.tsx` auf "Preis in €" präzisiert — reine
+  Formulierungsverbesserung eines bereits funktionierenden freien
+  Textfelds, keine Ehrlichkeits-/Vertrauens-Erzählung. Kein Kandidat.
+
+**Kandidatentopf:** war nach der siebten Mini-Changelog-Ausgabe am
+10.10. wieder leer, jetzt durch 46-48 auf **drei** — klar unter der
+Achter-Schwelle. Keine achte Mini-Changelog-Ausgabe heute.
+
+**Zusätzlich dokumentiert:** der im Live-Marketing-Chef-Bericht vom
+10.10. genannte Promo-Stopp-Fund (Flug bearbeiten → Manuell suchen
+speichert nur "es ist ein Flug", Formular startet leer) ist nur zur
+Hälfte behoben — `7dd2ef2`/`3c9dc4a` beheben den Speicher-Teil, das
+Formular (`FlightWizard.tsx`) startet laut Code weiterhin komplett leer
+statt vorbefüllt. Die Promo-Stopp-Empfehlung bleibt also unverändert
+gültig, in `marketing/freigabe-uebersicht.md` festgehalten.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2, weiterhin offen laut
+  `ZEITPLAN.md`) — ausdrücklich ein Live-Vorgang, fällt unter das Verbot.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei neuen
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden, zumal der Kandidatentopf mit drei weit unter der
+  Achter-Schwelle liegt.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 11.10. (Prüfung
+  der vier Fragen, fünf neue Commits einzeln geprüft, drei als
+  Tier-4-Kandidaten 46/47/48, zwei bewusst ausgeschlossen,
+  Kandidatentopf-Stand auf "drei" gesetzt, Teilstatus des
+  Marketing-Chef-Bericht-Funds vom 10.10. dokumentiert).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-10
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
