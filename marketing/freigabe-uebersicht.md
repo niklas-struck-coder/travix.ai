@@ -1,10 +1,146 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-10)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-11)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-11: drei neue Tier-4-Kandidaten (46: `Flugsuche.tsx` speicherte bei manueller Flugauswahl bisher nur `transportMode: 'flight'`, nie Airline/Route/Preis — `Buchung.tsx` zeigte danach nur das generische Label "Flug" statt der tatsächlich gewählten Verbindung; 47: derselbe generische-Label-Bug auf dem separaten In-Chat-Auswahlpfad (`useChat.ts` `selectFlight()`), eigener Commit, gleiche Fundgruppe; 48: `handleSearch()` in `Flugsuche.tsx`/`Hotelsuche.tsx` wandte bisher das Ergebnis der zuletzt AUFGELÖSTEN statt der zuletzt GESTARTETEN Duffel-Anfrage an — eine überlappende, langsamere ältere Suche konnte ein bereits korrekt angezeigtes neueres Ergebnis nachträglich überschreiben, direkte Fortsetzung derselben Race-Condition-Fundgruppe wie die bereits gezählten Kandidaten 36/44, jetzt für die beiden direkten Such-Seiten statt der Chat-Suchpfade), zwei Commits bewusst ausgeschlossen (reine Fast-Refresh-Lint-Bereinigung ohne Verhaltensänderung; Preis-Input-Platzhalter in `EditMode.tsx` auf "Preis in €" präzisiert — reine Formulierungsverbesserung eines bereits funktionierenden freien Textfelds, keine Ehrlichkeits-/Vertrauens-Erzählung, gleiche Ausschlussgruppe wie frühere Formulierungs-Fixes), Kandidatentopf von null auf **drei**, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `baf5af6`, letzter eigener Commit vom
+10.10.) war bereits vollständig in `main` gemergt (`git merge-base
+--is-ancestor baf5af6 origin/main` bestätigt das) — der Branch war also
+nur noch veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für
+bereits gemergte Branches vorgesehen neu von aktuellem `origin/main`
+(`14541e3`, früher Nacht-Check 11.10.) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 10.10.),
+`ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder diesem Dokument. Keine neuen
+Kanal-Links (`grep` nach `linkedin.com`/`instagram.com`/`tiktok.com` in
+`src/` und `index.html` liefert weiterhin keinen Treffer), kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+**`git log baf5af6..origin/main` zeigt die seit dem letzten Check (10.10.,
+Commit `baf5af6`) neu dazugekommenen Commits**, darunter fünf mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` sowie direkt im
+aktuellen Code geprüft:
+
+- **`7dd2ef2` (10.10., IT-Chef Auto, vierter Lauf):** `handleSelect()`
+  (`src/pages/Flugsuche.tsx`) speicherte bei einer manuellen Flugauswahl
+  bisher nur `transportMode: 'flight'` — unabhängig davon, welche
+  konkrete Verbindung gewählt wurde. `Buchung.tsx` zeigte danach nur das
+  generische Label "Flug" statt Airline/Route/Preis. Fix über eine neue
+  `summarizeFlightOffer()`-Hilfsfunktion, analog zum bereits bestehenden
+  Muster für `accommodation`. Live im Code verifiziert
+  (`src/lib/format.ts`, `src/pages/Flugsuche.tsx` Zeile 33). Deckt sich
+  mit genau dem Fund, den der Live-Marketing-Chef-Bericht vom 10.10.
+  (`reports/marketing-chef.md`) als Promo-Stopp-Grund nannte ("speichert
+  nur 'es ist ein Flug', nicht Route, Preis oder Airline") — für den
+  manuellen Such-Pfad jetzt behoben. **Sechsundvierzigster
+  Tier-4-Kandidat.**
+- **`3c9dc4a` (11.10., IT-Chef Auto):** derselbe generische-Label-Bug,
+  aber auf dem separaten In-Chat-Auswahlpfad: `selectFlight()`
+  (`src/hooks/useChat.ts`) bestätigte den gewählten Flug zwar in der
+  Chat-Nachricht, schrieb ihn aber nie in `trip.transportDetail`. Gleicher
+  `summarizeFlightOffer()`-Aufruf, eigener Commit, eigener Regressionstest.
+  Live im Code verifiziert (`src/hooks/useChat.ts` Zeile 422). Zusammen
+  mit `7dd2ef2` deckt das jetzt beide im Marketing-Chef-Bericht genannten
+  Auswahlwege ab. **Siebenundvierzigster Tier-4-Kandidat.**
+- **`116cd95` (11.10., IT-Chef Auto, zweiter Lauf desselben Tages):**
+  `handleSearch()` in `Flugsuche.tsx`/`Hotelsuche.tsx` wandte bisher das
+  Ergebnis der zuletzt AUFGELÖSTEN statt der zuletzt GESTARTETEN
+  Duffel-Anfrage an — anders als `useChat.ts`, das sich dagegen bereits
+  über `searchGenerationRef` absichert. Eine überlappende, langsamere
+  ältere Suche konnte so ein bereits korrekt angezeigtes neueres Ergebnis
+  nachträglich mit veralteten Daten überschreiben. Live im Code
+  verifiziert (gleiches Generation-Ref-Muster jetzt in beiden Dateien,
+  je ein neuer Regressionstest). Direkte Fortsetzung derselben
+  Race-Condition-Fundgruppe, die für den `setTimeout`-Pfad bereits am
+  07.10. als Kandidat 36 und für die Promise-Suchpfade in `useChat.ts`
+  am 10.10. als Kandidat 44 gezählt wurde — hier derselbe Bug für die
+  beiden direkten Such-Seiten, ein Commit für beide, daher ein
+  Kandidat statt zwei. **Achtundvierzigster Tier-4-Kandidat.**
+- **`3be7233` (10.10., IT-Chef Auto, fünfter Lauf):** Variantenfunktionen
+  (`badgeVariants`/`buttonVariants`/`tabsListVariants`) in eigene Dateien
+  ausgelagert, um React-Fast-Refresh-Lint-Warnungen zu beheben. Laut
+  Commit keine Verhaltensänderung, keine andere Datei importierte diese
+  Funktionen zuvor anders. **Kein Kandidat** — exakt dieselbe
+  Ausschlussgruppe wie jede bisherige reine Lint-/Refactoring-Änderung
+  ohne Verhaltensänderung.
+- **`cd85f4c` (11.10., IT-Chef Auto, dritter Lauf desselben Tages):**
+  Platzhaltertext der beiden Preis-Inputs in `EditMode.tsx` von "Preis"
+  bzw. "optional" auf "Preis in €" bzw. "optional, z. B. 25 €"
+  präzisiert. `TripActivity.price` bleibt bewusst freier Text, keine
+  Datentyp- oder Anzeige-Änderung, kein neues visuelles Element — reine
+  Formulierungsverbesserung eines bereits funktionierenden Felds, ohne
+  dass vorher eine falsche, fehlende oder erfundene Angabe angezeigt
+  wurde. **Kein Kandidat** — gleiche Ausschlussgruppe wie die bereits
+  ausgeschlossene Start=Ziel-Formulierungsverbesserung vom 09.09.
+
+**Kandidatentopf:** war nach der siebten Mini-Changelog-Ausgabe am
+10.10. wieder leer, jetzt durch 46-48 auf **drei** — klar unter der
+Achter-Schwelle und auch unter der Menge (vier), die selbst am 06.09.
+als "nicht ausreichend" galt. Keine achte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: alle
+drei neuen Kandidaten stammen aus einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commits; beide
+Ausschlüsse wenden nur bereits etablierte Kriterien konsequent an (keine
+Verhaltensänderung bzw. reine Formulierungsverbesserung ohne
+Ehrlichkeits-/Vertrauens-Erzählung). Keine offene
+Positionierungs-Grundsatzfrage — dieses Update wendet nur dieselbe,
+bereits in `MARKENDESIGN.md` festgelegte Einordnungslogik wie alle
+bisherigen Updates an, ohne etwas inhaltlich neu zu entscheiden.
+
+**Wichtig für den Live-Marketing-Chef-Bericht vom 10.10.:** der dort als
+Promo-Stopp-Grund genannte Fund ("Flug bearbeiten → Manuell suchen"
+speichert nur "es ist ein Flug", Formular startet leer) ist nur zur
+Hälfte behoben. Der Teil "keine Route/Preis/Airline gespeichert" ist
+jetzt durch `7dd2ef2`/`3c9dc4a` erledigt (siehe oben). Der zweite,
+eigenständige Teil — das Flugsuche-Formular (`FlightWizard.tsx`) startet
+beim Aufruf über "Bearbeiten → Manuell suchen" weiterhin komplett leer,
+statt mit der vorherigen Eingabe vorbefüllt zu sein (`FlightWizard.tsx`
+initialisiert `origin`/`destination`/Daten durchweg mit leeren Strings,
+kein Lesen aus `trip`) — ist weiterhin offen. Die Promo-Stopp-Empfehlung
+aus dem Bericht vom 10.10. gilt also unverändert weiter, bis auch dieser
+zweite Teil behoben ist; der nächste Lauf (autonom oder live) sollte das
+vor einer erneuten Bewerbung des Flug-Bearbeiten-Flows gegenprüfen.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei neuen
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden, zumal der Kandidatentopf mit drei ohnehin weit unter der
+  Schwelle für eine achte Mini-Changelog-Ausgabe liegt.
+- `ZEITPLAN.md` bewusst nicht angefasst — dieses Update betrifft nur die
+  laufende Kandidaten-/Freigabe-Verwaltung, keinen neuen Sprint-Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/pages/Flugsuche.tsx`, `src/hooks/useChat.ts`,
+`src/components/search/FlightWizard.tsx`, `src/pages/Hotelsuche.tsx` und
+`src/components/trip/EditMode.tsx` direkt im aktuellen Code gelesen,
+nicht nur aus Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 11.10. (Prüfung
+  der vier Fragen, fünf neue Commits einzeln geprüft, drei als
+  Tier-4-Kandidaten 46/47/48, zwei bewusst ausgeschlossen,
+  Kandidatentopf-Stand auf "drei" gesetzt, Teilstatus des
+  Marketing-Chef-Bericht-Funds vom 10.10. dokumentiert), Datum im Titel
+  auf 11.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-10: drei neue Tier-4-Kandidaten (43: `startEdit()` setzte das `awaitingFlightOrigin`-Flag bei einem abgebrochenen Flug-Abflughafen-Edit nicht zurück, ein späterer unabhängiger Transportmittel-Edit interpretierte die Eingabe dadurch fälschlich als IATA-Code statt als Verkehrsmittel und erfand z. B. den Flugcode "ZUG" für "Zug"; 44: `resetChat()` brach eine noch laufende Unterkunfts-/Flugsuche nicht ab, ihr spätes Ergebnis schrieb danach die Angebote der bereits verworfenen Reiseplanung in den frisch gestarteten Chat — direkte Fortsetzung des bereits am 07.10. für den Timeout-Pfad gezählten Kandidaten 36, jetzt für alle drei Promise-Suchpfade; 45: `editingField`/`awaitingFlightOrigin` waren reiner In-Memory-Zustand und überlebten einen Reload nicht — die Chat-Oberfläche zeigte nach einem Reload mitten im "Bearbeiten"-Flow weiterhin sichtbar die Edit-Frage, die nächste Antwort lief aber am Edit-Pfad vorbei in den normalen Advisor-Flow und das bearbeitete Feld blieb unverändert oder wurde falsch zugeordnet), zwei Commits bewusst ausgeschlossen (fehlende Fokus-Ankündigung bei Routenwechsel — reiner Barrierefreiheits-Fix ohne Ehrlichkeits-/Vertrauens-Erzählung; reine Testabdeckung für Duffel-Mapping-Funktionen ohne Verhaltensänderung), Kandidatentopf von sechs auf **neun** — damit über der Achter-Schwelle: siebte Mini-Changelog-Ausgabe geschrieben (siehe `marketing/mini-changelog-konzept.md`), Kandidatentopf danach wieder leer, alle vier Fragen weiterhin offen
 
