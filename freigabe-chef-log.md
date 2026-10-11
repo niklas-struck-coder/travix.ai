@@ -6452,3 +6452,55 @@ für sie nötig.
 
 **Info an Ni:** Nein — Prüfung sauber, alle drei Checks eigenständig
 grün, keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-11, Tages-Check (geplanter täglicher Auto-Lauf, kein Ni live dabei)
+
+**`it-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand) — bereits beim frühen Nacht-Check heute vollständig gemergt.
+Übersprungen, kein weiterer Check nötig.
+
+**Prüfung `marketing-chef/auto`** (1 Commit seit letztem Merge,
+`bd7bfbb`, 11.10.): Branch war neu von `origin/main` angelegt (eigener
+vorheriger Stand `baf5af6` war schon in `main`), ein neuer Commit
+obendrauf. Diff betrifft ausschließlich
+`marketing/freigabe-uebersicht.md` und `marketing-chef-auto-log.md` —
+kein Produkt-Code.
+
+Geprüft: keine erfundenen Kennzahlen/Nutzerzahlen/Kampagnen-Ergebnisse
+— die drei neu gezählten Tier-4-Kandidaten (46/47/48) berufen sich auf
+die bereits in `main` gemergten Commits `7dd2ef2`, `3c9dc4a` und
+`116cd95`, deren Inhalt im Log korrekt wiedergegeben wird (Flugauswahl
+speicherte bisher nur `transportMode: 'flight'` ohne Airline/Route/
+Preis; Race-Condition bei überlappenden Suchen). Kein Hinweis auf
+tatsächliches Posten/Versenden/Veröffentlichen — reine
+Kandidaten-Verwaltung, explizit als Entwurf/Übersicht gekennzeichnet.
+Text ist vollständig und kohärent, keine bloße Stichpunkt-Skizze.
+
+→ **Passt, nach `main` gemergt** (Merge-Commit, da kein
+Fast-Forward möglich — Branch war von einem älteren `main`-Stand aus
+neu angelegt worden).
+
+**Prüfung `support-chef-auto`** (1 Commit seit letztem Merge, `f9f8f3e`,
+11.10.): Diff betrifft ausschließlich `support-chef-auto-log.md` — reine
+Analyse, keine Code-Änderung.
+
+Stichprobe nicht nur oberflächlich, sondern mit echtem Code-Abgleich
+geprüft: Fund behauptet, `selectFlight()` in `src/hooks/useChat.ts`
+baue die Routen-Angabe für die Chat-Bestätigung nur aus
+`originIata`/`destinationIata` statt aus `originName`/`destinationName`,
+obwohl `summarizeFlightOffer()` zwei Zeilen weiter genau diesen
+Namen-vor-IATA-Fallback schon nutzt. Direkt im aktuellen
+`origin/main`-Stand nachvollzogen (`grep -n` in `useChat.ts`): Zeile
+418 `selectFlight`, Zeile 420 `` `${slice.originIata} → ${slice.destinationIata}` ``,
+Zeile 422 `summarizeFlightOffer(offer)` — Zeilenangaben und Beschreibung
+stimmen exakt. `FlightSlice` (`src/types/duffel.ts`) hat tatsächlich
+beide Namensfelder. Kein erfundener Befund.
+
+→ **Passt, nach `main` gemergt** (Merge-Commit, kein Fast-Forward
+möglich — Branch war ebenfalls von einem älteren `main`-Stand aus neu
+angelegt worden).
+
+Beide Merges nach `origin/main` gepusht (`14541e3..5674cca`).
+
+**Info an Ni:** Nein — beide Prüfungen bestanden, keine Auffälligkeit,
+die seine Aufmerksamkeit bräuchte.
