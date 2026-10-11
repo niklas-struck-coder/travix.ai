@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './useChat'
 import { searchFlights, searchStays } from '@/lib/duffel/client'
+import { summarizeFlightOffer } from '@/lib/format'
 import type { FlightOffer } from '@/types/duffel'
 import type { StayOffer } from '@/types/stays'
 
@@ -768,6 +769,32 @@ describe('useChat selectFlight confirmation message', () => {
     const confirmation = result.current.messages.at(-1)?.content ?? ''
     expect(confirmation).toContain(`249,00${NBSP}€`)
     expect(confirmation).not.toContain('249.00 EUR')
+  })
+
+  it('saves the selected flight into trip.transportDetail so Buchung.tsx can show it, not just the chat message', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '249.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: 'Berlin',
+          destinationIata: 'LIS',
+          destinationName: 'Lissabon',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+
+    expect(result.current.trip.transportDetail).toBe(summarizeFlightOffer(offer))
   })
 })
 

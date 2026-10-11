@@ -17902,3 +17902,69 @@ Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-11
+
+**Vorbereitung:** Autonomer Cloud-Lauf ohne Ni live dabei, wie in
+`.claude/skills/it-chef-eigen/SKILL.md` ("Autonomer Tagesmodus")
+beschrieben. `it-chef/auto` war beim Start auf dem Stand des fünften
+Laufs vom 10.10. (Commit `3be7233`), `origin/main` lag unverändert davor
+(Freigabe-Chef hatte den dritten Lauf bereits gemergt, vierter und
+fünfter Lauf warten noch auf Prüfung) — kein Merge nötig, da `main` seit
+dem fünften Lauf nicht weitergewandert ist. `main` selbst nicht
+angefasst.
+
+**Auswahl:** Einen eigens beauftragten Explore-Agenten gezielt nach
+einem neuen, bisher unentdeckten Kandidaten suchen lassen (der
+`reports/it-chef.md`-Eintrag vom 10.10. hatte bereits eine sehr breite
+Suche dokumentiert, ohne einen weiteren sicheren Fund — eine erneute
+identische Suche wäre keine zusätzliche Information gewesen). Fund:
+`src/hooks/useChat.ts`, Funktion `selectFlight()` (ausgelöst, wenn eine
+Nutzerin im KI-Chat eine Flugkarte aus den inline angezeigten
+Suchergebnissen auswählt) bestätigte den gewählten Flug zwar in der
+Chat-Nachricht ("... den Flug BER → LIS für 249,00 € für dich
+vorgemerkt ..."), schrieb die Auswahl aber nie in `trip.transportDetail`
+— genau das Feld, das `Buchung.tsx` für die Route/Preis-Anzeige neben
+dem Transportmittel auf dem eigentlichen Reiseplan liest. Der
+Reiseplan zeigte danach weiterhin nur "Flug" ohne Route/Preis, im
+Widerspruch zur eigenen Bestätigung des Chats. Die standalone
+`/flugsuche`-Seite bekam genau diesen Fix bereits im vierten Lauf vom
+10.10. (Commit `7dd2ef2`, `summarizeFlightOffer()` in `src/lib/format.ts`
+eingeführt) — der separate In-Chat-Pfad in `useChat.ts` wurde dabei nicht
+mitgezogen, da die Asymmetrie vor diesem Fix noch gar nicht existierte.
+Gegen die vier Sicherheitskriterien geprüft: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Bezug, keine offene Produkt- oder
+Architekturentscheidung (reine mechanische Übernahme der bereits
+etablierten, im vierten Lauf eingeführten Hilfsfunktion
+`summarizeFlightOffer()` auf einen zweiten, bisher übersehenen
+Aufrufpfad), klar genug beschrieben (ein Feld, eine Funktion, ein
+objektiv fehlender Aufruf), objektiv prüfbar (neuer Testassert auf
+`trip.transportDetail`, Typecheck/Lint/restliche Tests bleiben grün) →
+alle vier Kriterien erfüllt.
+
+**Gefunden und behoben:** `selectFlight()` (`src/hooks/useChat.ts`) ruft
+jetzt zusätzlich `setTrip((prev) => ({ ...prev, transportDetail:
+summarizeFlightOffer(offer) }))` auf, bevor die Bestätigungsnachricht
+gesendet wird — exakt dieselbe, bereits in `Flugsuche.tsx` etablierte
+Hilfsfunktion, kein neuer Code. `summarizeFlightOffer` entsprechend
+zusätzlich aus `@/lib/format` importiert. Der bestehende `useEffect` in
+`useChat.ts`, der `trip`-Änderungen automatisch über `saveStoredChat()`
+persistiert, deckt die neue Zuweisung ohne weitere Änderung ab. Neuer
+Regressionstest in `useChat.test.ts` ("saves the selected flight into
+trip.transportDetail so Buchung.tsx can show it, not just the chat
+message") — vor dem Fix durch temporäres Zurücknehmen der
+Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+verifiziert (`transportDetail` blieb `null` statt der erwarteten
+Zusammenfassung).
+
+**Geprüft:** `npm ci` (frischer Checkout; 650 Pakete, weiterhin
+dieselben zehn High-/Critical-Severity-Advisories, unverändert seit
+mehreren Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code),
+`npx vitest run src/hooks/useChat.test.ts` gezielt rot (vor dem Fix) und
+grün (nach dem Fix) verifiziert, danach volle Suite `npx vitest run`
+(62 Testdateien, 444 Tests, alle grün), `npm run lint` (0 Probleme),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

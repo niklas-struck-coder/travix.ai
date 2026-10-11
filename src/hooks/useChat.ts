@@ -10,7 +10,7 @@ import { toIsoDate } from '@/lib/trip/calendarUtils'
 import { clearStoredChat, loadStoredChat, saveStoredChat } from '@/lib/trip/tripStorage'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { ChatMessage, EditableTripField, TripDraft } from '@/types/chat'
-import { formatOfferPrice } from '@/lib/format'
+import { formatOfferPrice, summarizeFlightOffer } from '@/lib/format'
 
 const IATA_CODE_PATTERN = /^[a-zA-Z]{3}$/
 
@@ -419,6 +419,7 @@ export function useChat(speechEnabled: boolean) {
     const slice = offer.slices[0]
     const route = slice ? `${slice.originIata} → ${slice.destinationIata}` : trip.destination
     const confirmation = `Alles klar, ich hab den Flug ${route} für ${formatOfferPrice(offer.totalAmount, offer.totalCurrency)} für dich vorgemerkt. Dein Reiseplan steht weiterhin.`
+    setTrip((prev) => ({ ...prev, transportDetail: summarizeFlightOffer(offer) }))
     setFlightOffers(null)
     setMessages((prev) => [...prev, makeMessage('assistant', confirmation)])
     setQuickReplies(['Neue Reise planen'])

@@ -947,6 +947,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `tripStorage.ts`) reproduzierbar rot verifiziert (Budget blieb
   unverändert, `searchFlights` wurde nach dem simulierten Reload nicht
   aufgerufen).
+  Vom autonomen IT-Chef-Lauf am 11.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen Bug behoben: `selectFlight()`
+  (`useChat.ts`, ausgelöst beim Auswählen einer Flugkarte aus den inline
+  im KI-Chat angezeigten Suchergebnissen) bestätigte den gewählten Flug
+  zwar in der Chat-Nachricht ("... den Flug BER → LIS für 249,00 € für
+  dich vorgemerkt ..."), schrieb die Auswahl aber nie in
+  `trip.transportDetail` — genau das Feld, das `Buchung.tsx` für die
+  Route/Preis-Anzeige neben dem Transportmittel auf dem Reiseplan liest.
+  Der Reiseplan zeigte danach weiterhin nur "Flug" ohne Route/Preis, im
+  Widerspruch zur eigenen Bestätigung des Chats. Die standalone
+  `/flugsuche`-Seite bekam genau diesen Fix bereits am 10.10. (vierter
+  Lauf, `summarizeFlightOffer()` in `src/lib/format.ts` eingeführt) — der
+  separate In-Chat-Pfad wurde dabei nicht mitgezogen, da die Asymmetrie
+  vor diesem Fix noch gar nicht existierte. Fix: `selectFlight()` ruft
+  jetzt zusätzlich `setTrip((prev) => ({ ...prev, transportDetail:
+  summarizeFlightOffer(offer) }))` auf — exakt dieselbe, bereits in
+  `Flugsuche.tsx` etablierte Hilfsfunktion, keine neue Design-
+  Entscheidung. Neuer Regressionstest in `useChat.test.ts` — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `useChat.ts`) reproduzierbar rot verifiziert (`transportDetail` blieb
+  `null`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen
