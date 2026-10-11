@@ -158,6 +158,13 @@ describe('EditMode', () => {
     ).toBeInTheDocument()
   })
 
+  it('hints at the € format in both price fields, since price is stored as free text', () => {
+    renderEditMode([{ id: '1', name: 'Museum', price: null }])
+
+    expect(screen.getByLabelText('Preis für Museum')).toHaveAttribute('placeholder', 'Preis in €')
+    expect(screen.getByLabelText('Preis')).toHaveAttribute('placeholder', 'optional, z. B. 25 €')
+  })
+
   it('clears the unsaved "Neue Aktivität" draft when the dialog is closed without adding it', () => {
     renderEditMode([])
 

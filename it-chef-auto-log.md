@@ -18054,3 +18054,67 @@ Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-11 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits identisch mit dem Stand nach
+dem zweiten Lauf vom 11.10. (Commit `116cd95`), `origin/main` unverändert
+davor — kein Merge nötig. `main` selbst nicht angefasst.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` enthielten
+keinen neuen, eindeutig umsetzbaren Punkt, der nicht entweder blockiert
+(8.2-8.7 Foto-Upload/Kontext/Deal Finder, 8.11 Hilfe hängt an FAQ-Inhalten
+von Support-Chef), eine Produktentscheidung voraussetzt (Sprint 5) oder
+bereits erledigt ist (8.13 Unit-Tests für `calculateProgress`/
+`checklistRules` existieren bereits mit eigener Testdatei;
+`calculateCosts`/Schema-Validierung existieren mangels 6.7/4.1 weiterhin
+nicht im Code — seit vielen Läufen unverändert, siehe frühere
+Log-Einträge). Stattdessen den eigenen offenen Fund aus
+`reports/it-chef.md` (dort unter "Gefundene Bugs", Punkt 3, seit 18.08.
+unverändert dokumentiert) aufgegriffen: `src/components/trip/EditMode.tsx`
+— die beiden Preis-Inputs (bestehende Aktivität: Placeholder "Preis";
+neue Aktivität: Placeholder "optional") geben keinen Hinweis auf das
+erwartete Format. Im Code verifiziert: `TripActivity.price` ist
+`string | null` (`src/types/chat.ts:15`), bewusst freier Text statt einer
+Zahl mit `formatEuro()`-Formatierung (anders als die unabhängigen
+Demo-Preise in `Aktivitaeten.tsx`/`Angebote.tsx`) — bestätigt durch
+`addActivity()`/`updatePrice()` in `EditMode.tsx`, die den Wert
+unverändert übernehmen, sowie durch bestehende Tests/Demo-Daten im
+gesamten Code (`budget: '1.500 €'`, `transportDetail: '… · 149,00 €'`,
+`price: '10 €'` in `EditMode.test.tsx`/`Buchung.test.tsx`/
+`ChecklistPanel.test.tsx`), die alle voraussetzen, dass das „€“ bereits
+im gespeicherten String steckt. Gegen die vier Sicherheitskriterien
+geprüft: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug (reine
+Demo-Aktivitäten im aktiven Chat-Trip), keine offene Produkt- oder
+Architekturentscheidung (reine Placeholder-Textänderung, kein neues
+visuelles Element, kein Datentyp-Wechsel — beides wäre eine eigene
+Design-Entscheidung ohne Vorgabe in `MARKENDESIGN.md` gewesen), klar
+genug beschrieben (exakte Datei, exakte Zeilen, Fund bereits einmal von
+einem anderen Kanal unabhängig gemeldet), objektiv prüfbar (Placeholder-
+Attribut per Test abfragbar) → alle vier Kriterien erfüllt.
+
+**Gefunden und behoben:** Placeholder des bestehenden Preis-Inputs
+(`EditMode.tsx`, kein eigenes `<Label>`, nur `aria-label`) von "Preis"
+auf "Preis in €" geändert; Placeholder des Preis-Inputs im "Neue
+Aktivität"-Formular (hat ein eigenes `<Label>Preis</Label>`, daher kein
+Verlust des Wortes "Preis") von "optional" auf "optional, z. B. 25 €"
+geändert. Keine Änderung an `addActivity()`/`updatePrice()`, am
+gespeicherten Datentyp oder an bestehenden Tests, die weiterhin über die
+sichtbaren `<Label>`s/`aria-label`s statt über Placeholder-Text suchen.
+Neuer Regressionstest in `EditMode.test.tsx` ("hints at the € format in
+both price fields, since price is stored as free text") — vor dem Fix
+durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`EditMode.tsx`) reproduzierbar rot verifiziert (Placeholder zeigten noch
+"Preis"/"optional").
+
+**Geprüft:** `npm install` (frischer Checkout; 650 Pakete, weiterhin
+dieselben zehn High-/Critical-Severity-Advisories, unverändert seit
+mehreren Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code),
+`npx vitest run src/components/trip/EditMode.test.tsx` gezielt rot (vor
+dem Fix) und grün (nach dem Fix) verifiziert, danach volle Suite
+`npm test` (62 Testdateien, 447 Tests, alle grün), `npm run lint`
+(0 Probleme), `npm run build` (`tsc -b && vite build`, kein Typfehler,
+Build erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

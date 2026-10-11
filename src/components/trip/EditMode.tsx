@@ -86,7 +86,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
                     <Input
                       aria-label={`Preis für ${activityLabel}`}
                       className="w-24"
-                      placeholder="Preis"
+                      placeholder="Preis in €"
                       value={activity.price ?? ''}
                       onChange={(event) => updatePrice(activity.id, event.target.value)}
                     />
@@ -126,7 +126,7 @@ export function EditMode({ activities, onChange, children }: EditModeProps) {
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && !event.nativeEvent.isComposing) addActivity()
                 }}
-                placeholder="optional"
+                placeholder="optional, z. B. 25 €"
               />
             </div>
             <Button aria-label="Aktivität hinzufügen" onClick={addActivity} disabled={!name.trim()}>

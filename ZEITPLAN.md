@@ -2695,6 +2695,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerung, neuer Test schlug fehl: Feld zeigte weiterhin
   "Stadtführung" statt leer). Neuer Regressionstest in
   `EditMode.test.tsx`.
+  Vom autonomen IT-Chef-Lauf am 11.10. (dritter Lauf desselben Tages)
+  einen seit 18.08. in `reports/it-chef.md` wiederholt gemeldeten, aber
+  bisher nicht automatisch gefixten Fund behoben: Die beiden Preis-Inputs
+  (für bestehende Aktivitäten und im "Neue Aktivität"-Formular) hatten
+  keinen Hinweis auf das erwartete Format — `TripActivity.price` ist
+  bewusst freier Text (kein `number`, keine `formatEuro()`-Formatierung
+  wie bei den unabhängigen Demo-Preisen in `Aktivitaeten.tsx`/`Angebote.tsx`),
+  und das etablierte Muster im gesamten Code (`budget`, `transportDetail`,
+  bestehende Testdaten wie `price: '10 €'`) erwartet, dass Nutzer:innen das
+  „€“ selbst mittippen — ohne jeden Hinweis darauf blieb unklar, ob/wie
+  eine Währung angegeben werden soll. Bewusst **keine** Änderung des
+  Datentyps oder ein neues visuelles Element (Präfix-/Suffix-Icon) — das
+  wäre eine neue Design-Entscheidung ohne Vorgabe in `MARKENDESIGN.md`
+  gewesen, hier reicht eine reine Placeholder-Textänderung, die das
+  bestehende Verhalten unverändert lässt. Fix: Placeholder beim
+  bestehenden Preis-Input (bisher nur "Preis") auf "Preis in €", beim
+  neuen Preis-Input (bisher "optional") auf "optional, z. B. 25 €"
+  geändert. Neuer Regressionstest in `EditMode.test.tsx` — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `EditMode.tsx`) reproduzierbar rot verifiziert (Placeholder zeigten
+  noch "Preis"/"optional").
 - [ ] 2.x Auth & Nutzerkonten (abhängig von Backend-Entscheidung)
 
 ### Sprint 3 — Trip-Lifecycle-Seiten (KW37-39, 8.-28. Sep)
