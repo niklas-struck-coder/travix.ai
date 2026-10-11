@@ -4405,3 +4405,69 @@ Muster wie bei Fund 2, allerdings ohne den Daten-Verlust aus Fund 1, da
 der Hotelname ja tatsächlich gespeichert wird. Kein eigener Fund hier
 aufgeführt, um keine Vermutung ohne genaue Prüfung als Befund
 auszugeben.
+
+---
+
+## 2026-10-11 — Flugauswahl im KI-Chat (`useChat.ts`/`selectFlight()`)
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` der in den letzten Tagen (08.-
+11.10.) mit Abstand aktivste Bereich — IT-Chef hat heute (Commit
+`3c9dc4a`) gerade erst `selectFlight()` in `src/hooks/useChat.ts`
+ergänzt, damit der im KI-Chat gewählte Flug (wie schon länger bei
+`Flugsuche.tsx`) in `trip.transportDetail` landet. Diesen frischen Code
+sowie die direkt angrenzende Chat-Bestätigungsnachricht geprüft:
+
+- `src/hooks/useChat.ts` (`selectFlight()`, Zeile 418-428)
+- `src/pages/Flugsuche.tsx` (`handleSelect()`, zum Vergleich)
+- `src/lib/format.ts` (`summarizeFlightOffer()`)
+- `src/components/search/FlightCard.tsx` (`formatLocation()`, zum
+  Vergleich)
+- `src/types/duffel.ts` (`FlightSlice`)
+
+### Reibungspunkte
+
+**1. Chat-Bestätigung zeigt rohe IATA-Codes statt Klarnamen — genau der
+Fund, der am 27.09. in `FlightCard.tsx` schon einmal behoben wurde**
+`src/hooks/useChat.ts:418-422`: `selectFlight()` baut die Routen-Angabe
+für die Chat-Bestätigungsnachricht selbst, mit
+`` `${slice.originIata} → ${slice.destinationIata}` `` — rein aus den
+3-stelligen IATA-Codes, ohne auf `slice.originName`/`destinationName`
+zurückzugreifen (beide Felder existieren auf `FlightSlice`,
+`src/types/duffel.ts:22-25`, und sind laut `callDuffelProxy()`
+zuverlässig befüllt). Das ist exakt das Muster, das laut `ZEITPLAN.md`
+(IT-Chef-Lauf 27.09., dritter Lauf desselben Tages) in `FlightCard.tsx`
+bereits einmal als Fund galt und behoben wurde ("zeigte am Abflug-/
+Ankunftsort den rohen IATA-Code … statt eines Klarnamens") — hier taucht
+dasselbe Problem an einer neuen, erst heute geschriebenen Stelle wieder
+auf. Besonders auffällig: Nur zwei Zeilen tiefer (Zeile 422) ruft
+`selectFlight()` bereits `summarizeFlightOffer(offer)` auf, das genau
+diesen Namen-vor-IATA-Fallback schon enthält
+(`src/lib/format.ts:23-30`: `` (slice.originName || slice.originIata) ``)
+— die Funktion ist im selben File bereits importiert und zwei Zeilen
+später in Benutzung, wird für die Chat-Bestätigung selbst aber nicht
+genutzt. Live nachvollziehbar: Wählt eine Nutzerin im KI-Chat einen Flug
+aus, liest sie "Alles klar, ich hab den Flug BER → LIS für 245,00 € für
+dich vorgemerkt" statt "Berlin → Lissabon" — während dieselbe Auswahl auf
+`Flugsuche.tsx` (`handleSelect()`, Zeile 38-43) über `summarizeFlightOffer()`
+bereits korrekt mit Klarnamen in `trip.transportDetail` landet und so auch
+auf `Buchung.tsx` angezeigt wird. Die Chat-Nachricht und der danach auf
+dem Reiseplan sichtbare Text widersprechen sich dadurch in der Darstellung
+derselben Auswahl.
+
+*Vorschlag:* In `selectFlight()` für die Routen-Angabe der
+Bestätigungsnachricht denselben Namen-vor-IATA-Fallback nutzen, den
+`summarizeFlightOffer()` schon hat — am einfachsten durch Wiederverwendung
+von `summarizeFlightOffer(offer)` selbst (das Ergebnis enthält Airline,
+Route und Preis in einem String) oder durch eine eigene kleine
+`formatLocation`-ähnliche Hilfsfunktion analog zu `FlightCard.tsx`. Reine
+Textkorrektur ohne Datenmodell- oder Verhaltensänderung, keine neue
+Design-Entscheidung — mechanische Übernahme eines bereits zweimal
+etablierten Musters (`FlightCard.tsx`, `summarizeFlightOffer()`).
+
+### Nicht erneut aufgeführt
+Der bereits in den letzten beiden Berichten (09./10.10.) gemeldete,
+weiterhin offene Fund 2 ("Bearbeiten" → "Manuell suchen" startet das
+Flugsuche-Formular leer, `FlightWizard.tsx`) wurde heute nicht erneut
+geprüft, da IT-Chef daran laut `ZEITPLAN.md` seit dem letzten Bericht
+nichts geändert hat — kein neuer Stand, der eine erneute Meldung
+rechtfertigt.
