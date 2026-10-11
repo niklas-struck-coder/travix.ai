@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -17,13 +17,19 @@ export function Flugsuche() {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null)
   const [selectionHasTrip, setSelectionHasTrip] = useState(true)
   const [storageWarning, setStorageWarning] = useState(false)
+  // Bumped on every search so an overlapping, slower-to-resolve older
+  // request can tell it's stale and skip overwriting the newer one's
+  // results — same pattern as searchGenerationRef in useChat.ts.
+  const searchGenerationRef = useRef(0)
 
   const handleSearch = async (params: FlightSearchParams) => {
     setLoading(true)
     setErrors([])
     setSelectedOfferId(null)
     setOffers(null)
+    const generation = ++searchGenerationRef.current
     const result = await searchFlights(params)
+    if (searchGenerationRef.current !== generation) return
     setOffers(result.offers)
     setErrors(result.errors)
     setLoading(false)

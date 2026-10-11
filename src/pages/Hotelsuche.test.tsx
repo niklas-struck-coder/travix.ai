@@ -7,6 +7,7 @@ import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 import type { StayOffer } from '@/types/stays'
+import type { DuffelError } from '@/types/duffel'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchStays: vi.fn(),
@@ -29,14 +30,26 @@ function seedStoredChat() {
 // button that fires the same onSearch callback with fixed params.
 vi.mock('@/components/search/HotelWizard', () => ({
   HotelWizard: ({ onSearch, loading }: { onSearch: (params: unknown) => void; loading: boolean }) => (
-    <button
-      onClick={() =>
-        onSearch({ latitude: 0, longitude: 0, checkInDate: '2026-01-01', checkOutDate: '2026-01-05', rooms: 1, guests: 1 })
-      }
-      disabled={loading}
-    >
-      Hotels suchen
-    </button>
+    <>
+      <button
+        onClick={() =>
+          onSearch({ latitude: 0, longitude: 0, checkInDate: '2026-01-01', checkOutDate: '2026-01-05', rooms: 1, guests: 1 })
+        }
+        disabled={loading}
+      >
+        Hotels suchen
+      </button>
+      {/* Not disabled on `loading` — simulates a second search starting while the
+          first one is still in flight (e.g. an overlapping request), to test
+          that a slower, stale response can't overwrite a faster, newer one. */}
+      <button
+        onClick={() =>
+          onSearch({ latitude: 1, longitude: 1, checkInDate: '2026-02-01', checkOutDate: '2026-02-05', rooms: 1, guests: 1 })
+        }
+      >
+        Hotels suchen (zweite, überlappende Suche)
+      </button>
+    </>
   ),
 }))
 
@@ -121,6 +134,30 @@ describe('Hotelsuche', () => {
     expect(screen.queryByRole('button', { name: 'Ausgewählt' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Auswählen' })).toHaveLength(2)
     expect(screen.getAllByRole('button', { name: 'Auswählen' })[0]).not.toBeDisabled()
+  })
+
+  it('discards a stale search response that resolves after a newer, overlapping one already applied its result', async () => {
+    const searchStaysMock = vi.mocked(searchStays)
+    let resolveStaleSearch: (value: { offers: StayOffer[]; errors: DuffelError[] }) => void = () => {}
+    searchStaysMock.mockImplementationOnce(() => new Promise((resolve) => (resolveStaleSearch = resolve)))
+    searchStaysMock.mockResolvedValueOnce({ offers: [makeOffer('2', 'Ryokan Kyoto')], errors: [] })
+
+    render(
+      <MemoryRouter>
+        <Hotelsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Hotels suchen'))
+    fireEvent.click(screen.getByText('Hotels suchen (zweite, überlappende Suche)'))
+
+    await waitFor(() => expect(screen.getByText('Ryokan Kyoto')).toBeInTheDocument())
+
+    resolveStaleSearch({ offers: [], errors: [{ message: 'Die Unterkunftssuche hat gerade nicht geklappt.' }] })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByText('Ryokan Kyoto')).toBeInTheDocument()
   })
 
   it('announces a search error to assistive tech via role="alert"', async () => {

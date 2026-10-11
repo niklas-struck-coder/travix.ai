@@ -968,6 +968,31 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `useChat.ts`) reproduzierbar rot verifiziert (`transportDetail` blieb
   `null`).
+  Vom autonomen IT-Chef-Lauf am 11.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen Race-Condition-Bug in
+  `Flugsuche.tsx` und `Hotelsuche.tsx` behoben: `handleSearch` setzte das
+  Ergebnis der jeweils zuletzt AUFGELÖSTEN Duffel-Anfrage in den State,
+  nicht das der zuletzt GESTARTETEN — anders als `useChat.ts`, das sich
+  gegen genau dieses Problem bereits über einen hochgezählten
+  `searchGenerationRef` absichert (siehe Kommentar dort: "Bumped by
+  resetChat() so in-flight Duffel search Promises … can tell they're
+  stale"). Starten zwei überlappende Suchen (z. B. eine langsame Suche A,
+  gefolgt von einer schnelleren Suche B, bevor A geantwortet hat), zeigt
+  die Seite kurz korrekt B, bis As verspätete Antwort den Zustand erneut
+  überschreibt — mit veralteten Angeboten oder, schlimmer, einem
+  Fehlerzustand, der zu einer bereits erfolgreich abgeschlossenen Suche
+  gar nicht mehr passt, ohne dass `loading` das anzeigt. Fix: dasselbe
+  Muster 1:1 übernommen — neuer `searchGenerationRef` in beiden Seiten,
+  pro `handleSearch`-Aufruf hochgezählt, vor dem Anwenden des Ergebnisses
+  geprüft (`if (searchGenerationRef.current !== generation) return`),
+  keine neue Design-Entscheidung. Je ein neuer Regressionstest in
+  `Flugsuche.test.tsx`/`Hotelsuche.test.tsx` (zweite, überlappende Suche
+  löst schneller auf als die erste; die verspätete erste Antwort — ein
+  Fehler — darf das bereits angezeigte Ergebnis der zweiten nicht mehr
+  überschreiben) — vor dem Fix durch temporäres Zurücknehmen beider
+  Quelländerungen (`git stash` nur `Flugsuche.tsx`/`Hotelsuche.tsx`)
+  reproduzierbar rot verifiziert (beide neuen Tests zeigten danach den
+  veralteten Fehlerzustand statt der weiterhin gültigen Angebote).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -6,7 +6,7 @@ import { searchFlights } from '@/lib/duffel/client'
 import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
-import type { FlightOffer } from '@/types/duffel'
+import type { DuffelError, FlightOffer } from '@/types/duffel'
 
 vi.mock('@/lib/duffel/client', () => ({
   searchFlights: vi.fn(),
@@ -18,12 +18,20 @@ vi.mock('@/lib/duffel/client', () => ({
 // onSearch callback with fixed params.
 vi.mock('@/components/search/FlightWizard', () => ({
   FlightWizard: ({ onSearch, loading }: { onSearch: (params: unknown) => void; loading: boolean }) => (
-    <button
-      onClick={() => onSearch({ origin: 'BER', destination: 'LIS', departureDate: '2026-01-01', passengers: 1 })}
-      disabled={loading}
-    >
-      Flüge suchen
-    </button>
+    <>
+      <button
+        onClick={() => onSearch({ origin: 'BER', destination: 'LIS', departureDate: '2026-01-01', passengers: 1 })}
+        disabled={loading}
+      >
+        Flüge suchen
+      </button>
+      {/* Not disabled on `loading` — simulates a second search starting while the
+          first one is still in flight (e.g. an overlapping request), to test
+          that a slower, stale response can't overwrite a faster, newer one. */}
+      <button onClick={() => onSearch({ origin: 'BER', destination: 'FCO', departureDate: '2026-01-01', passengers: 1 })}>
+        Flüge suchen (zweite, überlappende Suche)
+      </button>
+    </>
   ),
 }))
 
@@ -146,6 +154,30 @@ describe('Flugsuche', () => {
 
     expect(await screen.findByText('Keine Flüge gefunden')).toBeInTheDocument()
     expect(screen.queryByText('Keine Ergebnisse gefunden')).not.toBeInTheDocument()
+  })
+
+  it('discards a stale search response that resolves after a newer, overlapping one already applied its result', async () => {
+    const searchFlightsMock = vi.mocked(searchFlights)
+    let resolveStaleSearch: (value: { offers: FlightOffer[]; errors: DuffelError[] }) => void = () => {}
+    searchFlightsMock.mockImplementationOnce(() => new Promise((resolve) => (resolveStaleSearch = resolve)))
+    searchFlightsMock.mockResolvedValueOnce({ offers: [makeOffer('2')], errors: [] })
+
+    render(
+      <MemoryRouter>
+        <Flugsuche />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Flüge suchen'))
+    fireEvent.click(screen.getByText('Flüge suchen (zweite, überlappende Suche)'))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Auswählen' })).toBeInTheDocument())
+
+    resolveStaleSearch({ offers: [], errors: [{ message: 'Die Flugsuche hat gerade nicht geklappt.' }] })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Auswählen' })).toBeInTheDocument()
   })
 
   it('announces a search error to assistive tech via role="alert"', async () => {

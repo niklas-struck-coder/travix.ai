@@ -17968,3 +17968,89 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-11 (zweiter Lauf desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` war bereits identisch mit dem Stand des
+ersten Laufs vom 11.10. (Commit `3c9dc4a`), `origin/main` lag unverändert
+davor (Freigabe-Chef hatte den dritten Lauf vom 10.10. bereits gemergt,
+vierter/fünfter Lauf vom 10.10. und der erste Lauf vom 11.10. warten noch
+auf Prüfung) — kein Merge nötig. `main` selbst nicht angefasst.
+
+**Auswahl:** Einen eigens beauftragten Explore-Agenten gezielt nach einem
+neuen, bisher unentdeckten Kandidaten suchen lassen, mit dem expliziten
+Hinweis, dass offensichtliche Funde (ARIA, Fokus, Timeout-Cleanup,
+Formatierung, stale Checkboxen) bereits großflächig abgearbeitet sind und
+gezielt nach Race Conditions, Inkonsistenzen zwischen strukturell
+ähnlichen Dateien und fehlenden Guards gesucht werden soll. Fund:
+`src/pages/Flugsuche.tsx` und `src/pages/Hotelsuche.tsx` (Zeilen 21-30 in
+beiden Dateien), Funktion `handleSearch()`:
+
+```ts
+const handleSearch = async (params: FlightSearchParams) => {
+  setLoading(true)
+  setErrors([])
+  setSelectedOfferId(null)
+  setOffers(null)
+  const result = await searchFlights(params)
+  setOffers(result.offers)
+  setErrors(result.errors)
+  setLoading(false)
+}
+```
+
+Kein Schutz gegen überlappende Suchanfragen: Startet eine zweite Suche,
+bevor die erste geantwortet hat, gewinnt beim Zurückschreiben in den
+State die zuletzt AUFGELÖSTE Promise, nicht die zuletzt GESTARTETE.
+Löst die zweite (neuere) Suche schneller auf als die erste (ältere,
+langsamere), zeigt die Seite kurz korrekt das neuere Ergebnis — bis die
+verspätete Antwort der ersten, inzwischen veralteten Suche den Zustand
+erneut überschreibt, mit `loading` bereits auf `false`, ohne jeden
+Hinweis auf einen Fehler. `src/hooks/useChat.ts` sichert sich gegen
+exakt dieses Problem bereits über einen hochgezählten
+`searchGenerationRef` ab (Kommentar dort: "Bumped by resetChat() so
+in-flight Duffel search Promises … can tell they're stale") — dieser
+bereits etablierte Schutz wurde nie auf die beiden eigenständigen
+Suchseiten übertragen, obwohl sie dieselben `searchFlights`/
+`searchStays`-Aufrufe nutzen. Gegen die vier Sicherheitskriterien
+geprüft: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug (reine
+UI-Zustandslogik einer Demo-Suche mit Testdaten), keine offene Produkt-
+oder Architekturentscheidung (mechanische Übertragung eines bereits im
+Code etablierten Musters auf zwei strukturell identische
+Geschwisterdateien), klar genug beschrieben (exakter Code, exakte
+Zeilen, 1:1 übertragbares Vorbild in derselben Codebasis), objektiv
+prüfbar (roter/grüner Test mit kontrolliert außer Reihenfolge
+auflösenden Mock-Promises) → alle vier Kriterien erfüllt.
+
+**Gefunden und behoben:** `Flugsuche.tsx` und `Hotelsuche.tsx` bekommen
+je einen neuen `searchGenerationRef` (per `useRef(0)`), der in
+`handleSearch()` vor dem `await` hochgezählt und lokal erfasst wird; vor
+dem Anwenden des Ergebnisses (`setOffers`/`setErrors`/`setLoading(false)`)
+wird geprüft, ob die erfasste Generation noch die aktuelle ist — sonst
+wird das Ergebnis stillschweigend verworfen. Identischer Fix in beiden
+Dateien, 1:1 nach dem in `useChat.ts` etablierten Muster, keine neue
+Design-Entscheidung. Je ein neuer Regressionstest in
+`Flugsuche.test.tsx`/`Hotelsuche.test.tsx` ("discards a stale search
+response that resolves after a newer, overlapping one already applied
+its result"): Der jeweilige FlightWizard/HotelWizard-Mock bekommt einen
+zweiten, nicht auf `loading` deaktivierten Button, der eine zweite,
+überlappende Suche auslöst; die erste (künstlich verzögerte) Suche
+löst mit einem Fehler auf, nachdem die zweite (sofort auflösende) Suche
+bereits erfolgreich Angebote angezeigt hat — vor dem Fix durch
+temporäres Zurücknehmen beider Quelländerungen (`git stash` nur
+`Flugsuche.tsx`/`Hotelsuche.tsx`) reproduzierbar rot verifiziert (beide
+neuen Tests zeigten danach den veralteten Fehlerzustand statt der
+weiterhin gültigen Angebote der zweiten Suche).
+
+**Geprüft:** `npm install` (frischer Checkout; 650 Pakete, weiterhin
+dieselben zehn High-/Critical-Severity-Advisories, unverändert seit
+mehreren Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code),
+`npx vitest run src/pages/Flugsuche.test.tsx src/pages/Hotelsuche.test.tsx`
+gezielt rot (vor dem Fix, beide neuen Tests) und grün (nach dem Fix)
+verifiziert, danach volle Suite `npm test` (62 Testdateien, 446 Tests,
+alle grün), `npm run lint` (0 Probleme), `npm run build` (`tsc -b && vite
+build`, kein Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
