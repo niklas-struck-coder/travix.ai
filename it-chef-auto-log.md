@@ -18183,3 +18183,59 @@ erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-11 (fünfter Lauf desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` entspricht exakt dem Stand nach dem
+vierten Lauf vom 11.10. (`8cf9d62`), `origin/main` seitdem unverändert —
+kein Merge nötig. `main` selbst nicht angefasst.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` wie in
+den vorherigen vier Läufen heute weiterhin ohne neuen, eindeutig
+umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3 KI-Engine, 5.7 Zug/Bus/
+Fähre, 8.1-8.7 Urlaubsmodus/Deal-Finder blockiert oder Produkt-/
+Architekturentscheidung; 8.13 Unit-Tests größtenteils bereits erledigt
+oder mangels `calculateCosts`/Schema-Validierung weiterhin nicht
+abgrenzbar). Da heute bereits vier eigenständige Funde (Race Condition,
+Preisfeld-Placeholder, Home-Destination-Links, siehe die vorherigen drei
+Einträge von heute) aus `reports/it-chef.md` bzw. eigener Code-Lektüre
+stammen, diesmal einen eigens beauftragten Explore-Agenten mit expliziter
+Liste aller heute bereits gefundenen/gefixten sowie aller bekannten,
+bewusst zurückgestellten Punkte beauftragt, um Doppelfunde
+auszuschließen. Der Agent hat systematisch alle Hooks, `lib/`-Utilities,
+Chat-/Search-Komponenten, Layout-Komponenten und alle 24 Seiten
+vollständig gelesen (nicht nur gegrept), zusätzlich `npm test` (448/448
+grün), `npx eslint .` (sauber), `npx tsc -b --noEmit` (sauber) sowie eine
+Suche nach TODO/FIXME/XXX/`console.log`/`debugger` (keine Treffer)
+durchgeführt.
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Zwei geprüfte
+Kandidaten wurden bewusst verworfen:
+- `ChatInput.tsx` zeigt `MicOff` im Ruhezustand und `Mic` beim
+  Aufnehmen — wirkt auf den ersten Blick invertiert, ist aber dasselbe
+  bewusste Muster wie `KiChat.tsx` (`VolumeX`/`Volume2` für die
+  Sprachausgabe): das Icon zeigt den aktuellen Zustand, das `aria-label`
+  die verfügbare Aktion. Konsistent, kein Bug.
+- `Sidebar.tsx` setzt bei eingeklappten NavLinks nur `title`, kein
+  explizites `aria-label`. Mit derselben Bibliothek geprüft, die Testing
+  Library für `getByRole(name:)` nutzt (`dom-accessibility-api`): `title`
+  liefert hier bereits einen gültigen Accessible Name, würde also weder
+  von einem automatisierten Test noch von axe-core als Verstoß erkannt,
+  und wirkt im Code bewusst gesetzt (`title={collapsed ? item.label :
+  undefined}`), nicht übersehen. Kein objektiv verifizierbarer Fix.
+
+Die übrigen bekannten offenen Punkte (Flugauswahl-Detailspeicherung
+inzwischen bereits am 10.10. gefixt; FlightWizard/HotelWizard-
+Vorbefüllung, Preisfeld-Datentyp, `searchGenerationRef` nur bei
+`resetChat()`) bleiben aus denselben, in früheren Einträgen genannten
+Gründen (Produktentscheidung bzw. kein Einzeiler) zurückgestellt. Kein
+Code-Commit für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein eigener
+Testlauf nötig über den bereits vom Explore-Agenten bestätigten grünen
+Stand hinaus (`npm test`, `npx eslint .`, `npx tsc -b --noEmit`
+unverändert zum vierten Lauf). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
