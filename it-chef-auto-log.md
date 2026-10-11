@@ -18118,3 +18118,68 @@ Build erfolgreich, unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-11 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** `it-chef/auto` (vorheriger Stand des dritten Laufs,
+`cd85f4c`) war zu diesem Zeitpunkt bereits von Freigabe-Chef vollständig
+nach `main` gemergt (`merge-base` von `origin/main`/`origin/it-chef/auto`
+entsprach exakt `cd85f4c`). Branch deshalb frisch von `origin/main`
+(`3d75da4`) neu aufgesetzt und sofort per Fast-Forward auf
+`origin/it-chef/auto` gepusht, wie im Skill für genau diesen Fall
+vorgesehen ("frischen Stand von main reinmergen") — `main` selbst dabei
+nicht angefasst, keine eigenen Code-Commits in diesem Schritt.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` enthielten
+keinen neuen, offenen Checkbox-Punkt, der nicht entweder blockiert ist
+(2.0 Base44, 4.1-4.3 KI-Engine, 5.7 Zug/Bus/Fähre, 8.1-8.7 Urlaubsmodus/
+Deal-Finder) oder eine eigene Produkt-/Architekturentscheidung voraussetzt
+(6.2/6.6/6.7 Kosten-Datenmodell, 7.4 Mehrfach-Chat-Historie, 7.12
+Budget-Charts ohne echte Preisdaten). Stattdessen über einen eigens
+beauftragten Explore-Agenten gezielt nach einem neuen, eigenständigen
+Fund gesucht (Vorgabe: nichts bereits Bekanntes/Zurückgestelltes erneut
+melden) — Ergebnis unten.
+
+**Gefunden und behoben:** `src/pages/Home.tsx` — die vier
+Destination-Karten der "Beliebte Reiseziele"-Sektion (3.8) sahen durch
+Bild+Titel+Tag exakt wie die optisch identischen, klickbaren Karten in
+`Favoriten.tsx` aus, waren aber rein dekorativ: kein `Link`, kein
+`onClick`, keine Tastatur-Erreichbarkeit. Selbst im Code verifiziert:
+`Favoriten.tsx:113` verlinkt für dieselbe Art Karte bereits auf
+`/ki-chat?destination={Ziel}`, und `src/components/chat/KiChat.tsx`
+(Zeile 86-99) verarbeitet diesen Query-Parameter bereits produktiv (wird
+als erster Chat-Beitrag übernommen, solange noch kein eigener Entwurf
+läuft) — das Zielverhalten existiert also bereits und wird anderswo
+exakt so genutzt, keine neue Produktentscheidung nötig. Gegen die vier
+Sicherheitskriterien geprüft: kein Auth-/Zahlungs-/Nutzerdaten-/
+Rechtstext-Bezug (reine Navigation), keine offene Architekturentscheidung
+(Zielverhalten bereits etabliert und produktiv genutzt), klar genug
+lokalisiert (exakte Datei, exakter Fund, unabhängig vom Explore-Agenten
+und von mir selbst im Code bestätigt), objektiv prüfbar (Link-Element per
+Test abfragbar) → alle vier Kriterien erfüllt. Fix: jede Karte in einen
+`<Link to={\`/ki-chat?destination=${encodeURIComponent(destination.name)}\`}>`
+mit `aria-label="Reise nach {Ziel} mit KI planen"` gewrappt, keine
+sonstige visuelle Änderung. Bewusst keinen zusätzlichen Button/Text nach
+dem `Favoriten.tsx`-Muster ergänzt: Die dort etablierte Variante (Button
+mit Icon + "Reise mit KI planen"-Text) ist für die deutlich schmaleren
+2-/4-spaltigen Home-Karten (dort nur 1-2 Spalten) nicht ohne eigene
+Design-Entscheidung übertragbar (Textumbruch/Überlauf-Risiko bei
+`whitespace-nowrap`) — die reine Link-Umwandlung ohne neues visuelles
+Element bleibt dagegen eine mechanische Lückenschließung ohne
+Interpretationsspielraum. Neuer Regressionstest in `Home.test.tsx` (Link
+zu `/ki-chat?destination=Lissabon` mit passendem `aria-label`) — vor dem
+Fix durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`Home.tsx`) reproduzierbar rot verifiziert (kein Link-Element mit diesem
+`aria-label` im Dokument).
+
+**Geprüft:** `npm install` (frischer Checkout; 650 Pakete, weiterhin
+dieselben zehn High-/Critical-Severity-Advisories, unverändert seit
+mehreren Läufen, betrifft nur Dev-Tooling, kein Laufzeit-Code),
+`npx vitest run src/pages/Home.test.tsx` gezielt rot (vor dem Fix) und
+grün (nach dem Fix) verifiziert, danach volle Suite `npm test`
+(62 Testdateien, 448 Tests, alle grün), `npm run lint` (0 Probleme),
+`npm run build` (`tsc -b && vite build`, kein Typfehler, Build
+erfolgreich, unveränderte Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

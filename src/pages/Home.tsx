@@ -67,13 +67,19 @@ export function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: index * 0.05, ease: 'easeOut' }}
             >
-              <Card className="overflow-hidden py-0">
-                <div className={`h-28 bg-gradient-to-br ${destination.gradient}`} />
-                <CardContent className="px-4 py-3">
-                  <p className="font-heading font-semibold text-foreground">{destination.name}</p>
-                  <p className="text-xs text-muted-foreground">{destination.tag}</p>
-                </CardContent>
-              </Card>
+              <Link
+                to={`/ki-chat?destination=${encodeURIComponent(destination.name)}`}
+                aria-label={`Reise nach ${destination.name} mit KI planen`}
+                className="block"
+              >
+                <Card className="overflow-hidden py-0">
+                  <div className={`h-28 bg-gradient-to-br ${destination.gradient}`} />
+                  <CardContent className="px-4 py-3">
+                    <p className="font-heading font-semibold text-foreground">{destination.name}</p>
+                    <p className="text-xs text-muted-foreground">{destination.tag}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </div>

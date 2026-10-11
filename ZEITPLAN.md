@@ -215,6 +215,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   empirisch als weiterhin rot verifiziert (fokussierte nachweisbar noch die
   alte, alleinige im DOM verbleibende Überschrift), bevor die endgültige,
   jetzt grüne Fassung committet wurde.
+  Vom autonomen IT-Chef-Lauf am 11.10. (vierter Lauf desselben Tages) einen
+  eigenständig (über einen eigens beauftragten Explore-Agenten) gefundenen
+  Bug in `Home.tsx` behoben: Die vier Destination-Karten in der "Beliebte
+  Reiseziele"-Sektion (Lissabon/Kyoto/Kapstadt/Reykjavik, 3.8) sahen durch
+  Bild+Titel+Tag exakt wie die optisch identischen, klickbaren Karten in
+  `Favoriten.tsx` aus, waren aber rein dekorativ — kein `Link`, kein
+  `onClick`, keine Tastatur-Erreichbarkeit. `Favoriten.tsx` (Zeile 113)
+  verlinkt für dieselbe Art Karte bereits auf
+  `/ki-chat?destination={Ziel}`, und `KiChat.tsx`
+  (`src/components/chat/KiChat.tsx`, Zeile 86-99) verarbeitet diesen Query-
+  Parameter bereits produktiv (übernimmt ihn als ersten Chat-Beitrag, sobald
+  noch kein eigener Entwurf läuft) — das Zielverhalten existierte also
+  bereits, nur die Verlinkung auf der Startseite fehlte. Fix: Jede Karte
+  jetzt in einen `<Link to={\`/ki-chat?destination=...\`}>` mit
+  `aria-label` gewrappt, ohne sonstige visuelle Änderung (kein neuer
+  Button/Text erfunden, da die schmalen 2-/4-spaltigen Karten anders als
+  bei `Favoriten.tsx` keinen Platz für einen zusätzlichen Button-Text ohne
+  eigene Design-Entscheidung hätten) — reine Schließung der
+  Funktionslücke, keine neue Design-Entscheidung. Neuer Regressionstest in
+  `Home.test.tsx` (Link zu `/ki-chat?destination=Lissabon`) — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `Home.tsx`) reproduzierbar rot verifiziert (kein Link-Element mit diesem
+  `aria-label` im Dokument).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
