@@ -1,105 +1,76 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-10
+**Datum:** 2026-10-12
 
-## Was ist seit dem letzten Eintrag (2026-10-08) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-10) passiert?
 
 Seit dem letzten Eintrag dieses Kanals lief der parallele Autonomie-Kanal
-`it-chef/auto` an mehreren Tagen weiter und lieferte, von Freigabe-Chef
-jeweils unabhängig geprüft und in `main` gemergt:
+`it-chef/auto` an mehreren Tagen weiter und hat dabei alle drei hier am
+10.10. offen gemeldeten Funde erledigt, von Freigabe-Chef jeweils
+unabhängig geprüft und in `main` gemergt:
 
-- `EditMode.tsx`: sichtbarer Zeilentext nutzt jetzt das disambiguierte
-  Label statt des rohen Namens — genau der Fund, der hier am 08.10. als
-  **PR #28** eigenständig umgesetzt wurde. Beide Fixes sind inhaltlich
-  identisch; in `main` steckt inzwischen die Fassung aus `it-chef/auto`.
-  **PR #28 ist dadurch überholt und kann geschlossen werden**, ebenso wie
-  weiterhin die älteren offenen Auto-Fix-PRs #1–#27 (siehe Vorschläge).
-- `useChat.ts`: "Start = Ziel"-Meldung im Flug-Chat nennt jetzt den
-  Zielort (zweiter inhaltlich identischer Fix zu demselben, hier am
-  08.10. umgesetzten Fund).
-- `useChat.ts`: `resetChat()` bricht laufende Duffel-Suchen (Flug/
-  Unterkunft) jetzt ab, statt ihr Ergebnis noch in den frisch gestarteten
-  Chat zu schreiben.
-- `useChat.ts`/`tripStorage.ts`: `editingField`/`awaitingFlightOrigin`
-  überleben jetzt einen Seiten-Reload, statt beim Laden aus
-  `localStorage` zu fehlen und den Edit-Ablauf (Budget, Flug-Abflugort)
-  stillschweigend auf den falschen Pfad zu schicken.
-- `useChat.ts`: stale `awaitingFlightOrigin`-Flag in `startEdit()` wird
-  jetzt beim Wechsel auf ein anderes Feld zurückgesetzt.
-- `routes.tsx`: die hier am 08.10. gemeldete fehlende Fokus-Ankündigung
-  bei Routenwechsel ist seit dem 09.10. behoben (`onExitComplete` +
-  `requestAnimationFrame`) — **selbst geprüft, Fix ist korrekt und
-  wirksam.**
-- `src/lib/duffel/client.ts`: fehlende Testabdeckung für die vier
-  Mapping-Funktionen (`mapSegment`/`mapSlice`/`mapOffer`/
-  `mapStayResult`) geschlossen.
+- **`src/pages/Flugsuche.tsx`** — die ausgewählte Verbindung wird jetzt mit
+  Airline/Route/Preis gespeichert (`summarizeFlightOffer()` in
+  `format.ts`, neues Feld `trip.transportDetail`), nicht mehr nur mit
+  `transportMode: 'flight'`. Selbst im Code verifiziert, inklusive
+  Anzeige in `Buchung.tsx`.
+- **`src/components/trip/EditMode.tsx:86-92`** — die Preis-Inputs für
+  Aktivitäten haben jetzt einen `placeholder="Preis in €"`-Hinweis.
+  Selbst verifiziert.
+- Eine verwandte, aber andere Race Condition (`Flugsuche.tsx`/
+  `Hotelsuche.tsx`: `handleSearch()` wandte das Ergebnis der zuletzt
+  *aufgelösten* statt der zuletzt *gestarteten* Suche an) wurde ebenfalls
+  über `it-chef/auto` behoben.
 
 **Eigene gezielte Bug-Suche heute:** Gezielt Dateien erneut gelesen
-(nicht nur gegrept) — `tripStorage.ts`, `useChat.ts`, `mockAdvisor.ts`,
-`cartTotals.ts`, `format.ts`, `calendarUtils.ts`, `checklistRules.ts`,
-`calculateProgress.ts`, `routes.tsx` selbst sowie, über einen eigens
-beauftragten Such-Durchlauf, zusätzlich `duffel/client.ts`,
-`useConcierge.ts`, `mockConcierge.ts`, `speech.ts`, `EditMode.tsx`,
-`ChecklistPanel.tsx` und die Seiten Buchung, Warenkorb, Flugsuche,
-Hotelsuche, Preisalarme, Angebote, MeineReisen, Kartenansicht,
-Dashboard, Reiseentwuerfe, Kalender, Urlaubsmodus, Favoriten,
-Aktivitaeten samt den Such-/Wizard- und Chat-Komponenten.
+(nicht nur gegrept) — `tripStorage.ts`, `useConcierge.ts`, `KiChat.tsx`
+(inkl. `?destination=`/`?edit=`-Logik), `Einstellungen.tsx`, `Profil.tsx`,
+`ReiseSuche.tsx`, `Favoriten.tsx`, sowie den kompletten Diff seit dem
+letzten Eintrag (`format.ts`, `mockAdvisor.ts`, `Buchung.tsx`,
+`Dashboard.tsx`, `Home.tsx`, `Reiseentwuerfe.tsx`, `types/chat.ts`,
+`useChat.ts`, plus den Badge/Button/Tabs-Variants-Refactor auf
+Import-Bruchstellen geprüft). Keine neuen TODOs/FIXMEs, keine kaputten
+Imports/Links, keine Typos in Nutzer-Texten gefunden. Baseline vorher
+geprüft: `npx eslint .` sauber, `npx tsc -b --noEmit` sauber, `npm test`
+454/454 grün (63 Testdateien).
 
-**Ergebnis:** ein neuer, echter Bug gefunden (siehe unten) — aber keiner,
-der die Sicherheits-Kriterien für einen Auto-Fix (klein, isoliert,
-risikoarm) erfüllt, deshalb heute **kein neuer Auto-Fix-PR**. Keine
-offenen TODOs/FIXMEs, keine kaputten Imports/Links gefunden.
+**Ergebnis:** kein neuer, sicherer Fund für einen Auto-Fix. Der einzige
+am 10.10. gemeldete, weiterhin offene Bug (siehe unten) bleibt
+unverändert bestehen — bewusst nicht blind angefasst, da kein Einzeiler.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keine. Der heutige Fund (siehe unten) betrifft mehrere Codepfade
-gleichzeitig und ist damit kein risikoarmer Einzeiler — bewusst nicht
-selbst angefasst.
+Keine. Kein Fund heute hat die Sicherheits-Kriterien (klein, isoliert,
+risikoarm) erfüllt.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
 1. **`src/hooks/useChat.ts` — laufende Duffel-Suchen werden nur bei
    `resetChat()` als veraltet erkannt, nicht beim normalen Verlassen des
-   Suchschritts.** Der Veraltet-Schutz (`searchGenerationRef`) wird
-   ausschließlich in `resetChat()` hochgezählt (Zeile 434). Wechselt man
-   dagegen z. B. über "Bearbeiten → Unterkunft" in die automatische
-   Suche (`startEdit()`, Zeile ~204) und tippt vor deren Antwort
-   stattdessen Freitext in den Chat (z. B. "Ich übernachte bei
-   Freunden"), übernimmt der generische Edit-Zweig in `sendMessage()`
-   den Freitext sofort als neue Unterkunft und bestätigt das — die
-   inzwischen noch laufende, alte Suche schreibt ihr Ergebnis aber kurz
-   danach trotzdem in den State (`setStayOffers`/`setStayErrors`), weil
-   ihre Generation nicht verändert wurde. Es poppen Hotelkarten oder eine
-   Fehlermeldung unter der bereits gegebenen Bestätigung auf, die ihr
-   widersprechen; ein Klick auf eine dieser Karten führt zu keiner
-   sinnvollen Aktion mehr (Feld ist schon belegt). Derselbe Mechanismus
-   betrifft die Flug-Suche (`runFlightSearch`) und die Unterkunftssuche
-   im Haupt-Chat-Ablauf. Kein Einzeiler: eine korrekte Lösung muss an
-   mehreren Stellen (Feldwechsel in `startEdit()`, Freitext-Zweig in
-   `sendMessage()`) entscheiden, wann eine laufende Suche wirklich
-   verworfen werden soll, ohne versehentlich auch berechtigte, noch
-   erwartete Ergebnisse zu verwerfen — deshalb zur Rücksprache/für einen
-   eigenen, sorgfältigeren Lauf vorgemerkt statt heute blind gefixt.
-2. **`src/pages/Flugsuche.tsx:32` — ausgewählter Flug wird nicht mit
-   Route/Preis/Airline gespeichert, nur `transportMode: 'flight'`.**
-   Bereits heute von Support-Chef gefunden und gemeldet
-   (`support-chef-auto-log.md`, Commit `6f6735a`); von mir unabhängig im
-   Code bestätigt, zusammen mit dem verwandten Fund, dass
-   `FlightWizard`/`HotelWizard` beim Aufruf über "Bearbeiten → Manuell
-   suchen" nicht mit der vorherigen Suche vorbefüllt werden. Nicht
-   erneut im Detail ausgeführt, um Support-Chefs Bericht nicht zu
-   duplizieren — hier nur als technischer Folgepunkt vermerkt.
-3. **`src/components/trip/EditMode.tsx:86-92` — Preisfeld ohne
-   Währungssymbol/Format.** Weiterhin unverändert, seit 18.08.
-   dokumentiert.
+   Suchschritts.** Weiterhin unverändert seit dem letzten Eintrag:
+   `searchGenerationRef` wird ausschließlich in `resetChat()` (Zeile 435)
+   hochgezählt, nicht in `startEdit()` (Zeile 172) beim Wechsel auf ein
+   anderes Feld oder im Freitext-Zweig von `sendMessage()`. Wechselt man
+   z. B. über "Bearbeiten → Unterkunft" in die automatische Suche und
+   tippt vor deren Antwort stattdessen Freitext (z. B. "Ich übernachte bei
+   Freunden"), übernimmt `sendMessage()` den Freitext sofort als neue
+   Unterkunft — die noch laufende, alte Suche schreibt ihr Ergebnis aber
+   kurz danach trotzdem in den State und wirft widersprüchliche
+   Hotelkarten/Fehler unter die bereits gegebene Bestätigung. Derselbe
+   Mechanismus betrifft die Flugsuche (`runFlightSearch`) und die
+   Unterkunftssuche im Haupt-Chat-Ablauf. Kein Einzeiler: eine korrekte
+   Lösung muss an mehreren Stellen entscheiden, wann eine laufende Suche
+   wirklich verworfen werden soll, ohne berechtigte, noch erwartete
+   Ergebnisse versehentlich zu verwerfen — deshalb weiterhin zur
+   Rücksprache/für einen eigenen, sorgfältigeren Lauf vorgemerkt.
 
 ## Weitere Vorschläge
 
-1. **Alle offenen Auto-Fix-PRs (#1–#28) können geschlossen werden.**
-   Jeder Fix steckt identisch oder gleichwertig bereits in `main` —
-   sowohl die drei vorherigen (stichprobenhaft erneut verifiziert) als
-   auch PR #28 (jetzt per `it-chef/auto`-Fix inhaltlich doppelt).
-   Reine Aufräumarbeit ohne Coderisiko, aber nur Ni kann PRs schließen.
+1. **Offene Auto-Fix-PRs (u. a. #1, #4-#18, #20-#22, #25-#28) weiterhin
+   zur Aufräumarbeit.** Mehrere (z. B. #28, siehe oben) sind inhaltlich
+   schon identisch in `main`, weil derselbe Fund später über
+   `it-chef/auto` nochmal griff. Nur Ni kann PRs schließen; eine
+   Stichprobenprüfung alter Nummern lohnt vor dem Schließen.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json` — kein Import irgendwo in `src/`. Entfernen reduziert
    die Bundle-Größe; Abhängigkeitsänderungen sind für diesen Kanal
@@ -109,4 +80,4 @@ selbst angefasst.
    Zugsuche-Seite, kein Nav-Eintrag, keine echte Datenquelle angebunden.
    Entweder verdrahten oder entfernen — Produktentscheidung.
 
-_Letztes Update: 2026-10-10_
+_Letztes Update: 2026-10-12_
