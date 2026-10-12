@@ -1,62 +1,67 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-10
+**Datum:** 2026-10-12
 
-## Was ist seit dem letzten Eintrag (2026-10-09) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-10) passiert?
 
-Ein schöner Tag für die Liste: Der Fokus-Sprung-Fund ist gefixt.
-`src/routes.tsx:70-72` ruft jetzt bei jedem Routenwechsel per
-`onExitComplete` + `requestAnimationFrame(focusPageHeading)` die neue
-Überschrift auf — inklusive eines Kommentars, der genau erklärt, warum
-das nicht direkt im `scrollTo`-Effekt passieren konnte (die alte Seite
-wäre zu dem Zeitpunkt noch im DOM). Screenreader-Nutzer bekommen die
-"neue Seite"-Ansage damit jetzt zuverlässig.
+Eine gute Nachricht zuerst: Der Flugauswahl-Fund vom letzten Mal ist zur
+Hälfte behoben. `src/pages/Flugsuche.tsx:38` speichert die gewählte
+Route jetzt tatsächlich im Reiseplan (`transportDetail:
+summarizeFlightOffer(offer)`), genauso wie `useChat.ts` das für den
+KI-Chat-Pfad nachgezogen hat — kein Detailverlust mehr. Die zweite
+Hälfte des Funds steht aber weiterhin: Das Bearbeiten-Formular bleibt
+leer, siehe Vorschlag 2.
 
-IT-Chef hat außerdem zwei Stabilitätsfixes gemergt: `resetChat()` bricht
-laufende Duffel-Suchen jetzt korrekt ab, und `editingField`/
-`awaitingFlightOrigin` überleben einen Seiten-Reload während der
-Bearbeitung. Freigabe-Chef hat heute mehrere Auto-Branches nach `main`
-gemergt.
+Daneben hat die automatische Tagesprüfung einen neuen, bestätigten Fund
+gemacht (Vorschlag 1), und die Startseite hat ein neues Feature
+bekommen, dem noch die passende Rückmeldung fehlt (Vorschlag 3).
 
-Der parallele, branch-basierte Support-Chef-Lauf hat heute einen neuen
-Fund gemacht, den ich im Code bestätigt habe: Bei der Flugauswahl gehen
-alle Details verloren. Siehe Vorschlag 1.
-
-Weiterhin offen, unverändert zum 09.10.: die Lösch-Warnungen und der
-Urlaubsmodus/Lissabon-Mismatch.
+Unverändert zum letzten Mal, seit 05.10. offen: die inkonsistenten
+Lösch-Warnungen und der Urlaubsmodus/Lissabon-Mismatch — an beidem hat
+sich im Code nichts getan, deshalb hier nur kurz erwähnt statt erneut
+ausführlich vorgeschlagen.
 
 ## Meine Vorschläge
 
-1. **Flugauswahl verliert alle Details — und das Bearbeiten-Formular
-   startet leer.** `src/pages/Flugsuche.tsx:32` speichert bei
-   `handleSelect` nur `transportMode: 'flight'` im Reiseplan. Auf
-   `Buchung.tsx:217` zeigt das deshalb nur das generische Label "Flug",
-   während `Hotelsuche.tsx:33` den konkreten `accommodationName`
-   speichert, der auf `Buchung.tsx:239` auch so angezeigt wird — zwei
-   strukturell gleiche Pfade, aber nur einer behält die Info. Wer über
-   "Bearbeiten" → "Manuell suchen" zurück zur Flugsuche kommt, sieht
-   zusätzlich ein komplett leeres `FlightWizard`-Formular statt der
-   vorherigen Sucheingabe. *Vorschlag:* `handleSelect` in `Flugsuche.tsx`
-   analog zu `Hotelsuche.tsx` die gewählte Route/Airline/Zeit im Trip
-   speichern, und die letzten Sucheingaben beim erneuten Öffnen von
-   `FlightWizard` vorbelegen.
+1. **Flugauswahl im KI-Chat bestätigt mit rohen Flughafen-Codes statt
+   Klarnamen.** `src/hooks/useChat.ts:420` baut die Routen-Angabe für die
+   Bestätigungsnachricht selbst aus `slice.originIata`/`destinationIata`
+   — zwei Zeilen weiter unten wird aber schon `summarizeFlightOffer()`
+   aufgerufen, das genau den Namen-vor-Code-Fallback mitbringt
+   (`src/lib/format.ts:23-30`). Wer im Chat einen Flug wählt, liest
+   "BER → LIS" statt "Berlin → Lissabon" — während der Reiseplan direkt
+   danach den Klarnamen zeigt. *Vorschlag:* in `selectFlight()` dasselbe
+   `summarizeFlightOffer()`-Ergebnis für die Bestätigung nutzen, das
+   ohnehin schon berechnet wird.
 
-2. **Lösch-Warnungen sind weiterhin an sieben Stellen unnötig einheitlich
-   scharf formuliert.** `EditMode.tsx:151`, `Preisalarme.tsx:137`,
-   `Warenkorb.tsx:134`, `Reiseentwuerfe.tsx:336/356`, `Favoriten.tsx:128`
-   und `Aktivitaeten.tsx:118` nutzen alle wortgleich "Das lässt sich
-   nicht rückgängig machen." — obwohl sich ein Favorit oder eine
-   Preisalarm-Entfernung einfach wieder anlegen lässt. *Vorschlag:*
-   unverändert — die scharfe Formulierung auf `Reiseentwuerfe.tsx`
-   begrenzen, bei den anderen sechs Stellen eine ruhigere Formulierung
-   wie "Du kannst [X] jederzeit wieder hinzufügen" verwenden.
+2. **Flug "Bearbeiten" → "Manuell suchen" führt weiterhin zu einem
+   komplett leeren Formular.** `src/components/search/FlightWizard.tsx`
+   initialisiert Herkunft/Ziel/Datum immer mit leeren Werten — unabhängig
+   davon, dass die zuvor gewählte Flugroute laut Vorschlag von letzter
+   Woche jetzt im Trip gespeichert wird. Wer zur Flugsuche zurückkehrt,
+   tippt alles erneut ein, obwohl die Daten eigentlich schon da wären.
+   *Vorschlag:* die gespeicherten Sucheingaben/Route beim Öffnen von
+   `FlightWizard` als Startwerte übergeben.
 
-3. **"Urlaubsmodus aktivieren" auf der Lissabon-Demokarte führt weiterhin
-   ins Leere oder zum falschen Ziel.** `MeineReisen.tsx:19-53` verlinkt
-   auf `/urlaubsmodus`, dessen Inhalt aber laut `Urlaubsmodus.tsx:12`
-   ausschließlich aus dem im KI-Chat gespeicherten Trip kommt
-   (`loadStoredChat()`), nicht aus der Demo-Liste. *Vorschlag:*
-   kurzfristig entweder den Button auf der Demo-Karte deaktivieren, oder
-   `MeineReisen.tsx` dieselbe Datenquelle nutzen lassen wie `Buchung.tsx`.
+3. **Die neu klickbaren Destination-Karten auf der Startseite sehen aus
+   wie reine Deko.** `src/pages/Home.tsx:70-74` macht die vier Karten in
+   "Beliebte Reiseziele" per `Link` klickbar, aber weder `Link` noch
+   `Card` haben eine Hover- oder Fokus-Markierung — jedes andere
+   interaktive Element der App (`Button`, `Input`, `Tabs`) hat ein
+   `focus-visible:ring`-Muster, nur hier fehlt es. Wer mit der Maus
+   drüberfährt oder durchtabbt, bekommt kein Signal, dass hier etwas
+   passiert. *Vorschlag:* `focus-visible:ring-[3px] focus-visible:ring-ring/50`
+   plus einen leichten `hover:shadow-md` auf Link/Card übernehmen —
+   kein neues Design, nur das bestehende Muster anwenden.
 
-_Letztes Update: 2026-10-10_
+4. **Weiterhin offen, unverändert:** Die Lösch-Warnungen (sechs Stellen,
+   u. a. `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
+   `Aktivitaeten.tsx:118` — alle wortgleich "nicht rückgängig machen",
+   obwohl z. B. ein Favorit trivial wieder anlegbar ist) und der
+   Urlaubsmodus-Mismatch (`MeineReisen.tsx:19` verlinkt von der
+   Lissabon-Demokarte auf `/urlaubsmodus`, das aber nur den im KI-Chat
+   gespeicherten Trip zeigt, nicht die Demo-Reise). Beide seit dem
+   05.10. bzw. 09.10. unverändert — der Vorschlag von damals steht nach
+   wie vor.
+
+_Letztes Update: 2026-10-12_
