@@ -417,7 +417,9 @@ export function useChat(speechEnabled: boolean) {
 
   const selectFlight = (offer: FlightOffer) => {
     const slice = offer.slices[0]
-    const route = slice ? `${slice.originIata} → ${slice.destinationIata}` : trip.destination
+    const route = slice
+      ? `${slice.originName || slice.originIata} → ${slice.destinationName || slice.destinationIata}`
+      : trip.destination
     const confirmation = `Alles klar, ich hab den Flug ${route} für ${formatOfferPrice(offer.totalAmount, offer.totalCurrency)} für dich vorgemerkt. Dein Reiseplan steht weiterhin.`
     setTrip((prev) => ({ ...prev, transportDetail: summarizeFlightOffer(offer) }))
     setFlightOffers(null)

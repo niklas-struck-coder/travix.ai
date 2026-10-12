@@ -796,6 +796,61 @@ describe('useChat selectFlight confirmation message', () => {
 
     expect(result.current.trip.transportDetail).toBe(summarizeFlightOffer(offer))
   })
+
+  it('uses the airport names in the confirmation message instead of raw IATA codes', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '249.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: 'Berlin',
+          destinationIata: 'LIS',
+          destinationName: 'Lissabon',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+
+    const confirmation = result.current.messages.at(-1)?.content ?? ''
+    expect(confirmation).toContain('Berlin → Lissabon')
+    expect(confirmation).not.toContain('BER → LIS')
+  })
+
+  it('falls back to the IATA code in the confirmation message when no airport name is known', () => {
+    const { result } = renderHook(() => useChat(false))
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '249.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: '',
+          destinationIata: 'LIS',
+          destinationName: '',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+
+    const confirmation = result.current.messages.at(-1)?.content ?? ''
+    expect(confirmation).toContain('BER → LIS')
+  })
 })
 
 describe('useChat reply timeout cleanup on unmount', () => {

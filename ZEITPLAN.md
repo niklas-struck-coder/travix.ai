@@ -1016,6 +1016,28 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerungen (`git stash` nur `Flugsuche.tsx`/`Hotelsuche.tsx`)
   reproduzierbar rot verifiziert (beide neuen Tests zeigten danach den
   veralteten Fehlerzustand statt der weiterhin gültigen Angebote).
+  Vom autonomen IT-Chef-Lauf am 12.10. (fünfter Lauf desselben Tages)
+  einen von Support-Chef (`support-chef-auto-log.md`, 11.10., Vorschlag 1)
+  gemeldeten Fund behoben: `selectFlight()` (`useChat.ts:420`) baute die
+  Routen-Angabe für die Chat-Bestätigungsnachricht bisher selbst aus
+  `slice.originIata`/`destinationIata` — rein aus den 3-stelligen
+  IATA-Codes, ohne den Namen-vor-IATA-Fallback zu nutzen, den
+  `summarizeFlightOffer()` zwei Zeilen darunter für `trip.transportDetail`
+  bereits anwendet. Wählte eine Nutzerin im KI-Chat einen Flug, las sie
+  "BER → LIS" in der Bestätigung, während der danach sichtbare Reiseplan
+  (`Buchung.tsx`) bereits korrekt "Berlin → Lissabon" zeigte — exakt
+  dasselbe Muster, das am 27.09. bereits einmal in `FlightCard.tsx`
+  behoben wurde. Fix: `route` nutzt jetzt denselben
+  `name || iata`-Fallback pro Ort (`slice.originName || slice.originIata`
+  / `slice.destinationName || slice.destinationIata`), mechanische
+  Übernahme des bereits zweimal etablierten Musters
+  (`FlightCard.tsx`/`summarizeFlightOffer()`), keine neue
+  Design-Entscheidung. Zwei neue Regressionstests in `useChat.test.ts`
+  (Namen statt IATA-Codes in der Bestätigung; Rückfall auf den IATA-Code,
+  wenn kein Name bekannt ist) — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
+  reproduzierbar rot verifiziert (zeigte "BER → LIS" statt
+  "Berlin → Lissabon").
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

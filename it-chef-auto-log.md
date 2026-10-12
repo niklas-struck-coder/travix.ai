@@ -18523,3 +18523,77 @@ uncommitteten Änderungen außer diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-12 (fünfter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`fcae3e9`, Stand nach dem vierten Lauf heute) lag
+diesmal hinter dem zwischenzeitlich weitergewanderten `origin/main`:
+Freigabe-Chef hat main auf `76c4c83` gebracht, mit neuen Inhalten in
+`support-chef-auto-log.md`, `reports/support-chef.md`,
+`reports/it-chef.md`, `freigabe-chef-log.md`, `marketing-chef-auto-log.md`,
+`marketing/freigabe-uebersicht.md`, `status.md`. `main` dabei unberührt
+gelassen, nur `origin/main` per `git merge` in `it-chef/auto` geholt —
+konfliktfrei (keine Datei von beiden Seiten gleichzeitig verändert).
+`npm ci` ausgeführt (Dependencies fehlten im frischen Checkout), danach
+Baseline geprüft: `npx eslint .` sauber, `npx tsc -b --noEmit` sauber,
+`npm test` 454/454 grün (63 Testdateien), `npm run build` sauber — alles
+grün, bevor überhaupt etwas angefasst wurde.
+
+**Auswahl:** Der frisch gemergte `reports/support-chef.md` (Datum
+2026-10-12) nennt unter Vorschlag 1 einen bereits im Code bestätigten
+Fund: `src/hooks/useChat.ts:420` (`selectFlight()`) baut die
+Routen-Angabe für die Chat-Bestätigungsnachricht selbst aus
+`slice.originIata`/`destinationIata` zusammen, ohne den Namen-vor-IATA-
+Fallback zu nutzen, den `summarizeFlightOffer()` zwei Zeilen darunter für
+`trip.transportDetail` bereits anwendet (`src/lib/format.ts:23-30`:
+`(slice.originName || slice.originIata)`). Selbst im Code gegen den
+aktuellen Stand verifiziert (Zeile 420 exakt wie im Bericht beschrieben)
+— keine Annahme übernommen, sondern nachgeprüft. Exakt dasselbe Muster
+wurde bereits am 27.09. in `FlightCard.tsx` behoben (siehe `ZEITPLAN.md`,
+Phase-5-Abschnitt) und ist hier an einer neueren Stelle (`useChat.ts`,
+erst kürzlich um `selectFlight()` ergänzt) wieder aufgetaucht.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten (reine Chat-Textformatierung). Keine offene Produkt-
+oder Architekturentscheidung — der Namen-vor-IATA-Fallback ist bereits
+zweimal im selben Codebereich etabliert (`FlightCard.tsx`,
+`summarizeFlightOffer()`), hier nur mechanisch auf eine dritte Stelle
+übertragen. Klar genug beschrieben (exakte Datei, exakte Zeile, exakter
+gewünschter Fallback). Objektiv prüfbar (Inhalt der erzeugten
+Chat-Nachricht per Test abfragbar).
+
+**Umsetzung:** `route` in `selectFlight()` (`src/hooks/useChat.ts`) von
+``${slice.originIata} → ${slice.destinationIata}`` auf
+``${slice.originName || slice.originIata} → ${slice.destinationName || slice.destinationIata}``
+umgestellt — mechanische Übernahme des bereits etablierten
+`name || iata`-Musters, keine sonstige Änderung an Struktur oder Wortlaut
+der Bestätigungsnachricht (bewusst nicht auf `summarizeFlightOffer()`
+selbst umgestellt, da dessen Ergebnis zusätzlich Airline und Preis in
+anderer Reihenfolge enthält und damit den bisherigen Nachrichtentext
+stärker verändert hätte, als der Fund verlangt). Zwei neue
+Regressionstests in `src/hooks/useChat.test.ts` (innerhalb der
+bestehenden `describe('useChat selectFlight confirmation message', ...)`-
+Gruppe): Namen statt IATA-Codes in der Bestätigung bei vorhandenem
+`originName`/`destinationName`; Rückfall auf den IATA-Code, wenn beide
+Namen leer sind. `ZEITPLAN.md` (Phase-4-Abschnitt, Programmierung/
+IT-Chef) entsprechend ergänzt; keine Checkbox in
+`tasks/tasks-prd-travix-platform.md` betroffen, da dieser Punkt keiner
+einzelnen PRD-Aufgabennummer zugeordnet ist (reiner Bugfix wie zuvor
+schon mehrere IATA-vs-Klarname-Funde in diesem Bereich).
+
+**Geprüft:** Vor dem Fix per `git stash` nur der Quelländerung
+(`src/hooks/useChat.ts`) verifiziert, dass der neue Test "uses the
+airport names in the confirmation message instead of raw IATA codes"
+reproduzierbar rot ist (`npx vitest run src/hooks/useChat.test.ts` → 1
+von 37 Tests fehlgeschlagen, zeigte "BER → LIS" statt "Berlin →
+Lissabon"). Nach dem Fix: derselbe Testlauf 37/37 grün. Volle Suite
+danach erneut grün: `npx eslint .` sauber, `npx tsc -b --noEmit` sauber,
+`npm test` 456/456 grün (63 Testdateien, +2 gegenüber der Baseline),
+`npm run build` sauber (unveränderte Chunk-Size-Warnung). `git status`
+nach Abschluss: nur die erwarteten Änderungen (`useChat.ts`,
+`useChat.test.ts`, `ZEITPLAN.md`, dieser Log-Eintrag) plus die bereits
+zuvor konfliktfrei gemergten Dateien von `origin/main`.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
