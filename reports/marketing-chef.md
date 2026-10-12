@@ -1,35 +1,53 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-10
+**Datum:** 2026-10-12
 
-## Was ist seit dem letzten Eintrag (2026-10-09) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-10) passiert?
 
-Hauptsächlich Bugfixing an der Bearbeiten-Funktion im Chat: resetChat()
-verwirft jetzt laufende Flug-/Unterkunftssuchen korrekt, und ein offener
-Edit-Status (z. B. "wartet auf neuen Abflugort") überlebt jetzt einen
-Seiten-Reload, statt stillschweigend auf den falschen Pfad zu rutschen.
-Solide Handwerks-Fixes, aber kein eigener Content-Anlass.
+Der Flug-Bearbeiten-Fund vom 10.10. ist jetzt zur Hälfte behoben: Die
+Flugauswahl speichert jetzt Route, Airline und Preis statt nur "es ist
+ein Flug" (`Flugsuche.tsx` und `useChat.ts`, von IT-Chef gemergt und
+unabhängig vom parallelen Marketing-Auto-Kanal im Code bestätigt). Das
+Such-Formular selbst startet beim erneuten Öffnen über "Bearbeiten"
+aber weiterhin komplett leer statt vorbefüllt – selbst in
+`FlightWizard.tsx` geprüft: alle Felder laufen noch auf leere
+Startwerte. Halber Fix, also vorerst weiterhin halber Promo-Stopp.
 
-Spannender ist ein neuer Fund von heute: Wählt man im Flugsuche-Chat
-einen Flug über "Bearbeiten → Manuell suchen" aus, speichert travix.ai
-nur "es ist ein Flug", nicht Route, Preis oder Airline – und das
-Such-Formular startet dabei komplett leer statt mit der vorherigen
-Eingabe vorbefüllt. Noch nicht gefixt. Gleiche Kategorie wie der
-Urlaubsmodus-Datenquellen-Fund von gestern: ein zentraler Klickpfad
-(Flug bearbeiten) tut aktuell nicht ganz, was er verspricht.
+Dazu ein neuer, kleiner Fund-und-Fix in dieser Woche: Die
+Destination-Karten auf der Startseite sahen klickbar aus, taten aber
+nichts – jetzt verlinken sie zum KI-Chat, und Support-Chef hat zusätzlich
+einen fehlenden Hover-/Fokus-Hinweis gefunden und fixen lassen. Genau
+die "sieht nach Button aus, ist aber nur Deko"-Kategorie, die sonst im
+Mini-Changelog landet. Der Tier-4-Kandidatentopf der parallelen
+Marketing-Auto-Spur steht dafür jetzt bei vier von acht – noch keine
+neue Changelog-Ausgabe fällig.
 
-Dazu intern schon vorbereitet, aber noch nicht veröffentlicht: der
-Mini-Changelog-Kandidatentopf hat erneut die Achter-Schwelle
-überschritten, eine komplett fertig getextete siebte Ausgabe liegt
-bereits als Entwurf vor (`marketing/mini-changelog-konzept.md`) – reine
-Ehrlichkeits-/Vertrauens-Fixes, keine erfundenen Zahlen.
+Der Urlaubsmodus/Lissabon-Datenquellen-Mismatch ist seit dem 10.10.
+unverändert offen, keine neuen Positionierungsentscheidungen, keine
+Kennzahlen zu berichten.
 
 ## Vorschläge
 
-1. **Flug-Bearbeiten-Fund heute: nicht bewerben, bis er behoben ist.** "Bearbeite deine Reise jederzeit" wäre aktuell ein Versprechen, das der Flug-Teil nicht hält (Details gehen verloren, Formular startet leer). Gleiche Linie wie beim Urlaubsmodus-Fund von gestern: Feature-Pfad erst sauber, dann Spotlight.
+1. **Flug-Bearbeiten-Promo bleibt gesperrt, Hotel-Bearbeiten-Promo kannst
+   du dagegen schon fahren.** "Bearbeite deine Reise jederzeit" stimmt für
+   den Flug-Teil erst, wenn auch das Formular vorbefüllt startet. Die
+   Hotelsuche speichert laut Code aber von Anfang an korrekt – lohnt sich,
+   das Versprechen vorerst gezielt auf Unterkunft zu begrenzen statt
+   pauschal "jede Buchung" zu versprechen.
 
-2. **Sieben fertige Mini-Changelog-Ausgaben sind ungenutztes Content-Kapital – einen Testballon starten statt weiter zu sammeln.** Statt auf die große Grundsatzentscheidung "eigene Changelog-Seite ja/nein" zu warten, lohnt sich ein kleiner Versuch: eine der bereits fertigen Ausgaben (z. B. #7) einmalig als kurzen Post auf einem bestehenden Kanal teilen. Günstiger Test der "wir zeigen unsere Fehler und wie wir sie fixen"-Tonalität, bevor Ni die größere Seiten-Frage entscheidet.
+2. **Destination-Karten-Fix als Changelog-Kandidat vormerken, nicht
+   einzeln bewerben.** Der Kandidatentopf steht bei vier von acht, also
+   noch zu früh für eine eigene Mini-Changelog-Ausgabe. Aber die
+   Geschichte selbst ist griffig für Nutzer ("sah aus wie ein Button, war
+   nur Deko – jetzt führt er zum KI-Chat") – gute Kandidatin für die
+   nächste Ausgabe, wenn der Topf voll ist.
 
-3. **Urlaubsmodus bleibt vorerst außen vor.** Keine Änderung seit gestern am Datenquellen-Mismatch – weiterhin kein aktives Feature-Spotlight dafür, bis der Klickpfad stimmt.
+3. **Kleine, glaubwürdige Content-Idee: doppelte Verifizierung als
+   Beleg, nicht als Behauptung.** Heute haben IT-Chef und der separate
+   Marketing-Auto-Kanal unabhängig voneinander im Code nachgeprüft, dass
+   die drei am 10.10. gemeldeten Bugs wirklich behoben sind – nicht nur
+   laut Commit-Message. Das ist ein kleiner, aber echter Baustein für die
+   "wir behaupten nichts, wir zeigen es"-Tonalität. Eher als Randnotiz in
+   einer größeren Mini-Changelog-Ausgabe nutzen, nicht als eigenen Post.
 
-_Letztes Update: 2026-10-10_
+_Letztes Update: 2026-10-12_
