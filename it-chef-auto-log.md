@@ -18239,3 +18239,78 @@ uncommitteten Änderungen außer diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-12
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`aa804f8`) war bereits auf dem aktuellen Stand von
+`origin/main` (`3d75da4`) — kein Merge nötig, `main` unverändert gelassen.
+`npm ci` ausgeführt (Dependencies fehlten im frischen Checkout), danach
+Baseline geprüft: `npx eslint .` sauber, `npm run build` (`tsc -b && vite
+build`) sauber, `npm test` 448/448 grün (62 Testdateien) — alles wie
+erwartet grün, bevor überhaupt etwas angefasst wurde.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3
+KI-Engine, 5.7 Zug/Bus/Fähre, 8.1-8.7 Urlaubsmodus/Deal-Finder weiterhin
+blockiert oder Produkt-/Architekturentscheidung; 8.13 weiterhin nicht
+abgrenzbar, da `calculateCosts.ts`/`schemas.ts` laut 6.6/6.7/4.1 nach wie
+vor nicht existieren — Tests für nicht existierenden Code sind kein
+sinnvoller Punkt). `reports/it-chef.md`/`reports/support-chef.md`/
+`reports/marketing-chef.md` (Stand 10.10.) durchgesehen: Fund 1
+("Flugauswahl verliert Details") im Flugsuche.tsx-Teil bereits am 10.10.
+gefixt (`handleSelect` speichert `transportDetail` via
+`summarizeFlightOffer`), Fund 3 (Preisfeld ohne €-Hinweis) ebenfalls am
+11.10. gefixt (`cd85f4c`); beide Berichte sind damit schlicht veraltet,
+nicht neue Funde. Verbleibender Teil von Support-Chefs Fund 1
+(FlightWizard/HotelWizard starten beim erneuten Öffnen ohne Vorbefüllung
+der letzten Sucheingabe) bleibt eine Architekturfrage (wo/wie letzte
+Sucheingabe persistieren) — geprüft, dass auch `HotelWizard`/
+`Hotelsuche.tsx` kein Vorbefüll-Muster haben, das man einfach übernehmen
+könnte, also keine mechanische Ein-Datei-Korrektur.
+
+Da nach mehreren Vortagen mit "kein neuer Punkt" bereits eine
+systematische Suche durch einen eigens beauftragten Explore-Agenten
+etabliert ist, heute erneut einen beauftragt — mit expliziter Liste aller
+bereits bekannten/zurückgestellten Funde, um Doppelmeldungen
+auszuschließen, und Fokus auf bisher seltener geprüfte Bereiche
+(`useFavorites.ts`, `usePriceAlerts.ts`, `useDrafts.ts`, `useCart.ts`,
+`useTrip.ts`, `duffel/client.ts`-Mapping-Edge-Cases, `mockConcierge.ts`,
+`cartTotals.ts`, `calendarUtils.ts`, `Urlaubsmodus.tsx`,
+`Kartenansicht.tsx`, `Reisekalender.tsx`, `HotelWizard.tsx`, sowie
+shadcn-Primitive mit nicht-trivialer Logik wie `dialog.tsx`/`sheet.tsx`/
+`select.tsx`/`progress.tsx`).
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Der Agent hat die
+genannten Bereiche vollständig gelesen (nicht nur gegrept) und bestätigt
+erneut einen durchgängig grünen Stand (`tsc -b`, `eslint .`, `vitest run`
+— 448/448). Zwei geprüfte, aber verworfene Kandidaten:
+- `useChat.ts` (`selectFlight`, Route-Fallback auf `trip.destination` bei
+  leeren `offer.slices`): nur über erfolgreiche `runFlightSearch`
+  erreichbar, die bereits einen gültigen Treffer voraussetzt — ein
+  echtes Duffel-Angebot hat immer mindestens eine Slice, rein defensiver
+  Code ohne real erreichbaren Fehlerfall.
+- `duffel/client.ts` (`mapOffer`/`mapStayResult`, `total_amount ?? '0'`):
+  fängt `undefined`/`null`, aber keinen literalen Leerstring `""` ab —
+  würde dann fälschlich "0,00 €" statt unbekannter Preis zeigen. Setzt
+  aber eine fehlerhafte Duffel-Antwort voraus, die nirgends beobachtet
+  oder getestet wurde — zu spekulativ für einen echten, nicht nur
+  theoretischen Fall.
+
+Die übrigen bekannten offenen Punkte (FlightWizard/HotelWizard-
+Vorbefüllung, Lösch-Warnungen-Tonalität, Urlaubsmodus/MeineReisen-
+Datenquellen-Mismatch, `searchGenerationRef` nur bei `resetChat()`,
+TrainCard/TrainResults unverdrahtet, `recharts` ungenutzt) bleiben aus
+denselben, in früheren Einträgen genannten Gründen (Produkt-/
+Architekturentscheidung, kein Einzeiler, oder Dependency-Änderung
+ausgeschlossen) zurückgestellt. Kein Code-Commit für einen neuen Punkt
+— nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein eigener
+Testlauf über den bereits bestätigten grünen Stand hinaus nötig (`npm
+test`, `npx eslint .`, `npm run build` alle grün, siehe oben). `git
+status` nach Abschluss: keine uncommitteten Änderungen außer diesem
+Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
