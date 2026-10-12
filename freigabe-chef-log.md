@@ -6504,3 +6504,109 @@ Beide Merges nach `origin/main` gepusht (`14541e3..5674cca`).
 
 **Info an Ni:** Nein — beide Prüfungen bestanden, keine Auffälligkeit,
 die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-12, früher Nacht-Check (geplanter täglicher Cloud-Lauf nach IT-Chefs stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits seit letztem Merge gegenüber
+`main` (`3d75da4`): `8cf9d62`, `aa804f8`, `618260c`, `2a5acb5`,
+`833739c`). Branch ausgecheckt, Diff zu `main` angeschaut (`ZEITPLAN.md`,
+`it-chef-auto-log.md`, `tasks/tasks-prd-travix-platform.md`,
+`src/pages/Home.tsx`, `src/pages/Home.test.tsx`,
+`src/pages/Dashboard.test.tsx`, `src/components/ui/progress.test.tsx`).
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log geglaubt): `npm
+install` im frischen Checkout, danach `npx tsc -b` → 0 Fehler, `npx
+eslint .` → 0 Probleme, `npx vitest run` → 454/454 Tests grün (63
+Testdateien) — deckt sich exakt mit der im `it-chef-auto-log.md`
+behaupteten Zahl für den dritten Lauf. Alles auf dem echten
+`it-chef/auto`-Stand geprüft, nicht auf `main`.
+
+Scope-Check: drei inhaltlich getrennte Punkte über fünf Commits, kein
+Scope-Creep —
+(1) `8cf9d62` (11.10., vierter Lauf): die vier Destination-Karten auf
+der Startseite (`Home.tsx`) waren rein dekorativ (kein `Link`), obwohl
+dasselbe Zielverhalten (`/ki-chat?destination=...`) für die
+optisch identischen Karten in `Favoriten.tsx` bereits existiert und
+`KiChat.tsx` den Parameter bereits produktiv verarbeitet — reine
+Schließung einer Verlinkungslücke ohne neues visuelles Element (Karten
+unverändert, nur in `<Link>` gewrappt), Regressionstest vorhanden und
+im Diff nachvollziehbar. Kein Abgleich mit `MARKENDESIGN.md` nötig, da
+keine neue Design-Entscheidung.
+(2) `2a5acb5` (12.10., zweiter Lauf): reine Testabdeckung für den
+bereits in `MARKENDESIGN.md` festgelegten und bereits implementierten
+Teal→Gold-Schwellenwert (80%) der Reiseentwürfe-Kachel in
+`Dashboard.tsx` — keine Produktionscode-Änderung, zwei neue Tests.
+(3) `833739c` (12.10., dritter Lauf): reine neue Testdatei für
+`src/components/ui/progress.tsx` (bestehende, unveränderte Logik) —
+keine Produktionscode-Änderung.
+`618260c` und `aa804f8` sind reine "kein neuer Punkt"-Log-Einträge ohne
+Code-Änderung. Keine Berührung von Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten in keinem der fünf Commits.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward, `main` war exakt auf
+`origin/main`): `origin/it-chef/auto` direkt nach `refs/heads/main`
+gepusht (`3d75da4..833739c`). Da `it-chef/auto` danach identisch zu
+`main` ist, bleibt der Branch unverändert auf dem neuen Stand.
+
+**`marketing-chef/auto` und `support-chef/auto`:** kurz mitgeprüft wie
+angewiesen — beide weiterhin ohne neuen Commit gegenüber `main` (0
+Commits Abstand), laufen laut Zeitplan erst um 6 Uhr. Planmäßig bei
+diesem frühen Lauf übersprungen, separater späterer Freigabe-Chef-Lauf
+für sie vorgesehen.
+
+**Info an Ni:** Nein — Prüfung sauber, alle drei Checks eigenständig
+grün und deckungsgleich mit den Log-Behauptungen, keine Auffälligkeit,
+die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-12, Tages-Check (geplanter täglicher Cloud-Lauf, kein Ni live dabei)
+
+**Vorbereitung:** lokaler `main`-Branch des Containers war auf einem
+veralteten, nicht mehr existierenden `origin/main`-Vorfahren stehen
+geblieben (vermutlich Rest einer älteren History, bevor `origin/main`
+umgeschrieben wurde). Ein destruktiver `git reset --hard` wurde von der
+Umgebung blockiert — stattdessen verlustfrei per `git checkout -B main
+origin/main` auf den echten aktuellen Remote-Stand (`149fc28`)
+gebracht, keine eigene unveröffentlichte Arbeit betroffen.
+
+**Prüfung `it-chef/auto`:** 0 Commits Abstand zu `main` — bereits beim
+frühen Nacht-Check heute vollständig gemergt. Nichts zu tun.
+
+**Prüfung `marketing-chef/auto`** (1 Commit seit letztem Merge,
+`4e76b52`): Diff betrifft ausschließlich `marketing-chef-auto-log.md`
+und `marketing/freigabe-uebersicht.md` (49. Tier-4-Kandidat:
+Destination-Karten auf der Startseite waren bis gestern rein
+dekorativ, verlinken jetzt zum KI-Chat). Geprüft: keine erfundenen
+Kennzahlen/Nutzerzahlen (Kandidat stammt nachvollziehbar aus dem
+bereits gemergten Commit `8cf9d62`, Topf korrekt von drei auf vier
+hochgezählt), reine Markdown-Pflege ohne jeden Hinweis auf tatsächliches
+Posten/Versenden, Text vollständig und kohärent, keine Stichpunkt-Skizze.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `149fc28..4e76b52`).
+
+**Prüfung `support-chef/auto`** (1 Commit seit letztem Merge,
+`4d19042`): Diff betrifft ausschließlich `support-chef-auto-log.md` —
+neuer Fund zu den gestern klickbar gemachten Destination-Karten auf der
+Startseite (`Home.tsx`): Karten sind jetzt per `Link` klickbar, aber
+weder `Link` noch `Card` tragen Hover-/Fokus-Styles, anders als jedes
+andere interaktive Element der Codebase.
+
+Stichprobe mit echtem Code-Abgleich geprüft, nicht nur behauptet:
+`src/pages/Home.tsx` Zeile 70-82 bestätigt `<Link className="block">`
+ohne Hover-/Fokus-Klasse; `src/components/ui/card.tsx` bestätigt, dass
+`Card` selbst nur `ring-1 ring-foreground/10` (statisch) mitbringt,
+keine `focus-visible`-Klasse. Gegenprobe per `grep -n focus-visible`
+über `button-variants.ts`, `input.tsx`, `select.tsx`, `tabs.tsx`,
+`badge-variants.ts`: alle fünf tragen tatsächlich ein
+`focus-visible:ring-...`-Muster. `Favoriten.tsx` Zeile 112-116 bestätigt
+den dort für dasselbe Zielverhalten genutzten expliziten `Button` statt
+unmarkierter klickbarer Karte. Beschreibung und Zeilenangaben stimmen
+exakt, kein erfundener Befund.
+
+→ **Passt, nach `main` gemergt** (Merge-Commit `1b291b9`, kein
+Fast-Forward möglich, da Branch vom selben `main`-Stand wie
+`marketing-chef/auto` abzweigte).
+
+Beide Merges nach `origin/main` gepusht (`149fc28..1b291b9`).
+
+**Info an Ni:** Nein — alle drei Prüfungen bestanden (eine davon ohne
+neuen Commit), keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.

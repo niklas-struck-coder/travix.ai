@@ -1,10 +1,106 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-11)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-12)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-12: ein neuer 49. Tier-4-Kandidat (`Home.tsx`: die vier
+Karten in "Beliebte Reiseziele" auf der Startseite sahen wie klickbare
+Karten aus — gleiches visuelles Muster wie die Kacheln in
+`Favoriten.tsx` — hatten aber keinen Link/onClick, führten also beim
+Klick ins Nichts; jede Karte verlinkt jetzt per `?destination=`-Parameter
+zum KI-Chat, derselbe Parameter, den `Favoriten.tsx` bereits produktiv
+nutzt), Kandidatentopf von drei auf **vier** — weiterhin klar unter der
+Achter-Schwelle, keine achte Mini-Changelog-Ausgabe heute, alle vier
+Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto` (`bd7bfbb`,
+letzter eigener Commit vom 11.10.) war bereits vollständig in `main`
+gemergt (`git merge-base --is-ancestor bd7bfbb origin/main` bestätigt
+das) — der Branch war also nur noch veraltet, nicht mehr in Arbeit. Wie
+in den Session-Regeln für bereits gemergte Branches vorgesehen per
+Fast-Forward-Merge neu auf den aktuellen `origin/main`-Stand (`149fc28`)
+gebracht.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine Notiz von Ni in `status.md` (zeigt weiterhin Stand 10.10.) oder
+diesem Dokument. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+**`git log bd7bfbb..origin/main` zeigt die seit dem letzten Check
+(11.10., Commit `bd7bfbb`) neu dazugekommenen Commits**, einzeln
+geprüft:
+
+- **`8cf9d62` (11.10., IT-Chef Auto, vierter Lauf desselben Tages):**
+  die vier Karten in "Beliebte Reiseziele" (`Home.tsx`) hatten bisher
+  keinen Link oder Klick-Handler, obwohl sie optisch genauso aussehen
+  wie die klickbaren Kacheln in `Favoriten.tsx` — ein Klick führte ins
+  Nichts. `KiChat.tsx` verarbeitet den `?destination=`-Parameter bereits
+  produktiv (von `Favoriten.tsx` genutzt); jede Karte verlinkt jetzt per
+  `<Link>` darauf, ohne sonstige visuelle Änderung. Live im Code
+  verifiziert (`src/pages/Home.tsx` Zeile 70-78), neuer Regressionstest
+  in `Home.test.tsx` vorher rot. Passt in dieselbe Kategorie wie frühere
+  "sieht klickbar aus, ist es aber nicht"-Funde — eine Erwartung, die die
+  Oberfläche optisch weckt, aber bisher nicht einlöste. **Neunund-
+  vierzigster Tier-4-Kandidat.**
+- **`2a5acb5`/`833739c` (12.10., IT-Chef Auto, zweiter/dritter Lauf):**
+  beide reine Testabdeckung für bereits bestehendes, unverändertes
+  Verhalten (`Dashboard.tsx` Gold-Highlight-Schwelle, `progress.tsx`
+  Fortschrittsbalken-Berechnung) — keine Produktionscode-Änderung, keine
+  Verhaltensänderung. **Kein Kandidat** — gleiche Ausschlussgruppe wie
+  jede bisherige reine Testergänzung ohne Verhaltensänderung.
+- `618260c`/`aa804f8` (12./11.10., IT-Chef Auto): "kein neuer sicherer
+  Punkt gefunden" — keine Codeänderung. **Kein Kandidat.**
+- `f9f8f3e` (11.10., Support-Chef Bericht): reiner Fundbericht
+  ("IATA-Code statt Klarname in Chat-Bestätigung bei Flugauswahl"),
+  keine Codeänderung — nur `support-chef-auto-log.md` betroffen. **Kein
+  Kandidat**, da kein Fix, sondern eine offene Meldung für IT-Chef.
+
+**Kandidatentopf:** war seit dem Update vom 11.10. bei **drei** (46-48),
+jetzt durch 49 auf **vier** — weiterhin klar unter der Achter-Schwelle.
+Keine achte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: der
+neue Kandidat stammt aus einem einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commit; alle
+Ausschlüsse wenden nur bereits etablierte Kriterien konsequent an (keine
+Verhaltensänderung bzw. kein Fix, nur eine Meldung). Keine offene
+Positionierungs-Grundsatzfrage — dieses Update wendet nur dieselbe,
+bereits in `MARKENDESIGN.md` festgelegte Einordnungslogik wie alle
+bisherigen Updates an, ohne etwas inhaltlich neu zu entscheiden.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zum neuen Einzelfund —
+  bleibt an die seit 20.08. geltende Selbstbeschränkung gebunden, zumal
+  der Kandidatentopf mit vier ohnehin weit unter der Schwelle für eine
+  achte Mini-Changelog-Ausgabe liegt.
+- `ZEITPLAN.md` bewusst nicht angefasst — dieses Update betrifft nur die
+  laufende Kandidaten-/Freigabe-Verwaltung, keinen neuen Sprint-Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/pages/Home.tsx` und `src/pages/Home.test.tsx` direkt im aktuellen
+Code gelesen, nicht nur aus Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 12.10. (Prüfung
+  der vier Fragen, vier neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 49, drei bewusst ausgeschlossen, Kandidatentopf-Stand
+  auf "vier" gesetzt), Datum im Titel auf 12.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-11: drei neue Tier-4-Kandidaten (46: `Flugsuche.tsx` speicherte bei manueller Flugauswahl bisher nur `transportMode: 'flight'`, nie Airline/Route/Preis — `Buchung.tsx` zeigte danach nur das generische Label "Flug" statt der tatsächlich gewählten Verbindung; 47: derselbe generische-Label-Bug auf dem separaten In-Chat-Auswahlpfad (`useChat.ts` `selectFlight()`), eigener Commit, gleiche Fundgruppe; 48: `handleSearch()` in `Flugsuche.tsx`/`Hotelsuche.tsx` wandte bisher das Ergebnis der zuletzt AUFGELÖSTEN statt der zuletzt GESTARTETEN Duffel-Anfrage an — eine überlappende, langsamere ältere Suche konnte ein bereits korrekt angezeigtes neueres Ergebnis nachträglich überschreiben, direkte Fortsetzung derselben Race-Condition-Fundgruppe wie die bereits gezählten Kandidaten 36/44, jetzt für die beiden direkten Such-Seiten statt der Chat-Suchpfade), zwei Commits bewusst ausgeschlossen (reine Fast-Refresh-Lint-Bereinigung ohne Verhaltensänderung; Preis-Input-Platzhalter in `EditMode.tsx` auf "Preis in €" präzisiert — reine Formulierungsverbesserung eines bereits funktionierenden freien Textfelds, keine Ehrlichkeits-/Vertrauens-Erzählung, gleiche Ausschlussgruppe wie frühere Formulierungs-Fixes), Kandidatentopf von null auf **drei**, alle vier Fragen weiterhin offen
 
