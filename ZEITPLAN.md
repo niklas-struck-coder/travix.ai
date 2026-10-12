@@ -1837,6 +1837,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Fix durch `git stash` nur der Testdatei verifiziert, dass ohne den
   Mock nur die bisherigen vier Tests existieren und keiner den
   80%-Zweig erreicht.
+  Vom autonomen IT-Chef-Lauf am 12.10. (dritter Lauf desselben Tages) eine
+  weitere Testabdeckungslücke geschlossen: `src/components/ui/progress.tsx`
+  (von shadcn/ui vorgegebener `Progress`-Wrapper um Radix, mit echter
+  eigener Logik — `style={{ transform: `translateX(-${100 - (value || 0)}%)`
+  }}` — statt eines reinen Klassen-Wrappers wie `button.tsx`/`badge.tsx`/
+  `card.tsx`, die deshalb weiterhin bewusst ungetestet bleiben) hatte
+  bisher keine eigene Testdatei, obwohl die Komponente mit echten,
+  dynamischen Fortschrittswerten in `Dashboard.tsx`, `Reiseentwuerfe.tsx`
+  und `ChecklistPanel.tsx` produktiv genutzt wird. Reine Testabdeckung für
+  bestehendes, unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `progress.test.tsx` (4 Tests, Muster analog `TravixAvatar.test.tsx`):
+  Verschiebung bei einem Zwischenwert (30 → `translateX(-70%)`), voll
+  gefüllt bei 100, komplett leer bei 0, sowie der Fallback auf 0 (komplett
+  leer), wenn gar kein `value` übergeben wird.
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

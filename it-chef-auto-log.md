@@ -18395,3 +18395,66 @@ nur die erwarteten Änderungen (`Dashboard.test.tsx`, `ZEITPLAN.md`,
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-12 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`2a5acb5`) war bereits auf dem aktuellen Stand von
+`origin/main` (`3d75da4`) — kein Merge nötig, `main` unverändert gelassen.
+`npm ci` ausgeführt (Dependencies fehlten im frischen Checkout), danach
+Baseline geprüft: `npx eslint .` sauber, `npm test` 450/450 grün (62
+Testdateien), `npm run build` (`tsc -b && vite build`) sauber — alles grün,
+bevor überhaupt etwas angefasst wurde.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut ohne
+neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3 KI-Engine,
+5.7 Zug/Bus/Fähre, 6.6/6.7/7.12 Kostenfelder, 8.1-8.7 Urlaubsmodus/
+Deal-Finder weiterhin blockiert oder Produkt-/Architekturentscheidung).
+Statt eines weiteren, eigens beauftragten Explore-Agenten diesmal gezielt
+systematisch nach Quelldateien ohne eigene Testdatei gesucht (Abgleich
+aller `.ts`/`.tsx`-Dateien in `src/` gegen vorhandene `*.test.ts(x)`).
+Übrig blieben: reine Typdefinitionsdateien (`src/types/*.ts`, nichts
+Lauffähiges zu testen), die bewusst ungetesteten Einstiegspunkte
+`App.tsx`/`main.tsx` (bereits in früheren Läufen so dokumentiert), die
+drei bereits ausgelagerten, reinen `cva()`-Variantendateien
+(`badge-variants.ts`/`button-variants.ts`/`tabs-variants.ts`, keine eigene
+Logik) sowie die trivialen shadcn/ui-Klassen-Wrapper ohne eigene Logik
+(`button.tsx`, `badge.tsx`, `card.tsx`, `input.tsx`, `label.tsx`,
+`tabs.tsx`) — und `src/components/ui/progress.tsx`: anders als die
+genannten trivialen Wrapper hat dieser eine echte eigene Berechnung
+(`style={{ transform: `translateX(-${100 - (value || 0)}%)` }}`,
+inklusive Fallback auf 0 ohne übergebenen Wert), die bisher durch keinen
+Test abgesichert war, obwohl die Komponente in `Dashboard.tsx`,
+`Reiseentwuerfe.tsx` und `ChecklistPanel.tsx` mit echten, dynamischen
+Werten produktiv genutzt wird.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten (reine UI-Darstellungslogik). Keine offene Produkt-
+oder Architekturentscheidung — das Verhalten ist bereits vollständig
+implementiert und produktiv genutzt, reine Testergänzung ohne
+Produktionscode-Änderung. Klar genug beschrieben (exakte Datei, exakte
+Berechnung). Objektiv prüfbar (gerenderter `style.transform` der
+Indikator-Spur per Test abfragbar).
+
+**Umsetzung:** Neue `src/components/ui/progress.test.tsx` (4 Tests,
+Muster analog `TravixAvatar.test.tsx`): Zwischenwert 30 →
+`translateX(-70%)`, voll gefüllt bei 100 → `translateX(-0%)`, komplett
+leer bei 0 → `translateX(-100%)`, sowie Fallback auf 0 (ebenfalls
+`translateX(-100%)`), wenn kein `value`-Prop übergeben wird. Keine
+Änderung an `progress.tsx` selbst — reine Testabdeckung für bestehendes,
+unverändertes, bereits korrektes Verhalten. `ZEITPLAN.md` (Phase-8-
+Abschnitt, Programmierung/IT-Chef) entsprechend ergänzt; keine
+Checkbox in `tasks/tasks-prd-travix-platform.md` betroffen, da dieser
+Punkt keiner einzelnen PRD-Aufgabennummer zugeordnet ist (reine
+Test-Hygiene wie zuvor schon `utils.test.ts`/`design-tokens.test.ts`).
+
+**Geprüft:** `npx vitest run src/components/ui/progress.test.tsx` grün
+(4/4) direkt nach dem Anlegen. Volle Suite danach: `npm test` 63
+Testdateien, 454 Tests, alle grün (+4 gegenüber der Baseline), `npx
+eslint .` weiterhin sauber, `npm run build` (`tsc -b && vite build`)
+weiterhin ohne Typfehler, Build erfolgreich, unveränderte
+Chunk-Size-Warnung. `git status` nach Abschluss: nur die erwarteten
+Änderungen (`progress.test.tsx`, `ZEITPLAN.md`, dieser Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
