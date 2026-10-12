@@ -4,6 +4,74 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-12
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`bd7bfbb`, letzter eigener Commit vom 11.10.) war bereits vollständig in
+`origin/main` gemergt (`git rev-list --left-right --count
+marketing-chef/auto...origin/main` zeigte 0 eigene / 10 fehlende
+Commits, `git merge-base` bestätigte `bd7bfbb` als Vorfahren von
+`main`). Wie in den Session-Regeln für bereits gemergte Branches
+vorgesehen: statt eines destruktiven Resets (von der Umgebung ohnehin
+blockiert) per `git merge origin/main --ff-only` auf den aktuellen
+`origin/main`-Stand (`149fc28`) gebracht — verlustfrei, da keine
+unveröffentlichte eigene Arbeit auf dem alten Branch-Stand lag.
+
+**Auswahl:** `ZEITPLAN.md`-Marketing-Bereich durchgesehen. Einzig
+offene, für den autonomen Modus sichere Punkt ist weiterhin Sprint 4
+"Laufende Content-Produktion" — konkret die laufende Pflege von
+`marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf) und darüber
+ggf. `marketing/mini-changelog-konzept.md`, wie an den Einträgen vom
+20.08. bis 11.10. etabliert. Alle anderen offenen Punkte bleiben
+ausgeschlossen:
+- "Landingpage/Warteliste live" (Sprint 2) und "Kampagne live schalten"
+  (Launch-Woche) — ausdrücklich Live-Vorgänge.
+- "Community/Warteliste aufbauen" (Sprint 4) und "Test-Kampagnen ...
+  starten" (Sprint 6) — ebenfalls Live-Vorgänge bzw. an die weiterhin
+  unbeantworteten Freigabe-Fragen gebunden.
+- "Launch-Kampagne vorbereiten" (Sprint 7) — bewusst nicht gewählt,
+  solange die Landingpage/Warteliste nicht live ist und Ni die vier
+  offenen Fragen in `marketing/freigabe-uebersicht.md` nicht beantwortet
+  hat; eine Vorbereitung jetzt würde auf denselben ungelösten
+  Grundsatzfragen aufbauen wie die bereits fertige, bewusst noch nicht
+  startbereite Vorlage in `marketing/kampagnen-konzept-ads.md`.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Kandidaten-Tracking), kein Live-Vorgang. Keine erfundenen Kennzahlen —
+der neue Kandidat stammt aus einem einzeln per `git show` und im
+aktuellen Code verifizierten, bereits gemergten Commit. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik an.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 12.10. Seit dem
+  letzten Check (`bd7bfbb`, 11.10.) kam genau ein neuer
+  Produkt-Code-Commit hinzu (`8cf9d62` — Destination-Karten auf der
+  Startseite verlinken jetzt zum KI-Chat, vorher optisch klickbar aber
+  ohne Funktion). Als 49. Tier-4-Kandidat aufgenommen (passt in die
+  "sieht klickbar aus, tut aber nichts"-Kategorie der
+  Ehrlichkeits-/Vertrauens-Funde). Drei weitere Commits geprüft und
+  bewusst ausgeschlossen: zwei reine Testabdeckungs-Commits ohne
+  Verhaltensänderung (`2a5acb5`, `833739c`), ein reiner
+  Support-Chef-Fundbericht ohne Codeänderung (`f9f8f3e`). Kandidatentopf
+  damit von drei auf vier — weiterhin unter der Achter-Schwelle, daher
+  keine achte Mini-Changelog-Ausgabe heute.
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, dieser
+Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-11
 
 **Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
