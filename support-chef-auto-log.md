@@ -4471,3 +4471,78 @@ Flugsuche-Formular leer, `FlightWizard.tsx`) wurde heute nicht erneut
 geprüft, da IT-Chef daran laut `ZEITPLAN.md` seit dem letzten Bericht
 nichts geändert hat — kein neuer Stand, der eine erneute Meldung
 rechtfertigt.
+
+---
+
+## 2026-10-12 — Destination-Karten auf der Startseite (`Home.tsx`)
+
+**Geprüfter Bereich:** Laut `ZEITPLAN.md` die jüngste, noch nicht
+eigenständig geprüfte UI-Änderung — IT-Chef hat gestern (vierter Lauf,
+Commit `8cf9d62`) die vier Karten in der "Beliebte Reiseziele"-Sektion
+auf der Startseite von rein dekorativ auf klickbar (`Link` zu
+`/ki-chat?destination=...`) umgestellt:
+
+- `src/pages/Home.tsx` (Zeile 70-82)
+- `src/components/ui/card.tsx` (zum Vergleich: Basis-Styling der `Card`)
+- `src/pages/Favoriten.tsx:113-120` (dasselbe Zielverhalten, dort aber
+  über einen expliziten `Button`)
+- `src/components/ui/button-variants.ts`, `src/components/ui/input.tsx`,
+  `src/components/ui/select.tsx`, `src/components/ui/tabs.tsx`,
+  `src/components/ui/badge-variants.ts` (zum Vergleich: durchgängiges
+  `focus-visible:ring-...`-Muster für alle anderen interaktiven Elemente)
+
+### Reibungspunkt
+
+**Die vier Karten sind jetzt klickbar, sehen aber weiterhin exakt wie
+reine Anzeige-Karten aus — kein Hover-, kein Tastatur-Fokus-Hinweis**
+
+`src/pages/Home.tsx:70-74`: Der neue `<Link className="block">` trägt
+keine eigene Hover- oder Fokus-Klasse, und `Card`
+(`src/components/ui/card.tsx:5-19`) selbst bringt ebenfalls keine
+Hover-/Fokus-Styles mit (nur statisches `ring-1 ring-foreground/10`).
+Eine Codesuche über `src/` nach `focus-visible` zeigt: *jedes* andere
+interaktive Element der App — `Button` (`button-variants.ts:4`), `Input`,
+`Select`, `Tabs`, `Badge` — hat ein explizites
+`focus-visible:ring-[3px] focus-visible:ring-ring/50`-Muster; die
+Karten in `Favoriten.tsx` nutzen für denselben Zielverhalten
+(`/ki-chat?destination=...`, Zeile 113-120) zusätzlich einen
+sichtbaren `Button` mit Icon und Text ("Reise mit KI planen") statt
+die ganze Karte unmarkiert klickbar zu machen. Die vier Home-Karten
+brechen damit als einziges interaktives Element der Codebase mit
+diesem durchgängigen Muster: Weder beim Drüberfahren mit der Maus noch
+beim Durchtabben mit der Tastatur gibt es irgendeine visuelle
+Veränderung — die Karten wirken optisch identisch zum Zustand vor dem
+gestrigen Fix (reines Bild+Titel+Tag), obwohl sie jetzt tatsächlich
+navigieren. Nutzer:innen, die nicht gezielt draufklicken (z. B. weil sie
+zuerst mit der Maus drüberfahren, um zu sehen, ob sich etwas tut, oder
+mit Tab navigieren), bekommen kein Signal, dass hier überhaupt etwas
+anklickbar ist — der gestern geschlossene Funktionslücke bleibt dadurch
+für einen Teil der Nutzer:innen weiterhin unsichtbar, auch wenn sie
+jetzt technisch funktioniert. Der Commit-Kommentar zu `8cf9d62`
+begründet das bewusste Fehlen eines sichtbaren Buttons mit zu wenig
+Platz auf den schmalen 2-/4-spaltigen Karten — das betrifft aber nur den
+Verzicht auf *Text*, nicht auf eine reine Hover-/Fokus-Zustandsänderung
+(z. B. Schatten oder Ring), die ohne Platzbedarf auskommt.
+
+*Vorschlag:* Keine neue Design-Entscheidung nötig, nur Übernahme des
+bereits etablierten Fokus-Musters: `focus-visible:ring-[3px]
+focus-visible:ring-ring/50` (wie bei `Button`/`Input`/`Tabs`) auf den
+`Link` oder die `Card` setzen, plus einen leichten Hover-Effekt (z. B.
+`hover:shadow-md transition-shadow`, in dieser Codebase bisher ebenfalls
+nirgends für Karten verwendet, aber ohne Platzbedarf umsetzbar). Das
+macht die neue Klickbarkeit sichtbar, ohne den vom Commit genannten
+Platzmangel für zusätzlichen Text zu berühren.
+
+### Nicht erneut aufgeführt
+Der bereits am 02./03.10. gemeldete, laut Code-Kommentar in
+`KiChat.tsx:74-82` weiterhin bewusst so gelassene Fund ("Klick auf eine
+Destination-Karte bleibt wirkungslos, wenn schon eine andere Reise läuft
+— `hasTripData(trip)` ist dann `true`, kein Toast/Hinweis") wurde heute
+nicht erneut als eigener Punkt ausgeführt, da inhaltlich seit dem
+03.10.-Bericht unverändert. Durch die vier neuen Home-Links ist dieser
+bestehende, bisher nur über `Favoriten.tsx` erreichbare Fall jetzt aber
+von insgesamt fünf statt einer Stelle aus auslösbar — der bereits
+vorgeschlagene Fix (`destinationHandled.current` unabhängig vom
+`hasTripData`-Ergebnis setzen, dort bereits umgesetzt) betrifft weiterhin
+nur das Aufräumen des Parameters, nicht das fehlende Nutzer-Feedback
+selbst.
