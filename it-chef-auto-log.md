@@ -18458,3 +18458,68 @@ Chunk-Size-Warnung. `git status` nach Abschluss: nur die erwarteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-12 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`833739c`) war bereits auf dem aktuellen Stand von
+`origin/main` (`76c4c83`, Support-Chef-Bericht) — kein Merge nötig, `main`
+unverändert gelassen. Da die drei vorherigen Läufe heute bereits je einen
+Punkt umgesetzt und committet hatten (Dashboard-Gold-Highlight-Test,
+progress.tsx-Test, eine weitere Testabdeckungslücke), für diesen vierten
+Lauf ohne erneute eigene volle Testlauf-Baseline begonnen, da keine
+Quelländerung aus einem vorherigen Lauf offen war (`git status` zu
+Beginn: clean).
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3
+KI-Engine, 5.7 Zug/Bus/Fähre, 6.6/6.7/7.12 Kostenfelder, 8.1-8.7
+Urlaubsmodus/Deal-Finder weiterhin blockiert oder Produkt-/
+Architekturentscheidung). Einen eigens beauftragten Explore-Agenten mit
+expliziter Liste aller heute und an Vortagen bereits bekannten/
+zurückgestellten Funde beauftragt (u. a. useChat.ts-Race-Condition,
+Flugsuche.tsx-Speicherlücke/Wizard-Vorbefüllung, EditMode.tsx-
+Währungssymbol, `recharts`, TrainCard/TrainResults, `total_amount ?? '0'`
+in duffel/client.ts, `selectFlight`-Route-Fallback, Sidebar-
+`title`-Attribut, triviale shadcn/ui-Wrapper, sowie die drei heute bereits
+gefixten Punkte), mit Fokus auf bisher seltener geprüfte Bereiche
+(useConcierge.ts, mockConcierge.ts, speech.ts, cartTotals.ts,
+calendarUtils.ts, checklistRules.ts, Urlaubsmodus/Kartenansicht/
+Reisekalender/Reisebudget/Aktivitaeten/Preisalarme/Angebote/MeineReisen/
+Profil/Einstellungen/Hilfe, ChecklistPanel/CostBreakdown/TripItem/
+TripSection/EmptySection, FlightWizard/HotelCard/HotelResults, sowie ein
+vollständiger Abgleich aller `.ts`/`.tsx`-Dateien gegen vorhandene
+`*.test.ts(x)`-Dateien).
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Der Agent hat die
+genannten Bereiche vollständig gelesen (nicht nur gegrept). Der
+Datei-gegen-Testdatei-Abgleich ergab nur eine einzige Lücke außerhalb der
+bereits ausgeschlossenen Liste: `select.tsx` ohne eigene Testdatei — anders
+als `dialog.tsx`/`sheet.tsx` (eigene Fokus-Restaurierungslogik) oder
+`progress.tsx` (eigene Transform-Berechnung) hat `select.tsx` aber keine
+eigene Logik, reiner Radix-Wrapper, fällt also in dieselbe Kategorie wie
+die bereits ausgeschlossenen trivialen shadcn/ui-Wrapper. Drei geprüfte,
+aber verworfene Grenzfälle:
+- `ChatInput.tsx`: Mikrofon-Fehlermeldung nutzt `role="status"` statt
+  `role="alert"` (anders als `FlightResults.tsx`/`HotelResults.tsx` bei
+  echten Fehlern) — laut `ChatInput.test.tsx` eine bewusste, bereits
+  getestete Entscheidung, kein Bug.
+- `Angebote.tsx`: lokale `formatPrice()`-Funktion statt der etablierten
+  `formatEuro()`/`formatOfferPrice()` aus `format.ts` — reine
+  Code-Duplikation ohne Verhaltensunterschied, nur Stil, kein Bug.
+- `vite-plugins/duffel-proxy.ts`: echte, ungetestete Logik
+  (`readBody`/`handleRequest`, Fehlerpfade), verarbeitet aber den
+  Duffel-API-Key über den `Authorization`-Header — fällt unter den
+  Ausschlusspunkt "kein Bezug zu Auth", deshalb bewusst nicht gemeldet.
+
+Die übrigen bekannten offenen Punkte bleiben aus denselben, in früheren
+Einträgen genannten Gründen zurückgestellt. Kein Code-Commit für einen
+neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein eigener neuer
+Testlauf nötig über den bereits am Vortag/in den vorherigen drei Läufen
+heute bestätigten grünen Stand hinaus. `git status` nach Abschluss: keine
+uncommitteten Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
