@@ -6504,3 +6504,56 @@ Beide Merges nach `origin/main` gepusht (`14541e3..5674cca`).
 
 **Info an Ni:** Nein — beide Prüfungen bestanden, keine Auffälligkeit,
 die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-12, früher Nacht-Check (geplanter täglicher Cloud-Lauf nach IT-Chefs stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits seit letztem Merge gegenüber
+`main` (`3d75da4`): `8cf9d62`, `aa804f8`, `618260c`, `2a5acb5`,
+`833739c`). Branch ausgecheckt, Diff zu `main` angeschaut (`ZEITPLAN.md`,
+`it-chef-auto-log.md`, `tasks/tasks-prd-travix-platform.md`,
+`src/pages/Home.tsx`, `src/pages/Home.test.tsx`,
+`src/pages/Dashboard.test.tsx`, `src/components/ui/progress.test.tsx`).
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log geglaubt): `npm
+install` im frischen Checkout, danach `npx tsc -b` → 0 Fehler, `npx
+eslint .` → 0 Probleme, `npx vitest run` → 454/454 Tests grün (63
+Testdateien) — deckt sich exakt mit der im `it-chef-auto-log.md`
+behaupteten Zahl für den dritten Lauf. Alles auf dem echten
+`it-chef/auto`-Stand geprüft, nicht auf `main`.
+
+Scope-Check: drei inhaltlich getrennte Punkte über fünf Commits, kein
+Scope-Creep —
+(1) `8cf9d62` (11.10., vierter Lauf): die vier Destination-Karten auf
+der Startseite (`Home.tsx`) waren rein dekorativ (kein `Link`), obwohl
+dasselbe Zielverhalten (`/ki-chat?destination=...`) für die
+optisch identischen Karten in `Favoriten.tsx` bereits existiert und
+`KiChat.tsx` den Parameter bereits produktiv verarbeitet — reine
+Schließung einer Verlinkungslücke ohne neues visuelles Element (Karten
+unverändert, nur in `<Link>` gewrappt), Regressionstest vorhanden und
+im Diff nachvollziehbar. Kein Abgleich mit `MARKENDESIGN.md` nötig, da
+keine neue Design-Entscheidung.
+(2) `2a5acb5` (12.10., zweiter Lauf): reine Testabdeckung für den
+bereits in `MARKENDESIGN.md` festgelegten und bereits implementierten
+Teal→Gold-Schwellenwert (80%) der Reiseentwürfe-Kachel in
+`Dashboard.tsx` — keine Produktionscode-Änderung, zwei neue Tests.
+(3) `833739c` (12.10., dritter Lauf): reine neue Testdatei für
+`src/components/ui/progress.tsx` (bestehende, unveränderte Logik) —
+keine Produktionscode-Änderung.
+`618260c` und `aa804f8` sind reine "kein neuer Punkt"-Log-Einträge ohne
+Code-Änderung. Keine Berührung von Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten in keinem der fünf Commits.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward, `main` war exakt auf
+`origin/main`): `origin/it-chef/auto` direkt nach `refs/heads/main`
+gepusht (`3d75da4..833739c`). Da `it-chef/auto` danach identisch zu
+`main` ist, bleibt der Branch unverändert auf dem neuen Stand.
+
+**`marketing-chef/auto` und `support-chef/auto`:** kurz mitgeprüft wie
+angewiesen — beide weiterhin ohne neuen Commit gegenüber `main` (0
+Commits Abstand), laufen laut Zeitplan erst um 6 Uhr. Planmäßig bei
+diesem frühen Lauf übersprungen, separater späterer Freigabe-Chef-Lauf
+für sie vorgesehen.
+
+**Info an Ni:** Nein — Prüfung sauber, alle drei Checks eigenständig
+grün und deckungsgleich mit den Log-Behauptungen, keine Auffälligkeit,
+die seine Aufmerksamkeit bräuchte.
