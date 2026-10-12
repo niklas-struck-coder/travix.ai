@@ -6557,3 +6557,56 @@ für sie vorgesehen.
 **Info an Ni:** Nein — Prüfung sauber, alle drei Checks eigenständig
 grün und deckungsgleich mit den Log-Behauptungen, keine Auffälligkeit,
 die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-12, Tages-Check (geplanter täglicher Cloud-Lauf, kein Ni live dabei)
+
+**Vorbereitung:** lokaler `main`-Branch des Containers war auf einem
+veralteten, nicht mehr existierenden `origin/main`-Vorfahren stehen
+geblieben (vermutlich Rest einer älteren History, bevor `origin/main`
+umgeschrieben wurde). Ein destruktiver `git reset --hard` wurde von der
+Umgebung blockiert — stattdessen verlustfrei per `git checkout -B main
+origin/main` auf den echten aktuellen Remote-Stand (`149fc28`)
+gebracht, keine eigene unveröffentlichte Arbeit betroffen.
+
+**Prüfung `it-chef/auto`:** 0 Commits Abstand zu `main` — bereits beim
+frühen Nacht-Check heute vollständig gemergt. Nichts zu tun.
+
+**Prüfung `marketing-chef/auto`** (1 Commit seit letztem Merge,
+`4e76b52`): Diff betrifft ausschließlich `marketing-chef-auto-log.md`
+und `marketing/freigabe-uebersicht.md` (49. Tier-4-Kandidat:
+Destination-Karten auf der Startseite waren bis gestern rein
+dekorativ, verlinken jetzt zum KI-Chat). Geprüft: keine erfundenen
+Kennzahlen/Nutzerzahlen (Kandidat stammt nachvollziehbar aus dem
+bereits gemergten Commit `8cf9d62`, Topf korrekt von drei auf vier
+hochgezählt), reine Markdown-Pflege ohne jeden Hinweis auf tatsächliches
+Posten/Versenden, Text vollständig und kohärent, keine Stichpunkt-Skizze.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `149fc28..4e76b52`).
+
+**Prüfung `support-chef/auto`** (1 Commit seit letztem Merge,
+`4d19042`): Diff betrifft ausschließlich `support-chef-auto-log.md` —
+neuer Fund zu den gestern klickbar gemachten Destination-Karten auf der
+Startseite (`Home.tsx`): Karten sind jetzt per `Link` klickbar, aber
+weder `Link` noch `Card` tragen Hover-/Fokus-Styles, anders als jedes
+andere interaktive Element der Codebase.
+
+Stichprobe mit echtem Code-Abgleich geprüft, nicht nur behauptet:
+`src/pages/Home.tsx` Zeile 70-82 bestätigt `<Link className="block">`
+ohne Hover-/Fokus-Klasse; `src/components/ui/card.tsx` bestätigt, dass
+`Card` selbst nur `ring-1 ring-foreground/10` (statisch) mitbringt,
+keine `focus-visible`-Klasse. Gegenprobe per `grep -n focus-visible`
+über `button-variants.ts`, `input.tsx`, `select.tsx`, `tabs.tsx`,
+`badge-variants.ts`: alle fünf tragen tatsächlich ein
+`focus-visible:ring-...`-Muster. `Favoriten.tsx` Zeile 112-116 bestätigt
+den dort für dasselbe Zielverhalten genutzten expliziten `Button` statt
+unmarkierter klickbarer Karte. Beschreibung und Zeilenangaben stimmen
+exakt, kein erfundener Befund.
+
+→ **Passt, nach `main` gemergt** (Merge-Commit `1b291b9`, kein
+Fast-Forward möglich, da Branch vom selben `main`-Stand wie
+`marketing-chef/auto` abzweigte).
+
+Beide Merges nach `origin/main` gepusht (`149fc28..1b291b9`).
+
+**Info an Ni:** Nein — alle drei Prüfungen bestanden (eine davon ohne
+neuen Commit), keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
