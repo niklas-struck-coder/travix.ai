@@ -18314,3 +18314,84 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-12 (zweiter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`618260c`) war bereits auf dem aktuellen Stand
+von `origin/main` (`3d75da4`) — kein Merge nötig, `main` unverändert
+gelassen. Baseline geprüft: `npx eslint .` sauber, `npx tsc -b
+--noEmit` sauber, `npm run build` sauber, `npm test` 448/448 grün (62
+Testdateien) — alles grün, bevor überhaupt etwas angefasst wurde.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3
+KI-Engine, 5.7 Zug/Bus/Fähre, 6.6/6.7/7.12 Kostenfelder, 8.1-8.7
+Urlaubsmodus/Deal-Finder weiterhin blockiert oder Produkt-/
+Architekturentscheidung). Da bereits der erste Lauf heute (00:19,
+`618260c`) über einen eigens beauftragten Explore-Agenten eine
+systematische Suche durch bisher seltener geprüfte Bereiche gemacht
+und nichts Neues gefunden hatte, für diesen zweiten Lauf erneut einen
+Explore-Agenten beauftragt — mit expliziter Liste aller bereits
+bekannten/zurückgestellten Funde (useChat.ts-Race-Condition bei
+Feldwechsel, Flugsuche.tsx-Speicherlücke/Wizard-Vorbefüllung,
+EditMode.tsx-Währungssymbol, `recharts`-Abhängigkeit, unverdrahtetes
+TrainCard/TrainResults, `total_amount ?? '0'` in duffel/client.ts,
+`selectFlight`-Route-Fallback, Sidebar-`title`-Attribut, triviale
+shadcn/ui-Wrapper ohne Testdatei), um Doppelmeldungen auszuschließen,
+mit Fokus auf tatsächlich noch nicht tief gelesene Bereiche
+(useConcierge.ts, duffel/client.ts volle Mapping-Logik,
+mockConcierge.ts, cartTotals.ts, calendarUtils.ts, format.ts,
+Urlaubsmodus/Kartenansicht/Kalender/Dashboard/Angebote/Preisalarme/
+Aktivitaeten/Profil/Einstellungen/Buchung/MeineReisen/KiChat,
+nav-config.ts/routes.tsx, ChecklistPanel.tsx/EditMode.tsx).
+
+**Ergebnis:** Der Agent hat alles vollständig gelesen (nicht nur
+gegrept) und einen echten, neuen, sicheren Kandidaten gefunden:
+`src/pages/Dashboard.tsx` hat laut `MARKENDESIGN.md` eine echte
+Verzweigung in der Reiseentwürfe-Kachel — ab 80% Durchschnitts-
+Planungsfortschritt (`almostDone`, Zeile 82) wechseln Icon und
+Prozent-Text von Teal auf Gold. Mit den fest hinterlegten Demo-
+Entwürfen (Lissabon 3/5, Kyoto 1/5 → 40% Schnitt) ist dieser Zweig im
+normalen Rendern nie erreichbar und war entsprechend durch keinen der
+vier bestehenden `Dashboard.test.tsx`-Tests abgedeckt — echte,
+bedingte UI-Logik ohne jede Testabsicherung, kein totes/absichtlich
+unerreichbares Konstrukt wie der strukturell ähnliche, bereits
+dokumentierte Fallback in `Kalender.tsx` (den der Agent ebenfalls
+geprüft, aber bewusst nicht erneut gemeldet hat).
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten
+oder rechtlichen Texten. Keine offene Produkt-/Architekturentscheidung
+— die Teal/Gold-Regel steht bereits vollständig in `MARKENDESIGN.md`
+und ist bereits implementiert, nur ungetestet. Keine neue
+Laufzeit-Logik nötig, reine Testergänzung. Ergebnis objektiv prüfbar
+(Test schlägt fehl, falls die Verzweigung je entfernt/geändert wird).
+
+**Umsetzung:** `calculateProgress` (`@/lib/trip/calculateProgress`) in
+`Dashboard.test.tsx` per `vi.mock(... vi.importActual ...)` gemockt —
+gleiches, bereits etabliertes Vorgehen wie bei `@/lib/duffel/client`
+in `Hotelsuche.test.tsx`/`Flugsuche.test.tsx`/`useChat.test.ts`;
+Standardverhalten bleibt über `importActual` für die bestehenden vier
+Tests unverändert erhalten. Zwei neue Tests: einer mit
+`mockReturnValueOnce(100).mockReturnValueOnce(60)` (Schnitt 80%)
+bestätigt die Gold-Klassen (`text-gold`) auf Prozent-Text und Icon,
+einer mit `mockReturnValueOnce(60).mockReturnValueOnce(60)` (Schnitt
+60%) bestätigt, dass es unterhalb der Schwelle bei Teal
+(`text-foreground`/`text-teal`) bleibt. Keine Produktionscode-Änderung
+in `Dashboard.tsx` selbst — reine Testabdeckung für bestehendes,
+unverändertes, bereits korrektes Verhalten.
+
+**Geprüft:** Vor dem Fix per `git stash` nur der Testdatei verifiziert,
+dass ohne den Mock lediglich die bisherigen vier Tests existieren und
+keiner den 80%-Zweig erreicht (`npx vitest run
+src/pages/Dashboard.test.tsx` → 4 passed). Nach dem Fix: derselbe
+Testlauf 6/6 grün. Volle Suite danach erneut grün: `npx eslint .`
+sauber, `npx tsc -b --noEmit` sauber, `npm test` 450/450 grün (62
+Testdateien, +2 gegenüber der Baseline), `npm run build` sauber.
+`tasks/tasks-prd-travix-platform.md` (7.7) und `ZEITPLAN.md`
+(Phase-7-Eintrag) entsprechend ergänzt. `git status` nach Abschluss:
+nur die erwarteten Änderungen (`Dashboard.test.tsx`, `ZEITPLAN.md`,
+`tasks/tasks-prd-travix-platform.md`, dieser Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

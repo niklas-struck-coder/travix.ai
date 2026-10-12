@@ -1810,6 +1810,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Reiseentwuerfe.test.tsx:255` entsprechend angepasst — vor dem Fix durch
   temporäres Zurücknehmen beider Quelländerungen (`git stash` nur
   `Dashboard.tsx`/`Reiseentwuerfe.tsx`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 12.10. (über einen eigens dafür
+  beauftragten Explore-Agenten gezielt gesucht, nachdem mehrere Läufe in
+  Folge keinen neuen Punkt fanden) eine Testabdeckungslücke in
+  `Dashboard.tsx` geschlossen: Die Reiseentwürfe-Kachel hat laut
+  `MARKENDESIGN.md` eine echte Verzweigung — ab 80% Durchschnitts-
+  Planungsfortschritt (`almostDone`, Zeile 82) wechseln Icon und
+  Prozent-Text von Teal auf Gold ("fast fertig geplant"-Hervorhebung).
+  Mit den fest hinterlegten Demo-Entwürfen (Lissabon 3/5, Kyoto 1/5 →
+  40% Schnitt) war dieser Zweig nie erreichbar und entsprechend bisher
+  durch keinen der vier bestehenden `Dashboard.test.tsx`-Tests
+  abgedeckt — echte, bedingte UI-Logik ohne jede Testabsicherung, kein
+  totes/absichtlich unerreichbares Konstrukt wie der strukturell
+  ähnliche, bereits dokumentierte Fallback in `Kalender.tsx`. Keine
+  Verhaltensänderung nötig, reine Testabdeckung für bestehende,
+  bereits korrekt implementierte Logik. Fix: `calculateProgress`
+  (`@/lib/trip/calculateProgress`) in `Dashboard.test.tsx` per
+  `vi.mock(...vi.importActual...)` gemockt (gleiches Vorgehen wie
+  bereits bei `@/lib/duffel/client` in `Hotelsuche.test.tsx`/
+  `Flugsuche.test.tsx`/`useChat.test.ts` etabliert, Standardverhalten
+  bleibt über `importActual` für die bestehenden vier Tests erhalten),
+  zwei neue Tests: einer mit `mockReturnValueOnce(100).mockReturnValueOnce(60)`
+  (Schnitt 80%) bestätigt Gold-Klassen auf Text und Icon, einer mit
+  `mockReturnValueOnce(60).mockReturnValueOnce(60)` (Schnitt 60%)
+  bestätigt, dass es unterhalb der Schwelle bei Teal bleibt. Vor dem
+  Fix durch `git stash` nur der Testdatei verifiziert, dass ohne den
+  Mock nur die bisherigen vier Tests existieren und keiner den
+  80%-Zweig erreicht.
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

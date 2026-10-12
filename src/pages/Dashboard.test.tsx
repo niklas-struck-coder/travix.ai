@@ -1,7 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { calculateProgress } from '@/lib/trip/calculateProgress'
 import { Dashboard } from './Dashboard'
+
+vi.mock('@/lib/trip/calculateProgress', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/trip/calculateProgress')>(
+    '@/lib/trip/calculateProgress',
+  )
+  return { calculateProgress: vi.fn(actual.calculateProgress) }
+})
 
 describe('Dashboard', () => {
   it('renders stat tiles for trips, drafts, cart total, and favorites', () => {
@@ -67,5 +75,41 @@ describe('Dashboard', () => {
 
     expect(screen.getByText('Prämienprogramm:', { exact: false })).toBeInTheDocument()
     expect(screen.getByText(/noch nicht verfügbar/)).toBeInTheDocument()
+  })
+
+  it('highlights the draft-progress tile in gold once the average reaches 80% or more (MARKENDESIGN.md)', () => {
+    vi.mocked(calculateProgress).mockReturnValueOnce(100).mockReturnValueOnce(60)
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>,
+    )
+
+    const percentage = screen.getByText('80%')
+    expect(percentage).toHaveClass('text-gold')
+    expect(percentage).not.toHaveClass('text-foreground')
+
+    const icon = document.querySelector('.lucide-file-clock')
+    expect(icon).toHaveClass('text-gold')
+    expect(icon).not.toHaveClass('text-teal')
+  })
+
+  it('keeps the draft-progress tile teal below the 80% gold threshold', () => {
+    vi.mocked(calculateProgress).mockReturnValueOnce(60).mockReturnValueOnce(60)
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>,
+    )
+
+    const percentage = screen.getByText('60%')
+    expect(percentage).toHaveClass('text-foreground')
+    expect(percentage).not.toHaveClass('text-gold')
+
+    const icon = document.querySelector('.lucide-file-clock')
+    expect(icon).toHaveClass('text-teal')
+    expect(icon).not.toHaveClass('text-gold')
   })
 })
