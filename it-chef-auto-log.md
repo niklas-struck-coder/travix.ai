@@ -18728,3 +18728,85 @@ Baseline hinaus. `git status` nach Abschluss: keine uncommitteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-13 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. `it-chef/auto` (`8c224c5`) war bereits auf dem aktuellen Stand von
+`origin/main` — kein Merge nötig, `main` unverändert gelassen. `npm ci`
+ausgeführt (Dependencies fehlten im frischen Checkout), danach Baseline
+geprüft: `npx eslint .` sauber, `npx tsc --noEmit` sauber, `npm test`
+461/461 grün (64 Testdateien), `npm run build` (`tsc -b && vite build`)
+sauber — alles grün, bevor überhaupt etwas angefasst wurde.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3
+KI-Engine, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende Datenfelder,
+7.4 Chat-Resume-Architektur, 8.1-8.7/8.9/8.11/8.12 Urlaubsmodus/
+Deal-Finder/Premium/Hilfe/Rewards weiterhin blockiert oder Produkt-/
+Architekturentscheidung). Ein eigener Testdatei-Abgleich über alle
+`.ts`/`.tsx`-Dateien in `src/` ergab zunächst scheinbar eine Lücke bei
+`src/components/ui/badge.tsx` — stellte sich beim Blick in dieses Log
+aber als bereits am 12.10. (dritter Lauf) bewusst und begründet
+ausgeschlossen heraus ("trivialer shadcn/ui-Klassen-Wrapper ohne eigene
+Logik", gleiche Kategorie wie `button.tsx`/`card.tsx`/`input.tsx`/
+`label.tsx`/`tabs.tsx`/`select.tsx`). Eine dafür bereits angelegte
+`badge.test.tsx` sowie die zugehörigen Einträge in `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` wurden deshalb wieder verworfen, statt
+eine bereits getroffene, dokumentierte Entscheidung ohne neue
+Erkenntnis zu kassieren. Stattdessen einen eigens beauftragten
+Explore-Agenten mit einer expliziten, ausführlichen Liste aller bereits
+bekannten/zurückgestellten Funde (siehe frühere Einträge dieses Logs,
+u. a. alle trivialen shadcn/ui-Wrapper, `selectFlight`-Route-Fallback,
+`total_amount ?? '0'`, Wizard-Vorbefüllung, Lösch-Warnungen-Tonalität,
+`recharts`, TrainCard/TrainResults unverdrahtet, Sidebar-`title`,
+ChatInput-Mikrofon-`role`, Angebote.tsx-`formatPrice()`-Duplikat,
+`duffel-proxy.ts`, sowie der KiChat.tsx-Destination-Klick-Fall ohne
+Toast-Feedback bei laufendem Trip) beauftragt, mit Fokus auf bisher
+seltener vollständig gelesene Bereiche (`useConcierge.ts`,
+`mockConcierge.ts`, `speech.ts`, `cartTotals.ts`, `calendarUtils.ts`,
+`checklistRules.ts`, `Urlaubsmodus.tsx`, `Kartenansicht.tsx`,
+`Reisekalender.tsx`, `Aktivitaeten.tsx`, `Preisalarme.tsx`,
+`Angebote.tsx`, `MeineReisen.tsx`, `Profil.tsx`, `Einstellungen.tsx`,
+`Buchung.tsx`, `ChecklistPanel.tsx`, `EditMode.tsx`, `nav-config.ts`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `HotelCard.tsx`,
+`HotelResults.tsx`, volle Duffel-Mapping-Logik in `duffel/client.ts`).
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Der Agent hat die
+genannten Bereiche vollständig gelesen (nicht nur gegrept) und
+bestätigt: jede Datei mit echter eigener Logik hat bereits eine
+passende Testdatei; übrig bleiben nur reine Typdefinitionsdateien und
+die bereits ausgeschlossenen Einstiegspunkte `App.tsx`/`main.tsx`. Drei
+geprüfte, aber verworfene Kandidaten:
+- `useChat.ts` (`~Zeile 405`, `!reply.accommodationNoticeHandled`-Zweig):
+  `findKnownDestination(reply.trip.destination)` stimmt dort immer mit
+  derselben, bereits in `mockAdvisor.ts`s `getNextAdvisorStep()` für
+  dasselbe unveränderte `destination`-Feld durchgeführten Prüfung
+  überein — der Zweig kann praktisch nie erreicht werden, gleiche
+  Kategorie wie der bereits ausgeschlossene `selectFlight`-Fallback.
+- Drei separate, byte-ähnliche Regex-Escape-Hilfsfunktionen
+  (`mockAdvisor.ts`, `mockConcierge.ts`, `types/stays.ts`): reine
+  Stil-Duplikation ohne Verhaltensunterschied, gleiche Kategorie wie
+  der bereits ausgeschlossene `Angebote.tsx`-`formatPrice()`-Fund.
+- `FlightWizard.tsx`/`HotelWizard.tsx`: kein Inline-Fehlertext, wenn ein
+  Datum durch Änderung des anderen ungültig wird (nur der Submit-Button
+  wird deaktiviert) — identisch in beiden Wizards, wirkt als bewusst
+  konsistentes Muster statt eines Versehens, zudem grenzwertig eine
+  Design-Interpretationsfrage.
+
+Keine neue Barrierefreiheitslücke gefunden: alle Icon-only-Buttons haben
+weiterhin `aria-label`, farbcodierte Elemente (Kalenderzellen, Badges)
+haben durchgängig textliche Alternativen, der gestrige Home.tsx-Fix
+bleibt unverändert intakt. Die übrigen bekannten offenen Punkte bleiben
+aus denselben, in früheren Einträgen genannten Gründen zurückgestellt.
+Kein Code-Commit für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf (die kurzzeitig
+angelegte, dann wieder verworfene `badge.test.tsx` samt zugehöriger
+Dokumentationsänderungen wurde vollständig zurückgenommen), daher kein
+weiterer eigener Testlauf nötig über die zu Beginn bereits grün
+bestätigte Baseline hinaus. `git status` nach Abschluss: keine
+uncommitteten Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
