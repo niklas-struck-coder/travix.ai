@@ -4546,3 +4546,56 @@ vorgeschlagene Fix (`destinationHandled.current` unabhängig vom
 `hasTripData`-Ergebnis setzen, dort bereits umgesetzt) betrifft weiterhin
 nur das Aufräumen des Parameters, nicht das fehlende Nutzer-Feedback
 selbst.
+
+---
+
+## 2026-10-13 — Nachkontrolle: Destination-Karten (`Home.tsx`) & Chat-Flugbestätigung (`useChat.ts`)
+
+**Geprüfter Bereich:** Seit dem letzten Bericht (12.10.) hat IT-Chef laut
+`ZEITPLAN.md`/`git log` auf `main` zwei direkt von Support-Chef gemeldete
+Funde behoben — heutiger Lauf prüft, ob beide tatsächlich wie
+vorgeschlagen umgesetzt wurden, statt sie nur anhand des Commit-Texts
+als erledigt zu übernehmen:
+
+- `src/pages/Home.tsx` (Commit `4541e9f`, 13.10.)
+- `src/hooks/useChat.ts` (`selectFlight()`, Commit `02132da`, 12.10.,
+  fünfter Lauf)
+
+### Ergebnis der Nachkontrolle
+
+**1. Hover-/Fokus-Hinweis auf den Destination-Karten — bestätigt behoben**
+`src/pages/Home.tsx:70-74`: Der `Link` um jede Karte trägt jetzt
+`focus-visible:ring-[3px] focus-visible:ring-ring/50` (identisch zum
+Muster in `button-variants.ts`/`tabs.tsx`/`badge-variants.ts`) sowie
+`hover:shadow-md transition-shadow` und `rounded-xl`, sodass der
+Fokus-Ring der abgerundeten Kartenform folgt. Exakt der am 12.10.
+vorgeschlagene Fix, keine Abweichung.
+
+**2. Klarname statt IATA-Code in der Chat-Flugbestätigung — bestätigt behoben**
+`src/hooks/useChat.ts:418-423` (`selectFlight()`): Die Routen-Angabe
+nutzt jetzt `` `${slice.originName || slice.originIata} → ${slice.destinationName || slice.destinationIata}` ``
+— derselbe Namen-vor-IATA-Fallback wie `summarizeFlightOffer()`
+(`src/lib/format.ts`) und `formatLocation()` (`FlightCard.tsx`). Eine
+Nutzerin, die im KI-Chat einen Flug auswählt, liest jetzt "Berlin →
+Lissabon" statt "BER → LIS" — die Chat-Nachricht widerspricht sich nicht
+mehr mit der Anzeige auf `Buchung.tsx`.
+
+### Kein neuer Reibungspunkt in diesem Lauf
+
+Seit dem 12.10.-Bericht ist laut `git log` auf `main` kein neue Seite
+oder Komponente hinzugekommen — die beiden heutigen IT-Chef-Auto-Läufe
+(`8c224c5`, `83be974`) meldeten jeweils "kein neuer sicherer Punkt
+gefunden". Um keinen Punkt zu erfinden, nur damit der Bericht nicht leer
+aussieht: Eine gezielte Gegenprüfung von `Flugsuche.tsx` (`handleSearch`/
+`handleSelect`, inkl. der am 11.10. ergänzten Race-Condition-Absicherung
+über `searchGenerationRef`) ergab keinen neuen Fund — Fehlerzustand,
+Speicher-Warnung und die "kein aktiver Reiseplan"-Meldung bei fehlendem
+Trip greifen konsistent zusammen.
+
+### Weiterhin offen (zur Erinnerung, kein neuer Fund)
+
+Der seit dem 09./10.10.-Bericht gemeldete Fund 2 ("Bearbeiten" → "Manuell
+suchen" startet `FlightWizard.tsx` beim erneuten Besuch von `/flugsuche`
+weiterhin komplett leer, `src/components/search/FlightWizard.tsx:37-40`)
+ist unverändert im Code vorhanden — keine Props zum Vorbefüllen aus einem
+bestehenden Reiseplan. Bleibt offen für einen künftigen IT-Chef-Lauf.
