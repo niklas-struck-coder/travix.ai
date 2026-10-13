@@ -18665,3 +18665,66 @@ Baseline), `npm run build` sauber (unveränderte Chunk-Size-Warnung).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-13 (zweiter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `it-chef/auto` (`4541e9f`, Hover-/Fokus-Fix auf
+den Destination-Karten vom ersten Lauf heute) war bereits auf dem
+aktuellen Stand von `origin/main` — kein Merge nötig, `main` unberührt.
+`node_modules` fehlte im frischen Checkout, zunächst `npm ci` (650
+Pakete, nur die bekannten `npm audit`-Hinweise). Baseline danach grün:
+`npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber,
+`npx vitest run` 457/457 grün (63 Testdateien), `git status` zu Beginn
+clean.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44, 4.1-4.3
+KI-Engine, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende Datenfelder,
+7.4 Chat-Historie-Architektur, 8.1-8.7/8.9/8.12 Urlaubsmodus/
+Deal-Finder/Premium/Rewards, 8.11 Hilfe (wartet auf FAQ-Inhalte von
+Support-Chef) weiterhin blockiert oder Produkt-/Architekturentscheidung).
+Einen eigens beauftragten Explore-Agenten beauftragt, der `it-chef-auto-
+log.md` (gesamt, 60+ Läufe) und den Tail von `ZEITPLAN.md` gegen einen
+neuen Kandidaten abgleicht, mit Fokus auf: Dateien ohne passende
+Testdatei (vollständiger Abgleich aller `src/**/*.ts(x)` gegen
+`*.test.ts(x)`), Wiederaufleben bereits gemeldeter, aber noch nicht
+umgesetzter Support-Chef-/Marketing-Chef-Funde (`reports/*.md`,
+12.10.), sowie eine eigenständige Lesung (nicht nur grep) von bisher
+seltener geprüften Dateien (`lib/trip/{calendarUtils,cartTotals,
+checklistRules,tripStorage}.ts`, `lib/format.ts`, `lib/duffel/client.ts`,
+`lib/ai/{mockAdvisor,mockConcierge}.ts`, `useConcierge.ts`,
+`QuickReplies.tsx`/`TripSummaryCard.tsx`, `Kartenansicht.tsx`/
+`MeineReisen.tsx`/`HotelWizard.tsx`, `nav-config.ts`).
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Testdatei-Abgleich
+ergab keine neue Lücke (einzige fehlende Testdatei weiterhin
+`select.tsx`, bereits am 12.10. als trivialer Radix-Wrapper ohne eigene
+Logik ausgeschlossen, gleiche Kategorie wie `button.tsx`/`badge.tsx`/
+`card.tsx`). Beide noch offenen Support-Chef-Funde vom 12.10.
+(`FlightWizard`-Vorbefüllung, Lösch-Warnungen/Urlaubsmodus-Tonalität)
+bleiben aus denselben, dort bereits genannten Gründen
+(Interpretations-/Tonalitätsentscheidung) zurückgestellt; die beiden
+anderen Funde desselben Berichts (IATA-Klarnamen im Chat,
+Destination-Karten-Hover) sind im Code bereits als behoben verifiziert
+(Lauf vom 12.10. fünfter Lauf bzw. 13.10. erster Lauf heute). Ein
+geprüfter, aber verworfener Grenzfall: `useConcierge.ts`s `sendMessage()`
+hat zwar dieselbe prinzipiell ungeschützte Overlapping-Timeout-Form, die
+anderswo bereits per `searchGenerationRef`-Muster behoben wurde, ist aber
+über die UI nicht auslösbar (`ChatInput` ist deaktiviert und
+`QuickReplies` werden geleert, solange `isThinking` aktiv ist) — kein
+real reproduzierbarer Bug, gleiche Begründung, mit der der Projekt-Agent
+den analogen `selectFlight`-Route-Fallback-Fall am 12.10. bereits
+verworfen hat.
+
+Die übrigen bekannten offenen Punkte bleiben aus denselben, in früheren
+Einträgen genannten Gründen zurückgestellt. Kein Code-Commit für einen
+neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein weiterer
+eigener Testlauf nötig über die zu Beginn bereits grün bestätigte
+Baseline hinaus. `git status` nach Abschluss: keine uncommitteten
+Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
