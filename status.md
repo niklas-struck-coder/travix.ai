@@ -13,16 +13,16 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-10):**
-- IT-Chef hat zwei Testabdeckungslücken geschlossen (Progress-Komponente,
-  Dashboard-Gold-Highlight) sowie zuvor einen Flug-Auswahl-Bug behoben
-- Support-Chef hat einen neuen Fund gemeldet: Destination-Karten auf der
-  Startseite ohne Hover-/Fokus-Hinweis (Home.tsx) — bereits gemergt
-- Marketing-Chef hat weitere Tier-4-Kandidaten gesammelt (Kandidatentopf
-  jetzt bei 49, u. a. zum Destination-Karten-Link)
-- Freigabe-Chef hat alle Tages-Läufe von IT-Chef, Marketing-Chef und
-  Support-Chef geprüft und nach main gemergt
+**Seit letztem Update (2026-10-12):**
+- IT-Chef hat die Hover-/Fokus-Markierung für Destination-Karten (Home.tsx)
+  umgesetzt; weitere Läufe am selben Tag ohne neuen sicheren Punkt
+- Support-Chef hat per Nachkontrolle bestätigt: Destination-Karten-Fix und
+  Klarname-statt-IATA-Code-Fix (useChat.ts) sind behoben, kein neuer Fund
+- Marketing-Chef hat einen weiteren Tier-4-Kandidaten gesammelt
+  (Kandidatentopf jetzt bei 50)
+- Freigabe-Chef hat zwei Tages-Checks durchgeführt und alle Branches
+  (IT-, Marketing-, Support-Chef) geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-12_
+_Letztes Update: 2026-10-13_
