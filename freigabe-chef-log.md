@@ -6662,3 +6662,45 @@ Nach `origin/main` gepusht.
 **Info an Ni:** Nein — Prüfung bestanden, keine Auffälligkeit, die seine
 Aufmerksamkeit bräuchte. `marketing-chef/auto`/`support-chef/auto` ohne
 neue Commits, folgen im separaten späteren Lauf.
+
+## 2026-10-13, zweiter Tages-Check (geplanter täglicher Auto-Lauf, kein Ni live dabei)
+
+**`it-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand, bereits im früheren Lauf heute gemergt) — planmäßig
+übersprungen.
+
+**Prüfung `marketing-chef/auto`** (1 Commit: "50. Tier-4-Kandidat
+(Klarname statt IATA-Code in Chat-Bestätigung), Topf von vier auf
+fünf"). Diff betrifft ausschließlich `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Code, kein Live-Vorgang (nichts gepostet/versendet/veröffentlicht).
+Behaupteten Fund selbst gegen aktuellen Code auf `main` verifiziert statt
+dem Log blind vertraut: `src/hooks/useChat.ts` (`selectFlight()`) baut
+die Routen-Anzeige tatsächlich über
+`` `${slice.originName || slice.originIata} → ${slice.destinationName || slice.destinationIata}` ``
+— exakt wie im Log behauptet. Keine erfundenen Kennzahlen/Nutzerzahlen,
+kein Hinweis auf tatsächliches Posten, Text vollständig und kohärent
+(kein Stichpunkt-Entwurf).
+
+→ **Passt, nach `main` gemergt** (`--no-ff`-Merge-Commit, da
+`marketing-chef/auto` seit dem Branch-Neuaufbau vom aktuellen `main`
+divergiert). Nach `origin/main` gepusht.
+
+**Prüfung `support-chef/auto`** (1 Commit: "Nachkontrolle
+Home.tsx-Hover/Fokus und useChat.ts-Klarname bestätigt behoben, kein
+neuer Fund"). Diff betrifft ausschließlich `support-chef-auto-log.md` —
+reine Analyse, keine Code-Änderung (niedrigstes Risiko der drei).
+Stichprobenartig gegen den aktuellen Code verifiziert: `src/pages/Home.tsx`
+(Zeile 70-74) trägt tatsächlich
+`focus-visible:ring-[3px] focus-visible:ring-ring/50` und
+`hover:shadow-md transition-shadow` auf dem `Link` um jede
+Destination-Karte; `src/hooks/useChat.ts` (`selectFlight()`) nutzt wie
+behauptet den Klarnamen-Fallback. Beide Datei-/Zeilenangaben stimmen,
+nichts wirkt erfunden.
+
+→ **Passt, nach `main` gemergt** (`--no-ff`-Merge-Commit). Nach
+`origin/main` gepusht.
+
+**Info an Ni:** Nein — alle drei Branches geprüft, zwei mit neuen
+Commits gemergt (`marketing-chef/auto`, `support-chef/auto`), keine
+Auffälligkeit, die seine Aufmerksamkeit bräuchte.
