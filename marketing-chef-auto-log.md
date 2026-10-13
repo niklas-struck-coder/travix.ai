@@ -4,6 +4,89 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-13
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`4e76b52`, letzter eigener Commit vom 12.10.) war bereits vollständig in
+`origin/main` gemergt (`git merge-base --is-ancestor 4e76b52 origin/main`
+bestätigt das, `git log origin/main..origin/marketing-chef/auto` zeigt
+keine eigenen, unveröffentlichten Commits) — laut Regel für bereits
+gemergte Branches neu von aktuellem `origin/main` (`6e8ca1f`) aus
+angelegt, statt auf dem veralteten Stand weiterzuarbeiten.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 12.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 12.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 4e76b52..origin/main` geprüft (Basislinie: der eigene
+Stand vom 12.10.): vier neue Commits, jeder einzeln per `git show` und
+direkt im aktuellen Code verifiziert:
+
+- `02132da` (12.10., IT-Chef Auto, fünfter Lauf desselben Tages):
+  `selectFlight()` (`useChat.ts`) zeigte die Chat-Bestätigung nach
+  Flugauswahl bisher mit rohen IATA-Codes statt der bereits verfügbaren
+  Flughafen-Klarnamen, obwohl `summarizeFlightOffer()` zwei Zeilen
+  darunter denselben Klarnamen-Fallback schon nutzt — dieselbe Fundgruppe
+  wie die drei bereits in `marketing/content-stueck-klarname-statt-
+  rohdaten.md` gebündelten `FlightCard.tsx`/`TrainCard.tsx`-Fixes, jetzt
+  an einem vierten, bisher übersehenen Ort. **50. Tier-4-Kandidat.**
+- `4541e9f` (13.10., IT-Chef Auto): Hover-/Fokus-Markierung auf den vier
+  Destination-Karten, die erst durch den bereits gezählten 49. Kandidaten
+  klickbar wurden — verfeinert nur diesen bestehenden Kandidaten, kein
+  eigenständiger neuer Fund.
+- `8c224c5`/`83be974` (13.10., IT-Chef Auto): "kein neuer sicherer Punkt
+  gefunden" bzw. reiner Freigabe-Chef-Merge-Log, keine Codeänderung.
+
+**Kandidatentopf:** war seit dem 12.10. bei vier (46-49), jetzt durch 50
+auf **fünf** — weiterhin klar unter der Achter-Schwelle für eine achte
+Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Kandidaten-Tracking), kein Live-Vorgang. Keine erfundenen Kennzahlen —
+der neue Kandidat stammt aus einem einzeln per `git show` und im
+aktuellen Code verifizierten, bereits gemergten Commit. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zum neuen Einzelfund —
+  bleibt an die seit 20.08. geltende Selbstbeschränkung gebunden, zumal
+  der Kandidatentopf mit fünf weit unter der Achter-Schwelle liegt.
+- Nachträgliche Ergänzung von `marketing/content-stueck-klarname-statt-
+  rohdaten.md` um den neuen Fund — das Stück ist als abgeschlossener
+  Entwurf formuliert und wartet bereits auf dieselbe Freigabe-Antwort wie
+  alle anderen Tier-1-Stücke; ein vierter Beleg ändert daran nichts.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 13.10. (Prüfung
+  der vier Fragen, vier neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 50, drei bewusst ausgeschlossen, Kandidatentopf-Stand
+  auf "fünf" gesetzt, Titel-Datum auf 13.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, dieser
+Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-12
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live

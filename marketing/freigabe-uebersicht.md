@@ -1,10 +1,120 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-12)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-13)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-13: ein neuer 50. Tier-4-Kandidat (`useChat.ts`:
+`selectFlight()` zeigte in der Chat-Bestätigung nach Flugauswahl rohe
+IATA-Codes ("BER → LIS") statt der bereits verfügbaren Flughafen-
+Klarnamen, obwohl dieselbe Datei zwei Zeilen darunter über
+`summarizeFlightOffer()` schon den Klarnamen-Fallback nutzt — dieselbe
+"Klarname statt Rohdaten"-Fundgruppe wie die drei bereits im
+gleichnamigen Content-Stück gebündelten `FlightCard.tsx`/`TrainCard.tsx`-
+Fixes, jetzt auf dem separaten Chat-Bestätigungstext), Kandidatentopf von
+vier auf **fünf** — weiterhin klar unter der Achter-Schwelle, keine achte
+Mini-Changelog-Ausgabe heute, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `4e76b52`, letzter eigener Commit vom
+12.10.) war bereits vollständig in `main` gemergt (`git merge-base
+--is-ancestor 4e76b52 origin/main` bestätigt das, `git log
+origin/main..origin/marketing-chef/auto` zeigt keine eigenen,
+unveröffentlichten Commits) — der Branch war also nur noch veraltet,
+nicht mehr in Arbeit. Wie in den Session-Regeln für bereits gemergte
+Branches vorgesehen neu von aktuellem `origin/main` (`6e8ca1f`) aus
+angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+`status.md` zeigt weiterhin Stand 12.10., keine Notiz zu einer der vier
+Fragen. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`, `ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen
+bleiben offen.
+
+**`git log 4e76b52..origin/main` zeigt die seit dem letzten Check
+(12.10., Commit `4e76b52`) neu dazugekommenen Commits**, einzeln
+geprüft:
+
+- **`02132da` (12.10., IT-Chef Auto, fünfter Lauf desselben Tages):**
+  `selectFlight()` (`src/hooks/useChat.ts`, Zeile 417-419) baute die
+  Routen-Anzeige für die Chat-Bestätigung bisher nur aus
+  `slice.originIata`/`slice.destinationIata` — zwei Zeilen darunter nutzt
+  `summarizeFlightOffer()` für denselben Flug bereits den Klarnamen-
+  Fallback. Live im Code verifiziert: jetzt
+  `slice.originName || slice.originIata` (bzw. für das Ziel analog). Exakt
+  dieselbe Fundkategorie wie die drei bereits in
+  `marketing/content-stueck-klarname-statt-rohdaten.md` gebündelten
+  Fixes (28.09.) — nur ein vierter, bisher übersehener Ort mit demselben
+  Muster (Chat-Bestätigungstext statt Kartenanzeige). **Fünfzigster
+  Tier-4-Kandidat.**
+- **`4541e9f` (13.10., IT-Chef Auto):** Hover-/Fokus-Markierung
+  (`focus-visible:ring`, `hover:shadow-md`) auf genau den vier
+  Destination-Karten, die erst durch den 49. Kandidaten (`8cf9d62`,
+  12.10.) überhaupt klickbar wurden. Verfeinert nur den bereits gezählten
+  49. Kandidaten (macht dessen neuen Link besser auffindbar), ist aber
+  kein eigenständiger neuer Fund — gleiches Muster wie am 09.13. bereits
+  dokumentiert ("verfeinert nur bereits gezählte Kandidaten, erhöht den
+  Topf nicht weiter"). **Kein eigener Kandidat.**
+- `8c224c5`/`83be974` (13.10., IT-Chef Auto, zweiter/dritter Lauf
+  desselben Tages): "kein neuer sicherer Punkt gefunden" — keine
+  Codeänderung. **Kein Kandidat.**
+- `6e8ca1f` (13.10., Freigabe-Chef-Log): reiner Merge-Log-Eintrag, keine
+  Produktcodeänderung. **Kein Kandidat.**
+
+**Kandidatentopf:** war seit dem Update vom 12.10. bei **vier** (46-49),
+jetzt durch 50 auf **fünf** — weiterhin klar unter der Achter-Schwelle.
+Keine achte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug für den autonomen Modus:** Ergebnis ist eine reine
+Markdown-Ergänzung dieser Übersicht — kein Live-Vorgang, nichts gepostet,
+versendet oder im Produkt verändert. Keine erfundenen Kennzahlen: der
+neue Kandidat stammt aus einem einzeln per `git show` und direkter
+Code-Prüfung verifizierten, bereits in `main` gemergten Commit; der
+Ausschluss der Hover-/Fokus-Verfeinerung wendet nur bereits etabliertes
+Kriterium an (verfeinert einen bestehenden Kandidaten statt einen
+eigenständigen neuen Fund darzustellen). Keine offene Positionierungs-
+Grundsatzfrage — dieses Update wendet nur dieselbe, bereits in
+`MARKENDESIGN.md` festgelegte Einordnungslogik wie alle bisherigen
+Updates an, ohne etwas inhaltlich neu zu entscheiden.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zum neuen Einzelfund —
+  bleibt an die seit 20.08. geltende Selbstbeschränkung gebunden, zumal
+  der Kandidatentopf mit fünf ohnehin weit unter der Schwelle für eine
+  achte Mini-Changelog-Ausgabe liegt.
+- `marketing/content-stueck-klarname-statt-rohdaten.md` nicht
+  nachträglich um den neuen Fund ergänzt — das Stück ist als
+  abgeschlossener Entwurf formuliert (drei konkrete Fixes, bereits bei Ni
+  zur Freigabe) und wartet laut `freigabe-uebersicht.md` ohnehin schon auf
+  dieselbe Antwort wie alle anderen Tier-1-Stücke; ein vierter Beleg
+  ändert daran nichts und würde das fertige Stück nur nachträglich
+  aufblähen, statt als eigener Tier-4-Kandidat sauber separat
+  dokumentiert zu sein.
+- `ZEITPLAN.md` bewusst nicht angefasst — dieses Update betrifft nur die
+  laufende Kandidaten-/Freigabe-Verwaltung, keinen neuen Sprint-Punkt.
+
+**Vor dem Schreiben geprüft (im Code, nicht nur behauptet):**
+`src/hooks/useChat.ts` (Zeile 417-419) und `src/pages/Home.tsx` direkt im
+aktuellen Code gelesen, nicht nur aus Commit-/Logtexten übernommen.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 13.10. (Prüfung
+  der vier Fragen, vier neue Commits einzeln geprüft, einer als
+  Tier-4-Kandidat 50, drei bewusst ausgeschlossen, Kandidatentopf-Stand
+  auf "fünf" gesetzt), Datum im Titel auf 13.10. gesetzt.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-12: ein neuer 49. Tier-4-Kandidat (`Home.tsx`: die vier
 Karten in "Beliebte Reiseziele" auf der Startseite sahen wie klickbare
