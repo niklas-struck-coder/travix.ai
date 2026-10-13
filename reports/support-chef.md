@@ -1,67 +1,59 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-12
+**Datum:** 2026-10-13
 
-## Was ist seit dem letzten Eintrag (2026-10-10) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-12) passiert?
 
-Eine gute Nachricht zuerst: Der Flugauswahl-Fund vom letzten Mal ist zur
-Hälfte behoben. `src/pages/Flugsuche.tsx:38` speichert die gewählte
-Route jetzt tatsächlich im Reiseplan (`transportDetail:
-summarizeFlightOffer(offer)`), genauso wie `useChat.ts` das für den
-KI-Chat-Pfad nachgezogen hat — kein Detailverlust mehr. Die zweite
-Hälfte des Funds steht aber weiterhin: Das Bearbeiten-Formular bleibt
-leer, siehe Vorschlag 2.
+Gute Nachrichten: Beide Funde vom letzten Mal sind jetzt wirklich behoben,
+nicht nur angekündigt. `src/hooks/useChat.ts:421` baut die
+Flug-Bestätigung im KI-Chat jetzt mit `slice.originName || slice.originIata`
+(und genauso für das Ziel) — wer einen Flug wählt, liest also "Berlin →
+Lissabon" statt "BER → LIS". Und die Destination-Karten auf der
+Startseite (`src/pages/Home.tsx:73`) haben jetzt
+`hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50` —
+Maus-Hover und Tab-Fokus geben jetzt ein klares Signal, dass die Karten
+klickbar sind.
 
-Daneben hat die automatische Tagesprüfung einen neuen, bestätigten Fund
-gemacht (Vorschlag 1), und die Startseite hat ein neues Feature
-bekommen, dem noch die passende Rückmeldung fehlt (Vorschlag 3).
-
-Unverändert zum letzten Mal, seit 05.10. offen: die inkonsistenten
-Lösch-Warnungen und der Urlaubsmodus/Lissabon-Mismatch — an beidem hat
-sich im Code nichts getan, deshalb hier nur kurz erwähnt statt erneut
-ausführlich vorgeschlagen.
+Ein neues Feature oder ein größerer Umbau war in den letzten zwei Tagen
+nicht dabei — IT-Chef hat laut eigenem Bericht gezielt bisher ungeprüfte
+Seiten durchsucht, aber nichts gefunden, das sich automatisch sicher
+fixen lässt. Dementsprechend bleibt es bei den zwei offenen Punkten aus
+den letzten Berichten, an denen sich im Code nichts getan hat.
 
 ## Meine Vorschläge
 
-1. **Flugauswahl im KI-Chat bestätigt mit rohen Flughafen-Codes statt
-   Klarnamen.** `src/hooks/useChat.ts:420` baut die Routen-Angabe für die
-   Bestätigungsnachricht selbst aus `slice.originIata`/`destinationIata`
-   — zwei Zeilen weiter unten wird aber schon `summarizeFlightOffer()`
-   aufgerufen, das genau den Namen-vor-Code-Fallback mitbringt
-   (`src/lib/format.ts:23-30`). Wer im Chat einen Flug wählt, liest
-   "BER → LIS" statt "Berlin → Lissabon" — während der Reiseplan direkt
-   danach den Klarnamen zeigt. *Vorschlag:* in `selectFlight()` dasselbe
-   `summarizeFlightOffer()`-Ergebnis für die Bestätigung nutzen, das
-   ohnehin schon berechnet wird.
+1. **Flug "Bearbeiten" → "Manuell suchen" führt weiterhin zu einem
+   komplett leeren Formular.** `src/components/search/FlightWizard.tsx:38-44`
+   initialisiert Herkunft, Ziel und Datum unverändert mit leeren Werten,
+   und die Komponente nimmt laut ihrem Props-Interface (`FlightWizardProps`,
+   Zeile 10-13) nur `onSearch` und `loading` entgegen — keine
+   Möglichkeit, Startwerte zu übergeben. Wer zur Flugsuche zurückkehrt,
+   tippt alles erneut ein, obwohl die zuvor gewählte Route im Trip schon
+   gespeichert ist. *Vorschlag:* `FlightWizard` um ein optionales
+   `initialValues`-Prop erweitern und beim Öffnen aus dem gespeicherten
+   Trip befüllen.
 
-2. **Flug "Bearbeiten" → "Manuell suchen" führt weiterhin zu einem
-   komplett leeren Formular.** `src/components/search/FlightWizard.tsx`
-   initialisiert Herkunft/Ziel/Datum immer mit leeren Werten — unabhängig
-   davon, dass die zuvor gewählte Flugroute laut Vorschlag von letzter
-   Woche jetzt im Trip gespeichert wird. Wer zur Flugsuche zurückkehrt,
-   tippt alles erneut ein, obwohl die Daten eigentlich schon da wären.
-   *Vorschlag:* die gespeicherten Sucheingaben/Route beim Öffnen von
-   `FlightWizard` als Startwerte übergeben.
+2. **Die Lösch-Warnungen klingen überall gleich dramatisch, auch wenn es
+   das nicht ist.** `Favoriten.tsx:128`, `Warenkorb.tsx:134`,
+   `Preisalarme.tsx:137`, `Aktivitaeten.tsx:118` und `EditMode.tsx:151`
+   verwenden alle wortgleich "Das lässt sich nicht rückgängig machen" —
+   auch dort, wo das gar nicht zutrifft, z. B. bei einem Favoriten, der
+   mit einem Klick wieder anlegbar wäre. Das verunsichert unnötig.
+   *Vorschlag:* den Warnhinweis nur dort zeigen, wo etwas wirklich
+   unwiderruflich ist (z. B. eine Buchung), und bei trivial
+   wiederherstellbaren Aktionen eine neutralere Formulierung ohne
+   "endgültig"-Ton verwenden.
 
-3. **Die neu klickbaren Destination-Karten auf der Startseite sehen aus
-   wie reine Deko.** `src/pages/Home.tsx:70-74` macht die vier Karten in
-   "Beliebte Reiseziele" per `Link` klickbar, aber weder `Link` noch
-   `Card` haben eine Hover- oder Fokus-Markierung — jedes andere
-   interaktive Element der App (`Button`, `Input`, `Tabs`) hat ein
-   `focus-visible:ring`-Muster, nur hier fehlt es. Wer mit der Maus
-   drüberfährt oder durchtabbt, bekommt kein Signal, dass hier etwas
-   passiert. *Vorschlag:* `focus-visible:ring-[3px] focus-visible:ring-ring/50`
-   plus einen leichten `hover:shadow-md` auf Link/Card übernehmen —
-   kein neues Design, nur das bestehende Muster anwenden.
+3. **Die "Urlaubsmodus aktivieren"-Karte für die Lissabon-Demoreise kann
+   auf einen leeren oder falschen Chat führen.** `src/pages/MeineReisen.tsx:49`
+   verlinkt von der Lissabon-Demokarte auf `/urlaubsmodus` — die Seite
+   selbst (`src/pages/Urlaubsmodus.tsx:12`) lädt ihren Trip aber nicht aus
+   dieser Demoreise, sondern aus `loadStoredChat()?.trip`, also dem im
+   KI-Chat gespeicherten Trip. Hat ein Nutzer noch nie mit dem KI-Chat
+   eine Reise geplant, landet er beim Klick auf die Lissabon-Karte in
+   einem Urlaubsmodus ohne Reisebezug — oder mit einem ganz anderen Ziel,
+   falls im Chat gerade etwas anderes gespeichert ist. *Vorschlag:* die
+   Demokarte entweder direkt mit den Lissabon-Demodaten befüllen, oder so
+   lange ausblenden/deaktivieren, bis echte Buchungen angebunden sind.
 
-4. **Weiterhin offen, unverändert:** Die Lösch-Warnungen (sechs Stellen,
-   u. a. `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
-   `Aktivitaeten.tsx:118` — alle wortgleich "nicht rückgängig machen",
-   obwohl z. B. ein Favorit trivial wieder anlegbar ist) und der
-   Urlaubsmodus-Mismatch (`MeineReisen.tsx:19` verlinkt von der
-   Lissabon-Demokarte auf `/urlaubsmodus`, das aber nur den im KI-Chat
-   gespeicherten Trip zeigt, nicht die Demo-Reise). Beide seit dem
-   05.10. bzw. 09.10. unverändert — der Vorschlag von damals steht nach
-   wie vor.
-
-_Letztes Update: 2026-10-12_
+_Letztes Update: 2026-10-13_
