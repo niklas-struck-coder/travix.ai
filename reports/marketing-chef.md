@@ -1,53 +1,49 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-12
+**Datum:** 2026-10-13
 
-## Was ist seit dem letzten Eintrag (2026-10-10) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-12) passiert?
 
-Der Flug-Bearbeiten-Fund vom 10.10. ist jetzt zur Hälfte behoben: Die
-Flugauswahl speichert jetzt Route, Airline und Preis statt nur "es ist
-ein Flug" (`Flugsuche.tsx` und `useChat.ts`, von IT-Chef gemergt und
-unabhängig vom parallelen Marketing-Auto-Kanal im Code bestätigt). Das
-Such-Formular selbst startet beim erneuten Öffnen über "Bearbeiten"
-aber weiterhin komplett leer statt vorbefüllt – selbst in
-`FlightWizard.tsx` geprüft: alle Felder laufen noch auf leere
-Startwerte. Halber Fix, also vorerst weiterhin halber Promo-Stopp.
+Zwei kleine, aber im Code bestätigte Fixes: Die Destination-Karten auf
+der Startseite haben jetzt einen Hover-/Fokus-Hinweis (`Home.tsx`,
+vorher nur Deko-Klasse, jetzt dasselbe Fokus-Ring-Muster wie überall
+sonst in der App). Und die Chat-Bestätigung nach einer Flugauswahl zeigt
+jetzt Klarnamen statt roher IATA-Codes ("Berlin → Lissabon" statt
+"BER → LIS") – derselbe Fix, der vorher schon zweimal an anderer Stelle
+(`FlightCard.tsx`, `summarizeFlightOffer()`) gemacht wurde, jetzt auch
+in `useChat.ts`. Beides selbst im Code verifiziert, nicht nur laut
+Commit-Message übernommen.
 
-Dazu ein neuer, kleiner Fund-und-Fix in dieser Woche: Die
-Destination-Karten auf der Startseite sahen klickbar aus, taten aber
-nichts – jetzt verlinken sie zum KI-Chat, und Support-Chef hat zusätzlich
-einen fehlenden Hover-/Fokus-Hinweis gefunden und fixen lassen. Genau
-die "sieht nach Button aus, ist aber nur Deko"-Kategorie, die sonst im
-Mini-Changelog landet. Der Tier-4-Kandidatentopf der parallelen
-Marketing-Auto-Spur steht dafür jetzt bei vier von acht – noch keine
-neue Changelog-Ausgabe fällig.
-
-Der Urlaubsmodus/Lissabon-Datenquellen-Mismatch ist seit dem 10.10.
-unverändert offen, keine neuen Positionierungsentscheidungen, keine
-Kennzahlen zu berichten.
+Der Flug-Bearbeiten-Fund (Formular startet beim erneuten Öffnen weiterhin
+leer) ist weiterhin offen – keine Änderung seit dem 12.10. Keine neuen
+Positionierungsentscheidungen, keine Kennzahlen zu berichten.
 
 ## Vorschläge
 
-1. **Flug-Bearbeiten-Promo bleibt gesperrt, Hotel-Bearbeiten-Promo kannst
-   du dagegen schon fahren.** "Bearbeite deine Reise jederzeit" stimmt für
-   den Flug-Teil erst, wenn auch das Formular vorbefüllt startet. Die
-   Hotelsuche speichert laut Code aber von Anfang an korrekt – lohnt sich,
-   das Versprechen vorerst gezielt auf Unterkunft zu begrenzen statt
-   pauschal "jede Buchung" zu versprechen.
+1. **Flug-Bearbeiten-Promo bleibt gesperrt, Hotel-Bearbeiten-Promo weiter
+   fahren.** Unverändert zum letzten Bericht: Solange das Flugformular
+   beim Bearbeiten leer startet, lieber "Bearbeite deine Reise" gezielt
+   auf Unterkunft begrenzen statt pauschal zu versprechen.
 
-2. **Destination-Karten-Fix als Changelog-Kandidat vormerken, nicht
-   einzeln bewerben.** Der Kandidatentopf steht bei vier von acht, also
-   noch zu früh für eine eigene Mini-Changelog-Ausgabe. Aber die
-   Geschichte selbst ist griffig für Nutzer ("sah aus wie ein Button, war
-   nur Deko – jetzt führt er zum KI-Chat") – gute Kandidatin für die
-   nächste Ausgabe, wenn der Topf voll ist.
+2. **Content-Idee: "Dasselbe Muster, dreimal konsequent angewendet" als
+   Beleg für sauberen Code statt als Behauptung.** Der IATA-Klarname-Fix
+   ist jetzt das dritte Mal im selben Code-Bereich passiert – das ist
+   eine ehrliche, kleine Geschichte über Konsistenz in der Produktarbeit
+   ("wir flicken nicht einzeln, wir übertragen ein einmal etabliertes
+   Muster"). Eignet sich gut als Randnotiz in der nächsten
+   Mini-Changelog-Ausgabe, nicht als eigener Post.
 
-3. **Kleine, glaubwürdige Content-Idee: doppelte Verifizierung als
-   Beleg, nicht als Behauptung.** Heute haben IT-Chef und der separate
-   Marketing-Auto-Kanal unabhängig voneinander im Code nachgeprüft, dass
-   die drei am 10.10. gemeldeten Bugs wirklich behoben sind – nicht nur
-   laut Commit-Message. Das ist ein kleiner, aber echter Baustein für die
-   "wir behaupten nichts, wir zeigen es"-Tonalität. Eher als Randnotiz in
-   einer größeren Mini-Changelog-Ausgabe nutzen, nicht als eigenen Post.
+3. **Accessibility als eigenes, kleines Content-Thema vormerken.** Der
+   Fokus-Ring auf den Destination-Karten ist jetzt an fünf Stellen der
+   App etabliert (Button, Input, Tabs, Badges, jetzt Karten). Das ist
+   genug Substanz für eine kurze, ehrliche Aussage wie "wir bauen
+   Tastatur-Bedienbarkeit von Anfang an mit" – aber erst, wenn der
+   Tier-4-Kandidatentopf (laut Marketing-Auto-Kanal aktuell bei 5 von 8)
+   für eine neue Changelog-Ausgabe voll ist. Noch nicht einzeln bewerben.
 
-_Letztes Update: 2026-10-12_
+4. **Kein Grund für neue Grundsatz-Vorschläge.** Positionierung,
+   Zielgruppen und die offene Urlaubsmodus/Lissabon-Datenquellen-Frage
+   sind seit dem letzten Lauf unverändert – hier gibt es ehrlich nichts
+   Neues zu berichten statt künstlich etwas zu erfinden.
+
+_Letztes Update: 2026-10-13_
