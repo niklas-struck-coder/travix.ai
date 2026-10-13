@@ -18887,3 +18887,70 @@ Baseline hinaus. `git status` nach Abschluss: keine uncommitteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-13 (fünfter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `it-chef/auto` (`1474988`, Stand nach dem
+vierten Lauf heute) war bereits exakt auf dem Stand von `origin/main`
+(`5bdd370`) — kein Merge nötig, `main` unberührt. `node_modules` fehlte
+im frischen Checkout, zunächst `npm ci` (650 Pakete, nur die bekannten
+`npm audit`-Hinweise, keine Blocker). Baseline danach grün: `npx eslint .`
+sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber, `npx vitest run`
+457/457 grün (63 Testdateien), `npm run build` sauber (unveränderte
+811-KB-Chunk-Size-Warnung) — alles grün, bevor überhaupt etwas angefasst
+wurde.
+
+**Auswahl:** `git log --oneline -- ZEITPLAN.md tasks/tasks-prd-travix-
+platform.md` geprüft: der letzte Commit, der eine der beiden Dateien
+anfasst, ist exakt der eigene vierte-Lauf-Commit (`1474988`) — seit dem
+vierten Lauf heute gab es also auch dort keine neue, von Ni selbst
+eingetragene Änderung. `ZEITPLAN.md` (komplett, 3336 Zeilen) und
+`tasks/tasks-prd-travix-platform.md` (komplett, 232 Zeilen) dennoch
+vollständig gelesen statt nur gegen den Log abgeglichen. Alle offenen
+Checkbox-Punkte in beiden Dateien sind unverändert dieselben bereits
+mehrfach dokumentierten: 2.0/2.x Base44/Auth-Backend-Entscheidung,
+4.1-4.3 KI-Engine (wartet auf Gemini-Zugangsdaten), 5.7 Zug/Bus/Fähre
+(fehlende Datenquelle + Anbieterwahl), 6.2 `TripItem.tsx`
+(fehlende Provider-URL-Felder), 6.6/6.7 `CostBreakdown`/`calculateCosts`
+(fehlende Preisfelder in `TripDraft`), 7.4 Chat-Resume-Architektur
+(Datenmodell-Entscheidung), 7.12 Reisebudget (dieselbe fehlende
+Preisfelder-Grundlage), 8.1-8.7/8.9/8.11/8.12 Urlaubsmodus/Deal-Finder/
+Premium/Hilfe/Rewards (Produktentscheidungen bzw. wartet auf
+FAQ-Inhalte von Support-Chef), Rechtstexte (explizit ausgeschlossen).
+Da seit dem dritten Lauf heute (bestätigt per
+`git diff --stat 83be974 HEAD -- src/`, weiterhin leer) keine einzige
+Quelländerung unter `src/` stattgefunden hat und der vierte Lauf bereits
+einen eigens beauftragten Explore-Agenten mit vollständiger Liste aller
+bisher geprüften/verworfenen Kandidaten sowie einer erneuten,
+interpretationsfreien Prüfung der drei offenen Support-Chef-Funde
+durchgeführt hat, wurde auf eine fünfte, inhaltlich redundante
+Voll-Exploration verzichtet — stattdessen gezielt nachgeprüft, ob sich an
+den damals festgestellten Fakten etwas geändert hat.
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Keine neuen
+Quelländerungen, keine neuen Einträge in `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` seit dem vierten Lauf, keine der
+bekannten offenen Produkt-/Architekturfragen hat sich aufgelöst. Die drei
+vom vierten Lauf neu geprüften Support-Chef-Funde (Lösch-Warnungen-
+Tonalität, Urlaubsmodus/Lissabon-Mismatch, FlightWizard-Vorbefüllung)
+bleiben aus denselben, dort bereits genannten Gründen offen
+(Interpretations- bzw. Architekturfrage). Alle übrigen bereits
+geprüften und verworfenen Kandidaten aus den Läufen 1-4 heute (triviale
+shadcn/ui-Wrapper ohne Testdatei, `selectFlight`-Fallback, Home.tsx-
+Hover/Fokus bereits gefixt, `useConcierge`-Timeout nicht real auslösbar,
+`accommodationNoticeHandled`-Zweig praktisch unerreichbar, drei
+Regex-Escape-Duplikate, Wizard-Inline-Fehlertext bei Datum) bleiben aus
+denselben Gründen verworfen — hier nicht erneut als neuer Fund
+präsentiert. Kein Code-Commit für einen neuen Punkt — nur dieser
+Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein weiterer
+eigener Testlauf nötig über die zu Beginn bereits grün bestätigte
+Baseline hinaus (`npx eslint .`, `npx tsc --noEmit -p tsconfig.app.json`,
+`npx vitest run` 457/457, `npm run build`, alle vor Beginn der Auswahl
+ausgeführt). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
