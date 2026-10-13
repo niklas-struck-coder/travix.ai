@@ -6610,3 +6610,55 @@ Beide Merges nach `origin/main` gepusht (`149fc28..1b291b9`).
 
 **Info an Ni:** Nein — alle drei Prüfungen bestanden (eine davon ohne
 neuen Commit), keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## Früher Nacht-Check 2026-10-13
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei, zwischen 0 und 4 Uhr nach IT-Chefs mehreren stündlichen Läufen.
+`marketing-chef/auto` und `support-chef/auto` laut Vorgabe für diesen
+frühen Lauf trotzdem kurz mitgeprüft: `git log origin/main..origin/<branch>`
+für beide leer — keine neuen Commits seit dem letzten Merge, also nichts
+zu tun (die beiden laufen erst um 6 Uhr, separater späterer Lauf).
+
+**Prüfung `it-chef/auto`** (4 Commits seit letztem Merge, bis `83be974`):
+Zwei der vier Commits (`8c224c5`, `83be974`, "zweiter"/"dritter Lauf
+desselben Tages") sind reine Log-Einträge ohne Code-Änderung ("kein
+neuer sicherer Punkt gefunden") — per `git diff --stat` bestätigt, dass
+dabei nur `it-chef-auto-log.md` angefasst wurde. Die zwei übrigen Commits
+bringen echte Code-Änderungen:
+
+- `02132da` (Flughafen-Klarnamen statt IATA-Codes in Chat-Bestätigung,
+  `src/hooks/useChat.ts`): `route` in `selectFlight()` nutzt jetzt
+  `slice.originName || slice.originIata` / `...destinationName ||
+  ...destinationIata` statt nur der IATA-Codes, mechanisch übernommen
+  aus demselben bereits etablierten Muster in `summarizeFlightOffer()`.
+- `4541e9f` (Hover-/Fokus-Markierung für Destination-Karten,
+  `src/pages/Home.tsx`): `className` des umschließenden `Link` von
+  `"block"` auf `"block rounded-xl outline-none transition-shadow
+  hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50"`
+  erweitert — exakt das Muster, das bereits in `button-variants.ts`,
+  `tabs.tsx`, `badge-variants.ts`, `input.tsx` verwendet wird (per
+  `grep -n focus-visible` an diesen vier Stellen gegengeprüft).
+
+Beide Commits betreffen jeweils nur den einen im Log beschriebenen
+Punkt (kein Scope-Creep über `useChat.ts`/`useChat.test.ts` bzw.
+`Home.tsx`/`Home.test.tsx` plus `ZEITPLAN.md`-Dokumentation hinaus).
+Kein Bezug zu Auth, Zahlungen oder rechtlichen Texten. Kein UI-Konflikt
+mit `MARKENDESIGN.md` (dort keine Vorgaben zu Fokus-/Hover-Styles,
+also kein Widerspruch zur bestehenden Codebase-Konvention).
+
+**Unabhängig selbst verifiziert** (nicht nur dem Log geglaubt):
+`it-chef/auto` ausgecheckt, `npm install` (Dependencies fehlten im
+frischen Checkout, 650 Pakete, nur bekannte `npm audit`-Hinweise, keine
+neuen Blocker). Danach selbst ausgeführt: `npx tsc -b` → sauber, `npx
+eslint .` → sauber, `npx vitest run` → **457/457 Tests grün** (63
+Testdateien) — deckt sich exakt mit der im `it-chef-auto-log.md`
+behaupteten Zahl.
+
+→ **Passt, nach `main` gemergt** (Fast-Forward `76c4c83..83be974`, da
+`origin/main` vollständiger Vorfahre von `origin/it-chef/auto` war).
+Nach `origin/main` gepusht.
+
+**Info an Ni:** Nein — Prüfung bestanden, keine Auffälligkeit, die seine
+Aufmerksamkeit bräuchte. `marketing-chef/auto`/`support-chef/auto` ohne
+neue Commits, folgen im separaten späteren Lauf.
