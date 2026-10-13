@@ -18810,3 +18810,80 @@ uncommitteten Änderungen außer diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-13 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `it-chef/auto` (`83be974`, Stand nach dem
+dritten Lauf heute) lag hinter dem zwischenzeitlich weitergewanderten
+`origin/main` (Freigabe-Chef hat main auf `5bdd370` gebracht, mit neuen
+Inhalten in `freigabe-chef-log.md`, `marketing-chef-auto-log.md`,
+`marketing/freigabe-uebersicht.md`, `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md`, `status.md`,
+`support-chef-auto-log.md`). Per `git merge origin/main` in `it-chef/auto`
+geholt — reiner Fast-Forward, keine einzige Datei unter `src/`
+betroffen, `main` dabei unberührt gelassen. `npm ci` ausgeführt
+(Dependencies fehlten im frischen Checkout), danach Baseline geprüft:
+`npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber,
+`npx vitest run` 457/457 grün (63 Testdateien), `npm run build` sauber
+(unveränderte Chunk-Size-Warnung) — alles grün, bevor überhaupt etwas
+angefasst wurde.
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+ohne neuen, eindeutig umsetzbaren Checkbox-Punkt (2.0 Base44/Auth,
+4.1-4.3 KI-Engine, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12, 7.4,
+8.1-8.7/8.9/8.11/8.12 weiterhin blockiert oder Produkt-/
+Architekturentscheidung). Einen eigens beauftragten Explore-Agenten mit
+einer vollständigen, expliziten Liste aller heute bereits dreimal
+geprüften/verworfenen Funde beauftragt (gleiche Kategorien wie in den
+vorherigen drei Einträgen von heute: trivialer shadcn/ui-Wrapper ohne
+Testdatei, `selectFlight`-Fallback bereits gefixt, Home.tsx-Hover/Fokus
+bereits gefixt, `useConcierge`-Timeout nicht real auslösbar,
+`accommodationNoticeHandled`-Zweig praktisch unerreichbar, drei
+Regex-Escape-Duplikate, Wizard-Inline-Fehlertext bei Datum), zusätzlich
+mit dem Auftrag, die drei im frisch gemergten `reports/support-chef.md`
+(Datum 2026-10-13) weiterhin offenen Funde noch einmal ehrlich auf einen
+rein mechanischen, interpretationsfreien Teilaspekt zu prüfen, statt sie
+nur pauschal zu übernehmen.
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Der Agent bestätigt:
+seit dem dritten Lauf heute (`83be974`) gab es keine einzige
+Codeänderung unter `src/` (`git diff --stat 83be974 HEAD -- src/` leer)
+— nur gemergte Reports/Logs. Testdatei-Abgleich über alle 82
+Nicht-Test-Dateien unter `src/**/*.ts(x)` ergab keine neue Lücke (ohne
+Test bleiben nur Einstiegspunkte, reine Typdefinitionsdateien ohne
+exportierte Funktionen, die bereits ausgeschlossenen shadcn-Wrapper und
+drei reine `cva()`-Style-Konstanten ohne jede Logik). Die drei offenen
+Support-Chef-Funde explizit neu geprüft:
+- **Lösch-Warnungen-Tonalität:** gezielt nach einer tatsächlichen
+  Undo-Funktion gesucht (`grep -rn "ückgängig|undo|wiederherstell"`) —
+  es gibt im gesamten Code keine einzige echte Undo-Funktionalität,
+  jeder Treffer ist dieselbe Warnmeldung. Eine "mechanische"
+  Unterscheidung zwischen trivial wiederherstellbaren und echten
+  Löschaktionen würde erfordern, selbst neu zu definieren, was als
+  Undo zählt (z. B. erneutes Hinzufügen als Favorit) — keine im Code
+  nachweisbare Tatsache, sondern eine neue Produktdefinition. Bleibt
+  Interpretationsfrage.
+- **Urlaubsmodus/Lissabon-Mismatch:** bestätigt reproduzierbar
+  (`Urlaubsmodus.tsx` lädt bewusst `loadStoredChat()?.trip`,
+  `MeineReisen.tsx` verlinkt von einer hartcodierten Demo-Karte dorthin),
+  aber die Behebung erfordert eine Entscheidung (Demo-Daten fest
+  verdrahten oder Link entfernen/deaktivieren) — bleibt
+  Architekturfrage.
+- **FlightWizard-Vorbefüllung:** keine neue Prüfung über den
+  dokumentierten Stand hinaus, da keine Codeänderung seit dem letzten
+  Lauf.
+
+Eigenständige Lesung (nicht nur grep) von `calculateProgress.ts`,
+`format.ts`, `checklistRules.ts`, `routes.tsx` ergab keinen neuen
+Logikfehler. Die übrigen bekannten offenen Punkte bleiben aus denselben,
+in früheren Einträgen genannten Gründen zurückgestellt. Kein
+Code-Commit für einen neuen Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein weiterer
+eigener Testlauf nötig über die zu Beginn bereits grün bestätigte
+Baseline hinaus. `git status` nach Abschluss: keine uncommitteten
+Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
