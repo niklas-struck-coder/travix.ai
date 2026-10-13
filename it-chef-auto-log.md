@@ -18597,3 +18597,71 @@ zuvor konfliktfrei gemergten Dateien von `origin/main`.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-13
+
+**Baseline vor dem Lauf:** `node_modules` fehlte im frischen Checkout
+(leere Cloud-Sandbox) — zunächst `npm ci` ausgeführt (650 Pakete, nur die
+bekannten `npm audit`-Hinweise, keine Blocker). Danach Baseline grün:
+`npx eslint .` sauber, `npx tsc -b --noEmit` sauber, `npm test` 456/456
+grün (63 Testdateien), `npm run build` sauber.
+
+**Auswahl:** `reports/support-chef.md` (Datum 2026-10-12, Vorschlag 3)
+meldet, dass die vier Destination-Karten auf der Startseite
+(`src/pages/Home.tsx:70-82`, seit dem 11.10. klickbar, siehe
+`ZEITPLAN.md`) weder eine Hover- noch eine Fokus-Markierung haben,
+während jedes andere interaktive Element der App (Button, Input, Tabs,
+Badge-Links) bereits dasselbe `focus-visible:ring-[3px]
+focus-visible:ring-ring/50`-Muster nutzt (`button-variants.ts`,
+`tabs.tsx`, `badge-variants.ts`, `input.tsx`). Im Code gegen den
+aktuellen Stand geprüft: Zeile 73 hatte tatsächlich nur `className="block"`
+auf dem `Link`, keine Hover-/Fokus-Klasse — der gemeldete Fund stimmt
+unverändert. Der Git-Log-Eintrag "Merge support-chef/auto:
+Destination-Karten ohne Hover-/Fokus-Hinweis" vom 12.10. war dabei
+ausschließlich der gemergte Support-Chef-Bericht selbst (nur
+`support-chef-auto-log.md` geändert, siehe `git show --stat 1b291b9`) —
+keine Code-Änderung an `Home.tsx`, der Fund war also tatsächlich noch
+offen.
+
+**Warum sicher genug:** Kein Bezug zu Auth, Zahlungen, Nutzerdaten oder
+rechtlichen Texten (reine visuelle Interaktions-Markierung auf einer
+bereits bestehenden Seite). Keine offene Produkt- oder
+Architekturentscheidung — das Fokus-Ring-Muster ist bereits an vier
+anderen Stellen der Codebasis etabliert, hier nur mechanisch auf eine
+fünfte Stelle übertragen; `hover:shadow-md` ist exakt die von
+Support-Chef vorgeschlagene, zusätzliche leichte Hover-Markierung. Klar
+genug beschrieben (exakte Datei, exakte Zeilen, exakte vorgeschlagene
+Klassen). Objektiv prüfbar (Klassen der gerenderten Link-Komponente per
+Test abfragbar).
+
+**Umsetzung:** `src/pages/Home.tsx` — `className` des `Link`, der jede
+Destination-Karte umschließt, von `"block"` auf
+`"block rounded-xl outline-none transition-shadow hover:shadow-md
+focus-visible:ring-[3px] focus-visible:ring-ring/50"` erweitert.
+`rounded-xl` ergänzt, damit der Fokus-Ring der abgerundeten Form der
+`Card` darunter folgt statt eckig darüber zu laufen (`Card` selbst nutzt
+`rounded-xl`, siehe `card.tsx`); `outline-none`, da der Fokus bereits
+über den Ring sichtbar ist (gleiches Muster wie `buttonVariants`). Keine
+sonstige Änderung an Struktur, Text oder Verhalten der Karten. Neuer
+Regressionstest in `src/pages/Home.test.tsx` ("gives each destination
+card a visible hover/focus affordance"), prüft, dass die Link-Klassen
+`focus-visible:ring-[3px]` und `hover:shadow-md` enthalten.
+`ZEITPLAN.md` (Phase-3-Abschnitt, Programmierung/IT-Chef) entsprechend
+ergänzt; keine Checkbox in `tasks/tasks-prd-travix-platform.md`
+betroffen, da dieser Punkt keiner einzelnen PRD-Aufgabennummer
+zugeordnet ist (reiner, von Support-Chef gemeldeter Bugfix, wie schon
+mehrere vorherige Funde in diesem Bereich).
+
+**Geprüft:** Vor dem Fix per `git stash` nur der Quelländerung
+(`src/pages/Home.tsx`) verifiziert, dass der neue Test reproduzierbar rot
+ist (`npx vitest run src/pages/Home.test.tsx` → 1 von 3 Tests
+fehlgeschlagen, `link.className` enthielt weder `focus-visible:ring-[3px]`
+noch `hover:shadow-md`). Nach dem Fix: derselbe Testlauf 3/3 grün. Volle
+Suite danach erneut grün: `npx eslint .` sauber, `npx tsc -b --noEmit`
+sauber, `npm test` 457/457 grün (63 Testdateien, +1 gegenüber der
+Baseline), `npm run build` sauber (unveränderte Chunk-Size-Warnung).
+`git status` nach Abschluss: nur die erwarteten Änderungen (`Home.tsx`,
+`Home.test.tsx`, `ZEITPLAN.md`, dieser Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

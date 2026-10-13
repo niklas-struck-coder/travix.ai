@@ -22,4 +22,15 @@ describe('Home', () => {
     const link = screen.getByRole('link', { name: /reise nach lissabon mit ki planen/i })
     expect(link).toHaveAttribute('href', '/ki-chat?destination=Lissabon')
   })
+
+  it('gives each destination card a visible hover/focus affordance', () => {
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>,
+    )
+    const link = screen.getByRole('link', { name: /reise nach lissabon mit ki planen/i })
+    expect(link.className).toContain('focus-visible:ring-[3px]')
+    expect(link.className).toContain('hover:shadow-md')
+  })
 })

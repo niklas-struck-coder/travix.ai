@@ -70,7 +70,7 @@ export function Home() {
               <Link
                 to={`/ki-chat?destination=${encodeURIComponent(destination.name)}`}
                 aria-label={`Reise nach ${destination.name} mit KI planen`}
-                className="block"
+                className="block rounded-xl outline-none transition-shadow hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 <Card className="overflow-hidden py-0">
                   <div className={`h-28 bg-gradient-to-br ${destination.gradient}`} />

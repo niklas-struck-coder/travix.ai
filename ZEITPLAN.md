@@ -238,6 +238,21 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `Home.tsx`) reproduzierbar rot verifiziert (kein Link-Element mit diesem
   `aria-label` im Dokument).
+  Vom autonomen IT-Chef-Lauf am 13.10. einen von `reports/support-chef.md`
+  (12.10., Vorschlag 3) gemeldeten Fund behoben: Die vier Destination-
+  Karten auf der Startseite (3.8, seit dem 11.10. klickbar, s.o.) hatten
+  weder einen Hover- noch einen Fokus-Hinweis, obwohl jedes andere
+  interaktive Element der App (`Button`, `Input`, `Tabs`, Badge-Links)
+  bereits dasselbe `focus-visible:ring-[3px] focus-visible:ring-ring/50`-
+  Muster nutzt (`button-variants.ts`, `tabs.tsx`, `badge-variants.ts`,
+  `input.tsx`). Wer mit der Maus drüberfuhr oder durchtabbte, bekam kein
+  Signal, dass die Karte klickbar ist. Fix: exakt das von Support-Chef
+  vorgeschlagene, bestehende Fokus-Muster auf den umschließenden `Link`
+  übernommen, plus `hover:shadow-md` als leichtes Hover-Signal (beides
+  wie vorgeschlagen, keine neue Design-Entscheidung) und `rounded-xl`,
+  damit der Fokus-Ring der Kartenform folgt statt eckig über die
+  abgerundete `Card` zu laufen. Neuer Regressionstest in `Home.test.tsx`
+  (prüft die beiden neuen Klassen auf dem Link).
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
