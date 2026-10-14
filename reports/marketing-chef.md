@@ -1,49 +1,54 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-13
+**Datum:** 2026-10-14
 
-## Was ist seit dem letzten Eintrag (2026-10-12) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-13) passiert?
 
-Zwei kleine, aber im Code bestätigte Fixes: Die Destination-Karten auf
-der Startseite haben jetzt einen Hover-/Fokus-Hinweis (`Home.tsx`,
-vorher nur Deko-Klasse, jetzt dasselbe Fokus-Ring-Muster wie überall
-sonst in der App). Und die Chat-Bestätigung nach einer Flugauswahl zeigt
-jetzt Klarnamen statt roher IATA-Codes ("Berlin → Lissabon" statt
-"BER → LIS") – derselbe Fix, der vorher schon zweimal an anderer Stelle
-(`FlightCard.tsx`, `summarizeFlightOffer()`) gemacht wurde, jetzt auch
-in `useChat.ts`. Beides selbst im Code verifiziert, nicht nur laut
-Commit-Message übernommen.
+Im Produkt-Code (`src/`) hat sich seit dem letzten Bericht nichts
+verändert – das habe ich per `git diff cdd4a7d..HEAD -- src/` selbst
+geprüft, nicht nur aus anderen Berichten übernommen. Alle Commits seit
+dem 13.10. sind Markdown-Berichte, Logs und Merges von IT-Chef,
+Support-Chef und eurem Freigabe-Chef, die untereinander bestätigen:
+kein neuer sicherer Auto-Fix-Punkt gefunden.
 
-Der Flug-Bearbeiten-Fund (Formular startet beim erneuten Öffnen weiterhin
-leer) ist weiterhin offen – keine Änderung seit dem 12.10. Keine neuen
+Eine Sache ist aber als **Befund** neu, noch nicht als Fix: Der
+Support-Chef hat gefunden, dass der Urlaubsmodus-Concierge bei jeder
+ehrlichen "Das weiß ich (noch) nicht"-Antwort denselben rot
+schüttelnden Warn-Avatar zeigt wie bei einem echten Fehler
+(`useConcierge.ts`). Noch nicht behoben – aber relevant für euch, weil
+genau diese Ehrlichkeit ("wir erfinden keine Antwort") eigentlich ein
+Markenwert ist, der gerade visuell wie ein Bug aussieht statt wie eine
+bewusste Haltung.
+
+Der Tier-4-Kandidatentopf für die nächste Mini-Changelog-Ausgabe steht
+unverändert bei 5 von 8 (laut Marketing-Auto-Kanal). Keine neuen
 Positionierungsentscheidungen, keine Kennzahlen zu berichten.
 
 ## Vorschläge
 
-1. **Flug-Bearbeiten-Promo bleibt gesperrt, Hotel-Bearbeiten-Promo weiter
-   fahren.** Unverändert zum letzten Bericht: Solange das Flugformular
-   beim Bearbeiten leer startet, lieber "Bearbeite deine Reise" gezielt
-   auf Unterkunft begrenzen statt pauschal zu versprechen.
+1. **Erst den Avatar-Fund fixen, dann draus einen Content-Moment
+   machen.** Sobald IT-Chef den neutralen Avatar-Zustand für ehrliche
+   Ausweich-Antworten umgesetzt hat, ist das ein guter Mini-Beleg für
+   "Ehrlichkeit als Feature" (eure Content-Säule 1) – nicht als eigener
+   Post, aber als Zeile im nächsten Changelog: "Der Concierge sagt jetzt
+   ruhig 'weiß ich nicht', statt Alarm zu schlagen." Vorher nicht
+   ankündigen, sonst wird aus einem echten Produktdetail eine leere
+   Behauptung.
 
-2. **Content-Idee: "Dasselbe Muster, dreimal konsequent angewendet" als
-   Beleg für sauberen Code statt als Behauptung.** Der IATA-Klarname-Fix
-   ist jetzt das dritte Mal im selben Code-Bereich passiert – das ist
-   eine ehrliche, kleine Geschichte über Konsistenz in der Produktarbeit
-   ("wir flicken nicht einzeln, wir übertragen ein einmal etabliertes
-   Muster"). Eignet sich gut als Randnotiz in der nächsten
-   Mini-Changelog-Ausgabe, nicht als eigener Post.
+2. **Flug-Bearbeiten-Promo bleibt gesperrt, Hotel-Bearbeiten-Promo
+   weiter fahren.** Unverändert zum letzten Bericht: Solange das
+   Flugformular beim Bearbeiten leer startet (noch offen laut IT-Chef),
+   lieber "Bearbeite deine Reise" gezielt auf Unterkunft begrenzen statt
+   pauschal zu versprechen.
 
-3. **Accessibility als eigenes, kleines Content-Thema vormerken.** Der
-   Fokus-Ring auf den Destination-Karten ist jetzt an fünf Stellen der
-   App etabliert (Button, Input, Tabs, Badges, jetzt Karten). Das ist
-   genug Substanz für eine kurze, ehrliche Aussage wie "wir bauen
-   Tastatur-Bedienbarkeit von Anfang an mit" – aber erst, wenn der
-   Tier-4-Kandidatentopf (laut Marketing-Auto-Kanal aktuell bei 5 von 8)
-   für eine neue Changelog-Ausgabe voll ist. Noch nicht einzeln bewerben.
+3. **Kein Grund, den Tier-4-Topf künstlich zu befüllen.** Fünf von acht
+   ist ein ehrlicher Zwischenstand, keine Lücke, die mit erfundenen
+   Themen gestopft werden muss. Lieber auf den Avatar-Fix warten, der
+   als sechster Kandidat zählen kann, sobald er tatsächlich gefixt ist.
 
-4. **Kein Grund für neue Grundsatz-Vorschläge.** Positionierung,
-   Zielgruppen und die offene Urlaubsmodus/Lissabon-Datenquellen-Frage
-   sind seit dem letzten Lauf unverändert – hier gibt es ehrlich nichts
-   Neues zu berichten statt künstlich etwas zu erfinden.
+4. **Positionierung/Zielgruppen weiterhin unverändert – nichts
+   Neues zu berichten.** Hier lieber ehrlich still bleiben, statt
+   Grundsatzvorschläge zu erfinden, die der aktuelle Entwicklungsstand
+   nicht hergibt.
 
-_Letztes Update: 2026-10-13_
+_Letztes Update: 2026-10-14_
