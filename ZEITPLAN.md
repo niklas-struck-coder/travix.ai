@@ -1552,6 +1552,15 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Tests) reproduzierbar rot verifiziert (alle sechs neuen Tests
   schlugen fehl: `summarizeFlightOffer` war nicht exportiert,
   `transportDetail` blieb `undefined`).
+  Vom autonomen IT-Chef-Lauf am 14.10. (fünfter Lauf desselben Tages)
+  einen eigenständig (über einen eigens beauftragten Explore-Agenten)
+  gefundenen Hygiene-Punkt behoben: Der Fehler-Anzeige-Block
+  (`role="alert"`, `AlertTriangle`-Icon, identische Tailwind-Klassen,
+  `errors.map`-Schleife) lag in `FlightResults.tsx` und
+  `HotelResults.tsx` Zeichen-für-Zeichen dupliziert vor. Fix: neue
+  `SearchErrorAlert.tsx` (gleiche Kategorie wie `NoResultsMessage.tsx`),
+  beide Komponenten rufen sie jetzt statt des duplizierten Blocks auf —
+  keine Verhaltensänderung. Neue `SearchErrorAlert.test.tsx` (2 Tests).
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

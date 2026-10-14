@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
-import { AlertTriangle } from 'lucide-react'
 import { FlightCard } from '@/components/search/FlightCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
+import { SearchErrorAlert } from '@/components/search/SearchErrorAlert'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
 import type { DuffelError, FlightOffer } from '@/types/duffel'
 
@@ -23,19 +23,7 @@ export function FlightResults({ offers, errors, loading, onSelect }: FlightResul
   }
 
   if (errors.length > 0) {
-    return (
-      <div
-        role="alert"
-        className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-      >
-        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-        <div className="flex flex-col gap-1">
-          {errors.map((error, index) => (
-            <span key={index}>{error.message}</span>
-          ))}
-        </div>
-      </div>
-    )
+    return <SearchErrorAlert errors={errors} />
   }
 
   if (!offers) return null

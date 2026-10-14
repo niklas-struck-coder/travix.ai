@@ -19177,3 +19177,70 @@ nach Abschluss: keine uncommitteten Änderungen außer diesem Commit.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-14 (fünfter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei — fünfter Lauf heute. `it-chef/auto` war bereits auf dem aktuellen
+Stand von `origin/main` (`ac63500`, unverändert seit dem vierten Lauf
+heute) — kein Merge nötig, `main` unberührt gelassen. `npm ci` ausgeführt
+(Dependencies fehlten im frischen Checkout), danach Baseline geprüft:
+`npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber,
+`npx vitest run` 457/457 grün (63 Testdateien) — alles grün, bevor
+überhaupt etwas angefasst wurde.
+
+**Auswahl:** Einen eigens beauftragten Explore-Agenten gezielt nach
+einem neuen, noch nicht gemeldeten Kandidaten suchen lassen (mit
+Auftrag, alle bereits bekannten, als nicht sicher genug eingestuften
+Punkte sowie `reports/it-chef.md`, `reports/support-chef.md`,
+`support-chef-auto-log.md` und `marketing-chef-auto-log.md` zu prüfen,
+um keine Dopplung zu riskieren). Fund: Der komplette Fehler-Anzeige-Block
+(`role="alert"`, `AlertTriangle`-Icon, identische Tailwind-Klassen,
+`errors.map`-Schleife) lag in `FlightResults.tsx` (Zeile 25-39) und
+`HotelResults.tsx` (Zeile 26-40) Zeichen-für-Zeichen dupliziert vor —
+selbst verifiziert, beide Blöcke waren wortgleich bis auf den
+umgebenden Komponentennamen.
+
+**Geprüft gegen die vier Sicherheitskriterien:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder Rechtstexten —
+  reine UI-Darstellungskomponente für Demo-Suchfehler.
+- Keine offene Produkt-/Architekturentscheidung — reine mechanische
+  Extraktion identischen, bereits bestehenden JSX-Codes in eine
+  gemeinsame Komponente, keine neue Logik, keine Verhaltensänderung.
+- Klar genug beschrieben — die Duplikation war exakt benannt (Datei und
+  Zeilen in beiden Komponenten), keine Interpretation nötig, da der Code
+  wortgleich war.
+- Objektiv prüfbar — bestehende Tests in `FlightResults.test.tsx`/
+  `HotelResults.test.tsx` prüfen bereits `role="alert"` und den
+  gerenderten Fehlertext; mussten nach der Extraktion unverändert grün
+  bleiben.
+
+**Umsetzung:** Neue `src/components/search/SearchErrorAlert.tsx`
+(gleiche Kategorie wie `NoResultsMessage.tsx`: kleine, reine
+Darstellungskomponente mit `errors: DuffelError[]`-Prop), exakt das
+bisherige JSX unverändert übernommen. `FlightResults.tsx` und
+`HotelResults.tsx` rufen diese Komponente jetzt statt des duplizierten
+Blocks auf, jeweiliger `AlertTriangle`-Import entfernt (nicht mehr
+direkt benötigt). Der ebenfalls fast identische `loading`-Block (nur der
+Ladetext unterscheidet sich je ein Wort) bewusst nicht extrahiert — dort
+wäre eine weitere Abstraktion (Text als Prop) für zwei verbleibende
+Wörter Unterschied unverhältnismäßig, anders als beim wortgleichen
+Fehler-Block. `TrainResults.tsx` unverändert gelassen, da dort noch kein
+Fehlerzustand verdrahtet ist (kein Duplikat, keine Änderung nötig). Neue
+`SearchErrorAlert.test.tsx` (2 Tests, Muster analog
+`NoResultsMessage.test.tsx`): ein Fehler wird per `role="alert"`
+angekündigt, mehrere Fehler werden alle gerendert.
+
+**Geprüft:** Keine Verhaltensänderung für bestehende Konsumenten —
+reine Extraktion wortgleichen Codes, daher kein Rot-vor-Fix nötig (wie
+bei früheren reinen Konsolidierungen, z. B. `focusPageHeading()` am
+06.10.). Nach dem Fix: `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 459/459 grün (64
+Testdateien, inkl. beider unveränderter Tests in
+`FlightResults.test.tsx`/`HotelResults.test.tsx` sowie der zwei neuen
+Tests in `SearchErrorAlert.test.tsx`), `npm run build` sauber
+(unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach Abschluss:
+keine uncommitteten Änderungen außer diesem Commit.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
