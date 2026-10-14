@@ -4599,3 +4599,76 @@ suchen" startet `FlightWizard.tsx` beim erneuten Besuch von `/flugsuche`
 weiterhin komplett leer, `src/components/search/FlightWizard.tsx:37-40`)
 ist unverändert im Code vorhanden — keine Props zum Vorbefüllen aus einem
 bestehenden Reiseplan. Bleibt offen für einen künftigen IT-Chef-Lauf.
+
+---
+
+## 2026-10-14 — Urlaubsmodus-Concierge, Avatar-Zustand bei ehrlichen Ausweich-Antworten (`src/hooks/useConcierge.ts`, `src/components/chat/TravixAvatar.tsx`, `src/lib/ai/mockConcierge.ts`)
+
+**Geprüfter Bereich:** Seit dem letzten Bericht (13.10.) ist laut `git
+log`/`ZEITPLAN.md` kein neuer Code auf `main` gelandet — alle drei
+heutigen IT-Chef-Auto-Läufe (`67a33f8`, `cfd28ea`, `a0ddca8`) meldeten
+"kein neuer sicherer Punkt gefunden", der Freigabe-Chef-Merge (`5c7106e`)
+betraf nur Log-Text. Um trotzdem keine alte, bereits geprüfte Seite
+wahllos zu wiederholen, habe ich mir den Urlaubsmodus-Bereich
+(`Urlaubsmodus.tsx`, `useConcierge.ts`, `mockConcierge.ts`) vorgenommen —
+Teil des laut `ZEITPLAN.md` noch laufenden Sprint 4 "Urlaubsmodus &
+Konto" (bis 19.10.), zuletzt dediziert am 2026-09-02 geprüft, seitdem
+aber durch mehrere IT-Chef-Läufe verändert (u. a. `role="status"` am
+21.09., das `matched`-Rückgabeformat selbst stammt vom 02.09.) und seither
+nie erneut aus Nutzersicht angeschaut.
+
+### Reibungspunkt
+
+**Jede ehrliche "Das weiß ich nicht"-Antwort des Concierge zeigt einen
+rot schüttelnden Warn-Avatar, als wäre etwas kaputt — nicht nur bei
+echten Fehlern**
+
+`useConcierge.ts:35`: `setAvatarState(reply.matched ? 'happy' : 'error')`.
+`reply.matched` ist laut dem eigenen Kommentar in `mockConcierge.ts:51`
+nicht auf technische Fehler beschränkt, sondern `false` für jede der drei
+folgenden, bewusst *ehrlichen* Antworten (`mockConcierge.ts:59-90`): kein
+Reiseziel geplant, ein geplantes aber nicht hinterlegtes Reiseziel, und —
+das in der Praxis wohl häufigste — eine erkannte, bekannte Reise, aber
+eine Frage außerhalb der drei abgedeckten Themen (Währung/Notruf/Begrüßung).
+Da `conciergeQuickReplies` (`mockConcierge.ts:93`) selbst nur diese drei
+Themen anbietet, landet jede andere, naheliegende Reisefrage ("Was soll
+ich anziehen?", "Brauche ich ein Visum?", "Wie ist das Wetter dort?") im
+Demo-Fallback mit `matched: false`.
+
+`TravixAvatar.tsx:14` definiert den `'error'`-Zustand visuell eindeutig
+als Fehlerzustand: `AlertTriangle`-Icon, `from-destructive to-navy`-Verlauf,
+`shadow-destructive/20` — exakt die Farbe/Semantik, die der Rest der App
+für echte Fehler reserviert (`role="alert"`-Fehlerboxen in
+`FlightResults.tsx`/`HotelResults.tsx`/`Flugsuche.tsx`/`Hotelsuche.tsx`
+nutzen dieselbe `destructive`-Farbe). Zusätzlich schüttelt das Icon
+(`iconAnimation.error`, Zeile 24: `x: [0, -3, 3, -3, 0]`) — eine Animation,
+die in UI-Konventionen allgemein "ungültige Eingabe"/"etwas ist
+fehlgeschlagen" signalisiert. Eine Nutzerin, die im Urlaubsmodus
+freimütig eine normale Reisefrage stellt und eine ehrliche, ruhige
+"das kann ich (noch) nicht beantworten"-Antwort bekommt, sieht dabei
+denselben visuellen Alarm wie bei einem echten technischen Fehler —
+das widerspricht dem erklärten Ziel dieses Bereichs (laut Kopfkommentar
+in `mockConcierge.ts:1-8` und dem bereits existierenden ehrlichen
+Antworttext selbst), Grenzen des Demo-Wissens transparent, aber nicht
+beunruhigend zu kommunizieren. `useConcierge.test.ts:80,93` bestätigt nur,
+*dass* `'error'` gesetzt wird — nicht, ob das die richtige Wahl ist.
+
+*Vorschlag:* Für die drei ehrlichen Ausweich-Fälle einen neutralen,
+nicht-alarmierenden Avatar-Zustand verwenden statt `'error'` — z. B. den
+bereits vorhandenen `'idle'`- oder `'thinking'`-Zustand (beide ohne
+Warnfarbe/Schüttel-Animation), oder einen neuen, eigenen Zustand (z. B.
+`'unsure'` mit einem neutralen Icon wie `HelpCircle` statt `AlertTriangle`
+und ohne Shake-Animation), falls eine sichtbare Abgrenzung zu `'happy'`
+gewünscht bleibt. `'error'` bliebe dann für tatsächliche technische
+Fehler reserviert (aktuell ungenutzt, aber im Typ bereits vorhanden) —
+konsistent mit der `destructive`-Farbnutzung im Rest der App. Reine
+Zustandswahl, keine neue Design-Entscheidung bei Text oder Logik nötig.
+
+### Kein zweiter Fund in diesem Lauf
+
+Der übrige Code in diesem Bereich (Wortgrenzen-Regex in `findFacts()`,
+die drei abgedeckten Themen-Antworten, das `role="status"`-Muster beim
+Laden, die kontextuelle Erreichbarkeit nur über "Urlaubsmodus aktivieren"
+in `MeineReisen.tsx`/`Buchung.tsx`) wirkt konsistent mit dem Rest der
+App — kein weiterer Punkt erfunden, nur um den Bericht länger wirken zu
+lassen.
