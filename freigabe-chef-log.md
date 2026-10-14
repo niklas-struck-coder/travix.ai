@@ -6734,3 +6734,39 @@ noch nichts Neues vom heutigen 6-Uhr-Lauf, planmäßig übersprungen.
 Neues, und das war in allen fünf Läufen nur Log-Text ohne Codeänderung
 ("kein neuer sicherer Punkt gefunden"), unabhängig verifiziert und
 gemergt. Keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-14, Tages-Check (geplanter täglicher Auto-Lauf, kein Ni live dabei)
+
+**`it-chef/auto`:** 0 Commits gegenüber `main` — planmäßig übersprungen.
+
+**Prüfung `marketing-chef/auto`** (1 Commit: "kein neuer Tier-4-Kandidat,
+Topf bleibt bei fünf"). Diff betrifft ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md` —
+reine Markdown-Ergänzung, kein Code, kein Live-Vorgang. Unabhängig
+nachgeprüft statt der Behauptung "14 neue Commits seit `903bb97`, keiner
+ändert `src/`" blind vertraut: `git log --oneline 903bb97..origin/main`
+zeigt tatsächlich genau 14 Commits, `git diff --stat 903bb97..origin/main
+-- src/` liefert keine Treffer — Behauptung stimmt. Keine erfundenen
+Kennzahlen, Text vollständig und kohärent.
+→ **Passt, nach `main` gemergt.**
+
+**Prüfung `support-chef/auto`** (1 Commit: "Urlaubsmodus-Concierge,
+Avatar-Zustand bei ehrlichen Ausweich-Antworten"). Diff betrifft
+ausschließlich `support-chef-auto-log.md` (73 Zeilen) — reine Analyse,
+keine Codeänderung. Fundstellen im aktuellen Code verifiziert:
+`src/hooks/useConcierge.ts:35` setzt tatsächlich
+`setAvatarState(reply.matched ? 'happy' : 'error')`;
+`src/lib/ai/mockConcierge.ts` liefert `matched: false` für alle drei
+ehrlichen Ausweich-Antworten (kein Reiseziel, unbekanntes Reiseziel,
+nicht abgedecktes Thema — Zeilen 62/69/89) und nicht nur für technische
+Fehler; `src/components/chat/TravixAvatar.tsx:14` definiert `error`
+tatsächlich mit `AlertTriangle`-Icon und `destructive`-Farbverlauf, Zeile
+24 mit der Shake-Animation. Fundstelle ist nachvollziehbar, nicht
+erfunden.
+→ **Passt, nach `main` gemergt.**
+
+**Info an Ni:** Nein — beide heutigen Läufe waren unauffällig
+(Marketing: reine Bestandsbestätigung ohne neuen Fund; Support: ein
+plausibler, gut belegter neuer UX-Fund zur Avatar-Farblogik im
+Urlaubsmodus, kein Hinweis auf wiederholte Regelverstöße). Keine
+Auffälligkeit, die seine Aufmerksamkeit jetzt bräuchte.
