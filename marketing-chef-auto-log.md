@@ -4,6 +4,76 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-14
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`903bb97`, letzter eigener Commit vom 13.10.) war bereits vollständig in
+`origin/main` gemergt (`git merge-base --is-ancestor 903bb97
+origin/main` bestätigt das) — laut Regel für bereits gemergte Branches
+neu von aktuellem `origin/main` (`5c7106e`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+Alle anderen offenen Marketing-Punkte (Landingpage/Warteliste live,
+Community/Warteliste aufbauen, Test-Kampagnen, Launch-Kampagne,
+Kampagne live schalten) bleiben wie an jedem Vortag ausgeschlossen —
+ausdrücklich Live-Vorgänge bzw. an die weiterhin unbeantworteten vier
+Freigabe-Fragen gebunden.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 13.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 13.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log 903bb97..origin/main` geprüft (Basislinie: der eigene
+Stand vom 13.10.): vierzehn Commits, jeder per `git show --stat`
+geprüft — keiner ändert etwas unter `src/` (Details siehe Update
+2026-10-14 in `marketing/freigabe-uebersicht.md`). Fünf davon sind
+IT-Chef-Auto-Läufe, die selbst ausdrücklich "kein neuer sicherer Punkt
+gefunden" vermerken; die übrigen sind Berichte, ein Daily-Status-Update
+und Merge-/Freigabe-Chef-Commits ohne eigene Codeänderung.
+
+**Kandidatentopf:** unverändert bei **fünf** (46-50) — weiterhin klar
+unter der Achter-Schwelle für eine achte Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Bestätigung des unveränderten Standes), kein Live-Vorgang. Keine
+erfundenen Kennzahlen — die Aussage "kein neuer Commit" stammt direkt
+aus `git log`/`git show --stat`. Klar genug beschrieben, keine offene
+Positionierungsfrage: wendet nur die seit 20.08. etablierte
+Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück — ohne neuen Fund gibt
+  es nichts Neues zu verarbeiten, zumal der Kandidatentopf mit fünf
+  weit unter der Achter-Schwelle liegt.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 14.10. (Prüfung
+  der vier Fragen, vierzehn neue Commits via `git show --stat` auf
+  Produkt-Code-Änderungen geprüft, keiner gefunden, Kandidatentopf-Stand
+  unverändert "fünf" bestätigt, Titel-Datum auf 14.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, dieser
+Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-13
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
