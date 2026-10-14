@@ -2485,6 +2485,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gemeinsamen Demo-Welt. Wie bei Kyoto bleibt das eine Datenkorrektur, die
   sich bei fortschreitender Zeit wiederholen wird, solange `TripDraft`
   keine echte Buchungs-/Backend-Anbindung hat (siehe Phase 2).
+  Vom autonomen IT-Chef-Lauf am 14.10. einen von `support-chef-auto-log.md`
+  (14.10., "Urlaubsmodus-Concierge, Avatar-Zustand bei ehrlichen
+  Ausweich-Antworten") gemeldeten Fund behoben: `useConcierge.ts:35` setzte
+  bei jeder der drei bewusst *ehrlichen* "Das weiß ich nicht"-Antworten des
+  Concierge (`reply.matched === false` in `mockConcierge.ts` — kein
+  geplantes Ziel, ein geplantes aber nicht hinterlegtes Ziel, oder eine
+  Frage außerhalb der drei abgedeckten Themen) denselben Avatar-Zustand
+  `'error'` wie bei einem echten technischen Fehler — `TravixAvatar.tsx`
+  zeigt dafür ein rot schütteltes `AlertTriangle`-Icon
+  (`destructive`-Farbe, dieselbe Semantik wie die `role="alert"`-Fehlerboxen
+  in `FlightResults.tsx`/`HotelResults.tsx`/`Flugsuche.tsx`/
+  `Hotelsuche.tsx`). Eine ruhige, ehrliche Ausweich-Antwort löste damit
+  denselben visuellen Alarm aus wie ein echter Fehler. Fix: exakt die im
+  Bericht als erste Option vorgeschlagene, mechanische Lösung ohne neue
+  Design-Entscheidung — `'idle'` (bereits vorhandener, neutraler
+  Zustand ohne Warnfarbe/Shake-Animation) statt `'error'` für diese drei
+  Fälle; `'error'` bleibt im Typ erhalten und weiterhin für echte
+  technische Fehler reserviert (aktuell an keiner Stelle im Code genutzt).
+  Zwei bestehende Tests in `useConcierge.test.ts` entsprechend umbenannt
+  und auf `'idle'` umgestellt — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useConcierge.ts`)
+  reproduzierbar rot verifiziert (beide erwarteten `'idle'`, bekamen
+  weiterhin `'error'`).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

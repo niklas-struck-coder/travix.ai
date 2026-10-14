@@ -67,7 +67,7 @@ describe('useConcierge', () => {
     expect(result.current.avatarState).toBe('happy')
   })
 
-  it('sets the avatar to "error" instead of "happy" after an honest limitation reply (no destination)', () => {
+  it('sets the avatar to "idle" instead of "happy" or "error" after an honest limitation reply (no destination)', () => {
     const { result } = renderHook(() => useConcierge(null))
 
     act(() => {
@@ -77,10 +77,10 @@ describe('useConcierge', () => {
       vi.advanceTimersByTime(700)
     })
 
-    expect(result.current.avatarState).toBe('error')
+    expect(result.current.avatarState).toBe('idle')
   })
 
-  it('sets the avatar to "error" instead of "happy" after an honest limitation reply (uncurated destination)', () => {
+  it('sets the avatar to "idle" instead of "happy" or "error" after an honest limitation reply (uncurated destination)', () => {
     const { result } = renderHook(() => useConcierge('Bali'))
 
     act(() => {
@@ -90,7 +90,7 @@ describe('useConcierge', () => {
       vi.advanceTimersByTime(700)
     })
 
-    expect(result.current.avatarState).toBe('error')
+    expect(result.current.avatarState).toBe('idle')
   })
 
   it('clears the pending reply timeout on unmount so it cannot fire against a stale instance', () => {

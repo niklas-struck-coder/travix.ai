@@ -19116,3 +19116,64 @@ diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-14 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei — vierter Lauf heute. `it-chef/auto` war bereits mehrfach nach
+`main` gemerged (zuletzt Freigabe-Chef-Commit `5c7106e`, danach nur noch
+Log-/Report-Commits auf `main`) und lag damit hinter `main` zurück —
+Branch frisch von `origin/main` (`ac63500`) neu aufgesetzt, `main`
+selbst unberührt gelassen. `npm ci` ausgeführt (Dependencies fehlten im
+frischen Checkout), danach Baseline geprüft: `npx eslint .` sauber,
+`npx tsc --noEmit -p tsconfig.app.json` sauber, `npx vitest run`
+457/457 grün (63 Testdateien), `npm run build` sauber (unveränderte
+811-KB-Chunk-Size-Warnung) — alles grün, bevor überhaupt etwas
+angefasst wurde.
+
+**Ausgewählter Punkt:** Der von Support-Chef im heutigen
+`support-chef-auto-log.md`-Eintrag ("Urlaubsmodus-Concierge, Avatar-
+Zustand bei ehrlichen Ausweich-Antworten") gemeldete Fund — ein von den
+drei vorangegangenen IT-Chef-Läufen heute noch nicht geprüfter, nach
+diesen Läufen neu hinzugekommener Bericht.
+
+**Geprüft gegen die vier Sicherheitskriterien:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder Rechtstexten —
+  reine Avatar-Zustandswahl im Demo-Concierge.
+- Keine offene Produkt-/Architekturentscheidung — Support-Chef bot zwei
+  Optionen an (bestehenden `'idle'`/`'thinking'`-Zustand wiederverwenden,
+  oder einen neuen `'unsure'`-Zustand mit eigenem Icon einführen); die
+  erste Option ist eine reine Wiederverwendung ohne neue Design-
+  Entscheidung (kein neues Icon, keine neue Farbe, kein neuer Eintrag im
+  `AvatarState`-Typ) und wurde gewählt, die zweite (neuer Zustand) bewusst
+  nicht, weil das laut Rolle-Abschnitt zu Marketing-Chef/MARKENDESIGN.md
+  gehören würde.
+- Klar genug beschrieben — Datei/Zeile (`useConcierge.ts:35`), exakte
+  Codezeile und Begründung im Bericht bereits vollständig diagnostiziert.
+- Objektiv prüfbar — bestehende Tests in `useConcierge.test.ts` prüfen
+  den gesetzten `avatarState` bereits explizit.
+
+**Umsetzung:** `src/hooks/useConcierge.ts:35`:
+`setAvatarState(reply.matched ? 'happy' : 'error')` →
+`setAvatarState(reply.matched ? 'happy' : 'idle')`. `'error'` bleibt im
+`AvatarState`-Typ (`TravixAvatar.tsx`) erhalten, aktuell aber an keiner
+Stelle im Code mehr verwendet — damit weiterhin für echte technische
+Fehler reserviert, konsistent mit der `destructive`-Farbnutzung im Rest
+der App (`role="alert"`-Fehlerboxen). Zwei bestehende Tests in
+`useConcierge.test.ts` umbenannt und von `'error'` auf `'idle'`
+umgestellt. `ZEITPLAN.md` (Phase-8-Abschnitt) und die Checkbox-Notiz zu
+8.1 in `tasks/tasks-prd-travix-platform.md` aktualisiert.
+
+**Geprüft:** Vor dem Fix durch temporäres Zurücknehmen nur der
+Quelländerung (`git stash push -- src/hooks/useConcierge.ts`)
+reproduzierbar rot verifiziert — beide betroffenen Tests erwarteten
+bereits `'idle'`, bekamen aber weiterhin `'error'` (`npx vitest run
+src/hooks/useConcierge.test.ts`: 2 von 9 Tests rot), danach Stash
+zurückgeholt. Nach dem Fix: `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 457/457 grün (63
+Testdateien, inkl. aller 9 Tests in `useConcierge.test.ts`), `npm run
+build` sauber (unveränderte 811-KB-Chunk-Size-Warnung). `git status`
+nach Abschluss: keine uncommitteten Änderungen außer diesem Commit.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

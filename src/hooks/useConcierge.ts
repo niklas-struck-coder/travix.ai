@@ -32,7 +32,7 @@ export function useConcierge(destination: string | null) {
       replyTimeoutRef.current = null
       const reply = getConciergeReply(destination, content)
       setMessages((prev) => [...prev, makeMessage('assistant', reply.text)])
-      setAvatarState(reply.matched ? 'happy' : 'error')
+      setAvatarState(reply.matched ? 'happy' : 'idle')
       setQuickReplies(hasKnownDestination(destination) ? conciergeQuickReplies : [])
       setIsThinking(false)
     }, 600)
