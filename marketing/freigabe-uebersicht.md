@@ -1,10 +1,82 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-13)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-14)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-14: nichts Neues — kein einziger neuer Produkt-Code-Commit
+seit dem letzten Check (13.10., Kandidat 50), Kandidatentopf bleibt bei
+**fünf**, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `marketing-chef/auto`
+(`origin/marketing-chef/auto`, `903bb97`, letzter eigener Commit vom
+13.10.) war bereits vollständig in `main` gemergt (`git merge-base
+--is-ancestor 903bb97 origin/main` bestätigt das) — der Branch war also
+nur noch veraltet, nicht mehr in Arbeit. Wie in den Session-Regeln für
+bereits gemergte Branches vorgesehen neu von aktuellem `origin/main`
+(`5c7106e`, früher Nacht-Check 14.10.) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+`status.md` zeigt weiterhin Stand 13.10., keine Notiz zu einer der vier
+Fragen. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`, `ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen
+bleiben offen.
+
+**`git log 903bb97..origin/main` zeigt die seit dem letzten Check**
+(13.10., Commit `903bb97`) vierzehn neue Commits — jeder einzeln per
+`git show --stat` geprüft, keiner davon ändert etwas unter `src/`:
+der eigene Merge nach `main` (`fd63e34`), ein Support-Chef-Merge
+(`7380e59`), zwei Support-Chef-Berichte (`f486800`, `5bdd370`, beide
+bestätigen nur bereits bekannte Funde bzw. melden keinen neuen), ein
+IT-Chef-Bericht (`b38973d`, "gezielte Bug-Suche ... kein neuer sicherer
+Auto-Fix-Punkt"), ein Marketing-Chef-Bericht (`cdd4a7d`), ein
+Daily-Status-Update (`49c3667`), ein Freigabe-Chef-Log (`9ade08a`) sowie
+fünf IT-Chef-Auto-Läufe am 13./14.10., die alle fünf ausdrücklich "kein
+neuer sicherer Punkt gefunden" vermerken (`1474988`, `2ba1375`,
+`67a33f8`, `cfd28ea`, `a0ddca8`) und entsprechend nur ihre eigenen Logs
+ergänzen, sowie der abschließende Freigabe-Chef-Bericht (`5c7106e`).
+**Kein einziger dieser Commits ändert Produkt-Code** — damit gibt es
+heute keinen neuen Tier-4-Kandidaten zu prüfen.
+
+**Kandidatentopf:** unverändert bei **fünf** (46-50) — weiterhin klar
+unter der Achter-Schwelle, keine achte Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Bestätigung des unveränderten Standes), kein Live-Vorgang. Keine
+erfundenen Kennzahlen — die Aussage "kein neuer Commit" stammt aus
+`git log`/`git show --stat`, nicht aus einer Annahme. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik an (gleiche Art Eintrag wie z. B.
+18.09., 24.09. oder 27.09., als ebenfalls kein neuer Commit vorlag).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück — ohne neuen Fund gibt
+  es nichts Neues zu verarbeiten, zumal der Kandidatentopf mit fünf
+  weiterhin weit unter der Achter-Schwelle liegt.
+
+**Umgesetzt:**
+- Dieses Update (Prüfung der vier Fragen, vierzehn neue Commits via
+  `git show --stat` auf Produkt-Code-Änderungen geprüft, keiner
+  gefunden, Kandidatentopf-Stand unverändert "fünf" bestätigt, Titel-
+  Datum auf 14.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, der
+Log-Eintrag in `marketing-chef-auto-log.md`).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-13: ein neuer 50. Tier-4-Kandidat (`useChat.ts`:
 `selectFlight()` zeigte in der Chat-Bestätigung nach Flugauswahl rohe
