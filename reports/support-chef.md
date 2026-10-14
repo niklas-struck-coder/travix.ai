@@ -1,24 +1,21 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-13
+**Datum:** 2026-10-14
 
-## Was ist seit dem letzten Eintrag (2026-10-12) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-13) passiert?
 
-Gute Nachrichten: Beide Funde vom letzten Mal sind jetzt wirklich behoben,
-nicht nur angekündigt. `src/hooks/useChat.ts:421` baut die
-Flug-Bestätigung im KI-Chat jetzt mit `slice.originName || slice.originIata`
-(und genauso für das Ziel) — wer einen Flug wählt, liest also "Berlin →
-Lissabon" statt "BER → LIS". Und die Destination-Karten auf der
-Startseite (`src/pages/Home.tsx:73`) haben jetzt
-`hover:shadow-md focus-visible:ring-[3px] focus-visible:ring-ring/50` —
-Maus-Hover und Tab-Fokus geben jetzt ein klares Signal, dass die Karten
-klickbar sind.
+Am Code selbst hat sich seitdem nichts getan — IT-Chef hat am 14.10.
+drei gezielte Läufe gemacht, aber nichts gefunden, das sich automatisch
+sicher fixen lässt. Die drei zuletzt offenen Punkte (leeres
+Flug-Bearbeiten-Formular, gleich dramatische Lösch-Warnungen,
+Lissabon-Demokarte mit möglichem Chat-Mismatch) bleiben deshalb
+unverändert bestehen.
 
-Ein neues Feature oder ein größerer Umbau war in den letzten zwei Tagen
-nicht dabei — IT-Chef hat laut eigenem Bericht gezielt bisher ungeprüfte
-Seiten durchsucht, aber nichts gefunden, das sich automatisch sicher
-fixen lässt. Dementsprechend bleibt es bei den zwei offenen Punkten aus
-den letzten Berichten, an denen sich im Code nichts getan hat.
+Neu dazugekommen ist ein eigener Fund beim Urlaubsmodus-Concierge: Jede
+ehrliche "das weiß ich nicht"-Antwort zeigt denselben roten,
+schüttelnden Warn-Avatar wie ein echter Fehler. Das ist noch nicht
+behoben, nur erkannt und dokumentiert — deshalb unten als vierter
+Punkt mit aufgenommen.
 
 ## Meine Vorschläge
 
@@ -56,4 +53,20 @@ den letzten Berichten, an denen sich im Code nichts getan hat.
    Demokarte entweder direkt mit den Lissabon-Demodaten befüllen, oder so
    lange ausblenden/deaktivieren, bis echte Buchungen angebunden sind.
 
-_Letztes Update: 2026-10-13_
+4. **Jede ehrliche "Das weiß ich nicht"-Antwort des Urlaubsmodus-Concierge
+   sieht aus wie ein echter Fehler.** `src/hooks/useConcierge.ts:35` setzt
+   `setAvatarState(reply.matched ? 'happy' : 'error')` — und `matched` ist
+   laut `src/lib/ai/mockConcierge.ts:59-90` nicht auf technische Fehler
+   beschränkt, sondern wird auch bei jeder normalen Reisefrage außerhalb
+   der drei abgedeckten Themen (Währung/Notruf/Begrüßung) `false`, z. B.
+   bei "Was soll ich anziehen?" oder "Brauche ich ein Visum?".
+   `TravixAvatar.tsx:14` zeigt bei `'error'` ein rotes, schüttelndes
+   Warn-Icon — genau die Farbe/Animation, die der Rest der App für echte
+   Fehler reserviert. Wer also ganz normal fragt und eine ruhige, ehrliche
+   Antwort bekommt, sieht dabei trotzdem einen Alarm. *Vorschlag:* für
+   die ehrlichen Ausweich-Antworten einen neutralen Zustand verwenden
+   (z. B. das bereits vorhandene `'idle'`/`'thinking'` oder einen neuen,
+   ruhigen `'unsure'`-Zustand) und `'error'` echten technischen Fehlern
+   vorbehalten.
+
+_Letztes Update: 2026-10-14_
