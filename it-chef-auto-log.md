@@ -18954,3 +18954,73 @@ außer diesem Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-14
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `origin/it-chef/auto` (`2ba1375`, Stand nach
+dem fünften Lauf gestern) war bereits exakt auf dem Stand von
+`origin/main` (`5bdd370`) — `git merge origin/main` meldete "Already up
+to date", kein neuer Merge nötig, `main` unberührt. `node_modules`
+fehlte im frischen Checkout, daher zunächst `npm ci` (650 Pakete, nur
+die bekannten `npm audit`-Hinweise, keine Blocker). Baseline danach
+grün: `npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json`
+sauber, `npx vitest run` 457/457 grün (63 Testdateien), `npm run build`
+sauber (unveränderte 811-KB-Chunk-Size-Warnung) — alles grün, bevor
+überhaupt etwas angefasst wurde.
+
+**Auswahl:** Bestätigt per `git diff --stat 2ba1375 HEAD -- src/`: seit
+dem letzten Lauf gestern gab es keine einzige Quelländerung unter
+`src/`. `ZEITPLAN.md` (3336 Zeilen) und
+`tasks/tasks-prd-travix-platform.md` (232 Zeilen) erneut vollständig
+gelesen statt nur gegen den Log abgeglichen — dieselben offenen
+Checkbox-Punkte wie in den letzten Einträgen (2.0/2.x Base44/Auth,
+4.1-4.3 KI-Engine wartet auf Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7/7.12 fehlende Preis-/Provider-Felder in `TripDraft`, 7.4
+Chat-Resume-Datenmodell, 8.1-8.7/8.9/8.11/8.12 Produktentscheidungen
+bzw. wartet auf FAQ-Inhalte von Support-Chef, Rechtstexte explizit
+ausgeschlossen) — unverändert alle Produkt-/Architekturentscheidungen
+oder blockiert, keiner davon neu als eindeutig umsetzbarer,
+interpretationsfreier Punkt verfügbar.
+
+Weil es sich um den ersten Lauf des neuen Tages handelt, zusätzlich
+einen eigenen Explore-Agenten mit vollständiger, expliziter Liste aller
+bisherigen Ausschlüsse (triviale shadcn/ui-Wrapper, `selectFlight`-
+Fallback, Home.tsx-Hover/Fokus, `useConcierge`-Timeout,
+`accommodationNoticeHandled`-Zweig, Regex-Escape-Duplikate,
+Wizard-Inline-Fehlertext, Lösch-Warnungen-Tonalität,
+Urlaubsmodus/Lissabon-Mismatch, FlightWizard-Vorbefüllung,
+IATA-Klarname/Hover-Fokus) beauftragt, gezielt in bisher nicht vertieft
+geprüften Dateien nach echten neuen Logikfehlern zu suchen (volle
+Dateien lesen, nicht nur grep). Geprüft wurden u. a. `calendarUtils.ts`,
+`cartTotals.ts`, `checklistRules.ts`, `calculateProgress.ts`,
+`tripStorage.ts`, `format.ts`, `utils.ts`, `duffel/client.ts`,
+`ai/mockAdvisor.ts`, `ai/mockConcierge.ts`, `speech.ts`, `useChat.ts`,
+`useConcierge.ts`, `EditMode.tsx`, `ChecklistPanel.tsx`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `Warenkorb.tsx`,
+`Preisalarme.tsx`, `Kalender.tsx`, sowie ein Abgleich `routes.tsx` gegen
+`nav-config.ts` auf kaputte Links. Ergebnis: keine Logikfehler, keine
+fehlende Testabdeckung über die bereits bekannten trivialen
+shadcn-Wrapper und reinen Typdefinitionsdateien hinaus, keine kaputten
+Routen. Einzige Randbeobachtung: die Demo-Reise "Kyoto"
+(2026-03-03–2026-03-10) in `Kalender.tsx` liegt inzwischen in der
+Vergangenheit — dieselbe Kategorie wie der bereits ausgeschlossene
+Urlaubsmodus/Lissabon-Fall (veraltende Demo-Daten, kein Codefehler),
+daher nicht als neuer Fund gewertet.
+
+**Ergebnis: kein neuer sicherer Punkt gefunden.** Alle vier
+Sicherheitskriterien (kein Auth/Zahlungen/Nutzerdaten/Rechtstexte, keine
+offene Produkt-/Architekturentscheidung, eindeutig ohne Interpretation
+umsetzbar, objektiv prüfbares Ergebnis) sind für keinen der verbliebenen
+offenen Punkte gleichzeitig erfüllt. Kein Code-Commit für einen neuen
+Punkt — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Quelländerung in diesem Lauf, daher kein weiterer
+eigener Testlauf nötig über die zu Beginn bereits grün bestätigte
+Baseline hinaus (`npx eslint .`, `npx tsc --noEmit -p tsconfig.app.json`,
+`npx vitest run` 457/457, `npm run build`, alle vor Beginn der Auswahl
+ausgeführt). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
