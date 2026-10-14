@@ -6704,3 +6704,33 @@ nichts wirkt erfunden.
 **Info an Ni:** Nein — alle drei Branches geprüft, zwei mit neuen
 Commits gemergt (`marketing-chef/auto`, `support-chef/auto`), keine
 Auffälligkeit, die seine Aufmerksamkeit bräuchte.
+
+## 2026-10-14, früher Nacht-Check (geplanter täglicher Auto-Lauf nach
+IT-Chefs mehreren stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live
+dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits gegenüber `main`: drei Läufe vom
+14.10. plus die letzten zwei vom 13.10., jeweils "kein neuer sicherer
+Punkt gefunden"). Diff gegen `main` betrifft ausschließlich
+`it-chef-auto-log.md` (306 neue Zeilen) — keine einzige Datei unter
+`src/` geändert, also kein Scope-Creep, keine Berührung von
+Auth/Zahlungen/rechtlichen Texten, kein UI/Design-Bezug zu prüfen.
+Unabhängig verifiziert statt dem Log vertraut: frischer `npm ci` (650
+Pakete, nur bekannte Audit-Hinweise), danach selbst ausgeführt —
+`npx tsc -b` sauber, `npx eslint .` sauber, `npx vitest run` 457/457
+grün (63 Testdateien) — deckt sich exakt mit den Behauptungen in den
+Log-Einträgen.
+→ **Passt, nach `main` gemergt** (Fast-Forward). Nach `origin/main`
+gepusht (`5bdd370..a0ddca8`).
+
+**Prüfung `marketing-chef/auto`:** 0 Commits gegenüber `main` — noch
+keine neuen Inhalte vom heutigen 6-Uhr-Lauf, planmäßig übersprungen
+(läuft erst später, dafür der separate spätere Freigabe-Chef-Lauf).
+
+**Prüfung `support-chef/auto`:** 0 Commits gegenüber `main` — ebenfalls
+noch nichts Neues vom heutigen 6-Uhr-Lauf, planmäßig übersprungen.
+
+**Info an Ni:** Nein — nur `it-chef/auto` hatte heute Nacht etwas
+Neues, und das war in allen fünf Läufen nur Log-Text ohne Codeänderung
+("kein neuer sicherer Punkt gefunden"), unabhängig verifiziert und
+gemergt. Keine Auffälligkeit, die seine Aufmerksamkeit bräuchte.
