@@ -6770,3 +6770,35 @@ erfunden.
 plausibler, gut belegter neuer UX-Fund zur Avatar-Farblogik im
 Urlaubsmodus, kein Hinweis auf wiederholte Regelverstöße). Keine
 Auffälligkeit, die seine Aufmerksamkeit jetzt bräuchte.
+
+## 2026-10-15, früher Nacht-Check (geplanter Auto-Lauf nach IT-Chefs
+mehreren stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits gegenüber `main`, aus dem
+vierten/fünften Lauf am 14.10. und dem sechsten/siebten/achten Lauf am
+15.10.: Concierge-Avatar-Zustand bei ehrlichen Ausweich-Antworten,
+`FlightResults`/`HotelResults`-Fehlerblock zu `SearchErrorAlert`
+konsolidiert, `startEdit()` setzt jetzt auch Flugsuch-State zurück,
+dieselbe Konsolidierung auf `Flugsuche`/`Hotelsuche` ausgedehnt,
+`escapeRegExp()`-Dreifach-Duplikat nach `lib/utils` zusammengeführt).
+
+Unabhängig selbst verifiziert, nicht nur dem Log vertraut: frischer
+`npm ci` (Dependencies fehlten), danach `npx tsc -b` sauber, `npx eslint
+.` sauber, `npx vitest run` 464/464 grün (64 Testdateien) — deckt sich
+exakt mit den Angaben im `it-chef-auto-log.md`-Eintrag zum achten Lauf.
+
+Diff Zeile für Zeile gegen die fünf Log-Einträge abgeglichen: jeder
+Commit entspricht genau dem einen beschriebenen Punkt, kein Scope-Creep.
+Kein Bezug zu Auth, Zahlungen oder Rechtstexten. Die einzige UI-Änderung
+(`SearchErrorAlert`-Extraktion in `FlightResults`/`HotelResults`/
+`Flugsuche`/`Hotelsuche`) übernimmt den bisherigen JSX-Block
+unverändert — keine neue Design-Entscheidung, die gegen
+`MARKENDESIGN.md` laufen könnte.
+→ **Passt, nach `main` gemergt** (Fast-Forward `ac63500..8a2d8c9`).
+
+**`marketing-chef/auto`** und **`support-chef/auto`**: kein neuer
+Commit gegenüber `main` (0 Commits Abstand) — laufen laut Zeitplan erst
+um 6 Uhr, planmäßig übersprungen in diesem frühen Lauf.
+
+**Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
+wiederholte Regelverstöße.
