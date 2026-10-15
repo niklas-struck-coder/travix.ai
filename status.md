@@ -13,17 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-13):**
-- Support-Chef hat Avatar-Zustand des Urlaubsmodus-Concierge bei ehrlichen
-  Ausweich-Antworten umgesetzt (gemergt); IATA-zu-Klarname- und
-  Hover/Fokus-Fixes bestätigt. Flug-Bearbeiten-Formular und ein
-  Lissabon/Urlaubsmodus-Mismatch bleiben weiterhin offen
-- IT-Chef hat mehrfach (13./14.10.) gezielt nach Bugs in bisher ungeprüften
-  Seiten gesucht, dabei aber keinen neuen sicheren Auto-Fix-Punkt gefunden
-- Marketing-Chef: kein neuer Tier-4-Kandidat, Kandidatentopf bleibt bei fünf
-- Freigabe-Chef hat mehrere Tages-/Nacht-Checks durchgeführt und alle
-  Branches (IT-, Marketing-, Support-Chef) unabhängig geprüft und gemergt
+**Seit letztem Update (2026-10-14):**
+- IT-Chef hat mehrere Fixes gemergt: stale Flugsuchergebnisse/-fehler beim
+  Bearbeiten werden jetzt zurückgesetzt, Fehler-Anzeige in Flug- und
+  Hotelsuche vereinheitlicht (SearchErrorAlert), und ein doppeltes
+  Hilfsmodul (escapeRegExp) konsolidiert
+- Support-Chef hat eine identische Fehlerzeile bei mehreren verschiedenen
+  Duffel-API-Fehlern in Flug-/Hotelsuche gemeldet
+- Marketing-Chef hat zwei neue Kandidaten aufgenommen (Concierge-Avatar-Fix,
+  stale Flugergebnisse), Kandidatentopf jetzt bei sieben
+- Freigabe-Chef hat Tages- und Nacht-Checks durchgeführt und die Branches
+  von IT-, Marketing- und Support-Chef unabhängig geprüft und gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-14_
+_Letztes Update: 2026-10-15_
