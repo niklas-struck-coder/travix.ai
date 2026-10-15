@@ -12,6 +12,20 @@ interface DuffelResult<T> {
   errors: DuffelError[]
 }
 
+// Duffel returns one raw error per invalid field (a validation API), but the
+// mapping below reduces every one of them to the same fixed German fallback
+// text regardless of `error.code` — without this, SearchErrorAlert.tsx would
+// print that identical sentence once per field, which reads as a rendering
+// bug rather than a real multi-error response.
+function dedupeByMessage(errors: DuffelError[]): DuffelError[] {
+  const seen = new Set<string>()
+  return errors.filter((error) => {
+    if (seen.has(error.message)) return false
+    seen.add(error.message)
+    return true
+  })
+}
+
 async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<DuffelResult<T>> {
   try {
     const response = await fetch(`/api/duffel${path}`, {
@@ -39,10 +53,12 @@ async function callDuffelProxy<T>(path: string, init?: RequestInit): Promise<Duf
       }
       const errors: DuffelError[] =
         rawErrors.length > 0
-          ? rawErrors.map((error) => ({
-              message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt — bitte prüfe deine Eingaben oder versuche es gleich noch einmal.',
-              code: error.code,
-            }))
+          ? dedupeByMessage(
+              rawErrors.map((error) => ({
+                message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt — bitte prüfe deine Eingaben oder versuche es gleich noch einmal.',
+                code: error.code,
+              })),
+            )
           : [{ message: `Duffel-Anfrage fehlgeschlagen (${response.status}) — bitte versuche es gleich noch einmal.` }]
       return { data: null, errors }
     }

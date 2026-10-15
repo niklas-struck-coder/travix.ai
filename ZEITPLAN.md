@@ -1094,6 +1094,32 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zeichen der Sonderzeichen-Klasse wird escaped) — bestehende Tests in
   `mockAdvisor.test.ts`/`stays.test.ts`/`mockConcierge.test.ts` blieben
   unverändert grün.
+  Vom autonomen IT-Chef-Lauf am 15.10. (neunter Lauf desselben Tages) einen
+  von Support-Chef gemeldeten, bereits in Auto-Fix-PR #29 (Branch
+  `it-chef-autofix/duffel-duplicate-error-lines-2026-10-15`) diagnostizierten
+  Fund unabhängig verifiziert und direkt auf `it-chef/auto` umgesetzt
+  (dieselbe Begründung wie beim `useConcierge()`-Timeout-Fix vom 01.10. über
+  Auto-Fix-PR #26: der Fund erfüllt die vier Sicherheitskriterien
+  eigenständig, PR #29 selbst bleibt unangetastet und wartet weiterhin auf
+  Nis Review): `callDuffelProxy()` (`src/lib/duffel/client.ts`) mappte jeden
+  rohen Duffel-Fehler (typischerweise ein Eintrag pro ungültigem Feld) auf
+  denselben festen deutschen Fallback-Text, unabhängig von `error.code` —
+  `SearchErrorAlert.tsx` zeigt pro Element in `errors` eine eigene Zeile, war
+  also für mehrere *unterschiedliche* Probleme gebaut, bekam durch das
+  feste Mapping aber nie unterschiedliche Sätze zu sehen und zeigte
+  stattdessen dieselbe Zeile mehrfach identisch untereinander — wirkt wie
+  ein Darstellungsfehler statt einer echten Mehrfach-Rückmeldung. Erfüllt
+  alle vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+  Fehlertext-Formatierung); keine offene Produktentscheidung (Zielverhalten
+  durch die bestehende Eine-Zeile-pro-Problem-Anzeige bereits festgelegt);
+  mechanisch (neue, klar abgegrenzte Hilfsfunktion); objektiv prüfbar (neuer
+  Test). Fix: neue `dedupeByMessage()`-Hilfsfunktion dedupliziert die
+  Fehlerliste nach Nachrichtentext, bevor sie zurückgegeben wird — keine
+  Änderung an Typen/Signaturen nach außen. Neuer Regressionstest in
+  `client.test.ts` ("collapses multiple raw Duffel validation errors into a
+  single deduplicated line") — vor dem Fix reproduzierbar rot verifiziert
+  (zwei verschiedene rohe Duffel-Fehler ergaben zwei identische Zeilen statt
+  einer).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

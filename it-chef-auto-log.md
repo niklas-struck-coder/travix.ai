@@ -19459,3 +19459,82 @@ uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+### Neunter Lauf desselben Tages
+
+**Vorbereitung:** Weiterer geplanter Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout (Session begann mit `HEAD` losgelöst von
+`main`). `git fetch origin main it-chef/auto` zuerst ausgeführt:
+`it-chef/auto` (`8a2d8c9`) war identisch zu `origin/main` (`12dd79d`,
+die beiden bereits dort eingeflossen) — keine Divergenz, keine eigenen
+unversendeten Commits eines vorherigen Laufs. Lokalen Branch
+`it-chef/auto` frisch von `origin/main` angelegt. `npm ci` ausgeführt
+(Dependencies fehlten im frischen Checkout), danach Baseline geprüft:
+`npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber,
+`npx vitest run` 464/464 grün (64 Testdateien), `npm run build` sauber
+(811-KB-Chunk-Size-Warnung unverändert) — alles grün vor jeder
+Änderung.
+
+**Auswahl:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` und
+die letzten Log-Einträge gelesen — alle verbleibenden offenen
+Checkbox-Punkte dort sind unverändert Produkt-/Architekturentscheidungen
+oder externe Blocker (2.0 Base44/Auth, 4.1-4.3 KI-Engine wartet auf
+Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende
+Preis-/Provider-Felder, 7.4 Chat-Resume-Datenmodell, 8.1-8.7/8.9/8.11/
+8.12, Rechtstexte ausgeschlossen). Zusätzlich die offenen
+`it-chef-autofix/*`-Branches geprüft (ein separater, plattform-
+verwalteter Auto-Fix-Kanal, der eigene GitHub-PRs für Nis Review öffnet
+statt über `it-chef/auto` zu laufen): `git merge-base --is-ancestor`
+gegen `origin/main` für alle 29 Branches zeigt, keiner ist bisher
+gemergt. Davon ist genau einer inhaltlich noch offen und zugleich schon
+unabhängig von Support-Chef (`support-chef-auto-log.md`, 15.10.) und
+IT-Chef (`reports/it-chef.md`, 15.10., dort als "PR #29, wartet auf
+Review" vermerkt) bestätigt:
+`it-chef-autofix/duffel-duplicate-error-lines-2026-10-15`. Dieselbe
+Vorgehensweise wie beim `useConcierge()`-Timeout-Fix vom 01.10. (dort
+Auto-Fix-PR #26 direkt übernommen): den dort diagnostizierten Fund
+eigenständig im aktuellen Code verifiziert (nicht einfach den Branch
+gemergt, auch um die dortigen `reports/*.md`-Änderungen nicht
+versehentlich mitzuziehen) und unabhängig gegen die vier Kriterien
+geprüft — PR #29 selbst bleibt unangetastet und wartet weiterhin auf Nis
+eigene Review-Entscheidung auf GitHub.
+
+**Ergebnis:** Fund bestätigt in `src/lib/duffel/client.ts`,
+`callDuffelProxy()`: mappt jeden rohen Duffel-Fehler (`rawErrors`,
+typischerweise ein Eintrag pro ungültigem Feld — eine klassische
+Validierungs-API) auf exakt denselben festen deutschen Text, unabhängig
+von `error.code`/`error.message`. `SearchErrorAlert.tsx` rendert für
+jedes Element in `errors` eine eigene Zeile — bewusst so gebaut, damit
+mehrere *unterschiedliche* Probleme einzeln lesbar sind
+(`SearchErrorAlert.test.tsx`), bekommt durch das feste Mapping aber nie
+unterschiedliche Sätze zu sehen und zeigt stattdessen dieselbe Zeile
+mehrfach identisch untereinander — wirkt wie ein Darstellungsfehler statt
+einer echten Mehrfach-Rückmeldung. Erfüllt alle vier Kriterien: kein
+Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Fehlertext-Formatierung
+im Duffel-Client); keine offene Produktentscheidung (Zielverhalten durch
+die bestehende Eine-Zeile-pro-Problem-Anzeige bereits festgelegt);
+mechanisch (neue, klar abgegrenzte Hilfsfunktion, keine Änderung an
+Typen/Signaturen nach außen); objektiv prüfbar (neuer Test).
+
+**Umgesetzt:** Neue `dedupeByMessage()`-Hilfsfunktion in `client.ts`
+dedupliziert die Fehlerliste nach Nachrichtentext, bevor sie
+zurückgegeben wird; im `!response.ok`-Zweig von `callDuffelProxy()`
+eingehängt. Neuer Regressionstest in `client.test.ts` ("collapses
+multiple raw Duffel validation errors into a single deduplicated line")
+— vor dem Fix durch Ausführen gegen den unveränderten Code reproduzierbar
+rot verifiziert (zwei verschiedene rohe Duffel-Fehler ergaben
+`result.errors` mit Länge 2 statt der erwarteten 1), nach dem Fix grün.
+`ZEITPLAN.md` (Phase-5-Abschnitt, direkt im `escapeRegExp()`-Eintrag vom
+selben Tag fortgeführt) entsprechend ergänzt. Kein Eintrag in
+`tasks/tasks-prd-travix-platform.md` nötig (reine Fehlerbehandlungs-
+Korrektur innerhalb der bereits abgeschlossenen Duffel-Integration, kein
+eigener PRD-Punkt betroffen).
+
+**Geprüft (nach dem Fix):** `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 465/465 grün (64
+Testdateien, inkl. des einen neuen Tests), `npm run build` sauber
+(unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach Abschluss:
+keine uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
