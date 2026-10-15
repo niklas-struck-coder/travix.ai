@@ -1,10 +1,106 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-14)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-15)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-15: zwei neue Tier-4-Kandidaten (Concierge-Avatar zeigt
+bei ehrlichen Ausweich-Antworten nicht mehr fälschlich den Fehlerzustand;
+`startEdit()` lässt keine veralteten Flugsuchergebnisse/-fehler mehr
+unter einem neuen Edit stehen), drei reine Refactoring-Commits bewusst
+ausgeschlossen, Kandidatentopf von fünf auf **sieben** (46-52) —
+weiterhin unter der Achter-Schwelle, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`c2e993a`, letzter eigener Commit vom 14.10.) war bereits vollständig in
+`origin/main` gemergt (`git log origin/main..origin/marketing-chef/auto`
+liefert nichts) — wie in den Session-Regeln für bereits gemergte
+Branches vorgesehen neu von aktuellem `origin/main` (`4b7da8d`) aus
+angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+keine neuen Kanal-Links, kein `changelog`-Treffer in `src/routes.tsx`,
+`ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen bleiben offen.
+
+**`git log c2e993a..origin/main` zeigt die seit dem letzten Check**
+(14.10., Commit `c2e993a`) vierzehn neue Commits. Fünf davon ändern
+tatsächlich Produkt-Code unter `src/` — jeder einzeln per `git show`
+geprüft:
+
+- **`00c741d`:** `useConcierge()` setzte für jede der drei bewusst
+  ehrlichen "weiß ich nicht"-Antworten des Urlaubsmodus-Concierge
+  denselben Avatar-Zustand `'error'` wie bei einem echten technischen
+  Fehler (rot schütteltes Warn-Icon) — genau der Fund, den der eigene
+  Bericht vom 14.10. (`reports/marketing-chef.md`) als künftigen
+  sechsten Kandidaten vormerkte, sobald er tatsächlich gefixt ist. Jetzt
+  ist er es: neutraler `'idle'`-Zustand statt `'error'`. **Neuer
+  51. Kandidat** — exakt die "Ehrlichkeit sieht nicht mehr wie ein Bug
+  aus"-Erzählung, die Säule 1 trägt.
+- **`1c6535c`:** `startEdit()` (`useChat.ts`) räumte beim Wechsel auf ein
+  anderes Bearbeiten-Feld bisher nur `stayOffers`/`stayErrors` auf, nicht
+  `flightOffers`/`flightErrors` — alte, zum neuen Edit-Prompt gehörige
+  Flugergebnisse blieben inkl. anklickbarer Angebotskarten sichtbar.
+  Gleiche Fundgruppe wie die bereits mehrfach gezählten "stale
+  Suchergebnisse bleiben sichtbar"-Kandidaten (u. a. Ausgabe 7). **Neuer
+  52. Kandidat.**
+- **`70dd3fc`, `83c1373`:** beide verschieben nur den bereits bestehenden
+  Fehler-Anzeige-Block in die neue, gemeinsame `SearchErrorAlert`-
+  Komponente (erst `FlightResults`/`HotelResults`, dann zusätzlich
+  `Flugsuche`/`Hotelsuche`) — reine Konsolidierung ohne Verhaltens-
+  änderung für Nutzer:innen, bewusst ausgeschlossen, gleiche Einstufung
+  wie frühere reine Dedupe-Commits.
+- **`8a2d8c9`:** konsolidiert `escapeRegExp()` aus `mockAdvisor.ts`/
+  `mockConcierge.ts` nach `lib/utils.ts` — ebenfalls reine
+  Code-Konsolidierung ohne Verhaltensänderung, bewusst ausgeschlossen.
+
+Die übrigen neun Commits sind reine Berichte/Logs/Merges ohne eigene
+`src/`-Änderung (u. a. der Support-Chef- und IT-Chef-Bericht vom 14.10.,
+der tägliche Freigabe-Chef-Merge, ein Daily-Status-Update).
+
+**Kandidatentopf:** von fünf auf **sieben** (46-52) — weiterhin klar
+unter der Achter-Schwelle, keine achte Mini-Changelog-Ausgabe heute.
+Mit den beiden heutigen Funden braucht es nur noch einen weiteren
+verifizierten Kandidaten, bevor Ausgabe 8 fällig wird.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung, kein
+Live-Vorgang. Keine erfundenen Kennzahlen — beide neuen Kandidaten sind
+direkt im Code (`src/hooks/useConcierge.ts`, `src/hooks/useChat.ts`) und
+per `git show` nachvollzogen, nicht aus Berichten übernommen. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik an (Ehrlichkeits-/Zuverlässigkeits-
+Fix mit echter Nutzer:innen-Konsequenz zählt, reine Konsolidierung ohne
+Verhaltensänderung nicht).
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine neue, eigenständige achte Mini-Changelog-Ausgabe — mit sieben von
+  acht nötigen Kandidaten noch nicht fällig; eine künstlich aufgefüllte
+  Ausgabe wäre keine ehrliche Vorlage.
+- Ein neues eigenständiges Social-Content-Stück — die beiden heutigen
+  Funde sind zu klein für einen eigenen Post, sie gehören in die nächste
+  Mini-Changelog-Ausgabe statt vereinzelt verwertet zu werden.
+
+**Umgesetzt:**
+- Dieses Update (Prüfung der vier Fragen, vierzehn neue Commits
+  geprüft, fünf mit Produkt-Code-Änderung einzeln per `git show`
+  bewertet, zwei neue Tier-4-Kandidaten aufgenommen, drei Refactoring-
+  Commits bewusst ausgeschlossen, Kandidatentopf-Stand auf "sieben"
+  gesetzt, Titel-Datum auf 15.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, der
+Log-Eintrag in `marketing-chef-auto-log.md`).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-14: nichts Neues — kein einziger neuer Produkt-Code-Commit
 seit dem letzten Check (13.10., Kandidat 50), Kandidatentopf bleibt bei

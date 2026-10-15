@@ -4,6 +4,79 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-15
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`c2e993a`, letzter eigener Commit vom 14.10.) war bereits vollständig in
+`origin/main` gemergt (`git log origin/main..origin/marketing-chef/auto`
+liefert keine Commits) — laut Regel für bereits gemergte Branches neu
+von aktuellem `origin/main` (`4b7da8d`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+Alle anderen offenen Marketing-Punkte (Landingpage/Warteliste live,
+Community/Warteliste aufbauen, Test-Kampagnen, Launch-Kampagne,
+Kampagne live schalten) bleiben wie an jedem Vortag ausgeschlossen —
+ausdrücklich Live-Vorgänge bzw. an die weiterhin unbeantworteten vier
+Freigabe-Fragen gebunden.
+
+**Warum dieser Punkt:** `git log c2e993a..origin/main` zeigt vierzehn
+neue Commits seit dem letzten eigenen Stand (14.10.). Fünf davon ändern
+Produkt-Code unter `src/`, jeder einzeln per `git show` geprüft. Zwei
+sind echte Ehrlichkeits-/Zuverlässigkeits-Fixes mit sichtbarer
+Nutzer:innen-Konsequenz: der Concierge-Avatar zeigt bei ehrlichen
+"weiß ich nicht"-Antworten nicht mehr denselben Fehlerzustand wie bei
+einem echten technischen Fehler (`00c741d`, exakt der im eigenen Bericht
+vom 14.10. vorgemerkte sechste Kandidat) — und `startEdit()` lässt beim
+Wechsel auf ein anderes Bearbeiten-Feld keine veralteten
+Flugsuchergebnisse/-fehler mehr unter dem neuen Edit stehen (`1c6535c`).
+Die übrigen drei (`70dd3fc`, `83c1373`, `8a2d8c9`) sind reine
+Code-Konsolidierungen ohne Verhaltensänderung, bewusst nicht als Tier-4-
+Kandidat gewertet. Details und Begründung siehe Update 2026-10-15 in
+`marketing/freigabe-uebersicht.md`.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Übersichtsdokument), kein Live-Vorgang. Keine erfundenen Kennzahlen —
+beide neuen Kandidaten sind direkt im Code nachvollzogen
+(`src/hooks/useConcierge.ts`, `src/hooks/useChat.ts`), nicht aus
+Berichten übernommen. Klar genug beschrieben, keine offene
+Positionierungsfrage: wendet nur die seit 20.08. etablierte
+Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine achte Mini-Changelog-Ausgabe — Kandidatentopf liegt mit sieben
+  noch unter der Achter-Schwelle, ein künstliches Auffüllen wäre keine
+  ehrliche Vorlage.
+- Ein neues eigenständiges Social-Content-Stück — die beiden heutigen
+  Funde sind zu klein für einen eigenen Post und gehören stattdessen in
+  die nächste Mini-Changelog-Ausgabe.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md`: neues Update vom 15.10. (Prüfung
+  der vier Fragen, vierzehn neue Commits geprüft, zwei neue Tier-4-
+  Kandidaten aufgenommen — Kandidatentopf von fünf auf sieben,
+  Kandidaten 51-52 —, drei Refactoring-Commits bewusst ausgeschlossen,
+  Titel-Datum auf 15.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, dieser
+Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-14
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
