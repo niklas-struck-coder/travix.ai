@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { startListening } from './speech'
+import { startListening, speak, stopSpeaking, isSpeechSynthesisSupported } from './speech'
+
+class FakeUtterance {
+  text: string
+  lang = ''
+  constructor(text: string) {
+    this.text = text
+  }
+}
 
 class FakeRecognition {
   lang = ''
@@ -82,5 +90,72 @@ describe('startListening', () => {
     expect(result).toBe(instance)
     expect(instance.start).toHaveBeenCalledTimes(1)
     expect(onEnd).not.toHaveBeenCalled()
+  })
+})
+
+describe('speech synthesis (speak/stopSpeaking/isSpeechSynthesisSupported)', () => {
+  let originalSpeechSynthesis: unknown
+  let originalSpeechSynthesisUtterance: unknown
+
+  beforeEach(() => {
+    originalSpeechSynthesis = (window as unknown as { speechSynthesis?: unknown }).speechSynthesis
+    originalSpeechSynthesisUtterance = (window as unknown as { SpeechSynthesisUtterance?: unknown })
+      .SpeechSynthesisUtterance
+  })
+
+  afterEach(() => {
+    ;(window as unknown as { speechSynthesis?: unknown }).speechSynthesis = originalSpeechSynthesis
+    ;(window as unknown as { SpeechSynthesisUtterance?: unknown }).SpeechSynthesisUtterance =
+      originalSpeechSynthesisUtterance
+  })
+
+  describe('isSpeechSynthesisSupported', () => {
+    it('returns true when the browser has speechSynthesis', () => {
+      ;(window as unknown as { speechSynthesis?: unknown }).speechSynthesis = { cancel: vi.fn(), speak: vi.fn() }
+      expect(isSpeechSynthesisSupported()).toBe(true)
+    })
+
+    it('returns false when the browser has no speechSynthesis', () => {
+      delete (window as unknown as { speechSynthesis?: unknown }).speechSynthesis
+      expect(isSpeechSynthesisSupported()).toBe(false)
+    })
+  })
+
+  describe('speak', () => {
+    it('cancels any ongoing speech and speaks the given text in German when supported', () => {
+      const cancel = vi.fn()
+      const speakFn = vi.fn()
+      ;(window as unknown as { speechSynthesis?: unknown }).speechSynthesis = { cancel, speak: speakFn }
+      ;(window as unknown as { SpeechSynthesisUtterance?: unknown }).SpeechSynthesisUtterance = FakeUtterance
+
+      speak('Hallo Welt')
+
+      expect(cancel).toHaveBeenCalledTimes(1)
+      expect(speakFn).toHaveBeenCalledTimes(1)
+      const utterance = speakFn.mock.calls[0][0] as FakeUtterance
+      expect(utterance.text).toBe('Hallo Welt')
+      expect(utterance.lang).toBe('de-DE')
+    })
+
+    it('does nothing when speech synthesis is not supported', () => {
+      delete (window as unknown as { speechSynthesis?: unknown }).speechSynthesis
+      expect(() => speak('Hallo Welt')).not.toThrow()
+    })
+  })
+
+  describe('stopSpeaking', () => {
+    it('cancels ongoing speech when supported', () => {
+      const cancel = vi.fn()
+      ;(window as unknown as { speechSynthesis?: unknown }).speechSynthesis = { cancel, speak: vi.fn() }
+
+      stopSpeaking()
+
+      expect(cancel).toHaveBeenCalledTimes(1)
+    })
+
+    it('does nothing when speech synthesis is not supported', () => {
+      delete (window as unknown as { speechSynthesis?: unknown }).speechSynthesis
+      expect(() => stopSpeaking()).not.toThrow()
+    })
   })
 })

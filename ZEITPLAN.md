@@ -2598,6 +2598,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zurücknehmen der Quelländerung (`git stash` nur `useConcierge.ts`)
   reproduzierbar rot verifiziert (beide erwarteten `'idle'`, bekamen
   weiterhin `'error'`).
+  Vom autonomen IT-Chef-Lauf am 15.10. (zehnter Lauf desselben Tages) eine
+  weitere Testabdeckungslücke geschlossen: `src/lib/ai/speech.ts` hatte
+  bisher nur `startListening()` in `speech.test.ts` getestet — die drei
+  anderen Exports des Moduls (`speak()`, `stopSpeaking()`,
+  `isSpeechSynthesisSupported()`) liefen in keinem Test gegen ihre echte
+  Implementierung, da `KiChat.test.tsx`/`useChat.test.ts` das gesamte
+  Modul mocken (`vi.mock('@/lib/ai/speech', ...)`). Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `describe`-Blöcke in `speech.test.ts` (6 Tests, Muster
+  analog zum bestehenden `startListening`-Backup/Restore für
+  `window.SpeechRecognition`): `window.speechSynthesis`/
+  `window.SpeechSynthesisUtterance` werden pro Test gestubbt und danach
+  zurückgesetzt. `isSpeechSynthesisSupported()` true/false je nach
+  Vorhandensein von `speechSynthesis`; `speak()` ruft `cancel()` und
+  `speak()` mit einer Utterance (`text`/`lang: 'de-DE'`) auf, wenn
+  unterstützt, tut nichts und wirft nicht, wenn nicht; `stopSpeaking()`
+  ruft `cancel()` nur bei Unterstützung auf. Vor dem Ergänzen durch
+  gezieltes Verändern von `speech.ts` (`lang` auf `'en-US'` statt
+  `'de-DE'`) reproduzierbar rot verifiziert, dass der neue Test eine
+  echte Regression fängt — Quelldatei danach unverändert zurückgesetzt.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

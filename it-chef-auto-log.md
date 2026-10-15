@@ -19538,3 +19538,81 @@ keine uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+### Zehnter Lauf desselben Tages
+
+**Vorbereitung:** Weiterer geplanter Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout (Session begann mit `HEAD` losgelöst von
+`main`). `git fetch` zeigte `origin/it-chef/auto` (`d1ee5f0`, neunter
+Lauf) als einzigen Commit vor `origin/main` (`12dd79d`) — keine
+Divergenz, keine eigenen unversendeten Änderungen eines vorherigen
+Laufs. Lokalen Branch `it-chef/auto` von `origin/it-chef/auto`
+ausgecheckt. `npm ci` ausgeführt (Dependencies fehlten im frischen
+Checkout), danach Baseline geprüft: `npx eslint .` sauber, `npx tsc
+--noEmit -p tsconfig.app.json` sauber, `npx vitest run` 465/465 grün (64
+Testdateien), `npm run build` sauber (811-KB-Chunk-Size-Warnung
+unverändert) — alles grün vor jeder Änderung.
+
+**Auswahl:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`,
+`reports/it-chef.md` und `reports/support-chef.md` gelesen. Alle
+verbleibenden offenen Checkbox-Punkte in `ZEITPLAN.md` sind unverändert
+Produkt-/Architekturentscheidungen oder externe Blocker (Backend/Auth,
+KI-Engine, Zug/Bus/Fähre-Einbindung, fehlende Preis-/Provider-Felder,
+Chat-Resume-Datenmodell, Deal Finder/Premium/Rewards, Rechtstexte
+ausgeschlossen). `reports/it-chef.md` (heutiger Stand) vermerkt
+ausdrücklich "Keine neuen, unsicheren Funde heute" und listet nur noch
+Vorschläge, die für den autonomen Kanal ausgeschlossen sind
+(Abhängigkeitsänderung, PR-Aufräumung, Produktentscheidung
+Zugsuche). Die drei offenen Punkte in `reports/support-chef.md`
+(FlightWizard-Vorbefüllung, einheitlich dramatische Lösch-Warnungen,
+Lissabon-Demokarte mit möglichem Chat-Mismatch) verlangen jeweils eine
+eigene Design-/Textentscheidung (Kriterium 3 nicht erfüllt) und bleiben
+daher bewusst unangetastet.
+
+Da der neunte Lauf bereits den einzig verbliebenen Auto-Fix-Kandidaten
+(PR #29, Duffel-Fehlerzeilen-Dedup) selbst umgesetzt hatte, zusätzlich
+einen eigens beauftragten Explore-Agenten für eine unabhängige Suche
+nach einem noch nicht gemeldeten, sicheren Punkt eingesetzt — mit der
+expliziten Vorgabe, nur in den heute noch nicht gegen den Code geprüften
+Dateien zu suchen (gegenüber den bereits im 15.10.-Bericht gelisteten).
+Ergebnis: `src/lib/ai/speech.ts` hatte bisher nur `startListening()` in
+`speech.test.ts` getestet — `speak()`, `stopSpeaking()` und
+`isSpeechSynthesisSupported()` liefen in keinem Test gegen ihre echte
+Implementierung, da `KiChat.test.tsx`/`useChat.test.ts` das gesamte
+Modul per `vi.mock(...)` ersetzen. Selbst gegen den Code verifiziert
+(Datei gelesen, bestätigt: drei Exports ohne echten Testaufruf im ganzen
+Repo) und unabhängig gegen die vier Kriterien geprüft: kein Auth-/
+Zahlungs-/Nutzerdaten-/Rechtsbezug (reine Browser-Speech-API-Wrapper);
+keine offene Produkt-/Architekturentscheidung (reine Testabdeckung für
+bestehendes, unverändertes Verhalten); mechanisch (exaktes
+Backup/Restore-Testmuster liegt im selben File für `startListening`
+bereits vor); objektiv prüfbar (Test zeigt das Verhalten vorher/nachher).
+
+**Umgesetzt:** Drei neue `describe`-Blöcke in `speech.test.ts` (6 neue
+Tests): `isSpeechSynthesisSupported` (true/false je nach Vorhandensein
+von `window.speechSynthesis`), `speak` (ruft `cancel()` und `speak()`
+mit einer Utterance auf, deren `text`/`lang: 'de-DE'` gesetzt sind, wenn
+unterstützt; tut nichts und wirft nicht, wenn nicht unterstützt),
+`stopSpeaking` (ruft `cancel()` nur bei Unterstützung auf). Gleiches
+Backup/Restore-Muster wie der bestehende `startListening`-Block
+(`beforeEach`/`afterEach` sichert/stellt `window.speechSynthesis` und
+`window.SpeechSynthesisUtterance` wieder her). Vor dem endgültigen
+Abschluss durch gezieltes, temporäres Verändern von `speech.ts`
+(`utterance.lang` auf `'en-US'` statt `'de-DE'`) reproduzierbar rot
+verifiziert, dass der neue Test eine echte Regression fängt (Assertion
+schlug mit "expected 'en-US' to be 'de-DE'" fehl) — Quelldatei danach
+unverändert auf den Ausgangsstand zurückgesetzt (`git diff` auf
+`speech.ts` leer). `ZEITPLAN.md` (Phase-4-Abschnitt, direkt im
+`useConcierge`-Eintrag vom selben Tag fortgeführt) entsprechend
+ergänzt. Kein Eintrag in `tasks/tasks-prd-travix-platform.md` nötig
+(reine Testabdeckungslücke an bestehendem, unverändertem Verhalten,
+kein eigener PRD-Punkt betroffen).
+
+**Geprüft (nach der Ergänzung):** `npx eslint .` sauber, `npx tsc
+--noEmit -p tsconfig.app.json` sauber, `npx vitest run` 471/471 grün (64
+Testdateien, inkl. der sechs neuen Tests), `npm run build` sauber
+(unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach Abschluss:
+keine uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
