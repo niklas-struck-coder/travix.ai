@@ -19242,5 +19242,86 @@ Tests in `SearchErrorAlert.test.tsx`), `npm run build` sauber
 (unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach Abschluss:
 keine uncommitteten Änderungen außer diesem Commit.
 
+## 2026-10-15
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Lokal zunächst fälschlich `it-chef/auto` neu von `origin/main`
+(`ac63500`) angelegt, ohne vorher auch den Remote-Branch `it-chef/auto`
+selbst zu fetchen — der existierte bereits mit zwei weiteren, noch nicht
+nach `main` gemergten Commits vom 14.10. (vierter/fünfter Lauf desselben
+Tages: Concierge-Avatar-Fix und FlightResults/HotelResults-
+Konsolidierung in `SearchErrorAlert`). Vor dem Push bemerkt (`git push`
+schlug mit "fetch first" fehl), per `git fetch origin it-chef/auto` und
+`git rebase origin/it-chef/auto` korrigiert — eigener Commit (siehe
+unten) jetzt korrekt auf deren Stand aufgesetzt, keine der beiden
+vorherigen Commits verloren oder überschrieben. `npm ci` ausgeführt
+(Dependencies fehlten im frischen Checkout), danach Baseline geprüft:
+`npx eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber,
+`npx vitest run` 457/457 grün (63 Testdateien, gegen den anfänglichen,
+noch nicht aktuellen `ac63500`-Stand), `npm run build` sauber
+(unveränderte 811-KB-Chunk-Size-Warnung) — alles grün, bevor überhaupt
+etwas angefasst wurde.
+
+**Auswahl:** `git diff --stat ac63500 HEAD -- src/` (gegen den
+Stand vor diesem Lauf) bestätigt: keine Quelländerung von mir seit dem
+letzten IT-Chef-Lauf am 14.10. außer den beiden oben genannten, bereits
+vorhandenen Commits. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md`/`it-chef-auto-log.md`/
+`reports/it-chef.md`/`reports/support-chef.md` gelesen. Die bekannten
+offenen Punkte bleiben unverändert Produkt-/Architekturentscheidungen
+oder externe Blocker (2.0 Base44/Auth, 4.1-4.3 KI-Engine wartet auf
+Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende Preis-/
+Provider-Felder, 7.4 Chat-Resume-Datenmodell, 8.1-8.7/8.9/8.11/8.12,
+Rechtstexte ausgeschlossen). Die bereits mehrfach geprüften und
+verworfenen Kandidaten (FlightWizard-Vorbefüllung, Lösch-Warnungen-
+Tonalität, Urlaubsmodus/Lissabon-Mismatch, Avatar-Fehlerzustand bei
+ehrlichen Concierge-Antworten — neu von Support-Chef am 14.10.
+gemeldet, aber mit mehreren gleichwertigen Lösungsoptionen (idle/
+thinking/neuer `unsure`-Zustand) ohne Vorgabe in `MARKENDESIGN.md`, also
+eine Tonalitäts-/Produktentscheidung statt mechanischer Korrektur) sind
+weiterhin nicht autonom sicher umsetzbar.
+
+Einen eigens beauftragten Explore-Agenten mit vollständiger Liste aller
+bisherigen Ausschlüsse (siehe oben, plus stale Duffel-Suchen, recharts,
+TrainCard, Kyoto-Demo-Datum, shadcn-Primitives) gezielt in bisher
+seltener vertieft geprüften Bereichen nach einem echten neuen Bug suchen
+lassen: alle `src/pages/*.tsx`, alle `src/components/**/*.tsx`, alle
+`src/lib/**/*.ts`, Hooks, sowie ein Abgleich etablierter Accessibility-
+Muster (`role="status"`/`role="alert"`/`aria-label`/`focus-visible`-Ring)
+gegen strukturell identische Stellen ohne das Muster.
+
+**Ergebnis:** Fund in `src/hooks/useChat.ts`, Funktion `startEdit()`
+(Zeile 172-177): setzte beim Wechsel auf ein anderes Feld bisher nur
+`stayOffers`/`stayErrors` zurück, nicht aber
+`flightOffers`/`flightErrors`/`flightLoading` — obwohl `sendMessage()`
+(Zeile 247-252) und `resetChat()` (Zeile 445-451) beide Suchergebnis-
+Typen bereits symmetrisch zurücksetzen. Erfüllt alle vier Kriterien: kein
+Auth/Zahlungs-/Nutzerdaten-/Rechtsbezug (reiner Client-State-Bug in der
+Demo-Chat-Logik); keine offene Produktentscheidung (Zielverhalten durch
+die Schwesterzeilen in `sendMessage()`/`resetChat()` bereits festgelegt);
+mechanisch (exakt dasselbe, bereits etablierte Reset-Muster fehlte nur
+strukturell identisch an einer Stelle); objektiv prüfbar (neue Tests).
+
+**Umgesetzt:** `startEdit()` setzt jetzt zusätzlich
+`setFlightOffers(null)`, `setFlightErrors([])` und
+`setFlightLoading(false)`. Zwei neue Regressionstests in
+`useChat.test.ts` ("clears stale flight offers and errors when editing a
+different, unrelated field" und "clears a still-pending flightLoading
+when editing a different field mid-search") — vor dem Fix durch
+temporäres Zurücknehmen der Quelländerung (`git stash` nur
+`useChat.ts`) reproduzierbar rot verifiziert (beide neuen Tests schlugen
+fehl: `flightOffers` blieb `[]` statt `null` zu werden,
+`flightErrors` blieb gefüllt, `flightLoading` blieb `true`). Nach dem
+Zurückholen des Fixes beide grün. `ZEITPLAN.md` (Phase 4 KI-Chat,
+Ist-Stand) entsprechend ergänzt.
+
+**Geprüft (nach dem Rebase, auf dem tatsächlichen Endstand):** `npx
+eslint .` sauber, `npx tsc --noEmit -p tsconfig.app.json` sauber, `npx
+vitest run` 461/461 grün (64 Testdateien — 459 bereits vom vierten/
+fünften Lauf des 14.10. plus die zwei neuen hier), `npm run build`
+sauber (unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach
+Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).

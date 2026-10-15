@@ -1053,6 +1053,28 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
   reproduzierbar rot verifiziert (zeigte "BER → LIS" statt
   "Berlin → Lissabon").
+  Vom autonomen IT-Chef-Lauf am 15.10. einen eigenständig (über einen
+  eigens beauftragten Explore-Agenten) gefundenen Bug in `useChat.ts`
+  behoben: `startEdit()` (Zeile 172-177) setzte beim Wechsel auf ein
+  anderes Feld bisher nur `stayOffers`/`stayErrors` zurück, nicht aber
+  `flightOffers`/`flightErrors`/`flightLoading` — obwohl `sendMessage()`
+  (Zeile 247-252) und `resetChat()` (Zeile 445-451) beide Suchergebnis-
+  Typen bereits symmetrisch zurücksetzen. Live reproduzierbar: Bei
+  "Bearbeiten" → Transportmittel → "Flug" → IATA-Code eine echte
+  Flugsuche abschließen, dann ohne eine Auswahl zu treffen erneut
+  "Bearbeiten" für ein anderes Feld (z. B. Reisedaten) anklicken — die
+  alten Flugergebnisse/-fehler blieben in `KiChat.tsx` (Zeile 209-211)
+  weiterhin sichtbar unter dem neuen Edit-Prompt, inkl. noch anklickbarer
+  `onSelect={selectFlight}`-Karten einer inzwischen kontextlosen
+  Flugauswahl. Fix: `startEdit()` setzt jetzt zusätzlich
+  `setFlightOffers(null)`, `setFlightErrors([])` und
+  `setFlightLoading(false)`, mechanische Übernahme des bereits in
+  `sendMessage()`/`resetChat()` etablierten Musters, keine neue
+  Design-Entscheidung. Zwei neue Regressionstests in `useChat.test.ts`
+  (stale Flugergebnisse/-fehler werden beim Wechsel auf ein anderes Feld
+  zurückgesetzt; ein noch laufendes `flightLoading` ebenso) — vor dem Fix
+  durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
+  `useChat.ts`) reproduzierbar rot verifiziert.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

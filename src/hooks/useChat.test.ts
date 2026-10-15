@@ -492,6 +492,44 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightLoading).toBe(false)
   })
 
+  // startEdit() used to reset stayOffers/stayErrors/editingField for every
+  // field, but left a stale flightOffers/flightErrors behind — so switching
+  // to edit an unrelated field (e.g. dates) after a flight search left the
+  // old flight results/errors rendered underneath the new edit prompt in
+  // KiChat.tsx, including still-clickable offer cards.
+  it('clears stale flight offers and errors when editing a different, unrelated field', async () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [{ message: 'Die Anfrage bei unserem Reise-Anbieter hat nicht geklappt.' }] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    await act(async () => {
+      await Promise.resolve()
+    })
+    expect(result.current.flightErrors.length).toBeGreaterThan(0)
+    expect(result.current.flightOffers).toEqual([])
+
+    act(() => {
+      result.current.startEdit('dates')
+    })
+
+    expect(result.current.flightOffers).toBeNull()
+    expect(result.current.flightErrors).toEqual([])
+  })
+
+  it('clears a still-pending flightLoading when editing a different field mid-search', () => {
+    vi.mocked(searchFlights).mockReturnValue(new Promise(() => {}))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    expect(result.current.flightLoading).toBe(true)
+
+    act(() => {
+      result.current.startEdit('dates')
+    })
+
+    expect(result.current.flightLoading).toBe(false)
+  })
+
   // startEdit() resets stayOffers/stayErrors/editingField for every field,
   // but used to leave a stale awaitingFlightOrigin=true behind when the
   // user abandoned an in-progress "edit transport mode -> Flug -> (never

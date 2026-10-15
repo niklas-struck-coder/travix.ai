@@ -172,6 +172,9 @@ export function useChat(speechEnabled: boolean) {
   const startEdit = (field: EditableTripField) => {
     setStayOffers(null)
     setStayErrors([])
+    setFlightOffers(null)
+    setFlightErrors([])
+    setFlightLoading(false)
     setEditingField(field)
     // Abandoning an in-progress "transportMode -> Flug -> (never enters an
     // origin)" edit for a different field must not leave this flag behind —
