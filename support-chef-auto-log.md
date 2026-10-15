@@ -4672,3 +4672,75 @@ Laden, die kontextuelle Erreichbarkeit nur über "Urlaubsmodus aktivieren"
 in `MeineReisen.tsx`/`Buchung.tsx`) wirkt konsistent mit dem Rest der
 App — kein weiterer Punkt erfunden, nur um den Bericht länger wirken zu
 lassen.
+
+---
+
+## 2026-10-15 — Fehleranzeige bei Flug-/Hotelsuche (`src/lib/duffel/client.ts`, `SearchErrorAlert.tsx`)
+
+**Geprüfter Bereich:** Seit dem letzten Bericht (14.10.) hat IT-Chef laut
+`git log` acht Auto-Läufe gemacht, davon mehrere direkt an der
+Fehleranzeige der Flug-/Hotelsuche: `70dd3fc` (Fehler-Anzeige-Block aus
+`FlightResults`/`HotelResults` in eine gemeinsame `SearchErrorAlert.tsx`
+konsolidiert), `83c1373` (dieselbe Konsolidierung auch in
+`Flugsuche.tsx`/`Hotelsuche.tsx` übernommen), `1c6535c` (Fix in
+`Flugsuche.tsx`/`Hotelsuche.tsx` `startEdit()`), `8a2d8c9`
+(`escapeRegExp()`-Dedup, ohne UI-Bezug). Das ist laut `ZEITPLAN.md`
+frisch gebauter/umgebauter Code von heute — genau der richtige Bereich
+für diesen Lauf, statt eine ältere, bereits mehrfach geprüfte Seite zu
+wiederholen. Geprüft: `src/components/search/SearchErrorAlert.tsx`,
+`src/lib/duffel/client.ts` (`callDuffelProxy()`), sowie alle drei
+Einbindungsstellen — `Flugsuche.tsx`, `Hotelsuche.tsx` und (über
+`FlightResults.tsx`/`HotelResults.tsx`) die Flug-/Hotelsuche im KI-Chat
+(`KiChat.tsx:206,210`).
+
+### Reibungspunkt
+
+**Liefert der Duffel-Anbieter mehrere Fehler gleichzeitig zurück, zeigt
+die neue, gerade konsolidierte Fehlerbox denselben Satz mehrfach
+hintereinander an — wirkt wie ein Darstellungsfehler statt einer echten
+Mehrfach-Rückmeldung**
+
+`SearchErrorAlert.tsx:16-18` rendert für jedes Element in `errors` eine
+eigene Zeile (`errors.map(...)`) — das ist bewusst so gebaut, damit bei
+mehreren *unterschiedlichen* Problemen (z. B. ungültiges Datum UND zu
+viele Passagiere) jedes einzeln lesbar ist, und wird in
+`SearchErrorAlert.test.tsx:14-20` auch genau so getestet ("Erster
+Fehler."/"Zweiter Fehler.").
+
+In der Praxis bekommt diese Komponente aber nie unterschiedliche Sätze zu
+sehen: `callDuffelProxy()` in `client.ts:30-38` mappt *jedes* Element aus
+der Duffel-Antwort (`rawErrors`, typischerweise ein Eintrag pro
+ungültigem Feld — eine klassische Validierungs-API) auf exakt denselben
+festen deutschen Text ("Die Anfrage bei unserem Reise-Anbieter hat nicht
+geklappt — bitte prüfe deine Eingaben oder versuche es gleich noch
+einmal."), unabhängig von `error.code` oder `error.message` der
+jeweiligen Duffel-Fehlermeldung — nur der (UI-seitig gar nicht
+angezeigte) `code` wird pro Eintrag übernommen. Meldet Duffel also z. B.
+zwei Validierungsfehler in einer Antwort, zeigt `SearchErrorAlert` exakt
+denselben Satz zweimal direkt untereinander — auf `/flugsuche`,
+`/hotelsuche` und in der Flug-/Hotelsuche im KI-Chat gleichermaßen, da
+alle drei Stellen dieselbe `callDuffelProxy()`-Fehlerliste 1:1
+weiterreichen. `client.test.ts` deckt diesen Mehrfach-Fehler-Fall nicht
+ab (`client.test.ts:42-44,120-121` prüft jeweils nur `result.errors[0]`).
+Für eine Nutzerin, die z. B. ein ungültiges Reisedatum *und* eine
+ungültige Passagierzahl gleichzeitig eingegeben hat, wirkt eine doppelt
+gedruckte, identische Fehlerzeile eher wie ein Bug in der neuen Anzeige
+als wie eine hilfreiche Mehrfach-Rückmeldung — und verrät ihr nicht,
+dass tatsächlich zwei verschiedene Eingaben betroffen sind.
+
+*Vorschlag:* In `callDuffelProxy()` die `rawErrors` vor dem Anzeigen auf
+eindeutige Texte reduzieren (z. B. nach `message`-Text oder nach `code`
+dedupen), bevor sie an `SearchErrorAlert` weitergereicht werden — dann
+bleibt die Komponente wie gebaut (eine Zeile pro *echtem* Problem), ohne
+dass der feste Übersetzungstext mehrfach identisch auftaucht. Alternativ,
+falls künftig doch unterschiedliche, feldspezifische deutsche Texte pro
+`error.code` gewünscht sind: eine kleine Code→Text-Zuordnung in
+`client.ts`, mit dem aktuellen Satz als Fallback für unbekannte Codes.
+
+### Kein zweiter Fund in diesem Lauf
+
+Der übrige, heute umgebaute Code (die Konsolidierung selbst in
+`FlightResults.tsx:25-27`/`HotelResults.tsx`, der `role="alert"`-Einsatz,
+der Netzwerk-/Parse-Fehler-Zweig in `client.ts:54-61`, der `startEdit()`-
+Fix vom selben Tag) wirkt konsistent und wie beabsichtigt — kein weiterer
+Punkt erfunden, nur um den Bericht länger wirken zu lassen.
