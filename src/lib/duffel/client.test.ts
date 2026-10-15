@@ -44,6 +44,27 @@ describe('searchFlights error handling', () => {
     expect(result.errors[0].code).toBe('invalid_input')
   })
 
+  it('collapses multiple raw Duffel validation errors into a single deduplicated line', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 422,
+        json: async () => ({
+          errors: [
+            { message: 'slices[0].origin: could not be resolved', code: 'invalid_input' },
+            { message: 'passengers[0].type: is invalid', code: 'invalid_input' },
+          ],
+        }),
+      }),
+    )
+
+    const result = await searchFlights(baseParams)
+
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toContain('Reise-Anbieter')
+  })
+
   it('falls back to a status-based German message when Duffel returns no error details', async () => {
     vi.stubGlobal(
       'fetch',
