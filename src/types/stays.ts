@@ -1,3 +1,5 @@
+import { escapeRegExp } from '@/lib/utils'
+
 export interface StayOffer {
   id: string
   accommodationName: string
@@ -42,7 +44,7 @@ export function findKnownDestination(query: string): KnownDestination | null {
   const normalized = query.trim().toLowerCase()
   return (
     knownDestinations.find((d) => {
-      const name = d.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const name = escapeRegExp(d.name.toLowerCase())
       return new RegExp(`\\b${name}\\b`).test(normalized)
     }) ?? null
   )

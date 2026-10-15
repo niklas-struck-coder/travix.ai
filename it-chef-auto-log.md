@@ -19392,3 +19392,70 @@ keine uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+### Achter Lauf desselben Tages
+
+**Vorbereitung:** Weiterer geplanter Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `git fetch origin main it-chef/auto` zuerst
+ausgeführt, `it-chef/auto` war bereits aktuell zu `main` (`ac63500`)
+plus den sieben bisherigen Läufen vom 14./15.10. — keine Divergenz.
+`npm ci` ausgeführt (Dependencies fehlten im frischen Checkout), danach
+Baseline geprüft: `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 461/461 grün (64
+Testdateien), `npm run build` sauber (811-KB-Chunk-Size-Warnung
+unverändert) — alles grün vor jeder Änderung.
+
+**Auswahl:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md` und die
+letzten ca. 300 Zeilen dieses Logs gelesen. Die dort bereits explizit als
+nicht-autonom-sicher ausgeschlossenen Kandidaten (Backend/Auth,
+KI-Engine ohne Zugangsdaten, Zug/Bus/Fähre-Integration, TripItem/
+CostBreakdown ohne Preisfelder, Chat-Resume-Architektur, Urlaubsmodus/
+Deal-Finder/Premium/Hilfe/Rewards blockiert oder Produktentscheidung)
+bleiben unverändert nicht sicher umsetzbar. Einen eigens beauftragten
+Explore-Agenten mit der vollständigen Ausschlussliste sowie den letzten
+Log-Einträgen gezielt nach einem neuen, noch nicht dokumentierten
+Kandidaten suchen lassen — Auftrag deckte gezielt bisher seltener
+geprüfte Dateien ab (u. a. `src/types/stays.ts`, `mockConcierge.ts`,
+diverse Seiten/Hooks ohne jüngste Logeinträge).
+
+**Ergebnis:** Fund: dieselbe RegExp-Escape-Logik
+(`value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')`, escaped Freitext für
+die sichere Verwendung als `\bWort\b`-RegExp) lag an drei Stellen
+unabhängig vor: als benannte Funktion `escapeRegExp()` in
+`src/lib/ai/mockAdvisor.ts` (genutzt von `detectTransportMode()`), sowie
+wortgleich inline in `findKnownDestination()` (`src/types/stays.ts:45`)
+und `findFacts()` (`src/lib/ai/mockConcierge.ts:31`) — beide ohne Import
+der bereits existierenden Funktion, selbst verifiziert durch Lesen aller
+drei Stellen. Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtsbezug (reine interne Hilfsfunktion); keine offene
+Produktentscheidung (reine mechanische Extraktion identischen,
+bestehenden Codes, keine neue Logik); klar genug beschrieben (Datei/
+Zeilen exakt benannt, Code wortgleich bis auf Variablennamen); objektiv
+prüfbar (bestehende Tests müssen unverändert grün bleiben, neue Tests
+für die extrahierte Funktion).
+
+**Umgesetzt:** `escapeRegExp()` nach `src/lib/utils.ts` verschoben
+(neben den bereits dort liegenden geteilten Helfern `cn`/
+`focusPageHeading`), aus `mockAdvisor.ts` entfernt und importiert,
+`stays.ts`/`mockConcierge.ts` nutzen jetzt ebenfalls den Import statt der
+inline wiederholten Regex. Neue `escapeRegExp`-Testgruppe in
+`utils.test.ts` (3 Tests: Sonderzeichen werden literal matchbar,
+unveränderter String bleibt unverändert, jedes Zeichen der
+Sonderzeichen-Klasse wird escaped). `ZEITPLAN.md` (Phase-4-Abschnitt,
+direkt im `startEdit()`-Eintrag vom selben Tag fortgeführt) entsprechend
+ergänzt. Kein Eintrag in `tasks/tasks-prd-travix-platform.md` nötig, da
+keiner der nummerierten Punkte dort diese interne Hilfsfunktion
+betrifft (reine Hygiene-Korrektur quer über drei Dateien, analog zur
+`focusPageHeading()`-Konsolidierung am 06.10. und der
+`formatEuro()`-Konsolidierung am 02.10.).
+
+**Geprüft (nach dem Fix):** `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 464/464 grün (64
+Testdateien, inkl. der unveränderten Tests in `mockAdvisor.test.ts`/
+`stays.test.ts`/`mockConcierge.test.ts` sowie der drei neuen Tests in
+`utils.test.ts`), `npm run build` sauber (unveränderte
+811-KB-Chunk-Size-Warnung). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

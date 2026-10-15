@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { cn, focusPageHeading } from '@/lib/utils'
+import { cn, escapeRegExp, focusPageHeading } from '@/lib/utils'
 
 describe('cn', () => {
   it('merges plain class name strings', () => {
@@ -59,5 +59,23 @@ describe('focusPageHeading', () => {
   it('does nothing when the page has no h1', () => {
     document.body.innerHTML = '<p>Keine Überschrift</p>'
     expect(() => focusPageHeading()).not.toThrow()
+  })
+})
+
+describe('escapeRegExp', () => {
+  it('escapes RegExp special characters so the result matches them literally', () => {
+    const input = 'New York (JFK)?'
+    const escaped = escapeRegExp(input)
+    expect(new RegExp(`^${escaped}$`).test(input)).toBe(true)
+  })
+
+  it('leaves a string without special characters unchanged', () => {
+    expect(escapeRegExp('Lissabon')).toBe('Lissabon')
+  })
+
+  it('escapes every character from the special-character class', () => {
+    expect(escapeRegExp('.*+?^${}()|[]\\')).toBe(
+      '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\',
+    )
   })
 })

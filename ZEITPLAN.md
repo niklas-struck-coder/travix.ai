@@ -1075,6 +1075,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   zurückgesetzt; ein noch laufendes `flightLoading` ebenso) — vor dem Fix
   durch temporäres Zurücknehmen der Quelländerung (`git stash` nur
   `useChat.ts`) reproduzierbar rot verifiziert.
+  Vom autonomen IT-Chef-Lauf am 15.10. (achter Lauf desselben Tages) eine
+  über einen eigens beauftragten Explore-Agenten gefundene
+  Code-Duplikation aufgeräumt: Dieselbe RegExp-Escape-Logik
+  (`value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')`, nötig um Freitext
+  sicher als `\bWort\b`-Muster zu verwenden) lag an drei Stellen
+  unabhängig vor — als benannte Funktion `escapeRegExp()` in
+  `mockAdvisor.ts` (genutzt von `detectTransportMode()`), und zweimal
+  wortgleich inline in `findKnownDestination()` (`src/types/stays.ts`)
+  sowie `findFacts()` (`src/lib/ai/mockConcierge.ts`), ohne die bereits
+  existierende Funktion zu importieren. Fix: `escapeRegExp()` nach
+  `src/lib/utils.ts` verschoben (neben `cn`/`focusPageHeading`, den
+  anderen geteilten Helfern dort), alle drei Stellen importieren sie jetzt
+  von dort statt sie erneut zu definieren. Reine mechanische Extraktion
+  ohne Verhaltensänderung, keine neue Design-Entscheidung. Neue
+  `escapeRegExp`-Testgruppe in `utils.test.ts` (3 Tests: Sonderzeichen
+  werden literal matchbar, unveränderter String bleibt unverändert, jedes
+  Zeichen der Sonderzeichen-Klasse wird escaped) — bestehende Tests in
+  `mockAdvisor.test.ts`/`stays.test.ts`/`mockConcierge.test.ts` blieben
+  unverändert grün.
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

@@ -6,6 +6,7 @@
  * recommendations or live event info, since that would violate the
  * "no fabricated data" principle without a real search backend.
  */
+import { escapeRegExp } from '@/lib/utils'
 
 interface DestinationFacts {
   currency: string
@@ -28,7 +29,7 @@ function findFacts(destination: string | null): DestinationFacts | null {
   if (!destination) return null
   const normalized = destination.toLowerCase()
   const match = Object.keys(destinationFacts).find((name) => {
-    const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const escaped = escapeRegExp(name.toLowerCase())
     return new RegExp(`\\b${escaped}\\b`).test(normalized)
   })
   return match ? destinationFacts[match] : null

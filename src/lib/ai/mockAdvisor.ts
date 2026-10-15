@@ -1,5 +1,6 @@
 import type { AdvisorReply, TransportMode, TripDraft } from '@/types/chat'
 import { findKnownDestination, knownDestinations } from '@/types/stays'
+import { escapeRegExp } from '@/lib/utils'
 
 /**
  * Local stand-in for the real AI engine (Base44 InvokeLLM + gemini_3_flash +
@@ -36,10 +37,6 @@ const noAutoSearchPhraseDe: Record<TransportMode, string> = {
 // der Quick-Reply-Klick ist dies das erste Chat-Feld, das auch Freitext
 // entgegennimmt.
 const SURPRISE_ME_PATTERN = /^überrasche? mich[!.?]*$/i
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
 
 export function detectTransportMode(text: string): TransportMode | null {
   const lower = text.toLowerCase()
