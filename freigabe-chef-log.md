@@ -6802,3 +6802,40 @@ um 6 Uhr, planmäßig übersprungen in diesem frühen Lauf.
 
 **Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
 wiederholte Regelverstöße.
+
+## 2026-10-15, Tages-Check (geplanter täglicher Auto-Lauf, kein Ni live dabei)
+
+**`it-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand) — der heutige Stand war bereits durch einen früheren Nacht-Lauf
+gemergt. Planmäßig übersprungen.
+
+**Prüfung `marketing-chef/auto`** (1 Commit: "zwei neue Tier-4-
+Kandidaten (Concierge-Avatar-Fix, startEdit stale Flugergebnisse), Topf
+bei sieben"). Diff betrifft ausschließlich `marketing-chef-auto-log.md`
+und `marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Code, kein Hinweis auf tatsächliches Posten/Versenden. Stichprobenartig
+gegen die zitierten Commits verifiziert statt dem Log blind vertraut:
+`git show 00c741d` bestätigt den Avatar-Fix in `useConcierge.ts` (`'idle'`
+statt `'error'` für die drei ehrlichen Ausweich-Antworten), `git show
+1c6535c` bestätigt den `startEdit()`-Fix in `useChat.ts`
+(`flightOffers`/`flightErrors`/`flightLoading` werden jetzt wie
+`stayOffers`/`stayErrors` zurückgesetzt). Keine erfundenen Kennzahlen,
+beide Kandidaten direkt im Code nachvollzogen.
+→ **Passt, nach `main` gemergt** (Fast-Forward `4b7da8d..d6512f9`).
+
+**Prüfung `support-chef/auto`** (1 Commit: "identische Fehlerzeile bei
+mehreren Duffel-Fehlern in Flug-/Hotelsuche gemeldet"). Diff betrifft
+ausschließlich `support-chef-auto-log.md` — reine Analyse, keine
+Code-Änderung, niedrigstes Risiko. Fund im Code verifiziert:
+`src/lib/duffel/client.ts` (`callDuffelProxy()`) mappt jedes Element aus
+`rawErrors` auf denselben festen deutschen Text, unabhängig von
+`error.code`/`error.message`; `SearchErrorAlert.tsx:16-18` rendert dafür
+pro Fehler eine eigene Zeile (`errors.map(...)`) — bei mehreren
+Duffel-Fehlern in einer Antwort erscheint der identische Satz tatsächlich
+mehrfach hintereinander. Datei-/Zeilenangaben stimmen, nichts wirkt
+erfunden.
+→ **Passt, nach `main` gemergt** (Merge-Commit, da `main` inzwischen
+durch den Marketing-Merge weitergewandert war).
+
+**Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
+wiederholte Regelverstöße.
