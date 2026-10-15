@@ -1583,6 +1583,20 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `SearchErrorAlert.tsx` (gleiche Kategorie wie `NoResultsMessage.tsx`),
   beide Komponenten rufen sie jetzt statt des duplizierten Blocks auf —
   keine Verhaltensänderung. Neue `SearchErrorAlert.test.tsx` (2 Tests).
+  Vom autonomen IT-Chef-Lauf am 15.10. (siebter Lauf desselben Tages) über
+  einen eigens beauftragten Explore-Agenten denselben, am 14.10. (fünfter
+  Lauf) bereits erkannten Fehler-Anzeige-Block an zwei weiteren, damals
+  nicht geprüften Stellen gefunden: Die eigenständigen Suchseiten
+  `Flugsuche.tsx` (Zeile 50-62) und `Hotelsuche.tsx` (Zeile 50-62) hatten
+  exakt denselben, Zeichen-für-Zeichen identischen Fehler-Block wie zuvor
+  `FlightResults.tsx`/`HotelResults.tsx` — nur die damals neu extrahierte
+  `SearchErrorAlert`-Komponente wurde dort nicht verwendet. Fix: beide
+  Seiten rufen jetzt ebenfalls `<SearchErrorAlert errors={errors} />` auf,
+  ungenutzter `AlertTriangle`-Import entfernt — reine Wiederverwendung der
+  bereits akzeptierten Komponente, keine Verhaltensänderung. Bestehende
+  `role="alert"`-Tests in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
+  unverändert grün (decken dasselbe Verhalten bereits ab), keine neuen
+  Tests nötig.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und

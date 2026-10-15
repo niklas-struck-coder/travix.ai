@@ -19325,3 +19325,70 @@ Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+### Siebter Lauf desselben Tages
+
+**Vorbereitung:** Weiterer geplanter Cloud-Lauf, autonom ohne Ni live
+dabei, frischer Checkout. `git fetch origin main it-chef/auto` zuerst
+ausgeführt (Lektion aus dem sechsten Lauf oben), `it-chef/auto` war
+bereits aktuell zu `main` (`ac63500`) plus den beiden Commits des
+vierten/fünften Laufs plus dem `startEdit()`-Fix des sechsten Laufs
+(`1c6535c`) — keine Divergenz. `npm ci` ausgeführt (Dependencies fehlten
+im frischen Checkout), danach Baseline geprüft: `npx eslint .` sauber,
+`npx tsc --noEmit -p tsconfig.app.json` sauber, `npx vitest run`
+461/461 grün (64 Testdateien), `npm run build` sauber (811-KB-Chunk-Size-
+Warnung unverändert) — alles grün vor jeder Änderung.
+
+**Auswahl:** `ZEITPLAN.md`, `tasks/tasks-prd-travix-platform.md`,
+`reports/it-chef.md` (14.10.) und `reports/support-chef.md` (14.10.)
+gelesen. Die dort bereits explizit als nicht-autonom-sicher
+ausgeschlossenen Kandidaten (Duffel-Stale-Suchen bei startEdit/Freitext,
+FlightWizard-Vorbefüllung, Lösch-Warnungen-Tonalität, Lissabon-Demokarte/
+Urlaubsmodus-Mismatch, recharts-Dependency, TrainCard/TrainResults
+unverdrahtet, Backend/Auth-Entscheidung, 4.1-4.3 KI-Engine ohne
+Zugangsdaten) bleiben unverändert nicht sicher umsetzbar. Einen eigens
+beauftragten Explore-Agenten mit der vollständigen Ausschlussliste sowie
+den letzten ca. 300 Log-Zeilen gezielt nach einem neuen, noch nicht
+dokumentierten Kandidaten suchen lassen.
+
+**Ergebnis:** Fund in `src/pages/Flugsuche.tsx` (Zeile 50-62) und
+`src/pages/Hotelsuche.tsx` (Zeile 50-62): derselbe Fehler-Anzeige-Block
+(`role="alert"`, `AlertTriangle`-Icon, identische Tailwind-Klassen,
+`errors.map(...)`), der im fünften Lauf desselben Tages bereits in
+`FlightResults.tsx`/`HotelResults.tsx` als Duplikat erkannt und durch die
+neue `SearchErrorAlert`-Komponente ersetzt wurde — dieser Lauf prüfte
+damals nur die beiden Chat-Ergebnis-Komponenten, nicht die beiden
+eigenständigen Suchseiten, die denselben Block ebenfalls Zeichen-für-
+Zeichen dupliziert enthalten (verifiziert: `diff` zwischen beiden Blöcken
+in `Flugsuche.tsx`/`Hotelsuche.tsx` ist leer, und beide sind identisch
+zum bereits ersetzten Block). Live reproduzierbar bei jeder
+fehlgeschlagenen Duffel-Suche auf einer der beiden eigenständigen
+Suchseiten. Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtsbezug; keine offene Produktentscheidung (reine
+Wiederverwendung der bereits akzeptierten `SearchErrorAlert`-Lösung);
+mechanisch (identischer, bereits vorhandener Code wird nur durch den
+Komponentenaufruf ersetzt, keine neue Logik); objektiv prüfbar
+(bestehende `role="alert"`-Tests müssen unverändert grün bleiben).
+
+**Umgesetzt:** In beiden Dateien den duplizierten `errors.length > 0`-
+Block durch `<SearchErrorAlert errors={errors} />` ersetzt, Import von
+`SearchErrorAlert` ergänzt, den dadurch ungenutzten `AlertTriangle`-Import
+aus `lucide-react` entfernt (`CheckCircle2` bleibt, wird weiterhin für die
+Erfolgsmeldung gebraucht). Keine neuen Tests nötig — reine Extraktion
+bereits akzeptierten, wortgleichen Codes ohne Verhaltensänderung, analog
+zur Konsolidierung von `focusPageHeading()` am 06.10. und der
+`SearchErrorAlert`-Extraktion selbst am 14.10.: die bestehenden
+`role="alert"`-Tests in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx` decken
+dasselbe Verhalten bereits ab und dienen als Verifikation. `ZEITPLAN.md`
+(Phase 3/Phase 6-Block, direkt im `SearchErrorAlert`-Eintrag vom 14.10.
+fortgeführt) entsprechend ergänzt.
+
+**Geprüft (nach dem Fix):** `npx eslint .` sauber, `npx tsc --noEmit -p
+tsconfig.app.json` sauber, `npx vitest run` 461/461 grün (64
+Testdateien, inkl. der unveränderten `role="alert"`-Tests in
+`Flugsuche.test.tsx`/`Hotelsuche.test.tsx`), `npm run build` sauber
+(unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach Abschluss:
+keine uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

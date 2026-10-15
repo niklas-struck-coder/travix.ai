@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { HotelWizard } from '@/components/search/HotelWizard'
 import { HotelCard } from '@/components/search/HotelCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
+import { SearchErrorAlert } from '@/components/search/SearchErrorAlert'
 import { searchStays } from '@/lib/duffel/client'
 import { updateStoredTrip } from '@/lib/trip/tripStorage'
 import type { DuffelError } from '@/types/duffel'
@@ -47,19 +48,7 @@ export function Hotelsuche() {
       <PageHeader title="Hotelsuche" description="Echte Testangebote von Duffel — keine erfundenen Preise" />
       <HotelWizard onSearch={handleSearch} loading={loading} />
 
-      {errors.length > 0 && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-        >
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          <div className="flex flex-col gap-1">
-            {errors.map((error, index) => (
-              <span key={index}>{error.message}</span>
-            ))}
-          </div>
-        </div>
-      )}
+      {errors.length > 0 && <SearchErrorAlert errors={errors} />}
 
       {storageWarning && (
         <p role="status" className="text-xs text-muted-foreground">
