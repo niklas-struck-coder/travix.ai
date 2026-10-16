@@ -291,6 +291,42 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayLoading).toBe(false)
   })
 
+  it('does not let a stale stay offer land once free text has already filled the accommodation field', async () => {
+    let resolveSearch: (result: { offers: StayOffer[]; errors: [] }) => void = () => {}
+    vi.mocked(searchStays).mockReturnValue(
+      new Promise((resolve) => {
+        resolveSearch = resolve
+      }),
+    )
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    expect(result.current.stayLoading).toBe(true)
+
+    // User doesn't wait for the auto-started search — they just type what
+    // they want instead, which fills the still-empty accommodation field
+    // directly via the generic free-text chat flow.
+    act(() => {
+      result.current.sendMessage('Ein ruhiges Hostel in der Altstadt bitte')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+    expect(result.current.trip.accommodation).toBe('Ein ruhiges Hostel in der Altstadt bitte')
+
+    // The abandoned search from the budget step now finally resolves — it
+    // must not resurrect offers for a field the user already filled themselves.
+    resolveSearch({
+      offers: [
+        { id: '1', accommodationName: 'Altes Hotel', rating: 4, address: 'Lissabon', totalAmount: '100', totalCurrency: 'EUR', photoUrl: null },
+      ],
+      errors: [],
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayOffers).toBeNull()
+  })
+
   // The avatar switches to the looping "searching" animation right when the
   // real search is announced (see TravixAvatar.tsx — every non-'idle' state
   // repeats forever), but none of the search's completion handlers used to

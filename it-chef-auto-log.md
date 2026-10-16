@@ -19765,3 +19765,98 @@ außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-16 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Frischer Checkout, `origin` gefetcht. `it-chef/auto` enthielt
+bereits fünf Commits aus den beiden früheren Läufen desselben Tages, die
+Freigabe-Chef noch nicht gemergt hatte (`main` unberührt) — direkt auf
+`origin/it-chef/auto` aufgesetzt statt auf `main`, wie es die Regeln für
+diesen Fall vorsehen. `npm install` ausgeführt (Dependencies fehlten im
+frischen Checkout).
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gelesen.
+Die verbleibenden offenen Top-Level-Punkte sind unverändert Produkt-/
+Architekturentscheidungen oder externe Blocker (Base44/Gemini-Credentials,
+Zug/Bus/Fähre-Datenquelle, Backend-Datenmodell für mehrere parallele
+Chat-Verläufe) — keiner erfüllt die vier Sicherheitskriterien für den
+autonomen Kanal. Wie in den beiden vorherigen Läufen desselben Tages
+deshalb wieder einen eigens dafür beauftragten Explore-Agenten mit der
+Suche nach einem noch nicht gemeldeten, sicheren, eigenständig
+verifizierbaren Bug beauftragt — mit der expliziten Vorgabe, die beiden
+bereits an diesem Tag gefixten Bugs (`avatarState` hängt in `'searching'`;
+`updateStoredTrip()` lässt `editingField`/`awaitingFlightOrigin` stehen)
+sowie alle anderen in `ZEITPLAN.md`/`it-chef-auto-log.md`/`reports/*.md`
+dokumentierten Funde NICHT erneut zu melden, und gezielt in Dateien zu
+suchen, die der letzte `reports/it-chef.md`-Eintrag (15.10.) noch nicht
+exhaustiv geprüft hatte.
+
+Ergebnis: `searchGenerationRef` (`src/hooks/useChat.ts`) soll laut dem
+eigenen Kommentar an seiner Definition verhindern, dass eine noch
+laufende Duffel-Suche (Flug/Unterkunft) ihr Ergebnis noch anwendet,
+nachdem das Gespräch längst weitergezogen ist — erhöht wurde der Zähler
+bisher aber ausschließlich in `resetChat()`, nicht in `sendMessage()`
+selbst. Damit greift der Veraltungs-Check nur beim "Neu starten"-Fall,
+nicht wenn der Chat durch eine ganz normale, weitere Nachricht
+weiterläuft, während noch eine ältere Suche offen ist. Das deckt sich
+mit einem bereits in `reports/it-chef.md` (15.10., Abschnitt "Gefundene
+Bugs") vermerkten, damals aber mangels konkretem Reproduktionsfall
+zurückgestellten Verdacht ("der Freitext-Zweig von `sendMessage()` setzt
+den Suchgenerationszähler weiterhin nicht hoch").
+
+Konkreter, jetzt gefundener Reproduktionsfall: Im Haupt-Chat-Flow löst
+der Budget-Schritt für ein bekanntes Ziel automatisch eine echte
+Unterkunftssuche aus. Wartet die Nutzerin das Ergebnis nicht ab, sondern
+beschreibt stattdessen sofort per Freitext ihre Wunschunterkunft (von der
+Chat-Antwort selbst ausdrücklich eingeladen: "wähle direkt eine aus, oder
+beschreibe, was du suchst"), füllt dieser Freitext über den generischen
+`getNextAdvisorStep()`-Zweig sofort das noch leere `trip.accommodation`
+— der Reiseplan gilt damit bereits als vollständig ("Dein Reiseplan
+steht!"). Löst sich die zuerst gestartete, eigentlich schon abgebrochene
+Suche danach auf, besteht ihr eigener Veraltungs-Check weiterhin, weil
+der Zähler in der Zwischenzeit nie erhöht wurde — die alten
+Unterkunftsangebote erscheinen dadurch erneut unter der bereits
+angezeigten Abschlussnachricht, widersprechen ihr sichtbar und hätten bei
+einem Klick die gerade selbst eingegebene Unterkunft stillschweigend
+wieder überschrieben. Derselbe Mechanismus betrifft auch den
+`awaitingFlightOrigin`-Pfad (Flug-Herkunftsflughafen). Gegen den
+bestehenden, analogen Test für den `resetChat()`-Fall
+(`useChat.test.ts`, "does not let a stale stay offer from a previous
+trip land after resetChat() mid-search") sowie gegen `mockAdvisor.ts`
+(`getNextAdvisorStep` füllt `next.accommodation` direkt aus
+unbestätigtem Freitext, sobald das Feld noch leer ist) verifiziert.
+Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/
+Rechtsbezug (reine lokale Chat-State-Konsistenz); keine offene
+Produktentscheidung (Zielverhalten durch den bereits bestehenden
+Kommentar an `searchGenerationRef`s Definition sowie durch
+`resetChat()`s identisches Muster längst festgelegt, hier nur lückenlos
+auf jede Chat-Nachricht statt nur auf den Reset angewendet); mechanisch
+(eine zusätzliche Zeile am Anfang von `sendMessage()`); objektiv prüfbar
+(neuer Test).
+
+**Umgesetzt:** `searchGenerationRef.current += 1` jetzt auch am Anfang
+von `sendMessage()`, exakt dasselbe Muster wie in `resetChat()`.
+Begleitkommentar an der Definition von `searchGenerationRef` entsprechend
+erweitert (nicht mehr nur "bumped by resetChat()"). Neuer
+Regressionstest in `useChat.test.ts` ("does not let a stale stay offer
+land once free text has already filled the accommodation field"): startet
+wie der bestehende `resetChat()`-Test eine echte, hängende
+`searchStays()`-Promise über den Budget-Schritt, schickt dann aber statt
+eines Resets eine normale Freitext-Nachricht, prüft, dass
+`trip.accommodation` dadurch gefüllt wird, löst danach die alte Promise
+auf und erwartet `stayOffers === null`. Vor der Ergänzung durch
+temporäres Zurücknehmen nur der einen Fix-Zeile in `useChat.ts`
+reproduzierbar rot verifiziert: der neue Test schlug fehl, die veralteten
+Angebote landeten trotz bereits per Freitext gefüllter Unterkunft im
+State. `ZEITPLAN.md` (16.10.-Eintrag, dritter Lauf) und
+`tasks/tasks-prd-travix-platform.md` (4.10) entsprechend ergänzt.
+
+**Geprüft (nach der Ergänzung):** `npx eslint .` sauber, `npx tsc -b`
+sauber, `npx vitest run` 479/479 grün (64 Testdateien, inkl. des neuen
+Tests), `npm run build` sauber (unveränderte 811-KB-Chunk-Size-Warnung).
+`git status` nach Abschluss: keine uncommitteten Änderungen außer den
+committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

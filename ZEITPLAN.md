@@ -1191,6 +1191,45 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerung (`git stash` nur `tripStorage.ts`) reproduzierbar rot
   verifiziert (beide Felder blieben nach `updateStoredTrip()` auf ihrem
   alten, veralteten Wert stehen).
+  Vom autonomen IT-Chef-Lauf am 16.10. (dritter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug behoben — die konkrete Reproduktion für einen seit
+  `reports/it-chef.md` (15.10.) als "theoretischer Verdacht, kein
+  Reproduktionsfall gefunden" zurückgestellten Punkt: `searchGenerationRef`
+  (`useChat.ts`) soll laut dem eigenen Kommentar an seiner Definition
+  verhindern, dass eine noch laufende Duffel-Suche (Flug/Unterkunft) ihr
+  Ergebnis noch anwendet, nachdem das Gespräch längst weitergezogen ist —
+  bisher wurde der Zähler aber ausschließlich von `resetChat()` erhöht,
+  nicht von `sendMessage()` selbst. Live reproduzierbar: Im Haupt-Chat-Flow
+  startet der Budget-Schritt für ein bekanntes Ziel automatisch eine echte
+  Unterkunftssuche; wartet die Nutzerin das Ergebnis nicht ab, sondern
+  beschreibt stattdessen sofort per Freitext ihre Wunschunterkunft (von der
+  Chat-Antwort selbst ausdrücklich eingeladen: "wähle direkt eine aus, oder
+  beschreibe, was du suchst"), füllt dieser Freitext über den generischen
+  `getNextAdvisorStep()`-Zweig sofort das noch leere `trip.accommodation`
+  — der Reiseplan gilt damit als vollständig. Löst sich die zuerst
+  gestartete, eigentlich abgebrochene Suche danach auf, bestand der
+  Veraltungs-Check (`if (searchGenerationRef.current !== generation)
+  return`) weiterhin, weil der Zähler zwischenzeitlich nie erhöht wurde —
+  die alten Unterkunftsangebote erschienen dadurch unter der bereits
+  angezeigten "Dein Reiseplan steht!"-Nachricht erneut, widersprachen ihr
+  und hätten bei einem Klick die gerade selbst eingegebene Unterkunft
+  stillschweigend wieder überschrieben. Derselbe Mechanismus betrifft auch
+  den `awaitingFlightOrigin`-Pfad. Erfüllt alle vier Kriterien: kein
+  Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine lokale Chat-State-
+  Konsistenz); keine offene Produktentscheidung (Zielverhalten durch den
+  bereits bestehenden Kommentar an `searchGenerationRef`s Definition sowie
+  durch `resetChat()`s identisches Muster längst festgelegt, hier nur
+  lückenlos auf jede Chat-Nachricht statt nur auf den Reset angewendet);
+  mechanisch (eine zusätzliche Zeile am Anfang von `sendMessage()`);
+  objektiv prüfbar (neuer Test). Fix: `searchGenerationRef.current += 1`
+  jetzt auch am Anfang von `sendMessage()`, exakt dasselbe Muster wie in
+  `resetChat()`. Neuer Regressionstest in `useChat.test.ts` ("does not let
+  a stale stay offer land once free text has already filled the
+  accommodation field") — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+  verifiziert (die veralteten Angebote landeten trotz bereits per Freitext
+  gefüllter Unterkunft im State).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

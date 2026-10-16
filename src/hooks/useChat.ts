@@ -88,10 +88,11 @@ export function useChat(speechEnabled: boolean) {
   const [storageWarning, setStorageWarning] = useState(false)
   const initialized = useRef(false)
   const replyTimeoutRef = useRef<number | null>(null)
-  // Bumped by resetChat() so in-flight Duffel search Promises (flight/stay)
-  // can tell they're stale once they resolve and skip applying their result —
-  // without this, a reset while a search is still running lets the old
-  // trip's offers pop into the freshly started chat.
+  // Bumped by resetChat() and by every sendMessage() turn so in-flight Duffel
+  // search Promises (flight/stay) can tell they're stale once they resolve
+  // and skip applying their result — without this, a reset or a later chat
+  // message sent while a search is still running lets its (now unrelated)
+  // offers pop into the current conversation turn.
   const searchGenerationRef = useRef(0)
 
   useEffect(() => {
@@ -249,6 +250,11 @@ export function useChat(speechEnabled: boolean) {
   }
 
   const sendMessage = (content: string) => {
+    // Bump the same generation counter resetChat() uses: any new user turn
+    // means the conversation has moved on, so a Duffel search still pending
+    // from an earlier turn (e.g. the accommodation search auto-started on
+    // the budget step) must not land its result once it finally resolves.
+    searchGenerationRef.current += 1
     setMessages((prev) => [...prev, makeMessage('user', content)])
     setQuickReplies([])
     setStayOffers(null)
