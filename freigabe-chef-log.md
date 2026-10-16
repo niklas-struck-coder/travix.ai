@@ -6872,3 +6872,42 @@ Abstand) — aus demselben Grund planmäßig übersprungen.
 
 **Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
 wiederholte Regelverstöße.
+
+## 2026-10-16, Autonomer Lauf (kein Ni live dabei)
+
+**Prüfung `it-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand) — bereits beim früheren Nacht-Check dieses Tages geprüft und
+gemergt (siehe Eintrag oben), für diesen Lauf übersprungen.
+
+**Prüfung `marketing-chef/auto`** (1 Commit gegenüber `main`, Basis war
+bereits aktueller `main`-Stand `ff2b9d4`, keine Divergenz): neue Ausgabe 8
+des Mini-Changelog-Konzepts (Kandidaten 46-56) plus zugehöriges Update in
+`marketing/freigabe-uebersicht.md` und Log-Eintrag — nur Markdown unter
+`marketing/` und im eigenen Log, kein Produkt-Code betroffen. Die vier
+neu aufgenommenen Kandidaten (53-56) per `git show` auf die zitierten
+Commits (`d1ee5f0`, `1cc978c`, `c71591f`, `ab1175e`) zurückgeprüft — alle
+vier existieren in `main` mit zur Beschreibung passenden Commit-Messages,
+keine erfundenen Kennzahlen oder Nutzerzahlen. Text ist vollständig und
+kohärent (keine Stichpunkt-Skizze), eindeutig als Entwurf markiert ("nichts
+davon ist live", keine Live-Veröffentlichung/Versand erwähnt).
+→ **Passt, nach `main` gemergt** (Fast-Forward `ff2b9d4..0a0383e`).
+
+**Prüfung `support-chef/auto`** (1 Commit gegenüber dem eigenen, älteren
+Branch-Stand vom 15.10.; reiner Diff gegen den direkten `main`-Tip wirkte
+wegen des veralteten Branch-Standes zunächst nach großen Änderungen an
+`useChat.ts`/`client.ts`/`tripStorage.ts` — Merge-Base-Diff gegen
+`8ec05b1` zeigt aber: tatsächlich nur ein neuer Abschnitt in
+`support-chef-auto-log.md`, keine Codeänderung). Neuer Fund geprüft: Avatar
+zeigt laut Log `'happy'` statt des eigens dafür gebauten `'error'`-Zustands
+nach fehlgeschlagener Flug-/Unterkunftssuche. Im Code stichprobenhaft
+nachvollzogen — `grep` über `src/` bestätigt, `setAvatarState('error')`
+wird tatsächlich nirgends aufgerufen, `TravixAvatar.tsx` definiert den
+`'error'`-Zustand (eigenes Icon/Farbe) vollständig fertig, `useChat.ts`
+setzt an den genannten Stellen (u. a. den `.catch()`-Blöcken) `'happy'`.
+Datei-/Zeilenangaben passen, nichts wirkt erfunden.
+→ **Passt, nach `main` gemergt** (Merge-Commit, da `main` durch den
+Marketing-Merge zuvor weitergewandert war).
+
+**Info an Ni:** Nein — unauffälliger Lauf, beide noch offenen Branches
+(`marketing-chef/auto`, `support-chef/auto`) grün und nach `main`
+gemergt, kein Hinweis auf wiederholte Regelverstöße.
