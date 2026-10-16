@@ -1120,6 +1120,41 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   single deduplicated line") — vor dem Fix reproduzierbar rot verifiziert
   (zwei verschiedene rohe Duffel-Fehler ergaben zwei identische Zeilen statt
   einer).
+  Vom autonomen IT-Chef-Lauf am 16.10. einen über einen eigens dafür
+  beauftragten Explore-Agenten gefundenen, eigenständigen Bug behoben:
+  `TravixAvatar.tsx` animiert den `'searching'`-Zustand (und jeden anderen
+  Nicht-`'idle'`-Zustand) mit `repeat: Infinity` — er läuft also endlos,
+  bis `avatarState` explizit auf einen anderen Wert gesetzt wird. Alle drei
+  Stellen, an denen `useChat.ts` eine echte Duffel-Suche startet
+  (`runFlightSearch()` für Flüge; die Unterkunftssuche sowohl im
+  `startEdit('accommodation')`-Pfad als auch im Haupt-Chat-Flow bei
+  `reply.nextField === 'accommodation'`) setzten `avatarState` vorher
+  korrekt auf `'searching'`, aber keiner der sechs zugehörigen
+  `.then()`/`.catch()`-Abschluss-Handler setzte danach einen Folgezustand —
+  anders als jede andere abgeschlossene Aktion in derselben Datei
+  (`selectFlight`, `selectHotel`, die Edit-Bestätigungen in `sendMessage()`),
+  die durchgängig `setAvatarState('happy')` beim Abschluss aufrufen. Nach
+  Abschluss einer echten Flug- oder Unterkunftssuche (Erfolg, echte
+  Null-Treffer oder Fehler) blieb der Avatar deshalb dauerhaft in der
+  pulsierenden "Sucht …"-Animation hängen, obwohl die Ergebnis-/
+  Fehlerkarten bereits korrekt angezeigt wurden — bis zufällig eine spätere,
+  unabhängige Aktion (nächste Chat-Nachricht, Angebotsauswahl) den Zustand
+  wieder änderte. Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/
+  Nutzerdaten-/Rechtsbezug (reine lokale Avatar-Animationsanzeige); keine
+  offene Produktentscheidung (Zielverhalten durch das in derselben Datei
+  bereits etablierte "Suche abgeschlossen → `'happy'`"-Muster festgelegt);
+  mechanisch (dieselbe eine Zeile an sechs bereits bestehenden Stellen
+  ergänzt); objektiv prüfbar (neue Tests). Fix: `setAvatarState('happy')`
+  in allen sechs `.then()`/`.catch()`-Handlern ergänzt (nach dem bereits
+  bestehenden `searchGenerationRef`-Veraltungs-Check), kein neuer
+  Avatar-Zustand für den Fehlerfall erfunden — die ehrliche Fehlermeldung
+  steht bereits in `stayErrors`/`flightErrors`, der Avatar muss nur
+  aufhören zu "suchen". Fünf neue Regressionstests in `useChat.test.ts`
+  (Flug- und Unterkunftssuche, je Erfolg und Fehlschlag, sowie der
+  `startEdit`-Wiederholungspfad) — vor dem Fix durch temporäres
+  Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
+  reproduzierbar rot verifiziert (`avatarState` blieb in allen fünf Fällen
+  bei `'searching'`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

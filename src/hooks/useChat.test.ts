@@ -290,6 +290,57 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
   })
+
+  // The avatar switches to the looping "searching" animation right when the
+  // real search is announced (see TravixAvatar.tsx — every non-'idle' state
+  // repeats forever), but none of the search's completion handlers used to
+  // move it on afterwards, so it kept animating "searching" indefinitely
+  // even once the results/error were already shown.
+  it('leaves the "searching" avatar animation once the automatic accommodation search in the main chat flow finishes', async () => {
+    vi.mocked(searchStays).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    expect(result.current.avatarState).toBe('searching')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).not.toBe('searching')
+  })
+
+  it('leaves the "searching" avatar animation once a failed automatic accommodation search finishes', async () => {
+    vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    expect(result.current.avatarState).toBe('searching')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).not.toBe('searching')
+  })
+
+  it('leaves the "searching" avatar animation once a retry via "Bearbeiten" (startEdit) finishes', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    expect(result.current.avatarState).toBe('searching')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).not.toBe('searching')
+  })
 })
 
 describe('useChat accommodation search for an unknown destination', () => {
@@ -576,6 +627,38 @@ describe('useChat flight search failure vs. real zero results', () => {
 
     expect(searchFlights).not.toHaveBeenCalled()
     expect(result.current.trip.transportMode).toBe('train')
+  })
+
+  // Same gap as the accommodation search above: runFlightSearch()'s own
+  // completion handlers never moved the avatar on from 'searching', so the
+  // looping "searching" animation (TravixAvatar.tsx) kept running forever
+  // after the real flight search had already resolved.
+  it('leaves the "searching" avatar animation once the flight search finishes', async () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    expect(result.current.avatarState).toBe('searching')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).not.toBe('searching')
+  })
+
+  it('leaves the "searching" avatar animation once a failed flight search finishes', async () => {
+    vi.mocked(searchFlights).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    expect(result.current.avatarState).toBe('searching')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).not.toBe('searching')
   })
 })
 

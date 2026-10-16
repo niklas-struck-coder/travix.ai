@@ -113,6 +113,7 @@ export function useChat(speechEnabled: boolean) {
         setFlightOffers(result.offers)
         setFlightErrors(result.errors)
         setFlightLoading(false)
+        setAvatarState('happy')
         if (result.errors.length > 0 || result.offers.length === 0) {
           setQuickReplies(['Neue Reise planen'])
         }
@@ -121,6 +122,7 @@ export function useChat(speechEnabled: boolean) {
         if (searchGenerationRef.current !== generation) return
         setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
         setFlightLoading(false)
+        setAvatarState('happy')
         setQuickReplies(['Neue Reise planen'])
       })
   }
@@ -227,11 +229,13 @@ export function useChat(speechEnabled: boolean) {
             }
           }
           setStayLoading(false)
+          setAvatarState('happy')
         })
         .catch(() => {
           if (searchGenerationRef.current !== generation) return
           setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
           setStayLoading(false)
+          setAvatarState('happy')
           setQuickReplies(['Neue Reise planen'])
         })
       return
@@ -398,11 +402,13 @@ export function useChat(speechEnabled: boolean) {
                 }
               }
               setStayLoading(false)
+              setAvatarState('happy')
             })
             .catch(() => {
               if (searchGenerationRef.current !== generation) return
               setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
               setStayLoading(false)
+              setAvatarState('happy')
               setQuickReplies(['Neue Reise planen'])
             })
         } else if (!reply.accommodationNoticeHandled) {

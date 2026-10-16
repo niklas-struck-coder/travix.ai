@@ -19616,3 +19616,73 @@ keine uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-16
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Frischer Checkout, `origin` gefetcht (inkl. mehrerer seit dem
+letzten Lauf neu entstandener `it-chef-autofix/*`-Branches und des
+aktualisierten `main`), `it-chef/auto` von `origin/it-chef/auto`
+ausgecheckt — bereits auf dem aktuellen `main`-Stand, kein Merge nötig.
+`npm ci` ausgeführt (Dependencies fehlten im frischen Checkout).
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gelesen.
+Die verbleibenden offenen Top-Level-Punkte sind unverändert Produkt-/
+Architekturentscheidungen oder externe Blocker (2.0 Base44/Auth, 4.1-4.3
+KI-Engine wartet auf Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre, 6.2/6.6/
+6.7/7.12 fehlende Preis-/Provider-Felder, 7.4 Chat-Resume-Datenmodell,
+8.1-8.7/8.9/8.12, 8.11 Hilfe wartet weiterhin auf FAQ-Inhalte von
+Support-Chef, Rechtstexte ausgeschlossen) — keiner davon erfüllt die vier
+Sicherheitskriterien für den autonomen Kanal. Wie in den Läufen zuvor
+deshalb einen eigens dafür beauftragten Explore-Agenten mit der Suche
+nach einem noch nicht gemeldeten, sicheren, eigenständig verifizierbaren
+Bug beauftragt (Vorgabe: gegen `ZEITPLAN.md`/`it-chef-auto-log.md`
+abgleichen, damit nichts bereits Bekanntes doppelt gemeldet wird).
+
+Ergebnis: `TravixAvatar.tsx` animiert jeden Nicht-`'idle'`-Zustand mit
+`repeat: Infinity` — einmal auf `'searching'` gesetzt, läuft die
+pulsierende Animation endlos weiter, bis explizit ein anderer Zustand
+gesetzt wird. `useChat.ts` setzt `avatarState` an drei Stellen vor einer
+echten Duffel-Suche auf `'searching'` (`runFlightSearch()`;
+`startEdit('accommodation')`; der `reply.nextField === 'accommodation'`-
+Zweig in `sendMessage()`), aber keiner der sechs zugehörigen
+`.then()`/`.catch()`-Handler setzte danach einen Folgezustand — anders
+als jede andere abgeschlossene Aktion im selben Hook (`selectFlight`,
+`selectHotel`, alle Edit-Bestätigungen), die durchgängig
+`setAvatarState('happy')` beim Abschluss aufrufen. Selbst gegen den Code
+verifiziert (alle drei Stellen und `TravixAvatar.tsx`s
+Animationskonfiguration gelesen) und gegen `ZEITPLAN.md`/
+`it-chef-auto-log.md` abgeglichen (Suche nach `avatarState`,
+`TravixAvatar`, `runFlightSearch`, "searching" — keine Erwähnung dieser
+drei Stellen). Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtsbezug (reine lokale Avatar-Animationsanzeige); keine
+offene Produkt-/Architekturentscheidung (Zielverhalten durch das in
+derselben Datei bereits etablierte "Suche abgeschlossen → `'happy'`"-
+Muster festgelegt, kein neuer Avatar-Zustand nötig — die ehrliche
+Fehlermeldung steht bereits in `stayErrors`/`flightErrors`); mechanisch
+(dieselbe eine Zeile an sechs bereits bestehenden Stellen ergänzt);
+objektiv prüfbar (neue Tests, vorher/nachher reproduzierbar).
+
+**Umgesetzt:** `setAvatarState('happy')` nach dem bereits bestehenden
+`searchGenerationRef`-Veraltungs-Check in allen sechs `.then()`/
+`.catch()`-Handlern ergänzt (`runFlightSearch()` sowie beide
+`searchStays()`-Aufrufe in `startEdit()`/`sendMessage()`). Fünf neue
+Regressionstests in `useChat.test.ts`: Flugsuche Erfolg/Fehlschlag,
+automatische Unterkunftssuche im Haupt-Chat-Flow Erfolg/Fehlschlag,
+sowie der `startEdit('accommodation')`-Wiederholungspfad — jeweils prüft
+`avatarState !== 'searching'` nach Auflösen des Promises. Vor dem
+endgültigen Abschluss durch temporäres Zurücknehmen nur der
+Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
+verifiziert: alle fünf neuen Tests schlugen fehl, `avatarState` blieb
+dauerhaft bei `'searching'` hängen. `ZEITPLAN.md` (Sprint-1-Abschnitt,
+direkt im `useChat.ts`-4.10-Eintrag fortgeführt) und
+`tasks/tasks-prd-travix-platform.md` (4.10) entsprechend ergänzt.
+
+**Geprüft (nach der Ergänzung):** `npx eslint .` sauber, `npx tsc -b`
+sauber, `npx vitest run` 476/476 grün (64 Testdateien, inkl. der fünf
+neuen Tests), `npm run build` sauber (unveränderte 811-KB-Chunk-Size-
+Warnung). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
