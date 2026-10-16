@@ -1,57 +1,57 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-15
+**Datum:** 2026-10-16
 
-## Was ist seit dem letzten Eintrag (2026-10-14) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-15) passiert?
 
-Diesmal gibt's tatsächlich Bewegung im Produkt-Code, nicht nur in
-Berichten. Ich hab mir den Commit-Verlauf seit gestern angeschaut
-(`git log 9e27ae7..HEAD`):
+Einiges – sowohl im Code als auch in der Marketing-Vorbereitung selbst.
 
-- **Der Avatar-Fund von gestern ist jetzt wirklich gefixt.** Der
-  Urlaubsmodus-Concierge zeigt bei ehrlichen "weiß ich (noch) nicht"-
-  Antworten jetzt einen neutralen Zustand statt des roten Fehler-Avatars
-  (`useConcierge.ts`). Genau das, was ich gestern als Vorbedingung für
-  einen Content-Moment genannt hatte.
-- **Der Flug-Bearbeiten-Bug ist ebenfalls behoben.** Wechselt man beim
-  Bearbeiten das Feld, bleiben jetzt keine veralteten Flugsuchergebnisse
-  mehr unter dem neuen Formular stehen (`startEdit()` in `useChat.ts`).
-- **Die Fehleranzeige ist jetzt überall einheitlich** – Flug-/
-  Hotelsuche-Seiten und Chat nutzen alle dieselbe `SearchErrorAlert`-
-  Komponente statt vier leicht unterschiedlicher Varianten.
-- **Neuer, noch offener Fund:** Support-Chef hat entdeckt, dass mehrere
-  gleichzeitige Duffel-Fehler (z. B. ungültiges Datum + ungültige
-  Passagierzahl) dieselbe Fehlerzeile doppelt untereinander zeigten.
-  IT-Chef hat dafür einen Fix vorbereitet (PR #29), der aber noch auf
-  Review wartet – also noch nicht in `main`.
-
-Der Tier-4-Kandidatentopf (laut Marketing-Auto-Kanal) steht jetzt bei 7
-von 8 – die Achter-Schwelle für die nächste Mini-Changelog-Ausgabe ist
-also fast erreicht, aber bewusst noch nicht künstlich aufgefüllt worden.
+- **Der Duffel-Dedup-Fix (PR #29) ist jetzt gemergt.** Mehrere
+  gleichzeitige Fehler bei Flug-/Hotelsuche zeigen nicht mehr dieselbe
+  Zeile doppelt an.
+- **Drei weitere, frische Fixes in `useChat.ts`:** Der Avatar bleibt
+  nach einer abgeschlossenen Suche nicht mehr dauerhaft im
+  "Sucht..."-Zustand hängen, eine über den Chat begonnene, aber auf der
+  Such-Seite abgeschlossene Bearbeitung verwechselt deine nächste
+  Chat-Nachricht nicht mehr mit einer Antwort darauf, und eine durch
+  Freitext überholte Hintergrundsuche taucht nicht mehr widersprüchlich
+  später auf.
+- **Neuer, noch offener Fund von heute:** Der Avatar zeigt nach einer
+  fehlgeschlagenen Suche fälschlich den fröhlichen statt des eigens
+  dafür gebauten Fehlerzustands (Warndreieck) – Fix liegt als PR #30 vor,
+  wartet noch auf Review.
+- **Marketing-Chef Auto hat die achte Mini-Changelog-Ausgabe
+  geschrieben** (`marketing/mini-changelog-konzept.md`) – reiner
+  Entwurf, nichts live. Der Kandidaten-Topf ist damit wieder leer, aber
+  die Grundfrage ("Soll die Footer-Changelog-Seite überhaupt gebaut
+  werden?") steht seit Ausgabe 1 unbeantwortet im Raum – acht Ausgaben
+  guter, ehrlicher Content liegen bereit und gehen nirgendwo raus.
 
 ## Vorschläge
 
-1. **Avatar-Fix und Fehleranzeige-Vereinheitlichung zusammen in die
-   nächste Mini-Changelog-Ausgabe, statt einzeln zu posten.** Beide sind
-   zu klein für eigene Posts, ergänzen sich aber gut als zwei Zeilen
-   unter "Ehrlichkeit als Feature": *"Der Concierge sagt jetzt ruhig
-   'weiß ich nicht', statt Alarm zu schlagen"* plus *"Fehlermeldungen
-   sehen jetzt überall gleich aus – kleines Detail, aber genau solche
-   Details machen ein Produkt ruhiger zu benutzen."*
-2. **Duffel-Dedup-Fix (PR #29) jetzt noch nicht ankündigen.** Erst wenn
-   der PR gemerged ist, zählt er als achter Tier-4-Kandidat und löst die
-   Changelog-Ausgabe aus – vorher wäre es eine Ankündigung auf Vorrat.
-3. **Flug-Bearbeiten-Promo jetzt wieder öffnen.** Der Grund für die
-   Sperre (Formular startet beim Bearbeiten leer/veraltet) ist laut
-   IT-Chef behoben. Die Hotel-Bearbeiten-Promo lief schon separat weiter
-   – jetzt lohnt sich wieder eine gemeinsame, einheitliche Formulierung
-   für "Bearbeite deine Reise", statt künstlich auf Unterkunft begrenzt
-   zu bleiben.
-4. **Die Tier-4-Grundsatzfrage an Ni ist weiterhin offen** (laut
-   Freigabe-Übersicht seit Wochen unbeantwortet: will Ni das
-   Mini-Changelog-Format überhaupt in dieser Form?). Bevor der Topf auf
-   unbestimmte Zeit weiterwächst, lohnt sich eine kurze, bewusste
-   Entscheidung dazu – sonst sammelt sich guter Content an, ohne je
-   rauszugehen.
+1. **Die Changelog-Entscheidung nicht länger offenlassen – notfalls mit
+   einer kleinen Alternative statt der ganzen Seite.** Acht Ausgaben
+   Wartezeit sind viel. Wenn die Footer-Seite zu groß als nächster
+   Schritt wirkt: schlag Ni vor, einfach die stärkste Geschichte aus
+   Ausgabe 8 (siehe Punkt 2) als einzelnen Social-Post zu bringen – klein
+   anfangen statt weiter zu warten.
+2. **"Die Figur lügt nicht" als eigener Mini-Post, sobald PR #30 gemerged
+   ist.** Der Avatar zeigte bisher fröhlich an, wo eigentlich ein Fehler
+   war – jetzt zeigt er ehrlich das Warndreieck. Genau das Gegenteil von
+   "Fake-Positivität", die man aus vielen Apps kennt. Passt direkt in die
+   Content-Säule "Ehrlichkeit als Feature" und braucht keine Zahlen,
+   nur die Geschichte.
+3. **"Ein Klick tut, was er verspricht" als Kurzclip/GIF.** Die vier
+   Reiseziel-Karten auf der Startseite waren bisher optisch klickbar,
+   aber funktionslos – jetzt springen sie wirklich in den KI-Chat mit
+   dem jeweiligen Ziel. Ein 5-Sekunden-Screen-Recording davon (Karte
+   klicken → Chat startet direkt mit Kontext) ist greifbarer als jeder
+   Text und zeigt nebenbei das Kernprodukt.
+4. **"Bearbeite deine Reise"-Promo jetzt auf Flug UND Unterkunft
+   ausweiten.** Die Gründe für die bisherige Beschränkung auf
+   Unterkunft (veraltete Flugsuchergebnisse, verwechselte
+   Chat-Antworten nach Bearbeitung außerhalb des Chats) sind laut
+   IT-Chef jetzt alle behoben. Eine gemeinsame Formulierung für beides
+   wirkt überzeugender als zwei separate, zeitlich versetzte Promos.
 
-_Letztes Update: 2026-10-15_
+_Letztes Update: 2026-10-16_
