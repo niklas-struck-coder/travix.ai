@@ -4744,3 +4744,68 @@ Der übrige, heute umgebaute Code (die Konsolidierung selbst in
 der Netzwerk-/Parse-Fehler-Zweig in `client.ts:54-61`, der `startEdit()`-
 Fix vom selben Tag) wirkt konsistent und wie beabsichtigt — kein weiterer
 Punkt erfunden, nur um den Bericht länger wirken zu lassen.
+
+---
+
+## 2026-10-16 — Avatar-Zustand nach fehlgeschlagener Flug-/Unterkunftssuche (`src/hooks/useChat.ts`)
+
+**Geprüfter Bereich:** `src/hooks/useChat.ts`, zusammen mit
+`src/components/chat/TravixAvatar.tsx` und `src/components/chat/KiChat.tsx`
+— heute Nacht hat der autonome IT-Chef-Lauf (Commit `1cc978c`, bereits von
+Freigabe-Chef nach `main` gemergt) genau in dieser Datei den seit Längerem
+bekannten Bug behoben, dass der Avatar nach einer echten Duffel-Suche
+dauerhaft im "sucht"-Zustand hängen blieb — alle sechs betroffenen
+`then()`/`catch()`-Abschluss-Handler (Flugsuche, Unterkunftssuche im
+Haupt-Chat-Flow und im `startEdit`-Bearbeiten-Flow) wurden auf
+`setAvatarState('happy')` gesetzt. Dieser frische Fix ist in dem, was er
+beheben sollte, korrekt — deckt dabei aber einen neuen, eigenständigen
+Reibungspunkt auf, der vorher so nicht sichtbar war (vorher blieb der
+Avatar einfach ewig im "sucht"-Zustand stehen, jetzt zeigt er aktiv den
+falschen Erfolgs-Zustand).
+
+### Reibungspunkt
+
+**1. Avatar zeigt "happy" (lächelndes Smiley-Icon) auch dann, wenn die
+Suche fehlgeschlagen ist oder einen Fehler zurückgab**
+
+`src/hooks/useChat.ts` setzt an allen sechs Suchabschluss-Stellen
+unbedingt `setAvatarState('happy')` — auch in den drei `.catch()`-Blöcken
+(Zeile 126 in `runFlightSearch`, Zeile 239 im `startEdit`-Unterkunftsfluss,
+Zeile 417 im Haupt-Chat-Unterkunftsfluss) und selbst in den
+`.then()`-Erfolgshandlern, wenn `result.errors.length > 0` ist (Zeile
+117/118, 233/223, 411/401) — also genau dann, wenn direkt daneben eine
+echte Fehlermeldung angezeigt wird. `TravixAvatar.tsx:5-14` definiert
+extra für diesen Fall einen eigenen `'error'`-Zustand (eigenes
+Warndreieck-Icon, Zittern-Animation, rot eingefärbter Ring) — eine
+Codesuche über den gesamten `src`-Ordner zeigt aber, dass
+`setAvatarState('error')` nirgends im Code tatsächlich aufgerufen wird.
+Der Zustand existiert fertig gebaut, wird aber nie benutzt.
+
+`KiChat.tsx:141` zeigt den Avatar im Chat-Header, `:205-210` rendern
+direkt darunter `HotelResults`/`FlightResults` mit genau diesen
+`errors`-Feldern (die laut dem gestrigen Lauf, 2026-10-15, bereits sauber
+mit `role="alert"` angekündigt werden). Nutzer:innen sehen bei einer
+fehlgeschlagenen Suche also gleichzeitig: oben ein lächelndes Smiley,
+unten eine Fehlerbox — ein sichtbarer Widerspruch im selben
+Bildschirmausschnitt, dasselbe Muster, das dieses Log am 14.10. bereits
+einmal bei `mockConcierge.ts`/`useConcierge.ts` bemängelt hat ("Avatar
+zeigt fälschlich den falschen Zustand").
+
+*Vorschlag:* In den drei `.catch()`-Zweigen sowie dort, wo
+`result.errors.length > 0` ist, `setAvatarState('error')` statt
+`setAvatarState('happy')` setzen — der Zustand ist bereits fertig
+entworfen und wartet nur auf seine erste echte Verwendung. Der Fall
+"keine Treffer, aber kein echter Fehler" (`result.offers.length === 0`
+ohne `errors`) sollte bewusst bei `'happy'` bleiben, da hier nichts
+fehlgeschlagen ist.
+
+### Nicht geprüft
+Die beiden anderen heutigen IT-Chef-Fixes in derselben Datei (`c71591f`:
+`editingField`/`awaitingFlightOrigin`-Reset in `updateStoredTrip()`;
+`ab1175e`: `searchGenerationRef`-Erhöhung in `sendMessage()`) wirken beide
+wie saubere, unsichtbare Zustandskorrekturen ohne eigenen neuen
+UX-Reibungspunkt — keine Auffälligkeit gefunden. Der
+`awaitingFlightOrigin`-Zwischenschritt ("Von welchem Flughafen möchtest
+du starten?") hat keine Möglichkeit, ohne Eingabe eines (ggf. falschen)
+Codes abzubrechen — das wurde nicht vertieft, da es kein heute neu
+verändertes Verhalten ist.
