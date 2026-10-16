@@ -1,106 +1,76 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-15
+**Datum:** 2026-10-16
 
-## Was ist seit dem letzten Eintrag (2026-10-14) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-15) passiert?
 
-Der parallele Autonomie-Kanal `it-chef/auto` hatte seit gestern vier
-weitere Läufe, alle von Freigabe-Chef bereits unabhängig geprüft und in
-`main` gemergt:
+Der parallele Autonomie-Kanal `it-chef/auto` hatte seit gestern drei
+weitere Läufe in `src/hooks/useChat.ts`, alle bereits von Freigabe-Chef
+unabhängig geprüft und in `main` gemergt:
 
-- **`src/hooks/useChat.ts` (`startEdit`)** — setzt jetzt auch
-  `flightOffers`/`flightErrors`/`flightLoading` zurück, nicht mehr nur die
-  Unterkunfts-Felder. Damit ist der in den letzten drei Berichten offen
-  gemeldete Bug ("laufende Flugsuche wird beim Wechsel auf ein anderes
-  Feld nicht als veraltet erkannt") behoben — siehe unten.
-- **Fehler-Anzeige-Konsolidierung** — der gemeinsame Fehler-Block aus
-  `FlightResults.tsx`/`HotelResults.tsx` wurde in eine eigene
-  `SearchErrorAlert.tsx`-Komponente extrahiert und zusätzlich in
-  `Flugsuche.tsx`/`Hotelsuche.tsx` übernommen, sodass jetzt alle vier
-  Stellen (Flug-/Hotelsuche-Seiten und im KI-Chat) exakt dieselbe
-  Fehleranzeige nutzen.
-- **`src/hooks/useConcierge.ts`** — der Avatar zeigt bei ehrlichen
-  Ausweich-Antworten des Urlaubsmodus-Concierge jetzt `idle` statt
-  fälschlich `error`.
-- **`escapeRegExp()`** — aus drei Kopien (`mockAdvisor.ts`,
-  `mockConcierge.ts`, `types/stays.ts`) nach `lib/utils.ts` konsolidiert,
-  rein intern, kein Verhaltensunterschied.
+- **Avatar blieb nach einer echten Flug-/Unterkunftssuche dauerhaft im
+  "sucht"-Zustand hängen** — alle sechs betroffenen Suchabschluss-Handler
+  setzen jetzt am Ende explizit einen Folgezustand statt nichts zu tun.
+- **`updateStoredTrip()` ließ `editingField`/`awaitingFlightOrigin`
+  stehen**, wenn ein Feld außerhalb des Chats (z. B. über die
+  "Bearbeiten"-Buttons im Reiseplan) geändert wurde.
+- **`sendMessage()` erhöhte `searchGenerationRef` nicht** im
+  Freitext-Zweig — eine zuvor noch laufende Suche konnte ihr (inzwischen
+  veraltetes) Ergebnis nach einer Freitext-Antwort noch anzeigen.
 
-Support-Chef hat heute zusätzlich einen neuen, konkreten Bug in genau
-diesem frisch umgebauten Fehler-Anzeige-Bereich gefunden (siehe
-`support-chef-auto-log.md`): mehrere gleichzeitige Duffel-Validierungs-
-fehler erzeugen identische, mehrfach untereinander angezeigte
-Fehlerzeilen. Marketing-Chef hat unabhängig zwei neue Tier-4-Kandidaten
-für den Marketing-Vorrat vorgemerkt (Concierge-Avatar-Fix,
-`startEdit`-Fix) — beide inzwischen wie oben beschrieben erledigt.
+Support-Chef hat den frischen ersten Fix (Avatar-Zustand) direkt
+weitergedacht und einen neuen, eigenständigen Reibungspunkt gemeldet:
+Der neue Folgezustand war in allen sechs Fällen unbedingt `'happy'` —
+auch in den drei `.catch()`-Zweigen und dort, wo echte Duffel-Fehler
+zurückkamen, also genau dann, wenn direkt daneben eine Fehlermeldung
+angezeigt wird. Siehe Auto-Fix unten.
 
-**Eigene gezielte Bug-Suche heute:** Dateien gezielt gelesen, mit Fokus
-auf den heute frisch umgebauten Code sowie bisher nicht einzeln
-geprüfte Dateien: den vollständigen Diff seit gestern
-(`useChat.ts`, `useConcierge.ts`, `mockAdvisor.ts`, `mockConcierge.ts`,
-`types/stays.ts`, `lib/utils.ts`, `SearchErrorAlert.tsx`,
-`FlightResults.tsx`, `HotelResults.tsx`, `Flugsuche.tsx`,
-`Hotelsuche.tsx`), außerdem `src/lib/duffel/client.ts`,
-`src/pages/Einstellungen.tsx`, `src/pages/MeineReisen.tsx`,
-`src/pages/Reiseentwuerfe.tsx`, `src/components/layout/AppShell.tsx`,
-`src/components/layout/MobileNav.tsx`, `src/components/layout/Sidebar.tsx`,
-`src/components/layout/PageTransition.tsx`,
-`src/components/chat/ChatMessage.tsx`, `src/components/chat/QuickReplies.tsx`,
-`src/components/chat/TravixAvatar.tsx` und `src/components/chat/KiChat.tsx`.
-
-**Ergebnis:** Dabei hat sich die von Support-Chef gemeldete Fehlerzeile
-als ein echter, kleiner, isolierter Bug bestätigt — siehe Auto-Fix unten.
-Die übrigen heute gelesenen Dateien zeigen keine neuen Bugs: keine
-offenen TODOs/FIXMEs, keine kaputten Imports/Links, keine Typos in
-Nutzer-Texten, Fehlerbehandlung durchgängig vorhanden.
-
-**Hinweis zur Baseline-Prüfung:** `node_modules` war in dieser Sitzung
-nicht installiert; `eslint`/`tsc`/`vitest` konnten daher nicht automatisch
-mitlaufen (kein `npm install` gemäß Sicherheitsregel). Der Fix und der
-neue Test wurden stattdessen von Hand gegen die Logik durchgespielt.
+**Eigene gezielte Bug-Suche heute:** `src/hooks/useChat.ts` (alle sechs
+Suchabschluss-Stellen gegen `TravixAvatar.tsx`/`KiChat.tsx` nachvoll­zogen,
+dazu codeweite Suche nach `setAvatarState('error')`-Aufrufen), außerdem
+`src/pages/Buchung.tsx`, `src/lib/trip/cartTotals.ts`,
+`src/lib/trip/checklistRules.ts` sowie eine codeweite Suche nach offenen
+TODOs/FIXMEs und nach `JSON.parse`/`localStorage`-Stellen ohne
+Fehlerbehandlung. Keine weiteren neuen Bugs gefunden — Buchung.tsx,
+cartTotals.ts und checklistRules.ts sind klein, lesbar und ohne
+Edge-Case-Lücken; der einzige `localStorage`/`JSON.parse`-Zugriff
+(`tripStorage.ts`) ist seit einem früheren Fix (PR #6) bereits
+abgesichert.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-1. **[PR #29](https://github.com/niklas-struck-coder/travix.ai/pull/29)
-   — Branch `it-chef-autofix/duffel-duplicate-error-lines-2026-10-15`:
-   Mehrere Duffel-Validierungsfehler zeigten in `SearchErrorAlert`
-   dieselbe Fehlerzeile mehrfach identisch untereinander.**
-   `callDuffelProxy()` in `src/lib/duffel/client.ts` mappt jeden rohen
-   Duffel-Fehler auf denselben festen deutschen Satz, unabhängig vom
-   `error.code`. Liefert Duffel z. B. gleichzeitig einen Fehler zu einem
-   ungültigen Datum und einem zu einer ungültigen Passagierzahl, zeigte
-   die Anzeige denselben Satz zweimal direkt untereinander — wirkte wie
-   ein Darstellungsfehler statt einer echten Mehrfach-Rückmeldung.
-   Fix: neue `dedupeByMessage()`-Hilfsfunktion dedupliziert die
-   Fehlerliste nach Nachrichtentext, bevor sie zurückgegeben wird.
-   Begleitender Test ergänzt. Klein, isoliert, keine Änderung an
-   Typen/Signaturen nach außen.
+1. **[PR #30](https://github.com/niklas-struck-coder/travix.ai/pull/30)
+   — Branch `it-chef-autofix/avatar-error-state-on-search-failure-2026-10-16`:
+   Avatar zeigt `'happy'` statt `'error'` nach fehlgeschlagener
+   Flug-/Unterkunftssuche.**
+   Alle sechs Suchabschluss-Handler in `useChat.ts` setzten unbedingt
+   `setAvatarState('happy')` — auch in den `.catch()`-Zweigen und dort,
+   wo `result.errors.length > 0` ist. `TravixAvatar.tsx` hat dafür einen
+   eigenen, fertig gestalteten `'error'`-Zustand (Warndreieck,
+   Zittern-Animation), der nirgends aufgerufen wurde. Fix: in diesen
+   Fällen jetzt `setAvatarState('error')`. Der Fall "keine Treffer, aber
+   kein echter Fehler" bleibt bewusst `'happy'`. Sechs neue Tests decken
+   alle sechs Stellen ab. Klein, isoliert, reine Bedingungsprüfung auf
+   einen bereits vorhandenen Zustand — keine API-Änderung nach außen.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
-Keine neuen, unsicheren Funde heute. Der bisher einzige offene,
-größere Punkt (laufende Duffel-Suchen wurden nicht in jedem Fall als
-veraltet erkannt) ist mit dem `startEdit()`-Fix des Auto-Kanals von
-heute für den Flug-/Unterkunftswechsel behoben. Noch nicht abgedeckt:
-der Freitext-Zweig von `sendMessage()` setzt den Suchgenerationszähler
-weiterhin nicht hoch — bleibt zur Beobachtung, da bisher kein konkreter
-Reproduktionsfall dafür gefunden wurde (anders als beim jetzt gefixten
-`startEdit()`-Fall).
+Keine neuen, unsicheren Funde heute.
 
 ## Weitere Vorschläge
 
-1. **Offene Auto-Fix-PRs weiterhin zur Aufräumarbeit.** Aktuell 22 ältere
-   offene PRs auf diesem Kanal plus PR #29 von heute (siehe GitHub),
-   einige davon inhaltlich schon identisch in `main`. Nur Ni kann PRs
-   schließen; eine Stichprobenprüfung vor dem Schließen lohnt sich
-   weiterhin.
+1. **Offene Auto-Fix-PRs weiterhin zur Aufräumarbeit.** Aktuell 23
+   ältere offene PRs auf diesem Kanal plus PR #30 von heute (siehe
+   GitHub), einige davon inhaltlich schon identisch in `main`. Nur Ni
+   kann PRs schließen; eine Stichprobenprüfung vor dem Schließen lohnt
+   sich weiterhin.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json` — kein Import irgendwo in `src/`. Entfernen reduziert
    die Bundle-Größe; Abhängigkeitsänderungen sind für diesen Kanal
    ausgeschlossen, daher nur Vorschlag.
-3. **`TrainCard`/`TrainResults` bleiben unverdrahteter toter Code.**
-   Vollständig implementiert mit eigener Testabdeckung, aber keine
-   Zugsuche-Seite, kein Nav-Eintrag, keine echte Datenquelle angebunden.
-   Entweder verdrahten oder entfernen — Produktentscheidung.
-
-_Letztes Update: 2026-10-15_
+3. **`node_modules` war in dieser Sitzung nicht installiert** —
+   `eslint`/`tsc`/`vitest` konnten daher nicht automatisch gegen den
+   heutigen Fix laufen (kein `npm install` gemäß Sicherheitsregel). Der
+   Fix wurde stattdessen von Hand gegen Logik und bestehende Tests
+   durchgespielt; eine CI-Pipeline, die bei jedem PR automatisch
+   `lint`/`build`/`test` laufen lässt, würde diese Lücke schließen.
