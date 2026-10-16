@@ -53,6 +53,25 @@ describe('updateStoredTrip', () => {
     expect(result?.messages).toEqual(seeded.messages)
     expect(result?.quickReplies).toEqual(seeded.quickReplies)
   })
+
+  it('clears a stale editingField left by an abandoned chat edit prompt', () => {
+    seedStoredChat({ editingField: 'accommodation' })
+
+    const result = updateStoredTrip({ accommodation: 'Hotel Lissabon' })
+
+    expect(result?.trip.accommodation).toBe('Hotel Lissabon')
+    expect(result?.editingField).toBeNull()
+    expect(loadStoredChat()?.editingField).toBeNull()
+  })
+
+  it('clears a stale awaitingFlightOrigin flag left by an abandoned chat edit prompt', () => {
+    seedStoredChat({ editingField: 'transportMode', awaitingFlightOrigin: true })
+
+    const result = updateStoredTrip({ transportMode: 'flight', transportDetail: 'BER → LIS' })
+
+    expect(result?.awaitingFlightOrigin).toBe(false)
+    expect(loadStoredChat()?.awaitingFlightOrigin).toBe(false)
+  })
 })
 
 describe('saveStoredChat', () => {

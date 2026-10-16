@@ -1155,6 +1155,42 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Zurücknehmen der Quelländerung (`git stash` nur `useChat.ts`)
   reproduzierbar rot verifiziert (`avatarState` blieb in allen fünf Fällen
   bei `'searching'`).
+  Vom autonomen IT-Chef-Lauf am 16.10. (weiterer Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  eigenständigen Bug behoben: `updateStoredTrip()` (`src/lib/trip/
+  tripStorage.ts`) — genutzt von `Flugsuche.tsx`, `Hotelsuche.tsx` und
+  `Buchung.tsx`, wenn dort direkt (nicht über den Chat) eine Auswahl
+  getroffen wird — merged seinen Patch in `trip`, ließ `editingField`/
+  `awaitingFlightOrigin` im gespeicherten Zustand aber unverändert stehen.
+  Seit dem 10.10.-Fix werden beide Felder zuverlässig persistiert und bei
+  jedem Mount von `useChat()` wiederhergestellt — wer also z. B. über
+  "Bearbeiten" auf `/buchung` den Chat-Editierdialog für die Unterkunft
+  öffnet (setzt `editingField: 'accommodation'`), den Ausflug dann aber
+  abbricht und statt einer Chat-Antwort direkt auf `/hotelsuche` manuell
+  ein Hotel wählt, bekam zwar die richtige Unterkunft gespeichert, aber
+  `editingField` blieb `'accommodation'`. Die nächste, völlig unabhängige
+  Nachricht im KI-Chat landete dadurch in `sendMessage()`s
+  `if (editingField)`-Zweig und überschrieb die gerade bewusst gewählte
+  Unterkunft unbemerkt mit dem rohen Freitext dieser Nachricht — begleitet
+  von der scheinbar passenden Bestätigung "Alles klar, ich hab die
+  Unterkunft aktualisiert", obwohl keine Bearbeitung beabsichtigt war.
+  Derselbe Mechanismus betraf `awaitingFlightOrigin` (`/flugsuche`) und
+  `editingField` nach einer Aktivitäten-Änderung über `Buchung.tsx`.
+  Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/
+  Rechtsbezug (reine lokale Chat-/Trip-State-Konsistenz); keine offene
+  Produktentscheidung (Zielverhalten — ein abgeschlossener Edit-Vorgang
+  hinterlässt kein offenes `editingField` — ist im selben Hook bereits
+  etabliert, `sendMessage()` löscht es nach jeder regulären Edit-Antwort,
+  hier nur für den bisher übersehenen Fall der direkten Seitenauswahl
+  nachgezogen); mechanisch (eine Funktion, zwei zusätzliche Felder beim
+  Zusammenbauen von `updated`); objektiv prüfbar (neue Tests). Fix:
+  `updateStoredTrip()` setzt `editingField: null` und
+  `awaitingFlightOrigin: false` jetzt explizit beim Zusammenbauen des
+  aktualisierten Zustands. Zwei neue Regressionstests in
+  `tripStorage.test.ts` — vor dem Fix durch temporäres Zurücknehmen der
+  Quelländerung (`git stash` nur `tripStorage.ts`) reproduzierbar rot
+  verifiziert (beide Felder blieben nach `updateStoredTrip()` auf ihrem
+  alten, veralteten Wert stehen).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

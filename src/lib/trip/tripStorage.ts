@@ -72,6 +72,14 @@ export function clearStoredChat(): void {
  * trip has been started yet — there's nothing to integrate the selection
  * into, and this function must not fabricate a new trip on its own.
  *
+ * Also clears `editingField`/`awaitingFlightOrigin`: a selection made
+ * directly on Flugsuche/Hotelsuche/Buchung (rather than by answering the
+ * chat's edit question) means any in-progress edit prompt is now stale —
+ * leaving it set would make useChat.ts misinterpret the next, unrelated chat
+ * message as the answer to that abandoned edit and silently overwrite this
+ * trip with that message's raw text (same "no stale edit flag survives a
+ * trip change" reasoning as loadStoredChat's own default above).
+ *
  * `saved` reports whether the merged trip actually made it into
  * localStorage, so callers can warn the user instead of showing a success
  * state that a reload would silently undo (same reasoning as
@@ -81,7 +89,12 @@ export function updateStoredTrip(patch: Partial<TripDraft>): (StoredChatState & 
   const stored = loadStoredChat()
   if (!stored) return null
 
-  const updated: StoredChatState = { ...stored, trip: { ...stored.trip, ...patch } }
+  const updated: StoredChatState = {
+    ...stored,
+    trip: { ...stored.trip, ...patch },
+    editingField: null,
+    awaitingFlightOrigin: false,
+  }
   const saved = saveStoredChat(updated)
   return { ...updated, saved }
 }

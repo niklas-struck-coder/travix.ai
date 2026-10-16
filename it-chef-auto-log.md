@@ -19686,3 +19686,82 @@ außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-16 (weiterer Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Frischer Checkout, `origin` gefetcht. `it-chef/auto` enthielt
+bereits drei Commits aus einem früheren Lauf desselben Tages, die der
+Freigabe-Chef noch nicht gemergt hatte (`main` unberührt) — direkt auf
+`origin/it-chef/auto` aufgesetzt statt auf `main`, wie es die Regeln für
+diesen Fall vorsehen. `npm install` ausgeführt (Dependencies fehlten im
+frischen Checkout).
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gelesen.
+Die verbleibenden offenen Top-Level-Punkte sind unverändert Produkt-/
+Architekturentscheidungen oder externe Blocker — keiner erfüllt die vier
+Sicherheitskriterien für den autonomen Kanal. Wie im vorherigen Lauf
+desselben Tages deshalb wieder einen eigens dafür beauftragten
+Explore-Agenten mit der Suche nach einem noch nicht gemeldeten, sicheren,
+eigenständig verifizierbaren Bug beauftragt — mit der expliziten Vorgabe,
+den im selben Tag bereits gefixten `avatarState`-Bug sowie alle anderen
+in `ZEITPLAN.md`/`it-chef-auto-log.md`/`reports/*.md` dokumentierten
+Funde NICHT erneut zu melden.
+
+Ergebnis: `updateStoredTrip()` (`src/lib/trip/tripStorage.ts`) — die von
+`Flugsuche.tsx`, `Hotelsuche.tsx` und `Buchung.tsx` genutzte Funktion, um
+eine außerhalb des Chats getroffene Auswahl (Flug, Hotel, Aktivitäten) in
+den gespeicherten Trip zu übernehmen — merged ihren Patch in `trip`, ließ
+`editingField`/`awaitingFlightOrigin` dabei aber unverändert stehen. Seit
+dem 10.10.-Fix werden beide Felder zuverlässig persistiert und bei jedem
+Mount von `useChat()` wiederhergestellt, wodurch das Problem seit diesem
+Datum tatsächlich reproduzierbar ist: Startet man über "Bearbeiten" auf
+`/buchung` einen Chat-Editierdialog (z. B. für die Unterkunft, setzt
+`editingField: 'accommodation'`), bricht diesen Ausflug dann aber ab und
+wählt statt einer Chat-Antwort direkt auf `/hotelsuche` manuell ein
+Hotel, wird zwar die richtige Unterkunft gespeichert, `editingField`
+bleibt aber `'accommodation'`. Die nächste, völlig unabhängige Nachricht
+im KI-Chat landet dadurch in `sendMessage()`s `if (editingField)`-Zweig
+und überschreibt die gerade bewusst gewählte Unterkunft unbemerkt mit dem
+rohen Freitext dieser Nachricht — begleitet von der scheinbar passenden
+Bestätigung "Alles klar, ich hab die Unterkunft aktualisiert", obwohl
+keine Bearbeitung beabsichtigt war. Derselbe Mechanismus betrifft
+`awaitingFlightOrigin` (`/flugsuche`) und `editingField` nach einer
+Aktivitäten-Änderung über `Buchung.tsx`. Selbst gegen den Code verifiziert
+(alle drei Aufrufer, `tripStorage.ts`, die Init-Restore- und
+`sendMessage()`-Edit-Zweige in `useChat.ts` gelesen) und gegen
+`ZEITPLAN.md`/`it-chef-auto-log.md`/`reports/it-chef.md`/
+`reports/support-chef.md` abgeglichen — keine Erwähnung dieses
+Zusammenspiels, insbesondere nicht zu verwechseln mit dem bereits im
+vorherigen Lauf desselben Tages behobenen, unabhängigen
+`avatarState`-Bug. Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtsbezug (reine lokale Chat-/Trip-State-Konsistenz);
+keine offene Produktentscheidung (Zielverhalten — ein abgeschlossener
+Edit-Vorgang hinterlässt kein offenes `editingField` — ist im selben Hook
+bereits etabliert, `sendMessage()` löscht es nach jeder regulären
+Edit-Antwort, hier nur für den bisher übersehenen Fall der direkten
+Seitenauswahl nachgezogen); mechanisch (eine Funktion, zwei zusätzliche
+Felder beim Zusammenbauen des aktualisierten Zustands); objektiv prüfbar
+(neue Tests).
+
+**Umgesetzt:** `updateStoredTrip()` setzt `editingField: null` und
+`awaitingFlightOrigin: false` jetzt explizit beim Zusammenbauen von
+`updated`, statt beide Felder unverändert aus dem alten Zustand zu
+übernehmen. Zwei neue Regressionstests in `tripStorage.test.ts`: einer
+seedet `editingField: 'accommodation'` und erwartet `null` danach, einer
+seedet `editingField: 'transportMode'` + `awaitingFlightOrigin: true` und
+erwartet `false` danach. Vor der Ergänzung durch temporäres Zurücknehmen
+nur der Quelländerung (`git stash` nur `tripStorage.ts`) reproduzierbar
+rot verifiziert: beide neuen Tests schlugen fehl, die veralteten Werte
+blieben nach `updateStoredTrip()` unverändert stehen. `ZEITPLAN.md`
+(16.10.-Eintrag, weiterer Lauf) und `tasks/tasks-prd-travix-platform.md`
+(4.10) entsprechend ergänzt.
+
+**Geprüft (nach der Ergänzung):** `npx eslint .` sauber, `npx tsc -b`
+sauber, `npx vitest run` 478/478 grün (64 Testdateien, inkl. der beiden
+neuen Tests), `npm run build` sauber (unveränderte 811-KB-Chunk-Size-
+Warnung). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
