@@ -358,6 +358,38 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.avatarState).not.toBe('searching')
   })
 
+  // The two tests above only checked that the avatar leaves 'searching' —
+  // they didn't check what it moves to. It used to always land on 'happy',
+  // even though TravixAvatar.tsx has a dedicated 'error' state (warning
+  // triangle, shake animation) that sat built but unused: a failed search
+  // showed a smiling avatar right next to the error message.
+  it('shows the error avatar state, not happy, when the automatic accommodation search fails outright', async () => {
+    vi.mocked(searchStays).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
+
+  it('shows the error avatar state, not happy, when the automatic accommodation search resolves with Duffel errors', async () => {
+    vi.mocked(searchStays).mockResolvedValue({
+      offers: [],
+      errors: [{ message: 'Ungültiges Reisedatum' }],
+    })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
+
   it('leaves the "searching" avatar animation once a retry via "Bearbeiten" (startEdit) finishes', async () => {
     vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
     const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
@@ -376,6 +408,47 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     })
 
     expect(result.current.avatarState).not.toBe('searching')
+  })
+
+  it('shows the error avatar state, not happy, when a retry via "Bearbeiten" (startEdit) fails', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockRejectedValueOnce(new Error('network down'))
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
+
+  it('shows the error avatar state, not happy, when a retry via "Bearbeiten" (startEdit) resolves with Duffel errors', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockResolvedValueOnce({
+      offers: [],
+      errors: [{ message: 'Ungültiges Reisedatum' }],
+    })
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
   })
 })
 
@@ -695,6 +768,35 @@ describe('useChat flight search failure vs. real zero results', () => {
     })
 
     expect(result.current.avatarState).not.toBe('searching')
+  })
+
+  it('shows the error avatar state, not happy, when the flight search fails outright', async () => {
+    vi.mocked(searchFlights).mockRejectedValue(new Error('network down'))
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
+  })
+
+  it('shows the error avatar state, not happy, when the flight search resolves with Duffel errors', async () => {
+    vi.mocked(searchFlights).mockResolvedValue({
+      offers: [],
+      errors: [{ message: 'Ungültige Passagierzahl' }],
+    })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.avatarState).toBe('error')
   })
 })
 
