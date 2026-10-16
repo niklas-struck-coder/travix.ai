@@ -4,6 +4,99 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-16
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`d6512f9`, letzter eigener Commit vom 15.10.) war bereits vollständig in
+`origin/main` gemergt (`git merge-base --is-ancestor d6512f9
+origin/main` bestätigt das) — laut Regel für bereits gemergte Branches
+neu von aktuellem `origin/main` (`ff2b9d4`) aus angelegt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf),
+heute zusätzlich die achte Mini-Changelog-Ausgabe, da der Topf die
+Achter-Schwelle überschritten hat. Alle anderen offenen Marketing-Punkte
+(Landingpage/Warteliste live, Community/Warteliste aufbauen,
+Test-Kampagnen, Launch-Kampagne, Kampagne live schalten) bleiben wie an
+jedem Vortag ausgeschlossen — ausdrücklich Live-Vorgänge bzw. an die
+weiterhin unbeantworteten vier Freigabe-Fragen gebunden.
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 15.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 15.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`) oder
+`marketing/freigabe-uebersicht.md`, keine neuen Kanal-Links, kein
+`changelog`-Treffer in `src/routes.tsx`. Alle vier Fragen bleiben offen.
+
+Danach `git log d6512f9..origin/main` geprüft (Basislinie: der eigene
+Stand vom 15.10.): elf neue Commits, fünf davon mit echter
+Produkt-Codeänderung unter `src/`, jeder einzeln per `git show` und
+direkt im Code geprüft. Vier sind echte Ehrlichkeits-/
+Zuverlässigkeits-Fixes mit sichtbarer Nutzer:innen-Konsequenz: doppelte
+Duffel-Fehlerzeilen werden jetzt dedupliziert (`d1ee5f0`), der
+Travix-Avatar bleibt nach einer echten Flug-/Unterkunftssuche nicht mehr
+dauerhaft in der "Sucht ..."-Animation hängen (`1cc978c`),
+`updateStoredTrip()` lässt nach einer außerhalb des Chats
+abgeschlossenen Bearbeitung kein internes Warte-Flag mehr stehen, das
+die nächste Chat-Nachricht falsch zuordnen würde (`c71591f`), und
+`sendMessage()` verwirft jetzt auch eine durch Freitext überholte
+automatische Unterkunftssuche zuverlässig (`ab1175e`). Der fünfte
+(`16a99ad`) ist reine Testabdeckung ohne Verhaltensänderung, bewusst
+nicht als Tier-4-Kandidat gewertet. Details und Begründung siehe Update
+2026-10-16 in `marketing/freigabe-uebersicht.md`.
+
+Mit den vier neuen Funden wuchs der Kandidatentopf von sieben (46-52)
+auf **elf** (46-56) — erstmals seit Ausgabe 7 (10.10.) wieder über der
+Achter-Schwelle. Deshalb heute, anders als an den Vortagen, eine neue,
+achte Mini-Changelog-Ausgabe geschrieben statt nur die Übersicht zu
+pflegen.
+
+**Warum sicher genug:** Ergebnis ist eine neue Ausgabe in einem bereits
+bestehenden Entwurfsdokument (`marketing/mini-changelog-konzept.md`)
+plus die zugehörige Markdown-Ergänzung der Übersicht — kein
+Live-Vorgang, nichts gepostet oder im Produkt verändert. Keine
+erfundenen Kennzahlen — alle vier neuen Kandidaten sind direkt im Code
+(`src/lib/duffel/client.ts`, `src/hooks/useChat.ts`,
+`src/lib/trip/tripStorage.ts`) und per `git show` nachvollzogen. Klar
+genug beschrieben, keine offene Positionierungsfrage: die achte Ausgabe
+wendet nur die seit 05.09. etablierte Textform (Vorher/Nachher-Sätze,
+Alltagssprache, keine erfundenen Zahlen) auf bereits verifizierte
+Commits an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der vier Funde
+  einzeln — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle vier passen gebündelt besser in die Mini-Changelog-
+  Ausgabe.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 8" (Stand: Fixes
+  vom 11.10. bis 16.10.2026, Kandidaten 46-56), gleiches Format wie
+  Ausgabe 1-7.
+- `marketing/freigabe-uebersicht.md`: neues Update vom 16.10. (Prüfung
+  der vier Fragen, elf neue Commits geprüft, vier neue Tier-4-
+  Kandidaten aufgenommen — Kandidatentopf von sieben auf elf, danach
+  wieder leer —, ein reiner Test-Commit bewusst ausgeschlossen,
+  Titel-Datum auf 16.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/mini-changelog-konzept.md`,
+`marketing/freigabe-uebersicht.md`, dieser Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-15
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live

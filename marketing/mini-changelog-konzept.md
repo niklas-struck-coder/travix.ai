@@ -990,3 +990,136 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
 (siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
 jetzt für eine mögliche achte Ausgabe.
+
+## Ausgabe 8 (Entwurf) — vom autonomen Marketing-Chef-Lauf am 2026-10-16
+
+Wie Ausgabe 1-7: **nichts davon ist live.** Reiner Textentwurf für
+dieselbe, noch nicht gebaute Footer-Seite — hängt an derselben vierten
+Frage wie Ausgabe 1-7 (weiterhin unbeantwortet, siehe
+`marketing/freigabe-uebersicht.md`).
+
+### Warum jetzt eine achte Ausgabe
+
+Dieselbe Selbstauflage wie bei Ausgabe 2-7: eine weitere Ausgabe erst
+schreiben, wenn sich seit der letzten Ausgabe wieder "genug" neue,
+einzeln verifizierte Tier-4-Kandidaten angesammelt haben — Richtwert
+bleibt der 06.09.-Maßstab (acht Kandidaten haben Ausgabe 2 ausgelöst).
+Der Kandidatentopf war laut `marketing/freigabe-uebersicht.md` seit
+Ausgabe 7 (10.10.) auf sieben gewachsen (Kandidaten 46-52: generisches
+"Flug"-Label statt echter Auswahl nach manueller und nach
+In-Chat-Flugbuchung, eine ältere, langsamere Suche konnte ein bereits
+korrekt angezeigtes neueres Ergebnis auf den direkten Such-Seiten
+nachträglich überschreiben, vier optisch klickbare, aber funktionslose
+Reiseziel-Karten auf der Startseite, roher IATA-Code statt Klarname in
+der Chat-Flugbestätigung, der Urlaubsmodus-Concierge zeigte bei
+ehrlichen "weiß ich nicht"-Antworten fälschlich den Fehlerzustand, und
+`startEdit()` ließ veraltete Flugsuchergebnisse unter einem neuen Edit
+stehen).
+
+Vor der Auswahl `git log d6512f9..origin/main` geprüft (letzter
+Marketing-Lauf, 15.10., dessen Inhalt laut Branch-Vergleich bereits
+vollständig in `main` gemergt war). Vier neue Commits mit echter
+Produkt-Codeänderung, jeder einzeln per `git show` und direkt im Code
+geprüft:
+
+- **`d1ee5f0` (15.10. spät):** Mehrere gleichzeitige Duffel-
+  Validierungsfehler zeigten bisher dieselbe feste Fehlerzeile mehrfach
+  identisch an, statt echter Mehrfach-Rückmeldung — jetzt werden
+  Duplikate nach Nachrichtentext entfernt.
+- **`1cc978c` (16.10.):** Der Travix-Avatar blieb nach einer echten
+  Flug- oder Unterkunftssuche (egal ob erfolgreich, ohne Treffer oder
+  fehlgeschlagen) dauerhaft in der "Sucht ..."-Animation hängen, weil
+  keiner der Abschluss-Pfade danach einen Folgezustand setzte — jetzt
+  kehrt der Avatar nach jeder abgeschlossenen Suche zuverlässig zurück.
+- **`c71591f` (16.10.):** Eine über den Chat begonnene, dann aber direkt
+  auf der Hotel-/Flugsuche-Seite abgeschlossene Bearbeitung ließ ein
+  internes "wartet auf Bearbeitungs-Antwort"-Flag gesetzt — deine
+  nächste, eigentlich unabhängige Chat-Nachricht wurde dadurch
+  unbemerkt fälschlich als Antwort auf die längst abgeschlossene
+  Bearbeitung behandelt. Jetzt wird das Flag beim Übernehmen der Auswahl
+  zuverlässig zurückgesetzt.
+- **`ab1175e` (16.10.):** Hast du beim automatischen Start einer
+  Unterkunftssuche sofort per Freitext geantwortet statt zu warten,
+  blieb die alte Suche im Hintergrund weiterhin aktiv — ihr Ergebnis
+  tauchte später widersprüchlich unter deiner bereits erhaltenen
+  Abschlussnachricht auf. Jetzt wird eine solche überholte Suche
+  zuverlässig verworfen.
+
+Ein weiterer geprüfter Commit **nicht** aufgenommen (reine
+Testabdeckung für bereits bestehende, unveränderte Funktionen, laut
+Commit keine Verhaltensänderung — gleiche Einstufung wie frühere reine
+Testabdeckungs-Ausschlüsse):
+- **`16a99ad` (15.10. spät):** schließt eine Testlücke für
+  `speak()`/`stopSpeaking()`/`isSpeechSynthesisSupported()`, ohne deren
+  Verhalten zu ändern.
+
+Zusammen mit den sieben bereits im Topf wartenden Kandidaten (46-52,
+siehe `marketing/freigabe-uebersicht.md`) ergeben sich **elf**
+Kandidaten — deutlich über der Achter-Schwelle, die bereits Ausgabe 2-7
+ausgelöst hat.
+
+### Achte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 11.10. bis 16.10.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-7, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Ein Klick zeigt, was du wirklich ausgewählt hast**
+- Hast du einen Flug manuell auf der Flugsuche-Seite ausgewählt oder im
+  Chat bestätigt, zeigte die Buchungsseite danach oft nur das generische
+  Wort "Flug" statt Airline, Strecke und Preis deiner tatsächlichen
+  Wahl — beide Auswahlwege zeigen jetzt die echte, gewählte Verbindung.
+- Die Flugbestätigung im Chat nannte Start- und Zielort bisher als roher
+  Flughafencode (z. B. "BER → LIS") statt des bereits an anderer Stelle
+  verwendeten Klarnamens — jetzt steht dort "Berlin → Lissabon".
+
+**Eine neuere Suche wird nicht mehr von einer alten überschrieben**
+- Auf den eigenständigen Flug- und Hotelsuche-Seiten konnte eine ältere,
+  aber langsamere Suche ein bereits korrekt angezeigtes neueres Ergebnis
+  nachträglich wieder überschreiben — das passiert jetzt nicht mehr.
+- Antwortest du beim automatischen Start einer Unterkunftssuche sofort
+  per Freitext statt abzuwarten, taucht das späte Ergebnis der
+  inzwischen überholten Suche nicht mehr widersprüchlich unter deiner
+  Abschlussnachricht auf.
+
+**Ein Klick tut tatsächlich das, was er verspricht**
+- Die vier Reiseziel-Karten auf der Startseite sahen aus wie klickbare
+  Karten, führten aber bisher ins Nichts — jetzt verlinken sie wirklich
+  zum KI-Chat mit dem jeweiligen Ziel.
+- Eine über den Chat begonnene Bearbeitung, die du stattdessen direkt
+  auf einer Such-Seite abgeschlossen hast, konnte deine nächste,
+  eigentlich unabhängige Chat-Nachricht unbemerkt falsch zuordnen —
+  passiert jetzt nicht mehr.
+
+**Die Travix-Figur zeigt ehrlich, was gerade passiert**
+- Der Avatar blieb nach einer echten Flug- oder Unterkunftssuche
+  manchmal dauerhaft in der "Sucht ..."-Animation hängen, selbst lange
+  nachdem die Suche längst beendet war — jetzt kehrt er nach jeder
+  Suche zuverlässig zu einem passenden Zustand zurück.
+- Antwortete der Urlaubsmodus-Concierge ehrlich mit "das weiß ich
+  nicht", zeigte die Figur dabei fälschlich denselben aufgeregten
+  Fehlerzustand wie bei einem echten technischen Problem — jetzt bleibt
+  sie dabei ruhig.
+
+**Du bekommst eine vollständige, statt einer wiederholten Rückmeldung**
+- Traten mehrere unterschiedliche Fehler bei einer Flug- oder
+  Hotelsuche gleichzeitig auf, zeigte dir travix.ai dieselbe Zeile
+  bisher mehrfach identisch an — jetzt siehst du jede Rückmeldung nur
+  einmal.
+
+---
+
+*Wie in Ausgabe 1-7: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig, nicht zuverlässig
+oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 8 hängt an derselben vierten Frage wie Ausgabe 1-7 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche neunte Ausgabe.

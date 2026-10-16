@@ -1,10 +1,158 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-15)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-16)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-16: vier neue Tier-4-Kandidaten (53: mehrere gleichzeitige
+Duffel-Fehler zeigten bisher dieselbe Zeile mehrfach identisch statt
+echter Mehrfach-Rückmeldung; 54: der Travix-Avatar blieb nach einer
+echten Flug-/Unterkunftssuche dauerhaft in der "Sucht ..."-Animation
+hängen, auch nach Erfolg, Null-Treffern oder Fehler; 55: eine per Hotel-/
+Flugsuche-Seite abgebrochene Chat-Bearbeitung ließ ein internes
+"Bearbeitet gerade ein Feld"-Flag gesetzt, wodurch die nächste,
+eigentlich unabhängige Chat-Nachricht fälschlich als Antwort auf die
+längst abgebrochene Bearbeitung behandelt wurde; 56: eine automatisch
+gestartete Unterkunftssuche ließ sich nicht wirklich abbrechen, wenn du
+stattdessen sofort per Freitext geantwortet hast — ihr spätes Ergebnis
+tauchte trotzdem noch unter der bereits gezeigten Abschlussnachricht
+auf), ein Commit bewusst ausgeschlossen (reine Testabdeckung für
+`speak()`/`stopSpeaking()`/`isSpeechSynthesisSupported()` ohne
+Verhaltensänderung), Kandidatentopf von sieben auf **elf** — damit
+deutlich über der Achter-Schwelle: **achte Mini-Changelog-Ausgabe
+geschrieben** (siehe `marketing/mini-changelog-konzept.md`),
+Kandidatentopf danach wieder leer, alle vier Fragen weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`d6512f9`, letzter eigener Commit vom 15.10.) war bereits vollständig in
+`origin/main` gemergt (`git merge-base --is-ancestor d6512f9
+origin/main` bestätigt das) — der Branch war also nur noch veraltet,
+nicht mehr in Arbeit. Wie in den Session-Regeln für bereits gemergte
+Branches vorgesehen neu von aktuellem `origin/main` (`ff2b9d4`) aus
+angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+`status.md` zeigt weiterhin Stand 15.10., keine Notiz zu einer der vier
+Fragen. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/` und `index.html`
+liefert weiterhin keinen Treffer), kein `changelog`-Treffer in
+`src/routes.tsx`, `ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen
+bleiben offen.
+
+**`git log d6512f9..origin/main` zeigt die seit dem letzten Check**
+(15.10., Commit `d6512f9`) elf neue Commits. Fünf davon ändern
+tatsächlich Produkt-Code unter `src/` — jeder einzeln per `git show`
+und direkt im Code (nicht nur per Commit-Text) geprüft:
+
+- **`d1ee5f0` (15.10. spät):** Mehrere gleichzeitige Duffel-
+  Validierungsfehler wurden bisher alle auf denselben festen deutschen
+  Fallback-Text gemappt — `SearchErrorAlert` zeigte dieselbe Zeile dann
+  mehrfach identisch statt echter Mehrfach-Rückmeldungen. Im Code
+  verifiziert: neue `dedupeByMessage()`-Hilfsfunktion in
+  `src/lib/duffel/client.ts` entfernt Duplikate nach Nachrichtentext.
+  Deckt sich mit einem bereits von Support-Chef gemeldeten Fund (siehe
+  `reports/support-chef.md`); der separate, noch wartende Auto-Fix-PR
+  #29 bleibt davon unberührt zurück. **53. Kandidat** — "du bekommst
+  eine ehrliche, vollständige Rückmeldung statt einer wiederholten
+  Zeile"-Erzählung, passt in dieselbe Gruppe wie frühere
+  Fehlermeldungs-Fixes.
+- **`1cc978c` (16.10.):** `useChat.ts` setzte `avatarState` vor jeder
+  echten Duffel-Suche (Flug sowie Unterkunft, sowohl im
+  `startEdit`- als auch im Hauptablauf) auf `'searching'`, aber keiner
+  der sechs `then()`/`catch()`-Abschluss-Handler setzte danach einen
+  Folgezustand — anders als jede andere abgeschlossene Aktion im selben
+  Hook. Im Code verifiziert: `TravixAvatar.tsx` animiert `'searching'`
+  mit `repeat: Infinity`, der Avatar blieb also nach Abschluss der Suche
+  (Erfolg, Null-Treffer oder Fehler) dauerhaft in der "Sucht
+  ..."-Animation hängen. Fix ergänzt `setAvatarState('happy')` in allen
+  sechs Handlern. **54. Kandidat** — exakt dieselbe "die Travix-Figur
+  zeigt nicht mehr fälschlich einen falschen Zustand"-Erzählung wie der
+  bereits als 51. Kandidat gezählte Concierge-Avatar-Fix vom 15.10., nur
+  für den Hauptchat statt den Urlaubsmodus-Concierge.
+- **`c71591f` (16.10.):** `updateStoredTrip()`
+  (`src/lib/trip/tripStorage.ts`) mergt einen Trip-Patch (z. B.
+  Hotelauswahl auf `/hotelsuche`, Flugauswahl auf `/flugsuche`) in den
+  gespeicherten Trip, ließ dabei aber `editingField`/
+  `awaitingFlightOrigin` unverändert stehen. Seit dem Fix vom 10.10.
+  werden beide Felder bei jedem Neuladen wiederhergestellt — ein über
+  den Chat gestarteter, dann aber per direkter Seitenauswahl
+  abgebrochener Edit-Dialog blieb dadurch intern weiterhin "offen" und
+  ließ die nächste, unabhängige Chat-Nachricht unbemerkt fälschlich als
+  Antwort auf die längst abgebrochene Bearbeitung behandeln. Im Code
+  verifiziert: `updateStoredTrip()` setzt beide Felder jetzt explizit
+  zurück. **55. Kandidat** — passt in dieselbe "deine nächste Nachricht
+  wird nicht mehr falsch zugeordnet"-Gruppe wie frühere Edit-Zustand-
+  Fixes (u. a. Kandidat 45).
+- **`ab1175e` (16.10.):** `searchGenerationRef` soll laut eigenem
+  Kommentar jede veraltete Duffel-Suche erkennbar machen, wurde aber nur
+  von `resetChat()` erhöht, nicht von `sendMessage()`. Startete der
+  Budget-Schritt automatisch eine Unterkunftssuche und antwortete die
+  Nutzerin stattdessen sofort per Freitext (füllt `trip.accommodation`
+  direkt), blieb die alte Suche beim späteren Auflösen weiterhin
+  "aktuell" — ihre Angebote erschienen widersprüchlich unter der bereits
+  gezeigten Abschlussnachricht. Im Code verifiziert: `sendMessage()`
+  erhöht den Zähler jetzt ebenfalls. **56. Kandidat** — direkte
+  Fortsetzung derselben "veraltete Suchergebnisse bleiben nicht mehr
+  sichtbar"-Fundgruppe wie die bereits gezählten Kandidaten 36/44/48/52,
+  jetzt für den Freitext-Antwortpfad.
+- **`16a99ad` (15.10. spät):** schließt nur eine Testabdeckungslücke für
+  drei bereits bestehende, unveränderte Funktionen
+  (`speak()`/`stopSpeaking()`/`isSpeechSynthesisSupported()`) — laut
+  Commit-Text und Diff keine Verhaltensänderung. **Kein Kandidat.**
+
+Die übrigen sechs Commits sind reine Berichte/Logs/Merges ohne eigene
+`src/`-Änderung (ein Support-Chef-Bericht, ein IT-Chef-Bericht, ein
+Marketing-Chef-Bericht, ein Support-Chef-Auto-Lauf ohne Codeänderung,
+ein Daily-Status-Update, ein Freigabe-Chef-Merge-Log).
+
+**Kandidatentopf:** von sieben auf **elf** (46-56) — deutlich über der
+Achter-Schwelle. Achte Mini-Changelog-Ausgabe geschrieben (siehe unten),
+Kandidatentopf danach wieder leer.
+
+**Warum sicher genug:** Ergebnis ist eine neue Ausgabe in einem bereits
+bestehenden Entwurfsdokument plus diese Markdown-Ergänzung — kein
+Live-Vorgang, nichts gepostet oder im Produkt verändert. Keine
+erfundenen Kennzahlen — alle vier neuen Kandidaten sind direkt im Code
+(`src/lib/duffel/client.ts`, `src/hooks/useChat.ts`,
+`src/lib/trip/tripStorage.ts`) und per `git show` nachvollzogen, nicht
+aus Berichten übernommen. Klar genug beschrieben, keine offene
+Positionierungsfrage: die achte Ausgabe wendet nur die seit 05.09.
+etablierte Textform (Vorher/Nachher-Sätze, Alltagssprache, keine
+erfundenen Zahlen) auf bereits verifizierte Commits an, entscheidet
+nichts neu.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück zu einem der vier Funde
+  einzeln — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle vier passen ohnehin besser gebündelt in die achte
+  Mini-Changelog-Ausgabe als vereinzelt.
+
+**Umgesetzt:**
+- `marketing/mini-changelog-konzept.md`: neue "Ausgabe 8" (Stand: Fixes
+  vom 11.10. bis 16.10.2026, Kandidaten 46-56), gleiches Format wie
+  Ausgabe 1-7.
+- Dieses Update (Prüfung der vier Fragen, elf neue Commits geprüft, fünf
+  mit Produkt-Code-Änderung einzeln per `git show` und im Code bewertet,
+  vier neue Tier-4-Kandidaten aufgenommen, ein reiner Test-Commit bewusst
+  ausgeschlossen, Kandidatentopf-Stand auf "elf, danach wieder leer"
+  gesetzt, Titel-Datum auf 16.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`,
+`marketing/mini-changelog-konzept.md`, der Log-Eintrag in
+`marketing-chef-auto-log.md`).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-15: zwei neue Tier-4-Kandidaten (Concierge-Avatar zeigt
 bei ehrlichen Ausweich-Antworten nicht mehr fälschlich den Fehlerzustand;
