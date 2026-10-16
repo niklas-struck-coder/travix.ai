@@ -6839,3 +6839,36 @@ durch den Marketing-Merge weitergewandert war).
 
 **Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
 wiederholte Regelverstöße.
+
+## 2026-10-16, Früher Nacht-Check (geplanter Auto-Lauf zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits gegenüber `main`: Duffel-Fehlerzeilen-
+Dedup, Testabdeckung für `speak()`/`stopSpeaking()`/
+`isSpeechSynthesisSupported()`, Avatar bleibt nach Flug-/Unterkunftssuche in
+`'searching'` hängen, `updateStoredTrip()` ließ `editingField`/
+`awaitingFlightOrigin` stehen, `sendMessage()` erhöhte
+`searchGenerationRef` nicht). Branch frisch ausgecheckt, `npm install`,
+danach unabhängig selbst ausgeführt statt dem Log vertraut: `npx tsc -b`
+sauber, `npx eslint .` sauber, `npx vitest run` 64/64 Testdateien, 479/479
+Tests grün. Diff auf `useChat.ts`, `duffel/client.ts`, `trip/tripStorage.ts`
+gegen die Log-Einträge der jeweiligen Läufe abgeglichen — jede Änderung
+entspricht genau dem beschriebenen einen Punkt, kein Scope-Creep über die
+fünf beschriebenen Fixes hinaus. Kein Auth-/Zahlungs-/Rechtsbezug (reine
+Avatar-Zustands-, Fehlertext- und Edit-Flag-Logik). Kein UI/Design
+betroffen, `MARKENDESIGN.md`-Check daher nicht nötig. `main`/`it-chef/auto`
+waren bereits ein einfacher Fast-Forward (`12dd79d..ab1175e`), keine
+Divergenz.
+→ **Passt, nach `main` gemergt** (Fast-Forward `12dd79d..ab1175e`).
+`it-chef/auto` war danach bereits identisch zu `main` (kein eigener Push
+nötig).
+
+**`marketing-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand) — planmäßig für diesen frühen Lauf übersprungen, läuft laut
+Zeitplan erst um 6 Uhr und wird im separaten späteren Freigabe-Chef-Lauf
+geprüft.
+
+**`support-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits
+Abstand) — aus demselben Grund planmäßig übersprungen.
+
+**Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
+wiederholte Regelverstöße.
