@@ -1230,6 +1230,50 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerung (`git stash` nur `useChat.ts`) reproduzierbar rot
   verifiziert (die veralteten Angebote landeten trotz bereits per Freitext
   gefüllter Unterkunft im State).
+  Vom autonomen IT-Chef-Lauf am 16.10. (vierter Lauf desselben Tages) einen
+  über einen eigens dafür beauftragten Explore-Agenten gefundenen,
+  direkten Folgebug des vorherigen Fixes (dritter Lauf, siehe oben)
+  behoben: Mit `searchGenerationRef.current += 1` jetzt auch in
+  `sendMessage()` bricht eine dadurch veraltete, noch laufende Duffel-
+  Suche (Unterkunft/Flug) korrekt in ihrem eigenen `.then()`/`.catch()`
+  per Veraltungs-Check (`if (searchGenerationRef.current !== generation)
+  return`) ab — genau dieser frühe `return` verhindert aber auch, dass
+  sie ihr eigenes `setStayLoading(false)`/`setFlightLoading(false)`
+  danach noch erreicht. `sendMessage()` selbst setzte zwar `stayOffers`/
+  `stayErrors` (und, sofern `!awaitingFlightOrigin`,
+  `flightOffers`/`flightErrors`) zurück, aber nicht `stayLoading`/
+  `flightLoading` — anders als `resetChat()`, das bereits alle vier
+  States zusammen zurücksetzt. Der Ladezustand blieb dadurch nach einer
+  so verworfenen Suche dauerhaft `true`, bis zum nächsten `resetChat()`:
+  `KiChat.tsx` rendert `<HotelResults loading>`/`<FlightResults
+  loading>`, solange `stayLoading`/`flightLoading` `true` ist, die
+  Ladeanzeige blieb also sichtbar unter der längst abgeschlossenen
+  Chat-Antwort stehen (Reiseplan zeigt bereits "Dein Reiseplan steht!",
+  darunter weiterhin ein Lade-Platzhalter). Live reproduzierbar sowohl
+  für Unterkunft (Budget-Schritt startet automatische Suche, Freitext-
+  Antwort füllt `trip.accommodation` vor deren Auflösung) als auch für
+  Flug (laufende `runFlightSearch()` nach IATA-Eingabe, danach eine
+  beliebige weitere Nachricht vor deren Auflösung). Erfüllt alle vier
+  Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reiner
+  lokaler Ladezustand im Chat); keine offene Produktentscheidung
+  (Zielverhalten durch `resetChat()`s identisches Muster — abgebrochene
+  Suche beendet auch den Ladezustand — längst festgelegt, hier nur auf
+  `sendMessage()` nachgezogen); mechanisch (zwei zusätzliche Zeilen nach
+  bestehendem Muster); objektiv prüfbar (Tests). Fix:
+  `setStayLoading(false)` direkt neben den bestehenden
+  `stayOffers`/`stayErrors`-Resets in `sendMessage()` ergänzt,
+  `setFlightLoading(false)` entsprechend im bestehenden
+  `if (!awaitingFlightOrigin)`-Block neben `flightOffers`/
+  `flightErrors`. Bestehender Test ("does not let a stale stay offer
+  land once free text has already filled the accommodation field",
+  siehe dritter Lauf) um die bisher fehlende Abschluss-Assertion
+  `expect(stayLoading).toBe(false)` ergänzt, neuer Regressionstest in
+  `useChat.test.ts` ("clears a still-pending flightLoading once a later
+  message arrives before the search resolves") für den analogen
+  Flug-Fall. Vor der Ergänzung durch temporäres Zurücknehmen nur der
+  Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert: beide Tests schlugen fehl
+  (`stayLoading`/`flightLoading` blieben `true`).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

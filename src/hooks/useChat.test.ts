@@ -325,6 +325,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     })
 
     expect(result.current.stayOffers).toBeNull()
+    expect(result.current.stayLoading).toBe(false)
   })
 
   // The avatar switches to the looping "searching" animation right when the
@@ -574,6 +575,33 @@ describe('useChat flight search failure vs. real zero results', () => {
 
     act(() => {
       result.current.resetChat()
+    })
+
+    expect(result.current.flightLoading).toBe(false)
+  })
+
+  it('clears a still-pending flightLoading once a later message arrives before the search resolves', async () => {
+    let resolveSearch: (result: { offers: FlightOffer[]; errors: [] }) => void = () => {}
+    vi.mocked(searchFlights).mockReturnValue(
+      new Promise((resolve) => {
+        resolveSearch = resolve
+      }),
+    )
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+    expect(result.current.flightLoading).toBe(true)
+
+    // User doesn't wait for the flight search either — a normal follow-up
+    // message bumps the generation counter before the Duffel request
+    // resolves.
+    act(() => {
+      result.current.sendMessage('Danke, das passt so.')
+    })
+
+    resolveSearch({ offers: [], errors: [] })
+    await act(async () => {
+      await Promise.resolve()
     })
 
     expect(result.current.flightLoading).toBe(false)

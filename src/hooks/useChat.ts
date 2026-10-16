@@ -259,9 +259,11 @@ export function useChat(speechEnabled: boolean) {
     setQuickReplies([])
     setStayOffers(null)
     setStayErrors([])
+    setStayLoading(false)
     if (!awaitingFlightOrigin) {
       setFlightOffers(null)
       setFlightErrors([])
+      setFlightLoading(false)
     }
     setIsThinking(true)
     setAvatarState('thinking')

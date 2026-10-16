@@ -19860,3 +19860,82 @@ committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-16 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Frischer Checkout, `origin` gefetcht. Die drei früheren Läufe
+desselben Tages (`avatarState`, `updateStoredTrip`, `searchGenerationRef`)
+waren inzwischen vom Freigabe-Chef bereits nach `main` gemergt — `main`
+und der alte `origin/it-chef/auto` enthielten denselben Stand (per
+`git merge-base --is-ancestor` geprüft). `it-chef/auto` deshalb frisch
+von `origin/main` aufgesetzt (`git checkout -B it-chef/auto origin/main`)
+statt auf dem alten, nicht mehr benötigten Branch-Stand weiterzuarbeiten,
+und per Fast-Forward-Push auf den Remote-Branch synchronisiert (der
+lokale Stop-Hook hatte die 9 dadurch "fehlenden" Commits moniert — reine
+Nachzieh-Synchronisation, keine neue Arbeit). `npm install` ausgeführt
+(Dependencies fehlten im frischen Checkout).
+
+**Auswahl:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gelesen.
+Die verbleibenden offenen Top-Level-Punkte sind weiterhin Produkt-/
+Architekturentscheidungen oder externe Blocker (Base44/Gemini-
+Credentials, Zug/Bus/Fähre-Datenquelle, Backend-Datenmodell) — keiner
+erfüllt die vier Sicherheitskriterien für den autonomen Kanal. Wie in den
+drei vorherigen Läufen desselben Tages deshalb wieder einen eigens dafür
+beauftragten Explore-Agenten mit der Suche nach einem noch nicht
+gemeldeten, sicheren, eigenständig verifizierbaren Bug beauftragt — mit
+der expliziten Vorgabe, die drei bereits an diesem Tag gefixten Bugs
+sowie alle anderen in `ZEITPLAN.md`/`it-chef-auto-log.md`/`reports/*.md`
+dokumentierten Funde NICHT erneut zu melden.
+
+Ergebnis: ein direkter Folgebug des dritten Fixes desselben Tages.
+Dessen `searchGenerationRef.current += 1` in `sendMessage()`
+(`useChat.ts`) lässt eine dadurch veraltete, noch laufende Duffel-Suche
+(Unterkunft/Flug) korrekt per Veraltungs-Check in ihrem `.then()`/
+`.catch()` früh zurückkehren — aber genau dieser frühe `return`
+verhindert auch, dass die Suche ihr eigenes `setStayLoading(false)`/
+`setFlightLoading(false)` erreicht. `sendMessage()` setzte dabei bereits
+`stayOffers`/`stayErrors` (bzw. bei `!awaitingFlightOrigin` auch
+`flightOffers`/`flightErrors`) zurück, aber nicht `stayLoading`/
+`flightLoading` — anders als `resetChat()`, das alle vier States
+zusammen zurücksetzt. Der Ladezustand (`<HotelResults loading>`/
+`<FlightResults loading>` in `KiChat.tsx`) blieb dadurch nach einer so
+verworfenen Suche dauerhaft `true`, bis zum nächsten `resetChat()` — die
+Ladeanzeige stand sichtbar unter der bereits abgeschlossenen
+Chat-Antwort. Selbst gegen den Code verifiziert (alle Aufrufer von
+`setStayLoading`/`setFlightLoading`, `resetChat()`s Referenzmuster) und
+gegen `ZEITPLAN.md`/`it-chef-auto-log.md`/`reports/*.md` abgeglichen —
+keine Erwähnung dieses spezifischen, erst durch den heutigen dritten Fix
+entstandenen Zusammenspiels. Erfüllt alle vier Kriterien: kein Auth-/
+Zahlungs-/Nutzerdaten-/Rechtsbezug (reiner lokaler Ladezustand im Chat);
+keine offene Produktentscheidung (Zielverhalten durch `resetChat()`s
+identisches Muster längst festgelegt, hier nur auf `sendMessage()`
+nachgezogen); mechanisch (zwei zusätzliche Zeilen nach bestehendem
+Muster); objektiv prüfbar (Tests).
+
+**Umgesetzt:** `setStayLoading(false)` direkt neben den bestehenden
+`stayOffers`/`stayErrors`-Resets in `sendMessage()` ergänzt,
+`setFlightLoading(false)` entsprechend im bestehenden
+`if (!awaitingFlightOrigin)`-Block neben `flightOffers`/`flightErrors`.
+Bestehender Test in `useChat.test.ts` ("does not let a stale stay offer
+land once free text has already filled the accommodation field") um die
+bisher fehlende Abschluss-Assertion `expect(stayLoading).toBe(false)`
+ergänzt, neuer Regressionstest dort ("clears a still-pending
+flightLoading once a later message arrives before the search resolves")
+für den analogen Flug-Fall (laufende `runFlightSearch()` nach
+IATA-Eingabe, danach eine weitere, unabhängige Nachricht vor Auflösung
+der alten Suche). Vor der Ergänzung durch temporäres Zurücknehmen nur
+der Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+reproduzierbar rot verifiziert: beide Tests schlugen fehl
+(`stayLoading`/`flightLoading` blieben `true`). `ZEITPLAN.md`
+(16.10.-Eintrag, vierter Lauf) und `tasks/tasks-prd-travix-platform.md`
+(4.10) entsprechend ergänzt.
+
+**Geprüft (nach der Ergänzung):** `npx eslint .` sauber, `npx tsc -b`
+sauber, `npx vitest run` 480/480 grün (64 Testdateien, inkl. der beiden
+betroffenen Tests), `npm run build` sauber (unveränderte 811-KB-Chunk-
+Size-Warnung). `git status` nach Abschluss: keine uncommitteten
+Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
