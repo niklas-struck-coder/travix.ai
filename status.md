@@ -13,18 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-14):**
-- IT-Chef hat mehrere Fixes gemergt: stale Flugsuchergebnisse/-fehler beim
-  Bearbeiten werden jetzt zurückgesetzt, Fehler-Anzeige in Flug- und
-  Hotelsuche vereinheitlicht (SearchErrorAlert), und ein doppeltes
-  Hilfsmodul (escapeRegExp) konsolidiert
-- Support-Chef hat eine identische Fehlerzeile bei mehreren verschiedenen
-  Duffel-API-Fehlern in Flug-/Hotelsuche gemeldet
-- Marketing-Chef hat zwei neue Kandidaten aufgenommen (Concierge-Avatar-Fix,
-  stale Flugergebnisse), Kandidatentopf jetzt bei sieben
+**Seit letztem Update (2026-10-15):**
+- IT-Chef hat mehrere Fixes gemergt: Concierge-Avatar bleibt nicht mehr fälschlich
+  in "searching" hängen, `updateStoredTrip()` räumt Bearbeitungszustand nach
+  externer Auswahl korrekt auf, `sendMessage()` verhindert jetzt veraltete
+  Suchangebote nach einer Freitext-Antwort
+- Support-Chef hat gemeldet, dass der Avatar nach fehlgeschlagener Flug-/
+  Unterkunftssuche fälschlich "happy" statt "error" zeigt
+- Marketing-Chef hat eine weitere Mini-Changelog-Ausgabe veröffentlicht,
+  Kandidatentopf danach wieder leer
 - Freigabe-Chef hat Tages- und Nacht-Checks durchgeführt und die Branches
   von IT-, Marketing- und Support-Chef unabhängig geprüft und gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-15_
+_Letztes Update: 2026-10-16_
