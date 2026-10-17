@@ -13,18 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-15):**
-- IT-Chef hat mehrere Fixes gemergt: Concierge-Avatar bleibt nicht mehr fälschlich
-  in "searching" hängen, `updateStoredTrip()` räumt Bearbeitungszustand nach
-  externer Auswahl korrekt auf, `sendMessage()` verhindert jetzt veraltete
-  Suchangebote nach einer Freitext-Antwort
-- Support-Chef hat gemeldet, dass der Avatar nach fehlgeschlagener Flug-/
-  Unterkunftssuche fälschlich "happy" statt "error" zeigt
-- Marketing-Chef hat eine weitere Mini-Changelog-Ausgabe veröffentlicht,
-  Kandidatentopf danach wieder leer
-- Freigabe-Chef hat Tages- und Nacht-Checks durchgeführt und die Branches
-  von IT-, Marketing- und Support-Chef unabhängig geprüft und gemergt
+**Seit letztem Update (2026-10-16):**
+- IT-Chef hat mehrere Fixes gemergt: Reise-Zusammenfassungskarte zeigt jetzt die
+  konkret gewählte Flug-/Zugverbindung statt eines generischen Labels,
+  `startEdit()` räumt Lade- und Suchstatus beim Feldwechsel in der
+  Unterkunftssuche korrekt auf; ein weiterer Lauf fand keinen neuen sicheren Punkt
+- Freigabe-Chef hat IT-Chef-Branch geprüft und gemergt; Marketing- und
+  Support-Chef-Branches wurden geprüft und bestanden, der Merge-Push war
+  aber blockiert
+- Marketing- und Support-Chef haben neue Kandidaten/Beobachtungen notiert
+  (u.a. Ladeanzeige bei überholter Suche, Transportmittel-Wechsel nach
+  Flugauswahl), noch nicht final verarbeitet
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-16_
+_Letztes Update: 2026-10-17_
