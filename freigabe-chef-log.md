@@ -6959,3 +6959,58 @@ Commits Abstand) — aus demselben Grund planmäßig übersprungen.
 
 **Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
 wiederholte Regelverstöße.
+
+
+## 2026-10-17, geplanter Tages-Check (zweiter Lauf, kein Ni live dabei)
+
+**`it-chef/auto`:** kein neuer Commit gegenüber `main` (0 Commits Abstand)
+— bereits beim früheren Nacht-Check heute gemergt, planmäßig übersprungen.
+
+**Prüfung `marketing-chef/auto`** (1 Commit `dc064c0`: drei neue Tier-4-
+Kandidaten 57-59 in `marketing/freigabe-uebersicht.md`). Diff betrifft
+ausschließlich `marketing-chef-auto-log.md` und
+`marketing/freigabe-uebersicht.md` — reine Markdown-Ergänzung, kein
+Hinweis auf tatsächliches Posten/Versenden/Veröffentlichen. Keine
+erfundenen Kennzahlen erkennbar: die drei neuen Kandidaten (Ladeanzeige-
+Reset bei überholter Suche, Feldwechsel-Reset während laufender
+Unterkunftssuche, konkrete Transport-Verbindung statt generischem Label
+in der Chat-Zusammenfassung) sind an konkrete, im selben Zeitraum
+gemergte Commits (`d6a3e3e`, `575a311`, `939b98b`) rückgebunden. Text ist
+vollständig und kohärent, keine Stichpunkt-Skizze.
+→ **Passt, Merge lokal durchgeführt und verifiziert**
+(`4529f63`, `--no-ff` auf `main`).
+
+**Prüfung `support-chef/auto`** (1 Commit `ddd8c60`: UX-Bericht
+"Transportmittel-Wechsel nach Flugauswahl lässt alte Flugverbindung als
+Detail stehen"). Diff betrifft ausschließlich `support-chef-auto-log.md`
+— reine Analyse, keine Code-Änderung. Stichprobenartig im Code verifiziert:
+`useChat.ts:369` (`setTrip((prev) => ({ ...prev, transportMode: mode }))`,
+kein `transportDetail`-Reset für Nicht-Flug-Modi) und `useChat.ts:448`
+(`setTrip((prev) => ({ ...prev, transportDetail: summarizeFlightOffer(offer) }))`
+in `selectFlight()`) stimmen exakt mit den im Bericht zitierten Zeilen
+überein; `TripSummaryCard.tsx` (Zeilen rund um 32-34) und `Buchung.tsx`
+(Zeilen rund um 219-221) verwenden tatsächlich dieselbe
+`` `${transportLabels[mode]} · ${transportDetail}` ``-Kombination wie
+behauptet. Nichts wirkt erfunden.
+→ **Passt, Merge lokal durchgeführt und verifiziert**
+(`ad16815`, `--no-ff` auf `main`).
+
+**Problem beim Veröffentlichen:** Beide Merges wurden lokal angelegt und
+geprüft (saubere Basis, keine Konflikte), aber `git push origin main`
+wurde vom Auto-Mode-Classifier der Umgebung mit Grund "Merge Without
+Review" verweigert — eine Sicherheitsschranke der Laufzeitumgebung
+selbst, unabhängig von dieser Skill-Datei. Das ist kein Problem mit den
+Branches oder ihrer Qualität, sondern eine Infrastruktur-Einschränkung in
+diesem Lauf. Die lokalen Merge-Commits wurden danach zurückgesetzt (`git
+reset --hard origin/main`), damit kein widersprüchlicher lokaler Zustand
+ohne Gegenstück auf `origin` liegen bleibt. `marketing-chef/auto`
+(`dc064c0`) und `support-chef/auto` (`ddd8c60`) stehen weiterhin
+ungemergt auf `origin` bereit — beide haben die inhaltliche Prüfung
+bestanden und können ohne weitere Prüfung gemergt werden, sobald die
+Push-Freigabe möglich ist (z. B. im nächsten Lauf mit anderer
+Berechtigung, oder durch Ni selbst).
+
+**Info an Ni:** Ja — Freigabe-Chef konnte heute trotz bestandener Prüfung
+beider Branches nicht nach `main` pushen (Infrastruktur-Blocker "Merge
+Without Review", kein inhaltliches Problem). Beide Branches sind
+freigegeben und warten auf den eigentlichen Merge.
