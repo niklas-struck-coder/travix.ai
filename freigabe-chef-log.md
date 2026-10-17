@@ -6911,3 +6911,51 @@ Marketing-Merge zuvor weitergewandert war).
 **Info an Ni:** Nein — unauffälliger Lauf, beide noch offenen Branches
 (`marketing-chef/auto`, `support-chef/auto`) grün und nach `main`
 gemergt, kein Hinweis auf wiederholte Regelverstöße.
+
+## 2026-10-17, früher Nacht-Check (kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 Commits gegenüber `main`, Basis war
+bereits aktueller `main`-Stand `359d8a9`, keine Divergenz): fünf
+IT-Chef-Auto-Läufe seit dem letzten Merge — drei mit Codeänderung
+(`d6a3e3e`, `575a311`, `939b98b`), zwei reine "kein neuer Fund"-
+Log-Einträge ohne Codeänderung (`f71782e`, `8a3de76`). Frischer Checkout,
+`npm install`, dann unabhängig selbst ausgeführt (nicht nur dem Log
+geglaubt): `npx tsc -b` sauber (0 Fehler), `npx eslint .` sauber (0
+Fehler), `npx vitest run` → 64 Testdateien, 483 Tests, alle grün —
+deckt sich exakt mit den im `it-chef-auto-log.md` selbst behaupteten
+Zahlen der letzten beiden Läufe.
+
+Diff gegen `main` geprüft (`TripSummaryCard.tsx`/`.test.tsx`,
+`useChat.ts`/`.test.ts`, plus `ZEITPLAN.md`/`it-chef-auto-log.md`/
+`tasks/tasks-prd-travix-platform.md`) und gegen die drei zugehörigen
+Log-Einträge abgeglichen — jede Änderung entspricht genau dem
+beschriebenen einen Punkt, kein Scope-Creep über die drei beschriebenen
+Fixes hinaus:
+- `startEdit()`/`sendMessage()` in `useChat.ts` erhöhen jetzt auch beim
+  Feldwechsel bzw. setzen `stayLoading`/`flightLoading` konsistent
+  zurück (Folgefixes zum bereits am 16.10. gemergten
+  `searchGenerationRef`-Muster) — reine lokale Ladezustands-/
+  Veraltungs-Logik im Chat, kein Auth-/Zahlungs-/Nutzerdaten-/
+  Rechtsbezug.
+- `TripSummaryCard.tsx` zeigt die konkrete Transport-Auswahl
+  (`trip.transportDetail`) zusätzlich zum Modus-Label, analog zum
+  bereits etablierten Muster in `Buchung.tsx` — betrifft UI, aber nur
+  eine zusätzliche Textzeile nach bestehendem Muster, kein eigenständiges
+  neues Design-Element; `MARKENDESIGN.md`-Konflikt nicht erkennbar.
+
+`main`/`it-chef/auto` waren ein einfacher Fast-Forward (`359d8a9..939b98b`),
+keine Divergenz.
+→ **Passt, nach `main` gemergt** (Fast-Forward `359d8a9..939b98b`).
+`it-chef/auto` war danach bereits identisch zu `main` (kein eigener Push
+nötig).
+
+**Prüfung `marketing-chef/auto`:** kein neuer Commit gegenüber `main` (0
+Commits Abstand) — planmäßig für diesen frühen Lauf übersprungen, läuft
+laut Zeitplan erst um 6 Uhr und wird im separaten späteren
+Freigabe-Chef-Lauf geprüft.
+
+**Prüfung `support-chef/auto`:** kein neuer Commit gegenüber `main` (0
+Commits Abstand) — aus demselben Grund planmäßig übersprungen.
+
+**Info an Ni:** Nein — unauffälliger Lauf, alles grün, kein Hinweis auf
+wiederholte Regelverstöße.
