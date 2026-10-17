@@ -20144,3 +20144,58 @@ committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-17 (dritter Lauf desselben Tages)
+
+**Vorbereitung:** Dritter geplanter Cloud-Lauf desselben Tages, autonom
+ohne Ni live dabei. `it-chef/auto` lag unverändert exakt auf
+`origin/main` (die ersten beiden Läufe heute hatten ihre neuen Commits
+bereits selbst auf `it-chef/auto` gepusht) — kein Merge/Rebase nötig,
+`main` so oder so unberührt gelassen.
+
+**Auswahl:** Die ersten beiden Läufe heute hatten bereits eine sehr
+gründliche, dateigenaue Suche über den Großteil des `src`-Baums
+dokumentiert (siehe die beiden Einträge oben). Einen eigens dafür
+beauftragten general-purpose-Agenten gezielt auf die bisher noch nicht
+geprüften Dateien angesetzt: `PageTransition.tsx`, `Home.tsx`,
+`ChatMessage.tsx`, `TripSummaryCard.tsx`, `TravixAvatar.tsx`,
+`progress.tsx`, `dialog.tsx`, `sheet.tsx`, `select.tsx`, `input.tsx`,
+`label.tsx`, `card.tsx`, `App.tsx`, `main.tsx`, `src/types/*.ts`,
+`design-tokens.ts`.
+
+**Ergebnis:** Ein eigenständiger, noch nicht gemeldeter Bug in
+`TripSummaryCard.tsx` (4.8) gefunden: Die Transport-Zeile der "Deine
+Reise bisher"-Karte im KI-Chat zeigte immer nur das generische
+Modus-Label (z. B. "Flug"), obwohl `trip.transportDetail` (gesetzt von
+`selectFlight()` in `useChat.ts`, sobald im Chat eine Flugkarte
+ausgewählt wird) die konkret gewählte Verbindung enthält —
+`Buchung.tsx` (6.4) kombiniert beide Felder für denselben Trip-State
+bereits korrekt, `TripSummaryCard.tsx` übernahm dieses etablierte
+Muster nicht. Details, Reproduktionsfall und Begründung der vier
+Kriterien siehe `ZEITPLAN.md` (17.10.-Eintrag, dritter Lauf). Alle
+übrigen genannten Dateien aktiv gelesen, keine weiteren Auffälligkeiten
+(`progress.tsx`s theoretisches Clamping-Problem bei Werten >100/<0 wird
+von keinem aktuellen Aufrufer erreicht, daher kein verifizierbarer
+Bug).
+
+**Umgesetzt:** Transport-Zeile in der `rows`-Definition kombiniert
+jetzt `transportLabels[trip.transportMode]` mit `trip.transportDetail`
+(falls gesetzt), exakt analog `Buchung.tsx` (Zeilen 217-223). Neuer
+Regressionstest in `TripSummaryCard.test.tsx` ("shows the specific
+transport detail alongside the mode label when a flight has been
+selected"). Vor der Ergänzung durch temporäres Zurücknehmen nur der
+Quelländerung in `TripSummaryCard.tsx` (`git stash` nur diese Datei)
+reproduzierbar rot verifiziert (Text mit Airline/Route/Preis fehlte im
+DOM), danach `git stash pop` und erneut grün bestätigt. `ZEITPLAN.md`
+(17.10.-Eintrag, dritter Lauf) und `tasks/tasks-prd-travix-platform.md`
+(4.8) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules`
+vorhanden), `npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (64 Testdateien, 483 Tests, alle grün — 482
+vorher + 1 neu), `npm run build` sauber (unveränderte 811-KB-Chunk-
+Size-Warnung). `git status` nach Abschluss: keine uncommitteten
+Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

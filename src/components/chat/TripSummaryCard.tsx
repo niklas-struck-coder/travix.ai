@@ -26,7 +26,13 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
 
   const rows = [
     trip.destination && { key: 'destination', icon: MapPin, label: trip.destination },
-    trip.transportMode && { key: 'transportMode', icon: TransportIcon, label: transportLabels[trip.transportMode] },
+    trip.transportMode && {
+      key: 'transportMode',
+      icon: TransportIcon,
+      label: trip.transportDetail
+        ? `${transportLabels[trip.transportMode]} · ${trip.transportDetail}`
+        : transportLabels[trip.transportMode],
+    },
     trip.dates && { key: 'dates', icon: CalendarDays, label: trip.dates },
     trip.budget && { key: 'budget', icon: Wallet, label: trip.budget },
     trip.accommodation && { key: 'accommodation', icon: BedDouble, label: trip.accommodation },

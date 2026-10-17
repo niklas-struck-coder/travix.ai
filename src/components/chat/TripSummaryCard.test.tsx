@@ -62,6 +62,22 @@ describe('TripSummaryCard', () => {
     expect(screen.getByRole('link', { name: /Speichern & ansehen/ })).toHaveAttribute('href', '/buchung')
   })
 
+  it('shows the specific transport detail alongside the mode label when a flight has been selected', () => {
+    render(
+      <MemoryRouter>
+        <TripSummaryCard
+          trip={{
+            ...emptyTrip,
+            transportMode: 'flight',
+            transportDetail: 'Test Airline · Berlin → Lissabon · 149,00 €',
+          }}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Flug · Test Airline · Berlin → Lissabon · 149,00 €')).toBeInTheDocument()
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
   })

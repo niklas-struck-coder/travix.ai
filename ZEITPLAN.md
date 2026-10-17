@@ -2524,6 +2524,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Anzeige nur der tatsächlich gesetzten Felder, Transportmittel-Label für
   den gewählten Modus, sowie alle Felder zusammen inkl. Link zu
   `/buchung`.
+  Vom autonomen IT-Chef-Lauf am 17.10. (dritter Lauf desselben Tages)
+  über einen eigens dafür beauftragten Explore-Agenten einen
+  eigenständigen Bug in `TripSummaryCard.tsx` (4.8) gefunden und
+  behoben: Die Transport-Zeile zeigte immer nur das generische
+  `transportLabels[trip.transportMode]` (z. B. "Flug"), obwohl
+  `trip.transportDetail` (`src/types/chat.ts`, gesetzt von
+  `selectFlight()` in `useChat.ts`, sobald im Chat direkt eine
+  Flugkarte ausgewählt wird) die konkrete gewählte Verbindung enthält —
+  `Buchung.tsx` (6.4, Zeilen 217-223) kombiniert beide Felder bereits
+  korrekt (`` `${transportLabels[...]} · ${trip.transportDetail}` ``),
+  `TripSummaryCard.tsx` übernahm dieses Muster nicht. Live
+  reproduzierbar: Im KI-Chat einen Flug aus den Suchergebnissen
+  auswählen → die direkt darunter angezeigte "Deine Reise
+  bisher"-Karte zeigt weiterhin nur "Flug" statt z. B. "Flug · Test
+  Airline · Berlin → Lissabon · 149,00 €", obwohl `/buchung` für
+  denselben Trip-State die Verbindung korrekt mit Detail anzeigt.
+  Erfüllt alle vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/
+  Rechtsbezug (reine Trip-Planungsanzeige); keine offene
+  Produktentscheidung (1:1-Übernahme des bereits etablierten Musters
+  aus `Buchung.tsx`); klar reproduzierbar ohne Annahmen; objektiv
+  prüfbar (Test). Fix: Transport-Zeile in `rows` kombiniert jetzt
+  `transportLabels[trip.transportMode]` mit `trip.transportDetail`
+  (falls gesetzt), exakt wie in `Buchung.tsx`. Neuer Regressionstest in
+  `TripSummaryCard.test.tsx` ("shows the specific transport detail
+  alongside the mode label when a flight has been selected") — vor der
+  Ergänzung durch temporäres Zurücknehmen nur der Quelländerung in
+  `TripSummaryCard.tsx` (`git stash` nur diese Datei) reproduzierbar rot
+  verifiziert (Text mit Airline/Route/Preis fehlte im DOM).
   Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
   `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
   Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`
