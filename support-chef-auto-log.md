@@ -4809,3 +4809,67 @@ UX-Reibungspunkt — keine Auffälligkeit gefunden. Der
 du starten?") hat keine Möglichkeit, ohne Eingabe eines (ggf. falschen)
 Codes abzubrechen — das wurde nicht vertieft, da es kein heute neu
 verändertes Verhalten ist.
+
+---
+
+## 2026-10-17 — Transport bearbeiten nach Flugauswahl (`src/hooks/useChat.ts`, `TripSummaryCard.tsx`, `Buchung.tsx`)
+
+**Geprüfter Bereich:** Laut `git log` kam heute Commit `939b98b`
+("TripSummaryCard zeigte nur generisches Transport-Label statt gewaehlter
+Verbindung") frisch dazu — `TripSummaryCard.tsx` zeigt die Chat-
+Zusammenfassungskarte seit heute zusätzlich `trip.transportDetail` an,
+genau wie `Buchung.tsx` es seit Längerem tut. Das ist laut `ZEITPLAN.md`
+frisch geänderter Code von heute, also der richtige Bereich für diesen
+Lauf. Geprüft: `src/components/chat/TripSummaryCard.tsx`,
+`src/hooks/useChat.ts` (der `editingField === 'transportMode'`-Zweig in
+`sendMessage()`), `src/pages/Buchung.tsx` sowie die zugehörigen Tests.
+
+### Reibungspunkt
+
+**Nach einer Flugauswahl das Transportmittel auf Zug/Bus/Fähre/Mietwagen
+umändern lässt die alte Flugverbindung als "Detail" stehen — die
+Zusammenfassung zeigt dann z. B. "Zug · Test Airline · Berlin → Lissabon
+· 149,00 €"**
+
+`useChat.ts:448` setzt beim Auswählen eines Flugs in `selectFlight()`
+`trip.transportDetail` auf die konkrete Verbindung (Airline, Route,
+Preis). Ändert die Nutzerin das Transportmittel danach über "Bearbeiten"
+(`startEdit('transportMode')`, erreichbar z. B. über den Stift-Button bei
+"Transport" auf `/buchung` oder `?edit=transportMode` im Chat) auf einen
+anderen Modus, landet die Eingabe im `editingField === 'transportMode'`-
+Zweig von `sendMessage()`. Für jeden Nicht-Flug-Modus setzt
+`useChat.ts:369` ausschließlich `transportMode: mode` — `transportDetail`
+bleibt unverändert auf dem alten Flugtext stehen (nur der Wechsel
+*zurück* auf `flight` nimmt den eigenen Zwischenschritt über
+`awaitingFlightOrigin`/eine neue Flugsuche, die `transportDetail` bei der
+nächsten `selectFlight()`-Auswahl korrekt überschreibt — für alle anderen
+vier Modi gibt es diesen Reset nicht).
+
+Da sowohl `TripSummaryCard.tsx:32-34` als auch `Buchung.tsx:219-221`
+dieselbe Kombination `` `${transportLabels[mode]} · ${transportDetail}` ``
+verwenden, erscheint die veraltete Flugverbindung nach dem Wechsel an
+*beiden* Stellen — im Chat direkt unter der Bestätigung "Alles klar, ich
+hab das Transportmittel aktualisiert" und auf der Buchungsübersicht. Für
+eine Nutzerin, die bewusst von Flug auf Zug umgestiegen ist, wirkt eine
+weiterhin angezeigte Flug-Airline samt Flugpreis nicht wie ein
+Kosmetikfehler, sondern wie ein ernster Datenfehler ("ist jetzt doch
+wieder ein Flug gebucht?"). `TripSummaryCard.test.tsx` und
+`Buchung.test.tsx` decken aktuell nur den Fall "Flug mit/ohne Detail" ab
+— kein Test prüft den Moden-Wechsel nach bereits gesetztem
+`transportDetail`.
+
+*Vorschlag:* In `useChat.ts:369` beim Setzen von `transportMode` auf
+einen Nicht-Flug-Wert zusätzlich `transportDetail: null` mitsetzen (eine
+Zeile, analog zum bereits vorhandenen Reset-Muster bei anderen Zwischen-
+Zuständen wie `awaitingFlightOrigin` in `startEdit()`). Ein
+Regressionstest analog den bestehenden in `useChat.test.ts` ("Flug
+auswählen, dann auf Zug wechseln → `transportDetail` ist wieder `null`")
+würde den Fix absichern.
+
+### Kein zweiter Fund in diesem Lauf
+
+Der übrige heute geänderte Code (`TripSummaryCard.tsx`s neue Zeile
+selbst, die Reihenfolge/Formatierung der kombinierten Label-Strings, der
+`stayLoading`/`searchGenerationRef`-Fix aus dem zweiten Lauf von heute,
+`575a311`) wirkt konsistent mit dem Rest der App — kein weiterer Punkt
+erfunden, nur um den Bericht länger wirken zu lassen.
