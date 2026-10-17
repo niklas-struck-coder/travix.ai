@@ -366,7 +366,11 @@ export function useChat(speechEnabled: boolean) {
             return
           }
 
-          setTrip((prev) => ({ ...prev, transportMode: mode }))
+          // transportDetail holds the concrete flight that selectFlight()
+          // saved (airline/route/price) — switching to a non-flight mode
+          // here must drop it too, otherwise TripSummaryCard/Buchung.tsx
+          // keep showing the old flight's detail next to the new mode.
+          setTrip((prev) => ({ ...prev, transportMode: mode, transportDetail: null }))
         } else {
           setTrip((prev) => ({ ...prev, [field]: content }))
         }

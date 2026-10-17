@@ -693,6 +693,52 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.trip.transportMode).toBe('train')
   })
 
+  // selectFlight() saves the chosen flight's airline/route/price into
+  // trip.transportDetail so TripSummaryCard.tsx/Buchung.tsx can show it
+  // (see the "saves the selected flight into trip.transportDetail" test
+  // below). Editing the transport mode away from "Flug" afterwards used to
+  // leave that old flight's detail behind on the new, unrelated mode —
+  // e.g. "Zug · Test Airline · Berlin → Lissabon · 149,00 €".
+  it('clears the old flight detail when the transport mode is changed away from "Flug"', () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '149.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: 'Berlin',
+          destinationIata: 'LIS',
+          destinationName: 'Lissabon',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+    expect(result.current.trip.transportDetail).toBe(summarizeFlightOffer(offer))
+
+    act(() => {
+      result.current.startEdit('transportMode')
+    })
+    act(() => {
+      result.current.sendMessage('Zug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.trip.transportMode).toBe('train')
+    expect(result.current.trip.transportDetail).toBeNull()
+  })
+
   // startEdit('accommodation') used to leave a still-pending stayLoading
   // behind and never bump searchGenerationRef (unlike sendMessage() and
   // resetChat()) when the user switched to editing a different, unrelated

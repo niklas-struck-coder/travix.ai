@@ -20199,3 +20199,50 @@ Size-Warnung). `git status` nach Abschluss: keine uncommitteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-17 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Vierter geplanter Cloud-Lauf desselben Tages, autonom
+ohne Ni live dabei. `it-chef/auto` lag unverändert exakt auf
+`origin/main` (die ersten drei Läufe heute hatten ihre neuen Commits
+bereits selbst auf `it-chef/auto` gepusht) — kein Merge/Rebase nötig,
+`main` so oder so unberührt gelassen.
+
+**Auswahl:** Statt eine weitere eigene Suche über bereits dreimal heute
+gründlich durchsuchte Dateien zu starten, zuerst `reports/support-chef.md`
+geprüft (Support-Chef läuft unabhängig und meldet eigene Funde). Dort ein
+frischer, noch nicht behobener Fund vom selben Tag (Vorschlag 1,
+2026-10-17): `trip.transportDetail` bleibt nach einem Wechsel des
+Transportmittels weg von "Flug" auf dem alten Flugtext stehen, mit
+exaktem Dateibezug (`src/hooks/useChat.ts:369`) und Reproduktionsfall.
+Gegen alle vier Kriterien geprüft (siehe `ZEITPLAN.md`, 17.10.-Eintrag,
+vierter Lauf) — erfüllt alle vier, als einziger Punkt umgesetzt.
+
+**Ergebnis:** Fund von Support-Chef im Code bestätigt: `sendMessage()`s
+`transportMode`-Edit-Zweig (`src/hooks/useChat.ts:369`) setzte beim
+Wechsel auf einen Nicht-Flug-Modus nur `transportMode: mode`, ließ
+`transportDetail` (von `selectFlight()` gesetzt) unverändert stehen.
+Zeigt die Chat-Zusammenfassungskarte (`TripSummaryCard.tsx`, seit dem
+dritten Lauf heute selbst Flugdetails anzeigend) und `Buchung.tsx`
+danach z. B. "Zug · Test Airline · Berlin → Lissabon · 149,00 €".
+
+**Umgesetzt:** `setTrip(...)` im Nicht-Flug-Zweig setzt jetzt zusätzlich
+`transportDetail: null` (passend zum Typ `string | null`). Neuer
+Regressionstest in `useChat.test.ts` ("clears the old flight detail when
+the transport mode is changed away from 'Flug'") — vor der Ergänzung
+durch temporäres Zurücknehmen nur der Quelländerung in `useChat.ts`
+(`git stash` nur diese Datei) reproduzierbar rot verifiziert
+(`transportDetail` zeigte weiterhin den alten Flugtext statt `null`),
+danach `git stash pop` und erneut grün bestätigt. `ZEITPLAN.md`
+(17.10.-Eintrag, vierter Lauf) und `tasks/tasks-prd-travix-platform.md`
+(4.10) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules`
+vorhanden), `npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (64 Testdateien, 484 Tests, alle grün — 483 vorher + 1
+neu), `npm run build` sauber (unveränderte 811-KB-Chunk-Size-Warnung).
+`git status` nach Abschluss: keine uncommitteten Änderungen außer den
+committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

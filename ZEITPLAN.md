@@ -2552,6 +2552,39 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Ergänzung durch temporäres Zurücknehmen nur der Quelländerung in
   `TripSummaryCard.tsx` (`git stash` nur diese Datei) reproduzierbar rot
   verifiziert (Text mit Airline/Route/Preis fehlte im DOM).
+  Vom autonomen IT-Chef-Lauf am 17.10. (vierter Lauf desselben Tages)
+  einen von Support-Chef (`reports/support-chef.md`, 17.10., Vorschlag 1)
+  gemeldeten Fund behoben: `trip.transportDetail` (4.10, gesetzt von
+  `selectFlight()` in `useChat.ts`, zeigt die konkret gewählte
+  Flugverbindung an) blieb nach einem Wechsel des Transportmittels über
+  "Bearbeiten" auf Zug/Bus/Fähre/Mietwagen unverändert auf dem alten
+  Flugtext stehen — der `transportMode`-Edit-Zweig in `sendMessage()`
+  (Zeile 369) setzte beim Wechsel auf einen Nicht-Flug-Modus bisher nur
+  `transportMode: mode`, nicht aber `transportDetail`. Live
+  reproduzierbar: Im KI-Chat einen Flug auswählen (setzt
+  `transportDetail`, z. B. "Test Airline · Berlin → Lissabon ·
+  149,00 €"), danach über "Bearbeiten" → "Zug" das Transportmittel
+  wechseln — die "Deine Reise bisher"-Karte (4.8, seit dem dritten Lauf
+  heute selbst Flugdetails anzeigend) sowie `Buchung.tsx` (6.4) zeigen
+  dann "Zug · Test Airline · Berlin → Lissabon · 149,00 €": ein
+  Transportmittel mit der Detailzeile eines ganz anderen. Erfüllt alle
+  vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+  Trip-Planungsanzeige); keine offene Produktentscheidung (reiner
+  Zustands-Reset, kein neues Verhalten); klar reproduzierbar ohne
+  Annahmen (von Support-Chef bereits mit exaktem Dateibezug und
+  Zeilennummer beschrieben); objektiv prüfbar (Test). Fix: `setTrip(...)`
+  im Nicht-Flug-Zweig setzt jetzt zusätzlich `transportDetail: null`
+  (passend zum Typ `string | null` in `src/types/chat.ts`). Der
+  Flug-Zweig selbst (Zeile 310, erneuter Wechsel auf "Flug") bleibt
+  bewusst unverändert — dort überschreibt eine neue `selectFlight()`-Auswahl
+  `transportDetail` ohnehin, und das war nicht Teil des gemeldeten
+  Fundes. Neuer Regressionstest in `useChat.test.ts` ("clears the old
+  flight detail when the transport mode is changed away from 'Flug'")
+  — vor der Ergänzung durch temporäres Zurücknehmen nur der
+  Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert (`transportDetail` zeigte weiterhin den
+  alten Flugtext statt `null`), danach `git stash pop` und erneut grün
+  bestätigt.
   Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
   `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
   Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`
