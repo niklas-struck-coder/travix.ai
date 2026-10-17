@@ -693,6 +693,72 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.trip.transportMode).toBe('train')
   })
 
+  // startEdit('accommodation') used to leave a still-pending stayLoading
+  // behind and never bump searchGenerationRef (unlike sendMessage() and
+  // resetChat()) when the user switched to editing a different, unrelated
+  // field before its own search resolved — so a later, stale stay offer
+  // could still land and clobber whatever the user had since moved on to.
+  it('clears a still-pending stayLoading when editing a different field mid-search', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    vi.mocked(searchStays).mockReturnValue(new Promise(() => {}))
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    expect(result.current.stayLoading).toBe(true)
+
+    act(() => {
+      result.current.startEdit('dates')
+    })
+
+    expect(result.current.stayLoading).toBe(false)
+  })
+
+  it('does not let a stale stay offer land once a different field edit has started before the search resolves', async () => {
+    vi.mocked(searchStays).mockResolvedValueOnce({ offers: [], errors: [] })
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    let resolveSearch: (result: { offers: StayOffer[]; errors: [] }) => void = () => {}
+    vi.mocked(searchStays).mockReturnValue(
+      new Promise((resolve) => {
+        resolveSearch = resolve
+      }),
+    )
+    act(() => {
+      result.current.startEdit('accommodation')
+    })
+    expect(result.current.stayLoading).toBe(true)
+
+    // User abandons this edit for a different field before the search
+    // resolves.
+    act(() => {
+      result.current.startEdit('dates')
+    })
+    expect(result.current.stayOffers).toBeNull()
+
+    // The abandoned request now finally resolves — it must not resurrect
+    // offers for a field edit the user already moved on from.
+    resolveSearch({
+      offers: [
+        { id: '1', accommodationName: 'Altes Hotel', rating: 4, address: 'Lissabon', totalAmount: '100', totalCurrency: 'EUR', photoUrl: null },
+      ],
+      errors: [],
+    })
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.stayOffers).toBeNull()
+    expect(result.current.stayLoading).toBe(false)
+  })
+
   // Same gap as the accommodation search above: runFlightSearch()'s own
   // completion handlers never moved the avatar on from 'searching', so the
   // looping "searching" animation (TravixAvatar.tsx) kept running forever

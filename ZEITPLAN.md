@@ -1274,6 +1274,42 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
   reproduzierbar rot verifiziert: beide Tests schlugen fehl
   (`stayLoading`/`flightLoading` blieben `true`).
+  Vom autonomen IT-Chef-Lauf am 17.10. (zweiter Lauf desselben Tages) über
+  einen eigens dafür beauftragten Explore-Agenten die letzte verbliebene
+  Lücke in genau diesem Muster gefunden und behoben: `startEdit()`
+  (`src/hooks/useChat.ts`) — die einzige weitere Stelle neben
+  `sendMessage()`, die selbst eine `searchStays()`-Suche startet (beim
+  erneuten Bearbeiten des Unterkunftsfelds über die "Bearbeiten"-Buttons
+  im Reiseplan) — erhöhte `searchGenerationRef` nie und setzte
+  `stayLoading` nicht zurück, obwohl der direkt daneben liegende
+  `setFlightLoading(false)`-Reset für dieselbe Funktion (Verlassen eines
+  Felds) längst existiert (siehe 16.10.-Fund, "clears stale flight
+  offers..."). Live reproduzierbar: Startet `startEdit('accommodation')`
+  eine Unterkunftssuche und wechselt die Nutzerin vor deren Auflösung über
+  erneutes `startEdit(anderesFeld)` zu einem anderen Feld, blieb (a)
+  `stayLoading` dauerhaft `true` (Ladeanzeige blieb stehen, bis
+  `resetChat()` oder `sendMessage()` es irgendwann zurücksetzte) und (b)
+  die alte, eigentlich verworfene Suche löste sich später trotzdem auf
+  und setzte `stayOffers`/`avatarState: 'happy'` — veraltete
+  Unterkunftsangebote erschienen dadurch unter dem inzwischen
+  angezeigten, unabhängigen neuen Bearbeiten-Prompt. Erfüllt alle vier
+  Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reiner
+  lokaler Chat-State); keine offene Produktentscheidung (Zielverhalten
+  durch `sendMessage()`s und `resetChat()`s identisches, bereits
+  etabliertes Muster längst festgelegt, hier nur auf die letzte fehlende
+  Stelle nachgezogen); mechanisch (zwei zusätzliche Zeilen nach
+  bestehendem Muster); objektiv prüfbar (Tests). Fix:
+  `searchGenerationRef.current += 1` jetzt als Erstes in `startEdit()`
+  (analog `sendMessage()`/`resetChat()`), `setStayLoading(false)` direkt
+  neben den bestehenden `stayOffers`/`stayErrors`-Resets ergänzt, die
+  bereits für jedes Feld laufen. Zwei neue Regressionstests in
+  `useChat.test.ts` ("clears a still-pending stayLoading when editing a
+  different field mid-search", "does not let a stale stay offer land
+  once a different field edit has started before the search resolves")
+  — vor der Ergänzung durch temporäres Zurücknehmen nur der
+  Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert: beide Tests schlugen fehl
+  (`stayLoading` blieb `true` bzw. die alten Angebote landeten trotzdem).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

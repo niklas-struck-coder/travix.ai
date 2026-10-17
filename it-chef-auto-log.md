@@ -20068,3 +20068,79 @@ vor diesem Commit: nur dieser Log-Eintrag als Änderung.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der gesamte Inhalt dieses Commits).
+
+## 2026-10-17 (zweiter Lauf desselben Tages)
+
+**Vorbereitung:** Zweiter geplanter Cloud-Lauf desselben Tages, autonom
+ohne Ni live dabei. `it-chef/auto` lag unverändert exakt auf
+`origin/main` (der erste Lauf heute hatte keinen Code geändert, nur den
+Log-Eintrag unten committet) — kein Merge/Rebase nötig, `main` so oder
+so unberührt gelassen.
+
+**Auswahl:** Der erste Lauf heute hatte bereits eine gründliche,
+dateigenaue Suche dokumentiert (siehe Eintrag oben) und dabei
+`useConcierge.ts`/`mockConcierge.ts`, `Kalender.tsx`/`calendarUtils.ts`,
+`Kartenansicht.tsx`, `tripStorage.ts`, `EditMode.tsx`,
+`FlightWizard.tsx`/`HotelWizard.tsx`, `Dashboard.tsx`/`cartTotals.ts`/
+`Warenkorb.tsx`, `mockAdvisor.ts`, `format.ts`, `TrainCard.tsx`,
+`ChatInput.tsx`/`speech.ts`, `QuickReplies.tsx`,
+`NoResultsMessage.tsx`/`SearchErrorAlert.tsx`, die Demo-Daten-Seiten
+sowie `routes.tsx`/`nav-config.ts` bereits ausgeschlossen. Einen eigens
+dafür beauftragten Explore-Agenten gezielt auf die noch nicht geprüften
+Bereiche angesetzt: `src/lib/duffel/client.ts`, `vite-plugins/duffel-
+proxy.ts`, `Buchung.tsx`, `Urlaubsmodus.tsx`, die Layout-Komponenten
+(`AppShell.tsx`/`Sidebar.tsx`/`MobileNav.tsx`/`PageHeader.tsx`),
+`FlightResults.tsx`/`HotelResults.tsx`/`FlightCard.tsx`/`HotelCard.tsx`,
+`Flugsuche.tsx`/`Hotelsuche.tsx`, `checklistRules.ts`/
+`calculateProgress.ts`, `ChecklistPanel.tsx`, `Reiseentwuerfe.tsx`,
+`Profil.tsx`/`Einstellungen.tsx`/`MeineReisen.tsx`, sowie zusätzlich die
+Frage, ob eine der sieben shadcn/ui-Primitiven ohne eigene Testdatei
+(`button.tsx`, `badge.tsx`, `tabs.tsx`, `label.tsx`, `input.tsx`,
+`card.tsx`, `select.tsx`) genug eigene Logik enthält, um eine neue
+Testdatei zu rechtfertigen.
+
+**Ergebnis:** Alle genannten Dateien aktiv gelesen. Die sieben
+UI-Primitiven bestätigt als reine Radix-/`cva`-Durchreich-Komponenten
+ohne eigene Logik — keine neue Testdatei gerechtfertigt. Ein konkreter,
+noch nicht gemeldeter Bug gefunden in `src/hooks/useChat.ts`,
+`startEdit()`: Die Funktion setzte `stayOffers`/`stayErrors` sowie (seit
+dem 16.10.-Fix, siehe oben) `flightLoading` für jedes Feld zurück, ließ
+dabei aber `stayLoading` unberührt und erhöhte — anders als
+`sendMessage()` und `resetChat()` — nie `searchGenerationRef`. Da
+`startEdit('accommodation')` neben `sendMessage()` die einzige Stelle
+ist, die selbst eine `searchStays()`-Suche startet, blieb eine beim
+erneuten Bearbeiten des Unterkunftsfelds gestartete, dann aber durch
+Wechsel zu einem anderen Feld abgebrochene Suche sowohl im Ladezustand
+hängen als auch ohne Veraltungs-Schutz — ihr Ergebnis landete später
+trotzdem. Genau dasselbe Muster wie der bereits am 16.10. (vierter Lauf)
+für `sendMessage()` behobene Bug, hier aber in `startEdit()` übersehen.
+Details, Reproduktionsfall und Begründung der vier Kriterien siehe
+`ZEITPLAN.md` (17.10.-Eintrag, zweiter Lauf).
+
+**Umgesetzt:** `searchGenerationRef.current += 1` jetzt als erste
+Anweisung in `startEdit()` (analog `sendMessage()`/`resetChat()`),
+`setStayLoading(false)` direkt neben den bestehenden `stayOffers`/
+`stayErrors`-Resets ergänzt (laufen bereits unbedingt für jedes Feld).
+Zwei neue Regressionstests in `useChat.test.ts`: "clears a still-pending
+stayLoading when editing a different field mid-search" und "does not
+let a stale stay offer land once a different field edit has started
+before the search resolves" (Aufbau exakt analog den bestehenden
+Flug-Pendants "clears a still-pending flightLoading when editing a
+different field mid-search"/"clears stale flight offers and errors when
+editing a different, unrelated field"). Vor der Ergänzung durch
+temporäres Zurücknehmen nur der Quelländerung in `useChat.ts` (`git
+stash push -- src/hooks/useChat.ts`) reproduzierbar rot verifiziert:
+beide neuen Tests schlugen fehl (`stayLoading` blieb `true` bzw. die
+alten Angebote landeten trotzdem), danach `git stash pop` und erneut
+grün bestätigt. `ZEITPLAN.md` (17.10.-Eintrag, zweiter Lauf) und
+`tasks/tasks-prd-travix-platform.md` (4.10) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules` vorhanden),
+`npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest
+run` (64 Testdateien, 482 Tests, alle grün — 480 vorher + 2 neue),
+`npm run build` sauber (unveränderte 811-KB-Chunk-Size-Warnung).
+`git status` nach Abschluss: keine uncommitteten Änderungen außer den
+committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

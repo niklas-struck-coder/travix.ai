@@ -173,8 +173,15 @@ export function useChat(speechEnabled: boolean) {
    * revisit a field that's already set.
    */
   const startEdit = (field: EditableTripField) => {
+    // Same generation bump as sendMessage()/resetChat(): starting an edit
+    // means any stay search still pending from a previous edit turn (e.g.
+    // startEdit('accommodation') started one, then the user picked a
+    // different field to edit before it resolved) must not land its offers
+    // once it finally resolves.
+    searchGenerationRef.current += 1
     setStayOffers(null)
     setStayErrors([])
+    setStayLoading(false)
     setFlightOffers(null)
     setFlightErrors([])
     setFlightLoading(false)
