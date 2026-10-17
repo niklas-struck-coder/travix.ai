@@ -20008,3 +20008,63 @@ Log-Eintrag als Änderung.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 der gesamte Inhalt dieses Commits).
+
+## 2026-10-17
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Frischer Checkout. `it-chef/auto` existierte bereits remote und
+lag exakt auf `origin/main` (Merge-Base identisch mit `origin/main`-Tip)
+— kein Merge/Rebase nötig, `main` so oder so unberührt gelassen.
+
+**Auswahl:** `ZEITPLAN.md` (Sprint 4, 29. Sep - 19. Okt) und
+`tasks/tasks-prd-travix-platform.md` gelesen. Verbleibende offene Punkte
+(8.2 Foto-Upload/Vision, 8.3 vollständig kontextbezogene Antworten, 8.4
+Quick-Action-Buttons, 8.5-8.7 Deal Finder, 8.9 Premium, 8.11 Hilfe, 8.12
+Rewards/Loyalty) sind weiterhin durchgängig blockiert: fehlende Base44/
+Gemini-Credentials, offene Produktentscheidungen (Premium-Tarife,
+Loyalty-Regeln laut PRD-Frage OQ-04) oder fehlender FAQ-Content vom
+Support-Chef — keiner erfüllt die vier Sicherheitskriterien. 8.13 (Unit-
+Tests für `calculateProgress`/`calculateCosts`/`checklistRules`/Schema-
+Validierung) selbst geprüft: `calculateProgress.ts` und
+`checklistRules.ts` haben bereits vollständig abdeckende Tests (keine
+Lücke mehr), `calculateCosts.ts` und die Schema-Validierung existieren
+mangels Preisfeldern bzw. KI-Anbindung weiterhin nicht (6.6/6.7/4.1
+weiterhin blockiert).
+
+Einen eigens dafür beauftragten Fork-Agenten mit der Suche nach einem
+noch nicht gemeldeten, sicheren, eigenständig verifizierbaren Bug
+beauftragt — gezielt in bisher seltener durchkämmten Bereichen:
+`useConcierge.ts`/`mockConcierge.ts` (Urlaubsmodus-Chat), `Kalender.tsx`/
+`calendarUtils.ts`, `Kartenansicht.tsx`, `tripStorage.ts`,
+`EditMode.tsx`, `FlightWizard.tsx`/`HotelWizard.tsx`, `Dashboard.tsx`/
+`cartTotals.ts`/`Warenkorb.tsx`, `mockAdvisor.ts`, `format.ts`,
+`TrainCard.tsx`, `ChatInput.tsx`/`speech.ts`, `QuickReplies.tsx`,
+`NoResultsMessage.tsx`/`SearchErrorAlert.tsx`, die Demo-Daten-Seiten
+(`Angebote.tsx`, `Preisalarme.tsx`, `Favoriten.tsx`, `Aktivitaeten.tsx`)
+sowie `routes.tsx`/`nav-config.ts`.
+
+**Ergebnis: kein neuer Fund.** Alle genannten Dateien aktiv gelesen
+(nicht nur gegrept). Eine einzige Beobachtung geprüft und verworfen:
+Rückflug-/Check-out-Datum bleibt in `FlightWizard.tsx`/`HotelWizard.tsx`
+optisch unverändert, wenn das frühere Datum geändert wird — ist aber
+bereits per `min`/`isValid` korrekt blockiert und in beiden Wizards
+konsistent so gebaut (kein Abweichungsfall zwischen Zwillings-
+Komponenten), eher eine UX-Designfrage als ein klarer Bug. Die in
+`Dashboard.tsx`/`Warenkorb.tsx` byte-identisch duplizierten Demo-
+`CartItem`-Arrays sind laut Code-Kommentar und Tests bewusst so
+angelegt, keine stillschweigende Divergenz.
+
+**Keine Codeänderung.** "Heute nichts gefunden, das sicher genug für
+einen autonomen Lauf ist" ist laut
+`.claude/skills/it-chef-eigen/SKILL.md` ein legitimes Ergebnis. Dieser
+Log-Eintrag selbst wird committet und auf `it-chef/auto` gepusht, damit
+der Lauf nachvollziehbar bleibt, auch wenn sonst nichts geändert wurde.
+
+**Geprüft:** Im Rahmen der Fork-Recherche frischer `npm install` +
+`npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (64 Testdateien, 480 Tests, alle grün) — unverändert
+gegenüber dem letzten Lauf, da keine Codeänderung erfolgte. `git status`
+vor diesem Commit: nur dieser Log-Eintrag als Änderung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+der gesamte Inhalt dieses Commits).
