@@ -89,6 +89,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   — Muster analog `design-tokens.test.ts` (reine, datenbasierte
   Funktionen ohne Render-Aufwand). `npm run lint`, `npm run build`
   (Typecheck) und die volle Testsuite (512 Tests) laufen weiterhin grün.
+  Vom autonomen IT-Chef-Lauf am 18.10. (dritter Lauf desselben Tages) die
+  letzte verbliebene Lücke aus derselben Extraktion (10.10.) geschlossen:
+  Anders als die drei `cva()`-Variantenfunktionen selbst (s.o., zweiter
+  Lauf) hatte die `Badge`-Komponente (`badge.tsx`) auch vorher schon keine
+  eigene Testdatei — bestehende Tests decken `Badge` bisher nur indirekt
+  über ihre Verwendung in anderen Komponenten ab (z. B.
+  `Preisalarme.test.tsx`), nie die Komponente selbst mit ihren Props
+  (`variant`, `asChild`, `className`). Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue `badge.test.tsx`
+  (5 Tests, Muster analog `progress.test.tsx`/`sheet.test.tsx`): Rendering
+  als `span` mit dem übergebenen Text, `data-slot="badge"` sowie
+  `data-variant` für Default- und explizit übergebene Variante (inkl. der
+  zugehörigen Klasse), Merge eines eigenen `className`, sowie `asChild`
+  (rendert z. B. einen `<a>`-Link direkt statt ihn in einen `span` zu
+  wrappen, bei weiterhin gesetztem `data-slot`). `npm run lint`, `npm run
+  build` (Typecheck) und die volle Testsuite (517 Tests) laufen weiterhin
+  grün.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

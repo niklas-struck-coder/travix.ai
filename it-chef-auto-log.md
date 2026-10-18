@@ -20397,3 +20397,59 @@ Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` weiterhin auf eigenem Stand nach den
+ersten beiden Läufen heute, kein neuer `main`-Fortschritt seitdem zu
+mergen (`git fetch origin` zeigte keine neuen Commits auf `main`).
+
+**Auswahl:** Dieselbe Vorprüfung wie im zweiten Lauf wiederholt (alle
+bekannten Funde aus `reports/support-chef.md` (17.10.) und
+`support-chef-auto-log.md` gegengeprüft) — keine Änderung seit dem
+zweiten Lauf, Vorschlag 3 (Lösch-Warnungen) und Vorschlag 4
+(Lissabon-Demokarte/Urlaubsmodus) bleiben beide aus denselben Gründen
+(eigene Abwägung/Produktentscheidung nötig) nicht sicher genug.
+`ZEITPLAN.md` Sprint 4/5-Punkte weiterhin blockiert bzw. noch nicht
+dran (8.13 erst ab KW43/20.10.).
+
+Erneut nach offenen Testabdeckungslücken gesucht, diesmal gezielt die im
+zweiten Lauf getroffene Einordnung "reiner Radix-Wrapper ohne eigene
+Logik" einzeln gegengeprüft statt pauschal zu übernehmen: `select.tsx`,
+`card.tsx`, `label.tsx`, `input.tsx` bestätigt (reine Pass-Through-Props
+an Radix-Primitives, kein eigener Verzweigungscode). `badge.tsx` dagegen
+hat entgegen dieser Kategorie doch eigene, bisher ungetestete Logik: ein
+`asChild`-Zweig, der zwischen `span` und `Slot.Root` umschaltet, sowie
+eine `data-variant`-Weitergabe an ein eigenes `data-slot="badge"`-Attribut
+— beides geht über reines Props-Durchreichen hinaus und wurde bisher nur
+indirekt über Verwendungen in anderen Komponententests (z. B.
+`Preisalarme.test.tsx`) mitgetestet, nie für die Komponente selbst mit
+allen ihren Fällen. `button.tsx`/`tabs.tsx` haben dieselbe `asChild`-Art
+Logik, bleiben aber für einen künftigen Lauf offen (ein Punkt pro Lauf).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine Komponenten-Testabdeckung für bestehendes, unverändertes
+Markup/Verhalten). Keine offene Produkt- oder Architekturentscheidung —
+`badge.tsx` existiert unverändert, es wird nichts Neues entschieden, nur
+geprüft. Klar genug beschrieben (Props/Verhalten stehen bereits im Code,
+keine Interpretation nötig). Ergebnis objektiv prüfbar (Tests laufen
+durch oder nicht).
+
+**Umgesetzt:** Neue `src/components/ui/badge.test.tsx` (5 Tests, Muster
+analog `progress.test.tsx`/`sheet.test.tsx`): Rendering als `span` mit
+Text, `data-slot="badge"`/`data-variant` für Default- und explizit
+übergebene Variante (inkl. zugehöriger Klasse), Merge eines eigenen
+`className`, sowie `asChild` (rendert z. B. einen `<a>`-Link direkt statt
+ihn in einen `span` zu wrappen, bei weiterhin gesetztem `data-slot`).
+`ZEITPLAN.md` (Ist-Stand Phase 1) und `tasks/tasks-prd-travix-platform.md`
+(1.3) entsprechend ergänzt.
+
+**Geprüft:** `npx vitest run src/components/ui/badge.test.tsx` zuerst
+isoliert (5/5 grün), danach `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte Chunk-Size-Warnung), `npm run lint` (0 Fehler),
+volle Testsuite (`npm test -- --run`, 68 Testdateien, 517 Tests, alle
+grün — 512 vorher + 5 neu). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
