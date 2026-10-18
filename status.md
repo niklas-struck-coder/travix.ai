@@ -13,18 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-16):**
-- IT-Chef hat mehrere Fixes gemergt: Reise-Zusammenfassungskarte zeigt jetzt die
-  konkret gewählte Flug-/Zugverbindung statt eines generischen Labels,
-  `startEdit()` räumt Lade- und Suchstatus beim Feldwechsel in der
-  Unterkunftssuche korrekt auf; ein weiterer Lauf fand keinen neuen sicheren Punkt
-- Freigabe-Chef hat IT-Chef-Branch geprüft und gemergt; Marketing- und
-  Support-Chef-Branches wurden geprüft und bestanden, der Merge-Push war
-  aber blockiert
-- Marketing- und Support-Chef haben neue Kandidaten/Beobachtungen notiert
-  (u.a. Ladeanzeige bei überholter Suche, Transportmittel-Wechsel nach
-  Flugauswahl), noch nicht final verarbeitet
+**Seit letztem Update (2026-10-17):**
+- IT-Chef hat einen Avatar-Fehlerzustand-Fix gemergt (Avatar blieb bei
+  fehlgeschlagener Suche fälschlich "happy" statt "error") und zusätzlich
+  neue Testabdeckung ergänzt (Badge-Komponente, drei cva()-Variantenfunktionen)
+- Freigabe-Chef hat den IT-Chef-Branch sowie anschließend Marketing- und
+  Support-Chef-Branches geprüft und erfolgreich nach main gemergt
+- Marketing- und Support-Chef haben bestehende offene Punkte erneut
+  gegengeprüft und zwei weitere Tier-4-Kandidaten notiert (u.a. Reset des
+  Transportdetails bei Moduswechsel, Avatar-Fehlerstatus), noch nicht final
+  umgesetzt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-17_
+_Letztes Update: 2026-10-18_
