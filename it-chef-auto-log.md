@@ -20199,3 +20199,257 @@ Size-Warnung). `git status` nach Abschluss: keine uncommitteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-17 (vierter Lauf desselben Tages)
+
+**Vorbereitung:** Vierter geplanter Cloud-Lauf desselben Tages, autonom
+ohne Ni live dabei. `it-chef/auto` lag unverändert exakt auf
+`origin/main` (die ersten drei Läufe heute hatten ihre neuen Commits
+bereits selbst auf `it-chef/auto` gepusht) — kein Merge/Rebase nötig,
+`main` so oder so unberührt gelassen.
+
+**Auswahl:** Statt eine weitere eigene Suche über bereits dreimal heute
+gründlich durchsuchte Dateien zu starten, zuerst `reports/support-chef.md`
+geprüft (Support-Chef läuft unabhängig und meldet eigene Funde). Dort ein
+frischer, noch nicht behobener Fund vom selben Tag (Vorschlag 1,
+2026-10-17): `trip.transportDetail` bleibt nach einem Wechsel des
+Transportmittels weg von "Flug" auf dem alten Flugtext stehen, mit
+exaktem Dateibezug (`src/hooks/useChat.ts:369`) und Reproduktionsfall.
+Gegen alle vier Kriterien geprüft (siehe `ZEITPLAN.md`, 17.10.-Eintrag,
+vierter Lauf) — erfüllt alle vier, als einziger Punkt umgesetzt.
+
+**Ergebnis:** Fund von Support-Chef im Code bestätigt: `sendMessage()`s
+`transportMode`-Edit-Zweig (`src/hooks/useChat.ts:369`) setzte beim
+Wechsel auf einen Nicht-Flug-Modus nur `transportMode: mode`, ließ
+`transportDetail` (von `selectFlight()` gesetzt) unverändert stehen.
+Zeigt die Chat-Zusammenfassungskarte (`TripSummaryCard.tsx`, seit dem
+dritten Lauf heute selbst Flugdetails anzeigend) und `Buchung.tsx`
+danach z. B. "Zug · Test Airline · Berlin → Lissabon · 149,00 €".
+
+**Umgesetzt:** `setTrip(...)` im Nicht-Flug-Zweig setzt jetzt zusätzlich
+`transportDetail: null` (passend zum Typ `string | null`). Neuer
+Regressionstest in `useChat.test.ts` ("clears the old flight detail when
+the transport mode is changed away from 'Flug'") — vor der Ergänzung
+durch temporäres Zurücknehmen nur der Quelländerung in `useChat.ts`
+(`git stash` nur diese Datei) reproduzierbar rot verifiziert
+(`transportDetail` zeigte weiterhin den alten Flugtext statt `null`),
+danach `git stash pop` und erneut grün bestätigt. `ZEITPLAN.md`
+(17.10.-Eintrag, vierter Lauf) und `tasks/tasks-prd-travix-platform.md`
+(4.10) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules`
+vorhanden), `npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (64 Testdateien, 484 Tests, alle grün — 483 vorher + 1
+neu), `npm run build` sauber (unveränderte 811-KB-Chunk-Size-Warnung).
+`git status` nach Abschluss: keine uncommitteten Änderungen außer den
+committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-18 (erster Lauf)
+
+**Vorbereitung:** Erster geplanter Cloud-Lauf heute, autonom ohne Ni
+live dabei. `it-chef/auto` lag seit gestern unverändert hinter `main`
+zurück (gestern kamen `freigabe-chef-log.md`-Einträge sowie Updates an
+`reports/*.md`/`status.md` über `main` hinzu) — `origin/main` in
+`it-chef/auto` gemergt (reiner Fast-Forward-Merge der Report-/Log-
+Dateien, keine Konflikte), `main` selbst dabei unberührt gelassen.
+
+**Auswahl:** Zuerst `reports/support-chef.md` (17.10.) geprüft — Vorschlag
+1 davon wurde bereits im vierten Lauf gestern behoben. Vorschlag 2
+("Avatar zeigt weiterhin ein lächelndes Smiley, auch wenn die Suche
+gerade fehlgeschlagen ist") im Code gegengeprüft: `useChat.ts` setzt an
+allen sechs Suchabschluss-Stellen (`runFlightSearch()` Zeilen 117/126;
+`startEdit('accommodation')` Zeilen 240/246; Unterkunftssuche im
+Haupt-Chat-Fluss Zeilen 424/430) tatsächlich weiterhin unbedingt
+`setAvatarState('happy')` — auch in jedem `.catch()`-Block und wenn
+`result.errors.length > 0` ist. `TravixAvatar.tsx` (4.4) hat dafür
+bereits einen fertigen `'error'`-Zustand (Warndreieck-Icon,
+Zittern-Animation, siehe `stateConfig`/`iconAnimation`), der aber im
+gesamten `src`-Baum nirgends aufgerufen wird (`grep -rn
+"setAvatarState('error')"` liefert keinen Treffer). Direkt daneben zeigt
+`KiChat.tsx` über `FlightResults`/`HotelResults`
+(`src/components/search/*.tsx`) bei denselben Fehlerfällen bereits eine
+echte `SearchErrorAlert`-Fehlermeldung an. Gegen alle vier Kriterien
+geprüft: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+Avatar-Anzeige im Chat); keine offene Produkt- oder
+Architekturentscheidung (reine Aktivierung eines bereits vorhandenen,
+fertig designten Avatar-Zustands für exakt den Fall, für den er laut
+Code-Kommentar/Variantenname gedacht ist — kein neues Design, keine neue
+UI); klar genug beschrieben, keine Interpretation nötig (von
+Support-Chef bereits mit exakten Zeilenangaben und Reproduktionsfall
+gemeldet); Ergebnis objektiv prüfbar (Tests). Erfüllt alle vier
+Kriterien — als einziger Punkt umgesetzt.
+
+**Umgesetzt:** In allen drei `.then()`-Blöcken
+`setAvatarState(result.errors.length > 0 ? 'error' : 'happy')` statt
+immer `'happy'` gesetzt. In allen drei `.catch()`-Blöcken (echter
+Netzwerk-/Request-Fehler) direkt `setAvatarState('error')` statt
+`'happy'`. Der Fall "Suche liefert ehrlich null Treffer" (kein
+`errors`-Eintrag) bleibt bewusst `'happy'` — das ist kein Fehler,
+sondern ein normales, bereits anderswo (z. B. "Neue Reise planen"-Hinweis)
+als solches behandeltes Suchergebnis, keine Verhaltensänderung für
+diesen Fall. Statt neuer Testfälle sieben `avatarState`-Assertions in
+bereits bestehenden, exakt passenden Testfällen in `useChat.test.ts`
+ergänzt (u. a. "sets a distinct error state when the search itself
+fails, instead of looking like zero results" für Flug und Unterkunft,
+"sets the error state when the search resolves with errors instead of
+rejecting", "does not set the error state when the search genuinely
+returns zero offers") — diese Tests deckten die relevanten Szenarien
+bereits exakt ab, nur ohne `avatarState`-Prüfung. `ZEITPLAN.md`
+(18.10.-Eintrag, Phase-4-Bullet) und
+`tasks/tasks-prd-travix-platform.md` (4.10) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules`
+vorhanden), `npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (64 Testdateien, 484 Tests, alle grün —
+unveränderte Anzahl, da nur Assertions in bestehenden Tests ergänzt,
+keine neuen Testfälle), `npm run build` sauber (unveränderte 811-KB-
+Chunk-Size-Warnung). Vor der Ergänzung durch temporäres Zurücknehmen
+nur der Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+reproduzierbar rot verifiziert: 5 der 7 neuen Assertions schlugen fehl
+(`avatarState` war weiterhin `'happy'` statt des erwarteten `'error'`),
+danach `git stash pop` und erneut grün bestätigt. `git status` nach
+Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-18 (zweiter Lauf)
+
+**Vorbereitung:** `it-chef/auto` nach dem ersten Lauf heute weiterhin
+auf eigenem Stand, kein neuer `main`-Fortschritt seitdem zu mergen
+(`git fetch origin` zeigte keine neuen Commits auf `main` seit dem
+ersten Lauf).
+
+**Auswahl:** Zuerst alle bekannten, bereits gemeldeten Funde
+gegengeprüft, bevor nach Neuem gesucht wurde: `reports/support-chef.md`
+(17.10.) Vorschlag 1 (transportDetail) und Vorschlag 2 (Avatar) sind
+beide bereits behoben (letzterer heute im ersten Lauf); Vorschlag 3
+(einheitlich dramatische Lösch-Warnungen) und Vorschlag 4 (Lissabon-
+Demokarte/Urlaubsmodus-Mismatch) erfordern beide eine eigene Abwägung,
+welche Aktionen "wirklich unwiderruflich" sind bzw. ob Demodaten befüllt
+oder die Karte ausgeblendet werden soll — beides laut Kriterium 2
+("keine offene Produkt-/Architekturentscheidung") nicht autonom genug.
+Der in `support-chef-auto-log.md` (09./10./11.10.) gemeldete Fund 2
+("Bearbeiten" → "Manuell suchen" startet das Flugsuche-Formular leer)
+ist laut eigener Einschätzung im Bericht selbst "kein Vorschlag für
+einen Ein-Zeiler-Fix, da das eine neue Datenstruktur voraussetzt" —
+ebenfalls keine sichere Einzeiler-Aufgabe für diesen Kanal. Fund 1 aus
+demselben Bericht (Chat-Bestätigung zeigt rohe IATA-Codes) ist bereits
+behoben (`useChat.ts:449` nutzt `originName || originIata`). `ZEITPLAN.md`
+Sprint 4 (8.2-8.7, 8.9, 8.11, 8.12) sind allesamt größere Features mit
+offener Produkt-/Architekturentscheidung (Foto-Upload+Vision, Deal
+Finder, Premium, Rewards/Loyalty) oder extern blockiert (8.11 Hilfe
+wartet auf FAQ-Inhalte von Support-Chef) — keiner davon erfüllt
+Kriterium 2 oder 3. Sprint 5 (8.13 Unit-Tests) ist laut Zeitplan erst ab
+KW43 (20.10.) vorgesehen.
+
+Stattdessen nach offenen Testabdeckungslücken gesucht (etabliertes,
+sicheres Fallback-Muster dieses Kanals, siehe z. B. `utils.test.ts`,
+`design-tokens.test.ts`, `PageHeader.test.tsx`): Abgleich aller
+`.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene `*.test.ts(x)`-Dateien
+ergab als einzige verbleibende Lücken mit echtem Testwert die drei
+`cva()`-Variantenfunktionen `badge-variants.ts`, `button-variants.ts`,
+`tabs-variants.ts` — beim Fast-Refresh-Fix am 10.10. aus den
+Komponentendateien ausgelagert, seitdem ohne eigene Testdatei (die
+übrigen Lücken sind reine Typ-Dateien ohne Laufzeitverhalten wie
+`types/chat.ts` oder reine Radix-Wrapper ohne eigene Logik wie
+`select.tsx`/`card.tsx`/`label.tsx`/`input.tsx`, bei denen ein eigener
+Test kaum mehr als Radix/React selbst prüfen würde).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine CSS-Klassen-Generierung). Keine offene Produkt- oder
+Architekturentscheidung — die drei Dateien und ihre Varianten/Größen
+existieren bereits unverändert seit dem 10.10., es wird nichts Neues
+entschieden, nur geprüft. Klar genug beschrieben (jede Variante/Größe
+steht bereits im Code, keine Interpretation nötig). Ergebnis objektiv
+prüfbar (Tests laufen durch oder nicht).
+
+**Umgesetzt:** Drei neue Testdateien, Muster analog
+`design-tokens.test.ts` (reine, datenbasierte Funktionen ohne
+Render-Aufwand):
+- `src/components/ui/badge-variants.test.ts` (8 Tests: alle sechs
+  `variant`-Werte anhand je einer charakteristischen Klasse, Default-Fall
+  entspricht explizitem `variant: 'default'`, Merge eines eigenen
+  `className`).
+- `src/components/ui/button-variants.test.ts` (15 Tests: alle sechs
+  `variant`-Werte, Default-Fall, alle acht `size`-Werte inkl. der vier
+  `icon-*`-Größen über `it.each`, Merge eines eigenen `className`).
+- `src/components/ui/tabs-variants.test.ts` (4 Tests: beide
+  `variant`-Werte, Default-Fall, Merge eines eigenen `className`).
+
+Keine Quelländerung — reine Testabdeckung für bestehendes, unverändertes
+Verhalten, kein neuer Bug gefunden. `tasks/tasks-prd-travix-platform.md`
+(Notiz unter 1.3) und `ZEITPLAN.md` (18.10.-Eintrag, Phase-1-Bullet)
+entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Beginn dieses Laufs), `npx vitest run` nur für die drei neuen Dateien
+zuerst isoliert (28/28 grün), danach `npm run lint` (0 Fehler), `npm
+test` / volle Suite (`npx vitest run`, 67 Testdateien, 512 Tests, alle
+grün — 484 vorher + 28 neu), `npm run build` (`tsc -b && vite build`,
+0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach
+Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-18 (dritter Lauf)
+
+**Vorbereitung:** `it-chef/auto` weiterhin auf eigenem Stand nach den
+ersten beiden Läufen heute, kein neuer `main`-Fortschritt seitdem zu
+mergen (`git fetch origin` zeigte keine neuen Commits auf `main`).
+
+**Auswahl:** Dieselbe Vorprüfung wie im zweiten Lauf wiederholt (alle
+bekannten Funde aus `reports/support-chef.md` (17.10.) und
+`support-chef-auto-log.md` gegengeprüft) — keine Änderung seit dem
+zweiten Lauf, Vorschlag 3 (Lösch-Warnungen) und Vorschlag 4
+(Lissabon-Demokarte/Urlaubsmodus) bleiben beide aus denselben Gründen
+(eigene Abwägung/Produktentscheidung nötig) nicht sicher genug.
+`ZEITPLAN.md` Sprint 4/5-Punkte weiterhin blockiert bzw. noch nicht
+dran (8.13 erst ab KW43/20.10.).
+
+Erneut nach offenen Testabdeckungslücken gesucht, diesmal gezielt die im
+zweiten Lauf getroffene Einordnung "reiner Radix-Wrapper ohne eigene
+Logik" einzeln gegengeprüft statt pauschal zu übernehmen: `select.tsx`,
+`card.tsx`, `label.tsx`, `input.tsx` bestätigt (reine Pass-Through-Props
+an Radix-Primitives, kein eigener Verzweigungscode). `badge.tsx` dagegen
+hat entgegen dieser Kategorie doch eigene, bisher ungetestete Logik: ein
+`asChild`-Zweig, der zwischen `span` und `Slot.Root` umschaltet, sowie
+eine `data-variant`-Weitergabe an ein eigenes `data-slot="badge"`-Attribut
+— beides geht über reines Props-Durchreichen hinaus und wurde bisher nur
+indirekt über Verwendungen in anderen Komponententests (z. B.
+`Preisalarme.test.tsx`) mitgetestet, nie für die Komponente selbst mit
+allen ihren Fällen. `button.tsx`/`tabs.tsx` haben dieselbe `asChild`-Art
+Logik, bleiben aber für einen künftigen Lauf offen (ein Punkt pro Lauf).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine Komponenten-Testabdeckung für bestehendes, unverändertes
+Markup/Verhalten). Keine offene Produkt- oder Architekturentscheidung —
+`badge.tsx` existiert unverändert, es wird nichts Neues entschieden, nur
+geprüft. Klar genug beschrieben (Props/Verhalten stehen bereits im Code,
+keine Interpretation nötig). Ergebnis objektiv prüfbar (Tests laufen
+durch oder nicht).
+
+**Umgesetzt:** Neue `src/components/ui/badge.test.tsx` (5 Tests, Muster
+analog `progress.test.tsx`/`sheet.test.tsx`): Rendering als `span` mit
+Text, `data-slot="badge"`/`data-variant` für Default- und explizit
+übergebene Variante (inkl. zugehöriger Klasse), Merge eines eigenen
+`className`, sowie `asChild` (rendert z. B. einen `<a>`-Link direkt statt
+ihn in einen `span` zu wrappen, bei weiterhin gesetztem `data-slot`).
+`ZEITPLAN.md` (Ist-Stand Phase 1) und `tasks/tasks-prd-travix-platform.md`
+(1.3) entsprechend ergänzt.
+
+**Geprüft:** `npx vitest run src/components/ui/badge.test.tsx` zuerst
+isoliert (5/5 grün), danach `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte Chunk-Size-Warnung), `npm run lint` (0 Fehler),
+volle Testsuite (`npm test -- --run`, 68 Testdateien, 517 Tests, alle
+grün — 512 vorher + 5 neu). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

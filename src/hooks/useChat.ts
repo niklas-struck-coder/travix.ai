@@ -114,7 +114,7 @@ export function useChat(speechEnabled: boolean) {
         setFlightOffers(result.offers)
         setFlightErrors(result.errors)
         setFlightLoading(false)
-        setAvatarState('happy')
+        setAvatarState(result.errors.length > 0 ? 'error' : 'happy')
         if (result.errors.length > 0 || result.offers.length === 0) {
           setQuickReplies(['Neue Reise planen'])
         }
@@ -123,7 +123,7 @@ export function useChat(speechEnabled: boolean) {
         if (searchGenerationRef.current !== generation) return
         setFlightErrors([{ message: "Die Flugsuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
         setFlightLoading(false)
-        setAvatarState('happy')
+        setAvatarState('error')
         setQuickReplies(['Neue Reise planen'])
       })
   }
@@ -237,13 +237,13 @@ export function useChat(speechEnabled: boolean) {
             }
           }
           setStayLoading(false)
-          setAvatarState('happy')
+          setAvatarState(result.errors.length > 0 ? 'error' : 'happy')
         })
         .catch(() => {
           if (searchGenerationRef.current !== generation) return
           setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
           setStayLoading(false)
-          setAvatarState('happy')
+          setAvatarState('error')
           setQuickReplies(['Neue Reise planen'])
         })
       return
@@ -366,7 +366,11 @@ export function useChat(speechEnabled: boolean) {
             return
           }
 
-          setTrip((prev) => ({ ...prev, transportMode: mode }))
+          // transportDetail holds the concrete flight that selectFlight()
+          // saved (airline/route/price) — switching to a non-flight mode
+          // here must drop it too, otherwise TripSummaryCard/Buchung.tsx
+          // keep showing the old flight's detail next to the new mode.
+          setTrip((prev) => ({ ...prev, transportMode: mode, transportDetail: null }))
         } else {
           setTrip((prev) => ({ ...prev, [field]: content }))
         }
@@ -417,13 +421,13 @@ export function useChat(speechEnabled: boolean) {
                 }
               }
               setStayLoading(false)
-              setAvatarState('happy')
+              setAvatarState(result.errors.length > 0 ? 'error' : 'happy')
             })
             .catch(() => {
               if (searchGenerationRef.current !== generation) return
               setStayErrors([{ message: "Die Unterkunftssuche hat gerade nicht geklappt — versuch's gleich nochmal." }])
               setStayLoading(false)
-              setAvatarState('happy')
+              setAvatarState('error')
               setQuickReplies(['Neue Reise planen'])
             })
         } else if (!reply.accommodationNoticeHandled) {

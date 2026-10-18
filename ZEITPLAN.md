@@ -72,6 +72,40 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Verhaltensänderung, bestehende Komponententests decken `Badge`/`Button`/
   `Tabs*` bereits ab) — `npm run lint` zeigt jetzt 0 Probleme statt der drei
   Warnungen.
+  Vom autonomen IT-Chef-Lauf am 18.10. (zweiter Lauf desselben Tages) eine
+  seit genau dieser Extraktion (10.10., s.o.) offene Testabdeckungslücke
+  geschlossen: `badge-variants.ts`, `button-variants.ts` und
+  `tabs-variants.ts` (die drei ausgelagerten `cva()`-Variantenfunktionen)
+  hatten seitdem keine eigene Testdatei — bestehende Komponententests
+  decken nur je eine konkrete Rendering-Variante ab, nicht die
+  Variantenfunktion selbst mit allen ihren Varianten/Größen. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `badge-variants.test.ts` (8 Tests: alle sechs
+  `variant`-Werte, Default-Fall, Merge eines eigenen `className`),
+  `button-variants.test.ts` (15 Tests: alle sechs `variant`-Werte,
+  Default-Fall, alle acht `size`-Werte inkl. der vier `icon-*`-Größen,
+  Merge eines eigenen `className`) und `tabs-variants.test.ts` (4 Tests:
+  beide `variant`-Werte, Default-Fall, Merge eines eigenen `className`)
+  — Muster analog `design-tokens.test.ts` (reine, datenbasierte
+  Funktionen ohne Render-Aufwand). `npm run lint`, `npm run build`
+  (Typecheck) und die volle Testsuite (512 Tests) laufen weiterhin grün.
+  Vom autonomen IT-Chef-Lauf am 18.10. (dritter Lauf desselben Tages) die
+  letzte verbliebene Lücke aus derselben Extraktion (10.10.) geschlossen:
+  Anders als die drei `cva()`-Variantenfunktionen selbst (s.o., zweiter
+  Lauf) hatte die `Badge`-Komponente (`badge.tsx`) auch vorher schon keine
+  eigene Testdatei — bestehende Tests decken `Badge` bisher nur indirekt
+  über ihre Verwendung in anderen Komponenten ab (z. B.
+  `Preisalarme.test.tsx`), nie die Komponente selbst mit ihren Props
+  (`variant`, `asChild`, `className`). Reine Testabdeckung für bestehendes,
+  unverändertes Verhalten, kein neuer Bug gefunden. Neue `badge.test.tsx`
+  (5 Tests, Muster analog `progress.test.tsx`/`sheet.test.tsx`): Rendering
+  als `span` mit dem übergebenen Text, `data-slot="badge"` sowie
+  `data-variant` für Default- und explizit übergebene Variante (inkl. der
+  zugehörigen Klasse), Merge eines eigenen `className`, sowie `asChild`
+  (rendert z. B. einen `<a>`-Link direkt statt ihn in einen `span` zu
+  wrappen, bei weiterhin gesetztem `data-slot`). `npm run lint`, `npm run
+  build` (Typecheck) und die volle Testsuite (517 Tests) laufen weiterhin
+  grün.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
@@ -2552,6 +2586,76 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Ergänzung durch temporäres Zurücknehmen nur der Quelländerung in
   `TripSummaryCard.tsx` (`git stash` nur diese Datei) reproduzierbar rot
   verifiziert (Text mit Airline/Route/Preis fehlte im DOM).
+  Vom autonomen IT-Chef-Lauf am 17.10. (vierter Lauf desselben Tages)
+  einen von Support-Chef (`reports/support-chef.md`, 17.10., Vorschlag 1)
+  gemeldeten Fund behoben: `trip.transportDetail` (4.10, gesetzt von
+  `selectFlight()` in `useChat.ts`, zeigt die konkret gewählte
+  Flugverbindung an) blieb nach einem Wechsel des Transportmittels über
+  "Bearbeiten" auf Zug/Bus/Fähre/Mietwagen unverändert auf dem alten
+  Flugtext stehen — der `transportMode`-Edit-Zweig in `sendMessage()`
+  (Zeile 369) setzte beim Wechsel auf einen Nicht-Flug-Modus bisher nur
+  `transportMode: mode`, nicht aber `transportDetail`. Live
+  reproduzierbar: Im KI-Chat einen Flug auswählen (setzt
+  `transportDetail`, z. B. "Test Airline · Berlin → Lissabon ·
+  149,00 €"), danach über "Bearbeiten" → "Zug" das Transportmittel
+  wechseln — die "Deine Reise bisher"-Karte (4.8, seit dem dritten Lauf
+  heute selbst Flugdetails anzeigend) sowie `Buchung.tsx` (6.4) zeigen
+  dann "Zug · Test Airline · Berlin → Lissabon · 149,00 €": ein
+  Transportmittel mit der Detailzeile eines ganz anderen. Erfüllt alle
+  vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+  Trip-Planungsanzeige); keine offene Produktentscheidung (reiner
+  Zustands-Reset, kein neues Verhalten); klar reproduzierbar ohne
+  Annahmen (von Support-Chef bereits mit exaktem Dateibezug und
+  Zeilennummer beschrieben); objektiv prüfbar (Test). Fix: `setTrip(...)`
+  im Nicht-Flug-Zweig setzt jetzt zusätzlich `transportDetail: null`
+  (passend zum Typ `string | null` in `src/types/chat.ts`). Der
+  Flug-Zweig selbst (Zeile 310, erneuter Wechsel auf "Flug") bleibt
+  bewusst unverändert — dort überschreibt eine neue `selectFlight()`-Auswahl
+  `transportDetail` ohnehin, und das war nicht Teil des gemeldeten
+  Fundes. Neuer Regressionstest in `useChat.test.ts` ("clears the old
+  flight detail when the transport mode is changed away from 'Flug'")
+  — vor der Ergänzung durch temporäres Zurücknehmen nur der
+  Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert (`transportDetail` zeigte weiterhin den
+  alten Flugtext statt `null`), danach `git stash pop` und erneut grün
+  bestätigt.
+  Vom autonomen IT-Chef-Lauf am 18.10. (erster Lauf) einen von
+  Support-Chef (`reports/support-chef.md`, 17.10., Vorschlag 2) gemeldeten
+  Fund behoben: `useChat.ts` rief an allen sechs Suchabschluss-Stellen
+  (Flug: `runFlightSearch()`, Zeilen 117/126; Unterkunft:
+  `startEdit('accommodation')`, Zeilen 240/246; Unterkunft im
+  Haupt-Chat-Fluss, Zeilen 424/430) unbedingt `setAvatarState('happy')`
+  auf — auch im jeweiligen `.catch()`-Block und wenn
+  `result.errors.length > 0` war. `KiChat.tsx` zeigt in diesem Fall über
+  `FlightResults`/`HotelResults` (`src/components/search/*.tsx`) parallel
+  eine echte `SearchErrorAlert`-Fehlermeldung an — Nutzer:innen sahen also
+  im selben Moment ein glücklich lächelndes Avatar-Icon und eine
+  Fehlerbox direkt darunter. `TravixAvatar.tsx` hat dafür bereits einen
+  fertigen `'error'`-Zustand (Warndreieck, Zittern-Animation), der im
+  ganzen Code bisher nirgends aufgerufen wurde. Erfüllt alle vier
+  Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+  Avatar-Anzeige); keine offene Produktentscheidung (1:1-Nutzung eines
+  bereits vorhandenen, aber toten Avatar-Zustands, kein neues Design);
+  klar reproduzierbar ohne Annahmen (von Support-Chef bereits mit exakten
+  Zeilenangaben beschrieben); objektiv prüfbar (Test). Fix: in allen drei
+  `.then()`-Blöcken `setAvatarState(result.errors.length > 0 ? 'error' :
+  'happy')` statt immer `'happy'`; in allen drei `.catch()`-Blöcken
+  (echter Netzwerk-/Request-Fehler, kein "nur leeres Ergebnis") direkt
+  `setAvatarState('error')`. Der Fall "Suche liefert ehrlich null
+  Treffer" (kein `errors`-Eintrag) bleibt bewusst `'happy'` — das ist kein
+  Fehler, sondern ein normales Suchergebnis, siehe auch den bereits
+  bestehenden "Neue Reise planen"-Hinweis für genau diesen Fall. Sieben
+  neue Assertions in bereits bestehenden, passenden Testfällen in
+  `useChat.test.ts` ergänzt (u. a. "sets a distinct error state when the
+  search itself fails" für Flug und Unterkunft, "sets the error state
+  when the search resolves with errors", "does not set an error when the
+  search genuinely returns zero offers") statt neuer Testfälle, da diese
+  bereits exakt die relevanten Szenarien abdeckten, nur ohne
+  `avatarState`-Prüfung. Vor der Ergänzung durch temporäres Zurücknehmen
+  nur der Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert (5 der 7 neuen Assertions schlugen fehl,
+  `avatarState` blieb `'happy'` statt `'error'`), danach `git stash pop`
+  und erneut grün bestätigt.
   Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
   `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
   Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`
