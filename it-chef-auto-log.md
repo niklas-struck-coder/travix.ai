@@ -20453,3 +20453,55 @@ uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (vierter Lauf)
+
+**Vorbereitung:** `git fetch origin` zeigte neuen Fortschritt auf `main`
+(Avatar-Fix von Support-/Marketing-/IT-Chef, zwei Freigabe-Chef-Merges,
+„Daily status update"). `it-chef/auto` war bereits vollständig in `main`
+gemerged (identisch zu `6e8ca1f`) — Branch frisch von `origin/main`
+(`0d700ca`) neu aufgesetzt, `main` selbst dabei nicht verändert.
+
+**Auswahl:** Im dritten Lauf heute (s.o.) wurde als nächster Kandidat
+vermerkt: „`button.tsx`/`tabs.tsx` haben dieselbe `asChild`-Art Logik,
+bleiben aber für einen künftigen Lauf offen (ein Punkt pro Lauf)."
+Gegengeprüft statt pauschal übernommen: `grep asChild` über
+`src/components/ui/tabs.tsx` ergab keinen Treffer — `TabsList`/
+`TabsTrigger`/`TabsContent` sind reine Radix-Wrapper ohne `asChild`-Zweig,
+der dritte Lauf hatte das versehentlich mit `button.tsx` gleichgesetzt.
+`button.tsx` dagegen hat tatsächlich eigene, bisher ungetestete Logik
+(`asChild`-Zweig, schaltet zwischen `button` und `Slot.Root` um, identisches
+Muster zu `Badge`) und keine eigene Testdatei (`ls src/components/ui/`
+bestätigt: nur `button-variants.test.ts` existiert, keine `button.test.tsx`)
+— bisher nur indirekt über Verwendungen in anderen Komponententests
+mitgetestet (`badge.test.tsx`, `dialog.test.tsx`), nie die Komponente
+selbst mit allen ihren Props.
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine Komponenten-Testabdeckung für bestehendes, unverändertes
+Markup/Verhalten). Keine offene Produkt- oder Architekturentscheidung —
+`button.tsx` existiert unverändert, es wird nichts Neues entschieden, nur
+geprüft. Klar genug beschrieben (Props/Verhalten stehen bereits im Code,
+keine Interpretation nötig). Ergebnis objektiv prüfbar (Tests laufen
+durch oder nicht).
+
+**Umgesetzt:** Neue `src/components/ui/button.test.tsx` (6 Tests, Muster
+analog `badge.test.tsx`): Rendering als `button` mit dem übergebenen Text,
+`data-slot="button"` sowie `data-variant`/`data-size` für Default- und
+explizit übergebene Variante/Größe (inkl. der zugehörigen Klassen), Merge
+eines eigenen `className`, sowie `asChild` (rendert z. B. einen `<a>`-Link
+direkt statt ihn in einen `button` zu wrappen, bei weiterhin gesetztem
+`data-slot`). `ZEITPLAN.md` (Ist-Stand Phase 1) und
+`tasks/tasks-prd-travix-platform.md` (1.3) entsprechend ergänzt, inkl.
+Korrektur der `tabs.tsx`-Fehleinschätzung aus dem dritten Lauf.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/button.test.tsx` zuerst isoliert (6/6 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 69 Testdateien, 523 Tests, alle grün — 517 vorher + 6
+neu). `git status` nach Abschluss: keine uncommitteten Änderungen außer
+den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

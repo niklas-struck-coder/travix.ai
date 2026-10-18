@@ -106,6 +106,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   wrappen, bei weiterhin gesetztem `data-slot`). `npm run lint`, `npm run
   build` (Typecheck) und die volle Testsuite (517 Tests) laufen weiterhin
   grün.
+  Vom autonomen IT-Chef-Lauf am 18.10. (vierter Lauf desselben Tages)
+  dieselbe Testabdeckungslücke für `Button` geschlossen: `button.tsx`
+  hatte — anders als die drei reinen Radix-Wrapper (`select.tsx`,
+  `card.tsx`, `label.tsx`, `input.tsx`, im dritten Lauf gegengeprüft) —
+  entgegen der im dritten Lauf getroffenen Kategorie "reiner Wrapper"
+  tatsächlich eigene Logik (ein `asChild`-Zweig, der zwischen `button`
+  und `Slot.Root` umschaltet, analog `Badge`), aber bisher keine eigene
+  Testdatei — bestehende Tests decken `Button` bisher nur indirekt über
+  seine Verwendung in anderen Komponenten ab, nie die Komponente selbst
+  mit ihren Props (`variant`, `size`, `asChild`, `className`). Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `button.test.tsx` (6 Tests, Muster analog
+  `badge.test.tsx`): Rendering als `button` mit dem übergebenen Text,
+  `data-slot="button"` sowie `data-variant`/`data-size` für Default- und
+  explizit übergebene Variante/Größe (inkl. der zugehörigen Klassen),
+  Merge eines eigenen `className`, sowie `asChild` (rendert z. B. einen
+  `<a>`-Link direkt statt ihn in einen `button` zu wrappen, bei
+  weiterhin gesetztem `data-slot`). Das strukturell identische Muster in
+  `tabs.tsx` bleibt entgegen der im dritten Lauf gemachten Annahme kein
+  Kandidat für einen Folgelauf: `TabsList`/`TabsTrigger`/`TabsContent`
+  haben keinen `asChild`-Zweig (geprüft per `grep asChild` im gesamten
+  `tabs.tsx`, kein Treffer) — der dritte Lauf hatte das versehentlich mit
+  `button.tsx` gleichgesetzt. `npm run lint`, `npm run build` (Typecheck)
+  und die volle Testsuite (523 Tests) laufen weiterhin grün.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
