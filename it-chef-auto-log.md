@@ -20505,3 +20505,43 @@ den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (fünfter Lauf)
+
+**Ausgewählt:** Über einen eigens beauftragten Explore-Agenten gesucht
+(Lint/Build waren zu Laufbeginn bereits grün, keine offenen TODOs/FIXMEs
+im `src`-Baum, vier frühere Läufe desselben Tages hatten die
+naheliegendsten Testlücken/Hygiene-Punkte schon geschlossen). Fund:
+`formatTime()` (formatiert einen ISO-Zeitstempel als "HH:MM") lag
+byte-identisch dupliziert in `src/components/search/FlightCard.tsx` und
+`src/components/search/TrainCard.tsx` vor — derselbe Funktionskörper,
+dieselbe Signatur. Erfüllt die Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten. Keine offene Produkt- oder
+Architekturentscheidung — reine mechanische Verschiebung ohne
+Verhaltensänderung, exakt dasselbe bereits etablierte Muster wie bei
+`formatEuro()`/`formatOfferPrice()`/`formatDuration()` (zuletzt
+`formatDuration()` am 05.10. nach `src/lib/format.ts` verschoben). Klar
+genug beschrieben (Funktionskörper ist bereits im Code identisch doppelt
+vorhanden, keine Interpretation nötig). Ergebnis objektiv prüfbar
+(Tests/Typecheck/Lint laufen durch oder nicht).
+
+**Umgesetzt:** `formatTime()` 1:1 nach `src/lib/format.ts` verschoben
+(gleiches Dokumentationskommentar-Muster wie `formatDuration` dort),
+beide lokalen Kopien in `FlightCard.tsx`/`TrainCard.tsx` entfernt, beide
+Dateien importieren `formatTime` jetzt zusätzlich aus `@/lib/format`
+(ergänzt den bestehenden `formatOfferPrice`/`formatDuration`-Import).
+Neue, direkte `formatTime`-Testgruppe in `format.test.ts` (2 Tests:
+gültiger ISO-Zeitstempel liefert "HH:MM" im lokalen Zeitformat, leerer
+String liefert den etablierten Platzhalter-Strich "—"). `ZEITPLAN.md`
+(Ist-Stand Phase 5) und `tasks/tasks-prd-travix-platform.md` (5.4)
+entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npm run lint` (0 Fehler),
+`npm run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung), volle Testsuite (`npx vitest run`, 69
+Testdateien, 525 Tests, alle grün — 523 vorher + 2 neu). `git status`
+nach Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

@@ -19,6 +19,12 @@ export function formatOfferPrice(amount: string, currency: string): string {
   }
 }
 
+/** Formats an ISO-8601 timestamp as a "HH:MM" local time, e.g. for flight/train offers. */
+export function formatTime(isoString: string): string {
+  if (!isoString) return '—'
+  return new Date(isoString).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+}
+
 /** Summarizes a selected flight offer (airline, route, price) for display outside the search results, e.g. on the Reiseplan. */
 export function summarizeFlightOffer(offer: FlightOffer): string {
   const slice = offer.slices[0]

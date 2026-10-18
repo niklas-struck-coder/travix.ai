@@ -1890,6 +1890,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `role="alert"`-Tests in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
   unverändert grün (decken dasselbe Verhalten bereits ab), keine neuen
   Tests nötig.
+  Vom autonomen IT-Chef-Lauf am 18.10. (fünfter Lauf desselben Tages) über
+  einen eigens beauftragten Explore-Agenten den letzten verbliebenen
+  Vertreter derselben Duplikations-Kategorie wie `formatEuro`/
+  `formatOfferPrice`/`formatDuration` gefunden: `formatTime()` (formatiert
+  einen ISO-Zeitstempel als "HH:MM") lag byte-identisch dupliziert in
+  `FlightCard.tsx` und `TrainCard.tsx` vor, anders als die bereits nach
+  `src/lib/format.ts` verschobenen Geschwister-Funktionen. Fix: 1:1
+  verschoben, beide lokalen Kopien entfernt, beide Karten importieren
+  `formatTime` jetzt aus `@/lib/format` — reine Verschiebung ohne
+  Verhaltensänderung. Neue, direkte `formatTime`-Testgruppe in
+  `format.test.ts` (2 Tests: gültiger Zeitstempel liefert "HH:MM",
+  leerer String liefert "—"). `npm run lint`, `npm run build`
+  (Typecheck) und die volle Testsuite (525 Tests) laufen weiterhin grün.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
