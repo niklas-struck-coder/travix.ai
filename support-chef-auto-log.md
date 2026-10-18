@@ -4873,3 +4873,73 @@ selbst, die Reihenfolge/Formatierung der kombinierten Label-Strings, der
 `stayLoading`/`searchGenerationRef`-Fix aus dem zweiten Lauf von heute,
 `575a311`) wirkt konsistent mit dem Rest der App — kein weiterer Punkt
 erfunden, nur um den Bericht länger wirken zu lassen.
+
+---
+
+## 2026-10-18 — Nachkontrolle Avatar-Fehlerzustand & Transport-Detail, plus Fehleranzeige-Konsolidierung (`FlightResults`/`HotelResults`/`Flugsuche`/`Hotelsuche`)
+
+**Geprüfter Bereich:** Die beiden zuletzt in `reports/support-chef.md`
+(17.10.) gemeldeten Funde — Avatar bleibt bei Suchfehlern fälschlich
+`'happy'` (`useChat.ts`), `transportDetail` bleibt nach einem
+Transportmittel-Wechsel weg von Flug auf dem alten Flugtext stehen
+(`useChat.ts:369`) — sowie als neu/kürzlich geänderter Bereich laut Commit-
+Historie die am 14.10. (`70dd3fc`) eingeführte `SearchErrorAlert`-
+Konsolidierung in `FlightResults.tsx`, `HotelResults.tsx`, `Flugsuche.tsx`
+und `Hotelsuche.tsx`.
+
+### Gute Nachricht: zwei gemeldete Funde sind jetzt behoben
+
+Beide am 17.10. gemeldeten Punkte sind im aktuellen `main` (nach dem
+Merge von `c78f0a9`/`43c9b0a`) tatsächlich behoben, im Code
+gegengeprüft:
+
+- **Avatar-Fehlerzustand:** `useChat.ts:117,126,240,246,424,430` setzen
+  jetzt an allen Suchabschluss-Stellen `setAvatarState('error')` statt
+  unbedingt `'happy'`, sowohl in den `.catch()`-Zweigen als auch bei
+  `result.errors.length > 0`. `resetChat()` (`useChat.ts:458`ff.) setzt
+  den Zustand bei "Neue Reise planen" zuverlässig zurück, der
+  Fehlerzustand bleibt also auch nicht hängen.
+- **`transportDetail` nach Moduswechsel:** `useChat.ts:373` setzt beim
+  Wechsel auf einen Nicht-Flug-Modus jetzt explizit
+  `transportDetail: null` mit — die Zusammenfassungskarte zeigt nach
+  einem Wechsel also nicht mehr den alten Flugtext neben dem neuen
+  Transportmittel.
+
+Beide Fixe sehen vollständig aus, kein neuer Randfall dabei entdeckt.
+
+### Weiterhin offen (heute erneut im Code gegengeprüft, unverändert)
+
+1. **Lösch-Warnungen klingen überall gleich dramatisch.**
+   `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
+   `Aktivitaeten.tsx:118` und `EditMode.tsx:151` verwenden weiterhin
+   wortgleich "Das lässt sich nicht rückgängig machen" — auch dort, wo
+   ein Favorit mit einem Klick wieder anlegbar wäre.
+2. **Lissabon-Demokarte vs. Urlaubsmodus-Trip-Quelle.**
+   `MeineReisen.tsx:49` verlinkt von der Lissabon-Demoreise auf
+   `/urlaubsmodus`, `Urlaubsmodus.tsx:12` lädt den Trip aber weiterhin
+   aus `loadStoredChat()?.trip` statt aus den Lissabon-Demodaten — wer
+   noch nie im KI-Chat geplant hat, landet in einem Urlaubsmodus ohne
+   oder mit falschem Reisebezug.
+3. **Leeres Formular bei "Manuell suchen" nach Flug-Bearbeiten.**
+   `Buchung.tsx:176` verlinkt bei unbekanntem Zielflughafen auf
+   `manualHref: '/flugsuche'`. `FlightWizard.tsx` (Props nur `onSearch`/
+   `loading`, Zeile 10-12) und `Flugsuche.tsx` (kein `loadStoredChat`-
+   Import) übernehmen das bereits bekannte Reiseziel nicht — `origin`
+   und `destination` starten beide leer (`FlightWizard.tsx:37-38`), obwohl
+   travix das Ziel zu diesem Zeitpunkt längst kennt. Nutzer:innen müssen
+   den schon genannten Zielort erneut als IATA-Code eintippen.
+   *Vorschlag (unverändert seit früherem Fund):* `Flugsuche.tsx` optional
+   einen `destination`-Query-Parameter oder den `trip`-Zustand lesen
+   lassen und als Vorbelegung an `FlightWizard` durchreichen.
+
+### Neu geprüft: Fehleranzeige-Konsolidierung vom 14.10.
+
+`SearchErrorAlert.tsx` wird jetzt einheitlich in allen vier Stellen
+verwendet (`FlightResults.tsx:26`, `HotelResults.tsx`, `Flugsuche.tsx:51`,
+`Hotelsuche.tsx:51`), jeweils exklusiv zu Lade-/Leerzustand (keine Stelle
+zeigt Fehler und `NoResultsMessage` gleichzeitig). Kein neuer
+Reibungspunkt gefunden — die Konsolidierung wirkt sauber und konsistent
+zwischen Chat- und Standalone-Suchseiten.
+
+Kein Punkt erfunden, der sich nicht am genannten Dateibezug im aktuellen
+Quelltext nachvollziehen lässt.
