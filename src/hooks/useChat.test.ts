@@ -110,6 +110,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('does not set the error state when the search genuinely returns zero offers', async () => {
@@ -123,6 +124,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors).toEqual([])
     expect(result.current.stayOffers).toEqual([])
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('happy')
   })
 
   it('offers "Neue Reise planen" as a next step in the main chat flow when the search genuinely returns zero offers, instead of a dead end', async () => {
@@ -147,6 +149,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('offers "Neue Reise planen" as a next step when the automatic search in the main chat flow resolves with errors', async () => {
@@ -191,6 +194,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('offers "Neue Reise planen" as a next step on the "Bearbeiten" (startEdit) path when the retry genuinely returns zero offers', async () => {
@@ -480,6 +484,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightOffers).toBeNull()
     expect(result.current.flightLoading).toBe(false)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('sets the error state when the search resolves with errors instead of rejecting (real Duffel API failure)', async () => {
@@ -495,6 +500,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('does not set an error when the search genuinely returns zero offers', async () => {
@@ -509,6 +515,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightErrors).toEqual([])
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
+    expect(result.current.avatarState).toBe('happy')
   })
 
   it('offers "Neue Reise planen" as a next step when the search genuinely returns zero offers, instead of a dead end', async () => {

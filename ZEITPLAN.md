@@ -2585,6 +2585,43 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   reproduzierbar rot verifiziert (`transportDetail` zeigte weiterhin den
   alten Flugtext statt `null`), danach `git stash pop` und erneut grün
   bestätigt.
+  Vom autonomen IT-Chef-Lauf am 18.10. (erster Lauf) einen von
+  Support-Chef (`reports/support-chef.md`, 17.10., Vorschlag 2) gemeldeten
+  Fund behoben: `useChat.ts` rief an allen sechs Suchabschluss-Stellen
+  (Flug: `runFlightSearch()`, Zeilen 117/126; Unterkunft:
+  `startEdit('accommodation')`, Zeilen 240/246; Unterkunft im
+  Haupt-Chat-Fluss, Zeilen 424/430) unbedingt `setAvatarState('happy')`
+  auf — auch im jeweiligen `.catch()`-Block und wenn
+  `result.errors.length > 0` war. `KiChat.tsx` zeigt in diesem Fall über
+  `FlightResults`/`HotelResults` (`src/components/search/*.tsx`) parallel
+  eine echte `SearchErrorAlert`-Fehlermeldung an — Nutzer:innen sahen also
+  im selben Moment ein glücklich lächelndes Avatar-Icon und eine
+  Fehlerbox direkt darunter. `TravixAvatar.tsx` hat dafür bereits einen
+  fertigen `'error'`-Zustand (Warndreieck, Zittern-Animation), der im
+  ganzen Code bisher nirgends aufgerufen wurde. Erfüllt alle vier
+  Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+  Avatar-Anzeige); keine offene Produktentscheidung (1:1-Nutzung eines
+  bereits vorhandenen, aber toten Avatar-Zustands, kein neues Design);
+  klar reproduzierbar ohne Annahmen (von Support-Chef bereits mit exakten
+  Zeilenangaben beschrieben); objektiv prüfbar (Test). Fix: in allen drei
+  `.then()`-Blöcken `setAvatarState(result.errors.length > 0 ? 'error' :
+  'happy')` statt immer `'happy'`; in allen drei `.catch()`-Blöcken
+  (echter Netzwerk-/Request-Fehler, kein "nur leeres Ergebnis") direkt
+  `setAvatarState('error')`. Der Fall "Suche liefert ehrlich null
+  Treffer" (kein `errors`-Eintrag) bleibt bewusst `'happy'` — das ist kein
+  Fehler, sondern ein normales Suchergebnis, siehe auch den bereits
+  bestehenden "Neue Reise planen"-Hinweis für genau diesen Fall. Sieben
+  neue Assertions in bereits bestehenden, passenden Testfällen in
+  `useChat.test.ts` ergänzt (u. a. "sets a distinct error state when the
+  search itself fails" für Flug und Unterkunft, "sets the error state
+  when the search resolves with errors", "does not set an error when the
+  search genuinely returns zero offers") statt neuer Testfälle, da diese
+  bereits exakt die relevanten Szenarien abdeckten, nur ohne
+  `avatarState`-Prüfung. Vor der Ergänzung durch temporäres Zurücknehmen
+  nur der Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+  reproduzierbar rot verifiziert (5 der 7 neuen Assertions schlugen fehl,
+  `avatarState` blieb `'happy'` statt `'error'`), danach `git stash pop`
+  und erneut grün bestätigt.
   Vom autonomen IT-Chef-Lauf am 17.09. (Vorschlag 2 aus
   `reports/support-chef.md`, 16.09.) behoben: Ein zweiter Klick auf das
   Mikrofon-Icon in `ChatInput.tsx` (4.6) tat bisher nichts — `handleMicClick()`

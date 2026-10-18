@@ -20246,3 +20246,73 @@ committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (erster Lauf)
+
+**Vorbereitung:** Erster geplanter Cloud-Lauf heute, autonom ohne Ni
+live dabei. `it-chef/auto` lag seit gestern unverändert hinter `main`
+zurück (gestern kamen `freigabe-chef-log.md`-Einträge sowie Updates an
+`reports/*.md`/`status.md` über `main` hinzu) — `origin/main` in
+`it-chef/auto` gemergt (reiner Fast-Forward-Merge der Report-/Log-
+Dateien, keine Konflikte), `main` selbst dabei unberührt gelassen.
+
+**Auswahl:** Zuerst `reports/support-chef.md` (17.10.) geprüft — Vorschlag
+1 davon wurde bereits im vierten Lauf gestern behoben. Vorschlag 2
+("Avatar zeigt weiterhin ein lächelndes Smiley, auch wenn die Suche
+gerade fehlgeschlagen ist") im Code gegengeprüft: `useChat.ts` setzt an
+allen sechs Suchabschluss-Stellen (`runFlightSearch()` Zeilen 117/126;
+`startEdit('accommodation')` Zeilen 240/246; Unterkunftssuche im
+Haupt-Chat-Fluss Zeilen 424/430) tatsächlich weiterhin unbedingt
+`setAvatarState('happy')` — auch in jedem `.catch()`-Block und wenn
+`result.errors.length > 0` ist. `TravixAvatar.tsx` (4.4) hat dafür
+bereits einen fertigen `'error'`-Zustand (Warndreieck-Icon,
+Zittern-Animation, siehe `stateConfig`/`iconAnimation`), der aber im
+gesamten `src`-Baum nirgends aufgerufen wird (`grep -rn
+"setAvatarState('error')"` liefert keinen Treffer). Direkt daneben zeigt
+`KiChat.tsx` über `FlightResults`/`HotelResults`
+(`src/components/search/*.tsx`) bei denselben Fehlerfällen bereits eine
+echte `SearchErrorAlert`-Fehlermeldung an. Gegen alle vier Kriterien
+geprüft: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug (reine
+Avatar-Anzeige im Chat); keine offene Produkt- oder
+Architekturentscheidung (reine Aktivierung eines bereits vorhandenen,
+fertig designten Avatar-Zustands für exakt den Fall, für den er laut
+Code-Kommentar/Variantenname gedacht ist — kein neues Design, keine neue
+UI); klar genug beschrieben, keine Interpretation nötig (von
+Support-Chef bereits mit exakten Zeilenangaben und Reproduktionsfall
+gemeldet); Ergebnis objektiv prüfbar (Tests). Erfüllt alle vier
+Kriterien — als einziger Punkt umgesetzt.
+
+**Umgesetzt:** In allen drei `.then()`-Blöcken
+`setAvatarState(result.errors.length > 0 ? 'error' : 'happy')` statt
+immer `'happy'` gesetzt. In allen drei `.catch()`-Blöcken (echter
+Netzwerk-/Request-Fehler) direkt `setAvatarState('error')` statt
+`'happy'`. Der Fall "Suche liefert ehrlich null Treffer" (kein
+`errors`-Eintrag) bleibt bewusst `'happy'` — das ist kein Fehler,
+sondern ein normales, bereits anderswo (z. B. "Neue Reise planen"-Hinweis)
+als solches behandeltes Suchergebnis, keine Verhaltensänderung für
+diesen Fall. Statt neuer Testfälle sieben `avatarState`-Assertions in
+bereits bestehenden, exakt passenden Testfällen in `useChat.test.ts`
+ergänzt (u. a. "sets a distinct error state when the search itself
+fails, instead of looking like zero results" für Flug und Unterkunft,
+"sets the error state when the search resolves with errors instead of
+rejecting", "does not set the error state when the search genuinely
+returns zero offers") — diese Tests deckten die relevanten Szenarien
+bereits exakt ab, nur ohne `avatarState`-Prüfung. `ZEITPLAN.md`
+(18.10.-Eintrag, Phase-4-Bullet) und
+`tasks/tasks-prd-travix-platform.md` (4.10) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, kein `node_modules`
+vorhanden), `npx tsc -b --noEmit` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (64 Testdateien, 484 Tests, alle grün —
+unveränderte Anzahl, da nur Assertions in bestehenden Tests ergänzt,
+keine neuen Testfälle), `npm run build` sauber (unveränderte 811-KB-
+Chunk-Size-Warnung). Vor der Ergänzung durch temporäres Zurücknehmen
+nur der Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
+reproduzierbar rot verifiziert: 5 der 7 neuen Assertions schlugen fehl
+(`avatarState` war weiterhin `'happy'` statt des erwarteten `'error'`),
+danach `git stash pop` und erneut grün bestätigt. `git status` nach
+Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
