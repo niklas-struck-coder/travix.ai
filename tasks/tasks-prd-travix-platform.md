@@ -124,7 +124,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
 - [x] 1.0 Project scaffolding — Vite + React + Tailwind + shadcn/ui + routing + design tokens
   - [x] 1.1 Initialize Vite + React + TypeScript project with `npm create vite@latest`
   - [x] 1.2 Install and configure Tailwind CSS with Travix design tokens (navy `#0A2342`, teal `#00C2A8`, gold `#F4B400`)
-  - [x] 1.3 Install and initialize shadcn/ui component library (Button, Card, Input, Dialog, Badge, Progress, Tabs, Sheet)
+  - [x] 1.3 Install and initialize shadcn/ui component library (Button, Card, Input, Dialog, Badge, Progress, Tabs, Sheet) — vom autonomen IT-Chef-Lauf am 18.10. eine Testabdeckungslücke geschlossen: Die drei beim Fast-Refresh-Fix (10.10.) in eigene Dateien ausgelagerten `cva()`-Variantenfunktionen (`badgeVariants`, `buttonVariants`, `tabsListVariants`) hatten seit ihrer Extraktion keine eigene Testdatei. Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug gefunden. Neue `badge-variants.test.ts`, `button-variants.test.ts`, `tabs-variants.test.ts` (Muster analog `design-tokens.test.ts`): je Variante/Größe wird die charakteristische Klasse geprüft sowie der Default-Fall (Aufruf ohne Props entspricht explizit übergebenem `defaultVariants`-Wert).
   - [x] 1.4 Install dependencies: Framer Motion, Recharts, React-Leaflet, lucide-react, React Router
   - [x] 1.5 Configure Google Fonts (Sora for headings, Inter for body) in `index.html`
   - [x] 1.6 Create `src/styles/globals.css` with CSS variables, glassmorphism utilities, and base styles

@@ -72,6 +72,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Verhaltensänderung, bestehende Komponententests decken `Badge`/`Button`/
   `Tabs*` bereits ab) — `npm run lint` zeigt jetzt 0 Probleme statt der drei
   Warnungen.
+  Vom autonomen IT-Chef-Lauf am 18.10. (zweiter Lauf desselben Tages) eine
+  seit genau dieser Extraktion (10.10., s.o.) offene Testabdeckungslücke
+  geschlossen: `badge-variants.ts`, `button-variants.ts` und
+  `tabs-variants.ts` (die drei ausgelagerten `cva()`-Variantenfunktionen)
+  hatten seitdem keine eigene Testdatei — bestehende Komponententests
+  decken nur je eine konkrete Rendering-Variante ab, nicht die
+  Variantenfunktion selbst mit allen ihren Varianten/Größen. Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `badge-variants.test.ts` (8 Tests: alle sechs
+  `variant`-Werte, Default-Fall, Merge eines eigenen `className`),
+  `button-variants.test.ts` (15 Tests: alle sechs `variant`-Werte,
+  Default-Fall, alle acht `size`-Werte inkl. der vier `icon-*`-Größen,
+  Merge eines eigenen `className`) und `tabs-variants.test.ts` (4 Tests:
+  beide `variant`-Werte, Default-Fall, Merge eines eigenen `className`)
+  — Muster analog `design-tokens.test.ts` (reine, datenbasierte
+  Funktionen ohne Render-Aufwand). `npm run lint`, `npm run build`
+  (Typecheck) und die volle Testsuite (512 Tests) laufen weiterhin grün.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

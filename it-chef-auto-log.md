@@ -20316,3 +20316,84 @@ Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (zweiter Lauf)
+
+**Vorbereitung:** `it-chef/auto` nach dem ersten Lauf heute weiterhin
+auf eigenem Stand, kein neuer `main`-Fortschritt seitdem zu mergen
+(`git fetch origin` zeigte keine neuen Commits auf `main` seit dem
+ersten Lauf).
+
+**Auswahl:** Zuerst alle bekannten, bereits gemeldeten Funde
+gegengeprüft, bevor nach Neuem gesucht wurde: `reports/support-chef.md`
+(17.10.) Vorschlag 1 (transportDetail) und Vorschlag 2 (Avatar) sind
+beide bereits behoben (letzterer heute im ersten Lauf); Vorschlag 3
+(einheitlich dramatische Lösch-Warnungen) und Vorschlag 4 (Lissabon-
+Demokarte/Urlaubsmodus-Mismatch) erfordern beide eine eigene Abwägung,
+welche Aktionen "wirklich unwiderruflich" sind bzw. ob Demodaten befüllt
+oder die Karte ausgeblendet werden soll — beides laut Kriterium 2
+("keine offene Produkt-/Architekturentscheidung") nicht autonom genug.
+Der in `support-chef-auto-log.md` (09./10./11.10.) gemeldete Fund 2
+("Bearbeiten" → "Manuell suchen" startet das Flugsuche-Formular leer)
+ist laut eigener Einschätzung im Bericht selbst "kein Vorschlag für
+einen Ein-Zeiler-Fix, da das eine neue Datenstruktur voraussetzt" —
+ebenfalls keine sichere Einzeiler-Aufgabe für diesen Kanal. Fund 1 aus
+demselben Bericht (Chat-Bestätigung zeigt rohe IATA-Codes) ist bereits
+behoben (`useChat.ts:449` nutzt `originName || originIata`). `ZEITPLAN.md`
+Sprint 4 (8.2-8.7, 8.9, 8.11, 8.12) sind allesamt größere Features mit
+offener Produkt-/Architekturentscheidung (Foto-Upload+Vision, Deal
+Finder, Premium, Rewards/Loyalty) oder extern blockiert (8.11 Hilfe
+wartet auf FAQ-Inhalte von Support-Chef) — keiner davon erfüllt
+Kriterium 2 oder 3. Sprint 5 (8.13 Unit-Tests) ist laut Zeitplan erst ab
+KW43 (20.10.) vorgesehen.
+
+Stattdessen nach offenen Testabdeckungslücken gesucht (etabliertes,
+sicheres Fallback-Muster dieses Kanals, siehe z. B. `utils.test.ts`,
+`design-tokens.test.ts`, `PageHeader.test.tsx`): Abgleich aller
+`.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene `*.test.ts(x)`-Dateien
+ergab als einzige verbleibende Lücken mit echtem Testwert die drei
+`cva()`-Variantenfunktionen `badge-variants.ts`, `button-variants.ts`,
+`tabs-variants.ts` — beim Fast-Refresh-Fix am 10.10. aus den
+Komponentendateien ausgelagert, seitdem ohne eigene Testdatei (die
+übrigen Lücken sind reine Typ-Dateien ohne Laufzeitverhalten wie
+`types/chat.ts` oder reine Radix-Wrapper ohne eigene Logik wie
+`select.tsx`/`card.tsx`/`label.tsx`/`input.tsx`, bei denen ein eigener
+Test kaum mehr als Radix/React selbst prüfen würde).
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine CSS-Klassen-Generierung). Keine offene Produkt- oder
+Architekturentscheidung — die drei Dateien und ihre Varianten/Größen
+existieren bereits unverändert seit dem 10.10., es wird nichts Neues
+entschieden, nur geprüft. Klar genug beschrieben (jede Variante/Größe
+steht bereits im Code, keine Interpretation nötig). Ergebnis objektiv
+prüfbar (Tests laufen durch oder nicht).
+
+**Umgesetzt:** Drei neue Testdateien, Muster analog
+`design-tokens.test.ts` (reine, datenbasierte Funktionen ohne
+Render-Aufwand):
+- `src/components/ui/badge-variants.test.ts` (8 Tests: alle sechs
+  `variant`-Werte anhand je einer charakteristischen Klasse, Default-Fall
+  entspricht explizitem `variant: 'default'`, Merge eines eigenen
+  `className`).
+- `src/components/ui/button-variants.test.ts` (15 Tests: alle sechs
+  `variant`-Werte, Default-Fall, alle acht `size`-Werte inkl. der vier
+  `icon-*`-Größen über `it.each`, Merge eines eigenen `className`).
+- `src/components/ui/tabs-variants.test.ts` (4 Tests: beide
+  `variant`-Werte, Default-Fall, Merge eines eigenen `className`).
+
+Keine Quelländerung — reine Testabdeckung für bestehendes, unverändertes
+Verhalten, kein neuer Bug gefunden. `tasks/tasks-prd-travix-platform.md`
+(Notiz unter 1.3) und `ZEITPLAN.md` (18.10.-Eintrag, Phase-1-Bullet)
+entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout, `node_modules` fehlte zu
+Beginn dieses Laufs), `npx vitest run` nur für die drei neuen Dateien
+zuerst isoliert (28/28 grün), danach `npm run lint` (0 Fehler), `npm
+test` / volle Suite (`npx vitest run`, 67 Testdateien, 512 Tests, alle
+grün — 484 vorher + 28 neu), `npm run build` (`tsc -b && vite build`,
+0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung). `git status` nach
+Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
