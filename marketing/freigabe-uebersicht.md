@@ -1,10 +1,236 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-16)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-18)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-18: zwei neue Tier-4-Kandidaten (60: ein Wechsel des
+Transportmittels weg von "Flug" löscht jetzt auch das alte, nicht mehr
+passende Flugdetail aus der Reise-Zusammenfassung statt es stehen zu
+lassen; 61: der Travix-Avatar zeigt nach einer fehlgeschlagenen Flug-/
+Unterkunftssuche jetzt wirklich 'error' statt weiterhin fälschlich
+'happy'), Kandidatentopf von drei auf **fünf** — weiterhin klar unter der
+Achter-Schwelle, keine neue Mini-Changelog-Ausgabe heute, alle vier Fragen
+weiterhin offen
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`dc064c0`, letzter eigener Commit vom 17.10., drei neue Tier-4-
+Kandidaten) war **noch nicht** in `origin/main` gemergt
+(`git merge-base --is-ancestor dc064c0 origin/main` liefert "nicht
+Ancestor" — der Freigabe-Chef-Lauf vom 17.10. hat laut `freigabe-chef-
+log.md` zwar geprüft und bestanden, der Merge-Push war aber blockiert).
+Anders als an den meisten Vortagen daher **nicht** neu von `main`
+angelegt, sondern der bestehende Branch ausgecheckt und `origin/main`
+(`99c6093`, inkl. der drei neuen IT-Chef-Auto-Läufe vom 17./18.10.) per
+Merge-Commit eingebracht, damit die Kandidatenprüfung unten auf dem
+tatsächlich aktuellen Code-Stand beruht, ohne die eigenen, noch nicht
+gemergten drei Kandidaten vom 17.10. zu verlieren.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+`status.md` zeigt weiterhin Stand 17.10., keine Notiz zu einer der vier
+Fragen. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/`/`index.html` liefert
+weiterhin keinen Treffer), kein `changelog`-Treffer in `src/routes.tsx`,
+`ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen bleiben offen.
+
+**`git log dc064c0..origin/main` zeigt die seit dem letzten eigenen
+Commit** (17.10., `dc064c0`) elf neue Commits. Vier davon ändern
+tatsächlich Dateien unter `src/` — jeder einzeln per `git show` und
+direkt im Code (nicht nur per Commit-Text) geprüft:
+
+- **`43c9b0a` (17.10., vierter IT-Chef-Lauf):** `sendMessage()`s
+  `transportMode`-Edit-Zweig setzte beim Wechsel auf ein Nicht-Flug-
+  Verkehrsmittel bisher nur `transportMode` selbst, ließ `transportDetail`
+  (von `selectFlight()` gesetzt) unverändert stehen — `TripSummaryCard.tsx`/
+  `Buchung.tsx` zeigten danach z. B. "Zug · Test Airline · Berlin →
+  Lissabon · 149,00 €", obwohl gar kein Flug mehr gewählt war. Im Code
+  verifiziert (`src/hooks/useChat.ts`): derselbe State-Update setzt
+  `transportDetail` jetzt zusätzlich auf `null`. **60. Kandidat** — passt
+  in dieselbe "du siehst wirklich das, was aktuell gilt, nicht einen
+  veralteten Rest" -Erzählung wie die gerade erst gezählten Kandidaten
+  57-59 und frühere Klarname-/Detail-Fixes (u. a. 46, 50).
+- **`c78f0a9` (18.10., erster IT-Chef-Lauf):** `useChat.ts` setzte an
+  allen Abschluss-Stellen der Flug-/Unterkunftssuche bisher unbedingt
+  `setAvatarState('happy')` — auch im `.catch()`-Fehlerfall und wenn
+  `result.errors.length > 0` war. Der dafür eigens vorgesehene
+  `'error'`-Zustand von `TravixAvatar.tsx` wurde dadurch nie erreicht, der
+  Avatar wirkte bei einer echten Fehlsuche weiterhin zufrieden. Im Code
+  verifiziert: alle vier betroffenen Stellen setzen jetzt `'error'` bei
+  Fehlern/`.catch()` statt pauschal `'happy'`. **61. Kandidat** — passt in
+  dieselbe Ehrlichkeits-/Verlässlichkeits-Gruppe wie die Avatar-
+  Hänger-Fixes vom 15./16.10. (z. B. Kandidat 55/56): der Avatar zeigt
+  den tatsächlichen Zustand statt eines pauschal positiven.
+
+Die übrigen zwei Commits unter `src/` (`73d5510`, `f19de43`, beide 18.10.)
+sind reine Testabdeckung für bereits bestehendes, unverändertes Verhalten
+(`cva()`-Variantenfunktionen bzw. `Badge`-Komponente) ohne jede
+Verhaltensänderung — bewusst nicht als Kandidat gezählt, gleiche
+Ausschlussregel wie bei früheren reinen Testabdeckungs-Commits (z. B.
+`16a99ad` am 16.10.). Die restlichen sieben Commits sind reine
+Berichte/Logs/Merges ohne eigene `src/`-Änderung.
+
+**Kandidatentopf:** von drei (57-59, Stand 17.10.) auf **fünf** (57-61) —
+weiterhin klar unter der Achter-Schwelle. Keine neue Mini-Changelog-
+Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung dieser
+bestehenden Übersicht, kein Live-Vorgang — nichts gepostet, versendet
+oder im Produkt verändert. Keine erfundenen Kennzahlen: beide neuen
+Kandidaten stammen aus einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commits (`src/hooks/useChat.ts`),
+nicht aus Berichten übernommen. Klar genug beschrieben, keine offene
+Positionierungsfrage: wendet nur die seit 20.08. etablierte
+Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine neunte Mini-Changelog-Ausgabe — Kandidatentopf steht mit fünf
+  weiterhin klar unter der etablierten Achter-Schwelle, ein künstliches
+  Auffüllen wäre keine ehrliche Vorlage.
+- Ein neues eigenständiges Social-Content-Stück zu einem der beiden neuen
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; beide fließen stattdessen in die laufende Mini-Changelog-
+  Pflege, sobald der Topf die Schwelle erreicht.
+
+**Umgesetzt:**
+- `origin/main` per Merge-Commit in `marketing-chef/auto` eingebracht
+  (s. o.), damit die Kandidatenprüfung auf dem aktuellen Code-Stand
+  beruht und die drei noch nicht gemergten eigenen Kandidaten vom 17.10.
+  nicht verloren gehen.
+- Dieses Update (Prüfung der vier Fragen, elf neue Commits geprüft, vier
+  mit Dateiänderung unter `src/` einzeln per `git show` und im Code
+  bewertet, zwei neue Tier-4-Kandidaten aufgenommen, Kandidatentopf-Stand
+  auf "fünf" gesetzt, Titel-Datum auf 18.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code durch diesen Lauf selbst geändert, daher
+kein eigener Build/Lint/Test nötig — reine Markdown-Ergänzung plus ein
+Merge-Commit, der nur bereits auf `main` grün gelaufenen Code einbringt.
+`git status` nach Abschluss zeigt nur die erwarteten Änderungen
+(`marketing/freigabe-uebersicht.md`, der Log-Eintrag in
+`marketing-chef-auto-log.md`) zusätzlich zum Merge-Commit.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
+
+## Update 2026-10-17: drei neue Tier-4-Kandidaten (57: die Ladeanzeige nach
+Flug-/Unterkunftssuche blieb nicht mehr dauerhaft stehen, wenn du
+stattdessen sofort weitergeschrieben hast; 58: ein Feldwechsel während
+einer laufenden Unterkunftssuche lässt kein verspätetes, veraltetes
+Ergebnis mehr unter dem neuen Feld landen; 59: die Chat-Zusammenfassungs-
+karte zeigt nach einer Flugauswahl jetzt die konkrete Verbindung statt nur
+"Flug"), Kandidatentopf von null auf **drei** — weiterhin klar unter der
+Achter-Schwelle, keine neue Mini-Changelog-Ausgabe heute, alle vier Fragen
+weiterhin offen
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`0a0383e`, letzter eigener Commit vom 16.10., achte Mini-Changelog-
+Ausgabe) war bereits vollständig in `origin/main` gemergt
+(`git merge-base --is-ancestor 0a0383e origin/main` bestätigt das) — laut
+Regel für bereits gemergte Branches neu von aktuellem `origin/main`
+(`c9cf22d`) aus angelegt.
+
+**Erst geprüft, ob sich an den vier offenen Fragen etwas geändert hat:**
+`status.md` zeigt weiterhin Stand 16.10., keine Notiz zu einer der vier
+Fragen. Keine neuen Kanal-Links (`grep` nach
+`linkedin.com`/`instagram.com`/`tiktok.com` in `src/`/`index.html` liefert
+weiterhin keinen Treffer), kein `changelog`-Treffer in `src/routes.tsx`,
+`ZEITPLAN.md` 6.2 weiterhin `[ ]`. Alle vier Fragen bleiben offen.
+
+**`git log 0a0383e..origin/main` zeigt die seit dem letzten Check**
+(16.10., Commit `0a0383e`) dreizehn neue Commits. Drei davon ändern
+tatsächlich Produkt-Code unter `src/` — jeder einzeln per `git show` und
+direkt im Code (nicht nur per Commit-Text) geprüft:
+
+- **`d6a3e3e` (16.10. spät):** `sendMessage()` erhöht
+  `searchGenerationRef` bereits (Fix vom selben Tag), der dadurch
+  ausgelöste frühe Veraltungs-`return` verhinderte aber auch
+  `setStayLoading(false)`/`setFlightLoading(false)` — eine automatisch
+  gestartete Flug-/Unterkunftssuche ließ die "Sucht ..."-Ladeanzeige
+  dauerhaft stehen, wenn stattdessen sofort per Freitext weitergeschrieben
+  wurde. Im Code verifiziert (`src/hooks/useChat.ts`): beide Loading-States
+  werden jetzt zusammen mit Offers/Errors zurückgesetzt, analog
+  `resetChat()`. **57. Kandidat** — passt in dieselbe "veraltete
+  Suchergebnisse/-zustände bleiben nicht mehr sichtbar"-Gruppe wie die
+  bereits gezählten Kandidaten 36/44/48/52/56.
+- **`575a311` (17.10.):** `startEdit()` ließ `stayLoading` unverändert
+  stehen und erhöhte `searchGenerationRef` nicht, anders als
+  `sendMessage()`/`resetChat()` — wechselte man während einer laufenden
+  Unterkunftssuche auf ein anderes Bearbeiten-Feld, konnte das
+  verspätete Ergebnis der längst verlassenen Suche trotzdem noch
+  erscheinen. Im Code verifiziert (`src/hooks/useChat.ts`): neuer
+  Zähler-Inkrement plus `setStayLoading(false)` direkt in `startEdit()`.
+  **58. Kandidat** — direkte Fortsetzung derselben Fundgruppe wie 57,
+  jetzt für den Feldwechsel-Pfad statt den Freitext-Pfad.
+- **`939b98b` (17.10.):** `TripSummaryCard.tsx` (Chat-
+  Zusammenfassungskarte) zeigte nach einer Flugauswahl im Chat nur das
+  generische Transportmittel-Label "Flug" statt der bereits in
+  `trip.transportDetail` vorhandenen konkreten Verbindung (Airline/Route/
+  Preis) — `Buchung.tsx` zeigt dieselbe Information an derselben Stelle
+  bereits korrekt. Im Code verifiziert: Transport-Zeile kombiniert jetzt
+  beide Felder analog `Buchung.tsx`. **59. Kandidat** — passt in dieselbe
+  "du siehst wirklich, was du ausgewählt hast, statt eines generischen
+  Platzhalters"-Erzählung wie die bereits gezählten Klarname-/Detail-Fixes
+  (u. a. Kandidat 46, 50).
+
+Die übrigen zehn Commits sind reine Berichte/Logs/Merges bzw. zwei "kein
+neuer sicherer Fund"-Läufe ohne eigene `src/`-Änderung (zwei IT-Chef-Auto-
+Läufe ohne Fund, ein Support-Chef-Bericht, ein IT-Chef-Bericht, ein
+Marketing-Chef-Bericht, ein Support-Chef-Auto-Lauf ohne Codeänderung, ein
+Daily-Status-Update, ein Freigabe-Chef-Merge-Log, ein Support-Chef/auto-
+Merge, ein Freigabe-Chef-Log).
+
+**Kandidatentopf:** von null (nach der achten Mini-Changelog-Ausgabe am
+16.10.) auf **drei** (57-59) — weiterhin klar unter der Achter-Schwelle.
+Keine neue Mini-Changelog-Ausgabe heute.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung dieser
+bestehenden Übersicht, kein Live-Vorgang — nichts gepostet, versendet oder
+im Produkt verändert. Keine erfundenen Kennzahlen: alle drei neuen
+Kandidaten stammen aus einzeln per `git show` und direkter Code-Prüfung
+verifizierten, bereits in `main` gemergten Commits (`src/hooks/useChat.ts`,
+`src/components/chat/TripSummaryCard.tsx`), nicht aus Berichten
+übernommen. Klar genug beschrieben, keine offene Positionierungsfrage:
+wendet nur die seit 20.08. etablierte Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine neunte Mini-Changelog-Ausgabe — Kandidatentopf steht mit drei
+  weit unter der etablierten Achter-Schwelle, ein künstliches Auffüllen
+  wäre keine ehrliche Vorlage.
+- Ein neues eigenständiges Social-Content-Stück zu einem der drei neuen
+  Einzelfunde — bleibt an die seit 20.08. geltende Selbstbeschränkung
+  gebunden; alle drei fließen stattdessen in die laufende
+  Mini-Changelog-Pflege, sobald der Topf die Schwelle erreicht.
+
+**Umgesetzt:**
+- Dieses Update (Prüfung der vier Fragen, dreizehn neue Commits geprüft,
+  drei mit Produkt-Code-Änderung einzeln per `git show` und im Code
+  bewertet, drei neue Tier-4-Kandidaten aufgenommen, Kandidatentopf-Stand
+  auf "drei" gesetzt, Titel-Datum auf 17.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert — "Laufende
+  Content-Produktion" ist laut Sprint-Eintrag ein fortlaufender Punkt,
+  kein einmaliger Abschluss.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test
+nötig — reine Markdown-Ergänzung. `git status` nach Abschluss zeigt nur
+die erwarteten Änderungen (`marketing/freigabe-uebersicht.md`, der
+Log-Eintrag in `marketing-chef-auto-log.md`).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-16: vier neue Tier-4-Kandidaten (53: mehrere gleichzeitige
 Duffel-Fehler zeigten bisher dieselbe Zeile mehrfach identisch statt
