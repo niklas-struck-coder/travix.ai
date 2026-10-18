@@ -4809,3 +4809,137 @@ UX-Reibungspunkt — keine Auffälligkeit gefunden. Der
 du starten?") hat keine Möglichkeit, ohne Eingabe eines (ggf. falschen)
 Codes abzubrechen — das wurde nicht vertieft, da es kein heute neu
 verändertes Verhalten ist.
+
+---
+
+## 2026-10-17 — Transport bearbeiten nach Flugauswahl (`src/hooks/useChat.ts`, `TripSummaryCard.tsx`, `Buchung.tsx`)
+
+**Geprüfter Bereich:** Laut `git log` kam heute Commit `939b98b`
+("TripSummaryCard zeigte nur generisches Transport-Label statt gewaehlter
+Verbindung") frisch dazu — `TripSummaryCard.tsx` zeigt die Chat-
+Zusammenfassungskarte seit heute zusätzlich `trip.transportDetail` an,
+genau wie `Buchung.tsx` es seit Längerem tut. Das ist laut `ZEITPLAN.md`
+frisch geänderter Code von heute, also der richtige Bereich für diesen
+Lauf. Geprüft: `src/components/chat/TripSummaryCard.tsx`,
+`src/hooks/useChat.ts` (der `editingField === 'transportMode'`-Zweig in
+`sendMessage()`), `src/pages/Buchung.tsx` sowie die zugehörigen Tests.
+
+### Reibungspunkt
+
+**Nach einer Flugauswahl das Transportmittel auf Zug/Bus/Fähre/Mietwagen
+umändern lässt die alte Flugverbindung als "Detail" stehen — die
+Zusammenfassung zeigt dann z. B. "Zug · Test Airline · Berlin → Lissabon
+· 149,00 €"**
+
+`useChat.ts:448` setzt beim Auswählen eines Flugs in `selectFlight()`
+`trip.transportDetail` auf die konkrete Verbindung (Airline, Route,
+Preis). Ändert die Nutzerin das Transportmittel danach über "Bearbeiten"
+(`startEdit('transportMode')`, erreichbar z. B. über den Stift-Button bei
+"Transport" auf `/buchung` oder `?edit=transportMode` im Chat) auf einen
+anderen Modus, landet die Eingabe im `editingField === 'transportMode'`-
+Zweig von `sendMessage()`. Für jeden Nicht-Flug-Modus setzt
+`useChat.ts:369` ausschließlich `transportMode: mode` — `transportDetail`
+bleibt unverändert auf dem alten Flugtext stehen (nur der Wechsel
+*zurück* auf `flight` nimmt den eigenen Zwischenschritt über
+`awaitingFlightOrigin`/eine neue Flugsuche, die `transportDetail` bei der
+nächsten `selectFlight()`-Auswahl korrekt überschreibt — für alle anderen
+vier Modi gibt es diesen Reset nicht).
+
+Da sowohl `TripSummaryCard.tsx:32-34` als auch `Buchung.tsx:219-221`
+dieselbe Kombination `` `${transportLabels[mode]} · ${transportDetail}` ``
+verwenden, erscheint die veraltete Flugverbindung nach dem Wechsel an
+*beiden* Stellen — im Chat direkt unter der Bestätigung "Alles klar, ich
+hab das Transportmittel aktualisiert" und auf der Buchungsübersicht. Für
+eine Nutzerin, die bewusst von Flug auf Zug umgestiegen ist, wirkt eine
+weiterhin angezeigte Flug-Airline samt Flugpreis nicht wie ein
+Kosmetikfehler, sondern wie ein ernster Datenfehler ("ist jetzt doch
+wieder ein Flug gebucht?"). `TripSummaryCard.test.tsx` und
+`Buchung.test.tsx` decken aktuell nur den Fall "Flug mit/ohne Detail" ab
+— kein Test prüft den Moden-Wechsel nach bereits gesetztem
+`transportDetail`.
+
+*Vorschlag:* In `useChat.ts:369` beim Setzen von `transportMode` auf
+einen Nicht-Flug-Wert zusätzlich `transportDetail: null` mitsetzen (eine
+Zeile, analog zum bereits vorhandenen Reset-Muster bei anderen Zwischen-
+Zuständen wie `awaitingFlightOrigin` in `startEdit()`). Ein
+Regressionstest analog den bestehenden in `useChat.test.ts` ("Flug
+auswählen, dann auf Zug wechseln → `transportDetail` ist wieder `null`")
+würde den Fix absichern.
+
+### Kein zweiter Fund in diesem Lauf
+
+Der übrige heute geänderte Code (`TripSummaryCard.tsx`s neue Zeile
+selbst, die Reihenfolge/Formatierung der kombinierten Label-Strings, der
+`stayLoading`/`searchGenerationRef`-Fix aus dem zweiten Lauf von heute,
+`575a311`) wirkt konsistent mit dem Rest der App — kein weiterer Punkt
+erfunden, nur um den Bericht länger wirken zu lassen.
+
+---
+
+## 2026-10-18 — Nachkontrolle Avatar-Fehlerzustand & Transport-Detail, plus Fehleranzeige-Konsolidierung (`FlightResults`/`HotelResults`/`Flugsuche`/`Hotelsuche`)
+
+**Geprüfter Bereich:** Die beiden zuletzt in `reports/support-chef.md`
+(17.10.) gemeldeten Funde — Avatar bleibt bei Suchfehlern fälschlich
+`'happy'` (`useChat.ts`), `transportDetail` bleibt nach einem
+Transportmittel-Wechsel weg von Flug auf dem alten Flugtext stehen
+(`useChat.ts:369`) — sowie als neu/kürzlich geänderter Bereich laut Commit-
+Historie die am 14.10. (`70dd3fc`) eingeführte `SearchErrorAlert`-
+Konsolidierung in `FlightResults.tsx`, `HotelResults.tsx`, `Flugsuche.tsx`
+und `Hotelsuche.tsx`.
+
+### Gute Nachricht: zwei gemeldete Funde sind jetzt behoben
+
+Beide am 17.10. gemeldeten Punkte sind im aktuellen `main` (nach dem
+Merge von `c78f0a9`/`43c9b0a`) tatsächlich behoben, im Code
+gegengeprüft:
+
+- **Avatar-Fehlerzustand:** `useChat.ts:117,126,240,246,424,430` setzen
+  jetzt an allen Suchabschluss-Stellen `setAvatarState('error')` statt
+  unbedingt `'happy'`, sowohl in den `.catch()`-Zweigen als auch bei
+  `result.errors.length > 0`. `resetChat()` (`useChat.ts:458`ff.) setzt
+  den Zustand bei "Neue Reise planen" zuverlässig zurück, der
+  Fehlerzustand bleibt also auch nicht hängen.
+- **`transportDetail` nach Moduswechsel:** `useChat.ts:373` setzt beim
+  Wechsel auf einen Nicht-Flug-Modus jetzt explizit
+  `transportDetail: null` mit — die Zusammenfassungskarte zeigt nach
+  einem Wechsel also nicht mehr den alten Flugtext neben dem neuen
+  Transportmittel.
+
+Beide Fixe sehen vollständig aus, kein neuer Randfall dabei entdeckt.
+
+### Weiterhin offen (heute erneut im Code gegengeprüft, unverändert)
+
+1. **Lösch-Warnungen klingen überall gleich dramatisch.**
+   `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
+   `Aktivitaeten.tsx:118` und `EditMode.tsx:151` verwenden weiterhin
+   wortgleich "Das lässt sich nicht rückgängig machen" — auch dort, wo
+   ein Favorit mit einem Klick wieder anlegbar wäre.
+2. **Lissabon-Demokarte vs. Urlaubsmodus-Trip-Quelle.**
+   `MeineReisen.tsx:49` verlinkt von der Lissabon-Demoreise auf
+   `/urlaubsmodus`, `Urlaubsmodus.tsx:12` lädt den Trip aber weiterhin
+   aus `loadStoredChat()?.trip` statt aus den Lissabon-Demodaten — wer
+   noch nie im KI-Chat geplant hat, landet in einem Urlaubsmodus ohne
+   oder mit falschem Reisebezug.
+3. **Leeres Formular bei "Manuell suchen" nach Flug-Bearbeiten.**
+   `Buchung.tsx:176` verlinkt bei unbekanntem Zielflughafen auf
+   `manualHref: '/flugsuche'`. `FlightWizard.tsx` (Props nur `onSearch`/
+   `loading`, Zeile 10-12) und `Flugsuche.tsx` (kein `loadStoredChat`-
+   Import) übernehmen das bereits bekannte Reiseziel nicht — `origin`
+   und `destination` starten beide leer (`FlightWizard.tsx:37-38`), obwohl
+   travix das Ziel zu diesem Zeitpunkt längst kennt. Nutzer:innen müssen
+   den schon genannten Zielort erneut als IATA-Code eintippen.
+   *Vorschlag (unverändert seit früherem Fund):* `Flugsuche.tsx` optional
+   einen `destination`-Query-Parameter oder den `trip`-Zustand lesen
+   lassen und als Vorbelegung an `FlightWizard` durchreichen.
+
+### Neu geprüft: Fehleranzeige-Konsolidierung vom 14.10.
+
+`SearchErrorAlert.tsx` wird jetzt einheitlich in allen vier Stellen
+verwendet (`FlightResults.tsx:26`, `HotelResults.tsx`, `Flugsuche.tsx:51`,
+`Hotelsuche.tsx:51`), jeweils exklusiv zu Lade-/Leerzustand (keine Stelle
+zeigt Fehler und `NoResultsMessage` gleichzeitig). Kein neuer
+Reibungspunkt gefunden — die Konsolidierung wirkt sauber und konsistent
+zwischen Chat- und Standalone-Suchseiten.
+
+Kein Punkt erfunden, der sich nicht am genannten Dateibezug im aktuellen
+Quelltext nachvollziehen lässt.
