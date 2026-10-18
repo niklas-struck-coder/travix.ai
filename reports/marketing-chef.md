@@ -1,57 +1,57 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-16
+**Datum:** 2026-10-17
 
-## Was ist seit dem letzten Eintrag (2026-10-15) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-16) passiert?
 
-Einiges – sowohl im Code als auch in der Marketing-Vorbereitung selbst.
+Eher ruhig, vor allem auf der technischen Seite weiter poliert – nicht viel
+grundsätzlich Neues fürs Marketing.
 
-- **Der Duffel-Dedup-Fix (PR #29) ist jetzt gemergt.** Mehrere
-  gleichzeitige Fehler bei Flug-/Hotelsuche zeigen nicht mehr dieselbe
-  Zeile doppelt an.
-- **Drei weitere, frische Fixes in `useChat.ts`:** Der Avatar bleibt
-  nach einer abgeschlossenen Suche nicht mehr dauerhaft im
-  "Sucht..."-Zustand hängen, eine über den Chat begonnene, aber auf der
-  Such-Seite abgeschlossene Bearbeitung verwechselt deine nächste
-  Chat-Nachricht nicht mehr mit einer Antwort darauf, und eine durch
-  Freitext überholte Hintergrundsuche taucht nicht mehr widersprüchlich
-  später auf.
-- **Neuer, noch offener Fund von heute:** Der Avatar zeigt nach einer
-  fehlgeschlagenen Suche fälschlich den fröhlichen statt des eigens
-  dafür gebauten Fehlerzustands (Warndreieck) – Fix liegt als PR #30 vor,
-  wartet noch auf Review.
-- **Marketing-Chef Auto hat die achte Mini-Changelog-Ausgabe
-  geschrieben** (`marketing/mini-changelog-konzept.md`) – reiner
-  Entwurf, nichts live. Der Kandidaten-Topf ist damit wieder leer, aber
-  die Grundfrage ("Soll die Footer-Changelog-Seite überhaupt gebaut
-  werden?") steht seit Ausgabe 1 unbeantwortet im Raum – acht Ausgaben
-  guter, ehrlicher Content liegen bereit und gehen nirgendwo raus.
+- **IT-Chef hat heute `useChat.ts` und einen ganzen Stapel weiterer
+  Kern-Dateien komplett durchgelesen (nicht nur gegrept) und fand keinen
+  neuen Bug.** Das ist an sich schon eine kleine Geschichte wert (siehe
+  Vorschlag 3), auch wenn dabei nichts Spektakuläres rauskam.
+- **Zwei kleine, aber ehrliche Konsistenz-Fixes:** `startEdit()` wirft
+  jetzt wie die anderen Einstiegspunkte eine veraltete
+  Unterkunftssuche sauber weg, statt sie noch ins Ergebnis
+  durchsickern zu lassen. Und die Reise-Zusammenfassung im Chat zeigt
+  nach einer Flugauswahl jetzt überall dieselbe Detailzeile
+  (Airline/Strecke/Preis) wie die Buchungsseite – vorher stand da an
+  einer Stelle nur das nackte Wort "Flug".
+- **Die Changelog-Entscheidung bleibt unverändert offen.** Ausgabe 8
+  (siehe letzter Bericht) liegt immer noch fertig da, der
+  Grundsatzfrage "Footer-Changelog-Seite ja/nein?" ist seit Ausgabe 1
+  nichts hinzugekommen. Die beiden heutigen Mini-Fixes sammeln sich
+  gerade als erste Kandidaten für eine mögliche Ausgabe 9.
+- **Zum Avatar-Fehlerzustand (PR #30)** kann ich ehrlich keinen
+  bestätigten "jetzt live"-Stand liefern – die Berichte dazu
+  widersprechen sich leicht, und eine echte Prüfung ist Sache von
+  IT-Chef. Die Mini-Post-Idee dazu aus dem letzten Bericht bleibt
+  deshalb vorerst zurückgestellt, bis das sauber bestätigt ist.
+
+Keine erfundenen Zahlen hier – es gibt schlicht keine neuen
+Nutzungsdaten, auf die ich mich stützen könnte.
 
 ## Vorschläge
 
-1. **Die Changelog-Entscheidung nicht länger offenlassen – notfalls mit
-   einer kleinen Alternative statt der ganzen Seite.** Acht Ausgaben
-   Wartezeit sind viel. Wenn die Footer-Seite zu groß als nächster
-   Schritt wirkt: schlag Ni vor, einfach die stärkste Geschichte aus
-   Ausgabe 8 (siehe Punkt 2) als einzelnen Social-Post zu bringen – klein
-   anfangen statt weiter zu warten.
-2. **"Die Figur lügt nicht" als eigener Mini-Post, sobald PR #30 gemerged
-   ist.** Der Avatar zeigte bisher fröhlich an, wo eigentlich ein Fehler
-   war – jetzt zeigt er ehrlich das Warndreieck. Genau das Gegenteil von
-   "Fake-Positivität", die man aus vielen Apps kennt. Passt direkt in die
-   Content-Säule "Ehrlichkeit als Feature" und braucht keine Zahlen,
-   nur die Geschichte.
-3. **"Ein Klick tut, was er verspricht" als Kurzclip/GIF.** Die vier
-   Reiseziel-Karten auf der Startseite waren bisher optisch klickbar,
-   aber funktionslos – jetzt springen sie wirklich in den KI-Chat mit
-   dem jeweiligen Ziel. Ein 5-Sekunden-Screen-Recording davon (Karte
-   klicken → Chat startet direkt mit Kontext) ist greifbarer als jeder
-   Text und zeigt nebenbei das Kernprodukt.
-4. **"Bearbeite deine Reise"-Promo jetzt auf Flug UND Unterkunft
-   ausweiten.** Die Gründe für die bisherige Beschränkung auf
-   Unterkunft (veraltete Flugsuchergebnisse, verwechselte
-   Chat-Antworten nach Bearbeitung außerhalb des Chats) sind laut
-   IT-Chef jetzt alle behoben. Eine gemeinsame Formulierung für beides
-   wirkt überzeugender als zwei separate, zeitlich versetzte Promos.
+1. **Die Changelog-Entscheidung diese Woche wirklich treffen – sonst
+   kleine Alternative statt weiter warten.** Das ist jetzt der
+   zweite Bericht in Folge mit demselben Punkt. Statt die ganze
+   Footer-Seite zu bauen: nimm die stärkste Geschichte aus Ausgabe 8
+   ("Ein Klick tut, was er verspricht" – die Reiseziel-Karten) und
+   bring sie als einzelnen Social-Post. Klein anfangen schlägt
+   weiter warten.
+2. **"Deine Reise zeigt überall dasselbe" als Kandidat für Ausgabe 9
+   vormerken, nicht einzeln posten.** Der heutige Fix (Chat-Zusammenfassung
+   zeigt jetzt dieselbe Flugdetail-Zeile wie die Buchungsseite) ist für
+   sich zu klein für einen eigenen Post, passt aber gut in die
+   bestehende Erzählung "ein Klick zeigt, was du wirklich ausgewählt
+   hast". Einfach in den Topf.
+3. **"Wir lesen unseren eigenen Code, auch wenn nichts dabei rauskommt"
+   als kleine Build-in-public-Notiz.** IT-Chef hat heute eine komplette,
+   ergebnislose Durchsicht gemacht – das ist unspektakulär, aber genau
+   die Art Sorgfalt, die zur Content-Säule "Ehrlichkeit als Feature"
+   passt: nicht jeder Tag bringt einen Fix, und das zuzugeben ist
+   glaubwürdiger als ständig neue Verbesserungen zu behaupten.
 
-_Letztes Update: 2026-10-16_
+_Letztes Update: 2026-10-17_

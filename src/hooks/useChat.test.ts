@@ -110,6 +110,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('does not set the error state when the search genuinely returns zero offers', async () => {
@@ -123,6 +124,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors).toEqual([])
     expect(result.current.stayOffers).toEqual([])
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('happy')
   })
 
   it('offers "Neue Reise planen" as a next step in the main chat flow when the search genuinely returns zero offers, instead of a dead end', async () => {
@@ -147,6 +149,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.stayLoading).toBe(false)
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('offers "Neue Reise planen" as a next step when the automatic search in the main chat flow resolves with errors', async () => {
@@ -191,6 +194,7 @@ describe('useChat accommodation search failure vs. real zero results', () => {
     expect(result.current.stayErrors.length).toBeGreaterThan(0)
     expect(result.current.stayOffers).toBeNull()
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('offers "Neue Reise planen" as a next step on the "Bearbeiten" (startEdit) path when the retry genuinely returns zero offers', async () => {
@@ -480,6 +484,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightOffers).toBeNull()
     expect(result.current.flightLoading).toBe(false)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('sets the error state when the search resolves with errors instead of rejecting (real Duffel API failure)', async () => {
@@ -495,6 +500,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
     expect(result.current.quickReplies).toEqual(['Neue Reise planen'])
+    expect(result.current.avatarState).toBe('error')
   })
 
   it('does not set an error when the search genuinely returns zero offers', async () => {
@@ -509,6 +515,7 @@ describe('useChat flight search failure vs. real zero results', () => {
     expect(result.current.flightErrors).toEqual([])
     expect(result.current.flightOffers).toEqual([])
     expect(result.current.flightLoading).toBe(false)
+    expect(result.current.avatarState).toBe('happy')
   })
 
   it('offers "Neue Reise planen" as a next step when the search genuinely returns zero offers, instead of a dead end', async () => {
@@ -691,6 +698,52 @@ describe('useChat flight search failure vs. real zero results', () => {
 
     expect(searchFlights).not.toHaveBeenCalled()
     expect(result.current.trip.transportMode).toBe('train')
+  })
+
+  // selectFlight() saves the chosen flight's airline/route/price into
+  // trip.transportDetail so TripSummaryCard.tsx/Buchung.tsx can show it
+  // (see the "saves the selected flight into trip.transportDetail" test
+  // below). Editing the transport mode away from "Flug" afterwards used to
+  // leave that old flight's detail behind on the new, unrelated mode —
+  // e.g. "Zug · Test Airline · Berlin → Lissabon · 149,00 €".
+  it('clears the old flight detail when the transport mode is changed away from "Flug"', () => {
+    vi.mocked(searchFlights).mockResolvedValue({ offers: [], errors: [] })
+
+    const result = completeTripUpToAccommodationFor(KNOWN_DESTINATION)
+    switchToFlightAndEnterOrigin(result, 'BER')
+
+    const offer: FlightOffer = {
+      id: 'off_1',
+      totalAmount: '149.00',
+      totalCurrency: 'EUR',
+      slices: [
+        {
+          originIata: 'BER',
+          originName: 'Berlin',
+          destinationIata: 'LIS',
+          destinationName: 'Lissabon',
+          duration: 'PT3H',
+          segments: [],
+        },
+      ],
+    }
+    act(() => {
+      result.current.selectFlight(offer)
+    })
+    expect(result.current.trip.transportDetail).toBe(summarizeFlightOffer(offer))
+
+    act(() => {
+      result.current.startEdit('transportMode')
+    })
+    act(() => {
+      result.current.sendMessage('Zug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    expect(result.current.trip.transportMode).toBe('train')
+    expect(result.current.trip.transportDetail).toBeNull()
   })
 
   // startEdit('accommodation') used to leave a still-pending stayLoading
