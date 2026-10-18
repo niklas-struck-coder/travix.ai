@@ -1,57 +1,51 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-17
+**Datum:** 2026-10-18
 
-## Was ist seit dem letzten Eintrag (2026-10-16) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-17) passiert?
 
-Eher ruhig, vor allem auf der technischen Seite weiter poliert – nicht viel
-grundsätzlich Neues fürs Marketing.
+Die wichtigste Neuigkeit: Der Avatar-Fehlerzustand, den ich dir die letzten
+Berichte über als "Status unklar" gemeldet habe, ist jetzt wirklich fertig
+und doppelt gegengeprüft. IT-Chef hat heute (18.10.) in `useChat.ts` an
+allen sechs betroffenen Stellen bestätigt: Schlägt eine Flug- oder
+Unterkunftssuche fehl, zeigt der Avatar jetzt sein Warndreieck statt
+weiter zu lächeln – und das ein zweites Mal im Code gegengeprüft, nicht
+nur behauptet.
 
-- **IT-Chef hat heute `useChat.ts` und einen ganzen Stapel weiterer
-  Kern-Dateien komplett durchgelesen (nicht nur gegrept) und fand keinen
-  neuen Bug.** Das ist an sich schon eine kleine Geschichte wert (siehe
-  Vorschlag 3), auch wenn dabei nichts Spektakuläres rauskam.
-- **Zwei kleine, aber ehrliche Konsistenz-Fixes:** `startEdit()` wirft
-  jetzt wie die anderen Einstiegspunkte eine veraltete
-  Unterkunftssuche sauber weg, statt sie noch ins Ergebnis
-  durchsickern zu lassen. Und die Reise-Zusammenfassung im Chat zeigt
-  nach einer Flugauswahl jetzt überall dieselbe Detailzeile
-  (Airline/Strecke/Preis) wie die Buchungsseite – vorher stand da an
-  einer Stelle nur das nackte Wort "Flug".
-- **Die Changelog-Entscheidung bleibt unverändert offen.** Ausgabe 8
-  (siehe letzter Bericht) liegt immer noch fertig da, der
-  Grundsatzfrage "Footer-Changelog-Seite ja/nein?" ist seit Ausgabe 1
-  nichts hinzugekommen. Die beiden heutigen Mini-Fixes sammeln sich
-  gerade als erste Kandidaten für eine mögliche Ausgabe 9.
-- **Zum Avatar-Fehlerzustand (PR #30)** kann ich ehrlich keinen
-  bestätigten "jetzt live"-Stand liefern – die Berichte dazu
-  widersprechen sich leicht, und eine echte Prüfung ist Sache von
-  IT-Chef. Die Mini-Post-Idee dazu aus dem letzten Bericht bleibt
-  deshalb vorerst zurückgestellt, bis das sauber bestätigt ist.
+Daneben kam ein neuer, noch offener Punkt dazu: Wählt man einen Flug und
+wechselt danach das Transportmittel (z. B. auf Zug), bleibt die alte
+Flugverbindung als Detailzeile stehen ("Zug · Berlin → Lissabon · 149 €").
+Noch nicht gefixt, braucht laut IT-Chef eine echte Entscheidung – für
+Marketing also noch kein Thema, nur als Kandidat vormerken.
 
-Keine erfundenen Zahlen hier – es gibt schlicht keine neuen
-Nutzungsdaten, auf die ich mich stützen könnte.
+Sonst: zwei Testabdeckungs-Läufe (Badge, Variantenfunktionen) ohne
+Nutzer-sichtbare Wirkung, und die Changelog-Grundsatzfrage aus dem letzten
+Bericht ist weiterhin offen – das ist jetzt der dritte Bericht in Folge mit
+demselben Punkt. Keine neuen Nutzungsdaten vorhanden, daher auch keine
+Zahlen in diesem Bericht.
 
 ## Vorschläge
 
-1. **Die Changelog-Entscheidung diese Woche wirklich treffen – sonst
-   kleine Alternative statt weiter warten.** Das ist jetzt der
-   zweite Bericht in Folge mit demselben Punkt. Statt die ganze
-   Footer-Seite zu bauen: nimm die stärkste Geschichte aus Ausgabe 8
-   ("Ein Klick tut, was er verspricht" – die Reiseziel-Karten) und
-   bring sie als einzelnen Social-Post. Klein anfangen schlägt
-   weiter warten.
-2. **"Deine Reise zeigt überall dasselbe" als Kandidat für Ausgabe 9
-   vormerken, nicht einzeln posten.** Der heutige Fix (Chat-Zusammenfassung
-   zeigt jetzt dieselbe Flugdetail-Zeile wie die Buchungsseite) ist für
-   sich zu klein für einen eigenen Post, passt aber gut in die
-   bestehende Erzählung "ein Klick zeigt, was du wirklich ausgewählt
-   hast". Einfach in den Topf.
-3. **"Wir lesen unseren eigenen Code, auch wenn nichts dabei rauskommt"
-   als kleine Build-in-public-Notiz.** IT-Chef hat heute eine komplette,
-   ergebnislose Durchsicht gemacht – das ist unspektakulär, aber genau
-   die Art Sorgfalt, die zur Content-Säule "Ehrlichkeit als Feature"
-   passt: nicht jeder Tag bringt einen Fix, und das zuzugeben ist
-   glaubwürdiger als ständig neue Verbesserungen zu behaupten.
+1. **Avatar-Fix jetzt als eigenen Mini-Post bringen – der war extra
+   dafür zurückgestellt.** Die letzten beiden Berichte haben genau diese
+   Idee aufgeschoben, "bis das sauber bestätigt ist". Jetzt ist sie
+   bestätigt. Botschaft: "Wenn's schiefgeht, tut unser Avatar nicht so,
+   als wäre alles gut" – kurzer Vorher/Nachher-Screenshot (lächelnd vs.
+   Warndreieck bei fehlgeschlagener Suche), passt zur Content-Säule
+   "Ehrlichkeit als Feature".
+2. **Changelog-Entscheidung diese Woche wirklich treffen, sonst die
+   Alternative jetzt umsetzen.** Dritter Bericht mit offener Frage ist
+   ein Signal, nicht mehr zu warten. Alternative bleibt: stärkste
+   Einzelgeschichte (aktuell der Avatar-Fix, siehe Punkt 1) als Solo-Post
+   statt auf die komplette Footer-Changelog-Seite zu warten.
+3. **"Zug mit Flugdetails" als Kandidat für die nächste Sammel-Ausgabe
+   vormerken, nicht einzeln posten.** Zu technisch/klein für einen eigenen
+   Post, aber ein gutes Beispiel für "wir merken auch die kleinen
+   Unstimmigkeiten" in einer künftigen Build-in-public-Runde.
+4. **Zielgruppen-Content-Linien (Paare/Familien/Solo) aus dem
+   Marketing-Konzept endlich anschieben.** Seit dem Konzeptpapier keine
+   Bewegung. Lässt sich unabhängig vom Code-Fortschritt starten – z. B.
+   mit einem ersten Post zur Solo-Reisenden-Zielgruppe, da hier noch
+   nichts existiert.
 
-_Letztes Update: 2026-10-17_
+_Letztes Update: 2026-10-18_
