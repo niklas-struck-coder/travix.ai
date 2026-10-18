@@ -7014,3 +7014,45 @@ Berechtigung, oder durch Ni selbst).
 beider Branches nicht nach `main` pushen (Infrastruktur-Blocker "Merge
 Without Review", kein inhaltliches Problem). Beide Branches sind
 freigegeben und warten auf den eigentlichen Merge.
+
+## 2026-10-18, früher Nacht-Check (geplanter Auto-Lauf zwischen 0 und 4 Uhr)
+
+**Prüfung `it-chef/auto`** (5 Commits Abstand zu `main`, davon 4 neu seit
+dem letzten Freigabe-Chef-Merge: `43c9b0a` transportDetail-Reset bei
+Moduswechsel weg von Flug, `c78f0a9` Avatar-Fehlerzustand statt immer
+`'happy'`, `73d5510`/`f19de43` reine Testabdeckung für
+`cva()`-Variantenfunktionen und `Badge`).
+
+Unabhängig selbst verifiziert (Branch ausgecheckt, nicht dem Log
+vertraut): `npm install` (frisch, nur Engine-Warnung für `jsdom` wegen
+Node-Version, kein Fehler), `npx tsc -b` → 0 Fehler, `npx eslint .` → 0
+Fehler, `npx vitest run` → 68 Testdateien, 517 Tests, alle grün (deckt
+sich exakt mit den im `it-chef-auto-log.md` behaupteten Zahlen).
+`git status` nach den Checks: keine uncommitteten Änderungen.
+
+Scope geprüft: Diff betrifft nur `ZEITPLAN.md`, `it-chef-auto-log.md`,
+drei neue `*-variants.test.ts`, `badge.test.tsx`, `useChat.test.ts`,
+`useChat.ts` (Avatar-State + `transportDetail: null`-Reset) und
+`tasks/tasks-prd-travix-platform.md` — kein Auth-/Zahlungs-/
+Rechtsbezug. Kein UI/Design-Element neu gestaltet (Avatar-`'error'`-
+Zustand war in `TravixAvatar.tsx` bereits fertig designt, nur bisher nie
+aktiviert) — `MARKENDESIGN.md` nicht einschlägig. Jeder der vier Commits
+dokumentiert genau einen Punkt, kein Scope-Creep.
+
+→ **Passt, nach `main` gemergt** (reiner Fast-Forward `7e3d57a..f19de43`,
+kein Konflikt). Push nach `origin/main` ist dieses Mal durchgegangen
+(kein "Merge Without Review"-Block wie in früheren Läufen). `it-chef/auto`
+steht danach bereits exakt auf dem neuen `main`-Stand (gleicher Commit
+`f19de43`), kein zusätzlicher Branch-Update-Schritt nötig.
+
+**`marketing-chef/auto` und `support-chef/auto`:** laut Auftrag für
+diesen frühen Lauf übersprungen — beide haben keine neuen Commits von
+heute (2026-10-18), ihr jeweils letzter Commit (`dc064c0` /
+`ddd8c60`) stammt vom 2026-10-17, 04:11/04:21 Uhr und wurde bereits in
+einem früheren Freigabe-Chef-Lauf geprüft. Kurz mitgeprüft wie
+angewiesen, aber tatsächlich nichts Neues seit dem letzten Lauf — der
+separate spätere Lauf (nach 6 Uhr) übernimmt sie, falls bis dahin neue
+Commits von heute dazukommen.
+
+**Info an Ni:** Kein Hinweis nötig — alles lief glatt, `it-chef/auto`
+sauber gemergt, keine wiederholten Probleme.
