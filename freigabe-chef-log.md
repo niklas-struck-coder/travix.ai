@@ -7105,3 +7105,53 @@ nach vorheriger eigener Prüfung, nur über PR statt direktem Push. PRs:
 **Info an Ni:** Kein Hinweis nötig — beide Branches liefen glatt durch
 die Prüfung, nur der Merge-Weg war dieses Mal anders (PR+API statt
 direktem Push) — rein technisch, keine inhaltliche Auffälligkeit.
+
+## 2026-10-19, geplanter täglicher Auto-Lauf (kein Ni live dabei)
+
+**`it-chef/auto`:** keine neuen Commits gegenüber `origin/main` (bereits
+per PR #33 gemergt) — planmäßig übersprungen, keine eigene Prüfung
+nötig.
+
+**Prüfung `marketing-chef/auto`** (Diff ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`,
+ein neuer Eintrag vom 19.10.: vier seit dem 18.10. neu hinzugekommene
+Commits auf `main` geprüft, alle als reine Testabdeckung/Konsolidierung
+ohne Verhaltensänderung eingeordnet, Kandidatentopf bleibt bei fünf,
+keine neue Mini-Changelog-Ausgabe). Reine Markdown-Ergänzung, kein Code,
+kein Live-Vorgang (kein Hinweis auf tatsächliches Posten/Versenden).
+Keine erfundenen Kennzahlen. Text vollständig und kohärent, keine
+Stichpunkt-Skizze.
+→ **Passt, nach `main` gemergt.**
+
+**Prüfung `support-chef/auto`** (Diff ausschließlich
+`support-chef-auto-log.md`, ein neuer Eintrag vom 19.10.: neuer Fund zu
+`formatTime()` in `src/lib/format.ts`, zeigt wörtlich "Invalid Date"
+bei ungültigen Zeitstempeln statt eines Fallbacks; plus Nachkontrolle
+von drei weiterhin offenen Punkten). Unabhängig nachvollzogen statt dem
+Log vertraut: `src/lib/format.ts` zeigt den beschriebenen Guard
+(`if (!isoString) return '—'` ohne `Number.isNaN`-Prüfung); per Node
+bestätigt, dass `new Date('nicht-parsbar').toLocaleTimeString('de-DE', …)`
+tatsächlich die Zeichenkette `"Invalid Date"` liefert; Verwendung in
+`src/components/search/FlightCard.tsx` und `.../TrainCard.tsx` bestätigt.
+Die drei nachkontrollierten offenen Punkte (Lösch-Warnungen, Lissabon-
+Demokarte, leeres Formular bei "Manuell suchen") stichprobenartig
+gegengeprüft, u. a. `Favoriten.tsx:128` ("Das lässt sich nicht rückgängig
+machen") exakt bestätigt. Alle Datei-/Zeilenverweise nachvollziehbar,
+nichts wirkt erfunden. Reine Analyse, kein Code geändert — niedrigstes
+Risiko.
+→ **Passt, nach `main` gemergt.**
+
+**Technischer Hinweis zum Ablauf:** Der lokale `main`-Branch in diesem
+Container war von `origin/main` divergiert (84 vs. 87 unterschiedliche
+Commits — vermutlich Rest eines älteren Container-Snapshots, nie
+gepusht). Lokalen `main` deshalb nicht angefasst/überschrieben, sondern
+einen neuen Arbeitszweig direkt von `origin/main` erstellt, beide
+Merges dort durchgeführt und per `git push origin <arbeitszweig>:main`
+auf den echten `main` geschrieben (`beffa92..d96cb72`). Inhaltlich
+derselbe geprüfte Merge wie sonst, nur der lokale Zwischenschritt war
+anders.
+
+**Info an Ni:** Kein Hinweis nötig — beide Branches liefen glatt durch
+die Prüfung, keine Auffälligkeit. Der divergierte lokale `main` in
+diesem Container ist rein technisch (betrifft nicht `origin/main` auf
+GitHub) und hat den Merge nicht beeinträchtigt.
