@@ -13,17 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-17):**
-- IT-Chef hat einen Avatar-Fehlerzustand-Fix gemergt (Avatar blieb bei
-  fehlgeschlagener Suche fälschlich "happy" statt "error") und zusätzlich
-  neue Testabdeckung ergänzt (Badge-Komponente, drei cva()-Variantenfunktionen)
-- Freigabe-Chef hat den IT-Chef-Branch sowie anschließend Marketing- und
-  Support-Chef-Branches geprüft und erfolgreich nach main gemergt
-- Marketing- und Support-Chef haben bestehende offene Punkte erneut
-  gegengeprüft und zwei weitere Tier-4-Kandidaten notiert (u.a. Reset des
-  Transportdetails bei Moduswechsel, Avatar-Fehlerstatus), noch nicht final
-  umgesetzt
+**Seit letztem Update (2026-10-18):**
+- IT-Chef hat mehrere Testabdeckungslücken geschlossen (Card-, Select-,
+  Tabs-Komponente) und formatTime() aus FlightCard/TrainCard in eine
+  gemeinsame lib/format.ts konsolidiert
+- Support-Chef hat einen neuen Fund gemeldet: formatTime() zeigt bei
+  kaputten Zeitstempeln "Invalid Date" an; drei ältere offene Punkte
+  erneut unverändert bestätigt
+- Marketing-Chef hat vier neue Commits reine Testabdeckung/Konsolidierung
+  ohne Verhaltensänderung eingestuft, Kandidatentopf bleibt bei fünf
+- Freigabe-Chef hat IT-, Marketing- und Support-Chef-Branches geprüft und
+  erfolgreich nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-18_
+_Letztes Update: 2026-10-19_
