@@ -20584,3 +20584,50 @@ den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-19 (weiterer Lauf)
+
+**Ausgewählt:** Nochmaliger Blick auf die im 18.10.-Lauf (dritter Lauf)
+getroffene Kategorisierung, die `select.tsx`, `card.tsx`, `label.tsx`
+und `input.tsx` pauschal als "reine Radix-Wrapper" ohne eigenen
+Testbedarf eingestuft hatte. Der direkt vorangehende Lauf von heute hat
+das für `card.tsx` schon widerlegt (eigene `size`-Prop-Logik). Beim
+erneuten Durchsehen derselben vier Dateien zeigt sich: `select.tsx` hat
+denselben blinden Fleck — `SelectTrigger` hat eine eigene `size`-Prop-
+Verzweigung (`"default"`/`"sm"` → `data-size`, dieselbe Art Logik wie
+bei `Card`), verwendet in `FlightWizard.tsx`, `HotelWizard.tsx`,
+`Profil.tsx` und `Einstellungen.tsx`, aber bisher nur indirekt über
+deren Tests mitgetestet. `label.tsx`/`input.tsx` dagegen bestätigt: echte
+reine Wrapper ohne jede Props-abhängige Verzweigung, bleiben bewusst
+ohne eigene Testdatei. Erfüllt die Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Testergänzung, `select.tsx` bleibt
+unverändert), klar beschrieben (Props/Verhalten vollständig im
+bestehenden Code sichtbar), Ergebnis objektiv prüfbar (Tests/Typecheck/
+Lint).
+
+**Umgesetzt:** Neue `src/components/ui/select.test.tsx` (5 Tests, Muster
+analog `card.test.tsx`): `data-slot`/`data-size`-Default (`"default"`)
+vs. explizit übergebenes `size="sm"` bei `SelectTrigger`, `className`-
+Merge, Platzhaltertext ohne Auswahl (`SelectValue`), sowie `data-slot`
+auf `SelectContent`/`SelectItem`/`SelectLabel`/`SelectSeparator` bei
+geöffnetem Menü über die kontrollierte `open`-Prop (analog dem
+`open`-Pattern in `dialog.test.tsx`, kein simulierter Klick nötig).
+Dabei eine fehlende jsdom-Funktion ergänzt: `Element.prototype.
+scrollIntoView` (von Radix Select beim Öffnen aufgerufen, in jsdom nicht
+implementiert) wird in `src/test/setup.ts` jetzt als No-op gestubbt,
+falls nicht vorhanden — reine Testinfrastruktur, kein Verhaltenscode
+betroffen, keine bestehenden Tests verändert. `ZEITPLAN.md` (Ist-Stand
+Phase 1) und `tasks/tasks-prd-travix-platform.md` (1.3) entsprechend
+ergänzt.
+
+**Geprüft:** `npx vitest run src/components/ui/select.test.tsx` zuerst
+isoliert (5/5 grün, nach dem `scrollIntoView`-Stub — vorher ein
+`TypeError: candidate?.scrollIntoView is not a function` beim Öffnen des
+Menüs), danach `npx tsc -b` (0 Typfehler), `npm run lint` (0 Fehler),
+volle Testsuite (`npx vitest run`, 71 Testdateien, 539 Tests, alle grün
+— 534 vorher + 5 neu). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

@@ -151,6 +151,36 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   sieben Komponenten. `npm run lint` (0 Fehler), `npm run build` (0
   Typfehler) und die volle Testsuite (70 Testdateien, 534 Tests) laufen
   weiterhin grün — 525 vorher + 9 neu.
+  Vom autonomen IT-Chef-Lauf am 19.10. (weiterer Lauf desselben Tages)
+  eine Fehlkategorisierung aus dem 18.10.-Lauf (dritter Lauf, s.o.)
+  korrigiert: Dort wurden `select.tsx`, `card.tsx`, `label.tsx` und
+  `input.tsx` pauschal als "reine Radix-Wrapper" ohne eigene Testdatei
+  eingestuft. Für `card.tsx` stellte sich das im Lauf direkt davor (s.o.)
+  schon als falsch heraus — `select.tsx` hat denselben blinden Fleck:
+  `SelectTrigger` (`select.tsx`) hat eine eigene `size`-Prop-Verzweigung
+  (`"default"`/`"sm"` → `data-size`, dieselbe Art Logik wie bei `Card`s
+  `size`-Prop), verwendet in `FlightWizard.tsx`, `HotelWizard.tsx`,
+  `Profil.tsx` und `Einstellungen.tsx`, aber bisher nur indirekt über
+  deren Seiten-/Komponententests mitgetestet, nie die Select-Bausteine
+  selbst mit allen Props/Zuständen gezielt. `label.tsx`/`input.tsx`
+  bleiben dagegen bewusst ohne eigene Testdatei — beide sind tatsächlich
+  reine Wrapper ohne jede Verzweigung (geprüft: kein Props-abhängiges
+  `className`/`data-*`), anders als die vorherige Fehlannahme bei
+  `select.tsx`. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `select.test.tsx` (5 Tests,
+  Muster analog `card.test.tsx`): `data-slot`/`data-size`-Default vs.
+  explizit `"sm"` bei `SelectTrigger`, `className`-Merge, Platzhaltertext
+  ohne Auswahl (`SelectValue`), sowie `data-slot` auf `SelectContent`/
+  `SelectItem`/`SelectLabel`/`SelectSeparator` bei geöffnetem Menü über
+  die kontrollierte `open`-Prop (analog dem `open`-Pattern in
+  `dialog.test.tsx`, kein simulierter Klick nötig). Dabei eine fehlende
+  jsdom-Funktion ergänzt: `Element.prototype.scrollIntoView` (von Radix
+  Select beim Öffnen aufgerufen, in jsdom nicht implementiert) wird in
+  `src/test/setup.ts` jetzt als No-op gestubbt, falls nicht vorhanden —
+  reine Testinfrastruktur, kein Verhaltenscode betroffen, keine
+  bestehenden Tests verändert. `npm run lint` (0 Fehler), `npm run build`
+  (0 Typfehler, via `npx tsc -b`) und die volle Testsuite (71
+  Testdateien, 539 Tests) laufen weiterhin grün — 534 vorher + 5 neu.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
