@@ -20676,3 +20676,68 @@ außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-19 (vierter Lauf, kein neuer sicherer Punkt gefunden)
+
+**Vorbereitung:** `it-chef/auto` hatte keine eigenen Commits mehr vor
+`origin/main` (die drei Läufe von heute sowie frühere Läufe waren laut
+Freigabe-Chef-Log bereits per PR gemergt) — Branch frisch von
+`origin/main` neu aufgesetzt, `main` dabei nicht angerührt. Baseline
+geprüft: `npm ci`, `npm run lint` (0 Fehler), `npm run build` (`tsc -b
+&& vite build`, 0 Typfehler, unveränderte 811-KB-Chunk-Warnung).
+
+**Gesucht, aber nicht übernommen:**
+- Alle UI-Komponenten (`src/components/ui/`), alle Pages, alle Hooks und
+  alle `lib/`-Dateien außer `input.tsx`/`label.tsx` haben inzwischen
+  eigene Testdateien — die Testabdeckungslücke, die die letzten Läufe
+  bearbeitet haben, ist komplett geschlossen. `input.tsx`/`label.tsx`
+  erneut gelesen: beide bestätigt reine Wrapper ohne jede
+  Props-Verzweigung, bewusst weiterhin ohne eigene Testdatei.
+- `formatTime()`-Invalid-Date-Fund aus `reports/support-chef.md`
+  (19.10.) ist bereits als eigener, fertiger PR #34
+  (`it-chef-autofix/formattime-invalid-date-2026-10-19`) offen — dort
+  nochmal denselben Fix zu bauen wäre doppelte Arbeit auf einem anderen
+  Branch/Mechanismus; bleibt bewusst unangetastet, das Mergen ist Sache
+  des Freigabe-Chef-Laufs bzw. Nis.
+- Die beiden anderen Support-Chef-Vorschläge von heute (Lösch-Warnungen-
+  Tonalität in `Favoriten.tsx`/`Warenkorb.tsx`/`Preisalarme.tsx`/
+  `Aktivitaeten.tsx`/`EditMode.tsx`; Urlaubsmodus-Lissabon-Demokarte ohne
+  passende Demo-Trip-Daten) brauchen beide eine Abwägung/Entscheidung
+  (welche Warnungen wie genau umformulieren; echte Demodaten einbauen
+  vs. Karte ausblenden) — keine der beiden ist "klar genug beschrieben,
+  dass keine Interpretation nötig ist", also nicht autonom umgesetzt.
+- `tasks/tasks-prd-travix-platform.md` erneut durchgesehen: alle noch
+  offenen Punkte in Phase 2 (Base44/Auth) und Sprint 5 (Duffel
+  Stays/Zahlungsprozess) sind weiterhin per Sicherheitskriterium tabu
+  (Auth bzw. Zahlungen). Die restlichen offenen Punkte in Sprint 4/
+  ZEITPLAN.md (8.2 Foto-Upload+Vision, 8.3 vollständig kontextbezogene
+  AI-Antworten, 8.4 Quick-Action-Buttons, 8.5-8.7 Deal Finder, 8.9
+  Premium, 8.11 Hilfe, 8.12 Rewards) sind jeweils entweder architektonisch
+  offen (kein Backend/keine echten Daten) oder groß genug, dass eine
+  einzelne, klar abgegrenzte Teilaufgabe ohne Rückfrage an Ni nicht
+  erkennbar ist.
+- Eigenständig nach Edge-Case-Bugs analog zum `formatTime()`-Muster
+  gesucht (ungeschützte `new Date()`/Array-/String-Zugriffe) in
+  `src/lib/trip/*.ts`, `src/lib/duffel/client.ts`,
+  `src/lib/ai/mockAdvisor.ts`/`mockConcierge.ts` sowie `src/routes.tsx`
+  gegen `src/lib/nav-config.ts` — nichts gefunden, alle defensiv
+  genug (z. B. `cartTotals.ts`, `calendarUtils.ts`, `checklistRules.ts`
+  ohne ungeschützte Zugriffe; `duffel/client.ts` nutzt durchgängig
+  Optional-Chaining mit Fallbacks; `routes.tsx`s `builtRoutes`-Set
+  stimmt exakt mit den tatsächlich registrierten `<Route>`-Einträgen
+  überein). `npm audit` zeigt 10 Schwachstellen, aber ausschließlich in
+  Dev-/Build-Tooling (`shadcn`-CLI, `postcss-selector-parser`,
+  `@modelcontextprotocol/sdk`, `proxy-addr` u. a.), nicht in
+  Produktions-Laufzeit-Code der App — kein Punkt aus `ZEITPLAN.md`/der
+  Aufgabenliste, also nicht ohne Rückfrage angefasst.
+
+**Ergebnis:** Heute kein neuer Punkt gefunden, der alle vier
+Sicherheitskriterien erfüllt UND nicht bereits anderswo (PR #34)
+bearbeitet wird. Keine Code-Änderung in diesem Lauf.
+
+**Geprüft:** Baseline (`npm run lint`, `npm run build`) grün wie oben.
+`git status` nach Abschluss: keine uncommitteten Änderungen außer diesem
+Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
