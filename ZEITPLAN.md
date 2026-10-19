@@ -130,6 +130,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `tabs.tsx`, kein Treffer) — der dritte Lauf hatte das versehentlich mit
   `button.tsx` gleichgesetzt. `npm run lint`, `npm run build` (Typecheck)
   und die volle Testsuite (523 Tests) laufen weiterhin grün.
+  Vom autonomen IT-Chef-Lauf am 19.10. eine weitere Testabdeckungslücke
+  geschlossen: `Card` und ihre sechs Unterkomponenten (`card.tsx`,
+  verwendet in 20 Dateien, u. a. `src/pages/*`, `src/components/search/
+  *Card.tsx`, `ChecklistPanel.tsx`, `TripSummaryCard.tsx`) hatten —
+  anders als `Badge`/`Button` (s.o.) — trotz eigener `size`-Prop-Logik
+  (`"default"`/`"sm"`, steuert `data-size` und darüber die
+  `--card-spacing`-CSS-Variable) bisher keine eigene Testdatei, sondern
+  wurden bisher nur indirekt über Seiten-Tests mitgetestet, nie mit allen
+  Props/Zuständen gezielt. Über einen eigens dafür beauftragten
+  Explore-Agenten als sauberster verbleibender Kandidat identifiziert
+  (codeweite Suche nach TODO/FIXME, `console.log`, leeren `catch`-Blöcken
+  und ungeschütztem `JSON.parse` ergab keine neuen Treffer). Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `card.test.tsx` (9 Tests, Muster analog
+  `badge.test.tsx`/`button.test.tsx`): `data-slot` je Unterkomponente
+  (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`,
+  `CardContent`, `CardFooter`), `data-size`-Default vs. explizit
+  übergebenes `size="sm"` bei `Card`, sowie `className`-Merge für alle
+  sieben Komponenten. `npm run lint` (0 Fehler), `npm run build` (0
+  Typfehler) und die volle Testsuite (70 Testdateien, 534 Tests) laufen
+  weiterhin grün — 525 vorher + 9 neu.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

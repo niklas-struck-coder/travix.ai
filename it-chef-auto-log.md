@@ -20545,3 +20545,42 @@ Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-19
+
+**Ausgewählt:** Über einen eigens beauftragten Explore-Agenten gesucht
+(bisherige Berichte vom 18.10. hatten die naheliegendsten Testlücken aus
+der Fast-Refresh-Extraktion vom 10.10. schon geschlossen, gezielte
+Bug-Suche im Bericht vom 18.10. ohne neuen Fund). Fund: `src/components/
+ui/card.tsx` (`Card` und sechs Unterkomponenten, verwendet in 20
+Dateien, u. a. `src/pages/*`, `src/components/search/*Card.tsx`,
+`ChecklistPanel.tsx`, `TripSummaryCard.tsx`) hatte — anders als `Badge`/
+`Button` (18.10.) — trotz eigener `size`-Prop-Logik (`"default"`/`"sm"`,
+steuert `data-size` und darüber die `--card-spacing`-CSS-Variable)
+bisher keine eigene Testdatei, nur indirekte Mitabdeckung über
+Seiten-Tests. Erfüllt die Sicherheitskriterien: kein Bezug zu Auth/
+Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Testergänzung, `card.tsx` bleibt
+unverändert), klar beschrieben (Props/Verhalten vollständig im
+bestehenden Code sichtbar), Ergebnis objektiv prüfbar (Tests/Typecheck/
+Lint).
+
+**Umgesetzt:** Neue `src/components/ui/card.test.tsx` (9 Tests, Muster
+analog `badge.test.tsx`/`button.test.tsx`): `data-slot` je
+Unterkomponente (`Card`, `CardHeader`, `CardTitle`, `CardDescription`,
+`CardAction`, `CardContent`, `CardFooter`), `data-size`-Default
+(`"default"`) vs. explizit übergebenes `size="sm"` bei `Card`, sowie
+`className`-Merge für alle sieben Komponenten. `ZEITPLAN.md` (Ist-Stand
+Phase 1) und `tasks/tasks-prd-travix-platform.md` (1.3) entsprechend
+ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/card.test.tsx` zuerst isoliert (9/9 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 70 Testdateien, 534 Tests, alle grün — 525 vorher + 9
+neu). `git status` nach Abschluss: keine uncommitteten Änderungen außer
+den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
