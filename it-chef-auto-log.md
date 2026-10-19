@@ -20453,3 +20453,226 @@ uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-18 (vierter Lauf)
+
+**Vorbereitung:** `git fetch origin` zeigte neuen Fortschritt auf `main`
+(Avatar-Fix von Support-/Marketing-/IT-Chef, zwei Freigabe-Chef-Merges,
+„Daily status update"). `it-chef/auto` war bereits vollständig in `main`
+gemerged (identisch zu `6e8ca1f`) — Branch frisch von `origin/main`
+(`0d700ca`) neu aufgesetzt, `main` selbst dabei nicht verändert.
+
+**Auswahl:** Im dritten Lauf heute (s.o.) wurde als nächster Kandidat
+vermerkt: „`button.tsx`/`tabs.tsx` haben dieselbe `asChild`-Art Logik,
+bleiben aber für einen künftigen Lauf offen (ein Punkt pro Lauf)."
+Gegengeprüft statt pauschal übernommen: `grep asChild` über
+`src/components/ui/tabs.tsx` ergab keinen Treffer — `TabsList`/
+`TabsTrigger`/`TabsContent` sind reine Radix-Wrapper ohne `asChild`-Zweig,
+der dritte Lauf hatte das versehentlich mit `button.tsx` gleichgesetzt.
+`button.tsx` dagegen hat tatsächlich eigene, bisher ungetestete Logik
+(`asChild`-Zweig, schaltet zwischen `button` und `Slot.Root` um, identisches
+Muster zu `Badge`) und keine eigene Testdatei (`ls src/components/ui/`
+bestätigt: nur `button-variants.test.ts` existiert, keine `button.test.tsx`)
+— bisher nur indirekt über Verwendungen in anderen Komponententests
+mitgetestet (`badge.test.tsx`, `dialog.test.tsx`), nie die Komponente
+selbst mit allen ihren Props.
+
+**Warum sicher genug:** Kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+(reine Komponenten-Testabdeckung für bestehendes, unverändertes
+Markup/Verhalten). Keine offene Produkt- oder Architekturentscheidung —
+`button.tsx` existiert unverändert, es wird nichts Neues entschieden, nur
+geprüft. Klar genug beschrieben (Props/Verhalten stehen bereits im Code,
+keine Interpretation nötig). Ergebnis objektiv prüfbar (Tests laufen
+durch oder nicht).
+
+**Umgesetzt:** Neue `src/components/ui/button.test.tsx` (6 Tests, Muster
+analog `badge.test.tsx`): Rendering als `button` mit dem übergebenen Text,
+`data-slot="button"` sowie `data-variant`/`data-size` für Default- und
+explizit übergebene Variante/Größe (inkl. der zugehörigen Klassen), Merge
+eines eigenen `className`, sowie `asChild` (rendert z. B. einen `<a>`-Link
+direkt statt ihn in einen `button` zu wrappen, bei weiterhin gesetztem
+`data-slot`). `ZEITPLAN.md` (Ist-Stand Phase 1) und
+`tasks/tasks-prd-travix-platform.md` (1.3) entsprechend ergänzt, inkl.
+Korrektur der `tabs.tsx`-Fehleinschätzung aus dem dritten Lauf.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/button.test.tsx` zuerst isoliert (6/6 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 69 Testdateien, 523 Tests, alle grün — 517 vorher + 6
+neu). `git status` nach Abschluss: keine uncommitteten Änderungen außer
+den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-18 (fünfter Lauf)
+
+**Ausgewählt:** Über einen eigens beauftragten Explore-Agenten gesucht
+(Lint/Build waren zu Laufbeginn bereits grün, keine offenen TODOs/FIXMEs
+im `src`-Baum, vier frühere Läufe desselben Tages hatten die
+naheliegendsten Testlücken/Hygiene-Punkte schon geschlossen). Fund:
+`formatTime()` (formatiert einen ISO-Zeitstempel als "HH:MM") lag
+byte-identisch dupliziert in `src/components/search/FlightCard.tsx` und
+`src/components/search/TrainCard.tsx` vor — derselbe Funktionskörper,
+dieselbe Signatur. Erfüllt die Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten. Keine offene Produkt- oder
+Architekturentscheidung — reine mechanische Verschiebung ohne
+Verhaltensänderung, exakt dasselbe bereits etablierte Muster wie bei
+`formatEuro()`/`formatOfferPrice()`/`formatDuration()` (zuletzt
+`formatDuration()` am 05.10. nach `src/lib/format.ts` verschoben). Klar
+genug beschrieben (Funktionskörper ist bereits im Code identisch doppelt
+vorhanden, keine Interpretation nötig). Ergebnis objektiv prüfbar
+(Tests/Typecheck/Lint laufen durch oder nicht).
+
+**Umgesetzt:** `formatTime()` 1:1 nach `src/lib/format.ts` verschoben
+(gleiches Dokumentationskommentar-Muster wie `formatDuration` dort),
+beide lokalen Kopien in `FlightCard.tsx`/`TrainCard.tsx` entfernt, beide
+Dateien importieren `formatTime` jetzt zusätzlich aus `@/lib/format`
+(ergänzt den bestehenden `formatOfferPrice`/`formatDuration`-Import).
+Neue, direkte `formatTime`-Testgruppe in `format.test.ts` (2 Tests:
+gültiger ISO-Zeitstempel liefert "HH:MM" im lokalen Zeitformat, leerer
+String liefert den etablierten Platzhalter-Strich "—"). `ZEITPLAN.md`
+(Ist-Stand Phase 5) und `tasks/tasks-prd-travix-platform.md` (5.4)
+entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npm run lint` (0 Fehler),
+`npm run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung), volle Testsuite (`npx vitest run`, 69
+Testdateien, 525 Tests, alle grün — 523 vorher + 2 neu). `git status`
+nach Abschluss: keine uncommitteten Änderungen außer den committeten
+Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-19
+
+**Ausgewählt:** Über einen eigens beauftragten Explore-Agenten gesucht
+(bisherige Berichte vom 18.10. hatten die naheliegendsten Testlücken aus
+der Fast-Refresh-Extraktion vom 10.10. schon geschlossen, gezielte
+Bug-Suche im Bericht vom 18.10. ohne neuen Fund). Fund: `src/components/
+ui/card.tsx` (`Card` und sechs Unterkomponenten, verwendet in 20
+Dateien, u. a. `src/pages/*`, `src/components/search/*Card.tsx`,
+`ChecklistPanel.tsx`, `TripSummaryCard.tsx`) hatte — anders als `Badge`/
+`Button` (18.10.) — trotz eigener `size`-Prop-Logik (`"default"`/`"sm"`,
+steuert `data-size` und darüber die `--card-spacing`-CSS-Variable)
+bisher keine eigene Testdatei, nur indirekte Mitabdeckung über
+Seiten-Tests. Erfüllt die Sicherheitskriterien: kein Bezug zu Auth/
+Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Testergänzung, `card.tsx` bleibt
+unverändert), klar beschrieben (Props/Verhalten vollständig im
+bestehenden Code sichtbar), Ergebnis objektiv prüfbar (Tests/Typecheck/
+Lint).
+
+**Umgesetzt:** Neue `src/components/ui/card.test.tsx` (9 Tests, Muster
+analog `badge.test.tsx`/`button.test.tsx`): `data-slot` je
+Unterkomponente (`Card`, `CardHeader`, `CardTitle`, `CardDescription`,
+`CardAction`, `CardContent`, `CardFooter`), `data-size`-Default
+(`"default"`) vs. explizit übergebenes `size="sm"` bei `Card`, sowie
+`className`-Merge für alle sieben Komponenten. `ZEITPLAN.md` (Ist-Stand
+Phase 1) und `tasks/tasks-prd-travix-platform.md` (1.3) entsprechend
+ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/card.test.tsx` zuerst isoliert (9/9 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 70 Testdateien, 534 Tests, alle grün — 525 vorher + 9
+neu). `git status` nach Abschluss: keine uncommitteten Änderungen außer
+den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-19 (weiterer Lauf)
+
+**Ausgewählt:** Nochmaliger Blick auf die im 18.10.-Lauf (dritter Lauf)
+getroffene Kategorisierung, die `select.tsx`, `card.tsx`, `label.tsx`
+und `input.tsx` pauschal als "reine Radix-Wrapper" ohne eigenen
+Testbedarf eingestuft hatte. Der direkt vorangehende Lauf von heute hat
+das für `card.tsx` schon widerlegt (eigene `size`-Prop-Logik). Beim
+erneuten Durchsehen derselben vier Dateien zeigt sich: `select.tsx` hat
+denselben blinden Fleck — `SelectTrigger` hat eine eigene `size`-Prop-
+Verzweigung (`"default"`/`"sm"` → `data-size`, dieselbe Art Logik wie
+bei `Card`), verwendet in `FlightWizard.tsx`, `HotelWizard.tsx`,
+`Profil.tsx` und `Einstellungen.tsx`, aber bisher nur indirekt über
+deren Tests mitgetestet. `label.tsx`/`input.tsx` dagegen bestätigt: echte
+reine Wrapper ohne jede Props-abhängige Verzweigung, bleiben bewusst
+ohne eigene Testdatei. Erfüllt die Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Testergänzung, `select.tsx` bleibt
+unverändert), klar beschrieben (Props/Verhalten vollständig im
+bestehenden Code sichtbar), Ergebnis objektiv prüfbar (Tests/Typecheck/
+Lint).
+
+**Umgesetzt:** Neue `src/components/ui/select.test.tsx` (5 Tests, Muster
+analog `card.test.tsx`): `data-slot`/`data-size`-Default (`"default"`)
+vs. explizit übergebenes `size="sm"` bei `SelectTrigger`, `className`-
+Merge, Platzhaltertext ohne Auswahl (`SelectValue`), sowie `data-slot`
+auf `SelectContent`/`SelectItem`/`SelectLabel`/`SelectSeparator` bei
+geöffnetem Menü über die kontrollierte `open`-Prop (analog dem
+`open`-Pattern in `dialog.test.tsx`, kein simulierter Klick nötig).
+Dabei eine fehlende jsdom-Funktion ergänzt: `Element.prototype.
+scrollIntoView` (von Radix Select beim Öffnen aufgerufen, in jsdom nicht
+implementiert) wird in `src/test/setup.ts` jetzt als No-op gestubbt,
+falls nicht vorhanden — reine Testinfrastruktur, kein Verhaltenscode
+betroffen, keine bestehenden Tests verändert. `ZEITPLAN.md` (Ist-Stand
+Phase 1) und `tasks/tasks-prd-travix-platform.md` (1.3) entsprechend
+ergänzt.
+
+**Geprüft:** `npx vitest run src/components/ui/select.test.tsx` zuerst
+isoliert (5/5 grün, nach dem `scrollIntoView`-Stub — vorher ein
+`TypeError: candidate?.scrollIntoView is not a function` beim Öffnen des
+Menüs), danach `npx tsc -b` (0 Typfehler), `npm run lint` (0 Fehler),
+volle Testsuite (`npx vitest run`, 71 Testdateien, 539 Tests, alle grün
+— 534 vorher + 5 neu). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
+## 2026-10-19 (dritter Lauf)
+
+**Ausgewählt:** Weitergeführt, was die beiden vorangehenden Läufe von
+heute begonnen haben: die 18.10.-Pauschalkategorisierung von
+`select.tsx`, `card.tsx`, `label.tsx` und `input.tsx` als "reine
+Radix-Wrapper" hatte sich für `card.tsx` und `select.tsx` bereits als
+falsch herausgestellt (beide haben eigene `size`-Prop-Verzweigungen).
+`tabs.tsx` war in dieser ursprünglichen Liste gar nicht enthalten,
+zeigt beim eigenständigen Durchsehen aber denselben blinden Fleck:
+`Tabs` (`src/components/ui/tabs.tsx`) hat eine eigene `orientation`-
+Prop-Verzweigung (`data-orientation`) und `TabsList` eine eigene
+`variant`-Prop-Verzweigung (`data-variant`, dieselbe `cva()`-Art Logik
+wie bei `Card`/`SelectTrigger`, via `tabsListVariants` aus
+`tabs-variants.ts`, das selbst schon getestet ist). Aktuell einzig
+genutzt in `FlightWizard.tsx`, dessen `FlightWizard.test.tsx` nur den
+tatsächlich verwendeten `value`/`onValueChange`-Ablauf prüft (geprüft:
+kein `data-slot`/`data-orientation`/`data-variant` in diesem Testfile),
+nicht die Tabs-Bausteine selbst mit allen Props. Erfüllt die
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+rechtlichen Texten, keine offene Produkt-/Architekturentscheidung
+(reine Testergänzung, `tabs.tsx` bleibt unverändert), klar beschrieben
+(Props/Verhalten vollständig im bestehenden Code sichtbar), Ergebnis
+objektiv prüfbar (Tests/Typecheck/Lint).
+
+**Umgesetzt:** Neue `src/components/ui/tabs.test.tsx` (8 Tests, Muster
+analog `card.test.tsx`/`select.test.tsx`): bei `Tabs` `data-slot`-
+Konstante sowie `data-orientation`-Default (`"horizontal"`) vs.
+explizit übergebenes `orientation="vertical"`, plus `className`-Merge;
+bei `TabsList` `data-slot`-Konstante sowie `data-variant`-Default
+(`"default"`) vs. explizit übergebenes `variant="line"`, plus
+`className`-Merge; bei `TabsTrigger` und `TabsContent` je `data-slot`-
+Konstante plus `className`-Merge. `ZEITPLAN.md` (Ist-Stand Phase 1) und
+`tasks/tasks-prd-travix-platform.md` (1.3) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/tabs.test.tsx` zuerst isoliert (8/8 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 72 Testdateien, 547 Tests, alle grün — 539 vorher +
+8 neu). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

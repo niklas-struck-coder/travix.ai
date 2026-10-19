@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatEuro, formatOfferPrice, formatDuration, summarizeFlightOffer } from '@/lib/format'
+import { formatEuro, formatOfferPrice, formatDuration, formatTime, summarizeFlightOffer } from '@/lib/format'
 import type { FlightOffer } from '@/types/duffel'
 
 // Intl.NumberFormat separates the amount from the currency symbol with a
@@ -73,6 +73,16 @@ describe('formatDuration', () => {
 
   it('returns the raw string for an unparseable duration', () => {
     expect(formatDuration('not-a-duration')).toBe('not-a-duration')
+  })
+})
+
+describe('formatTime', () => {
+  it('formats an ISO timestamp as HH:MM local time', () => {
+    expect(formatTime('2026-01-01T10:05:00Z')).toBe('10:05')
+  })
+
+  it('shows a placeholder dash for a missing timestamp', () => {
+    expect(formatTime('')).toBe('—')
   })
 })
 

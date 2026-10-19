@@ -2,13 +2,8 @@ import { Plane, ArrowRight, Clock, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatOfferPrice, formatDuration } from '@/lib/format'
+import { formatOfferPrice, formatDuration, formatTime } from '@/lib/format'
 import type { FlightOffer } from '@/types/duffel'
-
-function formatTime(isoString: string) {
-  if (!isoString) return '—'
-  return new Date(isoString).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-}
 
 function formatDate(isoString: string) {
   if (!isoString) return '—'

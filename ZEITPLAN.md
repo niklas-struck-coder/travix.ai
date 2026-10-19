@@ -106,6 +106,101 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   wrappen, bei weiterhin gesetztem `data-slot`). `npm run lint`, `npm run
   build` (Typecheck) und die volle Testsuite (517 Tests) laufen weiterhin
   grün.
+  Vom autonomen IT-Chef-Lauf am 18.10. (vierter Lauf desselben Tages)
+  dieselbe Testabdeckungslücke für `Button` geschlossen: `button.tsx`
+  hatte — anders als die drei reinen Radix-Wrapper (`select.tsx`,
+  `card.tsx`, `label.tsx`, `input.tsx`, im dritten Lauf gegengeprüft) —
+  entgegen der im dritten Lauf getroffenen Kategorie "reiner Wrapper"
+  tatsächlich eigene Logik (ein `asChild`-Zweig, der zwischen `button`
+  und `Slot.Root` umschaltet, analog `Badge`), aber bisher keine eigene
+  Testdatei — bestehende Tests decken `Button` bisher nur indirekt über
+  seine Verwendung in anderen Komponenten ab, nie die Komponente selbst
+  mit ihren Props (`variant`, `size`, `asChild`, `className`). Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `button.test.tsx` (6 Tests, Muster analog
+  `badge.test.tsx`): Rendering als `button` mit dem übergebenen Text,
+  `data-slot="button"` sowie `data-variant`/`data-size` für Default- und
+  explizit übergebene Variante/Größe (inkl. der zugehörigen Klassen),
+  Merge eines eigenen `className`, sowie `asChild` (rendert z. B. einen
+  `<a>`-Link direkt statt ihn in einen `button` zu wrappen, bei
+  weiterhin gesetztem `data-slot`). Das strukturell identische Muster in
+  `tabs.tsx` bleibt entgegen der im dritten Lauf gemachten Annahme kein
+  Kandidat für einen Folgelauf: `TabsList`/`TabsTrigger`/`TabsContent`
+  haben keinen `asChild`-Zweig (geprüft per `grep asChild` im gesamten
+  `tabs.tsx`, kein Treffer) — der dritte Lauf hatte das versehentlich mit
+  `button.tsx` gleichgesetzt. `npm run lint`, `npm run build` (Typecheck)
+  und die volle Testsuite (523 Tests) laufen weiterhin grün.
+  Vom autonomen IT-Chef-Lauf am 19.10. eine weitere Testabdeckungslücke
+  geschlossen: `Card` und ihre sechs Unterkomponenten (`card.tsx`,
+  verwendet in 20 Dateien, u. a. `src/pages/*`, `src/components/search/
+  *Card.tsx`, `ChecklistPanel.tsx`, `TripSummaryCard.tsx`) hatten —
+  anders als `Badge`/`Button` (s.o.) — trotz eigener `size`-Prop-Logik
+  (`"default"`/`"sm"`, steuert `data-size` und darüber die
+  `--card-spacing`-CSS-Variable) bisher keine eigene Testdatei, sondern
+  wurden bisher nur indirekt über Seiten-Tests mitgetestet, nie mit allen
+  Props/Zuständen gezielt. Über einen eigens dafür beauftragten
+  Explore-Agenten als sauberster verbleibender Kandidat identifiziert
+  (codeweite Suche nach TODO/FIXME, `console.log`, leeren `catch`-Blöcken
+  und ungeschütztem `JSON.parse` ergab keine neuen Treffer). Reine
+  Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug
+  gefunden. Neue `card.test.tsx` (9 Tests, Muster analog
+  `badge.test.tsx`/`button.test.tsx`): `data-slot` je Unterkomponente
+  (`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`,
+  `CardContent`, `CardFooter`), `data-size`-Default vs. explizit
+  übergebenes `size="sm"` bei `Card`, sowie `className`-Merge für alle
+  sieben Komponenten. `npm run lint` (0 Fehler), `npm run build` (0
+  Typfehler) und die volle Testsuite (70 Testdateien, 534 Tests) laufen
+  weiterhin grün — 525 vorher + 9 neu.
+  Vom autonomen IT-Chef-Lauf am 19.10. (weiterer Lauf desselben Tages)
+  eine Fehlkategorisierung aus dem 18.10.-Lauf (dritter Lauf, s.o.)
+  korrigiert: Dort wurden `select.tsx`, `card.tsx`, `label.tsx` und
+  `input.tsx` pauschal als "reine Radix-Wrapper" ohne eigene Testdatei
+  eingestuft. Für `card.tsx` stellte sich das im Lauf direkt davor (s.o.)
+  schon als falsch heraus — `select.tsx` hat denselben blinden Fleck:
+  `SelectTrigger` (`select.tsx`) hat eine eigene `size`-Prop-Verzweigung
+  (`"default"`/`"sm"` → `data-size`, dieselbe Art Logik wie bei `Card`s
+  `size`-Prop), verwendet in `FlightWizard.tsx`, `HotelWizard.tsx`,
+  `Profil.tsx` und `Einstellungen.tsx`, aber bisher nur indirekt über
+  deren Seiten-/Komponententests mitgetestet, nie die Select-Bausteine
+  selbst mit allen Props/Zuständen gezielt. `label.tsx`/`input.tsx`
+  bleiben dagegen bewusst ohne eigene Testdatei — beide sind tatsächlich
+  reine Wrapper ohne jede Verzweigung (geprüft: kein Props-abhängiges
+  `className`/`data-*`), anders als die vorherige Fehlannahme bei
+  `select.tsx`. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `select.test.tsx` (5 Tests,
+  Muster analog `card.test.tsx`): `data-slot`/`data-size`-Default vs.
+  explizit `"sm"` bei `SelectTrigger`, `className`-Merge, Platzhaltertext
+  ohne Auswahl (`SelectValue`), sowie `data-slot` auf `SelectContent`/
+  `SelectItem`/`SelectLabel`/`SelectSeparator` bei geöffnetem Menü über
+  die kontrollierte `open`-Prop (analog dem `open`-Pattern in
+  `dialog.test.tsx`, kein simulierter Klick nötig). Dabei eine fehlende
+  jsdom-Funktion ergänzt: `Element.prototype.scrollIntoView` (von Radix
+  Select beim Öffnen aufgerufen, in jsdom nicht implementiert) wird in
+  `src/test/setup.ts` jetzt als No-op gestubbt, falls nicht vorhanden —
+  reine Testinfrastruktur, kein Verhaltenscode betroffen, keine
+  bestehenden Tests verändert. `npm run lint` (0 Fehler), `npm run build`
+  (0 Typfehler, via `npx tsc -b`) und die volle Testsuite (71
+  Testdateien, 539 Tests) laufen weiterhin grün — 534 vorher + 5 neu.
+  Vom autonomen IT-Chef-Lauf am 19.10. (dritter Lauf desselben Tages) die
+  letzte verbliebene Lücke in derselben, ursprünglich 18.10. als "reine
+  Radix-Wrapper" fehlkategorisierten Gruppe geschlossen: `tabs.tsx`
+  (aktuell einzig genutzt in `FlightWizard.tsx`) war in dieser
+  Kategorisierung gar nicht enthalten, hat aber denselben blinden Fleck
+  wie `Card`/`SelectTrigger` — `Tabs` hat eine eigene `orientation`-Prop-
+  Verzweigung (`data-orientation`) und `TabsList` eine eigene `variant`-
+  Prop-Verzweigung (`data-variant`, dieselbe `cva()`-Art Logik), beide
+  bisher nur indirekt über `FlightWizard.test.tsx` mitgetestet (das nur
+  den tatsächlich genutzten `value`/`onValueChange`-Ablauf prüft, nicht
+  die Tabs-Bausteine selbst mit allen Props). Reine Testabdeckung für
+  bestehendes, unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `tabs.test.tsx` (8 Tests, Muster analog `card.test.tsx`/
+  `select.test.tsx`): `data-slot`/`data-orientation`-Default
+  (`"horizontal"`) vs. explizit `"vertical"` bei `Tabs`, `className`-
+  Merge; `data-slot`/`data-variant`-Default (`"default"`) vs. explizit
+  `"line"` bei `TabsList`, `className`-Merge; `data-slot`/`className`-
+  Merge bei `TabsTrigger` und `TabsContent`. `npm run lint` (0 Fehler),
+  `npm run build` (0 Typfehler) und die volle Testsuite (72 Testdateien,
+  547 Tests) laufen weiterhin grün — 539 vorher + 8 neu.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.
@@ -1866,6 +1961,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `role="alert"`-Tests in `Flugsuche.test.tsx`/`Hotelsuche.test.tsx`
   unverändert grün (decken dasselbe Verhalten bereits ab), keine neuen
   Tests nötig.
+  Vom autonomen IT-Chef-Lauf am 18.10. (fünfter Lauf desselben Tages) über
+  einen eigens beauftragten Explore-Agenten den letzten verbliebenen
+  Vertreter derselben Duplikations-Kategorie wie `formatEuro`/
+  `formatOfferPrice`/`formatDuration` gefunden: `formatTime()` (formatiert
+  einen ISO-Zeitstempel als "HH:MM") lag byte-identisch dupliziert in
+  `FlightCard.tsx` und `TrainCard.tsx` vor, anders als die bereits nach
+  `src/lib/format.ts` verschobenen Geschwister-Funktionen. Fix: 1:1
+  verschoben, beide lokalen Kopien entfernt, beide Karten importieren
+  `formatTime` jetzt aus `@/lib/format` — reine Verschiebung ohne
+  Verhaltensänderung. Neue, direkte `formatTime`-Testgruppe in
+  `format.test.ts` (2 Tests: gültiger Zeitstempel liefert "HH:MM",
+  leerer String liefert "—"). `npm run lint`, `npm run build`
+  (Typecheck) und die volle Testsuite (525 Tests) laufen weiterhin grün.
 - 🟡 Phase 6 Buchungsseite — Grundgerüst mit editierbaren Sektionen steht
   (6.1-6.5, 6.11, 6.13), manueller Bearbeitungsmodus für Aktivitäten
   (6.12) seit 17.08. ebenfalls fertig, aber Kostenübersicht (6.6, 6.7) und
