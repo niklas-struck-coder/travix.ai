@@ -181,6 +181,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bestehenden Tests verändert. `npm run lint` (0 Fehler), `npm run build`
   (0 Typfehler, via `npx tsc -b`) und die volle Testsuite (71
   Testdateien, 539 Tests) laufen weiterhin grün — 534 vorher + 5 neu.
+  Vom autonomen IT-Chef-Lauf am 19.10. (dritter Lauf desselben Tages) die
+  letzte verbliebene Lücke in derselben, ursprünglich 18.10. als "reine
+  Radix-Wrapper" fehlkategorisierten Gruppe geschlossen: `tabs.tsx`
+  (aktuell einzig genutzt in `FlightWizard.tsx`) war in dieser
+  Kategorisierung gar nicht enthalten, hat aber denselben blinden Fleck
+  wie `Card`/`SelectTrigger` — `Tabs` hat eine eigene `orientation`-Prop-
+  Verzweigung (`data-orientation`) und `TabsList` eine eigene `variant`-
+  Prop-Verzweigung (`data-variant`, dieselbe `cva()`-Art Logik), beide
+  bisher nur indirekt über `FlightWizard.test.tsx` mitgetestet (das nur
+  den tatsächlich genutzten `value`/`onValueChange`-Ablauf prüft, nicht
+  die Tabs-Bausteine selbst mit allen Props). Reine Testabdeckung für
+  bestehendes, unverändertes Verhalten, kein neuer Bug gefunden. Neue
+  `tabs.test.tsx` (8 Tests, Muster analog `card.test.tsx`/
+  `select.test.tsx`): `data-slot`/`data-orientation`-Default
+  (`"horizontal"`) vs. explizit `"vertical"` bei `Tabs`, `className`-
+  Merge; `data-slot`/`data-variant`-Default (`"default"`) vs. explizit
+  `"line"` bei `TabsList`, `className`-Merge; `data-slot`/`className`-
+  Merge bei `TabsTrigger` und `TabsContent`. `npm run lint` (0 Fehler),
+  `npm run build` (0 Typfehler) und die volle Testsuite (72 Testdateien,
+  547 Tests) laufen weiterhin grün — 539 vorher + 8 neu.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

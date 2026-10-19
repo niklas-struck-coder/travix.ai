@@ -20631,3 +20631,48 @@ uncommitteten Änderungen außer den committeten Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-19 (dritter Lauf)
+
+**Ausgewählt:** Weitergeführt, was die beiden vorangehenden Läufe von
+heute begonnen haben: die 18.10.-Pauschalkategorisierung von
+`select.tsx`, `card.tsx`, `label.tsx` und `input.tsx` als "reine
+Radix-Wrapper" hatte sich für `card.tsx` und `select.tsx` bereits als
+falsch herausgestellt (beide haben eigene `size`-Prop-Verzweigungen).
+`tabs.tsx` war in dieser ursprünglichen Liste gar nicht enthalten,
+zeigt beim eigenständigen Durchsehen aber denselben blinden Fleck:
+`Tabs` (`src/components/ui/tabs.tsx`) hat eine eigene `orientation`-
+Prop-Verzweigung (`data-orientation`) und `TabsList` eine eigene
+`variant`-Prop-Verzweigung (`data-variant`, dieselbe `cva()`-Art Logik
+wie bei `Card`/`SelectTrigger`, via `tabsListVariants` aus
+`tabs-variants.ts`, das selbst schon getestet ist). Aktuell einzig
+genutzt in `FlightWizard.tsx`, dessen `FlightWizard.test.tsx` nur den
+tatsächlich verwendeten `value`/`onValueChange`-Ablauf prüft (geprüft:
+kein `data-slot`/`data-orientation`/`data-variant` in diesem Testfile),
+nicht die Tabs-Bausteine selbst mit allen Props. Erfüllt die
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+rechtlichen Texten, keine offene Produkt-/Architekturentscheidung
+(reine Testergänzung, `tabs.tsx` bleibt unverändert), klar beschrieben
+(Props/Verhalten vollständig im bestehenden Code sichtbar), Ergebnis
+objektiv prüfbar (Tests/Typecheck/Lint).
+
+**Umgesetzt:** Neue `src/components/ui/tabs.test.tsx` (8 Tests, Muster
+analog `card.test.tsx`/`select.test.tsx`): bei `Tabs` `data-slot`-
+Konstante sowie `data-orientation`-Default (`"horizontal"`) vs.
+explizit übergebenes `orientation="vertical"`, plus `className`-Merge;
+bei `TabsList` `data-slot`-Konstante sowie `data-variant`-Default
+(`"default"`) vs. explizit übergebenes `variant="line"`, plus
+`className`-Merge; bei `TabsTrigger` und `TabsContent` je `data-slot`-
+Konstante plus `className`-Merge. `ZEITPLAN.md` (Ist-Stand Phase 1) und
+`tasks/tasks-prd-travix-platform.md` (1.3) entsprechend ergänzt.
+
+**Geprüft:** `npm ci` (frischer Checkout). `npx vitest run
+src/components/ui/tabs.test.tsx` zuerst isoliert (8/8 grün), danach
+`npm run lint` (0 Fehler), `npm run build` (`tsc -b && vite build`, 0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung), volle Testsuite
+(`npx vitest run`, 72 Testdateien, 547 Tests, alle grün — 539 vorher +
+8 neu). `git status` nach Abschluss: keine uncommitteten Änderungen
+außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
