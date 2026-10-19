@@ -1,10 +1,59 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-18)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-19)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-19: nichts Neues — drei neue Commits, aber alle reine
+Testabdeckung ohne Verhaltensänderung, Kandidatentopf bleibt bei **fünf**,
+alle vier Fragen weiterhin offen
+
+**Geprüft:** Die vier offenen Fragen unten zuerst gegen den aktuellen
+Stand geprüft — keine Änderung seit dem 18.10.: `status.md` (Update vom
+18.10., keine neue Notiz von Ni), `ZEITPLAN.md` (6.2 "Beim Anbieter
+buchen"-Button weiterhin `[ ]`), kein `changelog`-Treffer in `src/`
+(Footer-Changelog-Seite weiterhin nicht gebaut), keine neuen Kanal-Links.
+Alle vier Fragen bleiben offen.
+
+Danach `git log` von der eigenen Vorlauf-Basis (`cd096d5`, Stand 18.10.)
+gegen `origin/main` (`beffa92`) geprüft: 16 neue Commits, davon drei mit
+Dateiänderung unter `src/` (`324c1f4`, `aed046b`, `2d28bbd` — alle vom
+19.10., IT-Chef-Auto-Testabdeckung für Card/Select/Tabs) sowie ein
+vierter vom 18.10. (`21f1fc9`, `formatTime()`-Konsolidierung aus
+FlightCard/TrainCard nach `lib/format.ts`). Alle vier einzeln per
+`git show` geprüft: durchweg reine Testabdeckung bzw. eine
+byte-identische Funktionsverschiebung ohne Verhaltensänderung (bei
+`21f1fc9` die Diffs in `FlightCard.tsx`/`TrainCard.tsx`/`format.ts`
+direkt verglichen — dieselbe Logik, nur an einen Ort verschoben). Keine
+dieser vier Änderungen ist ein neuer Tier-4-Kandidat, gleiche
+Ausschlussregel wie bei früheren reinen Testabdeckungs-/Konsolidierungs-
+Commits (z. B. Update 2026-10-14). Die übrigen zwölf Commits sind Merges,
+Berichte, Logs und ein Daily-Status-Update, keine Produkt-Codeänderung.
+
+Der Marketing-Chef-Bericht vom 18.10. (`reports/marketing-chef.md`,
+Commit `4ef1eb8c`) schlägt Ni vor, den bereits gegengeprüften
+Avatar-Fehlerzustand-Fix jetzt als eigenständigen Mini-Post zu bringen —
+das ist aber derselbe Fund, der hier bereits gestern (18.10.) als Tier-
+4-Kandidat 61 aufgenommen wurde, keine neue Information. Ein eigenständi-
+ges Social-Content-Stück dafür bleibt bewusst ungeschrieben: dieselbe
+seit 20.08. geltende Selbstbeschränkung wie gestern, und gestern wurde
+genau dieser Fund aus demselben Grund schon einmal bewusst nicht einzeln
+gepostet — ohne neue Information (eine beantwortete Frage oder einen
+neuen Kandidaten, der die Achter-Schwelle reißt) wäre ein heutiger
+Kurswechsel keine neue Entscheidung, nur eine Wiederholung derselben
+Abwägung mit einem anderen Ergebnis.
+
+**Kandidatentopf bleibt bei fünf** (57-61, Stand 18.10.), weiterhin klar
+unter der Achter-Schwelle für eine sechste Mini-Changelog-Ausgabe. Keine
+neue Ausgabe heute.
+
+**Nächster Lauf:** weiterhin zuerst die vier offenen Fragen gegenprüfen,
+dann prüfen ob seit `beffa92` neue Produkt-Codeänderungen (nicht nur
+Testabdeckung/Konsolidierung) hinzugekommen sind, und den Kandidatentopf
+(Stand 19.10.: fünf) gegen den etablierten 06.09.-Maßstab (acht = genug)
+weiterführen.
 
 ## Update 2026-10-18: zwei neue Tier-4-Kandidaten (60: ein Wechsel des
 Transportmittels weg von "Flug" löscht jetzt auch das alte, nicht mehr
