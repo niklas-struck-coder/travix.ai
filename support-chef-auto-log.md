@@ -4943,3 +4943,74 @@ zwischen Chat- und Standalone-Suchseiten.
 
 Kein Punkt erfunden, der sich nicht am genannten Dateibezug im aktuellen
 Quelltext nachvollziehen lässt.
+
+---
+
+## 2026-10-19 — `formatTime()`-Konsolidierung (`src/lib/format.ts`, `FlightCard.tsx`, `TrainCard.tsx`) plus Nachkontrolle drei offener Punkte
+
+**Geprüfter Bereich:** Seit dem letzten Lauf (18.10.) kam laut
+`git log`/`ZEITPLAN.md` kein neues Feature dazu — die Commits vom 18./19.10.
+sind reine Testabdeckungs-Ergänzungen für UI-Primitive (`Badge`, `Button`,
+`Card`, `Select`, `Tabs`) ohne Verhaltensänderung, bis auf eine Ausnahme:
+Commit `21f1fc9` (18.10., fünfter Lauf) hat `formatTime()` aus
+`FlightCard.tsx`/`TrainCard.tsx` nach `src/lib/format.ts` konsolidiert —
+das ist der einzige in diesem Zeitraum tatsächlich angefasste
+Anzeige-Code, also der richtige Bereich für diesen Lauf. Dazu zusätzlich
+die drei aus dem 18.10.-Bericht weiterhin offenen Punkte im aktuellen
+Quelltext gegengeprüft.
+
+### Neuer Fund
+
+**`formatTime()` fängt nur eine leere Zeichenkette ab, nicht eine
+ungültige — bei kaputten Zeitangaben zeigt die Flug-/Zugkarte wörtlich
+"Invalid Date" statt einer Startzeit**
+
+`src/lib/format.ts:23-26`:
+```ts
+export function formatTime(isoString: string): string {
+  if (!isoString) return '—'
+  return new Date(isoString).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+}
+```
+Verifiziert (Node): `new Date('nicht-parsbar').toLocaleTimeString('de-DE', …)`
+liefert die Zeichenkette `"Invalid Date"` — kein Fehler, kein Fallback,
+einfach dieser Text. `formatTime()` wird in `FlightCard.tsx:43,50` für
+`firstSegment?.departingAt` / `…arrivingAt` und in `TrainCard.tsx:33,40`
+für `offer.departureTime` / `offer.arrivalTime` verwendet — beides
+Zeitstempel aus der Duffel-Flugsuche bzw. den Zug-Angeboten, also externe/
+Mock-Daten, nicht selbst erzeugte. Der Guard `if (!isoString) return '—'`
+deckt nur den Fall "Feld fehlt ganz" ab (dafür sorgt in `FlightCard.tsx`
+zusätzlich `?? ''`), nicht den Fall "Feld ist gesetzt, aber kein gültiges
+ISO-Datum" — genau das Muster, das `formatOfferPrice()` direkt daneben
+(`format.ts:9-20`) für einen vergleichbaren Fall (ungültiger/leerer
+Währungscode von Duffel) bereits per `try/catch` mit Fallback auf die
+Rohwerte behandelt. `formatTime()` hat dieses Netz nicht. Für eine
+Nutzerin, die gerade Flug- oder Zugergebnisse vergleicht, wäre
+"Invalid Date · 3h 15min" direkt neben Flughafen-/Bahnhofsnamen ein
+deutlich auffälligerer Eindruck von "diese App ist kaputt" als ein
+neutrales "—". `format.test.ts:79-86` deckt bisher nur den Happy-Path und
+die leere Zeichenkette ab, keinen ungültigen String.
+
+*Vorschlag:* In `formatTime()` das Ergebnis von `new Date(isoString)` vor
+der Formatierung auf `Number.isNaN(date.getTime())` prüfen und in diesem
+Fall ebenfalls `'—'` zurückgeben — ein Test analog "ungültiger
+Zeitstempel → '—'" würde das absichern. `FlightCard.tsx`s eigene,
+nicht konsolidierte `formatDate()`-Hilfsfunktion (Zeile 8-11) hat
+denselben Lücken-Typ, falls das beim Fix gleich mitgenommen werden soll.
+
+### Nachkontrolle: drei seit 17./18.10. offene Punkte — alle weiterhin unverändert im Code
+
+1. **Lösch-Warnungen klingen überall gleich dramatisch.** Weiterhin
+   wortgleich "Das lässt sich nicht rückgängig machen" in
+   `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
+   `Aktivitaeten.tsx:118` — unverändert gegenüber dem 18.10.-Bericht.
+2. **Lissabon-Demokarte vs. Urlaubsmodus-Trip-Quelle.**
+   `Urlaubsmodus.tsx:12` lädt den Trip weiterhin ausschließlich über
+   `loadStoredChat()?.trip` — unverändert.
+3. **Leeres Formular bei "Manuell suchen" nach Flug-Bearbeiten.**
+   `Buchung.tsx:176` verlinkt weiterhin auf das feste `manualHref:
+   '/flugsuche'` ohne Zielort-Übergabe; `Flugsuche.tsx` liest keinen
+   `destination`-Parameter — unverändert.
+
+Keine dieser drei wurde in der Zwischenzeit angefasst, also auch kein
+Grund, den jeweiligen Vorschlag zu ändern.
