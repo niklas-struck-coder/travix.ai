@@ -1,51 +1,50 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-18
+**Datum:** 2026-10-19
 
-## Was ist seit dem letzten Eintrag (2026-10-17) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-18) passiert?
 
-Die wichtigste Neuigkeit: Der Avatar-Fehlerzustand, den ich dir die letzten
-Berichte über als "Status unklar" gemeldet habe, ist jetzt wirklich fertig
-und doppelt gegengeprüft. IT-Chef hat heute (18.10.) in `useChat.ts` an
-allen sechs betroffenen Stellen bestätigt: Schlägt eine Flug- oder
-Unterkunftssuche fehl, zeigt der Avatar jetzt sein Warndreieck statt
-weiter zu lächeln – und das ein zweites Mal im Code gegengeprüft, nicht
-nur behauptet.
+Zwei Punkte aus dem letzten Bericht haben sich geklärt, beide positiv:
 
-Daneben kam ein neuer, noch offener Punkt dazu: Wählt man einen Flug und
-wechselt danach das Transportmittel (z. B. auf Zug), bleibt die alte
-Flugverbindung als Detailzeile stehen ("Zug · Berlin → Lissabon · 149 €").
-Noch nicht gefixt, braucht laut IT-Chef eine echte Entscheidung – für
-Marketing also noch kein Thema, nur als Kandidat vormerken.
+Der "Zug mit Flugdetails"-Kandidat, den ich zuletzt nur als unklaren
+Kandidaten vorgemerkt hatte, ist jetzt bestätigt gefixt – Support-Chef hat
+selbst im Code nachgeschaut: Wechselt man nach einer Flugauswahl das
+Transportmittel, wird die alte Flugverbindung jetzt korrekt mitgelöscht
+(`useChat.ts:373`). Kein offener Kandidat mehr, sondern ein zweiter
+fertiger "Ehrlichkeit als Feature"-Moment neben dem Avatar-Fix.
 
-Sonst: zwei Testabdeckungs-Läufe (Badge, Variantenfunktionen) ohne
-Nutzer-sichtbare Wirkung, und die Changelog-Grundsatzfrage aus dem letzten
-Bericht ist weiterhin offen – das ist jetzt der dritte Bericht in Folge mit
-demselben Punkt. Keine neuen Nutzungsdaten vorhanden, daher auch keine
-Zahlen in diesem Bericht.
+Dazu kam ein neuer, automatisch gefixter Bug: `formatTime()` zeigte bei
+kaputten Zeitstempeln (z. B. aus einer fehlerhaften Flugdaten-Antwort) den
+Text "Invalid Date" statt eines Platzhalters – jetzt zeigt es "—"
+([PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34),
+wartet noch auf Merge). Passt vom Prinzip her genau zum Avatar-Fix: Statt
+etwas Kaputtes zu verstecken, zeigt die App ehrlich, dass etwas nicht
+geklappt hat.
+
+Der Rest der letzten Tage war reine Testabdeckung (Button, Card, Select,
+Tabs) ohne für Nutzer sichtbare Änderung. Die Changelog-Grundsatzfrage aus
+den letzten drei Berichten ist weiterhin ungelöst – das ist jetzt der
+vierte Bericht in Folge mit demselben offenen Punkt. Keine neuen
+Nutzungsdaten vorhanden, daher auch diesmal keine Zahlen im Bericht.
 
 ## Vorschläge
 
-1. **Avatar-Fix jetzt als eigenen Mini-Post bringen – der war extra
-   dafür zurückgestellt.** Die letzten beiden Berichte haben genau diese
-   Idee aufgeschoben, "bis das sauber bestätigt ist". Jetzt ist sie
-   bestätigt. Botschaft: "Wenn's schiefgeht, tut unser Avatar nicht so,
-   als wäre alles gut" – kurzer Vorher/Nachher-Screenshot (lächelnd vs.
-   Warndreieck bei fehlgeschlagener Suche), passt zur Content-Säule
-   "Ehrlichkeit als Feature".
-2. **Changelog-Entscheidung diese Woche wirklich treffen, sonst die
-   Alternative jetzt umsetzen.** Dritter Bericht mit offener Frage ist
-   ein Signal, nicht mehr zu warten. Alternative bleibt: stärkste
-   Einzelgeschichte (aktuell der Avatar-Fix, siehe Punkt 1) als Solo-Post
-   statt auf die komplette Footer-Changelog-Seite zu warten.
-3. **"Zug mit Flugdetails" als Kandidat für die nächste Sammel-Ausgabe
-   vormerken, nicht einzeln posten.** Zu technisch/klein für einen eigenen
-   Post, aber ein gutes Beispiel für "wir merken auch die kleinen
-   Unstimmigkeiten" in einer künftigen Build-in-public-Runde.
-4. **Zielgruppen-Content-Linien (Paare/Familien/Solo) aus dem
-   Marketing-Konzept endlich anschieben.** Seit dem Konzeptpapier keine
-   Bewegung. Lässt sich unabhängig vom Code-Fortschritt starten – z. B.
-   mit einem ersten Post zur Solo-Reisenden-Zielgruppe, da hier noch
-   nichts existiert.
+1. **Jetzt einen Sammel-Post bauen statt weiter einzeln zu vertagen.**
+   Drei bestätigte Fixes liegen bereit: Avatar-Warndreieck, Zug/Flug-Reset
+   und (sobald PR #34 gemergt ist) "—" statt "Invalid Date". Das ist genug
+   Material für einen "Diese Woche in der App behoben"-Post statt auf die
+   komplette Footer-Changelog-Seite zu warten. Löst damit auch die
+   Changelog-Frage, die jetzt im vierten Bericht in Folge offen ist – nicht
+   weiter diskutieren, sondern die Alternative einfach umsetzen.
+2. **"Ehrlichkeit als Feature" als wiederkehrende Content-Linie statt
+   Einzelposts etablieren.** Drei konkrete Belege in zwei Wochen (Avatar
+   zeigt Fehler statt zu lächeln, kein Flugrest nach Transportwechsel,
+   ehrlicher Platzhalter statt "Invalid Date") sind ein eigenes Muster:
+   "Wir verstecken Fehler nicht, wir zeigen sie" als kleine Serie,
+   wiederverwendbar bei jedem künftigen Fix dieser Art.
+3. **Zielgruppen-Content-Linien (Paare/Familien/Solo) endlich starten.**
+   Seit dem Konzeptpapier weiterhin keine Bewegung – unabhängig vom
+   Code-Fortschritt umsetzbar. Vorschlag: erster Post zur
+   Solo-Reisenden-Zielgruppe, da hier noch gar nichts existiert.
 
-_Letztes Update: 2026-10-18_
+_Letztes Update: 2026-10-19_
