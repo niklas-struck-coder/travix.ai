@@ -3693,7 +3693,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `getPreviousMonth`/`getNextMonth` in `calendarUtils.ts` (mit
   Jahresübergang-Unit-Tests), die Jahr und Monat atomar aus demselben
   Zustand berechnen; `Kalender.tsx` setzt beide States direkt aus dem
-  Ergebnis statt über getrennte Updater-Funktionen
+  Ergebnis statt über getrennte Updater-Funktionen.
+  Vom autonomen IT-Chef-Lauf am 19.10. (fünfter Lauf) einen eigenständig
+  gefundenen Bug behoben: `today` (und darüber `todayIso`, die "Heute"-
+  Markierung sowie der "Heute"-Button) wurde bisher per `useMemo(() => new
+  Date(), [])` einmalig beim Mount berechnet und dann für die gesamte
+  Lebensdauer der Seite eingefroren — bleibt der Tab über Mitternacht
+  hinaus offen (ohne Navigation weg und zurück), zeigt das Kalenderraster
+  weiterhin den alten Tag als "heute", bis die Seite neu gemountet wird.
+  Anders als beim bewusst analogen `getTodayIso()`-Muster in
+  `FlightWizard.tsx`/`HotelWizard.tsx`, das `new Date()` absichtlich bei
+  jedem Render frisch liest, damit das `min`-Attribut der Datumsfelder nie
+  veraltet. `today`/`todayIso` werden jetzt ebenfalls bei jedem Render neu
+  berechnet statt gecacht. Neuer Regressionstest in `Kalender.test.tsx`
+  (Systemzeit nach dem ersten Render per `vi.setSystemTime()` auf den
+  nächsten Tag vorgestellt, dann ohne Unmount über Monatsnavigation ein
+  Rerender erzwungen — Markierung muss dem neuen Tag folgen).
 - [ ] 7.12 Reisebudget (Recharts) — weiterhin blockiert, `TripDraft` hat
   keine echten Preisfelder für Transport/Unterkunft (gleicher Grund wie
   bei 6.6/6.7, siehe oben)

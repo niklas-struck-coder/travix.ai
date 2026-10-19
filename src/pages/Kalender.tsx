@@ -25,12 +25,15 @@ const trips: (CalendarTripRange & { dates: string })[] = [
 ]
 
 export function Kalender() {
-  const today = useMemo(() => new Date(), [])
+  // Not memoized: re-reads the system clock on every render so "today"
+  // never goes stale while this page stays mounted (same reasoning as
+  // getTodayIso() in FlightWizard.tsx/HotelWizard.tsx).
+  const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
 
   const grid = useMemo(() => getMonthGridDays(year, month), [year, month])
-  const todayIso = useMemo(() => toIsoDate(today.getFullYear(), today.getMonth(), today.getDate()), [today])
+  const todayIso = toIsoDate(today.getFullYear(), today.getMonth(), today.getDate())
 
   function goToPreviousMonth() {
     const previous = getPreviousMonth(year, month)

@@ -74,4 +74,25 @@ describe('Kalender', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Heute' }))
     expect(screen.getByText('Oktober 2026')).toBeInTheDocument()
   })
+
+  it('keeps the "today" marker in sync with the clock while mounted, instead of freezing it at mount time', () => {
+    render(
+      <MemoryRouter>
+        <Kalender />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('(Heute)', { exact: false }).closest('[aria-current="date"]')).toHaveTextContent('20')
+
+    // Clock moves to the next day without the component unmounting (e.g. the
+    // tab stays open past midnight). A re-render (navigating the month grid
+    // and back) must pick up the new date instead of still showing day 20.
+    vi.setSystemTime(new Date(2026, 9, 21))
+    fireEvent.click(screen.getByRole('button', { name: 'Nächster Monat' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Vorheriger Monat' }))
+
+    const todayCell = screen.getByText('(Heute)', { exact: false }).closest('[aria-current="date"]')
+    expect(todayCell).toHaveTextContent('21')
+    expect(screen.getAllByText('(Heute)', { exact: false })).toHaveLength(1)
+  })
 })

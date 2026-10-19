@@ -20741,3 +20741,53 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-19 (fünfter Lauf)
+
+**Ausgewählt:** Vierter Lauf von heute hatte keinen neuen sicheren Punkt
+gefunden (Testabdeckungslücke für UI-Komponenten komplett geschlossen,
+gezielte Bug-Suche in `lib/trip/*.ts`, `lib/duffel/client.ts`,
+`lib/ai/mockAdvisor.ts`/`mockConcierge.ts`, `routes.tsx` ohne Fund). Für
+diesen Lauf gezielt in bisher nicht durchsuchten Dateien weitergesucht
+(Chat-Komponenten, Trip-Komponenten, Search-Komponenten, Hooks,
+`calendarUtils.ts`/`cartTotals.ts`, `speech.ts`, 14 weitere Pages). Fund:
+`src/pages/Kalender.tsx:28` berechnete `today` per `useMemo(() => new
+Date(), [])` nur einmal beim Mount und fror es damit für die gesamte
+Lebensdauer der Seite ein — bleibt der Tab über Mitternacht hinaus offen
+(kein Verlassen/Zurückkehren der Route, also kein Remount), zeigt das
+Kalenderraster weiterhin den alten Tag als "heute" (Markierung, "Heute"-
+Button), bis die Seite neu gemountet wird. Inkonsistent mit dem bewusst
+analogen `getTodayIso()`-Muster in `FlightWizard.tsx`/`HotelWizard.tsx`,
+das `new Date()` absichtlich bei jedem Render frisch liest. Erfüllt die
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+rechtlichen Texten, keine offene Produkt-/Architekturentscheidung ("heute"
+soll immer heute bedeuten), klar beschrieben (Verhalten vollständig im
+bestehenden Code sichtbar, Gegenbeispiel direkt daneben im Code), Ergebnis
+objektiv prüfbar (Test mit `vi.setSystemTime()`).
+
+**Umgesetzt:** `today`/`todayIso` in `Kalender.tsx` werden jetzt bei jedem
+Render frisch berechnet statt per `useMemo` gecacht (`grid` bleibt
+memoized, da es nur von `year`/`month` abhängt). Neuer Regressionstest in
+`Kalender.test.tsx`: Systemzeit nach dem ersten Render per
+`vi.setSystemTime()` auf den nächsten Tag vorgestellt, dann ohne Unmount
+über Monatsnavigation (Nächster Monat → Vorheriger Monat) ein Rerender
+erzwungen — die "Heute"-Markierung muss dem neuen Tag folgen statt beim
+alten zu bleiben. Test vor dem Fix gegen den alten Code gegengeprüft:
+schlägt dort fehl (zeigt weiterhin Tag 20 statt 21), bestätigt also
+tatsächlich den Bug statt nur das neue Verhalten zu beschreiben.
+`ZEITPLAN.md` (7.11-Eintrag) entsprechend ergänzt; Checkbox in
+`tasks/tasks-prd-travix-platform.md` (7.11) war bereits gesetzt, keine
+Änderung dort nötig.
+
+**Geprüft:** `npm ci` (frischer Checkout). Neuer Test zunächst gegen den
+unveränderten `Kalender.tsx` laufen lassen (per `git stash` nur der
+Page-Datei) — schlägt wie erwartet fehl. Danach mit dem Fix: `npx vitest
+run src/pages/Kalender.test.tsx` isoliert (5/5 grün), `npx tsc -b` (0
+Typfehler), `npm run lint` (0 Fehler), volle Testsuite (`npx vitest run`,
+72 Testdateien, 548 Tests, alle grün — 547 vorher + 1 neu), `npm run
+build` (`tsc -b && vite build`, 0 Typfehler, unveränderte 811-KB-Chunk-
+Size-Warnung). `git status` nach Abschluss: keine uncommitteten
+Änderungen außer den committeten Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
