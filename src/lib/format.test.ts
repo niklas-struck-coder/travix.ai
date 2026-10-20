@@ -84,6 +84,10 @@ describe('formatTime', () => {
   it('shows a placeholder dash for a missing timestamp', () => {
     expect(formatTime('')).toBe('—')
   })
+
+  it('shows a placeholder dash instead of "Invalid Date" for an unparseable timestamp', () => {
+    expect(formatTime('not-a-timestamp')).toBe('—')
+  })
 })
 
 function makeOffer(overrides: Partial<FlightOffer> = {}): FlightOffer {
