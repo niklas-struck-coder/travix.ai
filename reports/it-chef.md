@@ -1,48 +1,44 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-19
+**Datum:** 2026-10-20
 
-## Was ist seit dem letzten Eintrag (2026-10-18) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-19) passiert?
 
-Der parallele Autonomie-Kanal `it-chef/auto` hatte drei weitere Läufe,
-von Freigabe-Chef unabhängig geprüft und per PR #33 in `main` gemergt:
-
-- `formatTime()` aus `FlightCard`/`TrainCard` nach `lib/format.ts`
-  konsolidiert (keine Verhaltensänderung).
-- Testabdeckungslücken für `Button` (asChild-Logik), `Card`, `Select`
-  (SelectTrigger size-Prop) und `Tabs` (orientation/variant-Props)
-  geschlossen — ausschließlich neue Tests, kein Quellcode betroffen.
+Der parallele Autonomie-Kanal `it-chef/auto` hatte heute drei weitere
+Läufe — alle ohne neuen sicheren Fund. Freigabe-Chef hat den gestrigen
+Kalender-Fix ("Heute"-Button fror sich beim Mount ein) bereits früh am
+Tag per PR geprüft und gemergt; Marketing-Chef und Support-Chef haben die
+Seite danach nachkontrolliert, Verhalten bestätigt unverändert korrekt.
 
 **Eigene gezielte Bug-Suche heute:** Tatsächlich gelesen (nicht nur
-gegrept) — `cartTotals.ts`, `checklistRules.ts`, `calculateProgress.ts`,
-`EditMode.tsx`, `useConcierge.ts`, `mockConcierge.ts`, `mockAdvisor.ts`,
-`SearchErrorAlert.tsx`, `FlightWizard.tsx`, `TripSummaryCard.tsx`,
-`nav-config.ts`, `routes.tsx`. Dazu codeweite Suche nach TODO/FIXME
-(keine), `console.log`/`console.debug`/`console.warn` (keine), leeren
-`catch`-Blöcken (keine) und ungeschütztem `JSON.parse` (einziger Fall
-weiterhin `tripStorage.ts`, bereits abgesichert). Alle Nav-Einträge aus
-`nav-config.ts` haben eine passende Route in `routes.tsx` (gebaut oder
-bewusst als Platzhalter) — keine toten Links.
+gegrept) — `lib/duffel/client.ts`, `lib/trip/tripStorage.ts`,
+`lib/trip/calendarUtils.ts`, `hooks/useChat.ts`, `pages/Kalender.tsx`,
+`pages/Urlaubsmodus.tsx`, `pages/Dashboard.tsx`,
+`components/trip/ChecklistPanel.tsx`, `components/search/HotelWizard.tsx`,
+`components/search/FlightResults.tsx`, `components/search/NoResultsMessage.tsx`,
+`lib/nav-config.ts`, `routes.tsx`. Dazu codeweite Suche nach TODO/FIXME
+(keine), `console.log`/`console.debug`/`console.warn` (keine, nur
+begründete `console.error`-Aufrufe), leeren `catch`-Blöcken (keine) und
+ungeschütztem `JSON.parse` (einziger Fall weiterhin `tripStorage.ts`,
+bereits abgesichert). Alle Nav-Einträge aus `nav-config.ts` haben eine
+passende Route in `routes.tsx` (gebaut oder bewusst als Platzhalter) —
+keine toten Links.
 
-**Ergebnis:** Einen echten Bug bestätigt und automatisch gefixt (siehe
-unten) — der Fund kam von Support-Chefs Auto-Lauf heute, ich habe ihn im
-Code nachvollzogen und selbst behoben. Darüber hinaus keine neuen Bugs in
-den heute gelesenen Bereichen. Hinweis zur Methodik: `node_modules` war
-nicht installiert (kein `npm install` erlaubt), ein automatischer
-`lint`/`typecheck`/`test`-Lauf war daher nicht möglich — Prüfung erfolgte
-durch genaues Lesen von Code und bestehenden Tests.
+**Ergebnis:** Keinen neuen Bug gefunden. Der Code in den heute gelesenen
+Bereichen ist durchgängig gegen die üblichen Fallstricke abgesichert
+(ungültige Zeitstempel/Beträge, abgebrochene Promises bei Resets,
+fehlschlagendes `localStorage`, veraltete Suchergebnisse nach
+Tab-Wechsel). Hinweis zur Methodik: `node_modules` war nicht installiert
+(kein `npm install` erlaubt), ein automatischer `lint`/`typecheck`/
+`test`-Lauf war daher nicht möglich — Prüfung erfolgte durch genaues
+Lesen von Code und bestehenden Tests.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-1. **[PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34) —
-   `formatTime()` zeigte "Invalid Date" statt Platzhalter.**
-   `src/lib/format.ts` prüfte nur auf einen leeren Zeitstempel-String,
-   nicht auf einen gültigen. Ein unparsbarer ISO-String (z. B. aus einer
-   fehlerhaften Duffel-Antwort) ergab den sichtbaren Text `"Invalid Date"`
-   in `FlightCard`/`TrainCard`. Fix ergänzt denselben Gültigkeits-Check
-   (`Number.isNaN(date.getTime())`), den `formatDuration()`/
-   `formatOfferPrice()` in derselben Datei bereits nutzen, mit Fallback
-   auf `"—"`. Eine Zeile, isoliert, Test ergänzt — sehr sicher.
+Keiner. Heute kein neuer Bug gefunden, der sicher und klein genug für
+einen automatischen Fix gewesen wäre. [PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34)
+(`formatTime()` zeigte "Invalid Date" statt Platzhalter, aus dem
+gestrigen Lauf) wartet weiterhin auf Review.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
@@ -61,10 +57,10 @@ der Fix erfordert eine echte Produktabwägung statt eines Ein-Zeilers:
 
 ## Weitere Vorschläge
 
-1. **26 offene Auto-Fix-PRs** (inkl. des heutigen #34). Mehrere ältere
-   sind inhaltlich schon identisch in `main`, weil derselbe Fund später
-   über `it-chef/auto` nochmal griff. Nur Ni kann PRs schließen; eine
-   Stichprobenprüfung vor dem Schließen lohnt sich weiterhin.
+1. **26 offene Auto-Fix-PRs**, Stand unverändert zu gestern. Mehrere
+   ältere sind inhaltlich schon identisch in `main`, weil derselbe Fund
+   später über `it-chef/auto` nochmal griff. Nur Ni kann PRs schließen;
+   eine Stichprobenprüfung vor dem Schließen lohnt sich weiterhin.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json` — kein Import irgendwo in `src/`. Entfernen reduziert
    die Bundle-Größe; Abhängigkeitsänderungen sind für diesen Kanal
@@ -74,4 +70,4 @@ der Fix erfordert eine echte Produktabwägung statt eines Ein-Zeilers:
    Zugsuche-Seite, kein Nav-Eintrag, keine echte Datenquelle angebunden.
    Entweder verdrahten oder entfernen — Produktentscheidung.
 
-_Letztes Update: 2026-10-19_
+_Letztes Update: 2026-10-20_
