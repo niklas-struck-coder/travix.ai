@@ -20979,3 +20979,63 @@ Funds).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-20, 23:08 UTC (fünfter Lauf, kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, ca. 56 Minuten nach dem vorigen
+Lauf vom selben Tag (22:11 UTC, Commit `b292b31`, App.test.tsx ergänzt).
+`it-chef/auto` war bereits identisch zu `origin/main` (kein erneutes
+`checkout -B` nötig). `git log --all --since=<Zeitpunkt des vorigen
+Commits>` über alle lokal bekannten Branches (inkl. `origin/main`, alle
+`it-chef-autofix/*`-Branches, `marketing-chef/auto`, `support-chef/auto`)
+ergibt außer dem vorigen Commit selbst keinen neuen Commit. Working
+Tree sauber.
+
+**Punktesuche:** Da die Testabdeckungs-Durchsicht (Hauptquelle der
+letzten Funde) mit dem App.tsx-Fund vom vierten Lauf nun erschöpft ist
+(Abgleich aller `.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene
+Testdateien ergibt nur noch `input.tsx`/`label.tsx` (reine Wrapper,
+bereits am 19.10. bewusst ausgenommen), `main.tsx`/`src/test/setup.ts`
+(Einstiegspunkt/Testinfrastruktur) und die reinen Typdeklarationsdateien
+`src/types/chat.ts`, `src/types/duffel.ts`, `src/types/trains.ts` (keine
+Laufzeitlogik) sowie `src/types/profile.ts`/`src/types/settings.ts`
+(nur Konstanten-Arrays/Objekte ohne Verzweigung) — für keine davon wäre
+ein neuer Test mehr als die Literalwerte selbst prüfen), stattdessen
+gezielte Bug-Suche in bisher nicht taufrisch geprüften Bereichen:
+- `tasks/tasks-prd-travix-platform.md` / `ZEITPLAN.md`: nächste offene
+  Punkte sind Epic 2.0 (Base44 Auth/Entities — durch Sicherheitskriterium
+  1 ausgeschlossen) bzw. Sprint 5 (Duffel-Stays-Freischaltung und
+  Zahlungsprozess-Entscheidung — beides explizit Produktentscheidung/
+  rechtliche Folgen, ausgeschlossen). Punkt 8.13 ("Unit-Tests für
+  calculateProgress, calculateCosts, checklistRules, Schema-Validierung")
+  ist inhaltlich bereits erledigt (alle vier Dateien unter `src/lib/trip/`
+  haben Testdateien, `calculateCosts` existiert unter dem Namen
+  `cartTotals.ts` und ist ebenfalls getestet; eine `FULL_TRIP_SCHEMA`/
+  Schema-Validierung existiert in diesem Code-Stand nicht) — stale
+  Checkbox, aber kein neuer Umsetzungspunkt, daher nicht angefasst.
+- `src/lib/trip/tripStorage.ts`, `src/hooks/useChat.ts` (alle drei
+  `.then()`-Promise-Ketten), `src/lib/utils.ts`, `src/lib/trip/
+  calendarUtils.ts`: gelesen, keine neuen Edge-Case-Lücken gefunden —
+  bereits durchgängig mit Try/Catch, `Array.isArray`-Guards und
+  Generation-Checks gegen veraltete Responses abgesichert.
+- Repo-weite Suche nach TODO/FIXME/XXX, `console.log` und
+  `eslint-disable` in `src/` (außerhalb Tests): keine Treffer.
+- `src/lib/format.ts`: `formatTime()` liefert bei einem kaputten/
+  ungültigen ISO-Zeitstempel weiterhin "Invalid Date" statt eines
+  Platzhalters — **kein neuer Fund**, sondern derselbe, bereits am
+  19.10. gefundene und auf dem separaten, plattform-verwalteten Branch
+  `it-chef-autofix/formattime-invalid-date-2026-10-19` behobene Fall
+  (PR #34, laut Support-/Marketing-Chef-Berichten weiterhin offen zur
+  Durchsicht durch Ni). Bewusst **nicht** hier erneut gefixt, um keinen
+  mit PR #34 konkurrierenden/widersprüchlichen zweiten Fix auf einem
+  anderen Branch zu erzeugen.
+
+**Ergebnis:** Kein Punkt erfüllt aktuell alle vier Sicherheitskriterien
+für einen autonomen Durchlauf. Kein Produktcode geändert, kein
+Regressionsrisiko, daher keine erneute Ausführung von Typecheck/Lint/
+Tests/Build auf unverändertem Code (zuletzt beim vierten Lauf grün:
+`tsc -b` 0 Fehler, `npm run lint` 0 Fehler, 73 Testdateien/549 Tests
+grün, `npm run build` grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
