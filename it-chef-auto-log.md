@@ -20791,3 +20791,67 @@ Size-Warnung). `git status` nach Abschluss: keine uncommitteten
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-20 (kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto`
+lag zwei Commits vor `origin/main` (die beiden letzten Läufe von
+gestern — Select/Tabs-Tests, Kalender.tsx-"Heute"-Fix — waren noch nicht
+vom Freigabe-Chef gemerged), `main` selbst war nicht weiter voraus —
+direkt auf `it-chef/auto` weitergearbeitet, `main` nicht angerührt.
+
+**Gesucht, aber nichts gefunden, das alle vier Sicherheitskriterien
+erfüllt:**
+- `ZEITPLAN.md` (Ist-Stand Phase 1/3/4) komplett durchgesehen: keine
+  offene Checkbox mehr darin. Die verbliebenen offenen Punkte liegen
+  alle in den Sprint-Abschnitten weiter unten und sind entweder
+  Backend-/Architekturentscheidungen (2.0 Base44, 4.1-4.3 echter
+  LLM-Zugang), explizit Auth/Zahlungen (Sprint 5: Duffel Stays/
+  Zahlungsprozess, aktuell laufender Sprint laut Datum) oder zu groß/
+  vage für einen einzelnen klar abgegrenzten Punkt (8.2-8.7, 8.9-8.12).
+  Alles davon per Kriterium tabu bzw. nicht objektiv genug beschrieben.
+- Testabdeckung erneut geprüft: jede Nicht-Test-Datei unter
+  `src/components`, `src/hooks`, `src/lib`, `src/pages` hat eine eigene
+  Testdatei, bis auf `src/components/ui/input.tsx` und
+  `src/components/ui/label.tsx` — beide erneut gelesen, bestätigt reine
+  Radix-/HTML-Wrapper ohne jede Props-Verzweigung, bewusst weiterhin
+  ohne eigene Testdatei (wie in mehreren Vorläufen festgestellt).
+- Eigene Bug-Suche durch vollständiges Lesen (nicht nur Grep) von
+  `src/lib/trip/calendarUtils.ts`, `cartTotals.ts`, `checklistRules.ts`,
+  `calculateProgress.ts`, `tripStorage.ts`, `src/lib/ai/mockAdvisor.ts`,
+  `src/hooks/useChat.ts`, `src/hooks/useConcierge.ts`,
+  `src/components/chat/ChatInput.tsx`,
+  `src/components/trip/ChecklistPanel.tsx`,
+  `src/components/trip/EditMode.tsx`, `src/pages/Kartenansicht.tsx`,
+  `src/pages/Preisalarme.tsx` — keine neuen Edge-Case-Bugs gefunden,
+  durchgängig defensiv geschrieben (Generation-Counter gegen stale
+  Promises in `useChat.ts`, Array-/Optional-Chaining-Guards, eskapierte
+  Wortgrenzen-Regexe).
+- `formatTime()`-Invalid-Date-Fix liegt weiterhin als eigener, fertiger
+  Branch `it-chef-autofix/formattime-invalid-date-2026-10-19` (PR #34)
+  bereit und ist auf `it-chef/auto` bewusst nicht dupliziert — bestätigt,
+  dass `src/lib/format.ts` auf diesem Branch den Fix noch nicht enthält,
+  um keinen Merge-Konflikt mit dem wartenden PR zu riskieren.
+- Demo-Daten mit Datumsbezug gegengeprüft: Der "Kyoto"-Eintrag in
+  `src/pages/Reiseentwuerfe.tsx` (Status "Pausiert") trägt dasselbe
+  Datum (3.–10. März 2026) wie der als bereits abgeschlossen markierte
+  "Kyoto"-Trip in `MeineReisen.tsx` — rein optisch wirkt das inzwischen
+  inkonsistent (ein "pausierter, noch zu planender" Entwurf für ein
+  bereits vergangenes Datum). Bewusst nicht als Fund gewertet: reiner
+  Demo-Daten-String ohne Code-Logikfehler, keine objektiv per
+  Test/Typecheck prüfbare Korrektur — dieselbe Einordnung wie beim
+  strukturell identischen Fund vom 30.09. (siehe Log dort).
+
+**Ergebnis:** Kein Punkt umgesetzt, kein Produktcode geändert, nur
+dieser Log-Eintrag.
+
+**Geprüft (Status quo, keine Codeänderung, daher kein Regressionsrisiko):**
+`npm ci` (frischer Checkout), `npx tsc -b` (0 Typfehler), `npm run lint`
+(0 Fehler), volle Testsuite (`npx vitest run`, 72 Testdateien, 548
+Tests, alle grün — unverändert gegenüber dem Stand des letzten Laufs),
+`npm run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung). `git status` nach Abschluss: keine
+uncommitteten Änderungen außer diesem Log-Eintrag.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
