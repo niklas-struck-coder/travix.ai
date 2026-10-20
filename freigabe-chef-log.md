@@ -7188,3 +7188,37 @@ anders.
 die Prüfung, keine Auffälligkeit. Der divergierte lokale `main` in
 diesem Container ist rein technisch (betrifft nicht `origin/main` auf
 GitHub) und hat den Merge nicht beeinträchtigt.
+
+## 2026-10-20, früher geplanter Auto-Lauf (nach IT-Chefs stündlichen Läufen zwischen 0 und 4 Uhr, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (fünf neue Commits gegenüber `main`, davon
+vier reine "kein neuer sicherer Punkt gefunden"-Log-Einträge und ein
+Code-Fund vom fünften Lauf: Diff ausschließlich `Kalender.tsx`,
+`Kalender.test.tsx`, `ZEITPLAN.md`, `it-chef-auto-log.md`).
+**Unabhängig selbst verifiziert statt dem Log vertraut**: `npm install`
+ausgeführt (für frischen Checkout nötig), danach `npx tsc -b` (sauber,
+keine Fehler), `npx eslint .` (sauber, keine Fehler), `npx vitest run`
+(72 Testdateien, 548 Tests, alle grün — inkl. des neuen Regressionstests
+für den Kalender-Fix). Fund selbst nachvollzogen: `today` wurde bisher
+per `useMemo(() => new Date(), [])` einmalig beim Mount berechnet und
+danach eingefroren (`Kalender.tsx:28` vorher) — bleibt der Tab über
+Mitternacht offen, zeigt die "Heute"-Markierung weiter den alten Tag.
+Fix entfernt das `useMemo`, liest `new Date()` jetzt bei jedem Render
+frisch (analog zum bewusst gleichen Muster `getTodayIso()` in
+`FlightWizard.tsx`/`HotelWizard.tsx`). Scope passt exakt zum einen im
+Log beschriebenen Punkt (kein Scope-Creep), berührt keine
+Auth-/Zahlungs-/rechtlichen Texte, keine sichtbare Design-Änderung
+(reine Datumslogik, nichts gegen `MARKENDESIGN.md`).
+→ **Passt, nach `main` gemergt** (Fast-Forward `dd00f4a..89aa4a9`,
+direkt gepusht nach `origin/main`).
+
+**`marketing-chef/auto` und `support-chef/auto`:** laut Auftrag für
+diesen frühen Lauf kurz mitgeprüft — beide **keine neuen Commits**
+gegenüber `main` (der nächste reguläre Lauf dieser beiden ist erst um
+6 Uhr, dafür gibt es den separaten späteren Freigabe-Chef-Lauf).
+Planmäßig übersprungen, keine eigene Prüfung nötig.
+
+**Info an Ni:** Kein Hinweis nötig — der einzige geprüfte Branch lief
+glatt durch (Code, Typecheck, Lint, Tests alle grün), kleiner,
+klar abgegrenzter Fix ohne Risiko. Marketing/Support hatten planmäßig
+noch nichts Neues für diesen frühen Lauf.
