@@ -7222,3 +7222,52 @@ Planmäßig übersprungen, keine eigene Prüfung nötig.
 glatt durch (Code, Typecheck, Lint, Tests alle grün), kleiner,
 klar abgegrenzter Fix ohne Risiko. Marketing/Support hatten planmäßig
 noch nichts Neues für diesen frühen Lauf.
+
+## 2026-10-20, geplanter Tages-Check (Branches einzeln unabhängig geprüft, kein Ni live dabei)
+
+**Repo-Zustand zu Beginn:** `origin/main` stand bei `fc8ae3f` (inkl. des
+früheren Laufs heute, der `it-chef/auto` bereits geprüft und gemergt
+hatte — siehe Eintrag oben). Lokaler `main`-Branch in diesem Container
+war erneut von `origin/main` abgewichen (alter Snapshot-Rest, nie
+gepusht); wie beim letzten Mal keinen vorhandenen Branch überschrieben,
+sondern einen frischen Arbeitszweig direkt von `origin/main` angelegt,
+beide Merges dort durchgeführt und per `git push
+<arbeitszweig>:main` auf den echten `main` geschrieben (`fc8ae3f..03719c6`).
+
+**Prüfung `it-chef/auto`:** 0 Commits Abstand zu `main` — bereits im
+früheren Lauf heute gemergt. Planmäßig übersprungen, keine eigene
+Prüfung nötig.
+
+**Prüfung `marketing-chef/auto`** (1 neuer Commit, Diff ausschließlich
+`marketing-chef-auto-log.md` und `marketing/freigabe-uebersicht.md`:
+neuer Tier-4-Kandidat 62 — Kalender-"Heute"-Fix vom 19.10. — Kandidatentopf
+von fünf auf sechs, alle vier offenen Fragen weiterhin unbeantwortet,
+keine neue Mini-Changelog-Ausgabe). Unabhängig nachgeprüft statt dem Log
+vertraut: `ZEITPLAN.md` bestätigt 6.2 weiterhin `[ ]`, `status.md` zeigt
+weiterhin Stand 19.10. ohne neue Notiz zu einer der vier Fragen, `git
+grep changelog` in `src/` weiterhin ohne Treffer. Reine Markdown-
+Ergänzung, kein Code, kein Live-Vorgang (kein Hinweis auf tatsächliches
+Posten/Versenden). Keine erfundenen Kennzahlen — der neue Kandidat ist
+direkt aus dem bereits per `it-chef/auto`-Lauf verifizierten Kalender-Fix
+abgeleitet. Text vollständig und kohärent.
+→ **Passt, nach `main` gemergt.**
+
+**Prüfung `support-chef/auto`** (1 neuer Commit, Diff ausschließlich
+`support-chef-auto-log.md`: Nachkontrolle `Kalender.tsx` nach dem
+Mitternachts-Fix, drei bereits seit 20.08. offene Punkte erneut
+unverändert bestätigt, kein neuer Reibungspunkt behauptet). Stichprobenartig
+gegen den Code verifiziert statt dem Log vertraut: Demo-Trips in
+`Kalender.tsx:22-25` (Lissabon 15.–22. Nov. 2026, Kyoto 3.–10. März 2026)
+exakt bestätigt; `today = new Date()` wird tatsächlich bei jedem Render
+frisch berechnet (kein `useMemo` mehr); Trip-Badges (`:125-129`) und
+Listenkarten (`:140-150`) tatsächlich ohne `Link`/Button; Monatstitel
+(`:96`-Bereich) tatsächlich ohne `aria-live`. Alle Datei-/Zeilenverweise
+nachvollziehbar, nichts wirkt erfunden. Reine Analyse, kein Code
+geändert — niedrigstes Risiko.
+→ **Passt, nach `main` gemergt.**
+
+**Info an Ni:** Kein Hinweis nötig — beide geprüften Branches liefen
+glatt durch, reine Markdown-Pflege ohne Live-Vorgang, alle zitierten
+Fund-Details stichprobenartig im Code bestätigt. Der divergierte lokale
+`main` in diesem Container ist weiterhin rein technisch und hat den
+Merge nicht beeinträchtigt.
