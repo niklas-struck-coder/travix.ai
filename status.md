@@ -13,18 +13,19 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-18):**
-- IT-Chef hat mehrere Testabdeckungslücken geschlossen (Card-, Select-,
-  Tabs-Komponente) und formatTime() aus FlightCard/TrainCard in eine
-  gemeinsame lib/format.ts konsolidiert
-- Support-Chef hat einen neuen Fund gemeldet: formatTime() zeigt bei
-  kaputten Zeitstempeln "Invalid Date" an; drei ältere offene Punkte
-  erneut unverändert bestätigt
-- Marketing-Chef hat vier neue Commits reine Testabdeckung/Konsolidierung
-  ohne Verhaltensänderung eingestuft, Kandidatentopf bleibt bei fünf
-- Freigabe-Chef hat IT-, Marketing- und Support-Chef-Branches geprüft und
-  erfolgreich nach main gemergt
+**Seit letztem Update (2026-10-19):**
+- IT-Chef hat einen Bug in Kalender.tsx behoben: die "Heute"-Markierung
+  fror sich beim Mount ein; mehrere weitere Auto-Läufe fanden danach
+  keinen neuen sicheren Punkt mehr
+- Support-Chef hat den Fix nachkontrolliert (reine Analyse, keine
+  Codeänderung); drei ältere offene Punkte (leerer Erstaufruf, fehlende
+  Klickziele, kein aria-live) bleiben weiterhin unverändert offen
+- Marketing-Chef hat den Kalender-Fix als Tier-4-Kandidat eingestuft
+  (reine Markdown-Pflege), Kandidatentopf bleibt bei sechs, alle vier
+  offenen Fragen weiterhin ungeklärt
+- Freigabe-Chef hat IT-, Marketing- und Support-Chef-Branches mehrfach
+  geprüft und erfolgreich nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-19_
+_Letztes Update: 2026-10-20_
