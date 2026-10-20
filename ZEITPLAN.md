@@ -201,6 +201,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Merge bei `TabsTrigger` und `TabsContent`. `npm run lint` (0 Fehler),
   `npm run build` (0 Typfehler) und die volle Testsuite (72 Testdateien,
   547 Tests) laufen weiterhin grün — 539 vorher + 8 neu.
+  Vom autonomen IT-Chef-Lauf am 20.10. (vierter Lauf desselben Tages,
+  nach drei Läufen ohne neuen sicheren Fund) die letzte verbliebene
+  Testabdeckungslücke aus dieser Durchsicht geschlossen: `src/App.tsx`
+  (reine Komposition aus `BrowserRouter` und `AppRoutes`, einziger Ort,
+  an dem die App tatsächlich mit echtem Browser-Routing statt dem in
+  `routes.test.tsx` verwendeten `MemoryRouter` läuft) hatte bisher keine
+  eigene Testdatei. `main.tsx`/`vite-env.d.ts` bleiben bewusst ohne
+  Testdatei (reiner Einstiegspunkt bzw. Typdeklaration, kein sinnvolles
+  Testziel), ebenso `input.tsx`/`label.tsx` (laut Log vom 19.10. geprüft:
+  reine Wrapper ohne eigene Logik) — damit sind alle Quelldateien unter
+  `src/` entweder getestet oder aus benanntem Grund bewusst ausgenommen.
+  Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein
+  neuer Bug gefunden. Neue `App.test.tsx` (1 Test, rendert `<App />` ohne
+  zusätzlichen Router-Wrapper): prüft, dass die Root-URL `/` über die
+  echte `BrowserRouter`-Einbindung die Home-Seite zeigt. `npx tsc -b`
+  (0 Typfehler), `npm run lint` (0 Fehler) und die volle Testsuite (73
+  Testdateien, 549 Tests) laufen weiterhin grün — 548 vorher + 1 neu.
 - ✅ Phase 3 Layout/Navigation (inkl. Seitenübergangs-Animationen, heute
   vom autonomen IT-Chef-Lauf auf Branch `it-chef/auto` erledigt — noch
   nicht nach `main` gemerged). Vom autonomen IT-Chef-Lauf am 01.09.

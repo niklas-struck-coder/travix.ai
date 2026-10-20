@@ -20926,3 +20926,56 @@ erneute Ausführung derselben Prüfungen auf identischem Code.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-20, 22:11 UTC (vierter Lauf, neuer sicherer Punkt umgesetzt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, deutlich später am selben Tag
+als die drei vorigen "kein neuer Punkt"-Läufe (00:15/01:09/02:08 UTC).
+Dazwischen hat Freigabe-Chef `it-chef/auto` bereits nach `main` gemerged
+(`fc8ae3f`) und danach noch `marketing-chef/auto`/`support-chef/auto`
+gemerged (`57894ba`) — `it-chef/auto` war also hinter `main`
+zurückgefallen, enthielt aber nichts Eigenes mehr, das nicht schon in
+`main` steckte. Branch lokal frisch von `origin/main` neu aufgesetzt
+(`git checkout -B it-chef/auto origin/main`), `main` dabei nicht
+angefasst, nur der lokale/remote `it-chef/auto`-Branch.
+
+**Punktesuche:** Statt die zuvor dreifach wiederholte Datei-für-Datei-
+Durchsicht erneut laufen zu lassen, gezielt geprüft, welche
+Testabdeckungslücke aus der seit Wochen laufenden Testabdeckungs-
+Durchsicht (Badge/Button/Card/Select/Tabs/AppShell/PageHeader/
+PlaceholderPage/NichtGefunden/routes.tsx/Sidebar/…) noch offen ist:
+Abgleich aller `.ts`/`.tsx`-Dateien unter `src/` gegen vorhandene
+`*.test.ts(x)`-Dateien ergab genau sechs Treffer ohne Testdatei:
+`App.tsx`, `main.tsx`, `src/test/setup.ts`, `src/vite-env.d.ts`,
+`input.tsx`, `label.tsx`. Die letzten vier sind bereits aus früheren
+Läufen bekannt und bewusst ausgenommen (Einstiegspunkt, Typdeklaration,
+Testinfrastruktur, bzw. — für `input.tsx`/`label.tsx` — am 19.10. geprüft:
+reine Wrapper ohne eigene Logik/Verzweigung). `App.tsx` war die einzige
+echte, bisher übersehene Lücke: reine Komposition aus `BrowserRouter` +
+`AppRoutes`, der einzige Ort, an dem die App mit echtem Browser-Routing
+statt dem in `routes.test.tsx` verwendeten `MemoryRouter` läuft — bisher
+nie direkt gerendert.
+
+**Sicherheitskriterien:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten; keine offene Produkt-/Architekturentscheidung (reine
+Testabdeckung für bestehenden, unveränderten Code); klar umrissen (eine
+Datei, ein fehlender Test, exakt nach etabliertem Muster); objektiv
+prüfbar (Test läuft grün oder rot). Alle vier Kriterien erfüllt.
+
+**Umsetzung:** Neue `src/App.test.tsx` (1 Test, Muster angelehnt an
+`Home.test.tsx`/`routes.test.tsx`): rendert `<App />` ohne zusätzlichen
+Router-Wrapper und prüft, dass unter der Root-URL `/` die Home-Seite
+(Begrüßungs-Überschrift) erscheint. Reine Testabdeckung für bestehendes,
+unverändertes Verhalten — kein neuer Bug gefunden, kein Produktcode
+geändert. `tasks/tasks-prd-travix-platform.md` (Punkt 1.9) und
+`ZEITPLAN.md` (Phase-1-Ist-Stand) entsprechend mit diesem Fund ergänzt.
+
+**Geprüft:** Frischer Checkout, `npm ci` (da `node_modules` im frischen
+Checkout fehlte), `npx tsc -b` (0 Typfehler), `npm run lint` (0 Fehler),
+volle Testsuite (`npx vitest run`: 73 Testdateien, 549 Tests, alle
+grün — 548 vorher + 1 neu), `npm run build` (`tsc -b && vite build`,
+0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung, nicht Teil dieses
+Funds).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

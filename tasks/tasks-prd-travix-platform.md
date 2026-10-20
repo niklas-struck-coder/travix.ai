@@ -130,7 +130,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [x] 1.6 Create `src/styles/globals.css` with CSS variables, glassmorphism utilities, and base styles
   - [x] 1.7 Create `src/lib/design-tokens.ts` with color palette, font, and spacing constants
   - [x] 1.8 Set up React Router in `src/routes.tsx` with placeholder routes for all 20+ pages
-  - [x] 1.9 Create `src/App.tsx` and `src/main.tsx` entry points with router provider
+  - [x] 1.9 Create `src/App.tsx` and `src/main.tsx` entry points with router provider — vom autonomen IT-Chef-Lauf am 20.10. eine Testabdeckungslücke geschlossen: `App.tsx` hatte bisher keine eigene Testdatei (einzige verbleibende Lücke der laufenden Testabdeckungs-Durchsicht neben `main.tsx`/`vite-env.d.ts`, die als reiner Einstiegspunkt bzw. Typdeklaration kein sinnvolles Testziel sind, und `input.tsx`/`label.tsx`, die laut Log vom 19.10. bewusst ohne Testdatei bleiben, da reine Wrapper ohne eigene Logik). Reine Testabdeckung für bestehendes, unverändertes Verhalten, kein neuer Bug gefunden. Neue `App.test.tsx` (1 Test): rendert `<App />` ohne Router-Wrapper (anders als `routes.test.tsx`, das `AppRoutes` direkt mit `MemoryRouter` testet) und prüft, dass die echte `BrowserRouter`-Einbindung an der Root-URL `/` die Home-Seite zeigt.
   - [x] 1.10 Configure Vitest for unit testing
 
 - [ ] 2.0 Base44 setup — Auth, entities, RLS policies
