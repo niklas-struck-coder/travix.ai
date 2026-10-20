@@ -5014,3 +5014,62 @@ denselben Lücken-Typ, falls das beim Fix gleich mitgenommen werden soll.
 
 Keine dieser drei wurde in der Zwischenzeit angefasst, also auch kein
 Grund, den jeweiligen Vorschlag zu ändern.
+
+---
+
+## 2026-10-20 — Nachkontrolle Reisekalender (`/kalender`, `Kalender.tsx`)
+
+**Geprüfter Bereich:** Seit dem letzten Lauf (19.10.) kamen laut
+`git log`/`ZEITPLAN.md` nur drei weitere IT-Chef-Auto-Läufe ohne Fund
+("kein neuer sicherer Punkt gefunden") dazu — der formatTime()-Fund von
+gestern ist über PR #34 bereits gefixt (siehe `dd00f4a`/`f79deff`). Der
+einzige Lauf mit echter Codeänderung seit dem letzten Support-Chef-
+Bericht war `59989d6` (19.10., fünfter Lauf): `today`/`todayIso` in
+`src/pages/Kalender.tsx` werden jetzt bei jedem Render frisch aus der
+Systemzeit berechnet statt einmalig per `useMemo` beim Mount eingefroren
+zu werden (vorher blieb die "Heute"-Markierung über Mitternacht hinaus
+auf dem alten Tag stehen). Das ist der einzige in diesem Zeitraum
+tatsächlich geänderte Seiten-Code, also der richtige Bereich für diesen
+Lauf — zusammen mit den drei offenen Punkten aus dem einzigen bisherigen
+Kalender-Bericht (08.08./20.08., vor zwei Monaten, seitdem nie wieder
+geprüft), weil die Seite durch den Fix gerade wieder "frisch" ist.
+Geprüft: `src/pages/Kalender.tsx`, `src/lib/trip/calendarUtils.ts`,
+`src/pages/Kalender.test.tsx`.
+
+### Der neue Fix selbst: unauffällig, kein neuer Reibungspunkt
+
+Der `useMemo`→`new Date()`-Fix ändert nichts an der von Nutzer:innen
+sichtbaren Logik außer der behobenen Mitternachts-Staleness; `grid`
+bleibt weiterhin korrekt auf `[year, month]` memoized. Kein neuer Punkt
+hier.
+
+### Alle drei Punkte aus dem 20.08.-Bericht weiterhin unverändert offen — zwei Monate ohne Fortschritt
+
+1. **Beim ersten Aufruf zeigt der Kalender weiterhin eine leere Ansicht,
+   obwohl Reisen existieren.** `Kalender.tsx:22-25` zeigt inzwischen
+   andere Demo-Daten als im August (Lissabon jetzt 15.–22. November
+   2026, Kyoto weiterhin 3.–10. März 2026), aber die Seite startet nach
+   wie vor stur im *aktuellen* Monat (`:32-33`, `today.getFullYear()`/
+   `today.getMonth()`). Bei heutigem Datum (20.10.2026) liegt wieder
+   keiner der beiden Trips im initial angezeigten Oktober 2026 — das
+   Kalenderraster ist beim Öffnen der Seite weiterhin komplett leer,
+   reproduzierbar mit den aktuellen Demo-Daten genau wie im August.
+   *Vorschlag unverändert:* Beim Laden den Monat der nächstgelegenen
+   Reise vorauswählen, falls im aktuellen Monat keine Reise liegt.
+2. **Trip-Badges im Gitter und die Karten in der Liste darunter sind
+   weiterhin reine Anzeige, kein Klickziel.** `Kalender.tsx:125-129`
+   (Badge je Tageszelle) und `:140-150` (Karten in der Liste darunter)
+   haben nach wie vor keinen `Link`/Button — unverändert gegenüber
+   August, obwohl `MeineReisen.tsx` das Muster "Reisekarte = Link zur
+   nächsten Aktion" weiterhin durchgängig verwendet.
+3. **Monatswechsel wird für Screenreader-Nutzer:innen weiterhin nicht
+   angekündigt.** `Kalender.tsx:96` (Monatstitel) hat weiterhin kein
+   `aria-live`/`role="status"`. Codebase-weite Suche nach `aria-live` in
+   `src/` ergibt nach wie vor keinen einzigen Treffer irgendwo in der
+   App — unverändert seit August.
+
+Alle drei Vorschläge aus dem August-Bericht bleiben unverändert gültig;
+nichts davon wurde in der Zwischenzeit angefasst. Kein neuer Punkt
+erfunden, nur um den Bericht länger wirken zu lassen — die oben
+genannten drei sind die einzigen, die sich im aktuellen Quelltext
+nachvollziehen lassen.
