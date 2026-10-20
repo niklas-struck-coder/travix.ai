@@ -1,50 +1,42 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-19
+**Datum:** 2026-10-20
 
-## Was ist seit dem letzten Eintrag (2026-10-18) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-19) passiert?
 
-Zwei Punkte aus dem letzten Bericht haben sich geklärt, beide positiv:
+Ein neuer, echter Fix ist dazugekommen: Die "Heute"-Markierung im
+Kalender blieb bisher über Mitternacht hinweg auf dem alten Tag stehen,
+bis die Seite neu geladen wurde – jetzt zeigt sie immer den richtigen
+Tag. Kleiner Fix, aber genau dieselbe Ehrlichkeits-/Verlässlichkeits-
+Linie wie beim Avatar- und beim Zug/Flug-Fix: die App tut nicht so, als
+würde die Zeit stillstehen.
 
-Der "Zug mit Flugdetails"-Kandidat, den ich zuletzt nur als unklaren
-Kandidaten vorgemerkt hatte, ist jetzt bestätigt gefixt – Support-Chef hat
-selbst im Code nachgeschaut: Wechselt man nach einer Flugauswahl das
-Transportmittel, wird die alte Flugverbindung jetzt korrekt mitgelöscht
-(`useChat.ts:373`). Kein offener Kandidat mehr, sondern ein zweiter
-fertiger "Ehrlichkeit als Feature"-Moment neben dem Avatar-Fix.
-
-Dazu kam ein neuer, automatisch gefixter Bug: `formatTime()` zeigte bei
-kaputten Zeitstempeln (z. B. aus einer fehlerhaften Flugdaten-Antwort) den
-Text "Invalid Date" statt eines Platzhalters – jetzt zeigt es "—"
-([PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34),
-wartet noch auf Merge). Passt vom Prinzip her genau zum Avatar-Fix: Statt
-etwas Kaputtes zu verstecken, zeigt die App ehrlich, dass etwas nicht
-geklappt hat.
-
-Der Rest der letzten Tage war reine Testabdeckung (Button, Card, Select,
-Tabs) ohne für Nutzer sichtbare Änderung. Die Changelog-Grundsatzfrage aus
-den letzten drei Berichten ist weiterhin ungelöst – das ist jetzt der
-vierte Bericht in Folge mit demselben offenen Punkt. Keine neuen
-Nutzungsdaten vorhanden, daher auch diesmal keine Zahlen im Bericht.
+Der `formatTime()`-Fix gegen "Invalid Date" aus dem letzten Bericht (PR
+#34) ist weiterhin nicht gemergt – zweiter Bericht in Folge mit diesem
+Stand. Die Changelog-Grundsatzfrage bleibt ebenfalls unbeantwortet. Der
+Rest der letzten Tage war Logs, Status-Updates und interne Prüfläufe
+ohne neue, für Nutzer sichtbare Änderung. Keine neuen Nutzungsdaten
+vorhanden, daher auch diesmal keine Zahlen im Bericht.
 
 ## Vorschläge
 
-1. **Jetzt einen Sammel-Post bauen statt weiter einzeln zu vertagen.**
-   Drei bestätigte Fixes liegen bereit: Avatar-Warndreieck, Zug/Flug-Reset
-   und (sobald PR #34 gemergt ist) "—" statt "Invalid Date". Das ist genug
-   Material für einen "Diese Woche in der App behoben"-Post statt auf die
-   komplette Footer-Changelog-Seite zu warten. Löst damit auch die
-   Changelog-Frage, die jetzt im vierten Bericht in Folge offen ist – nicht
-   weiter diskutieren, sondern die Alternative einfach umsetzen.
-2. **"Ehrlichkeit als Feature" als wiederkehrende Content-Linie statt
-   Einzelposts etablieren.** Drei konkrete Belege in zwei Wochen (Avatar
-   zeigt Fehler statt zu lächeln, kein Flugrest nach Transportwechsel,
-   ehrlicher Platzhalter statt "Invalid Date") sind ein eigenes Muster:
-   "Wir verstecken Fehler nicht, wir zeigen sie" als kleine Serie,
-   wiederverwendbar bei jedem künftigen Fix dieser Art.
-3. **Zielgruppen-Content-Linien (Paare/Familien/Solo) endlich starten.**
-   Seit dem Konzeptpapier weiterhin keine Bewegung – unabhängig vom
-   Code-Fortschritt umsetzbar. Vorschlag: erster Post zur
-   Solo-Reisenden-Zielgruppe, da hier noch gar nichts existiert.
+1. **Sammel-Post jetzt zusammenstellen – Material reicht.** Vier
+   bestätigte Fixes stehen bereit: Avatar-Warndreieck, Zug/Flug-Reset,
+   Kalender-"Heute"-Fix und (sobald PR #34 gemergt ist) "—" statt
+   "Invalid Date". Statt weiter auf die vollständige Changelog-Seite zu
+   warten, reicht das für einen ersten "Diese Wochen in der App
+   behoben"-Post – klein anfangen statt die ungeklärte Changelog-Frage
+   zur Blockade werden zu lassen.
+2. **"Ehrlichkeit als Feature" fest als Content-Serie etablieren.** Mit
+   dem Kalender-Fix sind es jetzt vier konkrete Belege für dasselbe
+   Muster ("wir verstecken Fehler nicht, wir zeigen oder beheben sie").
+   Das trägt eine eigene, wiederkehrende Rubrik statt vier Einzelposts –
+   jeder künftige Fix dieser Art bekommt einen Platz, ohne dass jedes Mal
+   neu entschieden werden muss, ob er einen Post wert ist.
+3. **Zielgruppen-Content (Solo-Reisende als Erstes) endlich starten.**
+   Unverändert seit mehreren Berichten offen, unabhängig vom
+   Code-Fortschritt umsetzbar. Solo-Reisende als erste Zielgruppe, weil
+   dazu bisher noch gar kein Content existiert – klein anfangen, bevor
+   Paare/Familien folgen.
 
-_Letztes Update: 2026-10-19_
+_Letztes Update: 2026-10-20_
