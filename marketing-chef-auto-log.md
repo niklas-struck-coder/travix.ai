@@ -4,6 +4,80 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-20
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`c621520`, eigener Commit vom 19.10.) war bereits nach `origin/main`
+gemergt (siehe `freigabe-chef-log.md`, früher Lauf vom 20.10.). Branch
+deshalb wie im Fall eines bereits gemergten Branches vorgesehen neu von
+`origin/main` (`fc8ae3f`, inkl. drei weiterer IT-Chef-Auto-Läufe und
+eines Kalender-Fixes vom 19./20.10.) angelegt, nicht per Merge-Commit
+fortgeführt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 19.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 19.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`, keine neuen Kanal-Links. Alle vier Fragen
+bleiben offen.
+
+Danach `git log c621520..fc8ae3f` geprüft (Basislinie: der eigene Stand
+vom 19.10.): zehn neue Commits, davon neun ohne eigene
+Produkt-Codeänderung (Merges, Berichte, Logs, drei IT-Chef-Auto-Läufe vom
+20.10. ohne Fund) und einer mit echter Codeänderung (`59989d6`, Kalender-
+"Heute"-Fix vom 19.10., entstanden nach dem eigenen Branch-Stand vom
+selben Tag). Im Code per `git show` geprüft: ein echter Ehrlichkeits-/
+Verlässlichkeits-Fix mit sichtbarer Nutzer:innen-Konsequenz (die
+"Heute"-Markierung im Kalender blieb über Mitternacht hinaus auf dem
+alten Tag stehen, bis die Seite neu gemountet wurde) — neuer Tier-4-
+Kandidat 62. Details siehe Update 2026-10-20 in
+`marketing/freigabe-uebersicht.md`.
+
+Kandidatentopf wächst von fünf (57-61, Stand 19.10.) auf **sechs**
+(57-62) — weiterhin klar unter der Achter-Schwelle. Deshalb heute, wie an
+den meisten Vortagen, nur die Übersicht gepflegt, keine neue
+Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung einer
+bestehenden Übersicht, kein Live-Vorgang — nichts gepostet oder im
+Produkt verändert. Keine erfundenen Kennzahlen — der neue Kandidat ist
+direkt per `git show` nachvollzogen, keine Reichweiten-/Nutzerzahlen
+nötig. Klar genug beschrieben, keine offene Positionierungsfrage: wendet
+nur die seit 20.08. etablierte Einordnungslogik auf einen bereits
+verifizierten Commit an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Eine sechste Mini-Changelog-Ausgabe — Kandidatentopf liegt mit sechs
+  weiterhin unter der Achter-Schwelle, ein künstliches Auffüllen wäre
+  keine ehrliche Vorlage.
+- Ein eigenständiges Social-Content-Stück zum Kalender-Fix allein —
+  bleibt an die seit 20.08. geltende Selbstbeschränkung gebunden, ein
+  einzelner Kandidat reißt die Schwelle nicht.
+
+**Umgesetzt:**
+- `marketing-chef/auto` neu von aktuellem `origin/main` (`fc8ae3f`)
+  angelegt, da der vorherige Stand bereits gemergt war.
+- `marketing/freigabe-uebersicht.md`: neues Update vom 20.10. (Prüfung
+  der vier Fragen, ein neuer Commit geprüft — Kandidat 62 aufgenommen —,
+  Kandidatentopf von fünf auf sechs, Titel-Datum auf 20.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-19
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live

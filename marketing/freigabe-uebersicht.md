@@ -1,10 +1,59 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-19)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-20)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-20: ein weiterer Tier-4-Kandidat (62: Kalender-"Heute"
+fror sich beim Mount ein), Kandidatentopf von fünf auf **sechs**,
+weiterhin klar unter der Achter-Schwelle, alle vier Fragen weiterhin
+offen
+
+**Geprüft:** Die vier offenen Fragen unten zuerst gegen den aktuellen
+Stand geprüft — keine Änderung seit dem 19.10.: `status.md` (Update vom
+19.10., keine neue Notiz von Ni zu einer der vier Fragen), `ZEITPLAN.md`
+(6.2 "Beim Anbieter buchen"-Button weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/` (Footer-Changelog-Seite weiterhin nicht
+gebaut), keine neuen Kanal-Links (`linkedin.com`/`instagram.com`/
+`tiktok.com` in `src/`/`index.html` weiterhin ohne Treffer). Alle vier
+Fragen bleiben offen.
+
+Danach `git log` von der eigenen Vorlauf-Basis (`c621520`, Stand 19.10.,
+eigener letzter Commit) gegen `origin/main` (`fc8ae3f`) geprüft: zehn
+neue Commits. Davon neun ohne eigene Produkt-Codeänderung (Merges,
+Berichte, Logs, drei IT-Chef-Auto-Läufe vom 20.10. mit "kein neuer
+sicherer Punkt gefunden"). Ein Commit ändert tatsächlich Produktcode:
+
+- **`59989d6` (19.10., fünfter IT-Chef-Lauf, nach dem eigenen
+  Branch-Stand vom selben Tag entstanden):** `today`/`todayIso` in
+  `src/pages/Kalender.tsx` wurden per `useMemo(() => new Date(), [])`
+  nur einmal beim Mount berechnet statt wie im bewusst analogen
+  `getTodayIso()`-Muster (`FlightWizard.tsx`/`HotelWizard.tsx`) bei jedem
+  Render neu — blieb der Tab über Mitternacht offen (ohne Verlassen/
+  Zurückkehren der Route), zeigte das Kalenderraster weiterhin den alten
+  Tag als "heute" (Markierung, "Heute"-Button), bis die Seite neu
+  gemountet wurde. Im Code verifiziert (`git show 59989d6`): `today`/
+  `todayIso` werden jetzt bei jedem Render frisch berechnet, neuer
+  Regressionstest (`vi.setSystemTime()` nach dem ersten Render auf den
+  nächsten Tag vorgestellt, Rerender ohne Unmount erzwungen) vor dem Fix
+  gegen den alten Code gegengeprüft (schlägt dort nachweislich fehl).
+  **62. Kandidat** — passt in dieselbe "du siehst wirklich das, was
+  aktuell gilt, nicht einen veralteten Rest"-Erzählung wie die bereits
+  gelisteten Kandidaten 57/60 (veraltete Suchergebnisse bzw. stehen
+  gebliebenes Flugdetail).
+
+**Kandidatentopf wächst von fünf auf sechs** (57-62), weiterhin klar
+unter der Achter-Schwelle für eine sechste Mini-Changelog-Ausgabe. Keine
+neue Ausgabe heute, kein eigenständiges Social-Content-Stück zu diesem
+einzelnen Fund — gleiche seit 20.08. geltende Selbstbeschränkung wie an
+den Vortagen.
+
+**Nächster Lauf:** weiterhin zuerst die vier offenen Fragen gegenprüfen,
+dann prüfen ob seit `fc8ae3f` neue Produkt-Codeänderungen hinzugekommen
+sind, und den Kandidatentopf (Stand 20.10.: sechs) gegen den etablierten
+06.09.-Maßstab (acht = genug) weiterführen.
 
 ## Update 2026-10-19: nichts Neues — drei neue Commits, aber alle reine
 Testabdeckung ohne Verhaltensänderung, Kandidatentopf bleibt bei **fünf**,
