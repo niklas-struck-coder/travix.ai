@@ -21039,3 +21039,53 @@ grün, `npm run build` grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-21, 00:08 UTC (sechster Lauf, npm-audit-Fix)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, ca. 57 Minuten nach dem vorigen
+Lauf (fünfter Lauf, 20.10. 23:08 UTC, Commit `8c08dd4`, kein neuer
+sicherer Punkt). `it-chef/auto` identisch zu `origin/main`. `git log
+--all --since=<Zeitpunkt des vorigen Commits>` über alle lokal bekannten
+Branches (inkl. `origin/main`, alle `it-chef-autofix/*`-Branches,
+`marketing-chef/auto`, `support-chef/auto`) ergibt außer dem vorigen
+Commit selbst keinen neuen Commit — Code unverändert seit dem letzten
+Lauf.
+
+**Punktesuche:** Da Testabdeckung und gezielte Bug-Suche laut den
+letzten Läufen ausgeschöpft sind, nach etabliertem Muster (siehe
+frühere `npm audit`-Einträge in diesem Log) `npm ci` (frischer Checkout)
+und `npm audit` laufen lassen: **12 Schwachstellen (1 kritisch, 9 hoch,
+2 mittel)** — ein neuer Fund gegenüber dem zuletzt bestätigten Stand von
+0 Schwachstellen, da seither neue Advisories für transitive
+Dependencies veröffentlicht wurden (u.a. `proxy-addr` kritisch,
+`vite`/`source-map-js`/`postcss-selector-parser` hoch).
+
+**Sicherheitskriterien:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten; keine offene Produkt-/Architekturentscheidung (reiner
+Dependency-Patch ohne Breaking Changes); klar umrissen (`npm audit fix`
+ohne `--force`, keine Major-Sprünge); objektiv prüfbar (`npm audit`
+vorher/nachher, plus bestehende Typecheck-/Lint-/Testsuite als
+Regressionsschutz). Alle vier Kriterien erfüllt.
+
+**Umsetzung:** `npm audit fix` (ohne `--force`) ausgeführt — behebt 5
+der 12 Schwachstellen (u.a. `proxy-addr`, `vite`, `source-map-js`,
+`postcss-selector-parser`), reine `package-lock.json`-Änderung,
+`package.json` unverändert. Verbleibende 7 hohe Schwachstellen
+(`braces`/`micromatch`/`fast-glob`/`ts-morph`, transitiv über die
+`shadcn`-CLI, nur Scaffolding-Tool als Dev-Dependency) verlangen laut
+`npm audit fix --force` einen Major-Sprung auf `shadcn@1.0.0+` —
+bewusst **nicht** mitgenommen, da das ein Breaking-Change-Upgrade wäre
+und damit außerhalb des Sicherheitskriteriums "klar umrissen, kein
+Major-Sprung" liegt. Kein Produktcode geändert.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npm audit` vorher: 12
+Schwachstellen (1 kritisch, 9 hoch, 2 mittel); `npm audit fix`
+durchgeführt; `npm audit` danach: 7 Schwachstellen (alle hoch, alle auf
+die `shadcn`-Dev-Dependency zurückgeführt, s.o.). `npx tsc -b` (0
+Typfehler), `npm run lint` (0 Fehler), volle Testsuite (`npx vitest
+run`: 73 Testdateien, 549 Tests, alle grün — unverändert gegenüber dem
+letzten Lauf), `npm run build` (`tsc -b && vite build`, 0 Typfehler,
+unveränderte 811-KB-Chunk-Size-Warnung, nicht Teil dieses Funds).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
