@@ -7271,3 +7271,46 @@ glatt durch, reine Markdown-Pflege ohne Live-Vorgang, alle zitierten
 Fund-Details stichprobenartig im Code bestätigt. Der divergierte lokale
 `main` in diesem Container ist weiterhin rein technisch und hat den
 Merge nicht beeinträchtigt.
+
+## 2026-10-21, früher Nacht-Check (0–4 Uhr, nach IT-Chefs stündlichen Läufen, kein Ni live dabei)
+
+**Prüfung `it-chef/auto`** (5 neue Commits gegenüber `main`: vierter bis
+achter autonomer Lauf vom 20./21.10., Commits `b292b31`…`3f8de46`).
+Unabhängig nachgeprüft statt dem Log vertraut: Branch frisch
+ausgecheckt, `npm ci` auf frischem Checkout, `npx tsc -b` (0
+Typfehler), `npx eslint .` (0 Fehler), `npx vitest run` (**73
+Testdateien, 549 Tests, alle grün** — deckt sich exakt mit dem
+Log-Eintrag des vierten Laufs). `npm audit` nach `npm ci`: 7 hohe
+Schwachstellen, ausschließlich über die `shadcn`-CLI (Dev-Dependency,
+kein Laufzeitcode) — bestätigt den im Log begründeten bewussten
+Verzicht auf den Major-Sprung.
+
+Scope-Check: Diff betrifft nur neue `src/App.test.tsx` (letzte offene
+Testabdeckungslücke, `App.tsx`), `ZEITPLAN.md`/
+`tasks-prd-travix-platform.md` (Doku-Nachtrag), `package-lock.json`
+(reiner `npm audit fix`, kein Major-Sprung) und `it-chef-auto-log.md`.
+Kein Bezug zu Auth/Zahlungen/Nutzerdaten/Rechtstexten, kein UI-/
+Design-Code (MARKENDESIGN.md-Check nicht nötig), kein Scope-Creep
+gegenüber den beschriebenen Punkten (vierter Lauf: App.test.tsx;
+sechster Lauf: npm-audit-Fix).
+→ **Alle Checks bestanden — eigentlich Freigabe zum Merge.**
+
+**Merge nicht durchgeführt:** Der direkte `git push … :main` wurde von
+der Session-Berechtigungsprüfung mit "Merge Without Review" blockiert
+(bisher in früheren Läufen möglich, siehe Einträge oben). Statt den
+Block zu umgehen, PR #35 (`it-chef/auto` → `main`) erstellt mit allen
+oben genannten Prüfergebnissen in der Beschreibung — Freigabe/Merge
+liegt jetzt bei Ni. Dieser Log-Eintrag selbst läuft aus demselben
+Grund über einen separaten PR statt direkt auf `main`.
+
+**`marketing-chef/auto` und `support-chef/auto`:** laut Auftrag für
+diesen frühen Lauf kurz mitgeprüft — beide **keine neuen Commits**
+gegenüber `main` (nächster regulärer Lauf erst um 6 Uhr, separater
+späterer Freigabe-Chef-Lauf dafür vorgesehen). Planmäßig übersprungen.
+
+**Info an Ni:** Ja — diesmal nötig, da der autonome Merge-Schritt
+dieses Skills durch eine neue Session-Berechtigungsprüfung blockiert
+ist ("Merge Without Review"). Der eigentliche Check lief einwandfrei
+durch (Code, Typecheck, Lint, Tests, Audit alle wie erwartet), aber
+der Freigabe-Chef kann aktuell nicht mehr selbst nach `main` mergen,
+sondern nur noch Pull Requests öffnen. PR #35 wartet auf Nis Freigabe.
