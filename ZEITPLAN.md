@@ -3065,6 +3065,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   gezieltes Verändern von `speech.ts` (`lang` auf `'en-US'` statt
   `'de-DE'`) reproduzierbar rot verifiziert, dass der neue Test eine
   echte Regression fängt — Quelldatei danach unverändert zurückgesetzt.
+  Vom autonomen IT-Chef-Lauf am 21.10. (zehnter Lauf) einen von
+  `support-chef-auto-log.md` (21.10., Fund 3) gemeldeten toten Link
+  behoben: Die "Urlaubsmodus aktivieren"-Karte für die Lissabon-Demoreise
+  auf `/meine-reisen` (`MeineReisen.tsx`) verlinkte pauschal auf
+  `/urlaubsmodus` — die Seite (`Urlaubsmodus.tsx`) lädt ihren Trip aber
+  aus `loadStoredChat()?.trip`, dem einen gemeinsamen Chat-Trip in
+  `localStorage`, der mit den rein lokalen Demodaten von `MeineReisen.tsx`
+  nichts zu tun hat. Ohne eigenen, zur Lissabon-Demoreise passenden
+  Chat-Verlauf öffnete der Klick damit entweder eine leere oder eine
+  völlig unpassende Urlaubsmodus-Seite — obwohl `mockConcierge.ts` Lissabon
+  längst als kuratiertes Ziel kennt (Währung, Notrufnummer, Begrüßung).
+  Fix nach demselben bereits etablierten Muster wie der `?destination=`-
+  Query-Parameter von `Favoriten.tsx`/`Home.tsx` zu `/ki-chat` (siehe
+  `KiChat.tsx`, `useSearchParams().get('destination')`): Der Link trägt
+  jetzt `?destination=<Ziel>&dates=<Zeitraum>` der jeweiligen Karte,
+  `Urlaubsmodus.tsx` liest beide Parameter per `useSearchParams()` und
+  nutzt sie vorrangig vor dem gespeicherten Chat-Trip (der bleibt als
+  Fallback für den direkten Aufruf ohne Parameter unverändert bestehen).
+  Keine neue Architektur-/Backend-Entscheidung — reines Weiterreichen
+  bereits vorhandener Kartendaten über denselben Query-Mechanismus, den
+  die Seite an anderer Stelle schon kennt. Zwei neue Tests in
+  `Urlaubsmodus.test.tsx` (zeigt Lissabon/Kyoto aus der URL statt eines
+  leeren oder unpassenden gespeicherten Trips) und ein neuer Test in
+  `MeineReisen.test.tsx` (prüft den konkreten `href` der Karte).
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

@@ -21242,3 +21242,81 @@ Fehler), `npx vitest run` (73 Testdateien, 549 Tests, alle grün),
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-21, 23:14 UTC (zehnter Lauf — toter Urlaubsmodus-Link von der MeineReisen-Demokarte gefixt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf. `it-chef/auto` lag bereits auf dem
+Stand von `origin/main` (`d5d377a`), der neunte Lauf vom selben Tag hatte
+nur einen Log-Eintrag ohne Code-Änderung hinzugefügt (`6c04952`, npm-
+Tooling-Fehler blockierte den vitest-Audit-Fix). `npm ci` lief dieses Mal
+ohne den dort beschriebenen `npm`/Arborist-Fehler durch — Hinweis für Ni:
+scheint ein transientes Problem im vorigen Lauf gewesen zu sein, nicht
+dauerhaft kaputt. Der offene `npm audit`-Fund (2 mittlere Schwachstellen
+in `vitest`/`@vitest/mocker`, behebbar ohne `--force`) wurde in diesem
+Lauf bewusst nicht erneut verfolgt, um nicht zwei unabhängige Punkte
+gleichzeitig anzufassen — bleibt für einen künftigen Lauf offen.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` nach dem
+üblichen Muster durchsucht (offene Checkboxen in der laufenden Phase,
+Testabdeckungslücken, Support-Chef-Funde). Die offenen Sprint-4/5-Punkte
+(8.2 Foto-Upload, 8.3 volle Kontext-Antworten, 8.4 Quick-Actions, 8.5-8.7
+Deal Finder: alle an InvokeLLM/Backend-Credentials blockiert; 8.9 Premium:
+Inhalt hängt an der offenen PRD-Frage OQ-03 zu Features/Preisen; 8.12
+Rewards: hängt an OQ-04; 8.11 Hilfe: wartet auf FAQ-Inhalte von
+Support-Chef) erfüllen alle die vierte oder zweite Sicherheitsbedingung
+nicht. Testabdeckung weiterhin ausgeschöpft (geprüft: alle `.ts`/`.tsx`
+ohne eigene Testdatei sind reine Typdeklarationen oder bereits bekannte,
+bewusste Ausnahmen wie `input.tsx`/`label.tsx`/`main.tsx`). Stattdessen in
+`reports/support-chef.md` (21.10.) nachgesehen: Fund 3 dort ("Urlaubsmodus-
+Link von der Lissabon-Demokarte führt ins Leere", `MeineReisen.tsx:49` /
+`Urlaubsmodus.tsx:12`) war noch unbehandelt (Fund 1 = PR #34, Fund 4 = PR
+#38, beide schon in Arbeit/Review; Fund 2 Lösch-Warnungen bewusst
+zurückgestellt, da fünf Dateien gleichzeitig betroffen wären und die
+richtige Abstufung je Fall Interpretationsspielraum hätte — passt nicht
+zu "klar genug beschrieben").
+
+**Der Fund im Detail:** `MeineReisen.tsx` zeigt rein lokale Demo-Trips
+(Lissabon/Kyoto), `Urlaubsmodus.tsx` lädt seinen Trip aber ausschließlich
+aus `loadStoredChat()?.trip` (dem einen gemeinsamen Chat-Trip in
+`localStorage`). Der "Urlaubsmodus aktivieren"-Link auf der Lissabon-Karte
+verlinkte pauschal auf `/urlaubsmodus`, ohne der Seite zu sagen, um welche
+Reise es geht — landete je nach `localStorage`-Zustand entweder auf der
+leeren "noch keine Reise geplant"-Variante oder (schlimmer) zeigte die
+Fakten eines völlig anderen, zufällig gespeicherten Trips. Dabei ist
+Lissabon in `mockConcierge.ts` längst als kuratiertes Ziel hinterlegt
+(Währung, Notrufnummer, Begrüßung) — die Daten für eine korrekte Antwort
+liegen also bereits vor, sie kommen nur nie bei der Seite an.
+
+**Sicherheitskriterien:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten. Keine offene Produkt-/Architekturentscheidung — es wird kein
+neues Backend/keine geteilte Trip-Persistenz gebraucht (das wäre der
+Sprint-7.4-Block), nur das Weiterreichen bereits vorhandener Kartendaten.
+Klar beschrieben: Support-Chef hat Datei und Zeile exakt benannt, und das
+bereits etablierte `?destination=`-Query-Muster (`Favoriten.tsx`/
+`Home.tsx` → `/ki-chat`, gelesen in `KiChat.tsx` per `useSearchParams()`)
+gibt eine konkrete, bereits verwendete Lösung vor statt einer neuen
+Design-Entscheidung. Objektiv prüfbar: Test zeigt den richtigen
+Zielnamen/Zeitraum nach Klick auf die Karte. Alle vier Kriterien erfüllt.
+
+**Umsetzung:**
+- `src/pages/MeineReisen.tsx`: Link trägt jetzt
+  `?destination=<Ziel>&dates=<Zeitraum>` statt eines generischen Pfads.
+- `src/pages/Urlaubsmodus.tsx`: liest beide Parameter per
+  `useSearchParams()` und nutzt sie vorrangig vor `loadStoredChat()?.trip`
+  — der Fallback auf den gespeicherten Chat-Trip bleibt für den direkten
+  Aufruf ohne Parameter (z. B. über die Sidebar) unverändert bestehen.
+- Zwei neue Tests in `src/pages/Urlaubsmodus.test.tsx` (Banner/Begrüßung/
+  Quick-Replies aus der URL statt eines leeren oder unpassenden
+  gespeicherten Trips) und ein neuer Test in `src/pages/MeineReisen.test.tsx`
+  (prüft den konkreten `href` der Karte).
+- `ZEITPLAN.md` (Phase-8-Absatz im Ist-Stand) um den Fund/Fix ergänzt.
+  Keine Checkbox umzustellen — 8.1 bleibt wegen des weiterhin fehlenden
+  Tagesitinerars (8.3) offen, dieser Fix behebt nur den Navigations-Bug.
+
+**Ergebnis:** `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (73 Testdateien, 552 Tests, alle grün — 3 mehr als beim
+neunten Lauf durch die neuen Regressionstests), `npm run build` (`tsc -b
+&& vite build`, 0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

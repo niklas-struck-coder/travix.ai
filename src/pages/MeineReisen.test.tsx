@@ -30,4 +30,17 @@ describe('MeineReisen', () => {
     expect(screen.getByRole('link', { name: /Urlaubsmodus aktivieren/i })).toBeInTheDocument()
     expect(screen.getByText('Reise abgeschlossen')).toBeInTheDocument()
   })
+
+  it('links "Urlaubsmodus aktivieren" with this card\'s own destination and dates, not a generic path', () => {
+    render(
+      <MemoryRouter>
+        <MeineReisen />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /Urlaubsmodus aktivieren/i })).toHaveAttribute(
+      'href',
+      '/urlaubsmodus?destination=Lissabon&dates=15.%20%E2%80%93%2022.%20November%202026',
+    )
+  })
 })

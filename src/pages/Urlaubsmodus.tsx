@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Sun, CalendarDays } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
@@ -9,7 +10,21 @@ import { useConcierge } from '@/hooks/useConcierge'
 import { loadStoredChat } from '@/lib/trip/tripStorage'
 
 export function Urlaubsmodus() {
-  const [trip] = useState(() => loadStoredChat()?.trip ?? null)
+  const [searchParams] = useSearchParams()
+
+  // Coming from a MeineReisen-Karte (?destination=Lissabon&dates=... — same
+  // pattern as /ki-chat's ?destination=, see KiChat.tsx) takes priority over
+  // a stored chat trip: the demo trips on /meine-reisen aren't wired into
+  // tripStorage, so without this they'd open Urlaubsmodus with whatever (or
+  // no) trip happens to already be in localStorage instead of the one the
+  // user actually clicked.
+  const [trip] = useState(() => {
+    const destination = searchParams.get('destination')
+    if (destination) {
+      return { destination, dates: searchParams.get('dates') }
+    }
+    return loadStoredChat()?.trip ?? null
+  })
   const { messages, quickReplies, avatarState, isThinking, sendMessage } = useConcierge(trip?.destination ?? null)
   const scrollRef = useRef<HTMLDivElement>(null)
 

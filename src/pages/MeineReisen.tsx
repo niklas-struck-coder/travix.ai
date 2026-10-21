@@ -46,7 +46,9 @@ export function MeineReisen() {
 
               {trip.status === 'upcoming' ? (
                 <Button asChild size="sm" className="w-fit bg-teal text-navy hover:bg-teal/90">
-                  <Link to="/urlaubsmodus">
+                  <Link
+                    to={`/urlaubsmodus?destination=${encodeURIComponent(trip.destination)}&dates=${encodeURIComponent(trip.dates)}`}
+                  >
                     <Sun className="size-4" />
                     Urlaubsmodus aktivieren
                   </Link>

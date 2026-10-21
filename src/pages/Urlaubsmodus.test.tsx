@@ -23,9 +23,9 @@ function seedStoredChat(overrides: Partial<StoredChatState['trip']> = {}) {
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
 }
 
-function renderUrlaubsmodus() {
+function renderUrlaubsmodus(initialEntries: string[] = ['/urlaubsmodus']) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <Urlaubsmodus />
     </MemoryRouter>,
   )
@@ -84,6 +84,31 @@ describe('Urlaubsmodus – mit geplanter Reise', () => {
     renderUrlaubsmodus()
 
     expect(screen.queryByRole('button', { name: 'Währung?' })).not.toBeInTheDocument()
+  })
+})
+
+describe('Urlaubsmodus – Navigation von einer MeineReisen-Karte (?destination=&dates=)', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('uses the destination and dates from the URL instead of an empty stored chat', () => {
+    renderUrlaubsmodus(['/urlaubsmodus?destination=Lissabon&dates=15.%20%E2%80%93%2022.%20November%202026'])
+
+    expect(screen.getByText('Lissabon')).toBeInTheDocument()
+    expect(screen.getByText('15. – 22. November 2026')).toBeInTheDocument()
+    expect(
+      screen.getByText('Willkommen im Urlaubsmodus für deine Reise nach Lissabon! Frag mich zu Währung, Notrufnummern, Begrüßungsfloskeln oder anderen Fragen rund um deinen Trip.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Währung?' })).toBeInTheDocument()
+  })
+
+  it('prefers the URL destination over an unrelated trip already in the stored chat', () => {
+    seedStoredChat({ destination: 'Bali' })
+    renderUrlaubsmodus(['/urlaubsmodus?destination=Kyoto&dates=3.%20%E2%80%93%2010.%20M%C3%A4rz%202026'])
+
+    expect(screen.getByText('Kyoto')).toBeInTheDocument()
+    expect(screen.queryByText('Bali')).not.toBeInTheDocument()
   })
 })
 
