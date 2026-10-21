@@ -5073,3 +5073,99 @@ nichts davon wurde in der Zwischenzeit angefasst. Kein neuer Punkt
 erfunden, nur um den Bericht länger wirken zu lassen — die oben
 genannten drei sind die einzigen, die sich im aktuellen Quelltext
 nachvollziehen lassen.
+
+---
+
+## 2026-10-21 — Buchungsseite & Reise-Checkliste (`/buchung`, `Buchung.tsx`, `ChecklistPanel.tsx`)
+
+**Geprüfter Bereich:** Autonomer Lauf, niemand live dabei (siehe
+Autonomer-Tagesmodus-Abschnitt im Skill). Seit dem letzten Support-Chef-
+Bericht (20.10., Kalender-Nachkontrolle) betraf der einzige echte
+Funktions-Fix laut `git log` den Mitternachts-Bug im Kalender — den hat
+der gestrige Bericht bereits abgedeckt, hier also kein zweites Mal.
+Stattdessen `/buchung` gewählt: Die Seite selbst war zuletzt am 15.10.
+(repo-weiter Duffel-Dedup-Lauf) sowie indirekt am 17.10. (TripSummaryCard-
+Transportlabel-Fix, von dem Buchung.tsx dieselbe Anzeigelogik übernimmt)
+in Bewegung, wurde aber — anders als Kalender, Avatar oder transportDetail
+— seit dem 18.10.-Bericht ("ich bin dafür auch TripSummaryCard.tsx und
+Buchung.tsx durchgegangen") nicht noch einmal eigenständig auf die
+eigene Seitenlogik hin durchgesehen. Geprüft: `src/pages/Buchung.tsx`,
+`src/components/trip/ChecklistPanel.tsx`, `src/lib/trip/checklistRules.ts`.
+
+### Neuer Fund: "+ Suchen" bei leeren Feldern ignoriert den Edit-Shortcut, den der Pencil-Button direkt daneben nutzt
+
+`Buchung.tsx` zeigt pro Feld (Transport, Reisedaten, Budget, Unterkunft)
+dieselbe `Section`-Komponente. Ist ein Feld schon gesetzt, führt der
+Pencil-Button zu `editHref` (z. B. `/ki-chat?edit=dates`) — das lässt
+`KiChat.tsx:58-70` direkt in `startEdit('dates')` springen, statt die
+Nutzerin den ganzen Chat neu durchklicken zu lassen (genau der Zweck
+dieses Parameters, siehe Kommentar dort). Ist das Feld dagegen noch
+leer, zeigt dieselbe Komponente statt des Pencil-Buttons einen
+"+ Suchen"-Button — der aber in beiden betroffenen Stellen fest auf
+`/ki-chat` verlinkt (`Buchung.tsx:128` für Transport/Reisedaten/Budget/
+Unterkunft, `Buchung.tsx:277` für Aktivitäten) und das längst vorhandene
+`editHref`/`?edit=`-Muster komplett ignoriert, obwohl es für die ersten
+vier Felder bereits korrekt existiert und nur nicht an diesen zweiten
+Button weitergegeben wird. Zum Vergleich: `ChecklistPanel.tsx` (gleiche
+Seite, direkt darunter) verlinkt seine Transport-/Dates-/Accommodation-/
+Budget-Zeilen konsequent über genau dieses `AUTO_ITEM_HREF`-Muster mit
+`?edit=`-Parameter (`ChecklistPanel.tsx:20-25`) — innerhalb derselben
+Seite gibt es also zwei unterschiedliche Verhalten für denselben Zweck.
+*Für Aktivitäten* ist der Klick auf `/ki-chat` dagegen korrekt: Es gibt
+laut `editableFields` in `KiChat.tsx:25` gar keinen `?edit=activities`-
+Shortcut (Aktivitäten werden über den `EditMode`-Dialog direkt auf
+`Buchung.tsx` bearbeitet, nicht im Chat) — das ist in `ChecklistPanel.tsx`
+sogar explizit so kommentiert (Zeilen 14-18). Nur die vier anderen Felder
+betrifft der Fund wirklich.
+
+*Praktische Auswirkung:* Wer auf der Buchungsseite z. B. noch kein
+Budget angegeben hat und auf "+ Suchen" klickt, landet im Chat ohne
+jeden Hinweis, dass es gerade ums Budget geht — anders als beim Pencil-
+Klick auf ein bereits gesetztes Feld, der sofort gezielt nachfragt.
+Gerade für ein leeres Feld (wo die gezielte Nachfrage am meisten Zeit
+spart) fehlt der Shortcut, für ein bereits gesetztes (wo man ihn nur zum
+Ändern braucht) ist er da — genau umgekehrt zum eigentlichen Bedarf.
+
+*Vorschlag:* Den `editHref`-Wert (ist für Transport/Reisedaten/Budget/
+Unterkunft bereits als Prop vorhanden) auch am "+ Suchen"-Link in
+Zeile 128 verwenden, statt ihn fest auf `/ki-chat` zu setzen. Für
+Aktivitäten (Zeile 277) bleibt `/ki-chat` richtig, solange es dafür
+keinen Chat-Edit-Modus gibt.
+
+### Wiederaufgegriffener, seit zwei Monaten unverändert offener Fund: Checkliste hat weiterhin keine Persistenz
+
+Bereits am 24.08. gemeldet und seitdem nie wieder im Bericht erwähnt,
+im aktuellen Code aber unverändert vorhanden: Die acht manuell
+abhakbaren Vorbereitungs-Punkte der Reise-Checkliste (Reisepass, Visum,
+Reiseversicherung, Gesundheitsvorkehrungen, Dokumente, Zahlungsmittel,
+Zuhause organisiert, Koffer packen — `checklistRules.ts:26-34`) leben
+weiterhin ausschließlich in `useState<Set<string>>` innerhalb von
+`ChecklistPanel.tsx` (aktuell Zeile 33) — keine Rückbindung an
+`tripStorage.ts`/`localStorage`, anders als die automatisch erkannten
+Punkte (Transport/Daten/Unterkunft/Aktivitäten/Budget), die direkt aus
+`trip` kommen und damit über `saveStoredChat()` persistiert sind. Ein
+Reload oder erneuter Besuch der Seite setzt alle gesetzten Häkchen
+kommentarlos zurück, ohne jede Rückmeldung an die Nutzerin (anders als
+der `storageWarning`-Hinweis, der bei echten Speicherfehlern der
+Reisedaten erscheint — hier gibt es gar keinen Hinweis, weil es
+technisch kein Speicherfehler ist, sondern von vornherein kein Speichern
+versucht wird). Der ursprüngliche August-Bericht nannte den Grund dafür
+bereits treffend: Eine Reisevorbereitungs-Checkliste ist typischerweise
+etwas, das man über mehrere Tage/Wochen vor der Reise immer wieder
+öffnet — anders als ein Formularfeld, dessen Verlust beim Wegnavigieren
+zumindest innerhalb einer Sitzung auffällt.
+
+*Vorschlag unverändert:* Mindestens `localStorage` für die acht
+manuellen Häkchen (gleiches, einfaches Muster wie `tripStorage.ts` für
+die Reisedaten selbst), bis die größere Nutzerkonten-/Backend-
+Entscheidung laut `ZEITPLAN.md` gefallen ist. Mit mittlerweile zwei
+Monaten ohne Bewegung und einer aktiven, in Benutzung befindlichen Seite
+wäre das auch unabhängig von einer größeren Lösung ein kleiner,
+eigenständig sinnvoller Schritt.
+
+Kein dritter Punkt erfunden — abgesehen von den beiden oben genannten
+ergab die Durchsicht von `Buchung.tsx` und `ChecklistPanel.tsx` keine
+weiteren im Code nachvollziehbaren Reibungspunkte; insbesondere die
+Konsistenzprüfung zwischen `isTripComplete()` und der Checkliste
+(bereits in `tripStorage.ts:102-105` dokumentiert) ist nach wie vor
+korrekt gelöst.
