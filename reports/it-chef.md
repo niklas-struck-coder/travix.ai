@@ -1,44 +1,46 @@
 # IT-Chef Bericht
 
-**Datum:** 2026-10-20
+**Datum:** 2026-10-21
 
-## Was ist seit dem letzten Eintrag (2026-10-19) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-20) passiert?
 
-Der parallele Autonomie-Kanal `it-chef/auto` hatte heute drei weitere
-Läufe — alle ohne neuen sicheren Fund. Freigabe-Chef hat den gestrigen
-Kalender-Fix ("Heute"-Button fror sich beim Mount ein) bereits früh am
-Tag per PR geprüft und gemergt; Marketing-Chef und Support-Chef haben die
-Seite danach nachkontrolliert, Verhalten bestätigt unverändert korrekt.
+Seit gestern lief der parallele Autonomie-Kanal `it-chef/auto` acht Mal:
+ein `npm audit fix` (12 auf 7 Schwachstellen reduziert), eine ergänzte
+`App.tsx`-Testdatei, die restlichen sechs Läufe ohne neuen sicheren Fund.
+Marketing-Chef und Support-Chef haben parallel ihre eigenen Bereiche
+geprüft — Support-Chef hat dabei heute früh einen echten Bug auf der
+Buchungsseite gefunden (Details unten), den ich als klar genug für einen
+eigenen Fix eingestuft und umgesetzt habe.
 
 **Eigene gezielte Bug-Suche heute:** Tatsächlich gelesen (nicht nur
-gegrept) — `lib/duffel/client.ts`, `lib/trip/tripStorage.ts`,
-`lib/trip/calendarUtils.ts`, `hooks/useChat.ts`, `pages/Kalender.tsx`,
-`pages/Urlaubsmodus.tsx`, `pages/Dashboard.tsx`,
-`components/trip/ChecklistPanel.tsx`, `components/search/HotelWizard.tsx`,
-`components/search/FlightResults.tsx`, `components/search/NoResultsMessage.tsx`,
+gegrept) — `hooks/useChat.ts`, `hooks/useConcierge.ts`, `lib/ai/speech.ts`,
+`lib/format.ts`, `lib/utils.ts`, `lib/trip/cartTotals.ts`,
+`lib/trip/checklistRules.ts`, `pages/Buchung.tsx` (+ Test),
 `lib/nav-config.ts`, `routes.tsx`. Dazu codeweite Suche nach TODO/FIXME
-(keine), `console.log`/`console.debug`/`console.warn` (keine, nur
-begründete `console.error`-Aufrufe), leeren `catch`-Blöcken (keine) und
-ungeschütztem `JSON.parse` (einziger Fall weiterhin `tripStorage.ts`,
-bereits abgesichert). Alle Nav-Einträge aus `nav-config.ts` haben eine
-passende Route in `routes.tsx` (gebaut oder bewusst als Platzhalter) —
-keine toten Links.
-
-**Ergebnis:** Keinen neuen Bug gefunden. Der Code in den heute gelesenen
-Bereichen ist durchgängig gegen die üblichen Fallstricke abgesichert
-(ungültige Zeitstempel/Beträge, abgebrochene Promises bei Resets,
-fehlschlagendes `localStorage`, veraltete Suchergebnisse nach
-Tab-Wechsel). Hinweis zur Methodik: `node_modules` war nicht installiert
-(kein `npm install` erlaubt), ein automatischer `lint`/`typecheck`/
-`test`-Lauf war daher nicht möglich — Prüfung erfolgte durch genaues
-Lesen von Code und bestehenden Tests.
+(keine echten), `console.log`/`console.debug`/`console.warn` (keine),
+leeren `catch`-Blöcken (keine), ungeschütztem `JSON.parse` (einziger Fall
+weiterhin `tripStorage.ts`, bereits abgesichert) und `addEventListener`
+ohne Aufräumen (beide Stellen — `useChat.ts`, `lib/utils.ts` — räumen
+korrekt auf). Alle Nav-Einträge aus `nav-config.ts` haben weiterhin eine
+passende Route in `routes.tsx` — keine toten Links.
 
 ## Automatisch gefixt (PR wartet auf Review)
 
-Keiner. Heute kein neuer Bug gefunden, der sicher und klein genug für
-einen automatischen Fix gewesen wäre. [PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34)
-(`formatTime()` zeigte "Invalid Date" statt Platzhalter, aus dem
-gestrigen Lauf) wartet weiterhin auf Review.
+1. **[PR #38](https://github.com/niklas-struck-coder/travix.ai/pull/38) —
+   "+ Suchen" auf der Buchungsseite ignorierte den Edit-Shortcut bei
+   leeren Feldern.** Fund von Support-Chef Auto (heute). Bei Transport/
+   Reisedaten/Budget/Unterkunft verlinkte der "+ Suchen"-Button für ein
+   noch leeres Feld fest auf `/ki-chat`, statt — wie der Pencil-Button
+   direkt daneben für ein bereits gesetztes Feld — den vorhandenen
+   `editHref` (z. B. `/ki-chat?edit=budget`) zu nutzen. Dadurch landete
+   man im Chat ohne Hinweis, welches Feld gerade gefüllt werden soll.
+   Fix: eine Zeile in `Buchung.tsx` (`Link to={editHref}` statt
+   `to="/ki-chat"`), bestehender Test angepasst. Aktivitäten-Button bleibt
+   bewusst auf `/ki-chat`, da es dafür keinen Chat-Edit-Modus gibt.
+
+[PR #34](https://github.com/niklas-struck-coder/travix.ai/pull/34)
+(`formatTime()` zeigt "Invalid Date" statt Platzhalter) wartet weiterhin
+auf Review — im aktuellen `main` noch nicht behoben, Bug besteht unverändert.
 
 ## Gefundene Bugs (nicht automatisch gefixt)
 
@@ -54,13 +56,22 @@ der Fix erfordert eine echte Produktabwägung statt eines Ein-Zeilers:
    `MeineReisen.tsx` verlinkt die Lissabon-Demokarte auf `/urlaubsmodus`,
    die Seite lädt ihren Trip aber weiterhin aus `loadStoredChat()?.trip`
    statt aus der Demoreise.
+3. **Reise-Checkliste hat keine Persistenz** (Support-Chef-Fund, seit
+   August bekannt, heute wieder aufgegriffen). Die acht manuell
+   abhakbaren Vorbereitungspunkte in `ChecklistPanel.tsx` leben nur in
+   `useState`, nicht in `tripStorage.ts`/`localStorage` — ein Reload
+   setzt alle Häkchen kommentarlos zurück. Klein genug für einen Fix,
+   aber als reine Erweiterung (neuer Speicher-Pfad, kein Ein-Zeiler) für
+   diesen Kanal zu groß angesetzt — zur Entscheidung vorgelegt statt
+   automatisch angefasst.
 
 ## Weitere Vorschläge
 
-1. **26 offene Auto-Fix-PRs**, Stand unverändert zu gestern. Mehrere
-   ältere sind inhaltlich schon identisch in `main`, weil derselbe Fund
-   später über `it-chef/auto` nochmal griff. Nur Ni kann PRs schließen;
-   eine Stichprobenprüfung vor dem Schließen lohnt sich weiterhin.
+1. **28 offene Auto-Fix-PRs**, Stand +2 zu gestern (neu: #37
+   Freigabe-Chef-Log, #38 der heutige Fix). Mehrere ältere sind inhaltlich
+   schon identisch in `main`, weil derselbe Fund später über
+   `it-chef/auto` nochmal griff. Nur Ni kann PRs schließen; eine
+   Stichprobenprüfung vor dem Schließen lohnt sich weiterhin.
 2. **`recharts` ist weiterhin eine ungenutzte Abhängigkeit** in
    `package.json` — kein Import irgendwo in `src/`. Entfernen reduziert
    die Bundle-Größe; Abhängigkeitsänderungen sind für diesen Kanal
@@ -70,4 +81,4 @@ der Fix erfordert eine echte Produktabwägung statt eines Ein-Zeilers:
    Zugsuche-Seite, kein Nav-Eintrag, keine echte Datenquelle angebunden.
    Entweder verdrahten oder entfernen — Produktentscheidung.
 
-_Letztes Update: 2026-10-20_
+_Letztes Update: 2026-10-21_
