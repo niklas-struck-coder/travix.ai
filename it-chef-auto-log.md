@@ -21175,3 +21175,70 @@ Tests grün, `npm run build` grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-21, 22:13 UTC (neunter Lauf, npm-Tooling-Bug blockiert neuen npm-audit-Fund)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, ca. 20 Stunden nach dem vorigen
+Lauf vom selben Tag (achter Lauf, 02:08 UTC, Commit `3f8de46`, kein
+neuer sicherer Punkt). `it-chef/auto` lag hinter `origin/main` zurück;
+`main` per Fast-Forward-Merge eingeholt (`d5d377a`) — die Differenz
+betraf ausschließlich `reports/it-chef.md`, `reports/support-chef.md`
+und `status.md` (Berichte des parallelen, plattform-verwalteten
+`it-chef`-Kanals bzw. von Marketing-/Support-Chef), kein Produktcode.
+Insbesondere der dort dokumentierte Fund/Fix ("+ Suchen"-Button auf der
+Buchungsseite nutzt den Edit-Shortcut nicht, PR #38) wurde bewusst
+**nicht** hier nochmal gefixt, um keinen zweiten, mit PR #38
+konkurrierenden Fix zu erzeugen — ist im aktuellen `main` noch nicht
+gemergt, Fix bereits auf einem eigenen Branch unterwegs.
+
+**Punktesuche:** Frischer `npm ci`, dann `npm audit`: **9 Schwachstellen
+(2 mittel, 7 hoch)** — gegenüber dem letzten bestätigten Stand (7 hoch,
+siehe sechster/siebter/achter Lauf) ein neuer Fund: 2 mittlere
+Schwachstellen in `@vitest/mocker`/`vitest` (Code-Injection über
+unauthentifizierte Mock-Registrierung, Backslash-Traversal-Bypass),
+laut `npm audit`-Ausgabe **ohne** `--force` behebbar (`fix available via
+'npm audit fix'`, kein Major-Sprung — `vitest@4.1.12` existiert bereits
+innerhalb des in `package.json` gepinnten `^4.1.10`-Bereichs). Die
+restlichen 7 hohen Schwachstellen sind unverändert die bekannten,
+ausschließlich transitiv über die `shadcn`-CLI (Dev-Dependency)
+laufenden (`braces`/`micromatch`/`fast-glob`/`ts-morph`), weiterhin nur
+per Major-Sprung auf `shadcn@1.0.0+` behebbar — wie in den Vorläufen
+bewusst nicht umgesetzt (Breaking-Change-Upgrade).
+
+**Sicherheitskriterien (für den vitest-Fund):** Kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/Rechtstexten; keine offene Produkt-/
+Architekturentscheidung (reiner Patch innerhalb der bestehenden
+SemVer-Range); klar umrissen (`npm audit fix` ohne `--force`); objektiv
+prüfbar (`npm audit` vorher/nachher, bestehende Testsuite als
+Regressionsschutz). Alle vier Kriterien erfüllt — **aber nicht
+umsetzbar:**
+
+**Blocker:** Sowohl `npm audit fix` als auch der direkte, gezielte
+Versuch `npm install vitest@4.1.12` brechen reproduzierbar mit einem
+internen `npm`/Arborist-Fehler ab (`TypeError: Cannot read properties
+of null (reading 'edgesOut')`, in `#loadPeerSet` /
+`build-ideal-tree.js`, `npm v10.9.4`) — kein Problem im Projekt-Code
+oder in `package.json` (keine eigenen `optionalDependencies`/
+`peerDependenciesMeta`), sondern ein Fehler beim Auflösen von vitests
+eigenen optionalen Peer-Abhängigkeiten (`@vitest/browser`, `jsdom`,
+`happy-dom`, `canvas`). Beide Versuche brachen vor jeder
+Dateiänderung ab — `git status` danach sauber, kein Teilzustand.
+Ein Workaround (z. B. `--legacy-peer-deps`, manuelles Patchen von
+`package-lock.json`) hätte Auswirkungen auf die gesamte
+Abhängigkeitsauflösung, die sich in diesem Rahmen nicht mit
+vertretbarem Aufwand objektiv als unschädlich für den Rest des Baums
+verifizieren lassen — das verletzt das Kriterium "klar umrissen, kein
+Interpretationsspielraum" und wurde deshalb bewusst **nicht**
+versucht. Dies ist eher ein Hinweis für Ni (ggf. `npm` selbst
+aktualisieren) als ein autonom lösbarer Punkt.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt. Kein Produktcode
+geändert, `git status` nach den fehlgeschlagenen npm-Versuchen sauber.
+Trotzdem als Regressionsschutz-Baseline frisch durchlaufen (unverändert
+gegenüber den Vorläufen): `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (73 Testdateien, 549 Tests, alle grün),
+`npm run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
