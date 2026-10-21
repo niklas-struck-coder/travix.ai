@@ -147,7 +147,7 @@ describe('Buchung – Aktivitäten', () => {
     expect(screen.getByText('Noch keine Aktivitäten geplant')).toBeInTheDocument()
   })
 
-  it('shows a "+ Suchen" action linking to /ki-chat for every empty section (Transport, Reisedaten, Budget, Unterkunft, Aktivitäten)', () => {
+  it('shows a "+ Suchen" action for every empty section, pre-loading the field in KI-Chat via ?edit= just like the pencil-edit button does once the field is set', () => {
     seedStoredChat()
     render(
       <MemoryRouter>
@@ -162,7 +162,15 @@ describe('Buchung – Aktivitäten', () => {
 
     const searchLinks = screen.getAllByRole('link', { name: '+ Suchen' })
     expect(searchLinks).toHaveLength(5)
-    searchLinks.forEach((link) => expect(link).toHaveAttribute('href', '/ki-chat'))
+    const hrefs = searchLinks.map((link) => link.getAttribute('href'))
+    expect(hrefs).toEqual([
+      '/ki-chat?edit=transportMode',
+      '/ki-chat?edit=dates',
+      '/ki-chat?edit=budget',
+      '/ki-chat?edit=accommodation',
+      // Aktivitäten has no chat edit mode (handled via EditMode on this page instead).
+      '/ki-chat',
+    ])
   })
 
   it('adds an activity via EditMode and reflects it in the section and localStorage', () => {
