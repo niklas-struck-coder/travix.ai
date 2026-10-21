@@ -125,7 +125,7 @@ function Section({ icon: Icon, title, value, emptyLabel, editHref, editChoice }:
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm text-muted-foreground">{emptyLabel}</p>
             <Button asChild size="sm" variant="outline">
-              <Link to="/ki-chat">+ Suchen</Link>
+              <Link to={editHref}>+ Suchen</Link>
             </Button>
           </div>
         )}
