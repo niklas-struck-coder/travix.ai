@@ -1,10 +1,58 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-20)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-21)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-21: nichts Neues — keine neuen Produkt-Codeänderungen
+seit dem 20.10., Kandidatentopf bleibt bei **sechs**, alle vier Fragen
+weiterhin offen, Sammel-Post-Vorschlag aus dem interaktiven
+Marketing-Chef-Bericht geprüft und bewusst nicht als neue Information
+gewertet
+
+**Geprüft:** Die vier offenen Fragen unten zuerst gegen den aktuellen
+Stand geprüft — keine Änderung seit dem 20.10.: `status.md` (Update vom
+20.10., keine neue Notiz von Ni zu einer der vier Fragen), `ZEITPLAN.md`
+(6.2 "Beim Anbieter buchen"-Button weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`/`index.html` (Footer-Changelog-Seite
+weiterhin nicht gebaut), keine neuen Kanal-Links (`linkedin.com`/
+`instagram.com`/`tiktok.com` in `src/`/`index.html` weiterhin ohne
+Treffer). Alle vier Fragen bleiben offen.
+
+Danach `git log` von der eigenen Vorlauf-Basis (`50aa9df`, eigener
+letzter Commit vom 20.10., inzwischen nach `main` gemergt) gegen
+`origin/main` (`7129bcc`) geprüft: acht neue Commits, davon keiner mit
+Dateiänderung unter `src/` — ausschließlich Merges, der IT-Chef-Bericht
+vom 20.10. ("gezielte Bug-Suche ohne neuen sicheren Fund"), der eigene
+Marketing-Chef-Bericht, der Support-Chef-Bericht und ein Daily-Status-
+Update. Keine neue, per `git show` verifizierbare Produkt-Codeänderung,
+also kein neuer Tier-4-Kandidat.
+
+Der interaktive Marketing-Chef-Bericht vom 20.10.
+(`reports/marketing-chef.md`) schlägt vor, jetzt bereits einen
+Sammel-Post aus vier bestätigten Fixes zusammenzustellen, statt weiter
+auf die vollständige Changelog-Seite zu warten. Das ist aber keine neue
+Information im Sinne der seit 20.08. geltenden Selbstbeschränkung —
+keine der vier offenen Fragen ist dadurch beantwortet, und der hier
+geführte Kandidatentopf (sechs, 57-62) liegt weiterhin klar unter der
+Achter-Schwelle, die bisher jede Mini-Changelog-Ausgabe ausgelöst hat.
+Ein heutiger Kurswechsel wäre nur eine Wiederholung derselben Abwägung
+mit einem anderen Ergebnis, keine neue Entscheidung auf neuer Grundlage
+— deshalb auch heute kein eigenständiges Social-Content-Stück und keine
+siebte Mini-Changelog-Ausgabe allein aufgrund dieses Vorschlags.
+
+**Kandidatentopf bleibt bei sechs** (57-62, unverändert seit 20.10.),
+weiterhin klar unter der Achter-Schwelle. Keine neue Ausgabe heute.
+
+**Nächster Lauf:** weiterhin zuerst die vier offenen Fragen gegenprüfen,
+dann prüfen ob seit `7129bcc` neue Produkt-Codeänderungen hinzugekommen
+sind, und den Kandidatentopf (Stand 21.10.: sechs) gegen den etablierten
+06.09.-Maßstab (acht = genug) weiterführen. Sollte eine der vier Fragen
+beantwortet werden (insbesondere die erste, ob LinkedIn/Instagram jetzt
+angelegt werden dürfen), ändert das die Lage unabhängig vom
+Kandidatentopf-Stand grundlegend.
 
 ## Update 2026-10-20: ein weiterer Tier-4-Kandidat (62: Kalender-"Heute"
 fror sich beim Mount ein), Kandidatentopf von fünf auf **sechs**,
