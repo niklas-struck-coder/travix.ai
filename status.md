@@ -13,19 +13,18 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-19):**
-- IT-Chef hat einen Bug in Kalender.tsx behoben: die "Heute"-Markierung
-  fror sich beim Mount ein; mehrere weitere Auto-Läufe fanden danach
-  keinen neuen sicheren Punkt mehr
-- Support-Chef hat den Fix nachkontrolliert (reine Analyse, keine
-  Codeänderung); drei ältere offene Punkte (leerer Erstaufruf, fehlende
-  Klickziele, kein aria-live) bleiben weiterhin unverändert offen
-- Marketing-Chef hat den Kalender-Fix als Tier-4-Kandidat eingestuft
-  (reine Markdown-Pflege), Kandidatentopf bleibt bei sechs, alle vier
-  offenen Fragen weiterhin ungeklärt
-- Freigabe-Chef hat IT-, Marketing- und Support-Chef-Branches mehrfach
-  geprüft und erfolgreich nach main gemergt
+**Seit letztem Update (2026-10-20):**
+- IT-Chef: mehrere Auto-Läufe ohne neuen sicheren Fund, dazwischen ein
+  npm-audit-Fix (Schwachstellen von 12 auf 7 reduziert) und eine fehlende
+  Testdatei (App.tsx) ergänzt
+- Support-Chef hat die Buchungsseite/Checkliste geprüft: neuer Fund zum
+  "+ Suchen"-Edit-Shortcut, ein zwei Monate alter Punkt zur
+  Checklisten-Persistenz wurde wieder aufgegriffen
+- Marketing-Chef hat die Freigabe-Übersicht gepflegt; keine neuen
+  Tier-4-Kandidaten, alle vier offenen Fragen weiterhin ungeklärt
+- Freigabe-Chef hat die support-chef/auto- und marketing-chef/auto-Branches
+  geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-20_
+_Letztes Update: 2026-10-21_
