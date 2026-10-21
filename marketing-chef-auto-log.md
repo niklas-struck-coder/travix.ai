@@ -4,6 +4,82 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-21
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`50aa9df`, eigener Commit vom 20.10.) war bereits nach `origin/main`
+gemergt (siehe `freigabe-chef-log.md`, Lauf vom 20.10.). Branch deshalb
+wie im Fall eines bereits gemergten Branches vorgesehen neu von
+aktuellem `origin/main` (`7129bcc`, inkl. IT-Chef-, Marketing-Chef- und
+Support-Chef-Bericht vom 20.10.) angelegt, nicht per Merge-Commit
+fortgeführt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 20.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 20.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`, keine neuen Kanal-Links. Alle vier Fragen
+bleiben offen.
+
+Danach `git log 50aa9df..origin/main` geprüft (Basislinie: der eigene
+Stand vom 20.10.): acht neue Commits, ausschließlich Merges, Berichte
+(IT-Chef, Marketing-Chef, Support-Chef) und ein Daily-Status-Update —
+keiner mit Dateiänderung unter `src/`. Kein neuer Tier-4-Kandidat.
+
+Der interaktive Marketing-Chef-Bericht vom 20.10.
+(`reports/marketing-chef.md`) schlägt vor, jetzt bereits einen
+Sammel-Post aus vier bestätigten Fixes zusammenzustellen. Geprüft und
+bewusst nicht umgesetzt: beantwortet keine der vier offenen Fragen und
+der hier geführte Kandidatentopf (sechs, 57-62) bleibt klar unter der
+seit 06.09. etablierten Achter-Schwelle — ein heutiger Kurswechsel wäre
+nur eine Wiederholung derselben Abwägung, keine neue Entscheidung auf
+neuer Grundlage. Details siehe Update 2026-10-21 in
+`marketing/freigabe-uebersicht.md`.
+
+Kandidatentopf bleibt bei **sechs** (57-62, unverändert seit 20.10.),
+weiterhin klar unter der Achter-Schwelle. Deshalb heute keine neue
+Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung einer
+bestehenden Übersicht, kein Live-Vorgang — nichts gepostet oder im
+Produkt verändert. Keine erfundenen Kennzahlen — es gab schlicht keine
+neuen Commits zu bewerten, das wurde so dokumentiert statt etwas zu
+erfinden. Klar genug beschrieben, keine offene Positionierungsfrage:
+wendet nur die seit 20.08. etablierte Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein Sammel-Post aus vier Fixes, wie vom interaktiven Marketing-Chef-
+  Bericht vorgeschlagen — siehe oben, keine neue Information gegenüber
+  der seit 20.08. geltenden Selbstbeschränkung.
+- Eine siebte Mini-Changelog-Ausgabe — Kandidatentopf liegt mit sechs
+  weiterhin unter der Achter-Schwelle, ein künstliches Auffüllen wäre
+  keine ehrliche Vorlage.
+
+**Umgesetzt:**
+- `marketing-chef/auto` neu von aktuellem `origin/main` (`7129bcc`)
+  angelegt, da der vorherige Stand bereits gemergt war.
+- `marketing/freigabe-uebersicht.md`: neues Update vom 21.10. (Prüfung
+  der vier Fragen, keine neuen Commits zu bewerten, Sammel-Post-
+  Vorschlag geprüft und begründet nicht übernommen, Titel-Datum auf
+  21.10. gesetzt).
+- Keine Checkbox in `ZEITPLAN.md` geändert.
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-20
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
