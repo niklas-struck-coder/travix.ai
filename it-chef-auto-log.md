@@ -21581,3 +21581,70 @@ mit demselben Fund/Fix-Eintrag aktualisiert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-22, 23:10 UTC (fünfzehnter Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, fünfter des Tages, rund eine
+Stunde nach dem vierzehnten Lauf (`e97e477`, 22:13 UTC). `origin/main`
+unverändert bei `c8ba951` (keine neuen Commits seit dem vierzehnten
+Lauf), `it-chef/auto` liegt bereits einen Commit vor `main` — direkt auf
+dem bestehenden `it-chef/auto`-Stand weitergearbeitet statt neu von
+`main` auszuchecken, da dort nichts Neues zu mergen war.
+
+**Punktesuche:** Da sich an `main` seit dem vierzehnten Lauf nichts
+geändert hat, keine neuen Befunde aus frischen Commits zu erwarten.
+Trotzdem eigenständig erneut gesucht, statt den letzten Lauf einfach zu
+wiederholen:
+- `tasks/tasks-prd-travix-platform.md` komplett durchgesehen: alle noch
+  offenen Punkte (2.0 Base44/Auth, 4.1-4.3 KI-Engine, 5.7 Zug/Bus/Fähre,
+  6.2/6.6/6.7 Kosten-/Item-Felder, 7.4 Chat-Historie-Resume, 7.12 Budget-
+  Charts, 8.1-8.7 Urlaubsmodus-Vision/Deal-Finder, 8.9 Premium, 8.11
+  Hilfe, 8.12 Rewards, 8.13 Tests für `calculateCosts.ts`) bleiben aus
+  denselben, in Lauf elf bis vierzehn dokumentierten Gründen blockiert:
+  fehlende Backend-/Architekturentscheidung, fehlende Inhalte
+  (FAQ/Rewards-Regeln) oder fehlende Datenfelder, die erst eine
+  Produktentscheidung bräuchten — keine neue Information seit der
+  letzten Prüfung.
+- `reports/support-chef.md` (22.10.) erneut gelesen: Fund 3
+  ("Entwurf abschließen" sieht aus wie Löschwarnung) wurde bereits im
+  vierzehnten Lauf behoben. Vorschlag 3 ("Lösch-Warnungen abstufen je
+  nach Reversibilität", betrifft `Favoriten.tsx:128`,
+  `Warenkorb.tsx:134`, `Preisalarme.tsx:137`, `Aktivitaeten.tsx:118`,
+  `EditMode.tsx:151`) im Code gegengeprüft: alle fünf Dialoge warnen vor
+  einer tatsächlichen Löschung (Favorit/Warenkorb-Position/Preisalarm/
+  Aktivität wird endgültig entfernt, keine Undo-Funktion vorhanden) —
+  der rote `variant="destructive"`-Button und der Rückgängig-Hinweis
+  sind hier also im Unterschied zum Abschließen-Dialog tatsächlich
+  korrekt, keine Fehlkategorisierung. Eine andere Einstufung wäre eine
+  Interpretation ohne klaren Maßstab (verletzt Sicherheitskriterium 3),
+  kein autonom umsetzbarer Punkt.
+- Codeweite Gegenprüfung auf dasselbe Bugmuster wie im vierzehnten Lauf
+  (destruktiver roter Button ohne echten Datenverlust): alle zwölf
+  Fundstellen von `variant="destructive"` im `src`-Baum durchgesehen
+  (`grep -rn 'variant="destructive"' src --include="*.tsx"`) — die sechs
+  Nicht-Test-Treffer (`EditMode.tsx`, `KiChat.tsx`'s Chat-Reset-Dialog,
+  `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`,
+  `Reiseentwuerfe.tsx`'s Löschen-Dialog, `Warenkorb.tsx`) gehören
+  ausnahmslos zu einer echten Löschung oder einem kompletten Chat-Reset
+  (Trip-Daten gehen verloren) — kein weiterer Fehlfund.
+- Codeweite Suche nach TODO/FIXME, `console.log`/`console.warn`/
+  `console.error`, leeren `catch`-Blöcken: keine neuen Treffer (die vier
+  bestehenden `console.error`-Aufrufe in `tripStorage.ts`/
+  `duffel/client.ts` sind beabsichtigte Fehlerprotokollierung, kein Bug).
+- Testabdeckung erneut geprüft (`.tsx`/`.ts`-Dateien ohne zugehörige
+  `.test.*`-Datei): nur `label.tsx`, `input.tsx` (reine Wrapper ohne
+  eigene Logik, siehe 19.10.-Eintrag) und `main.tsx` (Einstiegspunkt)
+  fehlen weiterhin bewusst — vollständig, kein neuer Kandidat.
+- `.map(..., key={index})`-Stellen (`FlightCard.tsx`, `SearchErrorAlert.tsx`)
+  gegengeprüft: beide rendern statische, nie nachträglich umsortierte/
+  veränderte Listen (Flugsegmente, Fehlermeldungen einer einzelnen
+  Suchanfrage) — kein React-Key-Bug, kein Fix nötig.
+
+**Ergebnis:** Kein Punkt heute (fünfter Lauf) autonom umgesetzt, kein
+Produktcode geändert. Regressionsschutz-Baseline unverändert grün:
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73
+Testdateien, 552 Tests, alle grün — identisch zum vierzehnten Lauf, da
+sich seitdem nichts am Code geändert hat).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
