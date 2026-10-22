@@ -5169,3 +5169,85 @@ weiteren im Code nachvollziehbaren Reibungspunkte; insbesondere die
 Konsistenzprüfung zwischen `isTripComplete()` und der Checkliste
 (bereits in `tripStorage.ts:102-105` dokumentiert) ist nach wie vor
 korrekt gelöst.
+
+---
+
+## 2026-10-22 — Nachkontrolle Urlaubsmodus-Link-Fix (`/urlaubsmodus`, `MeineReisen.tsx`) & Status offener Fixes
+
+**Geprüfter Bereich:** Autonomer Lauf, niemand live dabei. Seit dem
+letzten Support-Chef-Bericht (21.10., Buchungsseite/Checkliste) ist laut
+`git log` auf `main` ein einziger echter UI-Fix dazugekommen: `f0cb096`
+("zehnter Lauf") behebt genau meinen gestrigen Fund 3 (toter
+Urlaubsmodus-Link von der Lissabon-Demokarte) in `src/pages/
+MeineReisen.tsx` und `src/pages/Urlaubsmodus.tsx` — der naheliegende
+Bereich für den heutigen Lauf. Zusätzlich habe ich geprüft, ob mein
+anderer gestriger Fund (Fund 4, "+ Suchen"-Edit-Shortcut) inzwischen
+tatsächlich in `main` angekommen ist, da `it-chef-auto-log.md`/
+`reports/it-chef.md` ihn als "gefixt (PR #38)" vermelden.
+
+### Urlaubsmodus-Link-Fix: korrekt umgesetzt, kein neuer Punkt
+
+`MeineReisen.tsx:49-51` übergibt jetzt Ziel und Zeitraum der jeweiligen
+Reisekarte per `?destination=&dates=`-Query (gleiches Muster wie
+`Favoriten.tsx`/`Home.tsx` → `/ki-chat`), und `Urlaubsmodus.tsx:21-27`
+liest diese Parameter vorrangig vor dem gespeicherten Chat-Trip aus
+`loadStoredChat()`. Für die Lissabon-Demokarte (einzige Reise mit
+`status: 'upcoming'`, Kyoto ist `'past'` und zeigt bewusst keinen
+Button) funktioniert das korrekt: `mockConcierge.ts:17` kennt "Lissabon"
+als kuratiertes Ziel, der Concierge antwortet entsprechend faktenbasiert
+statt mit der "noch keine hinterlegten Fakten"-Ausweichantwort. Die
+Tests (`MeineReisen.test.tsx`, `Urlaubsmodus.test.tsx`) decken sowohl den
+Normalfall als auch den Vorrang vor einem unpassenden gespeicherten Trip
+ab (Bali im Storage, Kyoto in der URL → Kyoto wird angezeigt). Im
+aktuell einzigen erreichbaren Navigationsweg (nur `/meine-reisen` selbst
+verlinkt hierhin, Urlaubsmodus ist laut `nav-config.ts` bewusst nicht in
+der Sidebar) konnte ich keinen neuen Reibungspunkt finden — insbesondere
+kein Problem damit, dass `<Routes key={location.pathname}>` in
+`routes.tsx:74` nur auf dem Pfad, nicht auf dem Query-String, remounted:
+das würde nur zum stehenden alten Trip führen, wenn von `/urlaubsmodus`
+direkt zu `/urlaubsmodus?destination=…` mit anderem Ziel gewechselt
+würde, und dafür gibt es aktuell keinen Link irgendwo in der App (jede
+Karte mit Button führt zunächst zurück über `/meine-reisen`, also über
+einen Pfadwechsel, der remounted). Falls künftig eine zweite
+gleichzeitig bevorstehende Demo-Reise dazukommt, wäre das aber vorsorglich
+im Auge zu behalten.
+
+### Fund von gestern ("+ Suchen"-Edit-Shortcut): Fix existiert, ist aber weiterhin nicht in `main` — Bug für Nutzer:innen unverändert reproduzierbar
+
+Anders als beim Urlaubsmodus-Fix ist der zweite gestrige Fund nicht
+wirklich live: `src/pages/Buchung.tsx:128` verlinkt "+ Suchen" bei einem
+leeren Transport-/Reisedaten-/Budget-/Unterkunft-Feld weiterhin fest auf
+`/ki-chat`, obwohl `editHref` (für den Pencil-Button bei bereits
+gesetztem Feld in Zeile 116 korrekt verwendet) genau dafür als Prop
+vorliegt. `src/pages/Buchung.test.tsx:150-165` bestätigt das: Der Test
+erwartet dort immer noch `/ki-chat` als Href für alle fünf "+ Suchen"-
+Links, nicht die erwarteten `?edit=…`-Varianten. Der eigentliche Fix-
+Commit (`1745128`, "Fix: '+ Suchen' auf Buchungsseite ignoriert den
+Edit-Shortcut …") existiert tatsächlich — aber ausschließlich auf dem
+separaten, noch ungemergten Branch `it-chef-autofix/buchung-suchen-edit-
+shortcut-2026-10-21` (PR #38). `reports/it-chef.md:27-39` benennt das
+selbst korrekt und transparent als "Automatisch gefixt (PR wartet auf
+Review)" — es ist also keine Falschmeldung, sondern ein offen
+ausgewiesener Merge-Rückstand. Für Nutzer:innen der aktuell laufenden
+App ändert das aber nichts: Wer heute auf der Buchungsseite ein noch
+leeres Feld über "+ Suchen" ausfüllen will, landet weiterhin ohne jeden
+Hinweis im allgemeinen Chat — genau das Verhalten, das gestern als
+Reibungspunkt gemeldet wurde.
+
+Gleiches Muster, schon länger bekannt, bei `PR #34`
+(`formatTime()`/`src/lib/format.ts:23`, zeigt bei kaputtem Zeitstempel
+weiterhin wörtlich "Invalid Date" statt eines Platzhalters) — laut
+`reports/support-chef.md` inzwischen seit vier Tagen unverändert
+ungemergt, hier nur zur Vollständigkeit erneut bestätigt, kein
+eigenständiger neuer Fund.
+
+*Vorschlag:* Keine Code-Änderung nötig, beide Fixes liegen bereits
+fertig vor (`it-chef-autofix/buchung-suchen-edit-shortcut-2026-10-21`
+bzw. die PR #34-Branch) — es braucht nur noch die Freigabe-Chef-
+Entscheidung, sie nach `main` zu mergen, damit die bereits bestätigten
+Reibungspunkte für echte Nutzer:innen tatsächlich verschwinden.
+
+### Nicht geprüft
+Der übrige Inhalt von `Buchung.tsx`/`ChecklistPanel.tsx` (gestern bereits
+vollständig geprüft) sowie alle anderen Seiten waren nicht Gegenstand
+dieses Laufs.
