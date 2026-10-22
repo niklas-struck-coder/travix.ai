@@ -128,7 +128,7 @@ describe('Reiseentwuerfe', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon abschließen' }))
     expect(screen.getByText('Entwurf abschließen?')).toBeInTheDocument()
-    expect(screen.getByText(/Der Entwurf für Lissabon wird abgeschlossen/)).toBeInTheDocument()
+    expect(screen.getByText(/Der Entwurf für Lissabon wird als abgeschlossen markiert/)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
     expect(screen.queryByText('Entwurf abschließen?')).not.toBeInTheDocument()
@@ -187,7 +187,7 @@ describe('Reiseentwuerfe', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
     fireEvent.click(screen.getByRole('button', { name: 'Lissabon (Eintrag 1) abschließen' }))
 
-    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 1\) wird abgeschlossen/)).toBeInTheDocument()
+    expect(screen.getByText(/Der Entwurf für Lissabon \(Eintrag 1\) wird als abgeschlossen markiert/)).toBeInTheDocument()
   })
 
   it('asks for confirmation before deleting a draft, and keeps it if cancelled', () => {

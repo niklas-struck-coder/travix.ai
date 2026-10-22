@@ -21513,3 +21513,71 @@ geändert. Regressionsschutz-Baseline unverändert grün: `npx tsc -b`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-22, 22:08 UTC (vierzehnter Lauf — ein sicherer Punkt gefunden und umgesetzt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, vierter des Tages, rund 20 Stunden
+nach dem dreizehnten Lauf (`62648b7`, 02:08 UTC). Branch `it-chef/auto`
+lag inhaltlich bereits auf `main` (die Läufe neun bis dreizehn waren über
+Nacht vom Freigabe-Chef gemergt worden), daher frisch von `origin/main`
+(`c8ba951`) neu ausgecheckt statt auf den alten `it-chef/auto`-Stand
+aufzusetzen.
+
+**Punktesuche:** Seit dem dreizehnten Lauf sind mehrere neue Commits auf
+`main` gelandet (Support-Chef-, Marketing-Chef- und IT-Chef-Berichte aus
+einer interaktiven Session mit Ni). Darin ein neuer, konkreter Fund von
+Support-Chef (`reports/support-chef.md`, 22.10., Fund 3): Der
+"Entwurf abschließen?"-Dialog auf `/entwuerfe` (`Reiseentwuerfe.tsx:355`)
+nutzt wortgleich denselben dramatischen Warntext wie der "Entwurf
+löschen?"-Dialog direkt darüber ("Das lässt sich nicht rückgängig
+machen") und denselben roten `variant="destructive"`-Bestätigungsbutton —
+obwohl Abschließen (`finalizeDraft()`, Zeile 141) nur den Status auf
+`'finalized'` setzt, keine Daten löscht und ein positiver Meilenstein
+ist, kein Verlust. Geprüft, dass der Dialog alle vier Sicherheitskriterien
+erfüllt:
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder Rechtstexten —
+  reine UI-Copy/Farbwahl auf einer Demo-Daten-Seite.
+- Keine offene Architektur-/Produktentscheidung — nur Text und
+  Button-Variante, keine neue Logik.
+- Klar genug beschrieben (konkrete Datei/Zeilen im Support-Chef-Fund),
+  keine Interpretation über das Gemeldete hinaus nötig.
+- Objektiv prüfbar (Typecheck/Lint/Tests) und per `MARKENDESIGN.md`
+  eindeutig entscheidbar (Teal für "positive/normale Werte", "niemals
+  Rot" für alarmierende, aber nicht destruktive Zustände — dort zwar für
+  Budget-Warnungen formuliert, aber dasselbe Prinzip trifft hier
+  genauso zu).
+
+**Umsetzung:** `Reiseentwuerfe.tsx` — Dialogtext auf "wird als
+abgeschlossen markiert und lässt sich danach nicht mehr bearbeiten. Alle
+Angaben bleiben erhalten und sind weiterhin unter 'Details ansehen'
+einsehbar" geändert (ehrlich: Abschließen sperrt tatsächlich das weitere
+Bearbeiten, siehe die bedingten Buttons Zeile 264-292, aber es ist keine
+Löschung). Bestätigungs-Button von `variant="destructive"` auf
+`className="bg-teal text-navy hover:bg-teal/90"` umgestellt — exakt das
+Muster des bereits bestehenden "Planung fortsetzen"-Buttons auf derselben
+Karte, keine neue Farbentscheidung erfunden. Zwei bestehende Tests in
+`Reiseentwuerfe.test.tsx` prüften den alten Wortlaut per Regex
+(`/wird abgeschlossen/`) und wurden auf den neuen Text angepasst — reine
+Testanpassung an die bewusste Textänderung, keine neue Testaussage.
+
+**Geprüft:** `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün,
+inkl. der zwei angepassten Tests), `npm run build` (`tsc -b && vite
+build`, 0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung — kein neuer
+Fund, bereits aus früheren Läufen bekannt).
+
+**Nicht erneut geprüft:** Die in Lauf elf/zwölf/dreizehn dokumentierten
+Blocker (Base44/Gemini-Credentials, Deal-Finder/Premium/Rewards-
+Architekturentscheidungen, Hilfe-Seite an FAQ-Inhalten, 8.13 an
+fehlenden `calculateCosts.ts`/Schema-Validierung, npm-audit-Fund blockiert
+durch denselben `@npmcli/arborist`-Tooling-Bug) — keine neue Information
+seit der letzten Prüfung, da heute außer den oben genannten
+Berichts-Commits nichts an diesen Stellen geändert wurde.
+
+**Ergebnis:** Ein Punkt umgesetzt (`Reiseentwuerfe.tsx`,
+"Entwurf abschließen?"-Dialog: Text + Button-Farbe), `ZEITPLAN.md`
+(Sprint 3, Punkt 7.3) und `tasks/tasks-prd-travix-platform.md` (Punkt 7.3)
+mit demselben Fund/Fix-Eintrag aktualisiert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

@@ -3505,6 +3505,25 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Ablauf. Neuer Regressionstest in `ChatInput.test.tsx` — vor dem Fix
   durch temporäres Zurücknehmen der Quelländerung reproduzierbar rot
   verifiziert.
+  Vom autonomen IT-Chef-Lauf am 22.10. (vierzehnter Lauf) einen von
+  `reports/support-chef.md` (22.10., Fund 3) gemeldeten Fund behoben: Der
+  "Entwurf abschließen?"-Dialog warnte wortgleich zum "Entwurf löschen?"-
+  Dialog ("Das lässt sich nicht rückgängig machen") und nutzte denselben
+  roten `variant="destructive"`-Button — obwohl Abschließen ein positiver
+  Meilenstein ist (Angaben bleiben erhalten, nur weiteres Bearbeiten wird
+  gesperrt) und keine Löschung. Fix: Dialogtext jetzt konkret statt
+  alarmierend ("wird als abgeschlossen markiert und lässt sich danach
+  nicht mehr bearbeiten. Alle Angaben bleiben erhalten..."),
+  Bestätigungs-Button auf `bg-teal text-navy hover:bg-teal/90` (dasselbe
+  Muster wie der "Planung fortsetzen"-Button direkt daneben) statt Rot —
+  Teal steht laut `MARKENDESIGN.md` für "positive/normale Werte", "Rot für
+  [...]-Warnungen" wird dort explizit als unnötig alarmierend abgelehnt.
+  Zwei bestehende Regressionstests in `Reiseentwuerfe.test.tsx` prüften
+  den alten Wortlaut per Regex und wurden an den neuen Text angepasst
+  (reine Testanpassung an die bewusste Textänderung). `npx tsc -b`
+  (0 Fehler), `npm run lint` (0 Fehler), `npm run build` (unveränderte
+  811-KB-Warnung) und die volle Testsuite (73 Testdateien, 552 Tests)
+  laufen weiterhin grün.
 - [ ] 7.4 "Planung fortsetzen" — KI-Chat mit voller Historie am
   Unterbrechungspunkt fortsetzen. Weiterhin offen — echte Wiederaufnahme
   je Entwurf bräuchte mehrere gleichzeitig gespeicherte Chat-Historien,

@@ -354,15 +354,16 @@ export function Reiseentwuerfe() {
           <DialogHeader>
             <DialogTitle>Entwurf abschließen?</DialogTitle>
             <DialogDescription>
-              Der Entwurf für {pendingFinalize && getDraftLabel(pendingFinalize, drafts)} wird abgeschlossen.
-              Das lässt sich nicht rückgängig machen.
+              Der Entwurf für {pendingFinalize && getDraftLabel(pendingFinalize, drafts)} wird als abgeschlossen
+              markiert und lässt sich danach nicht mehr bearbeiten. Alle Angaben bleiben erhalten und sind
+              weiterhin unter "Details ansehen" einsehbar.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Abbrechen</Button>
             </DialogClose>
-            <Button variant="destructive" onClick={confirmFinalize}>
+            <Button className="bg-teal text-navy hover:bg-teal/90" onClick={confirmFinalize}>
               Ja, abschließen
             </Button>
           </DialogFooter>
