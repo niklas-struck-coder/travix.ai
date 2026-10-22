@@ -4,6 +4,79 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-22
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`f3c597a`) war bereits nach `origin/main` gemergt (gleicher Hash wie
+`origin/support-chef/auto`, erkennbar am Freigabe-Chef-Merge-Commit).
+Branch deshalb wie im Fall eines bereits gemergten Branches vorgesehen
+neu von aktuellem `origin/main` (`62648b7`, inkl. drei weiterer
+IT-Chef-Auto-Läufe vom 22.10. ohne neuen Fund) angelegt, nicht per
+Merge-Commit fortgeführt.
+
+**Ausgewählter Punkt:** Marketing-Bereich, Sprint 4 aus `ZEITPLAN.md`
+("Laufende Content-Produktion") — wie an den Vortagen die laufende
+Pflege von `marketing/freigabe-uebersicht.md` (Tier-4-Kandidatentopf).
+
+**Warum dieser Punkt:** Erst geprüft, ob eine der vier offenen Fragen an
+Ni seit dem 21.10. beantwortet wurde: keine Notiz in `status.md` (zeigt
+weiterhin Stand 21.10.), `ZEITPLAN.md` (6.2 weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`, keine neuen Kanal-Links. Alle vier Fragen
+bleiben offen.
+
+Danach `git log f3c597a..origin/main` geprüft (Basislinie: der eigene
+gemergte Stand vom 21.10.): sieben neue Commits. Sechs davon ohne
+Produkt-Codeänderung (Lauf-Übergang, IT-Chef-/Support-Chef-Bericht, drei
+weitere IT-Chef-Auto-Läufe vom 22.10., laut deren eigenem Log an einem
+npm-Tooling-Bug gescheitert). Ein Commit (`f0cb096`, 21.10., zehnter
+IT-Chef-Lauf) ändert tatsächlich Produktcode — den toten
+"Urlaubsmodus aktivieren"-Link auf der Lissabon-Demokarte in
+`MeineReisen.tsx` (verlinkte pauschal auf `/urlaubsmodus` statt den
+tatsächlich angeklickten Trip per Query-Parameter zu übergeben). Im Code
+verifiziert statt dem Commit-Text vertraut (`git show f0cb096`): Fix
+folgt dem etablierten `?destination=`-Muster, liest Ziel/Zeitraum jetzt
+vorrangig aus der URL, Chat-Trip bleibt Fallback. Als neuer
+Tier-4-Kandidat (63) eingeordnet, Kandidatentopf von sechs auf sieben
+(57-63) — passt in dieselbe "du siehst wirklich das, was stimmt"-
+Erzählung wie die bereits gelisteten Kandidaten 57/60/62. Details siehe
+Update 2026-10-22 in `marketing/freigabe-uebersicht.md`.
+
+Kandidatentopf liegt bei **sieben** (57-63), weiterhin knapp unter der
+seit 06.09. etablierten Achter-Schwelle. Deshalb heute keine neue
+Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung einer
+bestehenden Übersicht, kein Live-Vorgang — nichts gepostet oder im
+Produkt verändert. Keine erfundenen Kennzahlen — der neue Kandidat ist
+direkt aus dem bereits per `git show` verifizierten IT-Chef-Fix
+abgeleitet, keine Follower-/Reichweitenzahl erfunden. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück allein zu Kandidat 63 —
+  seit 20.08. geltende Selbstbeschränkung: einzelne Tier-4-Funde werden
+  erst ab der Achter-Schwelle zu einer Mini-Changelog-Ausgabe
+  zusammengefasst, kein Einzel-Post pro Fix.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` ergänzt (neues Update
+  2026-10-22, Kandidat 63 aufgenommen, Kandidatentopf-Stand aktualisiert,
+  Vier-Fragen-Check dokumentiert).
+
+**Geprüft:** Kein Produkt-Code geändert, daher kein Build/Lint/Test nötig
+— reine Markdown-Ergänzung.
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-21
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live

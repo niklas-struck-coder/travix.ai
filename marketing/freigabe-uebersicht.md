@@ -1,10 +1,67 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-21)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-22)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-22: ein weiterer Tier-4-Kandidat (63: toter
+Urlaubsmodus-Link auf der MeineReisen-Demokarte gefixt), Kandidatentopf
+von sechs auf **sieben**, weiterhin klar unter der Achter-Schwelle, alle
+vier Fragen weiterhin offen
+
+**Geprüft:** Die vier offenen Fragen unten zuerst gegen den aktuellen
+Stand geprüft — keine Änderung seit dem 21.10.: `status.md` (Update vom
+21.10., keine neue Notiz von Ni zu einer der vier Fragen), `ZEITPLAN.md`
+(6.2 "Beim Anbieter buchen"-Button weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`/`index.html` (Footer-Changelog-Seite
+weiterhin nicht gebaut), keine neuen Kanal-Links (`linkedin.com`/
+`instagram.com`/`tiktok.com` in `src/`/`index.html` weiterhin ohne
+Treffer). Alle vier Fragen bleiben offen.
+
+Danach `git log` von der eigenen Vorlauf-Basis (`f3c597a`, eigener
+letzter Merge-Stand vom 21.10., inzwischen nach `main` gemergt) gegen
+`origin/main` (`62648b7`) geprüft: sieben neue Commits. Davon sechs ohne
+eigene Produkt-Codeänderung (ein Lauf-Übergangscommit, zwei Berichte
+[IT-Chef, Support-Chef] und drei weitere IT-Chef-Auto-Läufe vom 22.10.
+mit "kein neuer sicherer Punkt gefunden", laut deren Log-Einträgen an
+einem npm-Tooling-Bug gescheitert). Ein Commit ändert tatsächlich
+Produktcode:
+
+- **`f0cb096` (21.10., zehnter IT-Chef-Lauf):** Der "Urlaubsmodus
+  aktivieren"-Link auf der Lissabon-Demokarte in `MeineReisen.tsx`
+  verlinkte pauschal auf `/urlaubsmodus`, obwohl die Seite ihren Trip
+  bisher ausschließlich aus dem gespeicherten Chat-Trip in `localStorage`
+  lud — unabhängig von den rein lokalen Demodaten auf `/meine-reisen`.
+  Je nach `localStorage`-Zustand landete der Klick auf einer leeren oder
+  einer unpassenden Urlaubsmodus-Seite, obwohl Lissabon in
+  `mockConcierge.ts` längst als kuratiertes Ziel vorliegt. Im Code
+  verifiziert (`git show f0cb096`): Fix nach dem bereits etablierten
+  `?destination=`-Query-Muster (`Favoriten.tsx`/`Home.tsx` → `/ki-chat`)
+  — die Karte übergibt Ziel und Zeitraum jetzt per Query-Parameter,
+  `Urlaubsmodus.tsx` liest sie vorrangig vor dem gespeicherten Chat-Trip
+  (der als Fallback für den direkten Aufruf unverändert bleibt). Von
+  Support-Chef gefunden (`reports/support-chef.md`, 21.10., Fund 3), von
+  IT-Chef gefixt, `tsc -b`/Lint/Vitest/Build laut Commit-Nachricht grün.
+  **63. Kandidat** — passt in dieselbe "du siehst wirklich das, was
+  stimmt, nicht einen beliebigen oder leeren Rest"-Erzählung wie die
+  bereits gelisteten Kandidaten 57/60/62 (veraltete Suchergebnisse,
+  stehen gebliebenes Flugdetail, eingefrorenes Kalenderdatum) — hier:
+  ein Klick von der Demo-Reiseübersicht führt jetzt tatsächlich zum
+  passenden Ziel statt zu einer zufälligen Urlaubsmodus-Seite.
+
+**Kandidatentopf wächst von sechs auf sieben** (57-63), weiterhin klar
+unter der Achter-Schwelle für eine siebte Mini-Changelog-Ausgabe. Keine
+neue Ausgabe heute, kein eigenständiges Social-Content-Stück zu diesem
+einzelnen Fund — gleiche seit 20.08. geltende Selbstbeschränkung wie an
+den Vortagen.
+
+**Nächster Lauf:** weiterhin zuerst die vier offenen Fragen gegenprüfen,
+dann prüfen ob seit `62648b7` neue Produkt-Codeänderungen hinzugekommen
+sind, und den Kandidatentopf (Stand 22.10.: sieben) gegen den
+etablierten 06.09.-Maßstab (acht = genug) weiterführen — ein einziger
+weiterer verifizierter Kandidat würde die Schwelle bereits erreichen.
 
 ## Update 2026-10-21: nichts Neues — keine neuen Produkt-Codeänderungen
 seit dem 20.10., Kandidatentopf bleibt bei **sechs**, alle vier Fragen
