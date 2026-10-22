@@ -1,42 +1,46 @@
 # Marketing-Chef Bericht
 
-**Datum:** 2026-10-20
+**Datum:** 2026-10-22
 
-## Was ist seit dem letzten Eintrag (2026-10-19) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-20) passiert?
 
-Ein neuer, echter Fix ist dazugekommen: Die "Heute"-Markierung im
-Kalender blieb bisher über Mitternacht hinweg auf dem alten Tag stehen,
-bis die Seite neu geladen wurde – jetzt zeigt sie immer den richtigen
-Tag. Kleiner Fix, aber genau dieselbe Ehrlichkeits-/Verlässlichkeits-
-Linie wie beim Avatar- und beim Zug/Flug-Fix: die App tut nicht so, als
-würde die Zeit stillstehen.
+Ein neuer, echter Fix ist dazugekommen: Auf der MeineReisen-Demokarte
+(Lissabon) führte der "Urlaubsmodus aktivieren"-Link ins Leere oder auf
+eine völlig falsche Reise, weil die Zielseite ihren Trip aus einem
+anderen, nicht verknüpften Speicherort zog. Jetzt übergibt die Karte Ziel
+und Zeitraum direkt, der Link landet also wirklich dort, wo er
+hinverspricht. Das ist bereits der fünfte Fund in derselben Reihe wie
+Avatar-Warndreieck, Zug/Flug-Reset und Kalender-"Heute"-Fix: die App
+merkt und behebt eigene Unstimmigkeiten, statt sie zu verstecken.
 
-Der `formatTime()`-Fix gegen "Invalid Date" aus dem letzten Bericht (PR
-#34) ist weiterhin nicht gemergt – zweiter Bericht in Folge mit diesem
-Stand. Die Changelog-Grundsatzfrage bleibt ebenfalls unbeantwortet. Der
-Rest der letzten Tage war Logs, Status-Updates und interne Prüfläufe
-ohne neue, für Nutzer sichtbare Änderung. Keine neuen Nutzungsdaten
-vorhanden, daher auch diesmal keine Zahlen im Bericht.
+Der `formatTime()`-Fix gegen "Invalid Date" (PR #34) und der neuere
+Buchungsseiten-Edit-Shortcut-Fix (PR #38) liegen weiterhin unbeansprucht
+offen – dritter bzw. zweiter Bericht in Folge mit diesem Stand. Sonst war
+es ein Tag mit internem Aufräumen (npm-Audit, Testdatei), ohne weitere
+nutzersichtbare Änderung. Keine neuen Nutzungsdaten vorhanden, daher auch
+diesmal keine Zahlen im Bericht.
 
 ## Vorschläge
 
-1. **Sammel-Post jetzt zusammenstellen – Material reicht.** Vier
-   bestätigte Fixes stehen bereit: Avatar-Warndreieck, Zug/Flug-Reset,
-   Kalender-"Heute"-Fix und (sobald PR #34 gemergt ist) "—" statt
-   "Invalid Date". Statt weiter auf die vollständige Changelog-Seite zu
-   warten, reicht das für einen ersten "Diese Wochen in der App
-   behoben"-Post – klein anfangen statt die ungeklärte Changelog-Frage
-   zur Blockade werden zu lassen.
-2. **"Ehrlichkeit als Feature" fest als Content-Serie etablieren.** Mit
-   dem Kalender-Fix sind es jetzt vier konkrete Belege für dasselbe
-   Muster ("wir verstecken Fehler nicht, wir zeigen oder beheben sie").
-   Das trägt eine eigene, wiederkehrende Rubrik statt vier Einzelposts –
-   jeder künftige Fix dieser Art bekommt einen Platz, ohne dass jedes Mal
-   neu entschieden werden muss, ob er einen Post wert ist.
-3. **Zielgruppen-Content (Solo-Reisende als Erstes) endlich starten.**
-   Unverändert seit mehreren Berichten offen, unabhängig vom
-   Code-Fortschritt umsetzbar. Solo-Reisende als erste Zielgruppe, weil
-   dazu bisher noch gar kein Content existiert – klein anfangen, bevor
-   Paare/Familien folgen.
+1. **Sammel-Post jetzt wirklich bauen – fünf Belege sind genug.**
+   Avatar-Warndreieck, Zug/Flug-Reset, Kalender-"Heute"-Fix und jetzt der
+   Urlaubsmodus-Link stehen bereit, unabhängig von PR #34/#38. Weiter auf
+   die vollständige Changelog-Seite zu warten kostet nur Zeit – ein
+   erster "Diese Wochen in der App behoben"-Post mit diesen vier
+   bestätigten Fixes lohnt sich jetzt.
+2. **"Ehrlichkeit als Feature" offiziell launchen, nicht nur sammeln.**
+   Fünf Belege für dasselbe Muster sind mehr als genug Material für eine
+   feste, wiederkehrende Rubrik. Der Urlaubsmodus-Fix liefert sogar eine
+   gute Erklär-Linie dafür: "Bevor wir ein Feature bauen, das wir nicht
+   fertig fixen können, zeigen wir lieber ehrlich, was noch fehlt."
+3. **Zielgruppen-Content (Solo-Reisende) endlich starten.** Unverändert
+   seit mehreren Berichten offen, unabhängig vom Code-Fortschritt
+   umsetzbar. Solo-Reisende als erste Zielgruppe, weil dazu bisher noch
+   gar kein Content existiert.
+4. **PR #34 und #38 als Blocker benennen statt weiter nur zu notieren.**
+   Beide liegen jetzt schon mehrere Berichte lang unbeansprucht. Statt sie
+   nur mitzuschleifen, lohnt sich eine kurze, direkte Rückfrage an Ni, was
+   das Mergen blockiert – sonst bleibt der Sammel-Post (Vorschlag 1) auf
+   Dauer kleiner als er sein könnte.
 
-_Letztes Update: 2026-10-20_
+_Letztes Update: 2026-10-22_
