@@ -21459,3 +21459,57 @@ geändert. Regressionsschutz-Baseline unverändert grün: `npx tsc -b`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-22, 02:08 UTC (dreizehnter Lauf — kein neuer sicherer Punkt gefunden, npm-Tooling-Bug zum vierten Mal reproduziert)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, dritter des Tages, knapp eine
+Stunde nach dem zwölften Lauf (`e438d6b`, 01:15 UTC). `git log --all
+--since="2026-10-22 00:00"` zeigt außer den Läufen elf und zwölf selbst
+keinen neuen Commit auf irgendeinem Branch — `it-chef/auto` lag bereits
+auf `origin/main` plus den Commits der Läufe neun bis zwölf, kein
+frisches `main` nötig.
+
+**Punktesuche:** Da sich seit dem zwölften Lauf nichts geändert hat
+(kein neuer Commit, keine neue Notiz in `support-chef-auto-log.md`/
+`marketing-chef-auto-log.md`/`freigabe-chef-log.md`), wäre eine
+komplette Neudurchsicht von `ZEITPLAN.md`/`tasks-prd-travix-platform.md`
+reine Wiederholung der bereits zweimal dokumentierten Ergebnisse (Läufe
+elf und zwölf). Stattdessen gezielt neu geprüft, was sich seither
+tatsächlich geändert haben könnte:
+
+- Frische Codesuche nach `TODO`/`FIXME`, `console.log`/`console.warn`/
+  `console.debug` (außerhalb Testdateien) und leeren `catch`-Blöcken in
+  `src/`: **keine Treffer** — bestätigt unverändert gegenüber Lauf elf/
+  zwölf.
+- `ChecklistPanel.tsx` (Persistenz-Fund) nicht erneut gelesen, da sich
+  am zugehörigen Kommentar (Zeile 28-33, bewusste Zurückstellung bis zur
+  Nutzerkonten-/Backend-Entscheidung) seit der letzten Prüfung nichts
+  geändert haben kann — kein neuer Commit hat die Datei berührt.
+- Alle in Lauf elf/zwölf dokumentierten Blocker (Base44/Gemini-
+  Credentials, Deal-Finder/Premium/Rewards-Architekturentscheidungen,
+  Hilfe-Seite an FAQ-Inhalten, 8.13 an fehlenden `calculateCosts.ts`/
+  Schema-Validierung) bleiben aus demselben Grund unverändert gültig.
+
+**npm-audit-Fund ein viertes Mal versucht, ein viertes Mal blockiert:**
+In diesem frischen Container `npm ci` erneut fehlerfrei (`git status`
+davor und danach sauber), `npm audit` zeigt unverändert dieselben 9
+Schwachstellen (1 moderate `@vitest/mocker`-Fund ohne `--force` fixbar,
+7 high über die `shadcn`-CLI-Kette nur mit `--force`/Breaking-Change).
+`npm audit fix` für den Fund ohne `--force` schlug wieder mit demselben
+`TypeError: Cannot read properties of null (reading 'edgesOut')` in
+`@npmcli/arborist` fehl — vierte Reproduktion in vier unabhängigen
+Containern, diesmal bewusst nur einmal statt dreimal versucht, da das
+Muster bereits eindeutig etabliert ist. `git status` danach sauber,
+kein Dateisystem-Zustand verändert. Bestätigt endgültig: nicht
+transient, sondern ein stabiles Problem des npm/Node-Tooling-Images
+selbst beim Verändern des Abhängigkeitsbaums (nicht beim reinen `npm
+ci`) — weiterhin ein Hinweis für Ni (npm/Node-Version im
+Sandbox-Image prüfen), kein autonom lösbarer Punkt.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt, kein Produktcode
+geändert. Regressionsschutz-Baseline unverändert grün: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+552 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
