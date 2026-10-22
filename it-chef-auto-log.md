@@ -21390,3 +21390,72 @@ run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-22, 01:15 UTC (zwölfter Lauf — kein neuer sicherer Punkt gefunden, npm-Tooling-Bug zum dritten Mal reproduziert)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, zweiter des Tages, knapp eine
+Stunde nach dem elften Lauf (`24e3076`, 00:12 UTC). `it-chef/auto` lag
+bereits auf `origin/main` (`d5d377a`) plus den Commits der Läufe neun
+bis elf — kein frisches `main` nötig, keine Abweichung.
+
+**Punktesuche:** Da seit dem elften Lauf nur eine Stunde vergangen ist,
+zunächst geprüft, ob sich überhaupt etwas geändert hat, bevor dieselbe
+Suche wiederholt wird: `git log --all --since="2026-10-22 00:00"` zeigt
+außer dem elften Lauf selbst keinen neuen Commit auf irgendeinem Branch,
+`support-chef-auto-log.md`/`marketing-chef-auto-log.md`/
+`freigabe-chef-log.md` haben keinen neuen Eintrag nach dem 21.10. Die
+Lage ist damit identisch zum elften Lauf — trotzdem die Suche ehrlich
+neu durchgeführt statt den alten Befund nur zu kopieren:
+
+- `ZEITPLAN.md` komplett nach offenen Checkboxen durchsucht. Alle
+  weiterhin an Kriterium 1 (Base44/Gemini-Backend-Credentials: 2.0,
+  4.1-4.3, Auth 2.x) oder Kriterium 2 (offene Produkt-/
+  Architekturentscheidungen: Deal Finder 8.5-8.7 an InvokeLLM, Premium
+  8.9/OQ-03, Rewards 8.12/OQ-04, Zahlungsprozess-Entscheidung Sprint 5,
+  Hilfe 8.11 an FAQ-Inhalten von Support-Chef) blockiert.
+- Neu geprüft: 8.13 "Unit-Tests für calculateProgress, calculateCosts,
+  checklistRules, Schema-Validierung" (Sprint 5) — auf den ersten Blick
+  ein klarer, unabhängiger Testabdeckungs-Punkt ohne Architekturbezug.
+  Codesuche zeigt aber: `calculateProgress.ts` und `checklistRules.ts`
+  haben bereits eigene Testdateien (`calculateProgress.test.ts`,
+  `checklistRules.test.ts`); `calculateCosts.ts` existiert noch gar
+  nicht (hängt an den fehlenden Kostenfeldern in `TripDraft`, siehe
+  6.6/6.7) und eine Schema-Validierung (`FULL_TRIP_SCHEMA`, Task 4.1)
+  ebenfalls nicht. Für zwei der vier genannten Funktionen lassen sich
+  also keine Tests schreiben, weil sie nicht existieren — Punkt bleibt
+  als Ganzes nicht abgeschlossen umsetzbar, erfüllt Kriterium 3 nicht.
+- Frische Codesuche nach TODO/FIXME, `console.log`/`console.warn`/
+  `console.debug`, leeren `catch`-Blöcken: keine Treffer außerhalb von
+  Testdateien.
+- `ChecklistPanel.tsx` (zwei Monate alter, von Support-Chef wieder
+  aufgegriffener Persistenz-Fund) erneut angesehen: Kommentar Zeile 28-33
+  weiterhin unverändert — bewusst kein Speichern "bis die echte
+  Nutzerkonten-/Backend-Entscheidung gefallen ist". Bleibt Kriterium 2
+  verletzt, wie am 21./22.10. bereits entschieden; keine neue Information
+  seit dem elften Lauf.
+
+**npm-audit-Fund ein drittes Mal versucht:** `npm ci` lief wie im
+zehnten/elften Lauf fehlerfrei durch, `npm audit` zeigt unverändert die
+eine moderate `@vitest/mocker`-Schwachstelle mit Fix ohne `--force`
+(plus sieben neue "high"-Einträge über `braces`→`micromatch`→
+`fast-glob`→`shadcn`/`ts-morph` — reine Dev-Tooling-Kette für die
+`shadcn`-CLI, Fix dafür laut `npm audit` nur über `--force` mit
+Breaking-Change-Hinweis "Will install shadcn@1.0.0", daher nicht
+autonom angefasst). `npm audit fix` für den einen Fix-ohne-`--force`-Fund
+schlug erneut mit demselben `TypeError: Cannot read properties of null
+(reading 'edgesOut')` in `@npmcli/arborist` fehl wie im neunten und
+elften Lauf. `git status` danach sauber. Damit zum dritten Mal
+reproduziert, bei unterschiedlichem `npm ci`-Ausgang (mal Fehler, meist
+nicht) aber immer gleichem Fehler bei jedem Versuch, den
+Abhängigkeitsbaum zu verändern — bestätigt die Einschätzung aus dem
+elften Lauf, kein autonom lösbarer Punkt ohne Workaround mit
+unklaren Nebenwirkungen auf den gesamten Baum.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt, kein Produktcode
+geändert. Regressionsschutz-Baseline unverändert grün: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+552 Tests, alle grün), `npm run build` (`tsc -b && vite build`,
+0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
