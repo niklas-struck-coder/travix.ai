@@ -1,55 +1,58 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-21
+**Datum:** 2026-10-22
 
-## Was ist seit dem letzten Eintrag (2026-10-20) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-21) passiert?
 
-Seit gestern kam Bewegung in die Buchungsseite: Mein eigener autonomer
-Hintergrund-Lauf hat dort einen neuen Bug gefunden (dazu gleich mehr),
-IT-Chef hat ihn als klar genug für einen Fix eingestuft und bereits als
-PR #38 vorbereitet – der ist aber noch nicht live auf `main`. Die drei
-Punkte aus meinem letzten Bericht habe ich heute erneut im Code
-geprüft, sie stehen weiterhin unverändert:
+Eine gute Nachricht zuerst: Der Urlaubsmodus-Link von der Lissabon-
+Demokarte (mein letzter Punkt 3) ist gefixt und ich habe es im Code
+nachgeprüft – `src/pages/MeineReisen.tsx:49` übergibt jetzt Ziel und
+Zeitraum direkt an `/urlaubsmodus`, die Seite zeigt die passende Demo-
+Reise statt ins Leere zu laufen. Der Fix funktioniert.
 
-1. **`formatTime()`-Fix immer noch nicht live.** `src/lib/format.ts:23`
-   hat weiterhin keinen Schutz gegen einen kaputten Zeitstempel und
-   würde bei einer fehlerhaften Angebots-Antwort wörtlich "Invalid
-   Date" auf der Flug-/Zugkarte zeigen. PR #34 liegt fertig vor, ist
-   aber seit nunmehr drei Tagen nicht gemergt.
+Die beiden Merge-Baustellen von gestern stehen aber unverändert offen –
+das habe ich heute erneut direkt im Code geprüft, nicht nur in den
+Berichten:
 
-2. **Lösch-Warnungen klingen überall gleich dramatisch.**
-   `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:137`,
-   `Aktivitaeten.tsx:118` und `src/components/trip/EditMode.tsx:151`
-   sagen weiterhin wortgleich "Das lässt sich nicht rückgängig machen" –
-   auch dort, wo ein Favorit oder eine Aktivität mit einem Klick wieder
-   anlegbar wäre.
+1. **PR #34 (`formatTime()`-Fix) weiterhin nicht live.**
+   `src/lib/format.ts:23` zeigt bei einem kaputten Zeitstempel weiterhin
+   wörtlich "Invalid Date" statt eines Platzhalters. Der Fix liegt seit
+   nunmehr vier Tagen fertig vor, ist aber noch nicht gemergt.
 
-3. **Urlaubsmodus-Link von der Lissabon-Demokarte führt ins Leere.**
-   `src/pages/MeineReisen.tsx:49` verlinkt weiterhin auf `/urlaubsmodus`,
-   die Seite (`src/pages/Urlaubsmodus.tsx:12`) lädt ihren Trip aber immer
-   noch aus `loadStoredChat()?.trip` statt aus der Demoreise.
+2. **PR #38 ("+ Suchen"-Edit-Shortcut) ebenfalls weiterhin nicht live.**
+   `src/pages/Buchung.tsx:128` verlinkt ein leeres Feld (Transport,
+   Reisedaten, Budget, Unterkunft) immer noch fest auf `/ki-chat`, statt
+   wie der Stift-Button bei bereits gesetzten Feldern gezielt in den
+   passenden Chat-Schritt zu springen. Wer heute ein leeres Feld über
+   "+ Suchen" ausfüllen will, merkt von dem fertigen Fix noch nichts.
 
-Neu dazugekommen, direkt bestätigt im aktuellen `Buchung.tsx`:
+Neu aufgefallen, beim Durchsehen der Entwürfe-Seite:
 
-4. **"+ Suchen"-Button bei leeren Feldern nutzt den Edit-Shortcut nicht.**
-   `src/pages/Buchung.tsx:128`: Ist ein Feld (Transport, Reisedaten,
-   Budget, Unterkunft) schon gesetzt, führt der Stift-Button gezielt in
-   den passenden Chat-Schritt (z. B. `/ki-chat?edit=budget`). Ist das
-   Feld noch leer, verlinkt der "+ Suchen"-Button an derselben Stelle
-   stattdessen fest auf `/ki-chat` – ohne jeden Hinweis, worum es im
-   Chat gerade geht. Genau umgekehrt zum eigentlichen Bedarf: bei einem
-   leeren Feld würde die gezielte Nachfrage am meisten Zeit sparen. PR
-   #38 behebt das mit einer Zeile, wartet aber noch auf Review.
+3. **"Entwurf abschließen" sieht aus wie eine Löschwarnung.**
+   `src/pages/Reiseentwuerfe.tsx:357` warnt beim Abschließen eines
+   Reiseentwurfs mit demselben Satz wie beim Löschen ("Das lässt sich
+   nicht rückgängig machen"), und der Bestätigungs-Button ("Ja,
+   abschließen", Zeile 363) ist genauso rot eingefärbt (`variant=
+   "destructive"`) wie der Löschen-Button direkt darüber im selben
+   File. Dabei ist das Abschließen eines Entwurfs ein positiver
+   Meilenstein – kein Verlust. Die rote Einfärbung und die dramatische
+   Formulierung könnten Nutzer:innen unnötig zögern lassen, bevor sie
+   ihre fertige Reiseplanung bestätigen.
 
 ## Meine Vorschläge
 
-1. **PR #34 (formatTime()-Fix) zeitnah mergen** – der Fund ist seit drei
-   Tagen bekannt und fertig vorbereitet, nur noch nicht live.
-2. **PR #38 ("+ Suchen"-Edit-Shortcut) ebenfalls zeitnah mergen** – kleiner,
-   klar abgegrenzter Fix mit direkter Auswirkung auf den Buchungsablauf.
-3. **Lösch-Warnungen abstufen** je nach Reversibilität der Aktion (siehe
-   oben, fünf betroffene Dateien).
-4. **Urlaubsmodus-Demo reparieren oder ausblenden**, damit die
-   Lissabon-Karte nicht in einer leeren Seite endet.
+1. **PR #34 (`formatTime()`-Fix) zeitnah mergen** – der Fund ist jetzt
+   seit vier Tagen bekannt und fertig vorbereitet, nur noch nicht live.
+2. **PR #38 ("+ Suchen"-Edit-Shortcut) ebenfalls zeitnah mergen** –
+   kleiner, klar abgegrenzter Fix mit direkter Auswirkung auf den
+   Buchungsablauf.
+3. **Lösch-Warnungen abstufen** je nach Reversibilität der Aktion
+   (unverändert betroffen: `Favoriten.tsx:128`, `Warenkorb.tsx:134`,
+   `Preisalarme.tsx:137`, `Aktivitaeten.tsx:118`,
+   `src/components/trip/EditMode.tsx:151`).
+4. **"Entwurf abschließen" positiv statt destruktiv gestalten**
+   (`Reiseentwuerfe.tsx:357` & `:363`) – neutraleren Text ohne
+   "rückgängig machen"-Drohung und einen normalen statt roten Button
+   verwenden, damit ein Abschluss sich auch wie ein Erfolg anfühlt.
 
-_Letztes Update: 2026-10-21_
+_Letztes Update: 2026-10-22_
