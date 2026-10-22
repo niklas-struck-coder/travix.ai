@@ -21320,3 +21320,73 @@ neunten Lauf durch die neuen Regressionstests), `npm run build` (`tsc -b
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-22, 00:10 UTC (elfter Lauf — kein neuer sicherer Punkt gefunden, npm-Tooling-Bug erneut reproduziert)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, erster des Tages. `it-chef/auto`
+lag bereits auf `origin/main` (`d5d377a`) plus den zwei Commits vom
+neunten/zehnten Lauf vom 21.10. (`6c04952`, `f0cb096`) — frisches `main`
+reinmergen war nicht nötig, da keine Abweichung bestand.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks-prd-travix-platform.md` nach dem
+üblichen Muster durchsucht. Alle offenen Checkboxen in Phase 2/4/5/6/7/8
+bleiben an denselben Stellen blockiert wie in den Vorläufen dokumentiert:
+Base44-Setup (2.0) und KI-Engine (4.1-4.3) warten auf echte Backend-/
+Gemini-Credentials, Deal-Finder (8.5-8.7) ebenso, Premium/Rewards (8.9,
+8.12) an den offenen PRD-Fragen OQ-03/OQ-04, Hilfe-Seite (8.11) an
+FAQ-Inhalten von Support-Chef — alles verletzt Kriterium 1 oder 2.
+
+Eigene frische Codesuche durchgeführt statt nur die letzten Berichte zu
+wiederholen: projektweit nach TODO/FIXME, `console.log`/`console.warn`/
+`console.debug`, leeren `catch`-Blöcken und ungeschütztem `JSON.parse`
+gesucht — keine neuen Funde (einziger `JSON.parse`-Fall weiterhin in
+`tripStorage.ts`, bereits abgesichert). Testabdeckung erneut geprüft:
+alle `.ts`/`.tsx` ohne eigene Testdatei sind reine Typdeklarationen
+(`src/types/*.ts`) oder die bekannten, bewussten Ausnahmen
+`input.tsx`/`label.tsx`/`main.tsx` — keine Lücke.
+
+`ChecklistPanel.tsx` (der von Support-Chef/IT-Chef im normalen Gespräch
+am 21.10. aufgegriffene Persistenz-Fund) nochmal im Code angesehen: der
+Kommentar dort (Zeile 28-33) sagt explizit, der fehlende
+Reload-persistente Speicher sei bewusst so, "bis die echte
+Nutzerkonten-/Backend-Entscheidung gefallen ist" — das ist exakt die in
+Kriterium 2 ausgeschlossene offene Architekturentscheidung, nicht nur ein
+Implementierungsdetail. Bleibt damit zu Recht der interaktiven Rücksprache
+mit Ni vorbehalten, wie schon am 21.10. entschieden.
+
+**npm-audit-Fund erneut versucht, erneut blockiert:** Der am 21.10.
+(neunter Lauf) zurückgestellte Fund (2 moderate Schwachstellen in
+`vitest`/`@vitest/mocker`, Fix ohne `--force` über `npm audit fix`
+verfügbar, Ziel-Patch-Version `4.1.12` liegt sogar innerhalb des
+bestehenden `^4.1.10`-Ranges in `package.json`) wurde heute erneut
+angegangen. Diesmal lief `npm ci` zunächst fehlerfrei durch (anders als
+im neunten Lauf) — aber `npm audit fix` *und* ein direkter
+`npm install vitest@4.1.12`-Versuch schlugen beide mit demselben Fehler
+fehl: `TypeError: Cannot read properties of null (reading 'edgesOut')`
+in `@npmcli/arborist` (`build-ideal-tree.js`, `#loadPeerSet`), ausgelöst
+beim Auflösen der optionalen Peer-Abhängigkeit `@vitest/browser-playwright`
+(Teil der vitest-5-Peer-Kette, die beim Ermitteln kompatibler Versionen
+mitgeprüft wird, obwohl das Ziel nur ein 4.x-Patch ist). Beide Versuche
+brachen vor jeder Dateiänderung ab, `git status` danach beide Mal sauber.
+**Korrektur zur Vermutung aus dem zehnten Lauf:** Der Fehler ist damit
+kein einmaliges/transientes Problem gewesen, sondern reproduzierbar bei
+jedem Versuch, die `node_modules`/Lockfile-Struktur in diesem Checkout zu
+verändern — `npm ci` (reines Nachbauen aus bestehendem Lockfile) läuft
+durch, jede Änderung am Abhängigkeitsbaum (`npm install <pkg>`, `npm
+audit fix`) nicht. Ein Workaround (z. B. `--legacy-peer-deps`, manuelles
+Patchen von `package-lock.json`) hätte wie am 21.10. begründet
+Auswirkungen auf den gesamten Abhängigkeitsbaum, die sich nicht mit
+vertretbarem Aufwand objektiv als unschädlich verifizieren lassen —
+bewusst nicht versucht. Eher ein Hinweis für Ni (npm/Node-Version im
+Sandbox-Image prüfen) als ein autonom lösbarer Punkt.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt. Kein Produktcode
+geändert, `git status` nach den fehlgeschlagenen npm-Versuchen sauber.
+Trotzdem als Regressionsschutz-Baseline frisch durchlaufen (unverändert
+gegenüber dem zehnten Lauf): `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün), `npm
+run build` (`tsc -b && vite build`, 0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
