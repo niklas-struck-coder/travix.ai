@@ -13,18 +13,17 @@ als grober Kontext — keine Live-Daten, kein Ersatz für den echten Projektstan
 - Autonome Tages-Workflows für IT-, Marketing- und Support-Bereich, mit
   eigenständiger Prüfung/Merge durch einen "Freigabe-Chef"
 
-**Seit letztem Update (2026-10-21):**
-- IT-Chef: mehrere Auto-Läufe ohne neuen sicheren Fund, ein hartnäckiger
-  npm-Tooling-Bug wurde dabei mehrfach reproduziert (blockiert u.a. einen
-  vitest-Audit-Fix); ein toter Urlaubsmodus-Link auf der MeineReisen-Demokarte
-  wurde gefixt
-- Support-Chef hat den Urlaubsmodus-Link-Fix bestätigt; der
-  "+ Suchen"-Edit-Shortcut-Fix (PR #38) ist weiterhin nicht gemergt
-- Marketing-Chef hat den gefixten Urlaubsmodus-Link als neuen
-  Tier-4-Kandidaten aufgenommen
-- Freigabe-Chef hat marketing-chef/auto und support-chef/auto geprüft und
-  nach main gemergt, inkl. nachgetragener Einträge vom 10-21
+**Seit letztem Update (2026-10-22):**
+- IT-Chef: mehrere Auto-Läufe ohne neuen sicheren Fund; der hartnäckige
+  npm-Tooling-Bug (blockiert u.a. einen vitest-Audit-Fix) besteht weiterhin
+- Support-Chef hat den zuvor gefundenen Entwurf-abschließen-Dialog-Fix
+  (wirkte wie eine Löschwarnung, jetzt auf Teal/ehrlichen Text umgestellt)
+  verifiziert und als korrekt umgesetzt bestätigt
+- Marketing-Chef hat diesen Fix als Tier-4-Kandidaten aufgenommen und damit
+  die Achter-Schwelle für die nächste Mini-Changelog-Ausgabe erreicht
+- Freigabe-Chef hat marketing-chef/auto und support-chef/auto zweimal
+  geprüft und nach main gemergt
 
 **Status:** Frühe Entwicklungsphase, vieles ist noch aktiv in Arbeit und unfertig.
 
-_Letztes Update: 2026-10-22_
+_Letztes Update: 2026-10-23_
