@@ -21695,3 +21695,75 @@ Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-23, 01:10 UTC (siebzehnter Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, zweiter des 23.10., rund eine
+Stunde nach dem sechzehnten Lauf (`a4d80be`, 00:11 UTC). `origin/main`
+unverändert bei `c8ba951` (keine neuen Commits seit dem sechzehnten
+Lauf), `it-chef/auto` liegt bereits drei Commits vor `main` — direkt auf
+dem bestehenden `it-chef/auto`-Stand weitergearbeitet, kein frischer
+`main`-Merge nötig.
+
+**Punktesuche:** Da sich an `main` seit dem sechzehnten Lauf nichts
+geändert hat, eigenständig mit anderem Fokus als die Vorläufe gesucht,
+statt nur zu wiederholen:
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` komplett erneut
+  durchgesehen (37 bzw. 36 offene Punkte): alle bleiben aus denselben,
+  in den Läufen elf-sechzehn dokumentierten Gründen blockiert (offene
+  Backend-/Architekturentscheidung, fehlende Inhalte wie FAQ/Rewards-
+  Regeln, fehlende Datenfelder, oder rechtliche Pflichttexte).
+- `reports/it-chef.md`, `reports/support-chef.md` (beide 22.10., vom
+  plattform-verwalteten Kanal bzw. Support-Chef) gegengeprüft: die dort
+  neu gemeldeten Punkte — uneinheitlich abgestufte Lösch-Warnungen
+  (`Favoriten.tsx`, `Warenkorb.tsx`, `Preisalarme.tsx`,
+  `Aktivitaeten.tsx`, `Angebote.tsx`, `EditMode.tsx`) und fehlende
+  Persistenz der Reise-Checkliste (`ChecklistPanel.tsx`, bewusst
+  zurückgestellt bis zur Nutzerkonten-/Backend-Entscheidung) — sind in
+  den Berichten selbst explizit als Punkte markiert, die eine echte
+  Abwägung bzw. eine noch offene Architekturentscheidung brauchen, kein
+  Ein-Zeiler. Verletzen damit weiterhin Sicherheitskriterium 2 bzw. 3,
+  nicht autonom umsetzbar.
+- `src/lib/format.ts`s `formatTime()` gezielt gegen den dort bekannten
+  "Invalid Date"-Fund geprüft und auf dem offenen Autofix-Branch
+  `it-chef-autofix/formattime-invalid-date-2026-10-19` (`4b283c2`,
+  entspricht PR #34) bereits exakt gefixt vorgefunden (`date.getTime()`-
+  NaN-Check statt der rohen `toLocaleTimeString()`-Ausgabe) — eine
+  zweite, abweichende Lösung auf `it-chef/auto` wäre doppelte Arbeit und
+  würde beim späteren Merge von PR #34 kollidieren, daher nicht erneut
+  angefasst.
+- Fokus auf bisher nicht im Detail geprüfte Verdachtsmuster: `window.
+  addEventListener`-Aufrufe ohne zugehöriges `removeEventListener` im
+  ganzen `src`-Baum durchsucht — einziger Treffer (`src/lib/utils.ts`,
+  `focusHeading()`) nutzt `{ once: true }` und entfernt sich damit
+  selbst, kein Leck. `setTimeout`/`setInterval`-Nutzung in
+  `useChat.ts`/`useConcierge.ts` Zeile für Zeile gegen Unmount-Leck
+  geprüft: beide räumen ihren `replyTimeoutRef` im Cleanup-Effect ab,
+  kein neuer Fund (bestätigt den bereits im vierten Lauf behobenen
+  `useConcierge`-Fund, keine Regression).
+- Alle `size="icon"`-Buttons (reine Icon-Buttons ohne Text) im `src`-Baum
+  auf fehlendes `aria-label` geprüft (`EditMode.tsx`, `KiChat.tsx`,
+  `ChatInput.tsx` inkl. Mikrofon-Button, `Favoriten.tsx`,
+  `Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Buchung.tsx`,
+  `Reiseentwuerfe.tsx`, `Kalender.tsx`) — ausnahmslos mit sprechendem
+  `aria-label` versehen, kein Fund.
+- `src/lib/trip/calendarUtils.ts` und `src/lib/trip/cartTotals.ts`
+  (Monatsraster-/Wochentag-Logik bzw. Warenkorb-Summen) sowie deren
+  Verwendung in `Kalender.tsx` komplett gelesen: Monatswechsel/
+  Schaltjahr-/Jahreswechsel-Fälle über `getPreviousMonth`/`getNextMonth`
+  korrekt, `getTripsForDay` vergleicht ISO-Strings lexikografisch
+  korrekt (YYYY-MM-DD ist dafür safe), keine Fehlfunde.
+- `key={index}`-Stellen erneut vollständig gegrept (`FlightCard.tsx`,
+  `SearchErrorAlert.tsx`) — unverändert zu Lauf fünfzehn, keine neuen
+  Stellen, keine neue Information.
+
+**Ergebnis:** Kein Punkt heute (zweiter Lauf) autonom umgesetzt, kein
+Produktcode geändert. Regressionsschutz-Baseline frisch durchlaufen
+(nicht nur wiederholt behauptet) und unverändert grün: `npm ci`
+fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (73 Testdateien, 552 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung — bekannt, kein
+neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
