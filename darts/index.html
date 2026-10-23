@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oche Darts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Darts">
+<meta name="theme-color" content="#121d19">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-screen pub-scoreboard app — player strip on top, current visit, the board fills the rest, thumb bar at the bottom */
+:root {
+  --felt: #121d19;
+  --felt-2: #1a2a24;
+  --felt-3: #233830;
+  --line: #2f4a3f;
+  --ink: #f3eee2;
+  --muted: #9cb2a7;
+  --sisal: #eadcbc;
+  --red: #d33a2c;
+  --green: #1d8a4b;
+  --brass: #e3ab3e;
+  --brass-ink: #1b1305;
+  --bust: #ff6b57;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0;
+  background: var(--felt);
+  color: var(--ink);
+  font: 500 16px/1.4 var(--body);
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.num { font-variant-numeric: tabular-nums; }
+
+#app { height: 100%; }
+.screen {
+  height: 100%;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Setup ---------- */
+.setup { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.setup-inner { max-width: 560px; margin: 0 auto; padding-block: 20px 40px; display: flex; flex-direction: column; gap: 22px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand svg { width: 44px; height: 44px; flex: none; }
+.brand h1 { font: 900 2.6rem/0.9 var(--display); letter-spacing: 0.02em; margin: 0; text-transform: uppercase; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+.resume { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--felt-3); border: 1px solid var(--brass); border-radius: 12px; padding: 12px 14px; }
+.resume span { color: var(--muted); font-size: 0.9rem; }
+.resume strong { color: var(--ink); display: block; font-size: 1rem; }
+.sec { display: flex; flex-direction: column; gap: 10px; }
+.sec h2 { margin: 0; font: 600 0.78rem/1 var(--body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.hint { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--felt-2); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px;
+  min-height: 64px;
+}
+.opt svg { width: 38px; height: 38px; flex: none; }
+.opt.stack { flex-direction: column; align-items: flex-start; gap: 8px; }
+.opt.stack svg { width: 34px; height: 34px; }
+.opt b { display: block; font-weight: 700; }
+.opt small { display: block; color: var(--muted); font-size: 0.8rem; line-height: 1.25; }
+.opt[aria-pressed="true"] { border-color: var(--brass); background: var(--felt-3); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip {
+  border: 1.5px solid var(--line); background: var(--felt-2); border-radius: 999px;
+  padding: 8px 16px; font: 800 1.25rem/1 var(--display); letter-spacing: 0.03em; min-width: 64px;
+}
+.chip[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); }
+.chip-input {
+  width: 92px; border: 1.5px solid var(--line); background: var(--felt); color: var(--ink);
+  border-radius: 999px; padding: 8px 12px; font: 800 1.25rem/1 var(--display); text-align: center;
+}
+.players { display: flex; flex-direction: column; gap: 8px; }
+.prow { display: flex; align-items: center; gap: 8px; }
+.prow .pn { width: 30px; flex: none; text-align: center; font: 800 1.3rem/1 var(--display); color: var(--brass); }
+.prow input {
+  flex: 1; min-width: 0; background: var(--felt-2); border: 1.5px solid var(--line); color: var(--ink);
+  border-radius: 10px; padding: 11px 12px; font: 600 1rem var(--body);
+}
+.icon-btn {
+  width: 44px; height: 44px; flex: none; display: grid; place-items: center;
+  background: transparent; border: 1.5px solid var(--line); border-radius: 10px; color: var(--muted);
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ghost { background: transparent; border: 1.5px dashed var(--line); border-radius: 10px; padding: 11px 14px; color: var(--ink); font-weight: 600; }
+.primary {
+  background: var(--brass); color: var(--brass-ink); border: 0; border-radius: 14px;
+  padding: 16px; font: 900 1.6rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.solo {
+  display: flex; gap: 12px; align-items: center; border: 1.5px dashed var(--line); border-radius: 12px; padding: 12px;
+  color: var(--muted);
+}
+.solo svg { width: 34px; height: 34px; flex: none; }
+.solo b { color: var(--ink); }
+.tag { margin-left: auto; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
+
+/* ---------- Game ---------- */
+.game { display: flex; flex-direction: column; gap: 10px; padding-block: 8px 10px; }
+.topbar { display: flex; align-items: center; gap: 10px; }
+.topbar .mode { font: 800 1.15rem/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; }
+.topbar .round { margin-left: auto; color: var(--muted); font-size: 0.85rem; }
+.strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: none; padding-bottom: 2px; }
+.strip::-webkit-scrollbar { display: none; }
+.pcard {
+  flex: 1 0 96px; max-width: 170px; background: var(--felt-2); border: 1.5px solid var(--line); border-radius: 10px;
+  padding: 6px 10px; display: flex; flex-direction: column; min-width: 0;
+}
+.pcard .nm { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.pcard .sc { font: 900 1.7rem/1 var(--display); }
+.pcard .av { font-size: 0.72rem; color: var(--muted); }
+.pcard.on { border-color: var(--brass); background: var(--felt-3); }
+.pcard.on .nm { color: var(--brass); }
+.visit { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: end; flex: none; }
+.visit .who { grid-column: 1 / -1; font-weight: 700; font-size: 1rem; color: var(--brass); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.visit .big { font: 900 4.2rem/0.85 var(--display); letter-spacing: 0.01em; }
+.visit .right { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.slot {
+  border: 1.5px solid var(--line); border-radius: 8px; height: 38px; display: grid; place-items: center;
+  font: 800 1.3rem/1 var(--display); color: var(--muted);
+}
+.slot.f { color: var(--ink); background: var(--felt-3); border-color: var(--felt-3); }
+.slot.n { border-color: var(--brass); }
+.meta { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; color: var(--muted); min-height: 1.2em; }
+.meta b { color: var(--ink); }
+.meta .co { color: var(--brass); font-weight: 700; white-space: nowrap; }
+.meta .bust { color: var(--bust); font-weight: 700; }
+.progress { height: 6px; background: var(--felt-3); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--brass); }
+.board-wrap { flex: 1; min-height: 0; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)) + 4px) calc(-1 * max(16px, env(safe-area-inset-right, 0px)) + 4px); container-type: size; display: grid; place-items: center; position: relative; }
+.board-wrap svg { width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); touch-action: manipulation; user-select: none; -webkit-user-select: none; display: block; }
+.board-wrap.locked svg { opacity: 0.55; transition: opacity .2s; }
+.pop {
+  position: absolute; pointer-events: none; transform: translate(-50%, -130%);
+  background: var(--ink); color: var(--felt); border-radius: 8px; padding: 4px 10px;
+  font: 900 1.6rem/1 var(--display); box-shadow: 0 6px 18px rgba(0,0,0,.45);
+  animation: pop .7s ease-out forwards;
+}
+@keyframes pop { 0% { opacity: 0; transform: translate(-50%, -100%) scale(.8); } 15% { opacity: 1; transform: translate(-50%, -130%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -160%); } }
+.banner {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: var(--felt); border: 2px solid var(--brass); border-radius: 14px; padding: 10px 20px; text-align: center;
+  font: 900 2rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.04em; pointer-events: none; white-space: nowrap;
+}
+.banner small { display: block; font: 600 0.85rem/1.3 var(--body); text-transform: none; letter-spacing: 0; color: var(--muted); margin-top: 4px; }
+.banner.bust { border-color: var(--bust); color: var(--bust); }
+.actions { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; flex: none; }
+.act {
+  border: 1.5px solid var(--line); background: var(--felt-2); border-radius: 12px; min-height: 54px;
+  font: 800 1.15rem/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.act svg { width: 18px; height: 18px; }
+.act.next { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.act:disabled { opacity: 0.4; }
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: fixed; inset: 0; background: rgba(6, 10, 9, 0.78); display: grid; place-items: center; z-index: 20;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.dialog { background: var(--felt-2); border: 1.5px solid var(--line); border-radius: 16px; padding: 20px; width: min(420px, 100%); display: flex; flex-direction: column; gap: 14px; max-height: 100%; overflow-y: auto; }
+.dialog h3 { margin: 0; font: 900 2rem/1 var(--display); text-transform: uppercase; }
+.dialog p { margin: 0; color: var(--muted); }
+.dialog .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dialog .btns button { border-radius: 12px; padding: 12px; font-weight: 700; border: 1.5px solid var(--line); background: var(--felt-3); }
+.dialog .btns .yes { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); }
+.win h3 { color: var(--brass); font-size: 2.8rem; }
+.stats { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.stats th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 6px; }
+.stats td { padding: 7px 6px; border-top: 1px solid var(--line); }
+.stats td + td, .stats th + th { text-align: right; }
+.stats tr.w td { color: var(--brass); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) { .pop { animation-duration: 1.2s; } * { transition: none !important; } }
+@media (min-width: 760px) and (orientation: landscape) {
+  .game { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; grid-template-rows: auto auto auto 1fr auto; column-gap: 20px; }
+  .game > .topbar, .game > .strip, .game > .visit, .game > .actions { grid-column: 1; }
+  .game > .strip { flex-wrap: wrap; overflow: visible; }
+  .game > .board-wrap { grid-column: 2; grid-row: 1 / -1; margin-inline: 0; }
+  .game > .actions { grid-row: 5; align-self: end; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Board geometry (units: SVG viewBox -200..200, double ring outer edge = 170) ---------- */
+const SEG = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+// Triple and double rings are drawn a little wider than on a real board so they are easy to tap.
+const R = { bullIn: 8, bullOut: 18, tIn: 94, tOut: 112, dIn: 151, dOut: 170, frame: 198 };
+const RING_STEP = 17; // ring board: 10 rings of equal width
+const RING_COLORS = ['#f2c230', '#f2c230', '#d33a2c', '#d33a2c', '#2f7fd1', '#2f7fd1', '#1b1b1b', '#1b1b1b', '#efe7d6', '#efe7d6'];
+const MISS = { v: 0, m: 0, l: '–', miss: true };
+
+/* ---------- Presets ---------- */
+const PRESETS = {
+  'steel-x01': [101, 301, 501, 701],
+  'steel-race': [100, 300, 500, 1000],
+  'ring-x01': [50, 100, 150, 200],
+  'ring-race': [50, 100, 150, 200],
+};
+const DEFAULT_SETTINGS = {
+  board: 'steel', mode: 'x01', out: 'double',
+  values: { 'steel-x01': 501, 'steel-race': 300, 'ring-x01': 100, 'ring-race': 100 },
+  players: ['Spieler 1', 'Spieler 2'],
+};
+
+/* ---------- Storage (best effort) ---------- */
+function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
+
+let S = Object.assign({}, DEFAULT_SETTINGS, load('oche.settings', {}));
+S.values = Object.assign({}, DEFAULT_SETTINGS.values, S.values);
+if (!Array.isArray(S.players) || !S.players.length) S.players = DEFAULT_SETTINGS.players.slice();
+let G = load('oche.game', null);
+let undo = load('oche.undo', []);
+let view = 'setup';
+let advanceTimer = null;
+let modal = null; // 'quit' | null
+
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const key = () => S.board + '-' + S.mode;
+const persistSettings = () => save('oche.settings', S);
+const persistGame = () => { save('oche.game', G); save('oche.undo', undo.slice(-40)); };
+
+/* ---------- Icons ---------- */
+const ICON = {
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+  shuffle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>',
+  bot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01"/></svg>',
+};
+const miniSteel = '<svg viewBox="-20 -20 40 40"><circle r="19" fill="#151515"/><circle r="15" fill="#d33a2c"/><circle r="13.5" fill="#eadcbc"/><circle r="9" fill="#1d8a4b"/><circle r="7.6" fill="#151515"/><circle r="2.6" fill="#1d8a4b"/><circle r="1.2" fill="#d33a2c"/></svg>';
+const miniRing = '<svg viewBox="-20 -20 40 40"><circle r="19" fill="#efe7d6"/><circle r="15.2" fill="#1b1b1b"/><circle r="11.4" fill="#2f7fd1"/><circle r="7.6" fill="#d33a2c"/><circle r="3.8" fill="#f2c230"/></svg>';
+
+/* ---------- Board SVG ---------- */
+function pt(r, a) { const t = (a - 90) * Math.PI / 180; return [+(r * Math.cos(t)).toFixed(2), +(r * Math.sin(t)).toFixed(2)]; }
+function sector(r1, r2, a1, a2) {
+  const [x1, y1] = pt(r2, a1), [x2, y2] = pt(r2, a2), [x3, y3] = pt(r1, a2), [x4, y4] = pt(r1, a1);
+  return `M${x1} ${y1}A${r2} ${r2} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r1} ${r1} 0 0 0 ${x4} ${y4}Z`;
+}
+function steelSVG() {
+  const wire = 'stroke="#b9b4a6" stroke-width="0.7"';
+  let s = `<circle r="${R.frame}" fill="#151515"/>`;
+  SEG.forEach((n, i) => {
+    const a1 = i * 18 - 9, a2 = i * 18 + 9, dark = i % 2 === 0;
+    const single = dark ? '#161616' : '#eadcbc', ring = dark ? '#d33a2c' : '#1d8a4b';
+    s += `<path d="${sector(R.bullOut, R.tIn, a1, a2)}" fill="${single}" ${wire}/>`;
+    s += `<path d="${sector(R.tIn, R.tOut, a1, a2)}" fill="${ring}" ${wire}/>`;
+    s += `<path d="${sector(R.tOut, R.dIn, a1, a2)}" fill="${single}" ${wire}/>`;
+    s += `<path d="${sector(R.dIn, R.dOut, a1, a2)}" fill="${ring}" ${wire}/>`;
+    const [x, y] = pt(184, i * 18);
+    s += `<text x="${x}" y="${y}" fill="#f3eee2" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="21" text-anchor="middle" dominant-baseline="central">${n}</text>`;
+  });
+  s += `<circle r="${R.bullOut}" fill="#1d8a4b" ${wire}/><circle r="${R.bullIn}" fill="#d33a2c" ${wire}/>`;
+  return s;
+}
+function ringSVG() {
+  let s = `<circle r="${R.frame}" fill="#151515"/>`;
+  for (let k = 9; k >= 0; k--) {
+    const r = (k + 1) * RING_STEP;
+    s += `<circle r="${r}" fill="${RING_COLORS[k]}" stroke="#7d7869" stroke-width="0.8"/>`;
+  }
+  for (let k = 0; k < 10; k++) {
+    const y = -(k * RING_STEP + RING_STEP / 2), v = 10 - k, light = k < 2 || k >= 8;
+    const fill = light ? '#151515' : '#f3eee2';
+    s += `<text x="0" y="${k === 0 ? 0 : y}" fill="${fill}" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="13" text-anchor="middle" dominant-baseline="central">${v}</text>`;
+    if (k > 0) s += `<text x="0" y="${-y}" fill="${fill}" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="13" text-anchor="middle" dominant-baseline="central" opacity=".6">${v}</text>`;
+  }
+  return s;
+}
+function hitSteel(x, y) {
+  const r = Math.hypot(x, y);
+  if (r > R.dOut) return MISS;
+  if (r <= R.bullIn) return { v: 50, m: 2, l: 'Bull' };
+  if (r <= R.bullOut) return { v: 25, m: 1, l: '25' };
+  const deg = (Math.atan2(y, x) * 180 / Math.PI + 90 + 360) % 360;
+  const n = SEG[Math.floor((deg + 9) / 18) % 20];
+  if (r >= R.dIn) return { v: n * 2, m: 2, l: 'D' + n };
+  if (r >= R.tIn && r <= R.tOut) return { v: n * 3, m: 3, l: 'T' + n };
+  return { v: n, m: 1, l: String(n) };
+}
+function hitRing(x, y) {
+  const r = Math.hypot(x, y);
+  if (r > RING_STEP * 10) return MISS;
+  const v = 10 - Math.floor(r / RING_STEP);
+  return { v, m: 1, l: String(v) };
+}
+
+/* ---------- Checkout suggestions (steel, counting down) ---------- */
+const HIGH = [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+const SETUP = [
+  ...HIGH.map(n => ({ l: 'T' + n, v: 3 * n })),
+  { l: 'Bull', v: 50 }, { l: '25', v: 25 },
+  ...HIGH.map(n => ({ l: String(n), v: n })),
+  ...HIGH.map(n => ({ l: 'D' + n, v: 2 * n })),
+];
+const DOUBLES = [...[20, 16, 18, 12, 10, 8, 14, 6, 4, 2, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1].map(n => ({ l: 'D' + n, v: 2 * n })), { l: 'Bull', v: 50 }];
+function checkout(score, darts, dbl) {
+  if (score <= 0 || darts <= 0) return null;
+  const finals = dbl ? DOUBLES : SETUP;
+  for (let k = 1; k <= darts; k++) {
+    for (const f of finals) {
+      const rest = score - f.v;
+      if (k === 1) { if (rest === 0) return [f.l]; continue; }
+      if (rest <= 0) continue;
+      if (k === 2) { const a = SETUP.find(o => o.v === rest); if (a) return [a.l, f.l]; continue; }
+      for (const a of SETUP) {
+        if (a.v >= rest) continue;
+        const b = SETUP.find(o => o.v === rest - a.v);
+        if (b) return [a.l, b.l, f.l];
+      }
+    }
+  }
+  return null;
+}
+
+/* ---------- Game logic ---------- */
+function newGame(players) {
+  const value = S.values[key()];
+  G = {
+    board: S.board, mode: S.mode, value,
+    out: S.board === 'steel' && S.mode === 'x01' ? S.out : 'single',
+    players: players.map(n => ({ name: n, score: S.mode === 'x01' ? value : 0, darts: 0, points: 0, best: 0, legs: 0 })),
+    cur: 0, round: 1, turn: null, winner: null,
+  };
+  G.turn = freshTurn();
+  undo = [];
+  persistGame();
+}
+function freshTurn() { return { start: G.players[G.cur].score, darts: [], done: false, bust: false }; }
+function snapshot() { undo.push(JSON.stringify(G)); if (undo.length > 60) undo.shift(); }
+function turnSum(t) { return t.darts.reduce((a, d) => a + d.v, 0); }
+
+function throwDart(hit, at) {
+  if (!G || G.winner !== null) return;
+  if (G.turn.done) advance();
+  snapshot();
+  const p = G.players[G.cur], t = G.turn;
+  const d = { v: hit.v, m: hit.m, l: hit.l };
+  if (at) { d.x = at[0]; d.y = at[1]; }
+  t.darts.push(d);
+  p.darts++;
+  if (G.mode === 'x01') {
+    const ns = p.score - hit.v;
+    const dbl = G.out === 'double';
+    if (ns < 0 || (dbl && ns === 1) || (ns === 0 && dbl && hit.m !== 2)) {
+      p.points -= t.start - p.score;
+      p.score = t.start;
+      t.bust = true;
+      return endTurn();
+    }
+    p.score = ns; p.points += hit.v;
+    if (ns === 0) return finish();
+  } else {
+    p.score += hit.v; p.points += hit.v;
+    if (p.score >= G.value) return finish();
+  }
+  if (t.darts.length >= 3) return endTurn();
+  commit();
+}
+function endTurn() {
+  const p = G.players[G.cur];
+  if (!G.turn.bust) p.best = Math.max(p.best, turnSum(G.turn));
+  G.turn.done = true;
+  commit();
+  clearTimeout(advanceTimer);
+  advanceTimer = setTimeout(() => { if (G && G.turn.done && G.winner === null) { advance(); commit(); } }, G.turn.bust ? 1700 : 1200);
+}
+function advance() {
+  clearTimeout(advanceTimer);
+  G.cur = (G.cur + 1) % G.players.length;
+  if (G.cur === 0) G.round++;
+  G.turn = freshTurn();
+}
+function nextPlayer() {
+  if (!G || G.winner !== null) return;
+  if (G.turn.done) { advance(); return commit(); }
+  snapshot();
+  const p = G.players[G.cur];
+  p.darts += 3 - G.turn.darts.length; // skipped darts count as misses
+  p.best = Math.max(p.best, turnSum(G.turn));
+  advance();
+  commit();
+}
+function finish() {
+  const p = G.players[G.cur];
+  p.best = Math.max(p.best, turnSum(G.turn));
+  p.legs++;
+  G.winner = G.cur;
+  G.turn.done = true;
+  clearTimeout(advanceTimer);
+  commit();
+}
+function doUndo() {
+  if (!undo.length) return;
+  clearTimeout(advanceTimer);
+  G = JSON.parse(undo.pop());
+  commit();
+}
+function rematch() {
+  const legs = G.players.map(p => p.legs);
+  // the loser of the last leg starts: rotate so the player after the winner begins
+  const order = G.players.map((_, i) => (G.winner + 1 + i) % G.players.length);
+  const names = order.map(i => G.players[i].name);
+  const prevLegs = order.map(i => legs[i]);
+  S.board = G.board; S.mode = G.mode; S.values[key()] = G.value; if (G.board === 'steel' && G.mode === 'x01') S.out = G.out;
+  newGame(names);
+  G.players.forEach((p, i) => { p.legs = prevLegs[i]; });
+  commit();
+}
+function commit() { persistGame(); render(); }
+function avg(p) { return p.darts ? (p.points / p.darts * 3) : 0; }
+
+/* ---------- Rendering ---------- */
+function render() {
+  if (view === 'game' && G) renderGame(); else renderSetup();
+}
+
+function renderSetup() {
+  const presets = PRESETS[key()];
+  const val = S.values[key()];
+  const custom = !presets.includes(val);
+  const canResume = G && G.winner === null;
+  const steelX01 = S.board === 'steel' && S.mode === 'x01';
+  app.innerHTML = `
+  <div class="screen setup"><div class="setup-inner">
+    <div class="brand">${miniSteel}<div><h1>Oche Darts</h1><p>Tippen, wo der Pfeil steckt. Die App rechnet.</p></div></div>
+    ${canResume ? `<div class="resume"><div><strong>Laufendes Spiel</strong><span>${esc(G.players.map(p => p.name).join(' · '))} – Runde ${G.round}</span></div><button class="chip" data-a="resume" aria-pressed="true">Weiter</button></div>` : ''}
+    <section class="sec">
+      <h2>Scheibe</h2>
+      <div class="choice">
+        <button class="opt stack" data-a="board" data-v="steel" aria-pressed="${S.board === 'steel'}">${miniSteel}<span><b>Turnierscheibe</b><small>20 Felder, Doppel, Triple, Bull</small></span></button>
+        <button class="opt stack" data-a="board" data-v="ring" aria-pressed="${S.board === 'ring'}">${miniRing}<span><b>Ringscheibe</b><small>Rückseite: Ringe 10 bis 1</small></span></button>
+      </div>
+    </section>
+    <section class="sec">
+      <h2>Spielart</h2>
+      <div class="choice">
+        <button class="opt" data-a="mode" data-v="x01" aria-pressed="${S.mode === 'x01'}"><span><b>Runterspielen</b><small>Von ${S.board === 'steel' ? '501' : '100'} auf genau 0</small></span></button>
+        <button class="opt" data-a="mode" data-v="race" aria-pressed="${S.mode === 'race'}"><span><b>Hochspielen</b><small>Wer zuerst das Ziel erreicht</small></span></button>
+      </div>
+    </section>
+    <section class="sec">
+      <h2>${S.mode === 'x01' ? 'Startpunkte' : 'Zielpunkte'}</h2>
+      <div class="chips">
+        ${presets.map(v => `<button class="chip num" data-a="value" data-v="${v}" aria-pressed="${v === val}">${v}</button>`).join('')}
+        <input id="custom-value" class="chip-input num" type="number" inputmode="numeric" min="2" max="9999" placeholder="Eigene" value="${custom ? val : ''}" aria-label="Eigene Punktzahl">
+      </div>
+      ${S.board === 'steel' && S.mode === 'x01' ? '<p class="hint">Im Turnier wird 501 gespielt, für kürzere Runden 301. Jeder hat pro Aufnahme 3 Pfeile.</p>' : ''}
+      ${S.mode === 'race' ? '<p class="hint">Alle Treffer werden addiert. Wer die Zielpunkte zuerst erreicht oder überschreitet, gewinnt.</p>' : ''}
+    </section>
+    ${steelX01 ? `
+    <section class="sec">
+      <h2>Ausmachen</h2>
+      <div class="choice">
+        <button class="opt" data-a="out" data-v="double" aria-pressed="${S.out === 'double'}"><span><b>Double Out</b><small>Letzter Pfeil auf ein Doppel oder Bull, wie im Turnier</small></span></button>
+        <button class="opt" data-a="out" data-v="single" aria-pressed="${S.out === 'single'}"><span><b>Single Out</b><small>Jedes Feld zählt zum Ausmachen</small></span></button>
+      </div>
+      <p class="hint">Wer unter 0 kommt${S.out === 'double' ? ', auf 1 landet oder ohne Doppel auf 0 kommt' : ''}, hat überworfen: Die Aufnahme zählt nicht.</p>
+    </section>` : ''}
+    <section class="sec">
+      <h2>Spieler</h2>
+      <div class="players">
+        ${S.players.map((n, i) => `
+          <div class="prow">
+            <span class="pn">${i + 1}</span>
+            <input id="player-${i}" data-i="${i}" value="${esc(n)}" maxlength="18" autocomplete="off" aria-label="Name Spieler ${i + 1}">
+            <button class="icon-btn" data-a="del" data-i="${i}" aria-label="Spieler entfernen" ${S.players.length <= 1 ? 'disabled' : ''}>${ICON.x}</button>
+          </div>`).join('')}
+      </div>
+      <div class="row-btns">
+        <button class="ghost" data-a="add" ${S.players.length >= 8 ? 'disabled' : ''}>+ Spieler hinzufügen</button>
+        ${S.players.length > 1 ? `<button class="ghost" data-a="shuffle">Reihenfolge mischen</button>` : ''}
+      </div>
+    </section>
+    <div class="solo">${ICON.bot}<div><b>Solo gegen den Computer</b><br>Ein Gegner mit Stärke von Kneipe bis Profi.</div><span class="tag">Kommt bald</span></div>
+    <button class="primary" data-a="start">Spiel starten</button>
+  </div></div>`;
+}
+
+function renderGame() {
+  const p = G.players[G.cur], t = G.turn;
+  const x01 = G.mode === 'x01';
+  const modeLabel = (G.board === 'ring' ? 'Ringscheibe · ' : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : ' · Single Out') : 'Bis ' + G.value);
+  const left = 3 - t.darts.length;
+  let co = null;
+  if (x01 && G.board === 'steel' && !t.done && p.score <= 180) co = checkout(p.score, left, G.out === 'double');
+  const sum = turnSum(t);
+  const metaLeft = t.bust ? '<span class="bust">Überworfen – 0 Punkte</span>' : `Aufnahme <b class="num">${sum}</b>`;
+  const metaRight = co ? `<span class="co">${co.join(' · ')}</span>` : (x01 ? '' : `<span>noch <b class="num">${Math.max(0, G.value - p.score)}</b></span>`);
+  const pct = x01 ? 0 : Math.min(100, p.score / G.value * 100);
+
+  app.innerHTML = `
+  <div class="screen game">
+    <div class="topbar">
+      <button class="icon-btn" data-a="quit" aria-label="Spiel beenden">${ICON.back}</button>
+      <span class="mode">${esc(modeLabel)}</span>
+      <span class="round">Runde ${G.round}</span>
+    </div>
+    <div class="strip" id="strip">
+      ${G.players.map((q, i) => `<div class="pcard ${i === G.cur ? 'on' : ''}" ${i === G.cur ? 'id="cur-card"' : ''}>
+        <span class="nm">${esc(q.name)}${q.legs ? ' · ' + q.legs + (q.legs === 1 ? ' Leg' : ' Legs') : ''}</span>
+        <span class="sc num">${q.score}</span>
+        <span class="av num">Ø ${avg(q).toFixed(1)}</span>
+      </div>`).join('')}
+    </div>
+    <div class="visit">
+      <span class="who">${esc(p.name)} ist dran</span>
+      <span class="big num">${p.score}</span>
+      <div class="right">
+        <div class="slots">${[0, 1, 2].map(i => { const d = t.darts[i]; return `<span class="slot ${d ? 'f' : ''} ${!d && i === t.darts.length && !t.done ? 'n' : ''} num">${d ? esc(d.l) : ''}</span>`; }).join('')}</div>
+        ${x01 ? '' : `<div class="progress"><i style="width:${pct}%"></i></div>`}
+        <div class="meta"><span>${metaLeft}</span>${metaRight}</div>
+      </div>
+    </div>
+    <div class="board-wrap ${t.done ? 'locked' : ''}" id="board-wrap">
+      <svg id="board" viewBox="-200 -200 400 400" role="img" aria-label="Dartscheibe: tippe auf die Stelle, die du getroffen hast">
+        ${G.board === 'steel' ? steelSVG() : ringSVG()}
+        <g>${t.darts.filter(d => d.x !== undefined).map((d, i) => `<circle cx="${d.x}" cy="${d.y}" r="6" fill="#e3ab3e" stroke="#121d19" stroke-width="2.5"/><text x="${d.x}" y="${d.y}" font-size="7" font-weight="800" fill="#121d19" text-anchor="middle" dominant-baseline="central" font-family="Barlow, sans-serif">${i + 1}</text>`).join('')}</g>
+      </svg>
+      ${t.done && G.winner === null ? `<div class="banner ${t.bust ? 'bust' : ''}">${t.bust ? 'Überworfen!' : 'Aufnahme: ' + sum}<small>Gleich ist ${esc(G.players[(G.cur + 1) % G.players.length].name)} dran</small></div>` : ''}
+    </div>
+    <div class="actions">
+      <button class="act" data-a="miss" ${G.winner !== null ? 'disabled' : ''}>Daneben</button>
+      <button class="act" data-a="undo" ${undo.length ? '' : 'disabled'}>${ICON.undo}Zurück</button>
+      <button class="act next" data-a="next" ${G.winner !== null ? 'disabled' : ''}>Nächster${ICON.next}</button>
+    </div>
+  </div>
+  ${modal === 'quit' ? `<div class="overlay"><div class="dialog"><h3>Spiel verlassen?</h3><p>Der Spielstand bleibt gespeichert. Du kannst im Menü mit „Weiter“ fortsetzen.</p><div class="btns"><button data-a="stay">Weiterspielen</button><button class="yes" data-a="leave">Zum Menü</button></div></div></div>` : ''}
+  ${G.winner !== null ? winHTML() : ''}`;
+  const cc = document.getElementById('cur-card');
+  if (cc && cc.scrollIntoView) cc.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+function winHTML() {
+  const w = G.players[G.winner];
+  const lastDart = G.turn.darts[G.turn.darts.length - 1];
+  const rows = G.players.map((q, i) => ({ q, i })).sort((a, b) => a.i === G.winner ? -1 : b.i === G.winner ? 1 : (G.mode === 'x01' ? a.q.score - b.q.score : b.q.score - a.q.score));
+  return `<div class="overlay"><div class="dialog win">
+    <h3>${esc(w.name)} gewinnt!</h3>
+    <p>${G.mode === 'x01' ? 'Ausgemacht mit ' + esc(lastDart ? lastDart.l : '') + ' nach ' + w.darts + ' Pfeilen.' : G.value + ' Punkte erreicht nach ' + w.darts + ' Pfeilen.'}</p>
+    <table class="stats num">
+      <thead><tr><th>Spieler</th><th>${G.mode === 'x01' ? 'Rest' : 'Punkte'}</th><th>Ø 3 Pfeile</th><th>Beste</th></tr></thead>
+      <tbody>${rows.map(({ q, i }) => `<tr class="${i === G.winner ? 'w' : ''}"><td>${esc(q.name)}${q.legs ? ' (' + q.legs + ')' : ''}</td><td>${q.score}</td><td>${avg(q).toFixed(1)}</td><td>${q.best}</td></tr>`).join('')}</tbody>
+    </table>
+    <div class="btns"><button data-a="undo">Letzten Wurf zurück</button><button class="yes" data-a="rematch">Revanche</button></div>
+    <div class="btns"><button data-a="menu" style="grid-column:1/-1">Neues Spiel einstellen</button></div>
+  </div></div>`;
+}
+
+/* ---------- Events ---------- */
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (b) return action(b.dataset.a, b);
+  const svg = e.target.closest('#board');
+  if (svg && view === 'game') {
+    const r = svg.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width * 400 - 200;
+    const y = (e.clientY - r.top) / r.height * 400 - 200;
+    const hit = G.board === 'steel' ? hitSteel(x, y) : hitRing(x, y);
+    const at = hit.miss ? null : [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+    throwDart(hit, at);
+    showPop(hit, e.clientX, e.clientY);
+  }
+});
+function showPop(hit, cx, cy) {
+  const wrap = document.getElementById('board-wrap');
+  if (!wrap) return;
+  const r = wrap.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'pop';
+  el.textContent = hit.miss ? 'Daneben' : hit.l === 'Bull' || hit.l === '25' ? hit.l : hit.l + (hit.m > 1 ? ' = ' + hit.v : '');
+  el.style.left = (cx - r.left) + 'px';
+  el.style.top = (cy - r.top) + 'px';
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+app.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.i !== undefined && el.tagName === 'INPUT') { S.players[+el.dataset.i] = el.value; persistSettings(); }
+  if (el.id === 'custom-value') {
+    const v = parseInt(el.value, 10);
+    if (v >= 2 && v <= 9999) {
+      S.values[key()] = v; persistSettings();
+      document.querySelectorAll('[data-a="value"]').forEach(c => c.setAttribute('aria-pressed', 'false'));
+    }
+  }
+});
+function action(a, el) {
+  switch (a) {
+    case 'board': S.board = el.dataset.v; persistSettings(); return render();
+    case 'mode': S.mode = el.dataset.v; persistSettings(); return render();
+    case 'out': S.out = el.dataset.v; persistSettings(); return render();
+    case 'value': S.values[key()] = +el.dataset.v; persistSettings(); return render();
+    case 'add': S.players.push('Spieler ' + (S.players.length + 1)); persistSettings(); render(); { const i = document.getElementById('player-' + (S.players.length - 1)); if (i) { i.focus(); i.select(); } } return;
+    case 'del': S.players.splice(+el.dataset.i, 1); persistSettings(); return render();
+    case 'shuffle':
+      for (let i = S.players.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [S.players[i], S.players[j]] = [S.players[j], S.players[i]]; }
+      persistSettings(); return render();
+    case 'start': {
+      const names = S.players.map((n, i) => n.trim() || 'Spieler ' + (i + 1));
+      S.players = names; persistSettings();
+      newGame(names); view = 'game'; keepAwake(); return render();
+    }
+    case 'resume': view = 'game'; keepAwake(); return render();
+    case 'miss': return throwDart(MISS, null);
+    case 'undo': return doUndo();
+    case 'next': return nextPlayer();
+    case 'quit': modal = 'quit'; return render();
+    case 'stay': modal = null; return render();
+    case 'leave': modal = null; clearTimeout(advanceTimer); view = 'setup'; return render();
+    case 'rematch': return rematch();
+    case 'menu': G = null; undo = []; persistGame(); view = 'setup'; return render();
+  }
+}
+
+/* Keep the screen on while playing, where the browser allows it */
+let lock = null;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator && !lock) { lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); } } catch (e) { lock = null; }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && view === 'game') keepAwake(); });
+
+if (G && G.winner === null && G.turn && G.turn.done) { advance(); persistGame(); }
+render();
+})();
+</script>
+</body>
+</html>
