@@ -231,7 +231,7 @@ const PRESETS = {
   'ring-race': [50, 100, 150, 200],
 };
 const DEFAULT_SETTINGS = {
-  board: 'steel', mode: 'x01', out: 'double',
+  board: 'steel', mode: 'x01', out: 'single',
   values: { 'steel-x01': 501, 'steel-race': 300, 'ring-x01': 100, 'ring-race': 100 },
   players: ['Spieler 1', 'Spieler 2'],
 };
@@ -245,6 +245,12 @@ S.values = Object.assign({}, DEFAULT_SETTINGS.values, S.values);
 if (!Array.isArray(S.players) || !S.players.length) S.players = DEFAULT_SETTINGS.players.slice();
 let G = load('oche.game', null);
 let undo = load('oche.undo', []);
+// v2: reaching exactly 0 wins by default; switch older saved settings and games over once
+if (!S.v2) {
+  S.out = 'single'; S.v2 = true; persistSettingsEarly();
+  if (G && G.out === 'double') { G.out = 'single'; undo = []; }
+}
+function persistSettingsEarly() { save('oche.settings', S); }
 let view = 'setup';
 let advanceTimer = null;
 let modal = null; // 'quit' | null
@@ -427,6 +433,7 @@ function finish() {
   G.turn.done = true;
   clearTimeout(advanceTimer);
   commit();
+  confetti();
 }
 function doUndo() {
   if (!undo.length) return;
@@ -496,10 +503,10 @@ function renderSetup() {
     <section class="sec">
       <h2>Ausmachen</h2>
       <div class="choice">
-        <button class="opt" data-a="out" data-v="double" aria-pressed="${S.out === 'double'}"><span><b>Double Out</b><small>Letzter Pfeil auf ein Doppel oder Bull, wie im Turnier</small></span></button>
-        <button class="opt" data-a="out" data-v="single" aria-pressed="${S.out === 'single'}"><span><b>Single Out</b><small>Jedes Feld zählt zum Ausmachen</small></span></button>
+        <button class="opt" data-a="out" data-v="single" aria-pressed="${S.out === 'single'}"><span><b>Genau auf 0</b><small>Egal mit welchem Feld. Wer 0 erreicht, gewinnt.</small></span></button>
+        <button class="opt" data-a="out" data-v="double" aria-pressed="${S.out === 'double'}"><span><b>Profi: Double Out</b><small>Letzter Pfeil muss im äußeren Doppelring oder Bull landen</small></span></button>
       </div>
-      <p class="hint">Wer unter 0 kommt${S.out === 'double' ? ', auf 1 landet oder ohne Doppel auf 0 kommt' : ''}, hat überworfen: Die Aufnahme zählt nicht.</p>
+      <p class="hint">Wer unter 0 kommt${S.out === 'double' ? ', auf 1 landet oder ohne Doppel auf 0 kommt' : ''}, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.</p>
     </section>` : ''}
     <section class="sec">
       <h2>Spieler</h2>
@@ -524,7 +531,7 @@ function renderSetup() {
 function renderGame() {
   const p = G.players[G.cur], t = G.turn;
   const x01 = G.mode === 'x01';
-  const modeLabel = (G.board === 'ring' ? 'Ringscheibe · ' : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : ' · Single Out') : 'Bis ' + G.value);
+  const modeLabel = (G.board === 'ring' ? 'Ringscheibe · ' : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : ' · genau auf 0') : 'Bis ' + G.value);
   const left = 3 - t.darts.length;
   let co = null;
   if (x01 && G.board === 'steel' && !t.done && p.score <= 180) co = checkout(p.score, left, G.out === 'double');
@@ -575,13 +582,42 @@ function renderGame() {
   if (cc && cc.scrollIntoView) cc.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 
+/* Winner confetti on a throwaway canvas */
+function confetti() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas');
+  c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30';
+  document.body.appendChild(c);
+  const ctx = c.getContext('2d'), dpr = window.devicePixelRatio || 1;
+  const W = c.width = innerWidth * dpr, H = c.height = innerHeight * dpr;
+  const colors = ['#e3ab3e', '#d33a2c', '#1d8a4b', '#eadcbc', '#f3eee2', '#2f7fd1'];
+  const bits = Array.from({ length: 160 }, (_, i) => ({
+    x: W / 2 + (Math.random() - 0.5) * W * 0.3, y: H * 0.45,
+    vx: (Math.random() - 0.5) * 22 * dpr, vy: (-Math.random() * 22 - 8) * dpr,
+    s: (5 + Math.random() * 6) * dpr, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+    c: colors[i % colors.length],
+  }));
+  const t0 = performance.now();
+  (function frame(t) {
+    const age = t - t0;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = Math.max(0, 1 - Math.max(0, age - 2200) / 800);
+    for (const b of bits) {
+      b.vy += 0.55 * dpr; b.vx *= 0.985; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.fillStyle = b.c;
+      ctx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); ctx.restore();
+    }
+    if (age < 3000) requestAnimationFrame(frame); else c.remove();
+  })(t0);
+}
+
 function winHTML() {
   const w = G.players[G.winner];
   const lastDart = G.turn.darts[G.turn.darts.length - 1];
   const rows = G.players.map((q, i) => ({ q, i })).sort((a, b) => a.i === G.winner ? -1 : b.i === G.winner ? 1 : (G.mode === 'x01' ? a.q.score - b.q.score : b.q.score - a.q.score));
   return `<div class="overlay"><div class="dialog win">
     <h3>${esc(w.name)} gewinnt!</h3>
-    <p>${G.mode === 'x01' ? 'Ausgemacht mit ' + esc(lastDart ? lastDart.l : '') + ' nach ' + w.darts + ' Pfeilen.' : G.value + ' Punkte erreicht nach ' + w.darts + ' Pfeilen.'}</p>
+    <p>${G.mode === 'x01' ? 'Ausgemacht mit ' + esc(lastDart ? lastDart.l : '') + ' nach ' + w.darts + (w.darts === 1 ? ' Pfeil.' : ' Pfeilen.') : G.value + ' Punkte erreicht nach ' + w.darts + (w.darts === 1 ? ' Pfeil.' : ' Pfeilen.')}</p>
     <table class="stats num">
       <thead><tr><th>Spieler</th><th>${G.mode === 'x01' ? 'Rest' : 'Punkte'}</th><th>Ø 3 Pfeile</th><th>Beste</th></tr></thead>
       <tbody>${rows.map(({ q, i }) => `<tr class="${i === G.winner ? 'w' : ''}"><td>${esc(q.name)}${q.legs ? ' (' + q.legs + ')' : ''}</td><td>${q.score}</td><td>${avg(q).toFixed(1)}</td><td>${q.best}</td></tr>`).join('')}</tbody>
