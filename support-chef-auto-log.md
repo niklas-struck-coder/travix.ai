@@ -5251,3 +5251,73 @@ Reibungspunkte für echte Nutzer:innen tatsächlich verschwinden.
 Der übrige Inhalt von `Buchung.tsx`/`ChecklistPanel.tsx` (gestern bereits
 vollständig geprüft) sowie alle anderen Seiten waren nicht Gegenstand
 dieses Laufs.
+
+---
+
+## 2026-10-23 — Nachkontrolle "Entwurf abschließen"-Dialog (`Reiseentwuerfe.tsx`)
+
+**Geprüfter Bereich:** Autonomer Lauf, niemand live dabei. Seit dem
+letzten Support-Chef-Bericht (22.10., 04:18 Uhr) ist laut `git log` auf
+`main` genau ein neuer UI-Fix dazugekommen: `e97e477` ("vierzehnter
+Lauf", 22.10., 22:13 Uhr) setzt exakt meinen eigenen gestrigen Fund 3/
+Vorschlag 4 aus `reports/support-chef.md` um ("Entwurf abschließen"
+sah aus wie eine Löschwarnung). Das ist der naheliegende Bereich für
+den heutigen Lauf — ich habe den vollständigen Inhalt von
+`src/pages/Reiseentwuerfe.tsx` (416 Zeilen) gegen meinen eigenen Fund
+geprüft, nicht nur den geänderten Ausschnitt.
+
+### Fix korrekt und vollständig umgesetzt, kein neuer Punkt
+
+`Reiseentwuerfe.tsx:355-369`: Der Bestätigungsdialog beim Abschließen
+eines Entwurfs ist jetzt klar vom Löschen-Dialog (`:332-350`, weiterhin
+bewusst rot/`variant="destructive"`, da dort tatsächlich etwas verloren
+geht) unterschieden:
+
+- **Text ehrlich statt dramatisch:** Statt "wird abgeschlossen. Das
+  lässt sich nicht rückgängig machen." steht jetzt "wird als
+  abgeschlossen markiert und lässt sich danach nicht mehr bearbeiten.
+  Alle Angaben bleiben erhalten und sind weiterhin unter 'Details
+  ansehen' einsehbar." Das stimmt mit dem tatsächlichen Verhalten
+  überein: Für `status === 'finalized'` blendet die Karte "Planung
+  fortsetzen"/Pausieren/Abschließen aus (`:264`, `:269`, `:281`,
+  jeweils per `draft.status !== 'finalized'`-Guard) und zeigt
+  stattdessen nur noch den Auge-Button "Details ansehen" (`:293-304`),
+  der tatsächlich alle Angaben unverändert anzeigt (`:379-409`). Nichts
+  geht verloren, der neue Text behauptet also nichts Falsches.
+- **Button neutral statt rot:** `variant="destructive"` wurde durch
+  `className="bg-teal text-navy hover:bg-teal/90"` ersetzt (`:366`) —
+  dieselbe Teal-Farbe wie der primäre "Planung fortsetzen"-Button
+  (`:265`) und der CTA im Leerzustand (`:181`), also konsistent mit dem
+  sonstigen positiven Call-to-Action-Stil der Seite statt einer
+  zufälligen neuen Farbe.
+- Die zugehörigen Tests (`Reiseentwuerfe.test.tsx:131`, `:189`) wurden
+  im selben Commit auf den neuen Text angepasst; die Testsuite selbst
+  konnte ich wegen des schon mehrfach dokumentierten npm-Tooling-Bugs
+  (`vite.config.ts` kann `@vitejs/plugin-react`/`@tailwindcss/vite`
+  nicht auflösen, bekannt u.a. aus `it-chef-auto-log.md`) nicht
+  ausführen — die Prüfung erfolgte stattdessen vollständig durch
+  Nachlesen des Codes.
+
+Beim Durchgehen der restlichen Seite (Status-Badges, Duplizieren,
+Löschen, Leerzustand, Hinweis-Karte bei mehreren aktiven Entwürfen)
+ergab sich kein neuer, im Code nachvollziehbarer Reibungspunkt — das
+entspricht den bereits in früheren Berichten (u.a. 17.09., 21.09.,
+22.09., 23.09., 01.10.) geprüften und seitdem unveränderten Bereichen.
+
+### Weiterhin offen, nicht neu
+
+Nur zur Vollständigkeit, kein eigenständiger Fund: `PR #34`
+(`formatTime()`, `src/lib/format.ts:23`) und `PR #38` ("+ Suchen"-
+Edit-Shortcut, `src/pages/Buchung.tsx:128`) sind laut Code weiterhin
+ungemergt — im Einklang mit den Vorschlägen aus `reports/
+support-chef.md` wäre eine Freigabe-Chef-Entscheidung dazu weiterhin
+sinnvoll. Mein dritter gestriger Vorschlag (Lösch-Warnungen auf anderen
+Seiten wie `Favoriten.tsx:128`, `Warenkorb.tsx:134`, `Preisalarme.tsx:
+137`, `Aktivitaeten.tsx:118`, `EditMode.tsx:151` abstufen) wurde von
+diesem Fix bewusst nicht mitgenommen — dort handelt es sich tatsächlich
+um unwiderrufliches Löschen, also bleibt Rot dort weiterhin korrekt;
+der heutige Fix betraf gezielt nur den einen Fall, in dem Rot
+inhaltlich falsch war.
+
+### Nicht geprüft
+Alle anderen Seiten waren nicht Gegenstand dieses Laufs.
