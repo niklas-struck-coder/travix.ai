@@ -110,13 +110,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); out
   background: var(--brass); color: var(--brass-ink); border: 0; border-radius: 14px;
   padding: 16px; font: 900 1.6rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase;
 }
-.solo {
-  display: flex; gap: 12px; align-items: center; border: 1.5px dashed var(--line); border-radius: 12px; padding: 12px;
-  color: var(--muted);
-}
-.solo svg { width: 34px; height: 34px; flex: none; }
-.solo b { color: var(--ink); }
-.tag { margin-left: auto; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
+.chip.sm { font: 700 0.95rem/1 var(--body); letter-spacing: 0; padding: 10px 14px; min-width: 0; }
+.sec h2 .bot-ico { display: inline-block; width: 15px; height: 15px; vertical-align: -3px; margin-right: 4px; }
+.pcard .ai { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; border: 1px solid currentColor; border-radius: 4px; padding: 0 3px; margin-right: 4px; vertical-align: 1px; }
+.board-wrap.botturn svg { cursor: default; }
 
 /* ---------- Game ---------- */
 .game { display: flex; flex-direction: column; gap: 10px; padding-block: 8px 10px; }
@@ -144,7 +141,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); out
   font: 800 1.3rem/1 var(--display); color: var(--muted);
 }
 .slot.f { color: var(--ink); background: var(--felt-3); border-color: var(--felt-3); position: relative; }
-.slot.f::after { content: "↺"; position: absolute; top: 2px; right: 5px; font: 600 0.7rem/1 var(--body); color: var(--muted); }
+button.slot.f::after { content: "↺"; position: absolute; top: 2px; right: 5px; font: 600 0.7rem/1 var(--body); color: var(--muted); }
 button.slot { padding: 0; }
 .slot.n { border-color: var(--brass); }
 .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; color: var(--muted); min-height: 1.2em; }
@@ -234,6 +231,18 @@ const DEFAULT_SETTINGS = {
   board: 'steel', mode: 'x01', out: 'single',
   values: { 'steel-x01': 501, 'steel-race': 300, 'ring-x01': 100, 'ring-race': 100 },
   players: ['Spieler 1', 'Spieler 2'],
+  bot: 'off',
+};
+
+/* ---------- Computer opponent ----------
+   The bot picks a target like a real player would (T20, or the first dart of a checkout)
+   and its dart lands with a random scatter around that point. Spread is in board units:
+   the triple ring is about 18 units wide. */
+const BOT_LEVELS = {
+  easy: { name: 'Anfänger', spread: 62 },
+  pub: { name: 'Kneipe', spread: 40 },
+  good: { name: 'Fortgeschritten', spread: 25 },
+  pro: { name: 'Profi', spread: 14 },
 };
 
 /* ---------- Storage (best effort) ---------- */
@@ -362,7 +371,7 @@ function newGame(players) {
   G = {
     board: S.board, mode: S.mode, value,
     out: S.board === 'steel' && S.mode === 'x01' ? S.out : 'single',
-    players: players.map(n => ({ name: n, score: S.mode === 'x01' ? value : 0, darts: 0, points: 0, best: 0, legs: 0 })),
+    players: players.map(n => ({ name: n.name, bot: n.bot || null, score: S.mode === 'x01' ? value : 0, darts: 0, points: 0, best: 0, legs: 0 })),
     cur: 0, round: 1, turn: null, winner: null,
   };
   G.turn = freshTurn();
@@ -439,6 +448,8 @@ function doUndo() {
   if (!undo.length) return;
   clearTimeout(advanceTimer);
   G = JSON.parse(undo.pop());
+  // jump back over the computer's darts to the last dart a person entered
+  while (undo.length && G.players[G.cur].bot) G = JSON.parse(undo.pop());
   commit();
 }
 // Take back dart i of the current visit (and any darts after it) so it can be entered again
@@ -451,7 +462,7 @@ function rematch() {
   const legs = G.players.map(p => p.legs);
   // the loser of the last leg starts: rotate so the player after the winner begins
   const order = G.players.map((_, i) => (G.winner + 1 + i) % G.players.length);
-  const names = order.map(i => G.players[i].name);
+  const names = order.map(i => ({ name: G.players[i].name, bot: G.players[i].bot }));
   const prevLegs = order.map(i => legs[i]);
   S.board = G.board; S.mode = G.mode; S.values[key()] = G.value; if (G.board === 'steel' && G.mode === 'x01') S.out = G.out;
   newGame(names);
@@ -464,6 +475,7 @@ function avg(p) { return p.darts ? (p.points / p.darts * 3) : 0; }
 /* ---------- Rendering ---------- */
 function render() {
   if (view === 'game' && G) renderGame(); else renderSetup();
+  scheduleBot();
 }
 
 function renderSetup() {
@@ -523,7 +535,14 @@ function renderSetup() {
         ${S.players.length > 1 ? `<button class="ghost" data-a="shuffle">Reihenfolge mischen</button>` : ''}
       </div>
     </section>
-    <div class="solo">${ICON.bot}<div><b>Solo gegen den Computer</b><br>Ein Gegner mit Stärke von Kneipe bis Profi.</div><span class="tag">Kommt bald</span></div>
+    <section class="sec">
+      <h2><span class="bot-ico">${ICON.bot}</span>Gegen den Computer</h2>
+      <div class="chips">
+        <button class="chip sm" data-a="bot" data-v="off" aria-pressed="${S.bot === 'off'}">Aus</button>
+        ${Object.entries(BOT_LEVELS).map(([k, l]) => `<button class="chip sm" data-a="bot" data-v="${k}" aria-pressed="${S.bot === k}">${l.name}</button>`).join('')}
+      </div>
+      <p class="hint">${S.bot === 'off' ? 'Wähle eine Stärke, dann spielt der Computer als weiterer Spieler mit. Allein oder zu mehreren.' : 'Der Computer wirft nach euch. Er zielt wie ein echter Spieler und trifft je nach Stärke mal mehr, mal weniger.'}</p>
+    </section>
     <button class="primary" data-a="start">Spiel starten</button>
   </div></div>`;
 }
@@ -531,6 +550,8 @@ function renderSetup() {
 function renderGame() {
   const p = G.players[G.cur], t = G.turn;
   const x01 = G.mode === 'x01';
+  const botTurn = !!p.bot && !t.done;
+  const nextUp = G.players[(G.cur + 1) % G.players.length];
   const modeLabel = (G.board === 'ring' ? 'Ringscheibe · ' : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : ' · genau auf 0') : 'Bis ' + G.value);
   const left = 3 - t.darts.length;
   let co = null;
@@ -549,31 +570,31 @@ function renderGame() {
     </div>
     <div class="strip" id="strip">
       ${G.players.map((q, i) => `<div class="pcard ${i === G.cur ? 'on' : ''}" ${i === G.cur ? 'id="cur-card"' : ''}>
-        <span class="nm">${esc(q.name)}${q.legs ? ' · ' + q.legs + (q.legs === 1 ? ' Leg' : ' Legs') : ''}</span>
+        <span class="nm">${q.bot ? '<span class="ai">KI</span>' + esc(BOT_LEVELS[q.bot].name) : esc(q.name)}${q.legs ? ' · ' + q.legs + (q.legs === 1 ? ' Leg' : ' Legs') : ''}</span>
         <span class="sc num">${q.score}</span>
         <span class="av num">Ø ${avg(q).toFixed(1)}</span>
       </div>`).join('')}
     </div>
     <div class="visit">
-      <span class="who">${esc(p.name)} ist dran</span>
+      <span class="who">${p.bot ? 'Computer (' + esc(BOT_LEVELS[p.bot].name) + ') wirft …' : esc(p.name) + ' ist dran'}</span>
       <span class="big num">${p.score}</span>
       <div class="right">
-        <div class="slots">${[0, 1, 2].map(i => { const d = t.darts[i]; return d && G.winner === null ? `<button class="slot f num" data-a="redo" data-i="${i}" aria-label="Pfeil ${i + 1} (${esc(d.l)}) neu eingeben">${esc(d.l)}</button>` : `<span class="slot ${d ? 'f' : ''} ${!d && i === t.darts.length && !t.done ? 'n' : ''} num">${d ? esc(d.l) : ''}</span>`; }).join('')}</div>
+        <div class="slots">${[0, 1, 2].map(i => { const d = t.darts[i]; return d && G.winner === null && !p.bot ? `<button class="slot f num" data-a="redo" data-i="${i}" aria-label="Pfeil ${i + 1} (${esc(d.l)}) neu eingeben">${esc(d.l)}</button>` : `<span class="slot ${d ? 'f' : ''} ${!d && i === t.darts.length && !t.done ? 'n' : ''} num">${d ? esc(d.l) : ''}</span>`; }).join('')}</div>
         ${x01 ? '' : `<div class="progress"><i style="width:${pct}%"></i></div>`}
         <div class="meta"><span>${metaLeft}</span>${metaRight}</div>
       </div>
     </div>
-    <div class="board-wrap ${t.done ? 'locked' : ''}" id="board-wrap">
+    <div class="board-wrap ${t.done ? 'locked' : ''} ${botTurn ? 'botturn' : ''}" id="board-wrap">
       <svg id="board" viewBox="-200 -200 400 400" role="img" aria-label="Dartscheibe: tippe auf die Stelle, die du getroffen hast">
         ${G.board === 'steel' ? steelSVG() : ringSVG()}
         <g>${t.darts.filter(d => d.x !== undefined).map((d, i) => `<circle cx="${d.x}" cy="${d.y}" r="6" fill="#e3ab3e" stroke="#121d19" stroke-width="2.5"/><text x="${d.x}" y="${d.y}" font-size="7" font-weight="800" fill="#121d19" text-anchor="middle" dominant-baseline="central" font-family="Barlow, sans-serif">${i + 1}</text>`).join('')}</g>
       </svg>
-      ${t.done && G.winner === null ? `<div class="banner ${t.bust ? 'bust' : ''}">${t.bust ? 'Überworfen!' : 'Aufnahme: ' + sum}${t.bust && t.why ? '<small>' + t.why + '</small>' : ''}<small>Falsch getippt? Tippe auf den Pfeil oben.<br>Gleich ist ${esc(G.players[(G.cur + 1) % G.players.length].name)} dran</small></div>` : ''}
+      ${t.done && G.winner === null ? `<div class="banner ${t.bust ? 'bust' : ''}">${t.bust ? 'Überworfen!' : 'Aufnahme: ' + sum}${t.bust && t.why ? '<small>' + t.why + '</small>' : ''}<small>${p.bot ? '' : 'Falsch getippt? Tippe auf den Pfeil oben.<br>'}${nextUp.bot ? 'Gleich wirft der Computer' : 'Gleich ist ' + esc(nextUp.name) + ' dran'}</small></div>` : ''}
     </div>
     <div class="actions">
-      <button class="act" data-a="miss" ${G.winner !== null ? 'disabled' : ''}>Daneben</button>
+      <button class="act" data-a="miss" ${G.winner !== null || botTurn ? 'disabled' : ''}>Daneben</button>
       <button class="act" data-a="undo" ${undo.length ? '' : 'disabled'}>${ICON.undo}Zurück</button>
-      <button class="act next" data-a="next" ${G.winner !== null ? 'disabled' : ''}>Nächster${ICON.next}</button>
+      <button class="act next" data-a="next" ${G.winner !== null || botTurn ? 'disabled' : ''}>Nächster${ICON.next}</button>
     </div>
   </div>
   ${modal === 'quit' ? `<div class="overlay"><div class="dialog"><h3>Spiel verlassen?</h3><p>Der Spielstand bleibt gespeichert. Du kannst im Menü mit „Weiter“ fortsetzen.</p><div class="btns"><button data-a="stay">Weiterspielen</button><button class="yes" data-a="leave">Zum Menü</button></div></div></div>` : ''}
@@ -632,7 +653,7 @@ app.addEventListener('click', e => {
   const b = e.target.closest('[data-a]');
   if (b) return action(b.dataset.a, b);
   const svg = e.target.closest('#board');
-  if (svg && view === 'game') {
+  if (svg && view === 'game' && !(G.players[G.cur].bot && !G.turn.done)) {
     const r = svg.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width * 400 - 200;
     const y = (e.clientY - r.top) / r.height * 400 - 200;
@@ -642,6 +663,59 @@ app.addEventListener('click', e => {
     showPop(hit, e.clientX, e.clientY);
   }
 });
+let botTimer = null;
+function scheduleBot() {
+  clearTimeout(botTimer);
+  botTimer = null;
+  if (view !== 'game' || !G || G.winner !== null || modal) return;
+  if (!G.players[G.cur].bot || G.turn.done) return;
+  botTimer = setTimeout(botThrow, G.turn.darts.length ? 900 : 1200);
+}
+function gauss() {
+  let u = 0, v = 0;
+  while (!u) u = Math.random();
+  while (!v) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+// Board point at the middle of a field label such as 'T20', 'D16', '5', '25' or 'Bull'
+function aimAt(label) {
+  if (label === 'Bull') return [0, 0];
+  if (label === '25') return pt((R.bullIn + R.bullOut) / 2, 0);
+  const m = label[0] === 'T' ? 3 : label[0] === 'D' ? 2 : 1;
+  const n = +(m > 1 ? label.slice(1) : label);
+  const r = m === 3 ? (R.tIn + R.tOut) / 2 : m === 2 ? (R.dIn + R.dOut) / 2 : (R.tOut + R.dIn) / 2;
+  return pt(r, SEG.indexOf(n) * 18);
+}
+function botAim(p) {
+  const left = 3 - G.turn.darts.length;
+  if (G.board === 'ring') {
+    if (G.mode !== 'x01' || p.score >= 10) return [0, 0];
+    return [0, -((10 - p.score) * RING_STEP + RING_STEP / 2)];
+  }
+  if (G.mode === 'x01' && p.score <= 180) {
+    const dbl = G.out === 'double';
+    const plan = checkout(p.score, left, dbl) || checkout(p.score, 3, dbl);
+    if (plan) return aimAt(plan[0]);
+  }
+  return aimAt('T20');
+}
+function botThrow() {
+  botTimer = null;
+  if (view !== 'game' || !G || G.winner !== null || modal) return;
+  const p = G.players[G.cur];
+  if (!p.bot || G.turn.done) return;
+  const [ax, ay] = botAim(p);
+  const spread = BOT_LEVELS[p.bot].spread;
+  const x = ax + gauss() * spread, y = ay + gauss() * spread;
+  const hit = G.board === 'steel' ? hitSteel(x, y) : hitRing(x, y);
+  throwDart(hit, hit.miss ? null : [Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
+  const svg = document.getElementById('board');
+  if (svg) {
+    const r = svg.getBoundingClientRect();
+    const cx = Math.min(Math.max((x + 200) / 400, 0.05), 0.95), cy = Math.min(Math.max((y + 200) / 400, 0.1), 0.95);
+    showPop(hit, r.left + cx * r.width, r.top + cy * r.height);
+  }
+}
 function showPop(hit, cx, cy) {
   const wrap = document.getElementById('board-wrap');
   if (!wrap) return;
@@ -670,6 +744,7 @@ function action(a, el) {
     case 'board': S.board = el.dataset.v; persistSettings(); return render();
     case 'mode': S.mode = el.dataset.v; persistSettings(); return render();
     case 'out': S.out = el.dataset.v; persistSettings(); return render();
+    case 'bot': S.bot = el.dataset.v; persistSettings(); return render();
     case 'value': S.values[key()] = +el.dataset.v; persistSettings(); return render();
     case 'add': S.players.push('Spieler ' + (S.players.length + 1)); persistSettings(); render(); { const i = document.getElementById('player-' + (S.players.length - 1)); if (i) { i.focus(); i.select(); } } return;
     case 'del': S.players.splice(+el.dataset.i, 1); persistSettings(); return render();
@@ -679,7 +754,9 @@ function action(a, el) {
     case 'start': {
       const names = S.players.map((n, i) => n.trim() || 'Spieler ' + (i + 1));
       S.players = names; persistSettings();
-      newGame(names); view = 'game'; keepAwake(); return render();
+      const list = names.map(n => ({ name: n }));
+      if (BOT_LEVELS[S.bot]) list.push({ name: 'Computer', bot: S.bot });
+      newGame(list); view = 'game'; keepAwake(); return render();
     }
     case 'resume': view = 'game'; keepAwake(); return render();
     case 'miss': return throwDart(MISS, null);
