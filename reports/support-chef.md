@@ -1,58 +1,43 @@
 # Support-Chef Bericht
 
-**Datum:** 2026-10-22
+**Datum:** 2026-10-23
 
-## Was ist seit dem letzten Eintrag (2026-10-21) passiert?
+## Was ist seit dem letzten Eintrag (2026-10-22) passiert?
 
-Eine gute Nachricht zuerst: Der Urlaubsmodus-Link von der Lissabon-
-Demokarte (mein letzter Punkt 3) ist gefixt und ich habe es im Code
-nachgeprüft – `src/pages/MeineReisen.tsx:49` übergibt jetzt Ziel und
-Zeitraum direkt an `/urlaubsmodus`, die Seite zeigt die passende Demo-
-Reise statt ins Leere zu laufen. Der Fix funktioniert.
+Eine gute Nachricht zuerst: Mein Fund von gestern ist gefixt. Ich habe es
+im Code nachgeprüft – "Entwurf abschließen" in
+`src/pages/Reiseentwuerfe.tsx:357` wirkt nicht mehr wie eine
+Löschwarnung. Der Bestätigungs-Button ist jetzt teal statt rot
+(`className="bg-teal text-navy..."` statt `variant="destructive"`), und
+der Text spricht neutral von "nicht mehr bearbeiten" statt von "nicht
+rückgängig machen". Ein Abschluss fühlt sich jetzt auch so an, wie er
+gemeint ist: als Erfolg, nicht als Risiko.
 
-Die beiden Merge-Baustellen von gestern stehen aber unverändert offen –
-das habe ich heute erneut direkt im Code geprüft, nicht nur in den
+Die beiden bekannten Merge-Baustellen bleiben unverändert offen – auch
+das habe ich heute wieder direkt im Code geprüft, nicht nur in den
 Berichten:
 
 1. **PR #34 (`formatTime()`-Fix) weiterhin nicht live.**
    `src/lib/format.ts:23` zeigt bei einem kaputten Zeitstempel weiterhin
-   wörtlich "Invalid Date" statt eines Platzhalters. Der Fix liegt seit
-   nunmehr vier Tagen fertig vor, ist aber noch nicht gemergt.
+   wörtlich "Invalid Date" statt eines Platzhalters.
+2. **PR #38 ("+ Suchen"-Edit-Shortcut) weiterhin nicht live.**
+   `src/pages/Buchung.tsx:128` verlinkt ein leeres Feld immer noch fest
+   auf `/ki-chat`, statt gezielt in den passenden Chat-Schritt zu
+   springen.
 
-2. **PR #38 ("+ Suchen"-Edit-Shortcut) ebenfalls weiterhin nicht live.**
-   `src/pages/Buchung.tsx:128` verlinkt ein leeres Feld (Transport,
-   Reisedaten, Budget, Unterkunft) immer noch fest auf `/ki-chat`, statt
-   wie der Stift-Button bei bereits gesetzten Feldern gezielt in den
-   passenden Chat-Schritt zu springen. Wer heute ein leeres Feld über
-   "+ Suchen" ausfüllen will, merkt von dem fertigen Fix noch nichts.
-
-Neu aufgefallen, beim Durchsehen der Entwürfe-Seite:
-
-3. **"Entwurf abschließen" sieht aus wie eine Löschwarnung.**
-   `src/pages/Reiseentwuerfe.tsx:357` warnt beim Abschließen eines
-   Reiseentwurfs mit demselben Satz wie beim Löschen ("Das lässt sich
-   nicht rückgängig machen"), und der Bestätigungs-Button ("Ja,
-   abschließen", Zeile 363) ist genauso rot eingefärbt (`variant=
-   "destructive"`) wie der Löschen-Button direkt darüber im selben
-   File. Dabei ist das Abschließen eines Entwurfs ein positiver
-   Meilenstein – kein Verlust. Die rote Einfärbung und die dramatische
-   Formulierung könnten Nutzer:innen unnötig zögern lassen, bevor sie
-   ihre fertige Reiseplanung bestätigen.
+Darüber hinaus gab es in den letzten 1-2 Tagen keine Code-Änderungen,
+die die Nutzererfahrung betreffen – entsprechend sonst nichts
+Wesentliches Neues zu berichten.
 
 ## Meine Vorschläge
 
-1. **PR #34 (`formatTime()`-Fix) zeitnah mergen** – der Fund ist jetzt
-   seit vier Tagen bekannt und fertig vorbereitet, nur noch nicht live.
-2. **PR #38 ("+ Suchen"-Edit-Shortcut) ebenfalls zeitnah mergen** –
-   kleiner, klar abgegrenzter Fix mit direkter Auswirkung auf den
-   Buchungsablauf.
-3. **Lösch-Warnungen abstufen** je nach Reversibilität der Aktion
-   (unverändert betroffen: `Favoriten.tsx:128`, `Warenkorb.tsx:134`,
-   `Preisalarme.tsx:137`, `Aktivitaeten.tsx:118`,
-   `src/components/trip/EditMode.tsx:151`).
-4. **"Entwurf abschließen" positiv statt destruktiv gestalten**
-   (`Reiseentwuerfe.tsx:357` & `:363`) – neutraleren Text ohne
-   "rückgängig machen"-Drohung und einen normalen statt roten Button
-   verwenden, damit ein Abschluss sich auch wie ein Erfolg anfühlt.
+1. **PR #34 (`formatTime()`-Fix) zeitnah mergen** – der Fix liegt jetzt
+   seit über einer Woche fertig vor, nur noch nicht live.
+2. **PR #38 ("+ Suchen"-Edit-Shortcut) zeitnah mergen** – kleiner, klar
+   abgegrenzter Fix mit direkter Auswirkung auf den Buchungsablauf.
+3. **Lösch-Warnungen abstufen** je nach Reversibilität der Aktion –
+   weiterhin unverändert betroffen: `Favoriten.tsx:128`,
+   `Warenkorb.tsx:134`, `Preisalarme.tsx:137`, `Aktivitaeten.tsx:118`,
+   `src/components/trip/EditMode.tsx:151`.
 
-_Letztes Update: 2026-10-22_
+_Letztes Update: 2026-10-23_
