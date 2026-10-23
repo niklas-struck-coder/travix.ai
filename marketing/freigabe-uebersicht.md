@@ -1,10 +1,114 @@
-# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-22)
+# Freigabe-Übersicht — was liegt bereit, was blockiert (Stand 2026-10-23)
 
 Dieses Dokument sortiert die inzwischen neun fertigen Entwürfe in
 `marketing/`, damit die eigentliche Bremse (nicht neue Ideen, sondern
 Freigabe/Priorisierung durch Ni) leichter zu lösen ist. Erstellt/
 aktualisiert werden nur diese Übersicht bzw. neue Entwürfe, nichts wird
 gepostet oder verändert.
+
+## Update 2026-10-23: ein weiterer Tier-4-Kandidat (64: "Entwurf
+abschließen?"-Dialog von rotem Lösch-Muster auf ehrlichen Teal-Text
+umgestellt), Kandidatentopf von sieben auf **acht** — Achter-Schwelle
+erreicht, neunte Mini-Changelog-Ausgabe entworfen, alle vier Fragen
+weiterhin offen
+
+**Geprüft:** Die vier offenen Fragen unten zuerst gegen den aktuellen
+Stand geprüft — keine Änderung seit dem 22.10.: `status.md` (Update vom
+22.10., keine neue Notiz von Ni zu einer der vier Fragen), `ZEITPLAN.md`
+(6.2 "Beim Anbieter buchen"-Button weiterhin `[ ]`), kein
+`changelog`-Treffer in `src/`/`index.html` (Footer-Changelog-Seite
+weiterhin nicht gebaut), keine neuen Kanal-Links (`linkedin.com`/
+`instagram.com`/`tiktok.com` in `src/`/`index.html` weiterhin ohne
+Treffer). Alle vier Fragen bleiben offen.
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`0e2b067`, letzter eigener Commit vom 22.10.) war bereits vollständig in
+`origin/main` gemergt (Freigabe-Chef hat am 23.10. früh gemergt) — wie an
+den meisten Vortagen daher neu von aktuellem `origin/main` (`5ff2cef`)
+aus angelegt, statt auf den alten Branch-Stand aufzusetzen.
+
+`git log 0e2b067..origin/main` zeigt die seit dem letzten eigenen Commit
+zehn neue Commits. Davon neun ohne eigene Produkt-Codeänderung (ein
+Daily-Status-Update, Support-/IT-/Marketing-Chef-Berichte aus einer
+interaktiven Session mit Ni, vier IT-Chef-Auto-Läufe vom 22./23.10. mit
+"kein neuer sicherer Punkt gefunden", ein Freigabe-Chef-Merge-Log). Ein
+Commit ändert tatsächlich Produktcode:
+
+- **`e97e477` (22.10., vierzehnter IT-Chef-Lauf):** Der "Entwurf
+  abschließen?"-Dialog auf `/entwuerfe` (`Reiseentwuerfe.tsx`) nutzte
+  wortgleich denselben dramatischen Warntext wie der direkt darüber
+  liegende "Entwurf löschen?"-Dialog ("Das lässt sich nicht rückgängig
+  machen") und denselben roten `variant="destructive"`-Bestätigungs-
+  button — obwohl Abschließen (`finalizeDraft()`) nur den Status setzt,
+  keine Daten löscht und ein positiver Meilenstein ist. Im Code
+  verifiziert (`git show e97e477`): Dialogtext jetzt konkret statt
+  alarmierend ("wird als abgeschlossen markiert und lässt sich danach
+  nicht mehr bearbeiten. Alle Angaben bleiben erhalten..."),
+  Bestätigungs-Button auf dieselbe Teal-Farbe wie der direkt daneben
+  liegende "Planung fortsetzen"-Button umgestellt statt Rot — exakt das
+  in `MARKENDESIGN.md` festgehaltene Prinzip (Rot nie für reine
+  Warnungen, Teal für positive/normale Werte). Von Support-Chef gefunden
+  (`reports/support-chef.md`, 22.10., Fund 3), von IT-Chef gefixt,
+  `tsc -b`/Lint/Vitest (552 Tests)/Build laut Commit-Nachricht grün.
+  **64. Kandidat** — passt in dieselbe "eine Warnung sieht nur noch so
+  aus, wenn es wirklich eine ist"-Erzählung wie Kandidat 51 (Concierge
+  zeigt ehrlich "weiß ich nicht" ohne den aufgeregten Fehlerzustand) —
+  hier: ein positiver Abschluss sieht nicht mehr aus wie ein
+  unwiderruflicher Verlust.
+
+**Kandidatentopf wächst von sieben auf acht** (57-64) — damit ist die
+seit dem 06.09. etablierte Achter-Schwelle erreicht. Anders als an den
+Vortagen heute also **nicht** "weiter sammeln", sondern direkt die
+neunte Mini-Changelog-Ausgabe entworfen (siehe
+`marketing/mini-changelog-konzept.md`, unten) — alle acht Kandidaten
+(57-64) fließen dort ein, Kandidatentopf danach wieder leer, neue Funde
+sammeln sich ab jetzt für eine mögliche zehnte Ausgabe.
+
+**Warum sicher genug:**
+- Die Markdown-Ergänzung (Freigabe-Übersicht + neue Ausgabe) ist ein
+  reines Entwurfsdokument, kein Live-Vorgang — nichts gepostet,
+  versendet oder im Produkt verändert.
+- Keine erfundenen Kennzahlen: der neue Kandidat stammt aus einem
+  einzeln per `git show` und direkter Code-Prüfung verifizierten,
+  bereits in `main` gemergten Commit (`src/pages/Reiseentwuerfe.tsx`),
+  nicht aus einem Bericht übernommen; die Ausgabe selbst verwendet wie
+  Ausgabe 1-8 keine Follower-/Reichweiten-/Umsatzzahlen.
+- Klar genug beschrieben, keine offene Positionierungsfrage: wendet nur
+  die seit 20.08. etablierte Einordnungslogik und das seit 06.09.
+  geltende Achter-Schwellen-Kriterium an — kein künstliches Vorziehen,
+  die Schwelle wurde durch einen echten neuen Fund tatsächlich erreicht.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein neues eigenständiges Social-Content-Stück nur zu Kandidat 64 —
+  bleibt an die seit 20.08. geltende Selbstbeschränkung gebunden; fließt
+  stattdessen in die neunte Mini-Changelog-Ausgabe.
+
+**Umgesetzt:**
+- Dieses Update (vier Fragen gegengeprüft, zehn neue Commits geprüft,
+  einer mit Produkt-Code-Änderung per `git show` und im Code bewertet,
+  ein neuer Tier-4-Kandidat aufgenommen, Achter-Schwelle erreicht,
+  Kandidatentopf-Stand auf "acht, danach wieder leer" gesetzt,
+  Titel-Datum auf 23.10. gesetzt).
+- `marketing/mini-changelog-konzept.md` — neunte Ausgabe ergänzt (Fixes
+  vom 16.10. (spät) bis 22.10., Kandidaten 57-64), gleiches Format wie
+  Ausgabe 1-8.
+- Keine Checkbox in `ZEITPLAN.md` geändert für "Laufende
+  Content-Produktion" (Sprint 4) — fortlaufender Punkt, kein einmaliger
+  Abschluss; stattdessen ein Textzusatz zum heutigen Stand ergänzt (siehe
+  dort).
+
+**Geprüft:** Kein Produkt-Code durch diesen Lauf selbst geändert, daher
+kein eigener Build/Lint/Test nötig — reine Markdown-Ergänzung, der
+einzige bewertete Commit (`e97e477`) war bereits zuvor auf `main` grün
+gelaufen. `git status` nach Abschluss zeigt nur die erwarteten Änderungen
+(`marketing/freigabe-uebersicht.md`, `marketing/mini-changelog-konzept.md`,
+`ZEITPLAN.md`, der Log-Eintrag in `marketing-chef-auto-log.md`).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Update-Eintrag ist Teil desselben Commits).
 
 ## Update 2026-10-22: ein weiterer Tier-4-Kandidat (63: toter
 Urlaubsmodus-Link auf der MeineReisen-Demokarte gefixt), Kandidatentopf

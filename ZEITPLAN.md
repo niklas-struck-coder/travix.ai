@@ -3903,7 +3903,11 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Reiseentwurf, eine korrekte Tages-Anzeige bei langen Reisedauern sowie
   zuletzt mehrere zuvor nicht erkannte Transportmittel-Formulierungen im
   Chat) — weiterhin an dieselbe, noch unbeantwortete Freigabe-Frage
-  gebunden.
+  gebunden. Am 23.10. Ausgabe 9 ergänzt (acht neue Kandidaten seit
+  Ausgabe 8 gesammelt, u. a. ein ehrlicherer "Entwurf abschließen?"-
+  Dialog ohne rotes Lösch-Muster; siehe
+  `marketing/freigabe-uebersicht.md` für die volle Kandidatenliste
+  57-64) — weiterhin an dieselbe Freigabe-Frage gebunden.
 - [ ] Community/Warteliste aufbauen
 
 ### Sprint 5 (KW41-42, 6.-19. Okt)
