@@ -1123,3 +1123,69 @@ Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
 nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
 (siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
 jetzt für eine mögliche neunte Ausgabe.
+
+### Neunte Ausgabe — Entwurf für die Mini-Changelog-Seite
+
+*(Stand: Fixes vom 16.10. (spät) bis 22.10.2026, alle bereits gemergt in
+`main`. Ergänzt Ausgabe 1-8, ersetzt sie nicht.)*
+
+---
+
+### Was seither noch besser wurde
+
+**Eine veraltete Suche hängt nicht mehr in der Luft**
+- Hast du eine automatisch gestartete Flug- oder Unterkunftssuche nicht
+  abgewartet, sondern sofort per Freitext weitergeschrieben, blieb die
+  "Sucht ..."-Ladeanzeige danach manchmal dauerhaft stehen — das passiert
+  jetzt nicht mehr.
+- Bist du während einer laufenden Unterkunftssuche auf ein anderes
+  Bearbeiten-Feld gewechselt, konnte das verspätete Ergebnis der längst
+  verlassenen Suche trotzdem noch erscheinen — auch das passiert jetzt
+  nicht mehr.
+
+**Du siehst wirklich, was aktuell gilt — nicht einen veralteten Rest**
+- Hast du das Verkehrsmittel von Flug auf z. B. Zug gewechselt, zeigte
+  die Reise-Zusammenfassung danach manchmal noch die alte Flugverbindung
+  mit an — jetzt verschwindet sie zusammen mit der Umstellung.
+- Blieb der Tab über Mitternacht offen, zeigte der Kalender weiterhin den
+  Vortag als "heute" an, bis die Seite neu geladen wurde — jetzt stimmt
+  die Markierung jederzeit.
+
+**Du siehst wirklich, was du ausgewählt hast**
+- Die Chat-Zusammenfassungskarte zeigte nach einer Flugauswahl im Chat
+  oft nur das generische Wort "Flug" statt Airline, Strecke und Preis
+  deiner tatsächlichen Wahl — jetzt steht die konkrete Verbindung dort.
+
+**Die Travix-Figur zeigt ehrlich, was gerade passiert**
+- Schlug eine Flug- oder Unterkunftssuche fehl, wirkte der Avatar dabei
+  trotzdem weiterhin zufrieden statt den dafür vorgesehenen
+  Fehlerzustand zu zeigen — jetzt stimmt sein Ausdruck mit dem
+  tatsächlichen Ergebnis überein.
+
+**Ein Klick führt wirklich ans richtige Ziel**
+- Der "Urlaubsmodus aktivieren"-Link auf der Demo-Reiseübersicht führte
+  je nach vorherigem Verlauf manchmal auf eine leere oder unpassende
+  Seite statt zum tatsächlich kuratierten Ziel — jetzt landest du
+  zuverlässig dort, wo der Link es verspricht.
+
+**Eine Warnung sieht nur noch so aus, wenn es wirklich eine ist**
+- Der Dialog zum Abschließen eines Reiseentwurfs warnte bisher
+  wortgleich wie der Dialog zum endgültigen Löschen, inklusive demselben
+  roten Button — obwohl Abschließen nichts löscht, sondern ein positiver
+  Meilenstein ist (deine Angaben bleiben erhalten). Jetzt steht dort ein
+  konkreter, ruhiger Text in derselben Farbe wie andere positive
+  Aktionen.
+
+---
+
+*Wie in Ausgabe 1-8: keine neue Funktion dabei, nur Korrekturen an
+etwas, das vorher nicht ehrlich, nicht sorgfältig, nicht zuverlässig
+oder nicht klar genug war.*
+
+### Für Ni: keine neue Frage, nur ein Statusupdate
+
+Ausgabe 9 hängt an derselben vierten Frage wie Ausgabe 1-8 (Soll die
+Footer-Seite überhaupt gebaut werden?) — keine zusätzliche Entscheidung
+nötig. Der Tier-4-Kandidatentopf ist mit dieser Ausgabe wieder leer
+(siehe `marketing/freigabe-uebersicht.md`), neue Funde sammeln sich ab
+jetzt für eine mögliche zehnte Ausgabe.

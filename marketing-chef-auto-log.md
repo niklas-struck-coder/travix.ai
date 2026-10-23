@@ -4,6 +4,87 @@ Log der täglichen autonomen Cloud-Läufe auf Branch `marketing-chef/auto`.
 Jeder Eintrag: Datum, was entworfen wurde, warum dieser Punkt, ggf. warum
 nichts gemacht wurde.
 
+## 2026-10-23
+
+**Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
+dabei. Zuerst die Skill-Datei `.claude/skills/marketing-chef-eigen/SKILL.md`
+vollständig gelesen (Abschnitt "Autonomer Tagesmodus").
+
+**Repo-Zustand zu Beginn des Laufs:** `origin/marketing-chef/auto`
+(`0e2b067`, letzter eigener Commit vom 22.10.) war bereits vollständig in
+`origin/main` gemergt (Freigabe-Chef hat am 23.10. früh gemergt,
+`5ff2cef`) — wie an den meisten Vortagen daher neu von aktuellem
+`origin/main` aus angelegt, statt auf den alten Branch-Stand
+aufzusetzen.
+
+**Ausgewählter Punkt:** Sprint 4 aus `ZEITPLAN.md`, Marketing-Bereich —
+"Laufende Content-Produktion", konkret die etablierte Tier-4-
+Kandidaten-Pflege in `marketing/freigabe-uebersicht.md`.
+
+**Punktesuche:** Die vier offenen Freigabe-Fragen zuerst gegen den
+aktuellen Stand geprüft — keine Änderung seit dem 22.10. (`status.md`,
+`ZEITPLAN.md` 6.2, keine neuen Kanal-Links, kein `changelog`-Treffer).
+Danach `git log` von der letzten eigenen Vorlauf-Basis (`0e2b067`) gegen
+`origin/main` (`5ff2cef`) geprüft: zehn neue Commits, davon neun ohne
+eigene Produkt-Codeänderung. Ein Commit ändert tatsächlich Produktcode:
+`e97e477` (22.10., vierzehnter IT-Chef-Auto-Lauf) stellt den "Entwurf
+abschließen?"-Dialog auf `/entwuerfe` von wortgleichem Lösch-Warntext und
+rotem `variant="destructive"`-Button auf einen konkreten, ruhigen Text
+und dieselbe Teal-Farbe wie der benachbarte "Planung fortsetzen"-Button
+um — Abschließen löscht nichts, ist ein positiver Meilenstein, sollte
+also nicht wie ein unwiderruflicher Verlust wirken. Im Code verifiziert
+(`git show e97e477`, `src/pages/Reiseentwuerfe.tsx`). Geprüft, dass der
+Fund alle vier Sicherheitskriterien erfüllt: reine UI-Copy/Farbwahl ohne
+Auth-/Zahlungs-/Rechtsbezug, keine offene Architekturfrage, klar genug
+beschrieben (konkrete Datei/Zeilen im Support-Chef-Fund vom 22.10.),
+objektiv prüfbar und per `MARKENDESIGN.md` eindeutig entscheidbar (Teal
+für positive Werte, kein Rot für reine Warnungen). Als **64. Tier-4-
+Kandidat** aufgenommen — der Kandidatentopf wächst damit von sieben auf
+**acht** und erreicht die seit dem 06.09. etablierte Achter-Schwelle für
+eine neue Mini-Changelog-Ausgabe.
+
+**Warum sicher genug:** Ergebnis ist eine reine Markdown-Ergänzung
+(Freigabe-Übersicht + neue Mini-Changelog-Ausgabe), kein Live-Vorgang —
+nichts gepostet, versendet oder im Produkt verändert. Keine erfundenen
+Kennzahlen: der neue Kandidat stammt aus einem einzeln per `git show`
+verifizierten, bereits gemergten Commit, die neue Ausgabe nutzt wie
+Ausgabe 1-8 keine Follower-/Reichweiten-/Umsatzzahlen. Klar genug
+beschrieben, keine offene Positionierungsfrage: wendet nur die seit
+20.08. etablierte Einordnungslogik und das seit 06.09. geltende
+Achter-Schwellen-Kriterium an.
+
+**Andere Punkte geprüft und bewusst nicht gewählt:**
+- "Landingpage/Warteliste live" (Sprint 2), "Community/Warteliste
+  aufbauen" (Sprint 4), Testkampagnen/Launch-Kampagne (Sprint 6/7) —
+  weiterhin Live-Vorgänge bzw. an ungelöste Freigabe-Fragen gebunden.
+- Ein eigenständiges Social-Content-Stück nur zu Kandidat 64 — bleibt an
+  die seit 20.08. geltende Selbstbeschränkung gebunden, fließt
+  stattdessen in die neunte Mini-Changelog-Ausgabe.
+
+**Umgesetzt:**
+- `marketing/freigabe-uebersicht.md` — neues Update vom 23.10. (vierte
+  Fragen gegengeprüft, zehn neue Commits geprüft, ein neuer Tier-4-
+  Kandidat aufgenommen, Achter-Schwelle erreicht, Titel-Datum
+  aktualisiert).
+- `marketing/mini-changelog-konzept.md` — neunte Ausgabe ergänzt (Fixes
+  vom 16.10. (spät) bis 22.10.2026, Kandidaten 57-64 in sechs
+  Themengruppen, gleiches Format wie Ausgabe 1-8), Kandidatentopf danach
+  wieder leer.
+- `ZEITPLAN.md` (Sprint 4, Marketing) — Textzusatz zur neunten Ausgabe
+  ergänzt, keine Checkbox geändert (fortlaufender Punkt).
+
+**Geprüft:** Kein Produkt-Code durch diesen Lauf selbst geändert, daher
+kein eigener Build/Lint/Test nötig — reine Markdown-Ergänzung, der
+einzige bewertete Commit (`e97e477`) war bereits zuvor auf `main` grün
+gelaufen (laut dessen eigener Commit-Nachricht: `tsc -b`, Lint, 552
+Tests, Build). `git status` nach Abschluss zeigt nur die erwarteten
+Änderungen (`marketing/freigabe-uebersicht.md`,
+`marketing/mini-changelog-konzept.md`, `ZEITPLAN.md`, dieser
+Log-Eintrag).
+
+**Commit:** siehe Git-Historie auf `marketing-chef/auto` (dieser
+Log-Eintrag ist Teil desselben Commits).
+
 ## 2026-10-22
 
 **Vorbereitung:** Geplanter täglicher Cloud-Lauf, autonom ohne Ni live
