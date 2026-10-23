@@ -7507,3 +7507,52 @@ geprüft, nichts zu tun.
 **Info an Ni:** Kein Hinweis nötig — einziger inhaltlicher Fund war ein
 kleiner, klar abgegrenzter UI-Fix, alle Checks selbst grün, Merge glatt
 durchgelaufen.
+
+---
+
+## 2026-10-23 (später Lauf, autonom, ohne Ni live)
+
+Alle drei Auto-Branches gegen den aktuellen `main`-Stand (`5ff2cef`,
+bereits inkl. des früheren Merges heute) geprüft.
+
+**Prüfung `it-chef/auto`**: keine neuen Commits ggü. `main` (zeigt
+bereits auf denselben Stand) → nicht zu prüfen, nichts zu tun.
+
+**Prüfung `marketing-chef/auto`** (1 neuer Commit `0f10a3a`, reine
+Markdown-Änderung in `marketing/freigabe-uebersicht.md`,
+`marketing/mini-changelog-konzept.md`, `ZEITPLAN.md`,
+`marketing-chef-auto-log.md`): Kein Build/Lint/Test nötig, da kein
+Produktcode betroffen — stattdessen Inhalt selbst gegengelesen. Kern ist
+der 64. Tier-4-Kandidat: der im Diff zitierte Commit `e97e477` wurde per
+`git show` unabhängig nachgeprüft — Text und Code stimmen exakt mit der
+Beschreibung im Entwurf überein (Dialogtext von "Das lässt sich nicht
+rückgängig machen" auf einen konkreten, ruhigen Text geändert,
+Button-Farbe von `variant="destructive"` auf `bg-teal text-navy
+hover:bg-teal/90`). Keine erfundenen Kennzahlen (keine Follower-/
+Reichweiten-/Umsatzzahlen in der neuen Ausgabe 9), kein Hinweis auf
+tatsächliches Posten/Versenden — reiner Entwurf. Text vollständig und
+kohärent, keine bloße Stichpunkt-Skizze.
+→ **Passt, nach `main` gemergt** (`git merge origin/marketing-chef/auto`,
+saubere Zusammenführung ohne Konflikte mit dem zuvor gemergten
+`support-chef/auto`-Commit, da unterschiedliche Dateien betroffen).
+
+**Prüfung `support-chef/auto`** (1 neuer Commit `ccfa3e5`, reine
+Ergänzung in `support-chef-auto-log.md`, kein Code geändert): Stichprobe
+im Code durchgeführt — der im Bericht beschriebene Abgleich
+(`Reiseentwuerfe.tsx:355-369`, Dialogtext und Button-Klasse) stimmt
+exakt mit dem tatsächlichen Dateiinhalt überein, ebenso die zitierten
+Guard-Stellen (`draft.status !== 'finalized'` bei den drei
+Action-Buttons, "Details ansehen" via `Eye`-Button für abgeschlossene
+Entwürfe). Nichts wirkt erfunden.
+→ **Passt, nach `main` gemergt** (Fast-Forward `5ff2cef..ccfa3e5`).
+
+**Nach beiden Merges:** `git log` auf `main` zeigt beide neuen Commits
+plus einen Merge-Commit (da `marketing-chef/auto` nach dem
+`support-chef/auto`-Fast-Forward nicht mehr fast-forwardbar war, aber
+beide Branches unterschiedliche Dateien ändern — Merge ohne Konflikte).
+Push nach `origin/main` erfolgreich.
+
+**Info an Ni:** Kein Hinweis nötig — beide Branches reine
+Markdown-Entwürfe/Analyse ohne Code-Änderung, beide Funde im Code bzw.
+in der zitierten Historie unabhängig bestätigt, Merge glatt
+durchgelaufen.
