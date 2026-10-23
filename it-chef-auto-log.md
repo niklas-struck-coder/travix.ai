@@ -21767,3 +21767,45 @@ neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-23, 02:09 UTC (achtzehnter Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, dritter des 23.10., rund eine
+Stunde nach dem siebzehnten Lauf (`8eed4c4`, 01:10 UTC). `origin/main`
+unverändert bei `c8ba951` (keine neuen Commits seit dem siebzehnten
+Lauf), `reports/it-chef.md`/`reports/marketing-chef.md`/
+`reports/support-chef.md` unverändert vom 22.10. (keine neuen Funde der
+plattform-verwalteten Kanäle seit dem letzten Check). `it-chef/auto`
+liegt unverändert vier Commits vor `main` — direkt auf dem bestehenden
+`it-chef/auto`-Stand weitergearbeitet, kein frischer `main`-Merge nötig.
+
+**Punktesuche:** Da sich an `main` und den Berichten seit dem
+siebzehnten Lauf nichts geändert hat, wieder mit anderem Fokus als die
+Vorläufe gesucht statt nur zu wiederholen:
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gegengeprüft: alle
+  offenen Punkte (Backend-Entscheidung, KI-Integration, Buchungsflow,
+  Rechtliches, Marketing/Support-Aufgaben) bleiben aus denselben, seit
+  Lauf elf dokumentierten Gründen blockiert — keine neue Information.
+- Gezielt nach bisher nicht geprüften Fehlerklassen gesucht:
+  `dangerouslySetInnerHTML` (kein Treffer im ganzen `src`-Baum, kein
+  XSS-Risiko), `toLocaleString()`/`toLocaleDateString()`/
+  `toLocaleTimeString()` ohne explizites Locale-Argument außerhalb von
+  Tests (kein Treffer — alle Datums-/Zeit-/Zahlenformatierungen laufen
+  über `src/lib/format.ts` mit explizitem `'de-DE'`), `parseInt(...)`
+  ohne Radix außerhalb von Tests (kein Treffer), `<img>`-Tags ohne
+  `alt`-Attribut (kein Treffer), `href="#"` als Platzhalter-Link (kein
+  Treffer) — durchgehend sauber, kein neuer Fund.
+- Regressionsschutz-Baseline frisch durchlaufen (nicht nur wiederholt
+  behauptet): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run
+  lint` (0 Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle
+  grün — identisch zum siebzehnten Lauf, da sich seitdem nichts am Code
+  geändert hat).
+
+**Ergebnis:** Kein Punkt heute (dritter Lauf) autonom umgesetzt, kein
+Produktcode geändert — alle verbleibenden offenen Punkte verfehlen
+weiterhin mindestens eines der vier Sicherheitskriterien, und die neu
+geprüften Fehlerklassen ergaben keinen Fund. Regressionsschutz-Baseline
+unverändert grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
