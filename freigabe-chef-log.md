@@ -7465,3 +7465,45 @@ bestätigt. Erwähnenswert nur als Randnotiz: der Freigabe-Chef-Log auf
 immer schon ok, nur der Log-Eintrag landete auf einem Nebenbranch statt
 auf `main`) — jetzt nachgetragen, kein wiederholtes Muster über mehrere
 Tage hinweg beobachtet, daher kein Grund zur Sorge, nur zur Information.
+
+---
+
+## 2026-10-23 (früher Lauf, zwischen 0 und 4 Uhr)
+
+**Prüfung `it-chef/auto`** (5 neue Commits ggü. `main`, davon 4 reine
+"kein neuer sicherer Punkt gefunden"-Log-Einträge ohne Code-Änderung
+(16./17./18. Lauf) und ein Commit mit echter Änderung: 14. Lauf,
+22.10., behebt den von `reports/support-chef.md`/`support-chef-auto-log.md`
+gemeldeten Fund, dass der "Entwurf abschließen?"-Dialog in
+`Reiseentwuerfe.tsx` wortgleich wie der "Entwurf löschen?"-Dialog warnte
+("Das lässt sich nicht rückgängig machen") und denselben roten
+`variant="destructive"`-Button nutzte, obwohl Abschließen keine Löschung
+ist). Unabhängig selbst verifiziert, nicht nur dem Log vertraut:
+- `npm install` (node_modules war vorhanden, keine Änderungen nötig)
+- `npx tsc -b` → 0 Fehler
+- `npx eslint .` → 0 Fehler
+- `npx vitest run` → 73 Testdateien / 552 Tests, alle grün
+
+Diff selbst gegengelesen: betrifft ausschließlich `Reiseentwuerfe.tsx`
+(Dialogtext + Button-Farbe `bg-teal text-navy hover:bg-teal/90` statt
+`variant="destructive"`) und die beiden dazu passend angepassten
+Regex-Assertions in `Reiseentwuerfe.test.tsx` — kein Scope-Creep, kein
+Auth/Zahlungen/rechtliche Texte berührt. Gegen `MARKENDESIGN.md:83-87`
+geprüft: Teal ist dort explizit für "positive/normale Werte" vorgesehen,
+Rot für reine Warnungen wird dort ausdrücklich abgelehnt — Änderung
+passt zur eigenen Design-Richtlinie.
+→ **Passt, nach `main` gemergt** (Fast-Forward `c8ba951..2f24e6f`,
+Push erfolgreich). `it-chef/auto` zeigt danach bereits auf denselben
+Stand wie `main` (nichts weiter zu aktualisieren).
+
+**Prüfung `marketing-chef/auto`**: keine neuen Commits ggü. `main` (wie
+in der Aufgabe vorgesehen für diesen frühen Lauf — läuft erst ab 6 Uhr
+neu an, separater späterer Freigabe-Chef-Lauf deckt das ab) → nicht
+geprüft, nichts zu tun.
+
+**Prüfung `support-chef/auto`**: ebenfalls keine neuen Commits ggü.
+`main` → nicht geprüft, nichts zu tun.
+
+**Info an Ni:** Kein Hinweis nötig — einziger inhaltlicher Fund war ein
+kleiner, klar abgegrenzter UI-Fix, alle Checks selbst grün, Merge glatt
+durchgelaufen.
