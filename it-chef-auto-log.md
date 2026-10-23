@@ -21866,3 +21866,56 @@ Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-23, 23:14 UTC (zwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, fünfter des 23.10., gut eine
+Stunde nach dem neunzehnten Lauf (`8bae3cc`, 22:08 UTC). `origin/main`
+seitdem unverändert bei `fe1300e`. `it-chef/auto` war bereits wieder
+vollständig in `main` gemergt (keine eigenen Commits außer dem
+neunzehnten Laufs-Logeintrag, der selbst schon in `main` steckt) —
+Branch deshalb erneut frisch von `origin/main` neu angelegt.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegengeprüft: alle offenen Punkte (inkl. 8.13 Unit-Tests für
+`calculateCosts`/Schema-Validierung — beide Dateien existieren im Code
+noch gar nicht, da 6.7/4.1 selbst noch offen sind) bleiben aus denselben,
+seit Lauf elf dokumentierten Gründen blockiert. Die drei
+plattform-verwalteten Berichte (`reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md`, alle 23.10.)
+melden ebenfalls keinen neuen Fund, der alle vier Sicherheitskriterien
+erfüllt; PR #34/#38 bleiben unverändert offen (deren Merge ist
+Freigabe-Chefs Aufgabe, nicht diese hier).
+
+Zusätzlich zur eigenen Prüfung einen eigens dafür beauftragten,
+unabhängigen Explore-Agenten mit frischem Kontext losgeschickt: Auftrag
+war ein vollständiges, zeilenweises (nicht nur gegrepptes) Lesen von 24
+bisher in keinem Bericht einzeln als gelesen genannten Dateien
+(`EditMode.tsx`, `ChecklistPanel.tsx`, `Reiseentwuerfe.tsx`,
+`Warenkorb.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+`Aktivitaeten.tsx`, `Profil.tsx`, `Einstellungen.tsx`, `Buchung.tsx`,
+`Dashboard.tsx`, `Kalender.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+`routes.tsx`, `AppShell.tsx`, `Sidebar.tsx`, `MobileNav.tsx`,
+`FlightCard.tsx`, `HotelCard.tsx`, `TrainCard.tsx`, `TrainResults.tsx`,
+`Flugsuche.tsx`, `Hotelsuche.tsx`), mit Fokus auf State-Updates,
+Listen-Keys, Edge-Cases in Bedingungen und Barrierefreiheit bei
+nicht-shadcn-Interaktionselementen. Ergebnis: ein einziger index-basierter
+Listen-Key (`FlightCard.tsx:31`, `offer.slices`) ohne reale
+Reconciliation-Konsequenz (feste 1-2-Element-Liste, nie umsortiert/
+gefiltert während gemountet) — kein echter Fund. Der bereits mehrfach
+dokumentierte unverdrahtete `TrainCard`/`TrainResults`-Zustand (inkl.
+der Tatsache, dass `TrainResults.tsx` `selected` nie an `TrainCard`
+durchreicht) bewusst nicht als neuer Fund gewertet: beide sind toter,
+nicht erreichbarer Code, siehe `reports/it-chef.md`-Vorschlag 4.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73
+Testdateien, 552 Tests, alle grün).
+
+**Ergebnis:** Kein Punkt heute (fünfter Lauf) autonom umgesetzt, kein
+Produktcode geändert — weder die eigene Suche noch der unabhängige
+Explore-Agent fanden einen Fund, der alle vier Sicherheitskriterien
+erfüllt. Regressionsschutz-Baseline unverändert grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
