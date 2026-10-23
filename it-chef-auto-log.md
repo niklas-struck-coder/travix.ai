@@ -21648,3 +21648,50 @@ sich seitdem nichts am Code geändert hat).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-23, 00:11 UTC (sechzehnter Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, erster des 23.10. `origin/main`
+unverändert bei `c8ba951` (keine neuen Commits seit dem fünfzehnten
+Lauf), `it-chef/auto` liegt unverändert zwei Commits vor `main`
+(`558bb87`, 23:12 UTC 22.10.) — direkt auf dem bestehenden
+`it-chef/auto`-Stand weitergearbeitet, kein frischer `main`-Merge nötig.
+(Hinweis zur eigenen Vorgehensweise: dieser Lauf hat den Branch zunächst
+versehentlich frisch von `origin/main` neu angelegt, weil der erste
+`git fetch` nur `main` holte und `it-chef/auto` dadurch lokal unsichtbar
+blieb; vor dem Push bemerkt, `origin/it-chef/auto` gezielt nachgeholt und
+der lokale Branch darauf zurückgesetzt, bevor irgendetwas gepusht wurde
+— kein Datenverlust, kein fehlgeleiteter Push.)
+
+**Punktesuche:** Da sich an `main` und `it-chef/auto` seit dem
+fünfzehnten Lauf nichts geändert hat, eigenständig neu geprüft statt nur
+wiederholt:
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` durchgesehen: alle
+  offenen Punkte bleiben aus denselben, in Läufen elf-fünfzehn
+  dokumentierten Gründen blockiert (offene Backend-/Architektur-
+  entscheidung, fehlende Inhalte wie FAQ/Rewards-Regeln, oder fehlende
+  Datenfelder). 8.13 im Detail gegengeprüft: `calculateProgress.ts` und
+  `checklistRules.ts` haben bereits vollständige Testdateien, eine
+  `calculateCosts.ts` existiert weiterhin nicht (`cartTotals.ts`
+  `calculateCartTotal()` kommt dem am nächsten, ebenfalls bereits
+  getestet) und es gibt projektweit keine Schema-Validierungs-Schicht
+  (kein `zod`/Joi-Import) — unverändert blockiert.
+- Codeweite Suche nach `TODO`/`FIXME`, `console.log`/`console.debug`/
+  `console.warn` außerhalb Testdateien, leeren `catch`-Blöcken, `as any`
+  und ungeschütztem `JSON.parse`: keine neuen Treffer, identisch zu den
+  Vorläufen.
+- Den Fix aus dem vierzehnten Lauf (`Reiseentwuerfe.tsx`, Abschließen-
+  Dialog auf Teal umgestellt) gegengeprüft: `className="bg-teal
+  text-navy hover:bg-teal/90"` entspricht exakt demselben Muster, das
+  bereits in über 20 anderen Stellen im Code verwendet wird (`Home.tsx`,
+  `FlightCard.tsx`, `ChatInput.tsx` u.a.) — korrekt angewendet, keine
+  Inkonsistenz zum Design-System.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt, kein Produktcode
+geändert — alle verbleibenden offenen Punkte verfehlen weiterhin
+mindestens eines der vier Sicherheitskriterien. Regressionsschutz-
+Baseline unverändert grün: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
