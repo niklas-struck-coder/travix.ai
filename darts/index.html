@@ -64,6 +64,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); out
 .brand svg { width: 44px; height: 44px; flex: none; }
 .brand h1 { font: 900 2.6rem/0.9 var(--display); letter-spacing: 0.02em; margin: 0; text-transform: uppercase; }
 .brand p { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
+.langs { display: flex; gap: 6px; justify-content: flex-end; }
+.langs button { border: 1.5px solid var(--line); background: var(--felt-2); border-radius: 999px; padding: 6px 12px; font: 700 0.85rem/1 var(--body); color: var(--muted); }
+.langs button[aria-pressed="true"] { border-color: var(--brass); color: var(--ink); background: var(--felt-3); }
 .resume { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--felt-3); border: 1px solid var(--brass); border-radius: 12px; padding: 12px 14px; }
 .resume span { color: var(--muted); font-size: 0.9rem; }
 .resume strong { color: var(--ink); display: block; font-size: 1rem; }
@@ -89,7 +92,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--brass); out
 }
 .chip[aria-pressed="true"] { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); }
 .chip-input {
-  width: 92px; border: 1.5px solid var(--line); background: var(--felt); color: var(--ink);
+  width: 112px; border: 1.5px solid var(--line); background: var(--felt); color: var(--ink);
   border-radius: 999px; padding: 8px 12px; font: 800 1.25rem/1 var(--display); text-align: center;
 }
 .players { display: flex; flex-direction: column; gap: 8px; }
@@ -230,7 +233,7 @@ const PRESETS = {
 const DEFAULT_SETTINGS = {
   board: 'steel', mode: 'x01', out: 'single',
   values: { 'steel-x01': 501, 'steel-race': 300, 'ring-x01': 100, 'ring-race': 100 },
-  players: ['Spieler 1', 'Spieler 2'],
+  players: null,
   bot: 'off',
 };
 
@@ -245,13 +248,124 @@ const BOT_LEVELS = {
   pro: { name: 'Profi', spread: 14 },
 };
 
+/* ---------- Languages ---------- */
+const LANGS = { de: 'Deutsch', en: 'English', pl: 'Polski' };
+const STR = {
+  de: {
+    tagline: 'Tippen, wo der Pfeil steckt. Die App rechnet.', language: 'Sprache',
+    running: 'Laufendes Spiel', round: 'Runde {n}', resume: 'Weiter',
+    board: 'Scheibe', steel: 'Turnierscheibe', steelSub: '20 Felder, Doppel, Triple, Bull', ring: 'Ringscheibe', ringSub: 'Rückseite: Ringe 10 bis 1',
+    gameType: 'Spielart', down: 'Runterspielen', downSub: 'Von {n} auf genau 0', up: 'Hochspielen', upSub: 'Wer zuerst das Ziel erreicht',
+    startPts: 'Startpunkte', targetPts: 'Zielpunkte', custom: 'Eigene', customAria: 'Eigene Punktzahl',
+    hint501: 'Im Turnier wird 501 gespielt, für kürzere Runden 301. Jeder hat pro Aufnahme 3 Pfeile.',
+    hintRace: 'Alle Treffer werden addiert. Wer die Zielpunkte zuerst erreicht oder überschreitet, gewinnt.',
+    finish: 'Ausmachen', exact: 'Genau auf 0', exactSub: 'Egal mit welchem Feld. Wer 0 erreicht, gewinnt.',
+    dbl: 'Profi: Double Out', dblSub: 'Letzter Pfeil muss im äußeren Doppelring oder Bull landen',
+    bustHint: 'Wer unter 0 kommt, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.',
+    bustHintDbl: 'Wer unter 0 kommt, auf 1 landet oder ohne Doppel auf 0 kommt, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.',
+    players: 'Spieler', playerN: 'Spieler {n}', nameAria: 'Name Spieler {n}', remove: 'Spieler entfernen', add: '+ Spieler hinzufügen', shuffle: 'Reihenfolge mischen',
+    vsBot: 'Gegen den Computer', off: 'Aus', lvl_easy: 'Anfänger', lvl_pub: 'Kneipe', lvl_good: 'Fortgeschritten', lvl_pro: 'Profi',
+    botOff: 'Wähle eine Stärke, dann spielt der Computer als weiterer Spieler mit. Allein oder zu mehreren.',
+    botOn: 'Der Computer wirft nach euch. Er zielt wie ein echter Spieler und trifft je nach Stärke mal mehr, mal weniger.',
+    start: 'Spiel starten', computer: 'Computer', ai: 'KI',
+    modeRing: 'Ringe · ', modeExact: ' · genau auf 0', modeTo: 'Bis {n}',
+    bustShort: 'Überworfen – 0 Punkte', finishWith: 'Ausmachen mit', visit: 'Aufnahme', toGo: 'noch {n}',
+    quitAria: 'Spiel beenden', botThrows: 'Computer ({lvl}) wirft …', yourTurn: '{name} ist dran', redoAria: 'Pfeil {n} ({l}) neu eingeben',
+    boardAria: 'Dartscheibe: tippe auf die Stelle, die du getroffen hast',
+    bust: 'Überworfen!', visitTotal: 'Aufnahme: {n}',
+    why_over: 'Zu viele Punkte geworfen', why_one: 'Rest 1 kann man nicht mit einem Doppel ausmachen', why_dbl: 'Bei Double Out muss der letzte Pfeil ein Doppel oder Bull sein',
+    wrongTap: 'Falsch getippt? Tippe auf den Pfeil oben.', nextBot: 'Gleich wirft der Computer', nextName: 'Gleich ist {name} dran',
+    miss: 'Daneben', undo: 'Zurück', next: 'Nächster',
+    leaveQ: 'Spiel verlassen?', leaveP: 'Der Spielstand bleibt gespeichert. Du kannst im Menü mit „Weiter“ fortsetzen.', keepPlaying: 'Weiterspielen', toMenu: 'Zum Menü',
+    wins: '{name} gewinnt!', winX01: 'Ausgemacht mit {l} nach {n} {darts}.', winRace: '{v} Punkte erreicht nach {n} {darts}.',
+    thPlayer: 'Spieler', thRest: 'Rest', thPts: 'Punkte', thAvg: 'Ø 3 Pfeile', thBest: 'Beste',
+    undoLast: 'Letzten Wurf zurück', rematch: 'Revanche', newSetup: 'Neues Spiel einstellen',
+  },
+  en: {
+    tagline: 'Tap where the dart landed. The app does the maths.', language: 'Language',
+    running: 'Game in progress', round: 'Round {n}', resume: 'Resume',
+    board: 'Board', steel: 'Classic board', steelSub: '20 segments, doubles, trebles, bull', ring: 'Ring board', ringSub: 'Back side: rings 10 to 1',
+    gameType: 'Game', down: 'Count down', downSub: 'From {n} to exactly 0', up: 'Count up', upSub: 'First to reach the target wins',
+    startPts: 'Starting score', targetPts: 'Target score', custom: 'Custom', customAria: 'Custom score',
+    hint501: 'Tournaments play 501. For a shorter game, pick 301. Everyone throws 3 darts per turn.',
+    hintRace: 'All hits are added up. The first player to reach or pass the target wins.',
+    finish: 'Finish', exact: 'Exactly 0', exactSub: 'Any segment counts. Reach 0 and you win.',
+    dbl: 'Pro: Double out', dblSub: 'The last dart must hit the outer double ring or the bull',
+    bustHint: 'Go below 0 and you bust: that turn scores nothing.',
+    bustHintDbl: 'Go below 0, leave 1, or reach 0 without a double and you bust: that turn scores nothing.',
+    players: 'Players', playerN: 'Player {n}', nameAria: 'Name of player {n}', remove: 'Remove player', add: '+ Add player', shuffle: 'Shuffle order',
+    vsBot: 'Play the computer', off: 'Off', lvl_easy: 'Beginner', lvl_pub: 'Pub', lvl_good: 'Advanced', lvl_pro: 'Pro',
+    botOff: 'Pick a level and the computer joins as an extra player, whether you play alone or in a group.',
+    botOn: 'The computer throws after you. It aims like a real player and hits more or less often depending on its level.',
+    start: 'Start game', computer: 'Computer', ai: 'AI',
+    modeRing: 'Rings · ', modeExact: ' · exactly 0', modeTo: 'To {n}',
+    bustShort: 'Bust – no score', finishWith: 'Finish with', visit: 'Turn', toGo: '{n} to go',
+    quitAria: 'End game', botThrows: 'Computer ({lvl}) is throwing …', yourTurn: '{name} to throw', redoAria: 'Re-enter dart {n} ({l})',
+    boardAria: 'Dartboard: tap the spot you hit',
+    bust: 'Bust!', visitTotal: 'Turn: {n}',
+    why_over: 'Too many points', why_one: 'You can’t finish on 1 with a double', why_dbl: 'With double out, the last dart must be a double or the bull',
+    wrongTap: 'Wrong tap? Tap the dart above.', nextBot: 'The computer throws next', nextName: '{name} is up next',
+    miss: 'Miss', undo: 'Undo', next: 'Next',
+    leaveQ: 'Leave the game?', leaveP: 'Your game is saved. Tap “Resume” in the menu to carry on.', keepPlaying: 'Keep playing', toMenu: 'Menu',
+    wins: '{name} wins!', winX01: 'Finished on {l} after {n} {darts}.', winRace: 'Reached {v} points after {n} {darts}.',
+    thPlayer: 'Player', thRest: 'Left', thPts: 'Points', thAvg: '3-dart avg', thBest: 'Best',
+    undoLast: 'Undo last dart', rematch: 'Rematch', newSetup: 'Set up new game',
+  },
+  pl: {
+    tagline: 'Dotknij miejsca, w które wbiła się lotka. Aplikacja liczy za ciebie.', language: 'Język',
+    running: 'Trwająca gra', round: 'Runda {n}', resume: 'Wznów',
+    board: 'Tarcza', steel: 'Tarcza turniejowa', steelSub: '20 pól, podwójne, potrójne, bull', ring: 'Tarcza z pierścieniami', ringSub: 'Tył tarczy: pierścienie od 10 do 1',
+    gameType: 'Rodzaj gry', down: 'Odliczanie', downSub: 'Od {n} do dokładnie 0', up: 'Zbieranie punktów', upSub: 'Wygrywa, kto pierwszy osiągnie cel',
+    startPts: 'Punkty startowe', targetPts: 'Cel punktowy', custom: 'Własne', customAria: 'Własna liczba punktów',
+    hint501: 'W turniejach gra się 501, krótsza gra to 301. Każdy rzuca 3 lotkami w kolejce.',
+    hintRace: 'Wszystkie trafienia się sumują. Wygrywa, kto pierwszy osiągnie lub przekroczy cel.',
+    finish: 'Zakończenie', exact: 'Dokładnie 0', exactSub: 'Dowolne pole. Kto dojdzie do 0, wygrywa.',
+    dbl: 'Pro: Double out', dblSub: 'Ostatnia lotka musi trafić w zewnętrzny pierścień podwójny lub w bull',
+    bustHint: 'Kto zejdzie poniżej 0, ma przerzut: punkty z tej kolejki się nie liczą.',
+    bustHintDbl: 'Kto zejdzie poniżej 0, zostawi 1 albo dojdzie do 0 bez podwójnego, ma przerzut: punkty z tej kolejki się nie liczą.',
+    players: 'Gracze', playerN: 'Gracz {n}', nameAria: 'Imię gracza {n}', remove: 'Usuń gracza', add: '+ Dodaj gracza', shuffle: 'Losuj kolejność',
+    vsBot: 'Gra z komputerem', off: 'Wył.', lvl_easy: 'Początkujący', lvl_pub: 'Pub', lvl_good: 'Zaawansowany', lvl_pro: 'Zawodowiec',
+    botOff: 'Wybierz poziom, a komputer dołączy jako dodatkowy gracz. Sam lub w grupie.',
+    botOn: 'Komputer rzuca po was. Celuje jak prawdziwy gracz i trafia częściej lub rzadziej, zależnie od poziomu.',
+    start: 'Rozpocznij grę', computer: 'Komputer', ai: 'AI',
+    modeRing: 'Pierścienie · ', modeExact: ' · dokładnie 0', modeTo: 'Do {n}',
+    bustShort: 'Przerzut – 0 punktów', finishWith: 'Zakończ przez', visit: 'Kolejka', toGo: 'zostało {n}',
+    quitAria: 'Zakończ grę', botThrows: 'Komputer ({lvl}) rzuca …', yourTurn: 'Rzuca: {name}', redoAria: 'Wpisz ponownie lotkę {n} ({l})',
+    boardAria: 'Tarcza: dotknij miejsca, w które trafiłeś',
+    bust: 'Przerzut!', visitTotal: 'Kolejka: {n}',
+    why_over: 'Za dużo punktów', why_one: 'Nie da się zakończyć 1 podwójnym', why_dbl: 'Przy double out ostatnia lotka musi trafić w podwójne lub bull',
+    wrongTap: 'Pomyłka? Dotknij lotki powyżej.', nextBot: 'Teraz rzuca komputer', nextName: 'Następny: {name}',
+    miss: 'Pudło', undo: 'Cofnij', next: 'Dalej',
+    leaveQ: 'Wyjść z gry?', leaveP: 'Stan gry zostaje zapisany. W menu dotknij „Wznów”, aby grać dalej.', keepPlaying: 'Graj dalej', toMenu: 'Do menu',
+    wins: '{name} wygrywa!', winX01: 'Zakończone na {l} po {n} {darts}.', winRace: '{v} punktów po {n} {darts}.',
+    thPlayer: 'Gracz', thRest: 'Zostało', thPts: 'Punkty', thAvg: 'Śr. 3 lotek', thBest: 'Najlepsza',
+    undoLast: 'Cofnij ostatni rzut', rematch: 'Rewanż', newSetup: 'Ustaw nową grę',
+  },
+};
+// "after n darts" and "n legs" need real plural forms per language
+function dartsWord(n) {
+  if (lang === 'de') return n === 1 ? 'Pfeil' : 'Pfeilen';
+  if (lang === 'en') return n === 1 ? 'dart' : 'darts';
+  return n === 1 ? 'lotce' : 'lotkach';
+}
+function legsWord(n) {
+  if (lang === 'pl') { const d = n % 10, h = n % 100; return n === 1 ? 'leg' : d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'legi' : 'legów'; }
+  return n === 1 ? 'Leg' : 'Legs';
+}
+function t(k, vars) {
+  let str = (STR[lang] && STR[lang][k]) || STR.de[k] || k;
+  if (vars) for (const v in vars) str = str.split('{' + v + '}').join(vars[v]);
+  return str;
+}
+const pname = q => q.bot ? t('computer') : q.name;
+
 /* ---------- Storage (best effort) ---------- */
 function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
 function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
 
 let S = Object.assign({}, DEFAULT_SETTINGS, load('oche.settings', {}));
 S.values = Object.assign({}, DEFAULT_SETTINGS.values, S.values);
-if (!Array.isArray(S.players) || !S.players.length) S.players = DEFAULT_SETTINGS.players.slice();
+if (!Array.isArray(S.players) || !S.players.length) S.players = null;
 let G = load('oche.game', null);
 let undo = load('oche.undo', []);
 // v2: reaching exactly 0 wins by default; switch older saved settings and games over once
@@ -260,6 +374,10 @@ if (!S.v2) {
   if (G && G.out === 'double') { G.out = 'single'; undo = []; }
 }
 function persistSettingsEarly() { save('oche.settings', S); }
+function detectLang() { const l = (navigator.language || 'de').slice(0, 2).toLowerCase(); return LANGS[l] ? l : 'en'; }
+let lang = LANGS[S.lang] ? S.lang : detectLang();
+document.documentElement.lang = lang;
+if (!S.players) S.players = [t('playerN', { n: 1 }), t('playerN', { n: 2 })];
 let view = 'setup';
 let advanceTimer = null;
 let modal = null; // 'quit' | null
@@ -398,7 +516,7 @@ function throwDart(hit, at) {
       p.points -= t.start - p.score;
       p.score = t.start;
       t.bust = true;
-      t.why = ns < 0 ? 'Zu viele Punkte geworfen' : ns === 1 ? 'Rest 1 kann man nicht mit einem Doppel ausmachen' : 'Bei Double Out muss der letzte Pfeil ein Doppel oder Bull sein';
+      t.why = ns < 0 ? 'over' : ns === 1 ? 'one' : 'dbl';
       return endTurn();
     }
     p.score = ns; p.points += hit.v;
@@ -486,118 +604,122 @@ function renderSetup() {
   const steelX01 = S.board === 'steel' && S.mode === 'x01';
   app.innerHTML = `
   <div class="screen setup"><div class="setup-inner">
-    <div class="brand">${miniSteel}<div><h1>Oche Darts</h1><p>Tippen, wo der Pfeil steckt. Die App rechnet.</p></div></div>
-    ${canResume ? `<div class="resume"><div><strong>Laufendes Spiel</strong><span>${esc(G.players.map(p => p.name).join(' · '))} – Runde ${G.round}</span></div><button class="chip" data-a="resume" aria-pressed="true">Weiter</button></div>` : ''}
+    <div class="langs" role="group" aria-label="${t('language')}">
+      ${Object.entries(LANGS).map(([k, n]) => `<button data-a="lang" data-v="${k}" lang="${k}" aria-pressed="${lang === k}">${n}</button>`).join('')}
+    </div>
+    <div class="brand">${miniSteel}<div><h1>Oche Darts</h1><p>${t('tagline')}</p></div></div>
+    ${canResume ? `<div class="resume"><div><strong>${t('running')}</strong><span>${esc(G.players.map(pname).join(' · '))} – ${t('round', { n: G.round })}</span></div><button class="chip" data-a="resume" aria-pressed="true">${t('resume')}</button></div>` : ''}
     <section class="sec">
-      <h2>Scheibe</h2>
+      <h2>${t('board')}</h2>
       <div class="choice">
-        <button class="opt stack" data-a="board" data-v="steel" aria-pressed="${S.board === 'steel'}">${miniSteel}<span><b>Turnierscheibe</b><small>20 Felder, Doppel, Triple, Bull</small></span></button>
-        <button class="opt stack" data-a="board" data-v="ring" aria-pressed="${S.board === 'ring'}">${miniRing}<span><b>Ringscheibe</b><small>Rückseite: Ringe 10 bis 1</small></span></button>
+        <button class="opt stack" data-a="board" data-v="steel" aria-pressed="${S.board === 'steel'}">${miniSteel}<span><b>${t('steel')}</b><small>${t('steelSub')}</small></span></button>
+        <button class="opt stack" data-a="board" data-v="ring" aria-pressed="${S.board === 'ring'}">${miniRing}<span><b>${t('ring')}</b><small>${t('ringSub')}</small></span></button>
       </div>
     </section>
     <section class="sec">
-      <h2>Spielart</h2>
+      <h2>${t('gameType')}</h2>
       <div class="choice">
-        <button class="opt" data-a="mode" data-v="x01" aria-pressed="${S.mode === 'x01'}"><span><b>Runterspielen</b><small>Von ${S.board === 'steel' ? '501' : '100'} auf genau 0</small></span></button>
-        <button class="opt" data-a="mode" data-v="race" aria-pressed="${S.mode === 'race'}"><span><b>Hochspielen</b><small>Wer zuerst das Ziel erreicht</small></span></button>
+        <button class="opt" data-a="mode" data-v="x01" aria-pressed="${S.mode === 'x01'}"><span><b>${t('down')}</b><small>${t('downSub', { n: S.board === 'steel' ? 501 : 100 })}</small></span></button>
+        <button class="opt" data-a="mode" data-v="race" aria-pressed="${S.mode === 'race'}"><span><b>${t('up')}</b><small>${t('upSub')}</small></span></button>
       </div>
     </section>
     <section class="sec">
-      <h2>${S.mode === 'x01' ? 'Startpunkte' : 'Zielpunkte'}</h2>
+      <h2>${S.mode === 'x01' ? t('startPts') : t('targetPts')}</h2>
       <div class="chips">
         ${presets.map(v => `<button class="chip num" data-a="value" data-v="${v}" aria-pressed="${v === val}">${v}</button>`).join('')}
-        <input id="custom-value" class="chip-input num" type="number" inputmode="numeric" min="2" max="9999" placeholder="Eigene" value="${custom ? val : ''}" aria-label="Eigene Punktzahl">
+        <input id="custom-value" class="chip-input num" type="number" inputmode="numeric" min="2" max="9999" placeholder="${t('custom')}" value="${custom ? val : ''}" aria-label="${t('customAria')}">
       </div>
-      ${S.board === 'steel' && S.mode === 'x01' ? '<p class="hint">Im Turnier wird 501 gespielt, für kürzere Runden 301. Jeder hat pro Aufnahme 3 Pfeile.</p>' : ''}
-      ${S.mode === 'race' ? '<p class="hint">Alle Treffer werden addiert. Wer die Zielpunkte zuerst erreicht oder überschreitet, gewinnt.</p>' : ''}
+      ${steelX01 ? `<p class="hint">${t('hint501')}</p>` : ''}
+      ${S.mode === 'race' ? `<p class="hint">${t('hintRace')}</p>` : ''}
     </section>
     ${steelX01 ? `
     <section class="sec">
-      <h2>Ausmachen</h2>
+      <h2>${t('finish')}</h2>
       <div class="choice">
-        <button class="opt" data-a="out" data-v="single" aria-pressed="${S.out === 'single'}"><span><b>Genau auf 0</b><small>Egal mit welchem Feld. Wer 0 erreicht, gewinnt.</small></span></button>
-        <button class="opt" data-a="out" data-v="double" aria-pressed="${S.out === 'double'}"><span><b>Profi: Double Out</b><small>Letzter Pfeil muss im äußeren Doppelring oder Bull landen</small></span></button>
+        <button class="opt" data-a="out" data-v="single" aria-pressed="${S.out === 'single'}"><span><b>${t('exact')}</b><small>${t('exactSub')}</small></span></button>
+        <button class="opt" data-a="out" data-v="double" aria-pressed="${S.out === 'double'}"><span><b>${t('dbl')}</b><small>${t('dblSub')}</small></span></button>
       </div>
-      <p class="hint">Wer unter 0 kommt${S.out === 'double' ? ', auf 1 landet oder ohne Doppel auf 0 kommt' : ''}, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.</p>
+      <p class="hint">${S.out === 'double' ? t('bustHintDbl') : t('bustHint')}</p>
     </section>` : ''}
     <section class="sec">
-      <h2>Spieler</h2>
+      <h2>${t('players')}</h2>
       <div class="players">
         ${S.players.map((n, i) => `
           <div class="prow">
             <span class="pn">${i + 1}</span>
-            <input id="player-${i}" data-i="${i}" value="${esc(n)}" maxlength="18" autocomplete="off" aria-label="Name Spieler ${i + 1}">
-            <button class="icon-btn" data-a="del" data-i="${i}" aria-label="Spieler entfernen" ${S.players.length <= 1 ? 'disabled' : ''}>${ICON.x}</button>
+            <input id="player-${i}" data-i="${i}" value="${esc(n)}" maxlength="18" autocomplete="off" aria-label="${t('nameAria', { n: i + 1 })}">
+            <button class="icon-btn" data-a="del" data-i="${i}" aria-label="${t('remove')}" ${S.players.length <= 1 ? 'disabled' : ''}>${ICON.x}</button>
           </div>`).join('')}
       </div>
       <div class="row-btns">
-        <button class="ghost" data-a="add" ${S.players.length >= 8 ? 'disabled' : ''}>+ Spieler hinzufügen</button>
-        ${S.players.length > 1 ? `<button class="ghost" data-a="shuffle">Reihenfolge mischen</button>` : ''}
+        <button class="ghost" data-a="add" ${S.players.length >= 8 ? 'disabled' : ''}>${t('add')}</button>
+        ${S.players.length > 1 ? `<button class="ghost" data-a="shuffle">${t('shuffle')}</button>` : ''}
       </div>
     </section>
     <section class="sec">
-      <h2><span class="bot-ico">${ICON.bot}</span>Gegen den Computer</h2>
+      <h2><span class="bot-ico">${ICON.bot}</span>${t('vsBot')}</h2>
       <div class="chips">
-        <button class="chip sm" data-a="bot" data-v="off" aria-pressed="${S.bot === 'off'}">Aus</button>
-        ${Object.entries(BOT_LEVELS).map(([k, l]) => `<button class="chip sm" data-a="bot" data-v="${k}" aria-pressed="${S.bot === k}">${l.name}</button>`).join('')}
+        <button class="chip sm" data-a="bot" data-v="off" aria-pressed="${S.bot === 'off'}">${t('off')}</button>
+        ${Object.keys(BOT_LEVELS).map(k => `<button class="chip sm" data-a="bot" data-v="${k}" aria-pressed="${S.bot === k}">${t('lvl_' + k)}</button>`).join('')}
       </div>
-      <p class="hint">${S.bot === 'off' ? 'Wähle eine Stärke, dann spielt der Computer als weiterer Spieler mit. Allein oder zu mehreren.' : 'Der Computer wirft nach euch. Er zielt wie ein echter Spieler und trifft je nach Stärke mal mehr, mal weniger.'}</p>
+      <p class="hint">${S.bot === 'off' ? t('botOff') : t('botOn')}</p>
     </section>
-    <button class="primary" data-a="start">Spiel starten</button>
+    <button class="primary" data-a="start">${t('start')}</button>
   </div></div>`;
 }
 
 function renderGame() {
-  const p = G.players[G.cur], t = G.turn;
+  const p = G.players[G.cur], tn = G.turn;
   const x01 = G.mode === 'x01';
-  const botTurn = !!p.bot && !t.done;
+  const botTurn = !!p.bot && !tn.done;
   const nextUp = G.players[(G.cur + 1) % G.players.length];
-  const modeLabel = (G.board === 'ring' ? 'Ringscheibe · ' : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : ' · genau auf 0') : 'Bis ' + G.value);
-  const left = 3 - t.darts.length;
+  const modeLabel = (G.board === 'ring' ? t('modeRing') : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : t('modeExact')) : t('modeTo', { n: G.value }));
+  const left = 3 - tn.darts.length;
   let co = null;
-  if (x01 && G.board === 'steel' && !t.done && p.score <= 180) co = checkout(p.score, left, G.out === 'double');
-  const sum = turnSum(t);
-  const metaLeft = t.bust ? '<span class="bust">Überworfen – 0 Punkte</span>' : !t.darts.length && co ? 'Ausmachen mit' : `Aufnahme <b class="num">${sum}</b>`;
-  const metaRight = co ? `<span class="co">${co.join(' · ')}</span>` : (x01 ? '' : `<span>noch <b class="num">${Math.max(0, G.value - p.score)}</b></span>`);
+  if (x01 && G.board === 'steel' && !tn.done && p.score <= 180) co = checkout(p.score, left, G.out === 'double');
+  const sum = turnSum(tn);
+  const metaLeft = tn.bust ? `<span class="bust">${t('bustShort')}</span>` : !tn.darts.length && co ? t('finishWith') : `${t('visit')} <b class="num">${sum}</b>`;
+  const metaRight = co ? `<span class="co">${co.join(' · ')}</span>` : (x01 ? '' : `<span>${t('toGo', { n: `<b class="num">${Math.max(0, G.value - p.score)}</b>` })}</span>`);
   const pct = x01 ? 0 : Math.min(100, p.score / G.value * 100);
+  const why = tn.why ? (STR.de['why_' + tn.why] ? t('why_' + tn.why) : esc(tn.why)) : '';
 
   app.innerHTML = `
   <div class="screen game">
     <div class="topbar">
-      <button class="icon-btn" data-a="quit" aria-label="Spiel beenden">${ICON.back}</button>
+      <button class="icon-btn" data-a="quit" aria-label="${t('quitAria')}">${ICON.back}</button>
       <span class="mode">${esc(modeLabel)}</span>
-      <span class="round">Runde ${G.round}</span>
+      <span class="round">${t('round', { n: G.round })}</span>
     </div>
     <div class="strip" id="strip">
       ${G.players.map((q, i) => `<div class="pcard ${i === G.cur ? 'on' : ''}" ${i === G.cur ? 'id="cur-card"' : ''}>
-        <span class="nm">${q.bot ? '<span class="ai">KI</span>' + esc(BOT_LEVELS[q.bot].name) : esc(q.name)}${q.legs ? ' · ' + q.legs + (q.legs === 1 ? ' Leg' : ' Legs') : ''}</span>
+        <span class="nm">${q.bot ? `<span class="ai">${t('ai')}</span>` + esc(t('lvl_' + q.bot)) : esc(q.name)}${q.legs ? ' · ' + q.legs + ' ' + legsWord(q.legs) : ''}</span>
         <span class="sc num">${q.score}</span>
         <span class="av num">Ø ${avg(q).toFixed(1)}</span>
       </div>`).join('')}
     </div>
     <div class="visit">
-      <span class="who">${p.bot ? 'Computer (' + esc(BOT_LEVELS[p.bot].name) + ') wirft …' : esc(p.name) + ' ist dran'}</span>
+      <span class="who">${p.bot ? t('botThrows', { lvl: esc(t('lvl_' + p.bot)) }) : t('yourTurn', { name: esc(p.name) })}</span>
       <span class="big num">${p.score}</span>
       <div class="right">
-        <div class="slots">${[0, 1, 2].map(i => { const d = t.darts[i]; return d && G.winner === null && !p.bot ? `<button class="slot f num" data-a="redo" data-i="${i}" aria-label="Pfeil ${i + 1} (${esc(d.l)}) neu eingeben">${esc(d.l)}</button>` : `<span class="slot ${d ? 'f' : ''} ${!d && i === t.darts.length && !t.done ? 'n' : ''} num">${d ? esc(d.l) : ''}</span>`; }).join('')}</div>
+        <div class="slots">${[0, 1, 2].map(i => { const d = tn.darts[i]; return d && G.winner === null && !p.bot ? `<button class="slot f num" data-a="redo" data-i="${i}" aria-label="${t('redoAria', { n: i + 1, l: esc(d.l) })}">${esc(d.l)}</button>` : `<span class="slot ${d ? 'f' : ''} ${!d && i === tn.darts.length && !tn.done ? 'n' : ''} num">${d ? esc(d.l) : ''}</span>`; }).join('')}</div>
         ${x01 ? '' : `<div class="progress"><i style="width:${pct}%"></i></div>`}
         <div class="meta"><span>${metaLeft}</span>${metaRight}</div>
       </div>
     </div>
-    <div class="board-wrap ${t.done ? 'locked' : ''} ${botTurn ? 'botturn' : ''}" id="board-wrap">
-      <svg id="board" viewBox="-200 -200 400 400" role="img" aria-label="Dartscheibe: tippe auf die Stelle, die du getroffen hast">
+    <div class="board-wrap ${tn.done ? 'locked' : ''} ${botTurn ? 'botturn' : ''}" id="board-wrap">
+      <svg id="board" viewBox="-200 -200 400 400" role="img" aria-label="${t('boardAria')}">
         ${G.board === 'steel' ? steelSVG() : ringSVG()}
-        <g>${t.darts.filter(d => d.x !== undefined).map((d, i) => `<circle cx="${d.x}" cy="${d.y}" r="6" fill="#e3ab3e" stroke="#121d19" stroke-width="2.5"/><text x="${d.x}" y="${d.y}" font-size="7" font-weight="800" fill="#121d19" text-anchor="middle" dominant-baseline="central" font-family="Barlow, sans-serif">${i + 1}</text>`).join('')}</g>
+        <g>${tn.darts.filter(d => d.x !== undefined).map((d, i) => `<circle cx="${d.x}" cy="${d.y}" r="6" fill="#e3ab3e" stroke="#121d19" stroke-width="2.5"/><text x="${d.x}" y="${d.y}" font-size="7" font-weight="800" fill="#121d19" text-anchor="middle" dominant-baseline="central" font-family="Barlow, sans-serif">${i + 1}</text>`).join('')}</g>
       </svg>
-      ${t.done && G.winner === null ? `<div class="banner ${t.bust ? 'bust' : ''}">${t.bust ? 'Überworfen!' : 'Aufnahme: ' + sum}${t.bust && t.why ? '<small>' + t.why + '</small>' : ''}<small>${p.bot ? '' : 'Falsch getippt? Tippe auf den Pfeil oben.<br>'}${nextUp.bot ? 'Gleich wirft der Computer' : 'Gleich ist ' + esc(nextUp.name) + ' dran'}</small></div>` : ''}
+      ${tn.done && G.winner === null ? `<div class="banner ${tn.bust ? 'bust' : ''}">${tn.bust ? t('bust') : t('visitTotal', { n: sum })}${tn.bust && why ? '<small>' + why + '</small>' : ''}<small>${p.bot ? '' : t('wrongTap') + '<br>'}${nextUp.bot ? t('nextBot') : t('nextName', { name: esc(nextUp.name) })}</small></div>` : ''}
     </div>
     <div class="actions">
-      <button class="act" data-a="miss" ${G.winner !== null || botTurn ? 'disabled' : ''}>Daneben</button>
-      <button class="act" data-a="undo" ${undo.length ? '' : 'disabled'}>${ICON.undo}Zurück</button>
-      <button class="act next" data-a="next" ${G.winner !== null || botTurn ? 'disabled' : ''}>Nächster${ICON.next}</button>
+      <button class="act" data-a="miss" ${G.winner !== null || botTurn ? 'disabled' : ''}>${t('miss')}</button>
+      <button class="act" data-a="undo" ${undo.length ? '' : 'disabled'}>${ICON.undo}${t('undo')}</button>
+      <button class="act next" data-a="next" ${G.winner !== null || botTurn ? 'disabled' : ''}>${t('next')}${ICON.next}</button>
     </div>
   </div>
-  ${modal === 'quit' ? `<div class="overlay"><div class="dialog"><h3>Spiel verlassen?</h3><p>Der Spielstand bleibt gespeichert. Du kannst im Menü mit „Weiter“ fortsetzen.</p><div class="btns"><button data-a="stay">Weiterspielen</button><button class="yes" data-a="leave">Zum Menü</button></div></div></div>` : ''}
+  ${modal === 'quit' ? `<div class="overlay"><div class="dialog"><h3>${t('leaveQ')}</h3><p>${t('leaveP')}</p><div class="btns"><button data-a="stay">${t('keepPlaying')}</button><button class="yes" data-a="leave">${t('toMenu')}</button></div></div></div>` : ''}
   ${G.winner !== null ? winHTML() : ''}`;
   const cc = document.getElementById('cur-card');
   if (cc && cc.scrollIntoView) cc.scrollIntoView({ block: 'nearest', inline: 'center' });
@@ -636,15 +758,16 @@ function winHTML() {
   const w = G.players[G.winner];
   const lastDart = G.turn.darts[G.turn.darts.length - 1];
   const rows = G.players.map((q, i) => ({ q, i })).sort((a, b) => a.i === G.winner ? -1 : b.i === G.winner ? 1 : (G.mode === 'x01' ? a.q.score - b.q.score : b.q.score - a.q.score));
+  const darts = { n: w.darts, darts: dartsWord(w.darts) };
   return `<div class="overlay"><div class="dialog win">
-    <h3>${esc(w.name)} gewinnt!</h3>
-    <p>${G.mode === 'x01' ? 'Ausgemacht mit ' + esc(lastDart ? lastDart.l : '') + ' nach ' + w.darts + (w.darts === 1 ? ' Pfeil.' : ' Pfeilen.') : G.value + ' Punkte erreicht nach ' + w.darts + (w.darts === 1 ? ' Pfeil.' : ' Pfeilen.')}</p>
+    <h3>${t('wins', { name: esc(pname(w)) })}</h3>
+    <p>${G.mode === 'x01' ? t('winX01', Object.assign({ l: esc(lastDart ? lastDart.l : '') }, darts)) : t('winRace', Object.assign({ v: G.value }, darts))}</p>
     <table class="stats num">
-      <thead><tr><th>Spieler</th><th>${G.mode === 'x01' ? 'Rest' : 'Punkte'}</th><th>Ø 3 Pfeile</th><th>Beste</th></tr></thead>
-      <tbody>${rows.map(({ q, i }) => `<tr class="${i === G.winner ? 'w' : ''}"><td>${esc(q.name)}${q.legs ? ' (' + q.legs + ')' : ''}</td><td>${q.score}</td><td>${avg(q).toFixed(1)}</td><td>${q.best}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>${t('thPlayer')}</th><th>${G.mode === 'x01' ? t('thRest') : t('thPts')}</th><th>${t('thAvg')}</th><th>${t('thBest')}</th></tr></thead>
+      <tbody>${rows.map(({ q, i }) => `<tr class="${i === G.winner ? 'w' : ''}"><td>${esc(pname(q))}${q.legs ? ' (' + q.legs + ')' : ''}</td><td>${q.score}</td><td>${avg(q).toFixed(1)}</td><td>${q.best}</td></tr>`).join('')}</tbody>
     </table>
-    <div class="btns"><button data-a="undo">Letzten Wurf zurück</button><button class="yes" data-a="rematch">Revanche</button></div>
-    <div class="btns"><button data-a="menu" style="grid-column:1/-1">Neues Spiel einstellen</button></div>
+    <div class="btns"><button data-a="undo">${t('undoLast')}</button><button class="yes" data-a="rematch">${t('rematch')}</button></div>
+    <div class="btns"><button data-a="menu" style="grid-column:1/-1">${t('newSetup')}</button></div>
   </div></div>`;
 }
 
@@ -722,7 +845,7 @@ function showPop(hit, cx, cy) {
   const r = wrap.getBoundingClientRect();
   const el = document.createElement('div');
   el.className = 'pop';
-  el.textContent = hit.miss ? 'Daneben' : hit.l === 'Bull' || hit.l === '25' ? hit.l : hit.l + (hit.m > 1 ? ' = ' + hit.v : '');
+  el.textContent = hit.miss ? t('miss') : hit.l === 'Bull' || hit.l === '25' ? hit.l : hit.l + (hit.m > 1 ? ' = ' + hit.v : '');
   el.style.left = (cx - r.left) + 'px';
   el.style.top = (cy - r.top) + 'px';
   wrap.appendChild(el);
@@ -745,14 +868,23 @@ function action(a, el) {
     case 'mode': S.mode = el.dataset.v; persistSettings(); return render();
     case 'out': S.out = el.dataset.v; persistSettings(); return render();
     case 'bot': S.bot = el.dataset.v; persistSettings(); return render();
+    case 'lang': {
+      // rename untouched default names ("Spieler 2" -> "Player 2") along with the language
+      const old = lang;
+      lang = el.dataset.v; S.lang = lang; document.documentElement.lang = lang;
+      const rename = n => { const m = /\d+$/.exec(n); return m && n === STR[old].playerN.replace('{n}', m[0]) ? t('playerN', { n: m[0] }) : n; };
+      S.players = S.players.map(rename);
+      if (G) { G.players.forEach(q => { q.name = rename(q.name); }); persistGame(); }
+      persistSettings(); return render();
+    }
     case 'value': S.values[key()] = +el.dataset.v; persistSettings(); return render();
-    case 'add': S.players.push('Spieler ' + (S.players.length + 1)); persistSettings(); render(); { const i = document.getElementById('player-' + (S.players.length - 1)); if (i) { i.focus(); i.select(); } } return;
+    case 'add': S.players.push(t('playerN', { n: S.players.length + 1 })); persistSettings(); render(); { const i = document.getElementById('player-' + (S.players.length - 1)); if (i) { i.focus(); i.select(); } } return;
     case 'del': S.players.splice(+el.dataset.i, 1); persistSettings(); return render();
     case 'shuffle':
       for (let i = S.players.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [S.players[i], S.players[j]] = [S.players[j], S.players[i]]; }
       persistSettings(); return render();
     case 'start': {
-      const names = S.players.map((n, i) => n.trim() || 'Spieler ' + (i + 1));
+      const names = S.players.map((n, i) => n.trim() || t('playerN', { n: i + 1 }));
       S.players = names; persistSettings();
       const list = names.map(n => ({ name: n }));
       if (BOT_LEVELS[S.bot]) list.push({ name: 'Computer', bot: S.bot });
