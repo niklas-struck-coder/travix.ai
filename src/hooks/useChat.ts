@@ -257,6 +257,13 @@ export function useChat(speechEnabled: boolean) {
   }
 
   const sendMessage = (content: string) => {
+    // A reply from a previous, still-pending sendMessage() call must not
+    // fire after this one has scheduled its own — same reasoning as
+    // resetChat() below, just for the double-call case instead of a reset.
+    if (replyTimeoutRef.current !== null) {
+      window.clearTimeout(replyTimeoutRef.current)
+      replyTimeoutRef.current = null
+    }
     // Bump the same generation counter resetChat() uses: any new user turn
     // means the conversation has moved on, so a Duffel search still pending
     // from an earlier turn (e.g. the accommodation search auto-started on

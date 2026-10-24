@@ -22041,3 +22041,75 @@ Sicherheitskriterien. Regressionsschutz-Baseline unverändert grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-24, 02:12 UTC (dreiundzwanzigster Lauf — Fund umgesetzt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, dritter des 24.10. `origin/main`
+seit dem zweiundzwanzigsten Lauf (`fc5fb47`→`964daad`, 01:09 UTC)
+unverändert bei `fe1300e`. `it-chef/auto` war erneut vollständig in
+`main` gemergt — Branch frisch von `origin/main` neu angelegt.
+`reports/it-chef.md`, `reports/marketing-chef.md`,
+`reports/support-chef.md` unverändert vom 23.10.; PR #34/#38 bleiben
+unverändert offen (Merge ist Freigabe-Chefs Aufgabe).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+gegengeprüft — alle offenen Checkbox-Punkte bleiben aus denselben, seit
+Lauf elf dokumentierten Gründen blockiert. Da 22 Läufe zuvor bereits sehr
+viele naheliegende Fehlerklassen abgesucht hatten, einen eigens dafür
+beauftragten Explore-Agenten mit explizit neuen Suchschwerpunkten
+beauftragt (nicht erneut TODO/FIXME/console.log/leere catch-Blöcke/
+aria-label/dangerouslySetInnerHTML/Locale-Formatierung/parseInt-Radix/
+img-Alt/href="#"/Listen-Keys/Testabdeckung/htmlFor-id/doppelte DOM-IDs/
+eslint-disable/npm-audit/Pluralisierung/HotelWizard-Clamping/Stale-
+Search-Races, s. frühere Läufe), sondern: `setInterval` ohne
+`clearInterval`, Datums-Edge-Cases, ungeschützte `localStorage.setItem`-
+Aufrufe, kaputte interne `<Link>`/`navigate()`-Ziele gegen `routes.tsx`,
+Zahlenformat-Edge-Cases, Formularvalidierung, doppelte Array-Keys bei
+tatsächlich veränderlichen Listen, Off-by-one-Fehler, sowie
+Unmount-Races außerhalb der schon geprüften `useChat`/`useConcierge`-
+Timer.
+
+**Fund:** Genau in diesem letzten Punkt ein echter, bisher übersehener
+Bug: Sowohl `useChat.ts` als auch `useConcierge.ts` setzen in
+`sendMessage()` `replyTimeoutRef.current` auf einen neuen `setTimeout`,
+ohne vorher einen dort schon laufenden Timeout zu löschen — exakt das
+Lösch-vor-Setzen-Muster, das für `resetChat()` (siehe `useChat.ts`) und
+den Unmount-Cleanup-Effect in beiden Hooks längst existiert, hier aber
+für den Fall "`sendMessage()` wird ein zweites Mal aufgerufen, bevor die
+erste Antwort (600-700ms) gefeuert hat" übersehen. Live reproduzierbar
+(und per Test verifiziert): zwei kurz aufeinanderfolgende
+`sendMessage()`-Aufrufe lassen beide Antworten nacheinander landen,
+obwohl nur die zweite gemeinte Anfrage eine Antwort bekommen sollte;
+unmountet die Komponente zwischen beiden Aufrufen, feuert der erste,
+verwaiste Timeout sogar noch gegen eine bereits abgehängte
+Hook-Instanz. Details siehe `ZEITPLAN.md` (24.10.-Eintrag, Phase 4
+KI-Chat).
+
+**Sicherheitskriterien:** Alle vier erfüllt — kein Auth-/Zahlungs-/
+Nutzerdaten-/Rechtsbezug (reiner lokaler Chat-Timer-State); keine offene
+Produktentscheidung (dasselbe, bereits etablierte Lösch-vor-Setzen-
+Muster wie bei `resetChat()`, nur auf den fehlenden Fall nachgezogen);
+mechanisch und eindeutig (je drei zusätzliche Zeilen); objektiv prüfbar
+(zwei neue Regressionstests, vor dem Fix durch temporäres `git stash`
+nur der jeweiligen Quelländerung reproduzierbar rot verifiziert — beide
+schlugen fehl, zwei Assistenten-Antworten statt einer).
+
+**Umsetzung:** `useChat.ts`/`useConcierge.ts`: in `sendMessage()` ganz am
+Anfang denselben Lösch-Block wie in `resetChat()` ergänzt
+(`window.clearTimeout(replyTimeoutRef.current)` + Ref auf `null`, falls
+schon ein Timeout läuft), bevor der neue Timeout gesetzt wird. Neuer
+Regressionstest je Hook in `useChat.test.ts`/`useConcierge.test.ts`.
+`ZEITPLAN.md` (Phase 4 KI-Chat) entsprechend ergänzt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npm run build`
+(erfolgreich, nur die vorbestehende Chunk-Größen-Warnung), `npx vitest
+run` (73 Testdateien, 554 Tests — 552 vorher + 2 neu, alle grün).
+
+**Ergebnis:** Ein Punkt heute (dreiundzwanzigster Lauf) autonom
+umgesetzt und verifiziert — der erste tatsächliche Produktcode-Fix nach
+mehreren Läufen ohne neuen sicheren Fund. Kein weiterer Punkt zusätzlich
+angefasst (Ein-Punkt-Regel).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

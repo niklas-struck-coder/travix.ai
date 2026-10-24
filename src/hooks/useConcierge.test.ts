@@ -104,4 +104,25 @@ describe('useConcierge', () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalled()
   })
+
+  it('cancels an earlier still-pending reply when sendMessage is called again before it fires', () => {
+    const { result } = renderHook(() => useConcierge('Rom'))
+
+    act(() => {
+      result.current.sendMessage('Welche Währung brauche ich?')
+    })
+    act(() => {
+      result.current.sendMessage('Wie ist die Notrufnummer?')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    const assistantReplies = result.current.messages.filter((message) => message.role === 'assistant')
+    // Greeting + exactly one reply — the first call's reply must not land
+    // alongside the second's once both timeouts would otherwise have fired.
+    expect(assistantReplies).toHaveLength(2)
+    expect(assistantReplies[1]?.content).toContain('Notrufnummer')
+    expect(result.current.isThinking).toBe(false)
+  })
 })

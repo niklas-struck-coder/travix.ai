@@ -1456,6 +1456,39 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Quelländerung in `useChat.ts` (`git stash` nur diese Datei)
   reproduzierbar rot verifiziert: beide Tests schlugen fehl
   (`stayLoading` blieb `true` bzw. die alten Angebote landeten trotzdem).
+  Vom autonomen IT-Chef-Lauf am 24.10. (dreiundzwanzigster Lauf) einen
+  über einen eigens dafür beauftragten Explore-Agenten mit frischem Fokus
+  gefundenen Bug in `useChat.ts` und `useConcierge.ts` behoben: Jeder
+  Aufruf von `sendMessage()` setzt `replyTimeoutRef.current` auf einen
+  neuen `setTimeout`, ohne vorher einen dort schon laufenden Timeout zu
+  löschen — genau das Muster, das für `resetChat()` (s.o.) und den
+  Unmount-Cleanup bereits existiert, hier aber für den Fall "sendMessage()
+  wird ein zweites Mal aufgerufen, bevor die erste Antwort (600-700ms)
+  gefeuert hat" übersehen. Zwei Konsequenzen: (a) der Unmount-Cleanup
+  räumt dann nur noch den zuletzt gesetzten Timeout ab — unmountet die
+  Komponente zwischen beiden Aufrufen, feuert der erste, verwaiste Timeout
+  trotzdem noch gegen eine bereits abgehängte Hook-Instanz (genau die
+  Leck-Klasse, die dieser Ref eigentlich verhindern soll); (b) auch ohne
+  Unmount überschreibt die zuerst feuernde, eigentlich veraltete Antwort
+  `isThinking`/`quickReplies`/`avatarState`, nachdem die zweite Anfrage
+  längst eine neue Antwort erwartet — zwei Chat-Antworten (bzw. bei
+  `useConcierge.ts` zwei Concierge-Antworten) landen nacheinander, obwohl
+  nur die zweite gemeinte Anfrage eine Antwort bekommen sollte. Erfüllt
+  alle vier Kriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtsbezug
+  (reiner lokaler Chat-Timer-State); keine offene Produktentscheidung
+  (dieselbe Lösch-vor-Setzen-Regel, die `resetChat()` schon für denselben
+  Ref anwendet, hier nur auf den fehlenden Fall nachgezogen); mechanisch
+  (je drei zusätzliche Zeilen nach bestehendem Muster, keine Interpretation
+  nötig); objektiv prüfbar (Tests). Fix: in beiden `sendMessage()`-
+  Funktionen ganz am Anfang denselben Lösch-Block wie in `resetChat()`
+  ergänzt (`if (replyTimeoutRef.current !== null) { window.clearTimeout(...);
+  replyTimeoutRef.current = null }), bevor der neue Timeout gesetzt wird.
+  Neuer Regressionstest je Hook (`useChat.test.ts`: "does not let both an
+  earlier and a later turn reply land …"; `useConcierge.test.ts`: "cancels
+  an earlier still-pending reply when sendMessage is called again before
+  it fires") — beide vor der Ergänzung durch temporäres Zurücknehmen nur
+  der jeweiligen Quelländerung reproduzierbar rot verifiziert (zwei
+  Assistenten-Antworten statt einer).
 - 🟡 Phase 5 Suche — Flugsuche (5.8, 5.9, 5.11) und Hotelsuche (5.1-5.3,
   5.6) fertig und mit echten Duffel-Testdaten verbunden; Zug/Bus/Fähre:
   5.4 (`TrainCard.tsx`) und 5.5 (`TrainResults.tsx`) vom autonomen

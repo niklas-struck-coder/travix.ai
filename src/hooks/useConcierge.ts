@@ -23,6 +23,12 @@ export function useConcierge(destination: string | null) {
   }, [])
 
   const sendMessage = (content: string) => {
+    // A reply from a previous, still-pending sendMessage() call must not
+    // fire after this one has scheduled its own.
+    if (replyTimeoutRef.current !== null) {
+      window.clearTimeout(replyTimeoutRef.current)
+      replyTimeoutRef.current = null
+    }
     setMessages((prev) => [...prev, makeMessage('user', content)])
     setQuickReplies([])
     setIsThinking(true)

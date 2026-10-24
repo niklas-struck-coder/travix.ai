@@ -1179,6 +1179,39 @@ describe('useChat reply timeout cleanup on unmount', () => {
   })
 })
 
+describe('useChat sendMessage cancels an earlier still-pending reply', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('does not let both an earlier and a later turn reply land when sendMessage is called again before the first timeout fires', () => {
+    const { result } = renderHook(() => useChat(false))
+    const messagesBeforeTurn = result.current.messages.length
+
+    act(() => {
+      result.current.sendMessage('Musterstadt')
+    })
+    act(() => {
+      result.current.sendMessage('Zug')
+    })
+    act(() => {
+      vi.advanceTimersByTime(700)
+    })
+
+    // Each sendMessage() call adds one user message synchronously (2 total);
+    // only the *second* call's scheduled reply should fire — the first
+    // call's timeout must have been cancelled, not left to land alongside it.
+    const assistantRepliesAdded = result.current.messages.length - messagesBeforeTurn - 2
+    expect(assistantRepliesAdded).toBe(1)
+    expect(result.current.isThinking).toBe(false)
+  })
+})
+
 describe('useChat resetChat clears a still-pending reply timeout', () => {
   beforeEach(() => {
     localStorage.clear()
