@@ -21985,3 +21985,59 @@ behauptet): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-24, 01:09 UTC (zweiundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, zweiter des 24.10., eine knappe
+Stunde nach dem einundzwanzigsten Lauf (`fc5fb47`, 00:11 UTC).
+`origin/main` seitdem unverändert bei `fe1300e`. `it-chef/auto` war
+bereits wieder vollständig in `main` gemergt (keine eigenen Commits
+außer dem einundzwanzigsten Laufs-Logeintrag, der selbst schon in
+`main` steckt) — Branch deshalb erneut frisch von `origin/main` neu
+angelegt. `reports/it-chef.md`, `reports/marketing-chef.md`,
+`reports/support-chef.md` unverändert vom 23.10. — keine neuen Funde
+der plattform-verwalteten Kanäle seit dem letzten Check; PR #34/#38
+bleiben unverändert offen (Merge ist Freigabe-Chefs Aufgabe).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegengeprüft — alle offenen Punkte bleiben aus denselben, seit
+Lauf elf dokumentierten Gründen blockiert (offene Backend-/
+Architekturentscheidung, fehlende Inhalte/Datenfelder, rechtliche
+Pflichttexte). Zusätzlich mit anderem Fokus als die Vorläufe gesucht:
+- Alle `TODO`/`FIXME`/`console.log`/`debugger`-Vorkommen im `src`-Baum
+  gesucht — kein Treffer.
+- Alle `<img>`-Tags im `src`-Baum auf fehlendes `alt` geprüft — kein
+  Treffer.
+- Alle Icon-only-Buttons (`size="icon"` bzw. Button mit reinem
+  Icon-Kind) auf fehlendes `aria-label` geprüft — einziger Fund ohne
+  direktes `aria-label` am `Button` selbst (`Buchung.tsx:115`) trägt es
+  bereits am umschlossenen `Link` (`aria-label={`${title}
+  bearbeiten`}`), kein echter Fund.
+- Pluralisierung in Nutzertexten (`Aktivität`/`Aktivitäten` in
+  `Buchung.tsx`/`Reiseentwuerfe.tsx`) gegengeprüft — beide Stellen
+  verzweigen bereits korrekt auf `length === 1`, kein Fund. Weitere
+  Nacht-/Gäste-/Zimmer-Texte in `Dashboard.tsx`/`Angebote.tsx`/
+  `Warenkorb.tsx` sind statische Mock-Daten ohne Laufzeit-Pluralisierung
+  — kein Fund.
+- `HotelWizard.tsx` komplett gelesen: `clampGuestCount` begrenzt
+  Zimmer/Gäste bereits korrekt auf 1-9 inkl. `NaN`-Fallback, Check-out-
+  `min` verhindert ein Datum vor/gleich Check-in — kein Fund.
+
+Die beiden in `reports/it-chef.md`/`reports/support-chef.md` (23.10.)
+weiterhin offenen Funde (uneinheitlich dramatische Lösch-Warnungen,
+Reise-Checkliste ohne Persistenz) bleiben aus denselben, dort bereits
+begründeten Gründen eine echte Abwägung bzw. Architekturentscheidung,
+kein Ein-Zeiler — Sicherheitskriterium 2/3 weiterhin verletzt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73
+Testdateien, 552 Tests, alle grün).
+
+**Ergebnis:** Kein Punkt heute (zweiundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute neu geprüften
+Fehlerklassen ergaben keinen Fund, und alle verbleibenden offenen
+Punkte verfehlen weiterhin mindestens eines der vier
+Sicherheitskriterien. Regressionsschutz-Baseline unverändert grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
