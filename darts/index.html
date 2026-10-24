@@ -375,6 +375,9 @@ if (!S.v2) {
 }
 function persistSettingsEarly() { save('oche.settings', S); }
 function detectLang() { const l = (navigator.language || 'de').slice(0, 2).toLowerCase(); return LANGS[l] ? l : 'en'; }
+// a shared link like ?lang=pl (or #pl) opens the app in that language
+const urlLang = (new URLSearchParams(location.search).get('lang') || location.hash.slice(1)).toLowerCase();
+if (LANGS[urlLang]) S.lang = urlLang;
 let lang = LANGS[S.lang] ? S.lang : detectLang();
 document.documentElement.lang = lang;
 if (!S.players) S.players = [t('playerN', { n: 1 }), t('playerN', { n: 2 })];
