@@ -255,10 +255,10 @@ const STR = {
     tagline: 'Tippen, wo der Pfeil steckt. Die App rechnet.', language: 'Sprache',
     running: 'Laufendes Spiel', round: 'Runde {n}', resume: 'Weiter',
     board: 'Scheibe', steel: 'Turnierscheibe', steelSub: '20 Felder, Doppel, Triple, Bull', ring: 'Ringscheibe', ringSub: 'Rückseite: Ringe 10 bis 1',
-    gameType: 'Spielart', down: 'Runterspielen', downSub: 'Von {n} auf genau 0', up: 'Hochspielen', upSub: 'Wer zuerst das Ziel erreicht',
+    gameType: 'Spielart', down: 'Runterspielen', downSub: 'Von {n} auf genau 0', up: 'Hochspielen', upSub: 'Wer zuerst genau das Ziel trifft',
     startPts: 'Startpunkte', targetPts: 'Zielpunkte', custom: 'Eigene', customAria: 'Eigene Punktzahl',
     hint501: 'Im Turnier wird 501 gespielt, für kürzere Runden 301. Jeder hat pro Aufnahme 3 Pfeile.',
-    hintRace: 'Alle Treffer werden addiert. Wer die Zielpunkte zuerst erreicht oder überschreitet, gewinnt.',
+    hintRace: 'Alle Treffer werden addiert. Wer die Zielpunkte genau trifft, gewinnt. Wer drüber kommt, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.',
     finish: 'Ausmachen', exact: 'Genau auf 0', exactSub: 'Egal mit welchem Feld. Wer 0 erreicht, gewinnt.',
     dbl: 'Profi: Double Out', dblSub: 'Letzter Pfeil muss im äußeren Doppelring oder Bull landen',
     bustHint: 'Wer unter 0 kommt, hat überworfen: Die Punkte dieser Aufnahme zählen nicht.',
@@ -273,7 +273,7 @@ const STR = {
     quitAria: 'Spiel beenden', botThrows: 'Computer ({lvl}) wirft …', yourTurn: '{name} ist dran', redoAria: 'Pfeil {n} ({l}) neu eingeben',
     boardAria: 'Dartscheibe: tippe auf die Stelle, die du getroffen hast',
     bust: 'Überworfen!', visitTotal: 'Aufnahme: {n}',
-    why_over: 'Zu viele Punkte geworfen', why_one: 'Rest 1 kann man nicht mit einem Doppel ausmachen', why_dbl: 'Bei Double Out muss der letzte Pfeil ein Doppel oder Bull sein',
+    why_over: 'Zu viele Punkte geworfen', why_one: 'Rest 1 kann man nicht mit einem Doppel ausmachen', why_dbl: 'Bei Double Out muss der letzte Pfeil ein Doppel oder Bull sein', why_past: 'Über die Zielpunkte geworfen', hitExact: 'Genau treffen mit',
     wrongTap: 'Falsch getippt? Tippe auf den Pfeil oben.', nextBot: 'Gleich wirft der Computer', nextName: 'Gleich ist {name} dran',
     miss: 'Daneben', undo: 'Zurück', next: 'Nächster',
     leaveQ: 'Spiel verlassen?', leaveP: 'Der Spielstand bleibt gespeichert. Du kannst im Menü mit „Weiter“ fortsetzen.', keepPlaying: 'Weiterspielen', toMenu: 'Zum Menü',
@@ -285,10 +285,10 @@ const STR = {
     tagline: 'Tap where the dart landed. The app does the maths.', language: 'Language',
     running: 'Game in progress', round: 'Round {n}', resume: 'Resume',
     board: 'Board', steel: 'Classic board', steelSub: '20 segments, doubles, trebles, bull', ring: 'Ring board', ringSub: 'Back side: rings 10 to 1',
-    gameType: 'Game', down: 'Count down', downSub: 'From {n} to exactly 0', up: 'Count up', upSub: 'First to reach the target wins',
+    gameType: 'Game', down: 'Count down', downSub: 'From {n} to exactly 0', up: 'Count up', upSub: 'First to hit the target exactly wins',
     startPts: 'Starting score', targetPts: 'Target score', custom: 'Custom', customAria: 'Custom score',
     hint501: 'Tournaments play 501. For a shorter game, pick 301. Everyone throws 3 darts per turn.',
-    hintRace: 'All hits are added up. The first player to reach or pass the target wins.',
+    hintRace: 'All hits are added up. Hit the target exactly to win. Go past it and you bust: that turn scores nothing.',
     finish: 'Finish', exact: 'Exactly 0', exactSub: 'Any segment counts. Reach 0 and you win.',
     dbl: 'Pro: Double out', dblSub: 'The last dart must hit the outer double ring or the bull',
     bustHint: 'Go below 0 and you bust: that turn scores nothing.',
@@ -303,7 +303,7 @@ const STR = {
     quitAria: 'End game', botThrows: 'Computer ({lvl}) is throwing …', yourTurn: '{name} to throw', redoAria: 'Re-enter dart {n} ({l})',
     boardAria: 'Dartboard: tap the spot you hit',
     bust: 'Bust!', visitTotal: 'Turn: {n}',
-    why_over: 'Too many points', why_one: 'You can’t finish on 1 with a double', why_dbl: 'With double out, the last dart must be a double or the bull',
+    why_over: 'Too many points', why_one: 'You can’t finish on 1 with a double', why_dbl: 'With double out, the last dart must be a double or the bull', why_past: 'Went past the target', hitExact: 'Hit it with',
     wrongTap: 'Wrong tap? Tap the dart above.', nextBot: 'The computer throws next', nextName: '{name} is up next',
     miss: 'Miss', undo: 'Undo', next: 'Next',
     leaveQ: 'Leave the game?', leaveP: 'Your game is saved. Tap “Resume” in the menu to carry on.', keepPlaying: 'Keep playing', toMenu: 'Menu',
@@ -315,10 +315,10 @@ const STR = {
     tagline: 'Dotknij miejsca, w które wbiła się lotka. Aplikacja liczy za ciebie.', language: 'Język',
     running: 'Trwająca gra', round: 'Runda {n}', resume: 'Wznów',
     board: 'Tarcza', steel: 'Tarcza turniejowa', steelSub: '20 pól, podwójne, potrójne, bull', ring: 'Tarcza z pierścieniami', ringSub: 'Tył tarczy: pierścienie od 10 do 1',
-    gameType: 'Rodzaj gry', down: 'Odliczanie', downSub: 'Od {n} do dokładnie 0', up: 'Zbieranie punktów', upSub: 'Wygrywa, kto pierwszy osiągnie cel',
+    gameType: 'Rodzaj gry', down: 'Odliczanie', downSub: 'Od {n} do dokładnie 0', up: 'Zbieranie punktów', upSub: 'Wygrywa, kto pierwszy trafi dokładnie w cel',
     startPts: 'Punkty startowe', targetPts: 'Cel punktowy', custom: 'Własne', customAria: 'Własna liczba punktów',
     hint501: 'W turniejach gra się 501, krótsza gra to 301. Każdy rzuca 3 lotkami w kolejce.',
-    hintRace: 'Wszystkie trafienia się sumują. Wygrywa, kto pierwszy osiągnie lub przekroczy cel.',
+    hintRace: 'Wszystkie trafienia się sumują. Wygrywa, kto trafi dokładnie w cel. Kto go przekroczy, ma przerzut: punkty z tej kolejki się nie liczą.',
     finish: 'Zakończenie', exact: 'Dokładnie 0', exactSub: 'Dowolne pole. Kto dojdzie do 0, wygrywa.',
     dbl: 'Pro: Double out', dblSub: 'Ostatnia lotka musi trafić w zewnętrzny pierścień podwójny lub w bull',
     bustHint: 'Kto zejdzie poniżej 0, ma przerzut: punkty z tej kolejki się nie liczą.',
@@ -333,7 +333,7 @@ const STR = {
     quitAria: 'Zakończ grę', botThrows: 'Komputer ({lvl}) rzuca …', yourTurn: 'Rzuca: {name}', redoAria: 'Wpisz ponownie lotkę {n} ({l})',
     boardAria: 'Tarcza: dotknij miejsca, w które trafiłeś',
     bust: 'Przerzut!', visitTotal: 'Kolejka: {n}',
-    why_over: 'Za dużo punktów', why_one: 'Nie da się zakończyć 1 podwójnym', why_dbl: 'Przy double out ostatnia lotka musi trafić w podwójne lub bull',
+    why_over: 'Za dużo punktów', why_one: 'Nie da się zakończyć 1 podwójnym', why_dbl: 'Przy double out ostatnia lotka musi trafić w podwójne lub bull', why_past: 'Przekroczono cel', hitExact: 'Traf dokładnie:',
     wrongTap: 'Pomyłka? Dotknij lotki powyżej.', nextBot: 'Teraz rzuca komputer', nextName: 'Następny: {name}',
     miss: 'Pudło', undo: 'Cofnij', next: 'Dalej',
     leaveQ: 'Wyjść z gry?', leaveP: 'Stan gry zostaje zapisany. W menu dotknij „Wznów”, aby grać dalej.', keepPlaying: 'Graj dalej', toMenu: 'Do menu',
@@ -525,8 +525,17 @@ function throwDart(hit, at) {
     p.score = ns; p.points += hit.v;
     if (ns === 0) return finish();
   } else {
-    p.score += hit.v; p.points += hit.v;
-    if (p.score >= G.value) return finish();
+    // counting up: the target has to be hit exactly, going past it is a bust
+    const ns = p.score + hit.v;
+    if (ns > G.value) {
+      p.points -= p.score - t.start;
+      p.score = t.start;
+      t.bust = true;
+      t.why = 'past';
+      return endTurn();
+    }
+    p.score = ns; p.points += hit.v;
+    if (ns === G.value) return finish();
   }
   if (t.darts.length >= 3) return endTurn();
   commit();
@@ -679,10 +688,11 @@ function renderGame() {
   const modeLabel = (G.board === 'ring' ? t('modeRing') : '') + (x01 ? G.value + (G.out === 'double' ? ' · Double Out' : t('modeExact')) : t('modeTo', { n: G.value }));
   const left = 3 - tn.darts.length;
   let co = null;
-  if (x01 && G.board === 'steel' && !tn.done && p.score <= 180) co = checkout(p.score, left, G.out === 'double');
+  const need = x01 ? p.score : G.value - p.score;
+  if (G.board === 'steel' && !tn.done && need <= 180) co = checkout(need, left, x01 && G.out === 'double');
   const sum = turnSum(tn);
-  const metaLeft = tn.bust ? `<span class="bust">${t('bustShort')}</span>` : !tn.darts.length && co ? t('finishWith') : `${t('visit')} <b class="num">${sum}</b>`;
-  const metaRight = co ? `<span class="co">${co.join(' · ')}</span>` : (x01 ? '' : `<span>${t('toGo', { n: `<b class="num">${Math.max(0, G.value - p.score)}</b>` })}</span>`);
+  const metaLeft = tn.bust ? `<span class="bust">${t('bustShort')}</span>` : !tn.darts.length && co ? t(x01 ? 'finishWith' : 'hitExact') : `${t('visit')} <b class="num">${sum}</b>`;
+  const metaRight = co && (x01 || !tn.darts.length) ? `<span class="co">${co.join(' · ')}</span>` : (x01 ? '' : `<span>${t('toGo', { n: `<b class="num">${Math.max(0, G.value - p.score)}</b>` })}</span>`);
   const pct = x01 ? 0 : Math.min(100, p.score / G.value * 100);
   const why = tn.why ? (STR.de['why_' + tn.why] ? t('why_' + tn.why) : esc(tn.why)) : '';
 
@@ -814,13 +824,14 @@ function aimAt(label) {
 }
 function botAim(p) {
   const left = 3 - G.turn.darts.length;
+  const need = G.mode === 'x01' ? p.score : G.value - p.score;
   if (G.board === 'ring') {
-    if (G.mode !== 'x01' || p.score >= 10) return [0, 0];
-    return [0, -((10 - p.score) * RING_STEP + RING_STEP / 2)];
+    if (need >= 10) return [0, 0];
+    return [0, -((10 - need) * RING_STEP + RING_STEP / 2)];
   }
-  if (G.mode === 'x01' && p.score <= 180) {
-    const dbl = G.out === 'double';
-    const plan = checkout(p.score, left, dbl) || checkout(p.score, 3, dbl);
+  if (need <= 180) {
+    const dbl = G.mode === 'x01' && G.out === 'double';
+    const plan = checkout(need, left, dbl) || checkout(need, 3, dbl);
     if (plan) return aimAt(plan[0]);
   }
   return aimAt('T20');
