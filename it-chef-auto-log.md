@@ -22195,3 +22195,63 @@ run` (73 Testdateien, 554 Tests, alle grün, unverändert gegenüber dem
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-24, 23:11 UTC (fünfundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `main` unverändert seit dem 24. Lauf (letzter Commit
+weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-Stand.
+Zwischen dem 24. Lauf (22:16 UTC) und diesem Lauf (knapp eine Stunde
+später) liegt keine einzige neue Code-Änderung am Repo — der 24. Lauf
+hatte bereits eine ganze Reihe bisher nicht abgesuchter Fehlerklassen
+geprüft (Timeout-Vollständigkeit, `addEventListener`-Leaks, `.sort()`-
+Mutationen, `key={index}`-Stellen, Division-durch-Null, toter `/budget`-
+Link, unbehandelte Promise-Rejections, Doppel-Submit-Schutz, `npm audit`).
+
+**Was heute zusätzlich geprüft wurde** (um nicht nur den 24. Lauf zu
+wiederholen): `tasks/tasks-prd-travix-platform.md` komplett neu
+durchgesehen — alle verbleibenden offenen Punkte (2.x Base44, 4.1-4.3 KI-
+Anbindung, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7/7.12 fehlende Preis-Felder in
+`TripDraft`, 7.4 Mehrfach-Chat-Historie, 8.1-8.6/8.9/8.12 KI-/Produkt-
+Entscheidungen, 8.11 Hilfe-Seite) scheitern weiterhin an mindestens einem
+der vier Sicherheitskriterien (Backend-/Architektur-Abhängigkeit oder
+offene Produktentscheidung) — unverändert gegenüber den Vorläufen, siehe
+`ZEITPLAN.md`. Repo-weit nach `TODO`/`FIXME`/`XXX` gesucht: kein Treffer
+außerhalb von Tests. `dangerouslySetInnerHTML`: kein einziges Vorkommen,
+kein XSS-Risikopfad. `localStorage`-Zugriffe (`tripStorage.ts`): alle drei
+Stellen bereits try/catch-abgesichert mit dokumentierter Begründung, kein
+Fund. `mockConcierge.ts` (Wortgrenzen-Regex je Themen-Erkennung, inkl.
+Mehrwort-Ziel "New York") im Detail nachvollzogen: keine Fehlklassifizierung
+gefunden. `ChecklistPanel.tsx`/`checklistRules.ts`/`calculateProgress.ts`
+gegen die zugehörige `TripDraft`-Struktur geprüft: Feldkatalog weiterhin
+konsistent zwischen allen drei Stellen. `Kartenansicht.tsx` (Leaflet-
+Karte) gelesen: Koordinaten nur für kuratierte, bekannte Ziele, kein
+erfundener Pin, Screenreader-Textliste neben der Karte vorhanden — kein
+Fund. Alle sechs `useEffect`-Aufrufe repo-weit (`KiChat.tsx` dreifach,
+`ChatInput.tsx`, `useConcierge.ts`, `Urlaubsmodus.tsx`, `routes.tsx`)
+einzeln gegen fehlende Abhängigkeiten/Stale-Closures gelesen: alle mit
+korrekter/bewusst leerer Abhängigkeitsliste (z. B. `useEffect(() =>
+stopSpeaking, [])` zum Stoppen der Sprachausgabe beim Verlassen) — kein
+Fund. `reports/support-chef.md` (23.10.) gelesen: die beiden dort
+gemeldeten offenen Punkte (`formatTime()`-Fix auf
+`it-chef-autofix/formattime-invalid-date-2026-10-19`, "+ Suchen"-Edit-
+Shortcut auf `it-chef-autofix/buchung-suchen-edit-shortcut-2026-10-21`)
+sind bereits fertig umgesetzte, eigene Autofix-Branches/PRs, die auf
+Merge nach `main` warten — das ist Freigabe-Chefs/Nis Aufgabe, nicht
+dieses Modus (keine PRs/Merges nach `main`, siehe Skill-Regeln), und eine
+Neuimplementierung auf `it-chef/auto` wäre reine Doppelarbeit mit
+Konfliktrisiko gegenüber der bereits wartenden PR.
+
+**Ergebnis:** Kein Punkt heute (fünfundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute zusätzlich geprüften
+Fehlerklassen ergaben keinen neuen Fund, alle verbleibenden Checkbox-
+Punkte verfehlen weiterhin mindestens eines der vier Sicherheitskriterien,
+und die beiden von Support-Chef gemeldeten offenen Punkte sind bereits
+gelöst, aber noch nicht gemergt (nicht Teil dieses Modus).
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm install` fehlerfrei
+(nur die bekannte `jsdom`-Engine-Warnung), `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (73 Testdateien, 554 Tests, alle
+grün, unverändert gegenüber dem 24. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
