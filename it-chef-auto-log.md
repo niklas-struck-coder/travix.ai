@@ -22113,3 +22113,85 @@ angefasst (Ein-Punkt-Regel).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-24, 22:09 UTC (vierundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, ca. 20 Stunden nach dem letzten
+Lauf desselben Tages (dreiundzwanzigster Lauf, 02:12 UTC, Commit
+`ceadb8f`). `origin/main` seitdem unverändert bei `fe1300e`; `it-chef/auto`
+vollständig in `main` gemergt (Freigabe-Chef hat den Timeout-Fix aus dem
+23. Lauf offenbar bereits übernommen) — Branch frisch von `origin/main`
+neu angelegt, kein Merge nötig.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+gegengeprüft — alle offenen Checkbox-Punkte bleiben aus denselben, seit
+Lauf elf dokumentierten Gründen blockiert (Auth/Base44-Credentials,
+offene Produkt-/Architekturentscheidungen, fehlende Datenmodelle). Punkt
+8.13 ("Write unit tests for calculateProgress, calculateCosts,
+checklistRules, and schema validation") geprüft: `calculateProgress.ts`
+und `checklistRules.ts` haben bereits eigene Testdateien; `calculateCosts`
+(Punkt 6.7) und die Schema-Validierung (Punkt 4.1) existieren im Code
+noch gar nicht (beide noch offen/blockiert) — der Checkbox-Punkt lässt
+sich also nicht vollständig und ohne Annahmen über die fehlenden Teile
+abschließen, Kriterium 3 (klar genug ohne Interpretation) verletzt.
+
+Gezielt neue, bisher nicht abgesuchte Fehlerklassen geprüft: der mit dem
+23. Lauf gefixte Lösch-vor-Setzen-Timeout-Block in `useChat.ts`
+`sendMessage()` deckt tatsächlich alle drei `setTimeout`-Zweige der
+Funktion ab (Flughafen-IATA-Eingabe, generisches Feld-Edit, normaler
+Advisor-Schritt) — keine der drei Stellen hat einen eigenen,
+ungeschützten `setTimeout`-Aufruf außerhalb dieses Blocks, kein Fund.
+`addEventListener`-Aufrufe repo-weit durchsucht: nur zwei Stellen
+(`useChat.ts` beforeunload mit korrektem Cleanup, `utils.ts`
+`focusPageHeading()` mit `{ once: true }`) — kein Leak. Keine
+`.sort()`-Aufrufe im Code, also kein In-Place-Mutations-Risiko bei
+Suchergebnis-Listen. `key={index}`-Stellen (`FlightCard.tsx`,
+`SearchErrorAlert.tsx`) geprüft: beide auf statischen, nicht
+nachträglich umsortierten Listen innerhalb eines einzelnen Renders —
+kein Fund. `calculateProgress()` hat einen konstanten Nenner
+(`PROGRESS_COMPONENTS.length`), kein Division-durch-Null-Risiko. Die
+`/budget`-Route in `nav-config.ts` sieht auf den ersten Blick wie ein
+toter Link aus (Seite laut Aufgabe 7.12 noch nicht gebaut), landet aber
+über den `PlaceholderPage`-Fallback in `routes.tsx` korrekt — kein
+kaputter Link. `searchFlights`/`searchStays`/`callDuffelProxy` komplett
+gegen unbehandelte Promise-Rejections geprüft: durchgängig try/catch,
+wirft nie — kein Fund. Flug-/Hotel-Suchformulare (`FlightWizard.tsx`,
+`HotelWizard.tsx`) haben den Submit-Button bereits korrekt per
+`loading`-Flag gegen Doppel-Submits abgesichert — kein Fund.
+
+Frischer `npm ci` + `npm audit`: Ergebnis hat sich gegenüber dem letzten
+bekannten Stand (siehe neunter/elfter/zwölfter/dreizehnter Lauf)
+verschoben — jetzt 5 Schwachstellen (3 mittel, 2 hoch) statt vorher 9,
+und andere Pakete betroffen (`@vitest/mocker`, `body-parser`, `fast-uri`,
+`undici` statt der früheren `shadcn`-transitiven `braces`/`micromatch`/
+`fast-glob`/`ts-morph` — `shadcn` ist inzwischen bei `4.22.1` angekommen,
+die früher blockierende Major-Version-Problematik dort hat sich damit
+erledigt). Alle fünf verbleibenden Funde sind ausschließlich transitiv
+über reine Dev-Tooling-Pakete (`jsdom`→`undici`, `shadcn`→
+`@dotenvx/dotenvx`/`@modelcontextprotocol/sdk`→`conf`/`express`→
+`ajv`/`fast-uri`/`body-parser`, sowie `vitest`→`@vitest/mocker`), nicht
+im Produktions-Bundle. `npm audit fix` (zur Sicherheit zunächst mit
+`--dry-run`) erneut versucht: bricht weiterhin reproduzierbar mit
+demselben internen `npm`/Arborist-Fehler ab (`TypeError: Cannot read
+properties of null (reading 'edgesOut')`) — derselbe, seit Lauf neun
+dokumentierte Tooling-Bug in `npm@10.9.4`, unabhängig davon, welche
+Pakete konkret betroffen sind. Vor dem Abbruch keine Dateiänderung,
+`git status` danach sauber. Weiterhin kein autonom vertretbarer
+Workaround (siehe Begründung im neunten Lauf) — eher ein Hinweis für Ni
+(`npm`/Node aktualisieren), kein Punkt für diesen Modus.
+
+**Ergebnis:** Kein Punkt heute (vierundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute neu geprüften
+Fehlerklassen ergaben keinen Fund, der bekannte npm-audit-Blocker
+besteht unverändert (nur mit anderen betroffenen Paketen) fort, und alle
+verbleibenden Checkbox-Punkte verfehlen weiterhin mindestens eines der
+vier Sicherheitskriterien.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npm run build`
+(erfolgreich, nur die vorbestehende Chunk-Größen-Warnung), `npx vitest
+run` (73 Testdateien, 554 Tests, alle grün, unverändert gegenüber dem
+23. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
