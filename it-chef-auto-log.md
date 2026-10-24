@@ -21919,3 +21919,69 @@ erfüllt. Regressionsschutz-Baseline unverändert grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-24, 00:11 UTC (einundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, erster des 24.10. `origin/main`
+seit dem zwanzigsten Lauf um einen Commit weiter (Support-Chef-Bericht
+vom 23.10., kein Produktcode); `it-chef/auto` lag bereits zwei Commits
+vor `main`, direkt darauf weitergearbeitet. `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md` unverändert vom
+23.10. — keine neuen Funde der plattform-verwalteten Kanäle seit dem
+letzten Check.
+
+**Punktesuche:** Mit anderem Fokus als die Vorläufe gesucht, statt nur
+zu wiederholen:
+- Testabdeckung systematisch gegen alle `.ts`/`.tsx`-Dateien unter `src/`
+  abgeglichen (Skript: jede Nicht-Test-Datei auf eine passende
+  `*.test.*`-Datei geprüft). Verbleibende neun Dateien ohne eigene
+  Testdatei: `input.tsx`/`label.tsx` (laut Log vom 19.10. bewusst ohne
+  Test, reine Wrapper ohne eigene Logik), `main.tsx`/`test/setup.ts`
+  (reine Einstiegspunkte/Testinfrastruktur) sowie fünf reine
+  Typdeklarationsdateien (`types/chat.ts`, `types/duffel.ts`,
+  `types/profile.ts`, `types/settings.ts`, `types/trains.ts`) ohne
+  Laufzeitverhalten — Testabdeckung ist damit für jede Datei mit
+  tatsächlicher Logik vollständig, kein neuer Fund.
+- Alle `.find(...)`-Aufrufe im `src`-Baum auf direkten Property-Zugriff
+  ohne Undefined-Prüfung geprüft (`stays.ts`, `mockConcierge.ts`,
+  `Reiseentwuerfe.tsx`) — alle drei behandeln ein `undefined`-Ergebnis
+  korrekt (Fallback bzw. Optional Chaining), kein Fund.
+- Alle `htmlFor`/`id`-Paare auf Formularen (`EditMode.tsx`,
+  `FlightWizard.tsx`, `HotelWizard.tsx`, `Einstellungen.tsx`,
+  `Profil.tsx`) gegen das jeweils zugehörige Eingabeelement geprüft —
+  jedes `htmlFor` hat ein passendes `id` auf Input/`SelectTrigger`, kein
+  Fund. Zusätzlich nach `id="..."` innerhalb von `.map()`-Schleifen
+  gesucht (Risiko doppelter DOM-IDs bei Listen) — kein Treffer im ganzen
+  `src`-Baum.
+- `eslint-disable`-Kommentare im `src`-Baum gesucht — keiner vorhanden,
+  kein unterdrückter Lint-Fund zu prüfen.
+- `npm audit` erneut ausgeführt (3 Schwachstellen in transitiven
+  Dev-Abhängigkeiten: `body-parser`, `fast-uri`, `undici` — keine davon
+  Teil des produktiven Bundles). `npm audit fix --dry-run` gezielt selbst
+  reproduziert: bricht wie von IT-Chef im Bericht vom 23.10. dokumentiert
+  mit einem internen `TypeError` (`Cannot read properties of null
+  (reading 'edgesOut')`) in der Dependency-Resolution ab — bestätigt den
+  bekannten, nicht selbst behebbaren Tooling-Fehler im Sandbox-Image statt
+  eines neuen, autonom fixbaren Punkts. Ein unsupervidierter zweiter
+  Versuch mit `--force` würde das Lockfile ohne Kontrollmöglichkeit
+  riskieren — bewusst nicht versucht.
+- `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gegengeprüft: alle
+  offenen Punkte bleiben aus denselben, seit Lauf elf dokumentierten
+  Gründen blockiert (offene Backend-/Architekturentscheidung, fehlende
+  Inhalte, fehlende Datenfelder, rechtliche Pflichttexte). Die beiden in
+  `reports/it-chef.md`/`reports/support-chef.md` (23.10.) weiterhin
+  offenen Funde (uneinheitlich dramatische Lösch-Warnungen,
+  Reise-Checkliste ohne Persistenz) bleiben aus denselben, dort bereits
+  begründeten Gründen eine echte Abwägung bzw. Architekturentscheidung,
+  kein Ein-Zeiler — Sicherheitskriterium 2/3 weiterhin verletzt.
+
+**Ergebnis:** Kein Punkt heute autonom umgesetzt, kein Produktcode
+geändert — alle geprüften, bisher nicht im Detail untersuchten Stellen
+ergaben keinen neuen Fund, und alle verbleibenden offenen Punkte
+verfehlen weiterhin mindestens eines der vier Sicherheitskriterien.
+Regressionsschutz-Baseline frisch durchlaufen (nicht nur wiederholt
+behauptet): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (73 Testdateien, 552 Tests, alle grün).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
