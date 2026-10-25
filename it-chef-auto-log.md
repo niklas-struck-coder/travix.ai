@@ -22255,3 +22255,58 @@ grün, unverändert gegenüber dem 24. Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-25, 00:11 UTC (sechsundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt (bereits
+vollständig vor `main`, kein Merge nötig). Die vom 23. Lauf gefixten
+Timeout-Cleanups in `useChat.ts`/`useConcierge.ts` sind weiterhin nur
+auf diesem Branch vorhanden, noch nicht in `main` gemergt.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegengeprüft — alle offenen Checkbox-Punkte scheitern weiterhin
+an denselben, seit Lauf elf dokumentierten Gründen (Auth/Base44-
+Credentials, offene Produkt-/Architekturentscheidungen, fehlende
+Datenmodelle für Preise/Mehrfach-Chat-Historie). `reports/it-chef.md`
+und `reports/support-chef.md` (beide zuletzt 23.10.) gelesen: die
+beiden dort gemeldeten, bereits gelösten Funde (PR #34 `formatTime()`,
+PR #38 "+ Suchen"-Edit-Shortcut) warten weiterhin nur auf Merge nach
+`main` — nicht Teil dieses Modus, erneute Umsetzung auf `it-chef/auto`
+wäre Doppelarbeit mit Konfliktrisiko. Der dort gemeldete Vorschlag "Lösch-
+Warnungen je nach Reversibilität abstufen" geprüft und wieder
+zurückgestellt: erfordert eine echte Abwägung, welcher Schweregrad zu
+welcher der sieben betroffenen Aktionen passt und welchen Wortlaut sie
+bekommt — Interpretation über das hinaus, was in der Aufgabenliste
+steht, verletzt Kriterium 3.
+
+Gezielt neue, bisher nicht geloggte Stellen gelesen (nicht nur gegrept):
+`lib/trip/calendarUtils.ts` (Monatsraster-/Wochentag-Berechnung, inkl.
+Jahreswechsel in `getPreviousMonth`/`getNextMonth`) — korrekt. `lib/ai/
+speech.ts` (Spracheingabe/-ausgabe) — kein Event-Listener-Leck, `stop
+Speaking()` ruft korrekt `cancel()`. `lib/trip/cartTotals.ts`
+(Warenkorb-Gruppierung/Summe) — fester Typ-Reihenfolge, einfache
+Summenbildung, kein Rundungs- oder Gruppierungsfehler. `components/trip/
+EditMode.tsx` komplett gelesen (Preisfeld ist bewusst Freitext, keine
+numerische Validierung nötig) — kein Fund. `FlightWizard.tsx`s IATA-
+Validierung (`IATA_CODE_PATTERN` + `maxLength={3}`, Submit erst bei
+exaktem 3-Buchstaben-Match) — korrekt vor Übergabe an Duffel abgesichert.
+`MeineReisen.tsx`s Demo-Trip-Status (`upcoming`/`past`) gegen das
+heutige Datum (25.10.2026) geprüft — Lissabon (Nov. 2026) korrekt
+`upcoming`, Kyoto (März 2026) korrekt `past`, keine veraltete Annahme.
+Locale-Formatierung repo-weit (`toLocaleString`/`toLocaleDateString`/
+`Intl.NumberFormat`) durchsucht: durchgängig `'de-DE'`, keine Inkonsistenz.
+
+**Ergebnis:** Kein Punkt heute (sechsundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute zusätzlich geprüften
+Stellen ergaben keinen neuen Fund, und alle verbleibenden Checkbox-
+Punkte verfehlen weiterhin mindestens eines der vier Sicherheitskriterien.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `jsdom`-Engine-Warnung), `npx tsc -b` (0 Fehler), `npm run
+lint` (0 Fehler), `npx vitest run` (73 Testdateien, 554 Tests, alle
+grün, unverändert gegenüber dem 25. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
