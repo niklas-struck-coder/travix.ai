@@ -22310,3 +22310,67 @@ grün, unverändert gegenüber dem 25. Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-25, 01:12 UTC (siebenundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md` (Sprint 4/5) und
+`tasks/tasks-prd-travix-platform.md` erneut gegen die vier
+Sicherheitskriterien geprüft. Sprint 5 hat nur drei offene Punkte: Duffel
+Stays (externe Account-Freischaltung, kein Code-Punkt), die
+Zahlungsprozess-Entscheidung (explizit als Produktentscheidung mit
+rechtlichen Folgen markiert) und 8.13 (Unit-Tests für
+`calculateProgress`, `calculateCosts`, `checklistRules`,
+Schema-Validierung). 8.13 im Detail gegengeprüft: `calculateProgress.ts`
+und `checklistRules.ts` haben bereits vollständige Testdateien
+(`calculateProgress.test.ts`, `checklistRules.test.ts` — beide
+bestehend, nicht von heute). `calculateCosts.ts` existiert weiterhin
+nicht (6.7 selbst noch offen, blockiert auf fehlendes Preis-Feld für
+Transport/Unterkunft in `TripDraft`) — dafür lassen sich keine Tests
+schreiben. Repo-weit nach `zod`/`z.object`/`safeParse`/`function
+validate`/`export function parse` gesucht: keine Schema-Validierungs-
+Logik im Code vorhanden, die zu testen wäre. 8.13 ist damit für den
+heute tatsächlich existierenden Code bereits erledigt; der Rest hängt an
+noch nicht gebautem Code und ist kein eigener Punkt.
+
+Gezielt neue, bisher nicht einzeln geloggte Stellen vollständig gelesen:
+`lib/duffel/client.ts` (Fehlerbehandlung bei Non-OK-Response, kaputtem
+JSON und Netzwerkfehler, `dedupeByMessage()`) — jeder Pfad zeigt eine
+ehrliche deutsche Fallback-Meldung, kein Fund. `pages/Kalender.tsx`
+(dynamisches "Heute" ohne Memoisierung, `aria-current="date"`,
+Screenreader-Textliste unter dem Grid) — korrekt, kein Fund.
+`pages/Preisalarme.tsx` (`targetReached`/`priceChanged`-Bedingungen,
+Lösch-Bestätigungsdialog) — korrekt, kein Fund. `pages/Aktivitaeten.tsx`
+und `pages/Favoriten.tsx` (Entfernen-Button-`aria-label`s) gegen die am
+20.09. gefundene Mehrdeutigkeits-Klasse (gleichnamige Einträge) geprüft:
+anders als `EditMode.tsx`/`Reiseentwuerfe.tsx` haben beide Seiten keine
+Hinzufügen-Funktion und nur fixe, in sich eindeutige Demo-Daten — ein
+Namenskonflikt kann hier gar nicht entstehen, also kein echter Fund.
+`components/trip/ChecklistPanel.tsx` gegen `reports/it-chef.md`
+(23.10.) geprüft: fehlende Persistenz ist dort bereits als bewusst
+zurückgestellt dokumentiert (gleiches Muster wie `Profil.tsx`/
+`Einstellungen.tsx`, abhängig von der offenen Nutzerkonten-Entscheidung)
+— weiterhin kein Punkt für diesen Modus. `components/search/
+HotelWizard.tsx`/`FlightWizard.tsx` (Datums-Mindestwerte, Check-out
+muss nach Check-in liegen) — korrekt, kein Fund. Vorschlag "ungenutzte
+`recharts`-Abhängigkeit entfernen" aus `reports/it-chef.md` erneut
+geprüft: Abhängigkeitsänderungen bleiben für diesen Kanal ausgeschlossen
+(seit Lauf neun dokumentiert, unverändert gültig) — keine Neubewertung
+nötig, kein neuer Grund dagegen oder dafür.
+
+**Ergebnis:** Kein Punkt heute (siebenundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute geprüften Stellen
+ergaben keinen neuen Fund, und alle verbleibenden Checkbox-Punkte
+verfehlen weiterhin mindestens eines der vier Sicherheitskriterien.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version), `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+554 Tests, alle grün, unverändert gegenüber dem 26. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
