@@ -22419,3 +22419,49 @@ die bekannte `EBADENGINE`-Warnung für die Node-Version), `npx tsc -b`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-25, 22:08 UTC (neunundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md` (Sprint 5) und
+`tasks/tasks-prd-travix-platform.md` erneut gegen die vier
+Sicherheitskriterien geprüft — unverändert gegenüber dem 27./28. Lauf:
+Duffel Stays (externe Account-Freischaltung), Zahlungsprozess-Entscheidung
+(explizite Produktentscheidung mit rechtlichen Folgen) und 8.13 bleiben
+die einzigen offenen Sprint-5-Punkte; 8.13 ist für den tatsächlich
+existierenden Code weiterhin bereits erledigt (`calculateProgress.ts`/
+`checklistRules.ts` haben Testdateien, `calculateCosts.ts` existiert
+mangels 6.7 weiterhin nicht, keine Schema-Validierungs-Logik im Code).
+
+Statt blind dem 28.-Lauf-Befund zu vertrauen, eigenständig neu
+gegengeprüft: jede Produktionsdatei (`.ts`/`.tsx` unter `src/`, 82
+Dateien) gegen jede Testdatei abgeglichen (Namensvergleich, da
+`@vitest/coverage-v8` nicht installiert ist und eine Installation als
+Abhängigkeitsänderung für diesen Kanal ausgeschlossen bleibt) — einzige
+Dateien ohne eigene Testdatei sind `ui/input.tsx`/`ui/label.tsx` (seit
+19.10. dokumentiert: keine eigene Logik), `main.tsx`, `test/setup.ts`,
+`vite-env.d.ts` und die reinen Typdefinitionsdateien unter `types/` (kein
+Verhalten zu testen) — keine neue Lücke. Zusätzlich `lib/trip/
+calendarUtils.ts` und `lib/format.ts` unabhängig komplett neu gelesen
+(nicht nur gegen frühere Logeinträge verglichen): Monatsraster-/Wochentag-
+Berechnung, Jahreswechsel in `getPreviousMonth`/`getNextMonth`,
+`formatOfferPrice`s `try/catch` um `Intl.NumberFormat` bei ungültigem
+Währungscode, `formatDuration`s Regex-Zerlegung — jeweils korrekt, kein
+neuer Fund.
+
+**Ergebnis:** Kein Punkt heute (neunundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — weder die erneute Punktesuche noch
+die unabhängige Gegenprüfung ergaben einen neuen Fund oder einen Punkt,
+der alle vier Sicherheitskriterien erfüllt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version), `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+554 Tests, alle grün, unverändert gegenüber dem 28. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
