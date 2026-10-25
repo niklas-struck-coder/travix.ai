@@ -22374,3 +22374,48 @@ die bekannte `EBADENGINE`-Warnung für die Node-Version), `npx tsc -b`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-25, 02:10 UTC (achtundzwanzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft. Alle 36 offenen
+Checkbox-Punkte in der Taskliste hängen weiterhin an mindestens einem
+der bekannten Blocker: Backend-Entscheidung Base44 vs. Alternative
+(2.x), Gemini/Base44-Zugangsdaten (4.1-4.3), fehlende Provider-Auswahl
+für Zug/Bus/Fähre (5.7-Rest), fehlende Preis-/Provider-URL-Felder in
+`TripDraft` (6.2, 6.6, 6.7, 7.12), eigene Architektur-Entscheidung für
+mehrere parallele Chat-Historien (7.4-Rest), noch nicht gebauter Code
+ohne etwas zu testendes (8.13-Rest), oder echte Nutzerdaten/Rechtliches
+(Rechtstexte, Auth). Kein Punkt davon erfüllt heute neu alle vier
+Kriterien.
+
+Zusätzlich gegengeprüft, ob eine der 27 vorherigen Läufe eine Stelle im
+Code übersehen haben könnte: jede `.ts`/`.tsx`-Datei unter `src/`
+(außer Tests) mit den im gesamten `it-chef-auto-log.md` bisher genannten
+Dateinamen abgeglichen — alle 82 Produktionsdateien wurden in
+früheren Läufen bereits mindestens einmal einzeln gelesen und geprüft.
+Repo-weit nach `TODO`/`FIXME`/`XXX` und übrig gebliebenen
+`console.log`/`console.debug`-Aufrufen außerhalb von Tests gesucht:
+keine Treffer. `npm audit` zeigt weiterhin 5 bekannte Schwachstellen
+(3 moderate, 2 high) in Dev-Dependencies — Abhängigkeitsänderungen
+bleiben für diesen Kanal ausgeschlossen (seit Lauf neun dokumentiert),
+keine Neubewertung nötig.
+
+**Ergebnis:** Kein Punkt heute (achtundzwanzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — es gibt derzeit keinen offenen
+Punkt, der alle vier Sicherheitskriterien erfüllt, und eine gezielte
+Suche nach bisher unentdeckten Fehlstellen im bestehenden Code ergab
+ebenfalls keinen neuen Fund.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version), `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+554 Tests, alle grün, unverändert gegenüber dem 27. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
