@@ -22731,3 +22731,74 @@ neuer Test, alle grün), `npm run build` (0 Typfehler, unveränderte
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-26, 22:12 UTC (vierunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen, `git merge
+origin/main` meldet "Already up to date").
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte scheitern
+weiterhin an mindestens einem der seit Lauf elf dokumentierten Blocker.
+
+Da die letzten Läufe bereits sehr erschöpfend nach Logikfehlern,
+fehlender Testabdeckung, Barrierefreiheit und Duplikaten gesucht haben,
+diesmal bewusst andere, bisher nicht im Log genannte Ecken geprüft:
+- `vite-plugins/duffel-proxy.ts` (Dev-Server-Middleware für den
+  Duffel-API-Proxy, bisher nirgends im Log erwähnt, da außerhalb von
+  `src/`) komplett gelesen: Fehlerpfade (fehlender API-Key, Upstream-
+  Fehler), Body-Weiterleitung, Header-Handling — sauber, kein Fund.
+  Bewusst nicht als Testabdeckungslücke behandelt: Der Proxy existiert
+  nur, damit der Duffel-Secret-Key im Dev-Server bleibt und nie in den
+  Browser gelangt (direkter Bezug zur Duffel-Buchungsintegration) —
+  fällt damit unter das Zahlungs-/Buchungs-Ausschlusskriterium, selbst
+  für reine Testabdeckung ohne Verhaltensänderung.
+- Vollständiger, eigener (nicht nur wiederholter) Abgleich aller
+  Produktions-`.ts`/`.tsx`-Dateien unter `src/` gegen `*.test.ts(x)`
+  erneut durchgeführt: identische Ausnahmeliste wie in den Vorläufen
+  dokumentiert (`ui/input.tsx`, `ui/label.tsx`, `main.tsx`, reine
+  Typdeklarationsdateien unter `src/types/`) — keine neue Lücke.
+  `src/pages/Kartenansicht.tsx` (Leaflet-Karte) komplett gelesen:
+  Der klassische Leaflet/Bundler-Bug mit kaputten Standard-Marker-
+  Icon-Assets ist bereits durch einen eigenen `DivIcon`
+  (teal-Punkt statt Standard-Icon) umgangen — dokumentiert im
+  Code-Kommentar, kein Fund.
+- `npm audit` neu geprüft (5 bekannte Schwachstellen, ausschließlich
+  transitive Dev-Dependencies von `vitest`/Test-Tooling, kein
+  Produktionscode betroffen): `npm audit fix --dry-run` bricht mit
+  einem internen npm-Fehler ab ("Cannot read properties of null
+  (reading 'edgesOut')") — ein Fix wäre also kein klar umsetzbarer,
+  objektiv prüfbarer Einzeiler, sondern bräuchte manuelles Auflösen
+  eines kaputten Abhängigkeitsgraphen; bewusst nicht versucht, um
+  `package-lock.json` nicht unkontrolliert zu verändern. Bleibt
+  offener, aber nicht autonom sicher umsetzbarer Punkt.
+- `index.html` geprüft: Favicon ist weiterhin der Vite-Standard
+  (`/vite.svg`) statt eines Travix-Icons, es fehlt eine Meta-
+  Description. Beides bewusst nicht autonom behoben — ein eigenes Icon-
+  Asset bzw. eine erfundene Beschreibung wäre eine Design-/Content-
+  Entscheidung, die laut `MARKENDESIGN.md`/Kriterium 3 Marketing-Chef
+  bzw. Ni zusteht, nicht dem IT-Chef.
+- Repo-weit nach `setTimeout`/`setInterval` außerhalb von Tests gesucht
+  (`useConcierge.ts`, `useChat.ts`, drei Stellen) — alle über
+  `replyTimeoutRef` mit bestehendem Cleanup abgesichert (bereits seit
+  Lauf 23 bekannt), kein Fund.
+
+**Ergebnis:** Kein Punkt heute (vierunddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute gezielt geprüften, bisher
+nicht genannten Ecken (Dev-Proxy, Kartenansicht, Favicon/Meta,
+npm-audit-Fix-Versuch) ergaben keinen sicher umsetzbaren Punkt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version sowie die 5
+bekannten `npm audit`-Schwachstellen in Dev-Dependencies), `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+555 Tests, alle grün, unverändert gegenüber dem 33. Lauf), `npm run
+build` (0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung — bekannt,
+kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
