@@ -22519,3 +22519,70 @@ kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-26, 00:08 UTC (einunddreißigster Lauf — Fix: "Invalid Date" statt Platzhalter in `formatTime()`)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — alle offenen
+Checkbox-Punkte scheitern weiterhin an mindestens einem der seit Lauf elf
+dokumentierten Blocker (Backend-/Auth-Entscheidung, Gemini/Base44-
+Zugangsdaten, fehlende Provider-Auswahl Zug/Bus/Fähre, fehlende Preis-/
+Provider-URL-Felder in `TripDraft`, eigene Architekturentscheidung für
+parallele Chat-Historien, noch nicht gebauter Code ohne etwas zu
+Testendes, echte Nutzerdaten/Rechtliches). Gezielt geprüft, ob 8.11
+Hilfe oder 8.9 Premium heute doch sicher genug sind: 8.11 bleibt
+blockiert, weil die FAQ-Inhalte dafür laut `ZEITPLAN.md`
+(Sprint-2-Eintrag Support-Chef) noch gar nicht erarbeitet sind — selbst
+zu texten wäre "erfunden" statt "ehrlich", verstößt also gegen
+`MARKENDESIGN.md`s Grundregel; 8.9 Premium hat direkten Zahlungsbezug
+(Abo-Stufe) und hängt zusätzlich an der noch offenen
+Zahlungsprozess-Produktentscheidung (Sprint 5) — beides schließt
+Kriterium 1 aus.
+
+Diesmal nicht nur die eigene Checkbox-Liste, sondern auch die
+plattform-verwalteten Berichte (`reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md`, Stand 23.10.)
+gegen den tatsächlichen Code verifiziert. Dabei einen konkreten, bereits
+mehrfach wiederholt gemeldeten und inzwischen selbst nachvollzogenen
+Fund bestätigt: `reports/support-chef.md` nennt seit mehreren Berichten
+in Folge "PR #34" als fertigen, aber nicht gemergten Fix für
+`src/lib/format.ts:23` — `formatTime()` zeigt bei einem nicht
+parsebaren Zeitstempel wörtlich "Invalid Date" statt eines Platzhalters.
+Live im Code nachgeprüft (nicht nur dem Bericht vertraut): `new
+Date('nicht-valide').toLocaleTimeString('de-DE', …)` wirft dafür keine
+Exception, liefert aber tatsächlich die Zeichenkette `"Invalid Date"`
+zurück (per Node-REPL reproduziert). `formatTime()` hatte bisher nur
+einen Guard für eine leere/fehlende Eingabe (`if (!isoString) return
+'—'`), nicht aber für eine nicht-leere, aber ungültige. Erfüllt alle
+vier Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-
+Bezug, keine offene Produkt-/Architekturentscheidung, klar genug
+beschrieben (Bug + erwartetes Verhalten stehen fest, keine Interpretation
+nötig), objektiv prüfbar (Unit-Test mit ungültigem Zeitstempel).
+
+**Umsetzung:** `formatTime()` (`src/lib/format.ts`) um einen zweiten
+Guard ergänzt: `date.getTime()` wird nach dem Parsen per
+`Number.isNaN()` geprüft, bei `true` liefert die Funktion jetzt denselben
+`—`-Platzhalter wie beim leeren-Eingabe-Fall — exakt das bereits
+etablierte Muster aus der direkt daneben stehenden `formatDuration()`.
+Kein Verhaltenswechsel für einen gültigen Zeitstempel. Betrifft
+`TrainCard.tsx` und `FlightCard.tsx`, die beide über `formatTime()`
+Ab-/Anflugzeiten anzeigen. Neuer Regressionstest in `format.test.ts`
+("shows a placeholder dash instead of the literal 'Invalid Date' for an
+unparseable timestamp"), vor dem Fix manuell gegen den alten Code
+verifiziert (hätte `"Invalid Date"` statt `"—"` erwartet). Checkbox-
+Dateien mitaktualisiert: `tasks/tasks-prd-travix-platform.md` (5.4-Eintrag)
+und `ZEITPLAN.md` (5.4-Eintrag im Sprint-1-Abschnitt).
+
+**Geprüft:** `npm ci` fehlerfrei (nur die bekannte `EBADENGINE`-Warnung
+für die Node-Version), `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (73 Testdateien, 555 Tests — 554 vorher +1
+neuer Test, alle grün), `npm run build` (0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

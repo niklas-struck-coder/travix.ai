@@ -3194,6 +3194,18 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Regressionstests in `FlightCard.test.tsx` (Datum ohne Label bei
   einfacher Flugsuche; beide Labels plus je eigenes Datum bei Hin- und
   Rückflug).
+  Vom autonomen IT-Chef-Lauf am 26.10. einen von `reports/support-chef.md`
+  (23.10., seit mehreren Berichten unverändert wiederholt gemeldet) Fund
+  behoben: `formatTime()` (`src/lib/format.ts:23`) hatte nur einen Guard
+  für eine leere/fehlende Eingabe, nicht aber für einen nicht-leeren,
+  aber nicht parsebaren Zeitstempel — `new Date(ungültig)
+  .toLocaleTimeString()` wirft dafür keine Exception, sondern liefert
+  wörtlich die Zeichenkette "Invalid Date" zurück, die unverändert neben
+  dem Uhr-Icon in `TrainCard.tsx`/`FlightCard.tsx` erschienen wäre. Fix:
+  zusätzlicher `Number.isNaN(date.getTime())`-Guard direkt nach dem
+  Parsen, Rückgabe des bereits etablierten `—`-Platzhalters, exakt das
+  gleiche Muster wie in `formatDuration()` daneben. Neuer Regressionstest
+  in `format.test.ts`.
 - [x] 5.5 `TrainResults.tsx` — Listenansicht steht (analog zu
   `HotelResults.tsx`), noch nicht in KI-Chat eingebunden (5.7 offen)
 - [x] 5.11 Flugauswahl korrekt ins Trip-Transport-Objekt integrieren —
