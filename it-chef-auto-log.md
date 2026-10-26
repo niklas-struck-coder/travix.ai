@@ -22520,6 +22520,87 @@ kein neuer Fund).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
 
+## 2026-10-26, 02:11 UTC (dreiunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen). `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md` unverändert vom
+23.10. (keine neuen Funde der plattform-verwalteten Kanäle seit dem
+letzten Check).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte scheitern
+weiterhin an mindestens einem der seit Lauf elf dokumentierten Blocker
+(Backend-/Auth-Entscheidung, Gemini/Base44-Zugangsdaten, fehlende
+Provider-Auswahl Zug/Bus/Fähre, fehlende Preis-/Provider-URL-Felder in
+`TripDraft`, eigene Architekturentscheidung für parallele Chat-
+Historien, noch nicht gebauter Code ohne etwas zu Testendes, oder echte
+Nutzerdaten/Rechtliches).
+
+Statt nur die Checkliste gegenzuprüfen, diesmal gezielt Dateien
+komplett neu und unabhängig gelesen, die in den Zusammenfassungen der
+letzten Läufe nicht namentlich als "komplett gelesen" auftauchten (auch
+wenn frühere Läufe sie ggf. schon geprüft hatten) — Ziel: ein
+genuin neuer Blickwinkel statt reiner Wiederholung:
+- `src/lib/ai/mockAdvisor.ts`, `src/lib/ai/mockConcierge.ts`,
+  `src/lib/ai/speech.ts`, `src/lib/duffel/client.ts` komplett gelesen —
+  Transportmittel-Erkennung, Zielort-Fakten-Matching (Wortgrenzen-Regex),
+  Spracherkennung/-ausgabe (Cleanup, Fehlerpfade), Duffel-Error-Mapping/
+  -Dedupe: durchgängig korrekt, kein Fund.
+- `src/pages/Kartenansicht.tsx`, `Einstellungen.tsx`, `ReiseSuche.tsx`,
+  `Flugsuche.tsx`, `Hotelsuche.tsx`, `MeineReisen.tsx`,
+  `Urlaubsmodus.tsx` komplett gelesen — Race-Condition-Schutz bei
+  Flug-/Hotelsuche (`searchGenerationRef`, analog `useChat.ts`),
+  Demo-Reisedaten in `MeineReisen.tsx` (Lissabon November/Kyoto März,
+  beide konsistent zum aktuellen Datum als "bevorstehend"/"abgeschlossen"
+  eingestuft), `?destination=`/`?dates=`-Übernahme in `Urlaubsmodus.tsx`:
+  kein Fund.
+- `src/components/search/FlightCard.tsx`, `HotelCard.tsx`,
+  `TrainCard.tsx`, `src/components/chat/ChatInput.tsx`,
+  `ChatMessage.tsx`, `QuickReplies.tsx`, `TripSummaryCard.tsx`,
+  `src/components/chat/KiChat.tsx` komplett gelesen — dabei gezielt
+  `ChatMessage.tsx`s eigene, lokale `formatTime(timestamp: number)`
+  gegen den erst gestern (31. Lauf) in `format.ts`s gleichnamiger, aber
+  signaturverschiedener `formatTime(isoString: string)` gefixten
+  "Invalid Date"-Fund geprüft: kein verwandter Bug, da
+  `timestamp` ausschließlich aus `Date.now()` stammt
+  (`useChat.ts`/`useConcierge.ts`s `makeMessage()`), nie aus einer
+  parsebaren/ungültigen externen Zeichenkette — kein Fund.
+- `src/hooks/useChat.ts`, `useConcierge.ts`, `src/lib/trip/
+  tripStorage.ts`, `calculateProgress.ts`, `cartTotals.ts`,
+  `checklistRules.ts` komplett (neu) gelesen — Edit-Flow-Zustände
+  (`awaitingFlightOrigin`, Generation-Tracking bei `startEdit`),
+  localStorage-Fallbacks, Divisionen in `calculateProgress`/
+  `cartTotals` (feste Nenner, kein Division-durch-Null-Risiko): kein
+  Fund.
+- `TrainCard.tsx`/`TrainResults.tsx` gegengeprüft: `TrainResults` wird
+  nirgends importiert (nur `KiChat.tsx` nutzt `HotelResults`/
+  `FlightResults`) — bestätigt den bereits in `reports/it-chef.md`
+  (23.10.) gemeldeten Befund ("vollständig implementiert, aber keine
+  Zugsuche-Seite/Nav-Eintrag/Datenquelle") als unverändert eine offene
+  Produktentscheidung, kein autonom behebbarer Punkt.
+
+**Ergebnis:** Kein Punkt heute (dreiunddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute mit neuem Fokus
+gelesenen Dateien (KI-Mock-Logik, Such-/Kartenseiten, Karten-/Chat-
+Komponenten, Chat-Hooks, Trip-Berechnungen) ergaben keinen neuen Fund,
+und alle verbleibenden Checkbox-Punkte verfehlen weiterhin mindestens
+eines der vier Sicherheitskriterien.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version, sowie die
+bekannten 5 `npm audit`-Schwachstellen in Dev-Dependencies), `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien,
+555 Tests, alle grün, unverändert gegenüber dem 32. Lauf), `npm run
+build` (0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung — bekannt,
+kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
 ## 2026-10-26, 01:15 UTC (zweiunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
 
 **Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
