@@ -23023,3 +23023,67 @@ Size-Warnung — bekannt, kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-27, 22:09 UTC (neununddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen, bestätigt per
+`git log origin/main..origin/it-chef/auto` leer in Gegenrichtung).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte (Base44-Setup,
+KI-Engine/InvokeLLM, Zug/Bus/Fähre-Suche, Reiseplan-Provider-Links,
+`calculateCosts.ts`/`CostBreakdown.tsx`, Urlaubsmodus-KI-Funktionen,
+DealFinderChat, Premium/Hilfe-Seiten usw.) scheitern weiterhin an
+mindestens einem der seit Lauf elf dokumentierten Blocker (fehlende
+Credentials, offene Produkt-/Architekturentscheidung oder fehlende
+Datenmodell-Felder wie Preis-/Provider-URL-Felder in `TripDraft`).
+
+Eigene, unabhängige Stichprobe mit neuem Fokus gegenüber den
+Vorläufen:
+- `src/lib/nav-config.ts` gegen `src/routes.tsx` geprüft: `/hilfe`,
+  `/deal-finder`, `/budget`, `/premium` stehen in `navGroups`/
+  `extraRoutes`, aber nicht in `routes.tsx`s expliziter Routenliste —
+  auf den ersten Blick ein möglicher kaputter Link zur 404-Seite.
+  Beim Lesen von `routes.tsx` (Zeile 94–106) bestätigt: harmlos, denn
+  `allRoutes.filter(item => !builtRoutes.has(item.path))` rendert für
+  genau diese noch nicht gebauten Pfade automatisch eine
+  `PlaceholderPage` statt der 404-Route — kein Bug, Mechanismus
+  funktioniert wie im Kommentar in `nav-config.ts` beschrieben.
+- Alle `navigate('...')`- und `to="..."`-Aufrufe in `src/**/*.tsx`
+  (außerhalb Tests) gegen die Routenliste abgeglichen: ausschließlich
+  `/`, `/buchung`, `/entwuerfe`, `/ki-chat`, `/reise-planen`,
+  `/urlaubsmodus` — alle existieren, kein toter Link gefunden.
+- Repo-weit nach `key={index}`/`key={i}` in `.tsx` außerhalb von Tests
+  gesucht: zwei Treffer. `SearchErrorAlert.tsx` bereits im 38. Lauf
+  geprüft und als unkritisch bewertet (siehe dortiger Log-Eintrag).
+  Neu geprüft: `FlightCard.tsx` (`offer.slices.map((slice, index) =>
+  ... key={index}`) — ebenfalls unkritisch, da `offer.slices` pro
+  Render aus einem einmaligen, abgeschlossenen Duffel-Angebot kommt
+  (max. 2 Einträge, Hin-/Rückflug) und sich nie umsortiert oder
+  Einträge entfernt; kein beobachtbarer Fehler, nur stilistisch wäre
+  ein stabilerer Key (z. B. Segment-ID) denkbar — ohne Fehlverhalten
+  kein autonom umsetzbarer Punkt.
+- Icon-only-Buttons (`size="icon"`) in `src/pages/Kalender.tsx` und
+  `src/pages/Warenkorb.tsx` (bisher nicht einzeln im Log mit Fokus auf
+  genau dieses Muster genannt) stichprobenhaft gegen fehlende
+  `aria-label` geprüft — alle vorhanden, kein Fund.
+- Repo-weit nach leeren Catch-Blöcken (`catch (...) {}`) und
+  `as any`-Type-Assertions in `src/**/*.ts(x)` außerhalb von Tests
+  gesucht: kein Treffer.
+- Repo-weit nach `eslint-disable`-Kommentaren in `src/**/*.ts(x)`
+  außerhalb von Tests gesucht: kein Treffer.
+
+**Ergebnis:** Kein Punkt heute (neununddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(73 Testdateien, 555 Tests, alle grün, unverändert gegenüber dem
+38. Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
