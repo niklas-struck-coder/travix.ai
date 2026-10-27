@@ -23087,3 +23087,70 @@ Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+
+## 2026-10-27, 23:11 UTC (vierzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem 23.10. (weiterhin
+`fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-Stand —
+Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte scheitern
+weiterhin an mindestens einem der seit Lauf elf dokumentierten Blocker
+(Backend-/Auth-Entscheidung, Gemini/Base44-Zugangsdaten, fehlende
+Provider-Auswahl Zug/Bus/Fähre, fehlende Preis-/Provider-URL-Felder in
+`TripDraft`, noch nicht gebauter Code ohne etwas zu Testendes, oder
+echte Nutzerdaten/Rechtliches/Zahlungen). 8.13 (Unit-Tests für
+`calculateProgress`/`calculateCosts`/`checklistRules`/Schema-
+Validierung) erneut gegengeprüft: `calculateProgress.ts` und
+`checklistRules.ts` haben bereits eigene Testdateien,
+`calculateCosts.ts` und eine Schema-Validierung existieren weiterhin
+nicht im Code (siehe Lauf elf/zwölf) — Punkt bleibt als Ganzes nicht
+abschließbar.
+
+Eigene, unabhängige Stichprobe mit neuem Fokus gegenüber den
+Vorläufen:
+- Dynamische deutsche Pluralisierung bei Zeit-/Mengenangaben geprüft
+  (klassischer Bugtyp: "1 Tage" statt "1 Tag") — repo-weit nach
+  Vorkommen von "Tage"/"Nächte"/"Ergebnisse"/"Punkte" sowie allen
+  Stellen mit `formatDuration`/Datums-Differenzen gesucht
+  (`src/lib/trip/calendarUtils.ts`, `TripSummaryCard.tsx`,
+  `format.ts`): alle Vorkommen sind entweder fest kodierte
+  Demo-Zahlen (z. B. "5 Nächte" in `Dashboard.tsx`/`Warenkorb.tsx`,
+  nie dynamisch berechnet) oder reine Datumsformatierung ohne
+  Pluralform (`formatMonthLabel`, `formatDuration` gibt "Xh Ym"
+  zurück) — keine dynamische Zahl+Substantiv-Kombination mit
+  Pluralisierungsrisiko im gesamten `src`-Baum gefunden.
+- `calendarUtils.ts` und `TripSummaryCard.tsx` (bisher nicht mit
+  diesem Fokus einzeln gelesen) komplett durchgesehen — beide bereits
+  mit eigener Testdatei (`calendarUtils.test.ts`) bzw. einfache, reine
+  Darstellungskomponente ohne Logiklücke, kein Fund.
+- Den dokumentierten npm-Tooling-Bug (`TypeError: Cannot read
+  properties of null (reading 'edgesOut')` in `@npmcli/arborist`) ein
+  weiteres Mal gegengeprüft, ob er in diesem Container evtl. behoben
+  ist: `npm ci` fehlerfrei, `npm audit` zeigt unverändert 5
+  Schwachstellen (1 moderate `@vitest/mocker`-Fund ohne `--force`
+  fixbar, der Rest nur mit `--force`/Major-Sprung). `npm audit fix
+  --dry-run` schlägt weiterhin mit demselben `edgesOut`-Fehler fehl —
+  Reproduktion Nummer fünf, unverändert kein autonom lösbarer Punkt
+  ohne Workaround mit unklaren Nebenwirkungen.
+
+**Ergebnis:** Kein Punkt heute (vierzigster Lauf) autonom umgesetzt,
+kein Produktcode geändert — die heute gezielt geprüfte Ecke (deutsche
+Pluralisierung bei dynamischen Mengenangaben) sowie die erneute
+Gegenprüfung von 8.13 und dem npm-Tooling-Bug ergaben keinen sicher
+umsetzbaren Punkt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei
+(nur die bekannte `EBADENGINE`-Warnung für die Node-Version sowie die
+5 bekannten `npm audit`-Schwachstellen in Dev-Dependencies), `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73
+Testdateien, 555 Tests, alle grün, unverändert gegenüber dem 39. Lauf),
+`npm run build` (0 Typfehler, unveränderte 811-KB-Chunk-Size-Warnung —
+bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
