@@ -22803,6 +22803,68 @@ kein neuer Fund).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
 
+## 2026-10-27, 01:18 UTC (siebenunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, `git merge
+origin/main` meldet "Already up to date".
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft, inklusive 8.13
+("Write unit tests for calculateProgress, calculateCosts,
+checklistRules, and schema validation") als möglicher Sonderfall — bei
+näherer Prüfung bleibt auch dieser Punkt blockiert: `calculateProgress`
+und `checklistRules` haben bereits Tests (`calculateProgress.test.ts`,
+`checklistRules.test.ts`), die `calculateCosts.ts`- und
+Schema-Validierungs-Hälfte des Punkts existiert dagegen noch gar nicht
+im Code (6.7 bzw. 4.1 sind selbst noch offen/blockiert) — kein Testziel
+ohne zuerst eine der blockierten Implementierungen zu bauen, also
+weiterhin kein eigenständig umsetzbarer Rest-Scope.
+
+Eigene, unabhängige Stichprobe mit anderem Fokus als die Vorläufe
+(Icon-Buttons ohne `aria-label`, `<img>` ohne `alt`, `eslint-disable`-
+Kommentare, Datums-/Zeit-/Dauer-Formatierung, Web-Speech-API-Nutzung):
+- Alle `<img>`-Tags unter `src/` geprüft — kein Treffer ohne `alt`.
+- Repo-weit nach `eslint-disable` in `src/**/*.ts(x)` gesucht
+  (außerhalb von Tests) — kein Treffer.
+- Alle Icon-only-Buttons mit `onClick` durchgegangen (`Sidebar.tsx`
+  Ein-/Ausklappen, `MobileNav.tsx` Menü-Button, `ChatInput.tsx` Mikro-/
+  Senden-Button, `KiChat.tsx` Sprachausgabe-/Neu-starten-Button,
+  `ChecklistPanel.tsx` manuelle Checkbox-Buttons) — alle haben bereits
+  ein passendes `aria-label`/`aria-pressed`, kein Fund.
+- `src/lib/format.ts` (`formatEuro`, `formatOfferPrice`, `formatTime`,
+  `summarizeFlightOffer`, `formatDuration`) und
+  `src/lib/trip/calendarUtils.ts` (Monatsraster, Wochentags-/
+  Monatsnamen, Vor-/Folgemonat) komplett gelesen (bisher nicht einzeln
+  im Log genannt) — beide bereits mit Edge-Case-Absicherung (NaN-
+  Timestamps, fehlender/ungültiger Währungscode, Monatswechsel über
+  Jahresgrenzen), kein Fund.
+- `src/lib/ai/speech.ts` (`startListening`, `speak`, `stopSpeaking`)
+  gegen den bekannten "Sprachausgabe stoppt nicht"-Bugtyp geprüft (vgl.
+  offene `it-chef-autofix/sprachausgabe-stoppt-nicht`-Branch des
+  anderen, plattform-verwalteten IT-Chef-Skills) — `speak()` ruft vor
+  jedem neuen Utterance `speechSynthesis.cancel()`, `KiChat.tsx` räumt
+  zusätzlich per `useEffect(() => stopSpeaking, [])` beim Unmount auf;
+  kein eigener, hier reproduzierbarer Fund in dieser Version des Codes.
+
+**Ergebnis:** Kein Punkt heute (siebenunddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute gezielt geprüften
+Ecken (Checklisten-Punkt 8.13, Accessibility von Icon-Buttons, Format-/
+Kalenderfunktionen, Speech-API) ergaben keinen sicher umsetzbaren
+Punkt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei
+(nur die bekannte `EBADENGINE`-Warnung für die Node-Version sowie die
+5 bekannten `npm audit`-Schwachstellen in Dev-Dependencies), `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73
+Testdateien, 555 Tests, alle grün, unverändert gegenüber dem
+36. Lauf), `npm run build` (0 Typfehler, unveränderte 811-KB-Chunk-
+Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
 ## 2026-10-27, 00:12 UTC (sechsunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
 
 **Ausgangslage:** `origin/main` unverändert seit dem 23.10.
