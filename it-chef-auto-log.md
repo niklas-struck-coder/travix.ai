@@ -22803,6 +22803,59 @@ kein neuer Fund).
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
 
+## 2026-10-27, 00:12 UTC (sechsunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem 23.10.
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, `git merge
+origin/main` meldet "Already up to date".
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte scheitern
+weiterhin an mindestens einem der seit Lauf elf dokumentierten Blocker.
+
+Eigene, unabhängige Stichprobe heute mit anderem Fokus als die
+Vorläufe (Event-Listener-Leaks, veraltete Key-Props, ungeschützte
+`JSON.parse`-Aufrufe, Race Conditions bei asynchronen Requests):
+- Alle `addEventListener`-Stellen in `src/` geprüft (einzige
+  Fundstelle: `useChat.ts`, `beforeunload`-Handler) — hat bereits ein
+  korrektes `removeEventListener` im Cleanup des `useEffect`, kein Fund.
+- Alle `key={index}`-Verwendungen geprüft (`FlightCard.tsx` für
+  `offer.slices`, `SearchErrorAlert.tsx` für `errors`) — beide Listen
+  sind pro Render fix und werden nie umsortiert/gefiltert, also kein
+  echtes Key-Stabilitätsproblem (anders als bei einer Liste mit
+  Entfernen/Neuordnen), bewusst nicht als Fund gewertet.
+- Alle drei `JSON.parse`-Aufrufe in Produktionscode/Tests geprüft
+  (`tripStorage.ts` `loadStoredChat()`) — bereits in try/catch mit
+  Default-Werten für fehlende Legacy-Felder abgesichert (ausführlich im
+  Code selbst kommentiert), kein Fund.
+- `src/lib/duffel/client.ts` (`callDuffelProxy`, `searchFlights`,
+  `searchStays`) auf Race Conditions bei schnellen, wiederholten
+  Suchanfragen geprüft — fällt wie der zugehörige Dev-Proxy (s.
+  34. Lauf) unter das Zahlungs-/Buchungs-Ausschlusskriterium, selbst
+  für eine reine Robustheitsverbesserung ohne Verhaltensänderung für
+  den Erfolgsfall; bewusst nicht als autonom sicherer Punkt behandelt.
+- Vollständiger, eigener Abgleich aller Produktions-`.ts`/`.tsx`-Dateien
+  unter `src/` gegen `*.test.ts(x)` erneut durchgeführt (per Skript,
+  nicht nur Sichtprüfung): identische, bereits dokumentierte
+  Ausnahmeliste (`ui/input.tsx`, `ui/label.tsx`, `main.tsx`) — keine
+  neue Lücke.
+
+**Ergebnis:** Kein Punkt heute (sechsunddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute gezielt geprüften
+Ecken (Event-Listener, Key-Props, JSON.parse-Absicherung, Duffel-Race-
+Conditions) ergaben keinen sicher umsetzbaren Punkt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(73 Testdateien, 555 Tests, alle grün, unverändert gegenüber dem
+35. Lauf), `npm run build` (0 Typfehler, unveränderte 811-KB-Chunk-
+Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
 ## 2026-10-26, 23:09 UTC (fünfunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
 
 **Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
