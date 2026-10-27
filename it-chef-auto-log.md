@@ -22955,3 +22955,71 @@ Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-27, 02:12 UTC (achtunddreißigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `origin/main` unverändert seit dem letzten Lauf
+(weiterhin `fe1300e`), `it-chef/auto` entsprechend ohne neuen Basis-
+Stand — Branch frisch von `origin/it-chef/auto` ausgecheckt, bereits
+vollständig vor `main` (0 neue Commits zu mergen).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber den Vorläufen: alle offenen Checkbox-Punkte scheitern
+weiterhin an mindestens einem der seit Lauf elf dokumentierten Blocker
+(Backend-/Auth-Entscheidung, Gemini/Base44-Zugangsdaten, fehlende
+Provider-Auswahl Zug/Bus/Fähre, fehlende Preis-/Provider-URL-Felder in
+`TripDraft`, eigene Architekturentscheidung für parallele Chat-
+Historien, noch nicht gebauter Code ohne etwas zu Testendes, oder echte
+Nutzerdaten/Rechtliches/Zahlungen).
+
+Eigene, unabhängige Stichprobe mit Fokus auf bisher am seltensten im
+Log namentlich genannte Dateien (per Treffer-Zählung gegen diese
+Log-Datei ermittelt), um echte blinde Flecken statt reiner Wiederholung
+zu finden:
+- `src/pages/NichtGefunden.tsx` (404-Seite, bisher nur 4 Erwähnungen)
+  komplett gelesen — einfache statische Seite, kein Fund.
+- `src/components/search/SearchErrorAlert.tsx` komplett gelesen:
+  `errors.map((error, index) => <span key={index}>...)` nutzt den
+  Array-Index als React-`key`. Geprüft, ob das wie bei anderen bereits
+  gefixten Listen zu einem sichtbaren Bug führen kann (falsches
+  Re-Mapping von State/Fokus bei Reihenfolgeänderung): hier nicht, da
+  `errors` pro Render einmalig aus einer abgeschlossenen Duffel-Antwort
+  kommt und sich währenddessen nie umsortiert oder einzelne Einträge
+  entfernt — kein funktionaler Fund, nur ein stilistisch sauberer
+  wäre ein `error.message`-basierter Key, aber ohne beobachtbares
+  Fehlverhalten kein autonom umsetzbarer Punkt.
+- `src/components/chat/ChatMessage.tsx`s eigene, lokale
+  `formatTime(timestamp: number)` erneut gegen den in `format.ts`
+  gefixten "Invalid Date"-Fund (26. Lauf) geprüft, Bestätigung des
+  33. Laufs nachvollzogen: `timestamp` stammt ausschließlich aus
+  `Date.now()` (`useChat.ts`/`useConcierge.ts`s `makeMessage()`), nie
+  aus einer geparsten externen Zeichenkette — kein verwandter Bug.
+- Repo-weit nach `JSON.parse`, `addEventListener` und
+  `setTimeout`/`setInterval` in `src/**/*.ts(x)` außerhalb von Tests
+  gesucht: `JSON.parse` nur in `tripStorage.ts` (bereits mit
+  Try/Catch + Feld-Validierung abgesichert), `addEventListener` nur in
+  `useChat.ts` (`beforeunload`, mit `removeEventListener`-Cleanup) und
+  `lib/utils.ts`s `focusPageHeading()` (`{ once: true }`), alle vier
+  `setTimeout`-Aufrufe (`useChat.ts`×3, `useConcierge.ts`×1) bereits
+  per Ref + Unmount-Cleanup abgeräumt — keine neue Lücke in einem
+  dieser drei bekannten Bugmuster.
+- Testabdeckungs-Abgleich aller Produktionsdateien unter `src/` erneut
+  automatisiert laufen lassen: identische, bereits dokumentierte
+  Ausnahmeliste (`ui/input.tsx`, `ui/label.tsx`, `main.tsx`, reine
+  Typdeklarationsdateien unter `src/types/`) — keine neue Lücke.
+
+**Ergebnis:** Kein Punkt heute (achtunddreißigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — die heute gezielt geprüften
+Ecken (am seltensten referenzierte Dateien, Listen-Keys, erneute
+Gegenprüfung des `formatTime`-Bugmusters, JSON/Event-Listener/Timeout-
+Audit) ergaben keinen sicher umsetzbaren Punkt.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(73 Testdateien, 555 Tests, alle grün, unverändert gegenüber dem
+37. Lauf), `npm run build` (0 Typfehler, unveränderte 811-KB-Chunk-
+Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
