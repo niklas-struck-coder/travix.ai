@@ -23334,3 +23334,53 @@ dem 42. Lauf), `npm run build` (0 Typfehler, unveränderte
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-28 (vierundvierzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` (unverändert seit 23.10., `fe1300e`) — keine offenen eigenen
+Commits aus einem vorherigen Lauf zum Weiterarbeiten, frisch von
+`origin/it-chef/auto` ausgecheckt.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien geprüft — unverändert gegenüber den
+Vorläufen desselben Tages: alle verbleibenden offenen Punkte scheitern
+weiterhin an mindestens einem Kriterium (Backend-/Auth-Entscheidung, echte
+Produktentscheidung, fehlende Datenfelder/Zugangsdaten, oder
+Auth/Zahlungen/Rechtliches).
+
+**Eigene, unabhängige Bug-/Lücken-Suche** (vierter Fokus desselben Tages,
+auf bisher nicht geprüfte Muster statt einzelner Dateien): projektweit
+nach `key={index}`/`key={i}`/`key={idx}` in gerenderten Listen gesucht —
+zwei Treffer (`FlightCard.tsx` Segmentliste, `SearchErrorAlert.tsx`
+Fehlerliste), beide bereits im 41. Lauf desselben Tages als unkritisch
+eingestuft (stabile, nie umsortierte Listen). Projektweit nach leeren
+`catch`-Blöcken (verschluckten Fehlern) gesucht — keine Treffer. Geprüft,
+wie `DUFFEL_API_KEY` tatsächlich ins Backend gelangt
+(`vite-plugins/duffel-proxy.ts`, komplett gelesen): Key bleibt
+serverseitig im Vite-Dev-Middleware-Prozess, Frontend ruft nur den eigenen
+`/api/duffel/*`-Proxy auf, kein `process.env`/`import.meta.env`-Zugriff im
+Browser-Code (projektweite Suche nach beidem außerhalb von Build-Dateien:
+keine Treffer) — keine neue Lücke. Liste der Quelldateien ohne eigene
+Testdatei erneut gegen die Testdateien abgeglichen (Diff-Vergleich beider
+Listen): identisch zu den Vorläufen — ausschließlich die bereits
+dokumentierten bewussten Ausnahmen (`input.tsx`/`label.tsx` als reine
+Wrapper; `main.tsx`/`vite-env.d.ts`/`test/setup.ts` als
+Einstiegspunkt/Typdeklaration/Testinfrastruktur; `chat.ts`/`duffel.ts`/
+`profile.ts`/`settings.ts`/`trains.ts` als reine Typ-Dateien ohne eigene
+Logik), keine neue Lücke.
+
+**Ergebnis:** Kein Punkt heute (vierundvierzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — vierter "kein Fund"-Lauf
+desselben Tages.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur
+die bekannte `EBADENGINE`-Warnung für die Node-Version; `npm audit` zeigt
+weiterhin 8 Schwachstellen in Dev-Dependencies, unverändert gegenüber dem
+43. Lauf), `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (73 Testdateien, 555 Tests, alle grün, unverändert gegenüber
+dem 43. Lauf), `npm run build` (0 Typfehler, unveränderte
+811-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
