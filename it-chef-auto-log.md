@@ -23225,3 +23225,62 @@ unveränderte 811-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-28 (zweiundvierzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`origin/main` (unverändert seit 23.10., `fe1300e`) — keine offenen eigenen
+Commits aus einem vorherigen Lauf zum Weiterarbeiten, frisch von
+`origin/it-chef/auto` ausgecheckt.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien geprüft — unverändert gegenüber den
+Vorläufen: alle verbleibenden offenen Punkte scheitern weiterhin an
+mindestens einem Kriterium (Backend-/Auth-Entscheidung, echte
+Produktentscheidung, fehlende Datenfelder/Zugangsdaten, oder
+Auth/Zahlungen/Rechtliches).
+
+**Eigene, unabhängige Bug-/Lücken-Suche** (anderer Fokus als der 41. Lauf
+am selben Tag): Komplett und zeilenweise gegen die jeweilige Testdatei
+gelesen — `src/lib/ai/speech.ts`, `src/lib/duffel/client.ts`,
+`src/components/trip/EditMode.tsx`, `src/lib/nav-config.ts`,
+`src/lib/trip/cartTotals.ts`, `src/lib/trip/checklistRules.ts`,
+`src/lib/trip/calculateProgress.ts`, `src/lib/trip/calendarUtils.ts`,
+`src/lib/trip/tripStorage.ts`, `src/lib/ai/mockAdvisor.ts`,
+`src/lib/ai/mockConcierge.ts`, `src/hooks/useChat.ts`,
+`src/components/chat/ChatInput.tsx`, `src/pages/Buchung.tsx`,
+`src/pages/Dashboard.tsx` — kein neuer Bug, keine neue Testlücke. Jede
+dieser Dateien hat bereits eine eigene, ihr Verhalten (inkl. Edge Cases wie
+Wortgrenzen bei `detectTransportMode`/`findKnownDestination`,
+IME-Komposition in `EditMode`, kaputtes/fehlendes `localStorage` in
+`tripStorage.ts`, Netzwerk-/Parse-Fehler in `duffel/client.ts`) bereits
+abdeckende Testdatei.
+
+Zwei mögliche Kandidaten geprüft und verworfen:
+- `src/pages/Dashboard.tsx`, Zeile 79: `draftTrips.reduce(...) /
+  draftTrips.length` würde bei leerem `draftTrips` durch 0 teilen
+  (`NaN`). `draftTrips` ist dort aber ein fest kodiertes, zweielementiges
+  Demo-Array ohne jede Möglichkeit, zur Laufzeit leer zu werden (kein
+  Lösch-/Filter-Pfad führt dorthin) — rein hypothetisch, kein echter,
+  reproduzierbarer Fall, deshalb bewusst nicht als Bug gewertet (Kriterium
+  "klarer, tatsächlich auftretender Fehler").
+- `src/lib/ai/mockConcierge.ts`: `getConciergeReply()`s `preis`-Stichwort
+  (Zeile 78) hat bewusst keine Wortgrenze (Kommentar im Code erklärt das als
+  Wortstamm-Absicht, analog `währung`/`geld`/`bezahl`) — geprüft, ob es
+  fälschlich in einem plausiblen deutschen Satzkontext als Substring
+  matcht (z. B. in Eigennamen/Fremdwörtern mit "preis" als Teilstring):
+  kein solcher Fall gefunden, bestehendes Verhalten bleibt korrekt.
+
+**Ergebnis:** Kein Punkt heute (zweiundvierzigster Lauf) autonom umgesetzt,
+kein Produktcode geändert.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur die
+bekannte `EBADENGINE`-Warnung für die Node-Version; `npm audit` zeigt 8
+Schwachstellen, unverändert gegenüber dem 41. Lauf), `npx tsc -b` (0
+Fehler), `npm run lint` (0 Fehler), `npx vitest run` (73 Testdateien, 555
+Tests, alle grün, unverändert gegenüber dem 41. Lauf), `npm run build` (0
+Typfehler, unveränderte 811-KB-Chunk-Size-Warnung — bekannt, kein neuer
+Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
