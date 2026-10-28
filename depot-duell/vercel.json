@@ -1,0 +1,6 @@
+{
+  "crons": [{ "path": "/api/cron", "schedule": "5 22 * * *" }],
+  "headers": [
+    { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] }
+  ]
+}
