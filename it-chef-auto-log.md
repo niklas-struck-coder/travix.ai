@@ -23154,3 +23154,74 @@ bekannt, kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-10-28 (einundvierzigster Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits vollständig auf dem Stand von
+`main` (gleicher Merge-Base, keine offenen eigenen Commits aus einem
+vorherigen Lauf zum Weiterarbeiten) — frisch von `origin/main` übernommen.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gegen
+die vier Sicherheitskriterien geprüft — unverändert gegenüber den
+Vorläufen: alle verbleibenden offenen Top-Level-Punkte (2.0 Base44/Auth,
+4.1-4.3 KI-Engine/Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre-Suche ohne
+Provider, 6.2/6.6/6.7 fehlende Preis-/Provider-URL-Felder in `TripDraft`,
+7.4/7.12 dieselbe Daten-Lücke bzw. eigene Architekturentscheidung, 8.1-8.7
+KI-/Backend-Anbindung, 8.9 Premium mit erfundenen Tarifen, 8.11 Hilfe-Seite
+ohne FAQ-Inhalte von Support-Chef) scheitern weiterhin an mindestens einem
+Kriterium (Backend-/Auth-Entscheidung, echte Produktentscheidung, oder
+fehlende Datenfelder, die erfundene Werte erfordern würden).
+
+**Eigene, unabhängige Bug-Suche** (Fokus auf bisher selten durchleuchtete
+Dateien, da die meisten anderen bereits über viele Vorläufe hinweg mehrfach
+gefixt wurden): `src/pages/Profil.tsx`, `src/pages/Einstellungen.tsx`,
+`src/pages/Kartenansicht.tsx`, `src/pages/ReiseSuche.tsx`,
+`src/pages/Dashboard.tsx`, `src/lib/format.ts`,
+`src/lib/trip/calendarUtils.ts`, `src/lib/trip/cartTotals.ts`,
+`src/lib/trip/tripStorage.ts`, `src/hooks/useConcierge.ts`,
+`src/lib/ai/mockConcierge.ts`, `src/lib/ai/mockAdvisor.ts`,
+`src/components/trip/EditMode.tsx`, `src/lib/trip/checklistRules.ts`,
+`src/lib/duffel/client.ts`, `src/lib/utils.ts`,
+`src/components/search/FlightWizard.tsx` komplett gelesen — kein neuer Bug.
+Zusätzlich repo-weit nach gängigen Fehlermustern gesucht: `key={index}` in
+`.map()` (zwei Treffer, beide auf stabilen, nie umsortierten Listen —
+Segmente/Fehlermeldungen — unkritisch), `parseInt` ohne Radix (keine
+Treffer), lose Gleichheit `==`/`!=` (keine Treffer), `console.log` in
+Produktcode (keine Treffer), `TODO`/`FIXME`/`XXX` (keine Treffer),
+`addEventListener` ohne zugehöriges `removeEventListener` (keine Treffer —
+beide Vorkommen bereits korrekt abgeräumt). Geprüft, welche Quelldateien
+noch nie in `ZEITPLAN.md`/der Aufgabenliste erwähnt wurden
+(`src/types/profile.ts`, `src/types/settings.ts`) — beide reine
+Typ-/Konstanten-Definitionen ohne Logik, kein Fund. Dateien ohne eigene
+Testdatei durchgegangen — bis auf die bereits dokumentierten bewussten
+Ausnahmen (`input.tsx`/`label.tsx` als reine Wrapper, `main.tsx`/
+`vite-env.d.ts` als Einstiegspunkt/Typdeklaration) sind das ausschließlich
+reine Typ-Dateien (`chat.ts`, `duffel.ts`, `profile.ts`, `settings.ts`,
+`trains.ts`) ohne eigene Funktionen — kein sinnvolles Testziel, keine
+neue Lücke.
+
+Ein möglicher Kandidat wurde geprüft und verworfen: `FlightWizard.tsx`/
+`HotelWizard.tsx` zeigen bei widersprüchlichem Rückreise-/Check-out-Datum
+(z. B. nach nachträglicher Änderung des Hinreise-/Check-in-Datums) keine
+sichtbare Fehlermeldung, nur einen deaktivierten Submit-Button — anders als
+beim expliziten "Start/Ziel gleich"-Fund in `FlightWizard.tsx`. Das ist
+aber kein neu eingeführter Fehler, sondern ein konsistentes, in beiden
+Formularen gleich gehandhabtes Verhalten; eine Änderung wäre eine neue
+UX-Entscheidung (welcher Text, welche Stelle) und keine reine Bugfix-Lücte
+im Sinn der Kriterien — bewusst nicht autonom angegangen.
+
+**Ergebnis:** Kein Punkt heute (einundvierzigster Lauf) autonom umgesetzt,
+kein Produktcode geändert.
+
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei (nur die
+bekannte `EBADENGINE`-Warnung für die Node-Version; `npm audit` zeigt heute
+8 Schwachstellen statt der zuletzt dokumentierten 5 — reine
+Dev-Dependency-Verschiebung durch `npm ci`, nicht selbst verursacht, kein
+autonom lösbarer Punkt ohne Workaround mit unklaren Nebenwirkungen, bleibt
+wie in den Vorläufen unangetastet), `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (73 Testdateien, 555 Tests, alle grün,
+unverändert gegenüber dem 40. Lauf), `npm run build` (0 Typfehler,
+unveränderte 811-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
