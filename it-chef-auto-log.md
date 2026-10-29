@@ -23491,3 +23491,75 @@ Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-29 (siebenundvierzigster Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits auf dem Stand des 46. Laufs
+(derselbe Tag, Hilfe-Seite/8.11) — keine offenen eigenen Änderungen zum
+Weiterarbeiten, frisch von `origin/it-chef/auto` ausgecheckt.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — alle verbleibenden
+offenen Programmierungs-Punkte (6.2/6.6/6.7/7.4/7.12/8.1-8.9/8.12/8.13,
+5.7) scheitern weiterhin an mindestens einem Kriterium (fehlende
+Datenfelder/Datenmodell, echte Produkt-/Architekturentscheidung, oder
+Auth/Zahlungen). 8.13 ("Write unit tests for calculateProgress,
+calculateCosts, checklistRules, and schema validation") genauer
+geprüft: `calculateProgress.ts` und `checklistRules.ts` haben bereits
+eigene, vollständige Testdateien; `calculateCosts.ts` existiert noch
+nicht (hängt an 6.6/6.7, selbst blockiert) und "schema validation"
+bezieht sich auf das noch nicht existierende `FULL_TRIP_SCHEMA` (Phase
+4, blockiert auf Backend-Entscheidung) — kein neuer, umsetzbarer Teil
+übrig.
+
+**Fund in `reports/it-chef.md`/`reports/support-chef.md` (beide
+23.10.):** Beide Berichte nennen unabhängig voneinander einen bereits
+fertig diagnostizierten, auf GitHub wartenden Auto-Fix-PR, der seit über
+einer Woche nicht gemergt ist: PR #38 ("+ Suchen" ignoriert den
+Edit-Shortcut). Im Code auf dem Branch
+`it-chef-autofix/buchung-suchen-edit-shortcut-2026-10-21`
+nachgeprüft (nicht nur den Berichten vertraut) — Diff ist ein echter
+Ein-Zeiler plus angepasster Testerwartung, genau wie beschrieben.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Navigations-/Verlinkungskorrektur innerhalb der
+  Buchungsseite.
+- Keine offene Produkt-/Architekturentscheidung: Der `?edit=<feld>`-
+  Mechanismus existiert bereits und wird vom direkt danebenliegenden
+  Stift-Bearbeiten-Button für dasselbe Feld schon genutzt — der "+
+  Suchen"-Button für den leeren Zustand desselben Felds hatte ihn nur
+  versehentlich nicht übernommen.
+- Klar genug beschrieben: fertiger, bereits auf GitHub liegender Diff,
+  keine Interpretation nötig.
+- Objektiv prüfbar über Typecheck/Lint/Tests/Build.
+
+**Umgesetzt:**
+- `src/pages/Buchung.tsx`: In der gemeinsamen `Section`-Komponente der
+  "+ Suchen"-Link (leerer Feld-Zustand) von `to="/ki-chat"` auf
+  `to={editHref}` umgestellt — identisch zum bereits bestehenden Stift-
+  Bearbeiten-Link direkt darüber. `editHref` ist pro Section-Instanz
+  schon korrekt befüllt (`transportEditHref` =
+  `/ki-chat?edit=transportMode`, `/ki-chat?edit=dates`,
+  `/ki-chat?edit=budget`, `/ki-chat?edit=accommodation`). Aktivitäten
+  ist davon nicht betroffen — eigene, separat gerenderte Card ohne
+  `Section`/`editHref`.
+- `src/pages/Buchung.test.tsx`: Testerwartung von "alle fünf Links zeigen
+  auf `/ki-chat`" auf die vier konkreten `?edit=`-Werte plus den
+  unveränderten `/ki-chat`-Fall für Aktivitäten umgestellt, Testname
+  entsprechend präzisiert.
+- `tasks/tasks-prd-travix-platform.md`: Notiz bei 6.3 ergänzt (der dort
+  behauptete "mit Kontext"-Teil ist jetzt tatsächlich wahr).
+- `ZEITPLAN.md`: Phase-6/Ist-Stand-Absatz um diesen Lauf ergänzt.
+
+**Geprüft:** `npm ci` fehlerfrei (nur bekannte `EBADENGINE`-Warnung,
+`npm audit` weiterhin 9 Schwachstellen in Dev-Dependencies, unverändert
+gegenüber dem letzten Lauf), `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (74 Testdateien, 559 Tests, alle grün —
+unverändert gegenüber dem 46. Lauf, da nur eine bestehende
+Testerwartung präzisiert statt ein neuer Test ergänzt wurde), `npm run
+build` (0 Typfehler, unveränderte ~813-KB-Chunk-Size-Warnung — bekannt,
+kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

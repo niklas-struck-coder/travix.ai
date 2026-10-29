@@ -3133,6 +3133,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   bewusst kein erfundener Kontaktweg, da "Support-E-Mail live" laut
   diesem Dokument weiterhin offen ist (siehe Begründung im Log vom
   12.09.). Neue `Hilfe.test.tsx`, `routes.tsx` entsprechend verdrahtet.
+  Vom autonomen IT-Chef-Lauf am 29.10. (siebenundvierzigster Lauf) einen
+  bereits vollständig diagnostizierten, auf GitHub wartenden Auto-Fix-PR
+  direkt übernommen: [PR #38](https://github.com/niklas-struck-coder/travix.ai/pull/38)
+  ("+ Suchen" ignoriert Edit-Shortcut), laut `reports/it-chef.md`
+  (23.10.) und `reports/support-chef.md` (23.10.) seit über einer Woche
+  fertig, aber noch nicht gemergt. Der "+ Suchen"-Button für ein leeres
+  Transport-/Reisedaten-/Budget-/Unterkunft-Feld auf `/buchung`
+  (`Buchung.tsx`s gemeinsame `Section`-Komponente, 6.1/6.3) verlinkte
+  bisher pauschal auf `/ki-chat`, statt wie der danebenliegende Stift-
+  Bearbeiten-Button für ein bereits gefülltes Feld den passenden
+  `?edit=<feld>`-Chat-Schritt direkt zu öffnen — identisches Muster wie
+  der bereits am 21.10. behobene Unterschied bei der "Urlaubsmodus
+  aktivieren"-Karte (s. o.), hier nur für das Gegenstück bei leeren statt
+  gefüllten Feldern. Ein-Zeiler: `<Link to="/ki-chat">` auf `<Link
+  to={editHref}>` umgestellt — `editHref` wird pro Section-Instanz schon
+  mit dem richtigen `?edit=`-Wert befüllt (`transportEditHref`,
+  `/ki-chat?edit=dates`, `/ki-chat?edit=budget`,
+  `/ki-chat?edit=accommodation`), nur die "+ Suchen"-Variante hatte ihn
+  bisher ignoriert. Aktivitäten ist davon nicht betroffen (eigene,
+  separat gerenderte Card ohne `Section`/`editHref`, bearbeitet weiterhin
+  über `EditMode` auf derselben Seite). Bestehender Test in
+  `Buchung.test.tsx` prüfte bisher nur, dass alle fünf "+ Suchen"-Links
+  auf `/ki-chat` zeigen — Erwartung auf die vier konkreten `?edit=`-Werte
+  plus den unveränderten `/ki-chat`-Fall für Aktivitäten umgestellt.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
