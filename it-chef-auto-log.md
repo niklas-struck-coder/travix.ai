@@ -23431,3 +23431,63 @@ unveränderte 811-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-29 (sechsundvierzigster Lauf)
+
+**Ausgangslage:** `it-chef/auto` war vollständig auf dem Stand von
+`origin/main` (unverändert seit 23.10., `fe1300e`) — keine offenen eigenen
+Commits aus einem vorherigen Lauf zum Weiterarbeiten, frisch von
+`origin/it-chef/auto` ausgecheckt.
+
+**Ausgewählter Punkt:** Task 8.11 aus
+`tasks/tasks-prd-travix-platform.md` — "Build Hilfe page (`/hilfe`) with
+FAQ and support information". `/hilfe` zeigte bisher nur die generische
+`PlaceholderPage`.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — eine reine FAQ-Inhaltsseite.
+- Keine offene Produkt-/Architekturentscheidung: Inhalte beschreiben
+  ausschließlich bereits bestehendes, im Code nachprüfbares Verhalten
+  (KI-Chat-Verhalten, Duffel-Testdaten für Flug/Unterkunft vs. nicht
+  angebundenes Zug/Bus/Fähre, kein Nutzerkonto, lokale statt
+  serverseitige Speicherung). Bewusst **kein** erfundener Support-
+  Kontaktweg (E-Mail o. ä.) — "Support-E-Mail live" ist laut
+  `ZEITPLAN.md` weiterhin offen; der Log-Eintrag vom 12.09. hatte genau
+  diese Entscheidung (keine erfundene Mailto-Adresse) bereits getroffen
+  und ausdrücklich auf 8.11 vertagt, hier nur konsequent fortgeführt.
+- Klar genug beschrieben (Aufgabentext selbst), keine Interpretation
+  über das hinaus nötig, was im Code bereits real existiert.
+- Objektiv prüfbar: Typecheck/Lint/Tests/Build müssen grün bleiben, neue
+  Seite muss über `routes.tsx` erreichbar sein statt des Platzhalters.
+
+**Umgesetzt:**
+- Neue `src/pages/Hilfe.tsx`: fünf FAQ-Punkte (Frage/Antwort-Paare in
+  einer `<dl>` innerhalb einer `Card`, Muster analog `Einstellungen.tsx`)
+  — "Wie funktioniert der KI-Chat?", "Sind die angezeigten Flüge und
+  Unterkünfte echt?", "Muss ich mich anmelden?", "Bleiben meine Angaben
+  erhalten?", "Wie kann ich eine Frage stellen, die hier nicht
+  beantwortet wird?". Letzte Antwort benennt ehrlich, dass ein direkter
+  Support-Kontakt noch nicht eingerichtet ist, ohne einen zu erfinden.
+- `src/routes.tsx`: `/hilfe` aus der `allRoutes`-Platzhalterliste
+  herausgenommen (in `builtRoutes` aufgenommen) und auf die neue
+  `Hilfe`-Komponente verdrahtet, gleiches Muster wie jede andere feste
+  Route.
+- `tasks/tasks-prd-travix-platform.md`: Checkbox 8.11 auf erledigt
+  gesetzt, mit Begründung.
+- `ZEITPLAN.md`: Phase-8-Absatz um diesen Lauf ergänzt.
+- Neue `src/pages/Hilfe.test.tsx` (4 Tests): Titel/Beschreibung über
+  `PageHeader`, alle FAQ-Fragen/Antworten vorhanden, kein erfundener
+  Kontaktweg (`support@`/`mailto:` explizit abwesend), ehrliche
+  Duffel-Testdaten-vs-Zug/Bus/Fähre-Aussage.
+
+**Geprüft:** `npm ci` fehlerfrei (nur bekannte `EBADENGINE`-Warnung, `npm
+audit` zeigt 9 Schwachstellen in Dev-Dependencies, unverändert gegenüber
+dem letzten Lauf), `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (74 Testdateien, 559 Tests, alle grün — vorher 73/555,
+die neue `Hilfe.test.tsx` kommt mit 4 Tests dazu), `npm run build` (0
+Typfehler, unveränderte ~813-KB-Chunk-Size-Warnung — bekannt, kein neuer
+Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

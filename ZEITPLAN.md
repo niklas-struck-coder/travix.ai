@@ -3122,6 +3122,17 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Urlaubsmodus.test.tsx` (zeigt Lissabon/Kyoto aus der URL statt eines
   leeren oder unpassenden gespeicherten Trips) und ein neuer Test in
   `MeineReisen.test.tsx` (prüft den konkreten `href` der Karte).
+  Vom autonomen IT-Chef-Lauf am 29.10. (sechsundvierzigster Lauf) 8.11
+  umgesetzt: `/hilfe` zeigte bisher nur die generische `PlaceholderPage`.
+  Neue `src/pages/Hilfe.tsx` mit fünf FAQ-Punkten, die ausschließlich
+  bereits bestehendes Verhalten beschreiben (KI-Chat fragt eine Sache
+  nach der anderen und rät nicht; Flug-/Unterkunftssuche läuft auf echten
+  Duffel-Testdaten, Zug/Bus/Fähre ist weiterhin nicht angebunden; es gibt
+  noch kein Nutzerkonto; nur Chat/Reiseplan werden lokal gespeichert,
+  andere Listen mit Beispieldaten setzen sich beim Neuladen zurück) —
+  bewusst kein erfundener Kontaktweg, da "Support-E-Mail live" laut
+  diesem Dokument weiterhin offen ist (siehe Begründung im Log vom
+  12.09.). Neue `Hilfe.test.tsx`, `routes.tsx` entsprechend verdrahtet.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

@@ -21,6 +21,7 @@ import { Kalender } from '@/pages/Kalender'
 import { Warenkorb } from '@/pages/Warenkorb'
 import { Profil } from '@/pages/Profil'
 import { Einstellungen } from '@/pages/Einstellungen'
+import { Hilfe } from '@/pages/Hilfe'
 import { ReiseSuche } from '@/pages/ReiseSuche'
 import { Dashboard } from '@/pages/Dashboard'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
@@ -45,6 +46,7 @@ const builtRoutes = new Set([
   '/warenkorb',
   '/profil',
   '/einstellungen',
+  '/hilfe',
   '/reise-planen',
   '/dashboard',
 ])
@@ -89,6 +91,7 @@ export function AppRoutes() {
           <Route path="/warenkorb" element={<PageTransition><Warenkorb /></PageTransition>} />
           <Route path="/profil" element={<PageTransition><Profil /></PageTransition>} />
           <Route path="/einstellungen" element={<PageTransition><Einstellungen /></PageTransition>} />
+          <Route path="/hilfe" element={<PageTransition><Hilfe /></PageTransition>} />
           <Route path="/reise-planen" element={<PageTransition><ReiseSuche /></PageTransition>} />
           <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
           {allRoutes
