@@ -3157,6 +3157,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Buchung.test.tsx` prüfte bisher nur, dass alle fünf "+ Suchen"-Links
   auf `/ki-chat` zeigen — Erwartung auf die vier konkreten `?edit=`-Werte
   plus den unveränderten `/ki-chat`-Fall für Aktivitäten umgestellt.
+  Vom autonomen IT-Chef-Lauf am 29.10. (achtundvierzigster Lauf) einen
+  eigenständig gefundenen Bug behoben, der demselben Muster wie der
+  bereits am 26.10. für `formatTime()` behobene Fund folgt: `FlightCard.tsx`s
+  eigene lokale `formatDate()`-Hilfsfunktion (Abflug-/Ankunftsdatum,
+  z. B. "10.09.") zeigte bei einem nicht parsebaren Zeitstempel wörtlich
+  "Invalid Date" statt des überall sonst etablierten `—`-Platzhalters —
+  ihr fehlte derselbe `Number.isNaN(date.getTime())`-Schutz, den
+  `formatTime()`/`formatDuration()` (`src/lib/format.ts`) bereits haben.
+  Anders als `formatTime()` war `formatDate()` nie nach `format.ts`
+  verschoben worden, da sie (bisher) nur in `FlightCard.tsx` verwendet
+  wird, keine byte-identische Duplikation wie bei `formatTime()`
+  (18.10.) — deshalb Fix direkt in `FlightCard.tsx`, keine Verschiebung
+  nötig. Neuer Regressionstest in `FlightCard.test.tsx` (unparsebarer
+  `departingAt`-Zeitstempel zeigt `—` statt "Invalid Date"). `npm run
+  lint` (0 Fehler), `npm run build` (0 Typfehler, unveränderte
+  Chunk-Size-Warnung), `npx vitest run` (74 Testdateien, 560 Tests, alle
+  grün — 559 + 1 neuer Test) liefen vor dem Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

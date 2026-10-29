@@ -23563,3 +23563,24 @@ kein neuer Fund).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-29 (achtundvierzigster Lauf, automatisierter Cloud-Lauf)
+
+Aufgabenliste (`ZEITPLAN.md`/`tasks-prd-travix-platform.md`) erneut
+geprüft — alle verbleibenden offenen Punkte scheitern weiterhin an
+mindestens einem Sicherheitskriterium (Backend-Entscheidung,
+Produktentscheidung, oder Auth/Zahlungen), unverändert gegenüber dem
+47. Lauf. Stattdessen per gezielter Code-Suche einen eigenständigen Bug
+gefunden und behoben: `FlightCard.tsx`s lokale `formatDate()` zeigte bei
+einem nicht parsebaren Zeitstempel wörtlich "Invalid Date" statt des
+etablierten `—`-Platzhalters — derselbe Bug, der am 26.10. für
+`formatTime()` behoben wurde, hier an der einzigen verbliebenen Stelle.
+Fix: `Number.isNaN(date.getTime())`-Schutz ergänzt, analog `formatTime()`
+in `src/lib/format.ts`. Neuer Regressionstest in `FlightCard.test.tsx`.
+
+**Geprüft:** `npm run lint` (0 Fehler), `npm run build`/`tsc -b` (0
+Typfehler, unveränderte Chunk-Size-Warnung), `npx vitest run` (74
+Testdateien, 560 Tests, alle grün — 559 + 1 neuer Test).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

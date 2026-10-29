@@ -7,7 +7,9 @@ import type { FlightOffer } from '@/types/duffel'
 
 function formatDate(isoString: string) {
   if (!isoString) return '—'
-  return new Date(isoString).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
 function formatLocation(name: string, iata: string) {

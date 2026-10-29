@@ -173,6 +173,17 @@ describe('FlightCard', () => {
     expect(screen.queryByText('Rückflug')).not.toBeInTheDocument()
   })
 
+  it('shows a placeholder dash instead of the literal "Invalid Date" for an unparseable departure timestamp', () => {
+    const offer: FlightOffer = {
+      ...baseOffer,
+      slices: [{ ...directSlice, segments: [{ ...directSlice.segments[0], departingAt: 'not-a-timestamp' }] }],
+    }
+    render(<FlightCard offer={offer} />)
+
+    expect(screen.queryByText('Invalid Date')).not.toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+  })
+
   it('labels outbound and return slices and shows each date for a round trip', () => {
     const returnSlice = {
       ...directSlice,
