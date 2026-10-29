@@ -23584,3 +23584,87 @@ Testdateien, 560 Tests, alle grün — 559 + 1 neuer Test).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-10-29 (neunundvierzigster Lauf, automatisierter Cloud-Lauf)
+
+**Ausgangslage:** `it-chef/auto` war bereits auf dem Stand des 48. Laufs
+(derselbe Tag, `FlightCard`-`formatDate()`-Fix) — keine offenen eigenen
+Änderungen zum Weiterarbeiten, frisch von `origin/it-chef/auto`
+ausgecheckt.
+
+**Punktesuche in der Aufgabenliste:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut gegen die vier
+Sicherheitskriterien geprüft — unverändert gegenüber dem 47./48. Lauf
+scheitern alle verbleibenden offenen Programmierungs-Punkte
+(6.2/6.6/6.7/5.7/7.4/7.12/8.1-8.9/8.12/8.13) an mindestens einem
+Kriterium (fehlendes Datenmodell/-feld, echte Produkt- oder
+Architekturentscheidung, oder Auth/Zahlungsbezug). 8.13 bleibt wie am
+47. Lauf festgestellt nur teilweise umsetzbar (`calculateProgress.ts`/
+`checklistRules.ts` haben bereits Tests, `calculateCosts.ts` und das
+`FULL_TRIP_SCHEMA` existieren noch nicht).
+
+**Eigenständige Bug-Suche:** Drei unabhängige, tiefe Lesedurchgänge
+(nicht nur grep) über praktisch die gesamte verbleibende Codebasis, die
+in den letzten Läufen noch nicht im Detail durchgesehen wurde:
+- Durchgang 1: `Profil.tsx`, `Einstellungen.tsx`, `Kartenansicht.tsx`,
+  `Kalender.tsx`/`calendarUtils.ts`, `TripSummaryCard.tsx`,
+  `TrainCard.tsx`/`TrainResults.tsx`, `HotelWizard.tsx`/
+  `FlightWizard.tsx`, `ChecklistPanel.tsx`, `EditMode.tsx`,
+  `tripStorage.ts`, `cartTotals.ts`, `duffel/client.ts` (Fehlerpfad),
+  `Dashboard.tsx`, `MeineReisen.tsx`, `Warenkorb.tsx`, `Favoriten.tsx`,
+  `Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`.
+- Durchgang 2: `KiChat.tsx` (vollständig), `ChatInput.tsx`,
+  `ChatMessage.tsx`, `QuickReplies.tsx`, `TravixAvatar.tsx`,
+  `useChat.ts` (vollständig), `useConcierge.ts`, `mockAdvisor.ts`
+  (vollständig), `mockConcierge.ts` (vollständig), `speech.ts`, alle
+  `src/types/*`-Dateien.
+- Durchgang 3: `vite-plugins/duffel-proxy.ts`, `duffel/client.ts`
+  (Request-Aufbau für Flug-/Unterkunftssuche), `routes.tsx`,
+  `Sidebar.tsx`/`MobileNav.tsx`/`AppShell.tsx`/`PageHeader.tsx`,
+  `nav-config.ts`, `utils.ts`, `Buchung.tsx` (vollständig), `Home.tsx`
+  (vollständig), `dialog.tsx`/`select.tsx`/`sheet.tsx`.
+
+Konkret geprüfte, aber verworfene Verdachtsstellen: `selectFlight()`/
+`selectHotel()` in `useChat.ts` erhöhen `searchGenerationRef` nicht wie
+die anderen Handler — aber an dieser Stelle läuft im aktuellen UI-Fluss
+nie noch eine Suche, kein erreichbarer Stale-Write-Pfad. Die
+Duplikat-Namen-Disambiguierung (etabliert in `Reiseentwuerfe.tsx`/
+`EditMode.tsx`) fehlt scheinbar bei `Angebote.tsx`/`Aktivitaeten.tsx`,
+aber beide unterstützen nur Entfernen aus einer festen Demo-Liste ohne
+Duplizier-Pfad — die Lücke, die das Muster andernorts schließt, kann
+hier gar nicht auftreten. `Buchung.tsx`s "Urlaubsmodus aktivieren"-Link
+sieht auf den ersten Blick wie dieselbe fehlende `?destination=`-Lücke
+aus, die am 21.10. bei `MeineReisen.tsx` behoben wurde — ist es aber
+nicht: `Buchung.tsx`s `trip` ist bereits derselbe `loadStoredChat()`-
+Trip, auf den `Urlaubsmodus.tsx` sowieso zurückfällt, kein Parameter
+nötig. `TrainResults.tsx` übergibt `TrainCard.tsx` kein `selected`-Prop
+— aber `TrainCard`/`TrainResults` sind weiterhin unverdrahteter toter
+Code (5.7/Bericht-Punkt 4, Produktentscheidung offen), ein Fix hätte
+kein echtes Verhalten zu verifizieren. Die in `reports/it-chef.md`
+(23.10.) vorgeschlagene Entfernung der `recharts`-Abhängigkeit als
+"ungenutzt" wurde ebenfalls verworfen: Sie ist für den noch offenen
+Punkt 7.12 (Reisebudget-Seite mit Recharts-Diagrammen) vorgesehen, also
+absichtlich vorbereitet statt tatsächlich toter Code — ihr Entfernen
+wäre keine mechanische Aufräumarbeit, sondern würde der eigenen
+geplanten Umsetzung von 7.12 vorgreifen.
+
+Zusätzlich codeweite Prüfung auf übersprungene/deaktivierte Tests
+(`.skip(`, `xit(`, `xdescribe(`, `eslint-disable`) und auf `any`-Casts,
+die Typsicherheit umgehen könnten — beides: keine Funde.
+
+**Ergebnis:** Heute nichts gefunden, das sicher genug für einen
+autonomen Lauf ist. Alle offenen Aufgabenlisten-Punkte bleiben an
+denselben, bereits mehrfach dokumentierten Kriterien blockiert
+(Backend-/Nutzerkonten-Entscheidung, echte Produktentscheidung, oder
+Auth/Zahlungsbezug), und die eigenständige Bug-Suche über praktisch die
+gesamte verbleibende Codebasis ergab keinen neuen, unabhängig
+auftretenden Fehler, der alle vier Sicherheitskriterien erfüllt. Kein
+Commit mit Code-Änderung in diesem Lauf — nur dieser Log-Eintrag.
+
+**Geprüft:** Keine Code-Änderung vorgenommen, daher kein erneuter
+Typecheck/Lint/Testlauf nötig; der zuletzt bekannte grüne Stand (74
+Testdateien, 560 Tests, `tsc -b`/`eslint` je 0 Fehler) ist durch diesen
+Lauf unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist der einzige Inhalt des Commits).
