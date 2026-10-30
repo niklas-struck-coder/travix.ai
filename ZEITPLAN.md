@@ -3935,7 +3935,9 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   noch offen) und ohne Währungsumschaltung. Rein lokaler Demo-State ohne
   Persistenz und ohne echten E-Mail-Versand (Postfach laut Support-Track noch
   nicht live), gleiches Muster wie Profil/Favoriten/Preisalarme
-- [ ] 8.11 Hilfe
+- [x] 8.11 Hilfe — vom autonomen IT-Chef-Lauf am 29.10. (sechsundvierzigster
+  Lauf) gebaut, siehe Log oben; diese Übersichts-Checkbox war dabei nicht
+  mitgeflippt worden
 - [ ] 8.9 Premium, 8.12 Rewards/Loyalty
 
 ### Sprint 5 — Duffel Stays & Zahlungsprozess (KW43-44, 20. Okt - 2. Nov)
