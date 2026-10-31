@@ -1,4 +1,4 @@
-import { motion, type TargetAndTransition } from 'framer-motion'
+import { motion, useReducedMotion, type TargetAndTransition } from 'framer-motion'
 import { Hand, Loader2, PenLine, Search, Smile, AlertTriangle, Compass } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +43,7 @@ const iconSizeClasses = {
 
 export function TravixAvatar({ state, size = 'md' }: TravixAvatarProps) {
   const { icon: Icon, ring, glow } = stateConfig[state]
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <div
@@ -53,7 +54,7 @@ export function TravixAvatar({ state, size = 'md' }: TravixAvatarProps) {
         sizeClasses[size],
       )}
     >
-      {state === 'thinking' && (
+      {state === 'thinking' && !prefersReducedMotion && (
         <motion.span
           className="absolute inset-0 rounded-full border-2 border-teal/40"
           animate={{ scale: [1, 1.35], opacity: [0.6, 0] }}
@@ -61,11 +62,13 @@ export function TravixAvatar({ state, size = 'md' }: TravixAvatarProps) {
         />
       )}
       <motion.div
-        animate={iconAnimation[state]}
+        animate={prefersReducedMotion ? {} : iconAnimation[state]}
         transition={
-          state === 'thinking'
-            ? { duration: 1, repeat: Infinity, ease: 'linear' }
-            : { duration: 0.6, repeat: state === 'idle' ? 0 : Infinity, repeatDelay: 1.2, ease: 'easeInOut' }
+          prefersReducedMotion
+            ? { duration: 0 }
+            : state === 'thinking'
+              ? { duration: 1, repeat: Infinity, ease: 'linear' }
+              : { duration: 0.6, repeat: state === 'idle' ? 0 : Infinity, repeatDelay: 1.2, ease: 'easeInOut' }
         }
       >
         <Icon className={cn('text-white', iconSizeClasses[size])} strokeWidth={2} />

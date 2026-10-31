@@ -3174,6 +3174,35 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   lint` (0 Fehler), `npm run build` (0 Typfehler, unveränderte
   Chunk-Size-Warnung), `npx vitest run` (74 Testdateien, 560 Tests, alle
   grün — 559 + 1 neuer Test) liefen vor dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 31.10. (sechsundfünfzigster Lauf) eine
+  Accessibility-Lücke in `TravixAvatar.tsx` (4.4) geschlossen: Die
+  dauerhaft wiederholten Icon-Animationen (`rotate: 360` im Zustand
+  "thinking", Puls-/Wackel-Varianten in den übrigen fünf Zuständen) sowie
+  der zusätzliche Puls-Ring im Zustand "thinking" liefen bisher
+  unabhängig von `prefers-reduced-motion` — anders als `PageTransition.tsx`
+  (`src/components/layout/`), das `useReducedMotion()` von framer-motion
+  für die Routenwechsel-Animation bereits respektiert. Da der
+  Chat-Avatar bei jeder KI-Antwort sichtbar ist und mehrere seiner
+  Zustände endlos wiederholen (`repeat: Infinity`), betrifft das genau
+  die von WCAG 2.2.2 ("Pause, Stop, Hide") gemeinte dauerhafte Bewegung.
+  Fix nach demselben Muster wie `PageTransition.tsx`: `TravixAvatar.tsx`
+  ruft jetzt ebenfalls `useReducedMotion()` auf; bei aktivierter
+  Präferenz entfällt der Puls-Ring vollständig und die Icon-`motion.div`
+  bekommt ein leeres `animate`-Objekt mit `{ duration: 0 }` statt der
+  zustandsabhängigen Endlosanimation — Icon, Farben und Layout bleiben in
+  beiden Fällen identisch, nur die Bewegung entfällt. Neue
+  `TravixAvatar.reduced-motion.test.tsx` (eigene Datei statt eines
+  weiteren Tests in `TravixAvatar.test.tsx`, da framer-motion
+  `prefers-reduced-motion` nur einmal pro Testdatei-Prozess abfragt und
+  cacht — exakt das in `PageTransition.test.tsx` dokumentierte Verhalten;
+  ein gemeinsamer Lauf hätte den bestehenden "nur im Zustand
+  thinking"-Test für den Puls-Ring verfälscht, was beim ersten Versuch
+  auch tatsächlich fehlschlug und die eigene Datei nötig machte): prüft,
+  dass bei `matchMedia`-Mock mit `matches: true` der Puls-Ring entfällt,
+  das Icon selbst aber weiterhin angezeigt wird. `npx tsc -b` (0
+  Typfehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+  Testdateien, 561 Tests, alle grün — 560 + 1 neuer Test) liefen vor dem
+  Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

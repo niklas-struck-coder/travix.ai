@@ -159,7 +159,7 @@ Based on PRD: [`prd-travix-platform.md`](prd-travix-platform.md)
   - [ ] 4.1 Create `FULL_TRIP_SCHEMA` JSON schema in `src/lib/ai/schemas.ts` — blocked on Base44/Gemini credentials
   - [ ] 4.2 Write system prompts in `src/lib/ai/prompts.ts` enforcing transport mode, no fabrication, one-question flow — blocked on Base44/Gemini credentials
   - [ ] 4.3 Implement `invokeLLM.ts` wrapper with gemini_3_flash model and add_context_from_internet — blocked on Base44/Gemini credentials; `src/lib/ai/mockAdvisor.ts` stands in for now with the same conversation rules, keyword-matched instead of model-driven
-  - [x] 4.4 Build `TravixAvatar.tsx` with 6 animated states (greeting, thinking, writing, searching, happy, error)
+  - [x] 4.4 Build `TravixAvatar.tsx` with 6 animated states (greeting, thinking, writing, searching, happy, error) — vom autonomen IT-Chef-Lauf am 31.10. (sechsundfünfzigster Lauf) eine Accessibility-Lücke geschlossen: Die endlos wiederholten Icon-Animationen (z. B. `rotate: 360` im Zustand "thinking") sowie der zusätzliche Puls-Ring hatten anders als `PageTransition.tsx` (das `useReducedMotion()` bereits für die Routenwechsel-Animation nutzt) keine `prefers-reduced-motion`-Rücksicht. Details siehe `ZEITPLAN.md` (31.10.-Eintrag).
   - [x] 4.5 Build `ChatMessage.tsx` for user and assistant message bubbles with timestamps
   - [x] 4.6 Build `ChatInput.tsx` with text input, voice button, and send action
   - [x] 4.7 Build `QuickReplies.tsx` with context-aware suggestion chips

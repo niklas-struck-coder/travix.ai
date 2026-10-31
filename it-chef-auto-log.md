@@ -23983,3 +23983,60 @@ unabhängig frisch durchlaufen (reine Doku-Änderung, keine Auswirkung auf
 Code/Tests erwartet, trotzdem komplett verifiziert).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto`.
+
+## 2026-10-31 (sechsundfünfzigster Lauf)
+
+**Vorbereitung:** Frischer Checkout, `it-chef/auto` unverändert zu
+`origin/main` (letzter `main`-Commit weiterhin der 2026-10-23-Stand —
+Freigabe-Chef hat seither nicht gemergt), neun Commits vor
+`origin/main` weitergearbeitet, kein frischer `main`-Merge nötig.
+`npm ci`, dann `npx tsc -b`, `npm run lint`, `npx vitest run` unabhängig
+frisch durchlaufen lassen (Baseline vor der eigenen Änderung): **0
+Typfehler, 0 Lint-Fehler, 74 Testdateien/560 Tests grün** — identisch zu
+den letzten Läufen.
+
+**Ausgewählter Punkt:** `TravixAvatar.tsx` (Task 4.4, bereits `[x]`) hat
+in mehreren Zuständen dauerhaft wiederholte Animationen
+(`repeat: Infinity` — z. B. `rotate: 360` im Zustand "thinking", dazu
+ein zusätzlicher Puls-Ring), ohne `prefers-reduced-motion` zu
+berücksichtigen. `PageTransition.tsx` (Routenwechsel-Animation) nutzt
+dafür bereits `useReducedMotion()` von framer-motion — `TravixAvatar.tsx`
+war die einzige Stelle mit vergleichbarer Endlosanimation, die dieses
+etablierte Muster noch nicht übernommen hatte.
+
+**Warum sicher genug:**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten.
+- Keine offene Produkt-/Architekturentscheidung — reine Übernahme eines
+  bereits im selben Code-Stand etablierten Musters (`PageTransition.tsx`)
+  auf eine zweite Stelle mit demselben Problem.
+- Klar beschrieben: `useReducedMotion()` abfragen, bei aktivierter
+  Präferenz Puls-Ring weglassen und die Icon-Animation durch ein leeres
+  `animate`-Objekt mit `duration: 0` ersetzen — keine Interpretation
+  über das hinaus nötig, was `PageTransition.tsx` bereits vormacht.
+- Objektiv prüfbar: neuer Test bestätigt, dass bei `matchMedia`-Mock
+  (`matches: true`) der Puls-Ring entfällt, während Icon/Zustand
+  unverändert angezeigt werden; bestehende Tests für alle sechs
+  Zustände bleiben unverändert grün.
+
+**Umsetzung:** `src/components/chat/TravixAvatar.tsx` ruft jetzt
+`useReducedMotion()` auf. Puls-Ring wird nur noch gerendert, wenn
+`state === 'thinking' && !prefersReducedMotion`; die Icon-`motion.div`
+erhält bei aktivierter Präferenz `animate={{}}` und
+`transition={{ duration: 0 }}` statt der zustandsabhängigen
+Endlosanimation. Neue `TravixAvatar.reduced-motion.test.tsx` (bewusst
+eigene Datei statt eines weiteren Tests in `TravixAvatar.test.tsx`, da
+framer-motion `prefers-reduced-motion` nur einmal pro Testdatei-Prozess
+abfragt und cacht — ein erster Versuch mit dem Test in derselben Datei
+wie die bestehenden Zustandstests schlug deshalb fehl und bestätigte,
+dass die eigene Datei nötig ist, exakt das in `PageTransition.test.tsx`
+dokumentierte Verhalten). Checkbox zu 4.4 in
+`tasks/tasks-prd-travix-platform.md` blieb `[x]` (Task war schon fertig),
+mit Kurzverweis ergänzt; ausführliche Beschreibung in `ZEITPLAN.md`
+(31.10.-Eintrag) ergänzt.
+
+**Geprüft:** `npx tsc -b` (0 Typfehler), `npm run lint` (0 Fehler),
+`npx vitest run` (75 Testdateien, 561 Tests, alle grün — 560 + 1 neuer
+Test) liefen vor dem Commit grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto`.
