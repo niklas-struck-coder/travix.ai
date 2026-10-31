@@ -58,7 +58,7 @@ function dropSession(code) {
 const S = {
   assets: [], by: {}, quotes: {}, quotesAt: 0,
   code: null, game: null, games: {},
-  tab: "markt", filter: "alle", q: "", sort: "name",
+  tab: "uebersicht", filter: "alle", q: "", sort: "name",
   modal: null, startMode: null, quiz: {},
 };
 
@@ -131,7 +131,7 @@ function openGame(code) {
   S.code = code;
   S.game = S.games[code] || null;
   ls("dd-active", code);
-  S.tab = "markt";
+  S.tab = "uebersicht";
   history.replaceState(null, "", "/");
   render();
   loadGame(code);
@@ -185,7 +185,7 @@ function renderHeader() {
     : "";
   const strip = document.getElementById("strip");
   const g = S.game, p = myPlayer();
-  if (g && p && S.assets.length) {
+  if (g && p && S.assets.length && S.tab !== "uebersicht") {
     const v = valueOf(p), perf = v / g.startCash - 1;
     const lb = leaderboard(), rank = lb.findIndex((r) => r.me) + 1;
     const days = Math.max(0, Math.ceil((g.endAt - Date.now()) / DAY));
@@ -198,7 +198,7 @@ function renderHeader() {
   } else strip.innerHTML = "";
 
   const tabs = S.code
-    ? [["markt", "Markt"], ["depot", "Depot"], ["rangliste", "Rangliste"], ["spiel", "Einladen"], ["lernen", "Crashkurs"]]
+    ? [["uebersicht", "Übersicht"], ["markt", "Markt"], ["depot", "Depot"], ["rangliste", "Rangliste"], ["spiel", "Einladen"], ["lernen", "Crashkurs"]]
     : [];
   document.getElementById("tabs").innerHTML = tabs.map(([id, l]) => `<button role="tab" data-tab="${id}" aria-selected="${S.tab === id}">${l}</button>`).join("");
   document.getElementById("tabs").hidden = !tabs.length;
@@ -253,6 +253,54 @@ function viewStart() {
       <div><button class="btn primary" type="submit">Beitreten</button></div></form>` : ""}
   </section>
   ${mode === "learn" ? viewLernen() : ""}`;
+}
+
+/* ---------- Übersicht ---------- */
+function viewUebersicht() {
+  const g = S.game, p = myPlayer();
+  if (!g || !p || !S.assets.length) return `<div class="card empty">Lade Übersicht …</div>`;
+  const pos = Object.entries(p.holdings).map(([id, h]) => {
+    const q = S.quotes[id] || {}, px = q.p ?? h.cost / h.qty, v = h.qty * px;
+    const today = q.chg != null ? v - v / (1 + q.chg) : 0;
+    return { id, a: S.by[id] || { name: id, cls: "aktie" }, h, q, px, v, gl: v - h.cost, glp: h.cost ? v / h.cost - 1 : 0, today };
+  }).sort((x, y) => y.v - x.v);
+  const inv = pos.reduce((t, x) => t + x.v, 0), total = p.cash + inv, perf = total / g.startCash - 1;
+  const today = pos.reduce((t, x) => t + x.today, 0), todayPct = total - today ? today / (total - today) : 0;
+  const lb = leaderboard(), rank = lb.findIndex((r) => r.me) + 1;
+  const days = Math.max(0, Math.ceil((g.endAt - Date.now()) / DAY));
+  const byCls = {};
+  pos.forEach((x) => (byCls[x.a.cls] = (byCls[x.a.cls] || 0) + x.v));
+  const alloc = Object.entries(byCls).map(([c, v]) => `<span style="width:${(v / total) * 100}%;background:${CLS[c].c}"></span>`).join("") + `<span style="width:${(p.cash / total) * 100}%;background:var(--line)"></span>`;
+  const leg = Object.entries(byCls).map(([c, v]) => `<span><i style="background:${CLS[c].c}"></i>${CLS[c].n} ${EUR.format(v)} · ${((v / total) * 100).toFixed(0)} %</span>`).join("") + `<span><i style="background:var(--line)"></i>Bargeld ${EUR.format(p.cash)} · ${((p.cash / total) * 100).toFixed(0)} %</span>`;
+  const rows = pos.map((x) => `<button class="hold" data-asset="${x.id}">
+      <span class="nm"><b>${esc(x.a.name)}</b><span class="small muted"><i class="dot ${x.q.open ? "" : "closed"}"></i>${fmtQty(x.h.qty)} Stück · Kurs ${fmtPx(x.px)}</span></span>
+      <span class="hv"><b class="num">${EUR.format(x.v)}</b><span class="small muted">${((x.v / total) * 100).toFixed(1)} % vom Depot</span></span>
+      <span class="hv"><b class="num ${ud(x.gl)}">${fmtSigned(x.gl)}</b><span class="small num ${ud(x.glp)}">${fmtPct(x.glp)}</span></span>
+      <span class="hv hide-s"><span class="num ${ud(x.today)}">${fmtSigned(x.today)}</span><span class="small muted">heute</span></span></button>`).join("");
+  const mini = lb.slice(0, 5).map((r, i) => `<div class="mrow ${r.me ? "me" : ""}"><span class="num">${i + 1}.</span><span>${esc(r.p.name)}${r.me ? " (du)" : ""}</span><span class="num">${EUR.format(r.v)}</span><span class="num small ${ud(r.perf)}">${fmtPct(r.perf)}</span></div>`).join("");
+  const last = p.trades.slice(0, 5).map((t) => `<div><span>${t.side === "buy" ? `<span class="up">Kauf</span>` : `<span class="down">Verkauf</span>`} ${esc(S.by[t.id]?.name || t.id)} <span class="muted">${EUR.format(t.qty * t.p)}</span></span><time>${fmtTime(t.t)}</time></div>`).join("");
+  return `<div class="dash">
+    <div class="hero-num card">
+      <span class="lbl">Dein Depot</span>
+      <span class="total num">${EUR.format(total)}</span>
+      <span class="num ${ud(perf)}">${fmtSigned(total - g.startCash)} (${fmtPct(perf)}) seit Start</span>
+      <span class="num small ${ud(today)}">${fmtSigned(today)} (${fmtPct(todayPct)}) heute</span>
+    </div>
+    <div class="kpis">
+      <div class="stat"><span class="lbl">Bargeld verfügbar</span><span class="v">${EUR.format(p.cash)}</span><span class="small muted">zum Investieren</span></div>
+      <div class="stat"><span class="lbl">Investiert</span><span class="v">${EUR.format(inv)}</span><span class="small muted">${pos.length} ${pos.length === 1 ? "Position" : "Positionen"}</span></div>
+      <div class="stat"><span class="lbl">Platz</span><span class="v">${rank} / ${lb.length}</span><span class="small muted">${esc(g.name)}</span></div>
+      <div class="stat"><span class="lbl">Spielende</span><span class="v">${ended(g) ? "vorbei" : `${days} ${days === 1 ? "Tag" : "Tage"}`}</span><span class="small muted">${fmtDate(g.endAt)}</span></div>
+    </div>
+  </div>
+  <div class="section card"><h3>Aufteilung</h3><div class="alloc" style="height:14px">${alloc}</div><div class="legend">${leg}</div></div>
+  <div class="section"><h2>Alles, was du besitzt</h2>
+    ${pos.length ? `<div class="holds">${rows}<div class="hold sum"><span class="nm"><b>Bargeld</b><span class="small muted">nicht investiert</span></span><span class="hv"><b class="num">${EUR.format(p.cash)}</b><span class="small muted">${((p.cash / total) * 100).toFixed(1)} % vom Depot</span></span><span></span><span class="hide-s"></span></div></div>` : `<div class="card empty">Noch nichts gekauft. <button class="btn" data-tab="markt">Zum Markt</button></div>`}
+  </div>
+  <div class="grid2b">
+    <div class="card"><h3>Rangliste</h3><div class="mini">${mini}</div><button class="btn" data-tab="rangliste" style="margin-top:8px">Ganze Rangliste</button></div>
+    <div class="card"><h3>Deine letzten Orders</h3><div class="feed" style="margin-top:6px">${last || `<p class="muted">Noch keine Orders.</p>`}</div></div>
+  </div>`;
 }
 
 /* ---------- Markt ---------- */
@@ -427,7 +475,7 @@ function render() {
   document.querySelectorAll("#view input[type=password]").forEach((i) => (pins[i.id] = i.value));
   let html;
   if (!S.code) html = viewStart();
-  else html = ({ markt: viewMarkt, depot: viewDepot, rangliste: viewRang, spiel: viewSpiel, lernen: viewLernen }[S.tab] || viewMarkt)();
+  else html = ({ uebersicht: viewUebersicht, markt: viewMarkt, depot: viewDepot, rangliste: viewRang, spiel: viewSpiel, lernen: viewLernen }[S.tab] || viewMarkt)();
   document.getElementById("view").innerHTML = html;
   for (const [id, val] of Object.entries({ ...keep, ...pins })) {
     const el = document.getElementById(id);
