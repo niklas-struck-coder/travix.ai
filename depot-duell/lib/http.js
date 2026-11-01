@@ -14,7 +14,8 @@ export function handler(fn) {
     } catch (e) {
       if (e instanceof HttpError) return send(res, e.status, { error: e.message });
       console.error(e);
-      send(res, 500, { error: "Da ist etwas schiefgelaufen. Bitte gleich nochmal versuchen." });
+      const dbg = req.query && req.query.debug === "1" ? { name: e && e.name, message: e && e.message, stack: String(e && e.stack).split("\n").slice(0, 4) } : undefined;
+      send(res, 500, { error: "Da ist etwas schiefgelaufen. Bitte gleich nochmal versuchen.", dbg });
     }
   };
 }
