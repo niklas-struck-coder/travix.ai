@@ -28,49 +28,55 @@ async function pool(items, size, fn) {
   return out;
 }
 
-/* ---------- Yahoo-Zugang: Cookie + Crumb ---------- */
-let auth = null; // { cookie, crumb }
-async function getAuth(force = false) {
-  if (auth && !force) return auth;
-  for (const host of ["fc.yahoo.com", "finance.yahoo.com"]) {
+/* ---------- Stapel-Kurse über den offenen Spark-Endpunkt (ohne Login) ---------- */
+// Liefert { symbol: {price, prev, chgPct} }
+async function sparkChunk(symbols) {
+  const qs = `symbols=${symbols.map(encodeURIComponent).join(",")}&range=1d&interval=1d`;
+  for (const host of ["query1", "query2"]) {
     try {
-      const r = await fetchText(`https://${host}/`);
-      const list = typeof r.headers.getSetCookie === "function" ? r.headers.getSetCookie() : (r.headers.get("set-cookie") ? [r.headers.get("set-cookie")] : []);
-      const cookie = list.map((c) => c.split(";")[0]).filter(Boolean).join("; ");
-      if (!cookie) continue;
-      const cr = await fetchText("https://query1.finance.yahoo.com/v1/test/getcrumb", { headers: { Cookie: cookie } });
-      const crumb = (await cr.text()).trim();
-      if (crumb && crumb.length < 40 && !crumb.includes("<")) {
-        auth = { cookie, crumb };
-        return auth;
+      const r = await fetchText(`https://${host}.finance.yahoo.com/v8/finance/spark?${qs}`);
+      if (!r.ok) continue;
+      const j = await r.json();
+      const out = {};
+      for (const [sym, v] of Object.entries(j || {})) {
+        if (!v || typeof v !== "object") continue;
+        const price = v.fulldayPrice ?? (Array.isArray(v.close) ? v.close[v.close.length - 1] : null);
+        if (!(price > 0)) continue;
+        out[sym] = { price, prev: v.chartPreviousClose ?? null, chgPct: v.fulldayChangePercent ?? null };
       }
+      if (Object.keys(out).length) return out;
     } catch {
-      // nächsten Host versuchen
+      // nächster Host
     }
   }
-  auth = null;
-  return null;
+  return {};
 }
 
-async function quoteChunk(symbols) {
-  const a = await getAuth();
-  if (!a) return [];
-  const qs = `symbols=${symbols.map(encodeURIComponent).join(",")}&crumb=${encodeURIComponent(a.crumb)}`;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const r = await fetchText(`https://query1.finance.yahoo.com/v7/finance/quote?${qs}`, { headers: { Cookie: (auth || a).cookie } });
-      if (r.status === 401 || r.status === 403) {
-        await getAuth(true);
-        continue;
-      }
-      if (!r.ok) return [];
-      const j = await r.json();
-      return j?.quoteResponse?.result || [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
+// Währung aus dem Yahoo-Symbol ableiten
+function curOf(a) {
+  if (a.cls === "krypto") return "EUR";
+  const y = a.yahoo;
+  if (y.endsWith("-EUR")) return "EUR";
+  if (/\.(DE|F|PA|AS|MI|MC|BR|LS|HE|VI|IR)$/.test(y)) return "EUR";
+  if (y.endsWith(".SW")) return "CHF";
+  if (y.endsWith(".L")) return "GBp";
+  return "USD"; // US-Aktien, ADRs, Rohstoff-Futures, US-ETFs
+}
+
+// Börsenöffnung aus der Zeit in Berlin ableiten
+function berlinNow() {
+  const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Berlin", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+  const g = (k) => p.find((x) => x.type === k)?.value;
+  return { wd: g("weekday"), min: Number(g("hour")) * 60 + Number(g("minute")) };
+}
+function isOpen(a, bn) {
+  if (a.cls === "krypto") return true;
+  const weekend = bn.wd === "Sat" || bn.wd === "Sun";
+  if (weekend) return false;
+  if (a.yahoo.endsWith("=F")) return true; // Rohstoff-Futures fast durchgehend werktags
+  const cur = curOf(a);
+  if (cur === "USD") return bn.min >= 930 && bn.min < 1320; // US-Börse 15:30–22:00 Berlin
+  return bn.min >= 540 && bn.min < 1050; // europäische Börsen 09:00–17:30
 }
 
 export async function yahooChart(symbol, range = "1d", interval = "5m") {
@@ -92,10 +98,10 @@ async function fxRates(currencies) {
   const rates = { EUR: 1 };
   const need = [...new Set(currencies.map((c) => (c === "GBp" ? "GBP" : c)))].filter((c) => c && c !== "EUR");
   if (need.length) {
-    const res = await quoteChunk(need.map((c) => `EUR${c}=X`));
-    for (const q of res) {
-      const cur = (q.symbol || "").slice(3, 6);
-      if (q.regularMarketPrice > 0) rates[cur] = q.regularMarketPrice;
+    const res = await sparkChunk(need.map((c) => `EUR${c}=X`));
+    for (const [sym, v] of Object.entries(res)) {
+      const cur = sym.slice(3, 6);
+      if (v.price > 0) rates[cur] = v.price;
     }
   }
   if (rates.GBP) rates.GBp = rates.GBP * 100;
@@ -106,23 +112,23 @@ async function fxRates(currencies) {
 async function loadQuotes() {
   const chunks = [];
   for (let i = 0; i < ASSETS.length; i += CHUNK) chunks.push(ASSETS.slice(i, i + CHUNK));
-  const results = await pool(chunks, 6, (c) => quoteChunk(c.map((a) => a.yahoo)));
+  const results = await pool(chunks, 6, (c) => sparkChunk(c.map((a) => a.yahoo)));
   const raw = {};
-  for (const arr of results) if (arr) for (const q of arr) if (q?.symbol) raw[q.symbol] = q;
+  for (const map of results) if (map) Object.assign(raw, map);
 
-  const rates = await fxRates(Object.values(raw).map((q) => q.currency));
+  const rates = await fxRates(ASSETS.map(curOf));
+  const bn = berlinNow();
   const quotes = {};
   for (const a of ASSETS) {
     const q = raw[a.yahoo];
-    if (!q || !(q.regularMarketPrice > 0)) continue;
-    const rate = rates[q.currency];
+    if (!q || !(q.price > 0)) continue;
+    const rate = rates[curOf(a)];
     if (!rate) continue;
-    const open = a.cls === "krypto" ? true : q.marketState === "REGULAR";
     quotes[a.id] = {
-      p: q.regularMarketPrice / rate,
-      chg: q.regularMarketChangePercent != null ? q.regularMarketChangePercent / 100 : null,
-      open,
-      t: (q.regularMarketTime || Date.now() / 1000) * 1000,
+      p: q.price / rate,
+      chg: q.chgPct != null ? q.chgPct / 100 : q.prev ? q.price / q.prev - 1 : null,
+      open: isOpen(a, bn),
+      t: Date.now(),
     };
   }
   return quotes;
@@ -168,13 +174,13 @@ export async function priceFor(id) {
   const { quotes, at } = await getQuotes();
   const q = quotes[id];
   if (q && !q.stale && Date.now() - at < QUOTE_TTL) return q;
-  const res = await quoteChunk([a.yahoo]);
-  const one = res[0];
-  if (!one || !(one.regularMarketPrice > 0)) return q || null;
-  const rates = await fxRates([one.currency]);
-  const rate = rates[one.currency];
+  const res = await sparkChunk([a.yahoo]);
+  const one = res[a.yahoo];
+  if (!one || !(one.price > 0)) return q || null;
+  const cur = curOf(a);
+  const rate = (await fxRates([cur]))[cur];
   if (!rate) return q || null;
-  return { p: one.regularMarketPrice / rate, chg: one.regularMarketChangePercent != null ? one.regularMarketChangePercent / 100 : null, open: a.cls === "krypto" ? true : one.marketState === "REGULAR", t: Date.now() };
+  return { p: one.price / rate, chg: one.chgPct != null ? one.chgPct / 100 : null, open: isOpen(a, berlinNow()), t: Date.now() };
 }
 
 const RANGES = { "1d": "5m", "5d": "30m", "1mo": "1h", "6mo": "1d", "1y": "1d", "5y": "1wk" };
