@@ -312,8 +312,11 @@ function viewMarkt() {
   if (S.sort === "up") list.sort((a, b) => c(b) - c(a));
   else if (S.sort === "down") list.sort((a, b) => c(a) - c(b));
   else list.sort((a, b) => a.name.localeCompare(b.name, "de"));
+  const CAP = 200;
+  const total = list.length;
+  const shown = list.slice(0, CAP);
   const chips = [["alle", "Alle"], ...Object.entries(CLS).map(([k, v]) => [k, v.n])].map(([id, l]) => `<button class="chip" data-filter="${id}" aria-pressed="${S.filter === id}">${l}</button>`).join("");
-  const rows = list.map((a) => {
+  const rows = shown.map((a) => {
     const qq = S.quotes[a.id];
     return `<button class="row" data-asset="${a.id}"><span class="nm"><b><span class="cls">${CLS[a.cls].one}</span>${esc(a.name)}</b><span><i class="dot ${qq.open ? "" : "closed"}" title="${qq.open ? "Börse offen" : "Börse geschlossen"}"></i>${esc(a.sector)}</span></span><span class="px num">${fmtPx(qq.p)}</span><span class="pill ${ud(qq.chg)}">${fmtPct(qq.chg)}</span></button>`;
   }).join("");
@@ -325,7 +328,7 @@ function viewMarkt() {
       <select id="sort" aria-label="Sortieren"><option value="name" ${S.sort === "name" ? "selected" : ""}>A–Z</option><option value="up" ${S.sort === "up" ? "selected" : ""}>Top-Gewinner heute</option><option value="down" ${S.sort === "down" ? "selected" : ""}>Top-Verlierer heute</option></select></div>
     <div class="chips" style="margin-bottom:12px">${chips}</div>
     <div class="list">${rows || `<div class="empty">Nichts gefunden für „${esc(S.q)}“.</div>`}</div>
-    <p class="small muted">${list.length} Werte · Prozent = Veränderung heute (Krypto: 24 Stunden) · <i class="dot"></i>Börse offen <i class="dot closed" style="margin-left:8px"></i>geschlossen · Stand ${fmtClock(S.quotesAt)} Uhr</p>
+    <p class="small muted">${total > CAP ? `Zeige die ersten ${CAP} von ${total} Werten – nutze die Suche, um gezielt zu finden.` : `${total} Werte`} · Prozent = Veränderung heute (Krypto: 24 Stunden) · <i class="dot"></i>Börse offen <i class="dot closed" style="margin-left:8px"></i>geschlossen · Stand ${fmtClock(S.quotesAt)} Uhr</p>
   </div><aside class="side">
     <div class="card"><h3>Heute vorne & hinten</h3><div style="margin-top:6px">${all.slice(0, 4).map(mv).join("")}${all.slice(-4).reverse().map(mv).join("")}</div></div>
     ${feed.length ? `<div class="card"><h3>Was die anderen handeln</h3><div class="feed" style="margin-top:6px">${feed.map(feedRow).join("")}</div></div>` : ""}
