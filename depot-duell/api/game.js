@@ -1,14 +1,26 @@
 import { randomBytes } from "node:crypto";
 import { handler, send, body } from "../lib/http.js";
-import { HttpError, readGame, createGame, mutateGame } from "../lib/store.js";
-import { addPlayer, login, checkPin, cleanName, newCode, ended, publicGame, berlinDay, MAX_PLAYERS } from "../lib/game.js";
+import { HttpError, readGame, createGame, mutateGame, writeJson } from "../lib/store.js";
+import { addPlayer, login, checkPin, cleanName, newCode, ended, publicGame, berlinDay, MAX_PLAYERS, processPending, pendingSymbols } from "../lib/game.js";
+import { quotesFor } from "../lib/market.js";
 
 const DAY = 864e5;
 
+// Fällige Vormerkungen ausführen (wenn die Börse offen ist) und ggf. speichern
+async function runPending(code, game) {
+  const syms = pendingSymbols(game);
+  if (!syms.length) return;
+  const quotes = await quotesFor(syms);
+  const done = processPending(game, (id) => quotes[id]);
+  if (done > 0) await writeJson(`games/${code}.json`, game).catch(() => {});
+}
+
 export default handler(async (req, res) => {
   if (req.method === "GET") {
-    const g = await readGame(String(req.query.code || "").toUpperCase());
+    const code = String(req.query.code || "").toUpperCase();
+    const g = await readGame(code);
     if (!g) throw new HttpError(404, "Spiel nicht gefunden. Prüfe den Code.");
+    await runPending(code, g.data);
     return send(res, 200, publicGame(g.data));
   }
   const b = body(req);

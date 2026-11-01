@@ -294,6 +294,7 @@ function viewUebersicht() {
     </div>
   </div>
   <div class="section card"><h3>Aufteilung</h3><div class="alloc" style="height:14px">${alloc}</div><div class="legend">${leg}</div></div>
+  ${(p.pending || []).length ? `<div class="section card"><h3>Vorgemerkte Aufträge</h3><p class="small muted" style="margin:0 0 8px">Werden automatisch beim nächsten Börsenstart zum dann gültigen Kurs ausgeführt.</p><div class="pendlist">${(p.pending || []).map((o) => `<div class="pend"><span><b>${o.side === "buy" ? "Kauf" : "Verkauf"}</b> ${esc(S.by[o.id]?.name || o.id)} <span class="muted">· ${o.all ? "alles" : o.eur != null ? EUR.format(o.eur) : fmtQty(o.qty) + " Stück"}</span></span><button class="btn" data-cancelpending="${o.t}">Stornieren</button></div>`).join("")}</div></div>` : ""}
   <div class="section"><h2>Alles, was du besitzt</h2>
     ${pos.length ? `<div class="holds">${rows}<div class="hold sum"><span class="nm"><b>Bargeld</b><span class="small muted">nicht investiert</span></span><span class="hv"><b class="num">${EUR.format(p.cash)}</b><span class="small muted">${((p.cash / total) * 100).toFixed(1)} % vom Depot</span></span><span></span><span class="hide-s"></span></div></div>` : `<div class="card empty">Noch nichts gekauft. <button class="btn" data-tab="markt">Zum Markt</button></div>`}
   </div>
@@ -530,6 +531,8 @@ function renderModal() {
   if (!m) { el.innerHTML = ""; return; }
   const a = S.by[m.id], q = S.quotes[m.id] || {}, g = S.game, p = myPlayer(), h = p?.holdings?.[m.id];
   const canTrade = p && !ended(g) && q.open;
+  const canQueue = p && !ended(g) && !q.open; // Börse zu -> vormerken möglich
+  const label = m.busy ? "Wird ausgeführt …" : canQueue ? (m.side === "buy" ? "Zum Börsenstart vormerken" : "Verkauf vormerken") : m.side === "buy" ? "Kaufen" : "Verkaufen";
   el.innerHTML = `<div class="ov" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
     <div class="mhead"><div><span class="cls">${CLS[a.cls].one}</span><span class="small muted">${esc(a.sector)}</span><h2 id="mtitle" style="margin-top:4px">${esc(a.name)}</h2>
       <div><span class="px" id="mpx"></span> <span id="mchg"></span></div>
@@ -544,8 +547,9 @@ function renderModal() {
       <div class="rowf"><label>${m.unit === "eur" ? "Betrag in €" : "Stückzahl"}<input type="text" inputmode="decimal" id="amt" value="${esc(m.amount)}" placeholder="0"></label></div>
       <div class="quick">${[["25 %", 0.25], ["50 %", 0.5], ["Alles", 1]].map(([l, f]) => `<button data-frac="${f}">${l}</button>`).join("")}</div>
       <div class="small" id="msum"></div>
-      <button class="btn primary" id="mgo" ${canTrade && !m.busy ? "" : "disabled"}>${m.busy ? "Wird ausgeführt …" : m.side === "buy" ? "Kaufen" : "Verkaufen"}</button>
-      ${!canTrade ? `<span class="small muted">${ended(g) ? "Spiel beendet, Handel geschlossen." : !q.open ? "Handel möglich, sobald die Börse öffnet." : ""}</span>` : ""}
+      <button class="btn primary" id="mgo" ${(canTrade || canQueue) && !m.busy ? "" : "disabled"}>${label}</button>
+      ${canQueue ? `<span class="small muted">Die Börse ist gerade zu. Vorgemerkte Aufträge werden automatisch beim nächsten Börsenstart zum dann gültigen Kurs ausgeführt.</span>` : ended(g) ? `<span class="small muted">Spiel beendet, Handel geschlossen.</span>` : ""}
+      ${(p.pending || []).filter((o) => o.id === m.id).length ? `<div class="small" style="margin-top:4px">Vorgemerkt: ${(p.pending || []).filter((o) => o.id === m.id).map((o) => `${o.side === "buy" ? "Kauf" : "Verkauf"} ${o.all ? "alles" : o.eur != null ? EUR.format(o.eur) : fmtQty(o.qty) + " Stk"} <button class="linkbtn" data-cancelpending="${o.t}">stornieren</button>`).join(", ")}</div>` : ""}
     </div>` : `<div class="trade"><span>Zum Handeln tritt einem Spiel bei.</span></div>`}
   </div></div>`;
   drawChart();
@@ -622,6 +626,7 @@ function drawChart() {
 
 async function submitTrade() {
   const m = S.modal, o = orderInfo(), s = me();
+  const queue = !S.quotes[m.id]?.open; // Börse zu -> vormerken
   if (!o || !(o.qty > 0)) return toast("Gib eine Menge größer 0 ein.");
   m.busy = true;
   renderModal();
@@ -630,16 +635,32 @@ async function submitTrade() {
     if (o.all) body.all = true;
     else if (o.eur != null) body.eur = o.eur;
     else body.qty = o.qty;
+    if (queue) body.queue = true;
     const d = await api("/api/trade", { body });
     S.game = d.game;
     S.games[S.code] = d.game;
-    toast(`${m.side === "buy" ? "Gekauft" : "Verkauft"}: ${fmtQty(d.trade.qty)} × ${S.by[m.id].name} zu ${fmtPx(d.trade.p)}`);
+    if (d.queued) toast(`Vorgemerkt: ${m.side === "buy" ? "Kauf" : "Verkauf"} von ${S.by[m.id].name} zum nächsten Börsenstart.`);
+    else toast(`${m.side === "buy" ? "Gekauft" : "Verkauft"}: ${fmtQty(d.trade.qty)} × ${S.by[m.id].name} zu ${fmtPx(d.trade.p)}`);
     if (S.modal) { S.modal.amount = ""; S.modal.all = false; }
   } catch (e) {
     toast(e.message);
     if (e.status === 401) { dropSession(S.code); render(); }
   }
   if (S.modal) { S.modal.busy = false; renderModal(); }
+  render();
+}
+
+async function cancelPendingOrder(t) {
+  const s = me();
+  try {
+    const d = await api("/api/trade", { body: { action: "cancelPending", code: S.code, pid: s.pid, token: s.token, t } });
+    S.game = d.game;
+    S.games[S.code] = d.game;
+    toast("Vormerkung storniert.");
+  } catch (e) {
+    toast(e.message);
+  }
+  renderModal();
   render();
 }
 
@@ -725,6 +746,7 @@ document.addEventListener("click", (e) => {
     updateModalLive();
     return;
   }
+  if (d.cancelpending) return cancelPendingOrder(Number(d.cancelpending));
   if (t.id === "mgo") return submitTrade();
 });
 document.addEventListener("input", (e) => {

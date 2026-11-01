@@ -5,6 +5,7 @@ const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const MAX_PLAYERS = 30;
 const MAX_TRADES = 300;
 const MAX_FEED = 200;
+const MAX_PENDING = 40;
 
 export const newCode = () => Array.from({ length: 6 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join("");
 export const newId = () => randomBytes(6).toString("hex");
@@ -35,6 +36,7 @@ export function addPlayer(game, name, pin) {
     cash: game.startCash,
     holdings: {},
     trades: [],
+    pending: [],
     joinedAt: Date.now(),
   };
   return { pid: id, token };
@@ -99,10 +101,69 @@ export function executeTrade(game, pid, { id, side, qty, price }) {
   return trade;
 }
 
+// Einen Auftrag vormerken (wird beim nächsten Börsenstart ausgeführt)
+export function queueOrder(game, pid, o) {
+  const p = game.players[pid];
+  p.pending = p.pending || [];
+  if (p.pending.length >= MAX_PENDING) throw new HttpError(400, "Du hast schon zu viele vorgemerkte Aufträge.");
+  const entry = { t: Date.now(), id: o.id, side: o.side };
+  if (o.all) entry.all = true;
+  else if (o.eur != null) entry.eur = o.eur;
+  else entry.qty = o.qty;
+  p.pending.push(entry);
+  return entry;
+}
+
+export function cancelPending(game, pid, t) {
+  const p = game.players[pid];
+  p.pending = (p.pending || []).filter((o) => o.t !== t);
+}
+
+// Vorgemerkte Aufträge ausführen, sobald die jeweilige Börse offen ist.
+// quoteFor(id) -> {p, open} | undefined. Gibt die Anzahl ausgeführter Aufträge zurück.
+export function processPending(game, quoteFor) {
+  let done = 0;
+  for (const [pid, p] of Object.entries(game.players)) {
+    if (!p.pending || !p.pending.length) continue;
+    if (ended(game)) { p.pending = []; continue; } // Spiel vorbei: Vormerkungen verfallen
+    const keep = [];
+    const fee = game.fee || 0;
+    for (const o of p.pending) {
+      const q = quoteFor(o.id);
+      if (!q || !q.open || !(q.p > 0)) { keep.push(o); continue; } // Börse noch zu: warten
+      let qty;
+      if (o.all && o.side === "sell") qty = p.holdings[o.id]?.qty || 0;
+      else if (o.all && o.side === "buy") qty = Math.max(0, (p.cash - fee) / q.p);
+      else if (o.eur != null) qty = o.side === "buy" ? Math.max(0, (o.eur - fee) / q.p) : o.eur / q.p;
+      else qty = o.qty;
+      if (o.side === "buy") qty = Math.min(qty, Math.max(0, (p.cash - fee) / q.p)); // an Bargeld anpassen
+      if (o.side === "sell") qty = Math.min(qty, p.holdings[o.id]?.qty || 0);
+      if (!(qty > 0)) continue; // nicht mehr ausführbar (kein Geld / keine Stücke) -> verwerfen
+      try {
+        const t = executeTrade(game, pid, { id: o.id, side: o.side, qty, price: q.p });
+        t.queued = true;
+        if (game.feed && game.feed[0]) game.feed[0].queued = true;
+        done++;
+      } catch {
+        // nicht ausführbar -> Auftrag verfällt
+      }
+    }
+    p.pending = keep;
+  }
+  return done;
+}
+
+// Alle Symbole, für die es offene Vormerkungen gibt
+export function pendingSymbols(game) {
+  const s = new Set();
+  for (const p of Object.values(game.players || {})) for (const o of p.pending || []) s.add(o.id);
+  return [...s];
+}
+
 export function publicGame(game) {
   const players = {};
   for (const [pid, p] of Object.entries(game.players)) {
-    players[pid] = { name: p.name, cash: p.cash, holdings: p.holdings, trades: p.trades.slice(0, 100), joinedAt: p.joinedAt };
+    players[pid] = { name: p.name, cash: p.cash, holdings: p.holdings, trades: p.trades.slice(0, 100), pending: p.pending || [], joinedAt: p.joinedAt };
   }
   return {
     code: game.code,

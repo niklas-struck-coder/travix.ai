@@ -203,3 +203,9 @@ button.hold:hover{background:var(--sunk)}
 .mrow:first-child{border-top:0}
 .mrow.me{font-weight:600}
 .mrow .small{text-align:right}
+
+/* Vorgemerkte Aufträge */
+.pendlist{display:grid;gap:8px}
+.pend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--sunk);border-radius:8px;padding:8px 12px}
+.pend .btn{padding:4px 10px;font-size:.82rem}
+.linkbtn{border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;padding:0}

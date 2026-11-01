@@ -1,7 +1,7 @@
 import { handler, send } from "../lib/http.js";
 import { listGameCodes, mutateGame } from "../lib/store.js";
 import { getQuotes } from "../lib/market.js";
-import { berlinDay, portfolioValue } from "../lib/game.js";
+import { berlinDay, portfolioValue, processPending } from "../lib/game.js";
 
 // Täglicher Schnappschuss der Depotwerte für den Verlaufs-Chart der Rangliste
 export default handler(async (req, res) => {
@@ -14,6 +14,7 @@ export default handler(async (req, res) => {
     try {
       await mutateGame(code, (game) => {
         if (Date.now() > game.endAt + 864e5) return;
+        processPending(game, (id) => (quotes[id] ? { p: quotes[id].p, open: quotes[id].open } : undefined));
         const v = {};
         for (const [pid, p] of Object.entries(game.players)) v[pid] = Math.round(portfolioValue(p, quotes) * 100) / 100;
         game.history = (game.history || []).filter((h) => h.d !== day);

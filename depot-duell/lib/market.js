@@ -53,7 +53,7 @@ async function sparkChunk(symbols) {
 }
 
 // Währung aus dem Yahoo-Symbol ableiten
-function curOf(a) {
+export function curOf(a) {
   if (a.cls === "krypto") return "EUR";
   const y = a.yahoo;
   if (y.endsWith("-EUR")) return "EUR";
@@ -66,12 +66,12 @@ function curOf(a) {
 }
 
 // Börsenöffnung aus der Zeit in Berlin ableiten
-function berlinNow() {
+export function berlinNow() {
   const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Berlin", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
   const g = (k) => p.find((x) => x.type === k)?.value;
   return { wd: g("weekday"), min: Number(g("hour")) * 60 + Number(g("minute")) };
 }
-function isOpen(a, bn) {
+export function isOpen(a, bn) {
   if (a.cls === "krypto") return true;
   const weekend = bn.wd === "Sat" || bn.wd === "Sun";
   if (weekend) return false;
@@ -168,6 +168,29 @@ export async function getQuotes() {
     inflight = null;
   });
   return inflight;
+}
+
+// Kurse für wenige bestimmte Werte (für die Ausführung vorgemerkter Aufträge)
+// -> { id: {p, open} }
+export async function quotesFor(ids) {
+  const assets = ids.map((id) => BY_ID[id]).filter(Boolean);
+  if (!assets.length) return {};
+  const chunks = [];
+  for (let i = 0; i < assets.length; i += CHUNK) chunks.push(assets.slice(i, i + CHUNK));
+  const results = await pool(chunks, 6, (c) => sparkChunk(c.map((a) => a.yahoo)));
+  const raw = {};
+  for (const m of results) if (m) Object.assign(raw, m);
+  const rates = await fxRates(assets.map(curOf));
+  const bn = berlinNow();
+  const out = {};
+  for (const a of assets) {
+    const q = raw[a.yahoo];
+    if (!q || !(q.price > 0)) continue;
+    const rate = rates[curOf(a)];
+    if (!rate) continue;
+    out[a.id] = { p: q.price / rate, open: isOpen(a, bn) };
+  }
+  return out;
 }
 
 // Frischer Kurs für eine Order – nur dieses eine Symbol laden (schnell, kein Voll-Abruf)
