@@ -100,10 +100,14 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             maxLength={3}
             className="uppercase"
             required
+            aria-invalid={sameAirport}
+            aria-describedby={sameAirport ? 'destination-same-airport-error' : undefined}
           />
           <p className="text-xs text-muted-foreground">3-stelliger Flughafencode, z. B. LIS</p>
           {sameAirport && (
-            <p className="text-xs text-destructive">Start und Ziel dürfen nicht gleich sein</p>
+            <p id="destination-same-airport-error" className="text-xs text-destructive">
+              Start und Ziel dürfen nicht gleich sein
+            </p>
           )}
         </div>
         <div className="flex flex-col gap-1.5">

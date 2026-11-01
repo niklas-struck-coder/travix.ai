@@ -3203,6 +3203,29 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Typfehler), `npm run lint` (0 Fehler), `npx vitest run` (75
   Testdateien, 561 Tests, alle grün — 560 + 1 neuer Test) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 01.11. (dreiundsechzigster Lauf) eine
+  weitere Accessibility-Lücke geschlossen: `FlightWizard.tsx` zeigt eine
+  Fehlermeldung ("Start und Ziel dürfen nicht gleich sein") unter dem
+  Zielflughafen-Feld, wenn Start- und Zielflughafen identisch sind — das
+  zugehörige `Input` hatte dafür aber kein `aria-describedby`/
+  `aria-invalid`, sodass Screenreader-Nutzer:innen den Fehler beim
+  Fokussieren/Verlassen des Felds nicht hören, nur sehend wahrnehmen
+  konnten. Einzige inline Feld-Validierungsmeldung dieser Art im ganzen
+  Code (geprüft per `grep` nach `text-destructive` in
+  `components/search|trip` sowie `pages` — kein weiterer Treffer außer
+  der bereits korrekt mit `role="alert"` versehenen
+  `SearchErrorAlert.tsx`). Fix: `<Input id="destination">` bekommt jetzt
+  `aria-invalid={sameAirport}` und `aria-describedby`, das bei aktivem
+  Fehler auf die neue `id="destination-same-airport-error"` der
+  Fehlermeldung zeigt, sonst `undefined`. Reine Accessibility-
+  Verdrahtung, kein Verhaltensunterschied für Sehende. Neuer Test in
+  `FlightWizard.test.tsx` ("links the same-airport error to the
+  destination field for screen readers") ergänzt den bestehenden
+  Validierungstest um die Prüfung von `aria-invalid`/`aria-describedby`
+  im Default-Zustand, bei aktivem Fehler und nach dessen Behebung. `npx
+  tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+  Testdateien, 562 Tests, alle grün — 561 + 1 neuer Test) liefen vor dem
+  Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

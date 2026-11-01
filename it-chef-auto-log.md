@@ -24437,3 +24437,78 @@ Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-01 (dreiundsechzigster Lauf — Accessibility-Fix in FlightWizard umgesetzt)
+
+**Ausgangslage:** Frischer Checkout, `it-chef/auto` unverändert vom 62.
+Lauf (`c211cab`) übernommen. `origin/main` weiterhin unverändert auf
+`fe1300e` (2026-10-23) — kein frischer `main`-Merge nötig (`it-chef/auto`
+ist weiterhin rein vorauslaufend vor `origin/main`).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber allen Vorläufen: alle sechs verbleibenden offenen
+Eltern-Checkboxen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0) scheitern weiterhin an
+mindestens einem Kriterium (Base44-/Duffel-/Gemini-Zugangsdaten bzw.
+fehlende Provider/Datenfelder, oder eine Architektur-/Produktentscheidung,
+die Ni zusteht).
+
+**Eigene, unabhängige Bug-/Lücken-Suche mit anderem Fokus als die
+Vorläufe** (über einen eigens dafür beauftragten Explore-Agenten,
+gezielt auf noch nicht geprüfte Kategorien beschränkt): Icon-only
+Buttons/Links ohne `aria-label` (kein Fund — durchgängig vorhanden),
+`<img>`-Tags ohne sinnvollen `alt`-Text (kein Fund — einziges `<img>` im
+Repo, `HotelCard.tsx`, hat bereits einen korrekten, inhaltlichen
+`alt`-Text), deutsche Tippfehler/doppelte Wörter in nutzersichtbaren
+JSX-Strings über alle Seiten (kein Fund), fehlende Testdateien für
+reine Hilfsfunktionen (kein neuer Fund — einzige Lücken `ui/input.tsx`/
+`ui/label.tsx` sind reine Wrapper ohne eigene Logik), `eslint-disable`-
+Kommentare im `src`-Baum (kein einziges Vorkommen), redundanter Code
+mit echtem Divergenzrisiko zwischen Parallel-Dateien (`transportIcons`/
+`transportLabels` sind zwar in `TripSummaryCard.tsx`, `Buchung.tsx` und
+`Reiseentwuerfe.tsx` dupliziert, aber aktuell ohne tatsächliche
+Abweichung — reiner Refactoring-Hinweis, kein Bug; `TrainCard`/
+`TrainResults`/`TrainOffer` sind vollständig unbenutzter Code, dessen
+Fertigstellung aber eine Produktentscheidung wäre).
+
+**Fund (neue Kategorie, bisher nicht geprüft — Feld-Fehlermeldung ohne
+programmatische Verknüpfung):** `FlightWizard.tsx` zeigt unter dem
+Zielflughafen-Feld eine Fehlermeldung ("Start und Ziel dürfen nicht
+gleich sein"), wenn Start- und Zielflughafen identisch sind
+(`sameAirport`) — das zugehörige `<Input id="destination">` hatte dafür
+aber weder `aria-describedby` noch `aria-invalid`. Für
+Screenreader-Nutzer:innen war der Fehler beim Fokussieren/Verlassen des
+Felds nicht hörbar, nur sehend wahrnehmbar (WCAG 3.3.1/4.1.2). Einzige
+inline Feld-Validierungsmeldung dieser Art im ganzen Code — die
+bestehende `SearchErrorAlert.tsx` hat bereits korrekt `role="alert"`.
+Erfüllt alle vier Sicherheitskriterien: keine Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Berührung, keine offene Architektur-/
+Produktentscheidung, klar genug beschrieben (reine ARIA-Verdrahtung),
+objektiv prüfbar (Attribut-Werte per Test).
+
+**Fix:** `src/components/search/FlightWizard.tsx` — `Input` bekommt
+`aria-invalid={sameAirport}` und `aria-describedby={sameAirport ?
+'destination-same-airport-error' : undefined}`; die Fehlermeldung
+(`<p>`) bekommt die passende `id="destination-same-airport-error"`.
+Reine Accessibility-Verdrahtung, kein Verhaltensunterschied für
+Sehende, keine neue Annahme über das hinaus, was der bestehende Code
+bereits tut.
+
+**Tests:** Neuer Test in `FlightWizard.test.tsx` ("links the
+same-airport error to the destination field for screen readers")
+prüft `aria-invalid`/`aria-describedby` im Default-Zustand (kein
+Fehler), bei aktivem Fehler (verknüpft auf die tatsächliche `id` der
+Fehlermeldung) und nach dessen Behebung (Attribute wieder entfernt).
+Bestehender Test "rejects an identical origin and destination airport
+with a hint" unverändert, weiterhin grün.
+
+**Dokumentation:** `ZEITPLAN.md` (Ist-Stand-Abschnitt) und
+`tasks/tasks-prd-travix-platform.md` (Checkbox 5.8) um eine Notiz zu
+diesem Fix ergänzt.
+
+**Regressionsschutz vor dem Commit:** `npm ci` fehlerfrei, `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 562 Tests, alle grün — 561 vorher + 1 neu).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

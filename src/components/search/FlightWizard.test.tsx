@@ -91,4 +91,24 @@ describe('FlightWizard', () => {
     expect(screen.queryByText('Start und Ziel dürfen nicht gleich sein')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Flüge suchen/ })).toBeEnabled()
   })
+
+  it('links the same-airport error to the destination field for screen readers', () => {
+    render(<FlightWizard onSearch={vi.fn()} loading={false} />)
+
+    const destinationInput = screen.getByLabelText('Nach (IATA)')
+    expect(destinationInput).toHaveAttribute('aria-invalid', 'false')
+    expect(destinationInput).not.toHaveAttribute('aria-describedby')
+
+    fireEvent.change(screen.getByLabelText('Von (IATA)'), { target: { value: 'BER' } })
+    fireEvent.change(destinationInput, { target: { value: 'ber' } })
+
+    const errorMessage = screen.getByText('Start und Ziel dürfen nicht gleich sein')
+    expect(destinationInput).toHaveAttribute('aria-invalid', 'true')
+    expect(destinationInput).toHaveAttribute('aria-describedby', errorMessage.id)
+
+    fireEvent.change(destinationInput, { target: { value: 'LIS' } })
+
+    expect(destinationInput).toHaveAttribute('aria-invalid', 'false')
+    expect(destinationInput).not.toHaveAttribute('aria-describedby')
+  })
 })
