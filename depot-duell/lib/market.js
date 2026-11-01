@@ -4,7 +4,7 @@ import { readJson, writeJson } from "./store.js";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 const QUOTE_TTL = 90_000;
 const SNAPSHOT_EVERY = 10 * 60_000;
-const CHUNK = 50;
+const CHUNK = 20;
 
 async function fetchText(url, opts = {}, timeout = 9000) {
   const r = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json", ...(opts.headers || {}) }, signal: AbortSignal.timeout(timeout) });
@@ -112,7 +112,7 @@ async function fxRates(currencies) {
 async function loadQuotes() {
   const chunks = [];
   for (let i = 0; i < ASSETS.length; i += CHUNK) chunks.push(ASSETS.slice(i, i + CHUNK));
-  const results = await pool(chunks, 6, (c) => sparkChunk(c.map((a) => a.yahoo)));
+  const results = await pool(chunks, 10, (c) => sparkChunk(c.map((a) => a.yahoo)));
   const raw = {};
   for (const map of results) if (map) Object.assign(raw, map);
 

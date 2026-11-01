@@ -1,5 +1,12 @@
 {
   "crons": [{ "path": "/api/cron", "schedule": "5 22 * * *" }],
+  "functions": {
+    "api/quotes.js": { "maxDuration": 30 },
+    "api/cron.js": { "maxDuration": 60 },
+    "api/trade.js": { "maxDuration": 20 },
+    "api/chart.js": { "maxDuration": 20 },
+    "api/game.js": { "maxDuration": 20 }
+  },
   "headers": [
     { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] }
   ]
