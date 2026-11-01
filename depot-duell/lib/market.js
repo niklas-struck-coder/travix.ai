@@ -60,6 +60,8 @@ function curOf(a) {
   if (/\.(DE|F|PA|AS|MI|MC|BR|LS|HE|VI|IR)$/.test(y)) return "EUR";
   if (y.endsWith(".SW")) return "CHF";
   if (y.endsWith(".L")) return "GBp";
+  if (y.endsWith(".HK")) return "HKD";
+  if (/\.(SS|SZ)$/.test(y)) return "CNY";
   return "USD"; // US-Aktien, ADRs, Rohstoff-Futures, US-ETFs
 }
 
@@ -76,6 +78,7 @@ function isOpen(a, bn) {
   if (a.yahoo.endsWith("=F")) return true; // Rohstoff-Futures fast durchgehend werktags
   const cur = curOf(a);
   if (cur === "USD") return bn.min >= 930 && bn.min < 1320; // US-Börse 15:30–22:00 Berlin
+  if (cur === "HKD" || cur === "CNY") return bn.min >= 150 && bn.min < 540; // Hongkong/China ca. 02:30–09:00 Berlin
   return bn.min >= 540 && bn.min < 1050; // europäische Börsen 09:00–17:30
 }
 
