@@ -82,6 +82,23 @@ describe('MobileNav', () => {
     })
   })
 
+  it('verknüpft das geöffnete Menü per aria-describedby mit einer (visuell versteckten) Beschreibung für Screenreader', () => {
+    render(
+      <MemoryRouter>
+        <MobileNav />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menü öffnen' }))
+
+    const dialog = screen.getByRole('dialog')
+    const describedById = dialog.getAttribute('aria-describedby')
+    expect(describedById).toBeTruthy()
+    expect(document.getElementById(describedById!)).toHaveTextContent(
+      'Navigationsmenü mit allen Seiten von Travix',
+    )
+  })
+
   it('kehrt beim Schließen ohne Navigation (z.B. Escape) weiterhin zum Menü-Button zurück', async () => {
     render(
       <MemoryRouter>

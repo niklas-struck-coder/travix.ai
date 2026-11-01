@@ -5,6 +5,7 @@ import { navGroups } from '@/lib/nav-config'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -55,6 +56,7 @@ export function MobileNav() {
         >
           <SheetHeader className="border-b border-sidebar-border px-4 py-4">
             <SheetTitle className="font-heading text-sidebar-foreground">Travix</SheetTitle>
+            <SheetDescription className="sr-only">Navigationsmenü mit allen Seiten von Travix</SheetDescription>
           </SheetHeader>
           <nav className="space-y-6 overflow-y-auto px-3 py-4">
             {navGroups.map((group) => (

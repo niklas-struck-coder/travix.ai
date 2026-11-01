@@ -24512,3 +24512,90 @@ Testdateien, 562 Tests, alle grün — 561 vorher + 1 neu).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-01 (vierundsechzigster Lauf — SheetDescription-Lücke in MobileNav geschlossen)
+
+**Ausgangslage:** Frischer Checkout, `it-chef/auto` unverändert vom 63.
+Lauf (`14dc271`) übernommen. `origin/main` weiterhin unverändert auf
+`fe1300e` (2026-10-23) — kein frischer `main`-Merge nötig (`it-chef/auto`
+ist weiterhin rein vorauslaufend vor `origin/main`).
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber allen Vorläufen: alle sechs verbleibenden offenen
+Eltern-Checkboxen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0) scheitern weiterhin an
+mindestens einem Kriterium (Base44-/Duffel-/Gemini-Zugangsdaten bzw.
+fehlende Provider/Datenfelder, oder eine Architektur-/Produktentscheidung,
+die Ni zusteht).
+
+**Eigene, unabhängige Bug-/Lücken-Suche mit anderem Fokus als die
+Vorläufe (direkt im Anschluss an den 63. Lauf, der eine fehlende
+Feld-Fehler-Verdrahtung in `FlightWizard.tsx` behoben hatte — diesmal
+dieselbe "ist jede ARIA-Verdrahtung vollständig?"-Frage auf Dialoge/
+Sheets statt auf Formularfelder angewendet):**
+- `HotelWizard.tsx` auf ein zu `FlightWizard.tsx`s `sameAirport`-Fall
+  analoges Problem geprüft: kein eigenes Fehlertext-Element vorhanden
+  (Check-out < Check-in wird bereits rein über das `min`-Attribut des
+  Datums-Inputs verhindert) — nichts zu verdrahten, kein Fund.
+- `setTimeout`-Stellen (`useConcierge.ts`, drei Stellen in `useChat.ts`)
+  erneut gegen fehlendes Cleanup beim Unmount geprüft — alle bereits über
+  einen `useEffect`-Cleanup mit `clearTimeout` abgesichert. Kein Fund.
+- Repo-weit nach `console.log`/`console.debug`/`console.warn` im
+  Produktcode gesucht — kein Treffer.
+- Alle `Dialog`/`Sheet`-Primitiven (`dialog.tsx`, `sheet.tsx`) gelesen:
+  beide bauen bereits sorgfältig auf Radix auf, inkl. eigener
+  Fokus-Rückgabe-Logik beim Schließen (`onCloseAutoFocus` mit Fallback
+  auf die Seiten-`<h1>`, falls der Auslöser beim Schließen schon aus dem
+  DOM entfernt wurde) — kein Fund an der Primitive selbst.
+- Darauf aufbauend jede tatsächliche `DialogContent`/`SheetContent`-
+  Verwendung im Code gegen eine passende `DialogDescription`/
+  `SheetDescription` gegengeprüft (Radix verdrahtet `aria-describedby`
+  am Dialog automatisch über die `Description`-Komponente; fehlt sie,
+  bleibt der Dialog beim Öffnen für Screenreader-Nutzer:innen ohne
+  Beschreibung). Acht von neun Dateien mit `DialogContent`
+  (`EditMode.tsx`, `KiChat.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`,
+  `Angebote.tsx`, `Aktivitaeten.tsx`, `Buchung.tsx`, `Reiseentwuerfe.tsx`,
+  `Warenkorb.tsx`) haben pro `DialogContent` exakt eine
+  `DialogDescription`.
+
+**Fund:** `MobileNav.tsx` (3.3, bereits `[x]`) ist die einzige Stelle im
+gesamten Code mit einem `SheetContent` (dasselbe Radix-Dialog-Primitiv
+wie `DialogContent`, nur als Slide-in statt zentriertem Modal), das zwar
+einen `SheetTitle` ("Travix"), aber keinen `SheetDescription` hat.
+Dadurch setzt Radix kein `aria-describedby` am Dialog — beim Öffnen des
+mobilen Hauptmenüs hören Screenreader-Nutzer:innen nur den Titel, keine
+Beschreibung, anders als an jeder anderen Dialog-/Sheet-Stelle im Code.
+Erfüllt alle vier Sicherheitskriterien: keine Auth-/Zahlungs-/
+Nutzerdaten-/Rechtstext-Berührung, keine offene Architektur-/
+Produktentscheidung (reine Übernahme des im selben Code-Stand überall
+sonst bereits etablierten Musters), klar genug beschrieben (eine fehlende
+`SheetDescription` ergänzen), objektiv prüfbar (`aria-describedby` zeigt
+nach dem Fix auf ein Element mit der neuen Beschreibung).
+
+**Fix:** `src/components/layout/MobileNav.tsx` — `SheetDescription`
+(neu importiert aus `@/components/ui/sheet`) wird im `SheetHeader` direkt
+nach dem `SheetTitle` ergänzt, mit `className="sr-only"` (visuell
+versteckt, exakt das bereits für den "Schließen"-Button in
+`sheet.tsx`/`dialog.tsx` etablierte Muster) und dem Text "Navigationsmenü
+mit allen Seiten von Travix". Reine Accessibility-Verdrahtung, keine
+inhaltliche oder optische Änderung für Sehende.
+
+**Tests:** Neuer Test in `MobileNav.test.tsx` ("verknüpft das geöffnete
+Menü per aria-describedby mit einer (visuell versteckten) Beschreibung
+für Screenreader") öffnet das Menü, liest `aria-describedby` des
+Dialog-Elements aus und prüft, dass das referenzierte Element exakt den
+neuen Beschreibungstext enthält. Alle sechs bestehenden
+`MobileNav.test.tsx`-Tests unverändert, weiterhin grün.
+
+**Dokumentation:** `ZEITPLAN.md` (laufender Sprint-1-Abschnitt, direkt
+im Anschluss an den 63.-Lauf-Eintrag) und `tasks/tasks-prd-travix-platform.md`
+(Checkbox 3.3) um eine Notiz zu diesem Fix ergänzt.
+
+**Regressionsschutz vor dem Commit:** `npm ci` fehlerfrei (24
+Schwachstellen laut `npm audit`, reine Dev-Dependency-Auflösung dieses
+Containers, identisch zu den Vorläufen), `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 563 Tests, alle
+grün — 562 vorher + 1 neu).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

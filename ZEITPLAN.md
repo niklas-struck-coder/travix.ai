@@ -3226,6 +3226,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
   Testdateien, 562 Tests, alle grün — 561 + 1 neuer Test) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 01.11. (vierundsechzigster Lauf) eine
+  weitere, bisher nicht geprüfte Accessibility-Lücke geschlossen:
+  `MobileNav.tsx` (3.3) rendert sein `SheetContent` mit `SheetTitle`, aber
+  ohne `SheetDescription` — die einzige Stelle im Code, an der ein
+  `DialogContent`/`SheetContent` nicht mit einer passenden Description
+  verdrahtet ist (Gegenprüfung: Anzahl `<DialogContent`/`<DialogDescription`
+  bzw. `<SheetContent`/`<SheetDescription` pro Datei stimmte überall sonst
+  exakt überein). Radix setzt ohne `Description` kein `aria-describedby`
+  am Dialog — Screenreader-Nutzer:innen hören beim Öffnen des mobilen
+  Menüs nur den Titel "Travix", keine Beschreibung. Fix: neue, visuell
+  versteckte (`sr-only`) `SheetDescription` "Navigationsmenü mit allen
+  Seiten von Travix" im `SheetHeader`, exakt nach dem bereits etablierten
+  Muster aller anderen Dialoge/Sheets im Code. Kein Verhaltensunterschied
+  für Sehende. Neuer Test in `MobileNav.test.tsx` ("verknüpft das
+  geöffnete Menü per aria-describedby mit einer (visuell versteckten)
+  Beschreibung für Screenreader") prüft, dass `aria-describedby` des
+  geöffneten Dialogs auf ein Element mit genau diesem Text zeigt. `npx tsc
+  -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+  Testdateien, 563 Tests, alle grün — 562 + 1 neuer Test) liefen vor dem
+  Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
