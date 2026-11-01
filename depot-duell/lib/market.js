@@ -170,19 +170,18 @@ export async function getQuotes() {
   return inflight;
 }
 
-// Frischer Kurs für eine Order (max. QUOTE_TTL alt)
+// Frischer Kurs für eine Order – nur dieses eine Symbol laden (schnell, kein Voll-Abruf)
 export async function priceFor(id) {
   const a = BY_ID[id];
   if (!a) return null;
-  const { quotes, at } = await getQuotes();
-  const q = quotes[id];
-  if (q && !q.stale && Date.now() - at < QUOTE_TTL) return q;
+  // Warmen Zwischenspeicher nutzen, wenn vorhanden und frisch
+  if (cache && !cache.quotes[id]?.stale && Date.now() - cache.at < QUOTE_TTL && cache.quotes[id]) return cache.quotes[id];
   const res = await sparkChunk([a.yahoo]);
   const one = res[a.yahoo];
-  if (!one || !(one.price > 0)) return q || null;
+  if (!one || !(one.price > 0)) return cache?.quotes[id] || null;
   const cur = curOf(a);
   const rate = (await fxRates([cur]))[cur];
-  if (!rate) return q || null;
+  if (!rate) return cache?.quotes[id] || null;
   return { p: one.price / rate, chg: one.chgPct != null ? one.chgPct / 100 : null, open: isOpen(a, berlinNow()), t: Date.now() };
 }
 
