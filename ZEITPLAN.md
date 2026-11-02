@@ -3246,6 +3246,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
   Testdateien, 563 Tests, alle grün — 562 + 1 neuer Test) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 02.11. (siebenundsechzigster Lauf, zweiter
+  Lauf desselben Tages, nachdem der erste Lauf desselben Tages keinen
+  neuen sicheren Punkt fand) eine eigenständig gefundene Lücke
+  geschlossen: der Browser-Tab-Titel (`<title>` aus `index.html`) blieb
+  bei jedem Routenwechsel unverändert auf der statischen Zeichenkette
+  "Travix – Das intelligenteste digitale Reisebüro" stehen — anders als
+  die jeweilige Seiten-`<h1>`, die `nav-config.ts` bereits für jede Route
+  einen eigenen Namen entnimmt. Für Nutzer:innen mit mehreren offenen
+  Tabs oder Screenreader-Nutzer:innen (WCAG 2.4.2 "Page Titled") gab es
+  dadurch keine Möglichkeit, Seiten am Tab-Titel zu unterscheiden. Fix in
+  `src/routes.tsx`: neue `getPageTitle(pathname)`-Hilfsfunktion sucht die
+  aktuelle Route in der bereits bestehenden `allRoutes`-Liste
+  (`nav-config.ts`) und setzt `document.title` auf `"<Label> – Travix"`
+  (z. B. "Profil – Travix"), in einem eigenen `useEffect` neben dem
+  bestehenden `scrollTo(0, 0)`-Effekt, gleiche Abhängigkeit
+  (`location.pathname`). Die Startseite (`/`) behält bewusst den
+  vollständigen bisherigen Titel als Marken-Claim statt "Start – Travix".
+  Die unbekannte-Route-Seite (`NichtGefunden.tsx`, Catch-all `*`) bekommt
+  den festen Titel "Seite nicht gefunden – Travix", passend zu ihrer
+  eigenen `<h1>`. Reine Zusatzfunktionalität, kein Verhalten einer
+  bestehenden Seite geändert. Zwei neue Tests in `routes.test.tsx`
+  ("sets a page-specific browser tab title that updates when
+  navigating", "gives the honest not-found page its own tab title
+  instead of the generic default"). `npm ci` fehlerfrei (24
+  Schwachstellen laut `npm audit`, reine Dev-Dependency-Auflösung dieses
+  Containers, identisch zu den Vorläufen), `npx tsc -b` (0 Fehler), `npm
+  run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 565 Tests, alle
+  grün — 563 + 2 neue Tests) liefen vor dem Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

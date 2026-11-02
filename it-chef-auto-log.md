@@ -24733,3 +24733,78 @@ Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-02 (siebenundsechzigster Lauf — zweiter Lauf desselben Tages)
+
+**Ausgangslage:** Frischer Checkout, `it-chef/auto` unverändert vom 66.
+Lauf desselben Tages (`1e5ec4c`, 00:16 UTC, kein neuer sicherer Punkt
+gefunden) übernommen. `origin/main` weiterhin unverändert auf `fe1300e`
+(2026-10-23) — kein frischer `main`-Merge nötig (`git merge origin/main`
+meldet "Already up to date").
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut gegen die vier Sicherheitskriterien geprüft — unverändert
+gegenüber allen Vorläufen: alle sechs verbleibenden offenen
+Eltern-Checkboxen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0) und ihre offenen
+Unterpunkte (u. a. 5.7, 6.2, 6.6, 6.7, 7.4, 7.12, 8.1-8.7, 8.9) scheitern
+weiterhin an mindestens einem Kriterium (Base44-/Duffel-/Gemini-
+Zugangsdaten bzw. fehlende Provider-/Preis-Datenfelder, oder eine
+Architektur-/Produktentscheidung, die Ni zusteht).
+
+**Eigene, unabhängige Bug-/Lücken-Suche mit neuem Fokus (Kategorien aus
+Vorläufen — Dialog/Sheet-Descriptions, setTimeout-Cleanup, ARIA an
+Formularfeldern, `window.alert`/`eslint-disable`/`parseInt`-Radix,
+Testabdeckungslücken, `new Date()`-Verwendungen — bewusst nicht
+wiederholt):** `addEventListener`-Stellen im ganzen `src`-Baum gegen
+fehlendes Cleanup geprüft (nur zwei Treffer: der `beforeunload`-Listener
+in `useChat.ts`, bereits per `removeEventListener` im Effekt-Cleanup
+abgeräumt; der `blur`-Listener in `utils.ts`s `focusPageHeading()`, über
+`{ once: true }` selbst-abräumend) — kein neuer Fund. Array-Index als
+React-`key`-Prop repo-weit gesucht (zwei Treffer, `FlightCard.tsx`/
+`SearchErrorAlert.tsx`, beide über statische, nicht umsortierbare Listen
+— kein echtes Risiko). `routes.tsx` gegen fehlende Catch-all-Route
+geprüft (bereits vorhanden, `NichtGefunden.tsx`).
+
+**Gefundener und umgesetzter Punkt:** Der Browser-Tab-Titel
+(`document.title`, aus dem statischen `<title>` in `index.html`) blieb
+bei jedem Routenwechsel unverändert, obwohl jede Seite bereits einen
+eigenen Namen als `<h1>` zeigt (über `PageHeader`/`nav-config.ts`) —
+WCAG 2.4.2 ("Page Titled") verlangt einen seitenspezifischen Titel, und
+mehrere offene Tabs oder ein Screenreader-Wechsel zwischen Seiten waren
+dadurch nicht unterscheidbar.
+
+**Warum sicher genug (alle vier Kriterien):**
+- Kein Bezug zu Auth, Zahlungen, echten Nutzerdaten oder rechtlichen
+  Texten — reine Navigations-/Accessibility-Ergänzung.
+- Keine offene Produkt-/Architekturentscheidung: nutzt ausschließlich
+  die bereits bestehende `allRoutes`-Liste (`nav-config.ts`), kein neues
+  Datenmodell, keine neue Abhängigkeit.
+- Klar beschrieben, keine Interpretation nötig: ein `useEffect` neben
+  dem bestehenden `scrollTo(0, 0)`-Effekt in `routes.tsx`, gleiche
+  Abhängigkeit (`location.pathname`).
+- Ergebnis objektiv prüfbar: `document.title` ist in Tests direkt
+  auslesbar.
+
+**Umgesetzt:**
+- `src/routes.tsx`: neue `getPageTitle(pathname)`-Hilfsfunktion (sucht
+  die Route in `allRoutes`, liefert `"<Label> – Travix"`), neuer
+  `useEffect` setzt `document.title` bei jedem Routenwechsel. Startseite
+  (`/`) behält bewusst den vollen bisherigen Titel als Marken-Claim statt
+  "Start – Travix". Catch-all-Route (`*`, `NichtGefunden.tsx`) bekommt
+  den festen Titel "Seite nicht gefunden – Travix".
+- Zwei neue Tests in `routes.test.tsx`: Titel wechselt bei Navigation
+  von `/dashboard` zu `/profil` korrekt auf "Profil – Travix"; unbekannte
+  Route bekommt den eigenen Titel statt des generischen Standardwerts.
+
+**Dokumentation:** `ZEITPLAN.md` (laufender Abschnitt, direkt im
+Anschluss an den 64.-Lauf-Eintrag) und `tasks/tasks-prd-travix-platform.md`
+(Checkbox 1.8) um eine Notiz zu diesem Fix ergänzt.
+
+**Regressionsschutz vor dem Commit:** `npm ci` fehlerfrei (24
+Schwachstellen laut `npm audit`, reine Dev-Dependency-Auflösung dieses
+Containers, identisch zu den Vorläufen), `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 565 Tests, alle
+grün — 563 vorher + 2 neu).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

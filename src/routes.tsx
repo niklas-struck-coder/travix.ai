@@ -51,11 +51,29 @@ const builtRoutes = new Set([
   '/dashboard',
 ])
 
+// The browser tab title was stuck on this one static string from
+// index.html on every route — a multi-tab or screen-reader user had no way
+// to tell pages apart outside the app itself. Mirrors the same label each
+// page already shows as its own <h1> via `PageHeader`/`nav-config.ts`.
+const BASE_TITLE = 'Travix – Das intelligenteste digitale Reisebüro'
+const NOT_FOUND_TITLE = 'Seite nicht gefunden – Travix'
+
+function getPageTitle(pathname: string): string {
+  if (pathname === '/') return BASE_TITLE
+  const route = allRoutes.find((item) => item.path === pathname)
+  if (!route) return NOT_FOUND_TITLE
+  return `${route.label} – Travix`
+}
+
 export function AppRoutes() {
   const location = useLocation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname)
   }, [location.pathname])
 
   return (

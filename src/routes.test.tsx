@@ -43,4 +43,28 @@ describe('AppRoutes', () => {
       expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Profil' }))
     })
   })
+
+  it('sets a page-specific browser tab title that updates when navigating', () => {
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    render(
+      <MemoryRouter initialEntries={['/dashboard']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+    expect(document.title).toBe('Dashboard – Travix')
+
+    fireEvent.click(screen.getAllByRole('link', { name: 'Profil' })[0])
+
+    expect(document.title).toBe('Profil – Travix')
+  })
+
+  it('gives the honest not-found page its own tab title instead of the generic default', () => {
+    render(
+      <MemoryRouter initialEntries={['/does-not-exist']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    expect(document.title).toBe('Seite nicht gefunden – Travix')
+  })
 })
