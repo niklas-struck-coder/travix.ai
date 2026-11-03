@@ -25184,3 +25184,53 @@ beiden neuen Tests), danach komplette Baseline erneut: `npx tsc -b`
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-03, 22:14 UTC (vierundsiebzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, direkt im Anschluss an den
+dreiundsiebzigsten Lauf (`cd77036`, 02:08 UTC, Fund umgesetzt:
+Tab-Titel auf `/buchung`). `it-chef/auto` unverändert übernommen, 0
+Commits Rückstand/Vorsprung zu `origin/it-chef/auto`, kein frischer
+`main`-Merge nötig (`main` weiterhin bei `fe1300e`, 2026-10-23 —
+Freigabe-Chef hat seither nicht gemergt). Regressionsschutz-Baseline
+frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` 0 Fehler, `npm run
+lint` 0 Probleme, `npx vitest run` 75 Testdateien/567 Tests grün —
+identisch zum Endstand des 73. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+unverändert gegenüber allen Vorläufen blockiert (Punkte 2.0/4.1-4.3 u. a.
+weiterhin explizit "blocked on Base44/Gemini credentials" bzw. Auth).
+Gezielt nach bisher nicht abgedeckten Winkeln gesucht, die der 73. Lauf
+noch nicht geprüft hatte: (1) `addEventListener`-Aufrufe repo-weit auf
+fehlendes Cleanup (`utils.ts` nutzt `once: true`, `useChat.ts`s
+`beforeunload`-Listener hat bereits ein korrektes `removeEventListener`
+im Effekt-Cleanup — beide unauffällig), (2) `setTimeout`/`setInterval`
+auf fehlendes `clearTimeout`/`clearInterval` (nur `useChat.ts`/
+`useConcierge.ts`, beide bereits im 23. Lauf gefixt, keine neue Stelle),
+(3) `<form>`-Elemente auf Buttons ohne explizites `type` (nur
+`FlightWizard.tsx`/`HotelWizard.tsx`, je nur ein einziger `Button` mit
+explizitem `type="submit"`, keine weiteren Buttons im Formular), (4)
+`<img>`-Tags auf fehlenden/falschen `alt`-Text (nur `HotelCard.tsx`,
+korrekt mit `offer.accommodationName`), (5) alle `PageHeader`-Aufrufe
+in `src/pages/*.tsx` erneut gegen ihre jeweilige `<h1>` und das
+nav-config-Label abgeglichen, inkl. `Urlaubsmodus.tsx` (zeigt das Ziel
+separat unterhalb der Überschrift, nicht im `<h1>` selbst — Titel
+bleibt bewusst statisch "Urlaubsmodus", kein Fall wie `Buchung.tsx`) —
+`Buchung.tsx` bleibt die einzige Seite mit reise-abhängigem Titel, (6)
+das im 73. Lauf neu eingeführte `getPageTitle()`-`/buchung`-Zweig selbst
+nochmal gegen Edge Cases geprüft (leerer `destination`-String, fehlender
+Trip) — fällt korrekt auf den generischen Titel zurück. Einzig
+auffällig, aber nicht als Bug zu werten: drei `.map()`-Aufrufe
+(`FlightCard.tsx`, `SearchErrorAlert.tsx`, `QuickReplies.tsx`,
+`Home.tsx`) nutzen den Array-Index als React-`key`; alle vier Listen
+sind statisch bzw. nur anhängend, kein Reorder/Filter beobachtet, also
+kein objektiv nachweisbares Fehlverhalten — daher keine qualifizierende
+Lücke im Sinne von Kriterium 4.
+
+**Ergebnis:** Kein Punkt heute (vierundsiebzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund", analog zu
+den vorherigen "kein Fund"-Läufen. Regressionsschutz-Baseline frisch
+durchlaufen (siehe oben), unverändert gegenüber dem 73. Lauf.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
