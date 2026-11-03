@@ -25234,3 +25234,67 @@ durchlaufen (siehe oben), unverändert gegenüber dem 73. Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-03, 23:20 UTC (fünfundsiebzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, direkt im Anschluss an den
+vierundsiebzigsten Lauf (`48d1c90`, 22:14 UTC, kein Fund). `it-chef/auto`
+unverändert übernommen, 0 Commits Rückstand/Vorsprung zu
+`origin/it-chef/auto`, kein frischer `main`-Merge nötig (`main` weiterhin
+bei `fe1300e`, 2026-10-23 — Freigabe-Chef hat seither nicht gemergt).
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei, `npx
+tsc -b` 0 Fehler, `npm run lint` 0 Probleme, `npx vitest run` 75
+Testdateien/567 Tests grün — identisch zum Endstand des 74. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut geprüft — alle noch offenen Punkte (6.2/6.6/6.7 blockiert durch
+fehlende Preis-/Provider-URL-Felder in `TripDraft`, 7.4 durch das
+Ein-Trip-Datenmodell, 7.12/8.2-8.7/8.9/8.11/8.12 durch fehlende
+Vision-/Deal-Finder-/Premium-Features, 2.x/4.1-4.3/Sprint-5-Punkte durch
+Backend-/Zahlungs-/Duffel-Freigabe-Entscheidungen) bleiben
+Architektur- bzw. Produktentscheidungen, keine autonom umsetzbaren
+Einzelpunkte. 8.13 (Unit-Tests) ist für `calculateProgress` und
+`checklistRules` bereits abgedeckt (`calculateProgress.test.ts`,
+`checklistRules.test.ts` existieren); `calculateCosts`/Schema-Validierung
+existieren noch nicht (blockiert durch 6.6/6.7 bzw. 4.1).
+
+Gezielt nach bisher nicht abgedeckten Winkeln gesucht, die der 74. Lauf
+noch nicht geprüft hatte: (1) `detectTransportMode()`/
+`findKnownDestination()` erneut gegen Freitext-Edge-Cases geprüft
+(Wortgrenzen, Leerzeichen) — `ChatInput.tsx` trimmt bereits vor jedem
+`onSend()`, sodass ein ungetrimmtes `trip.destination` über den
+Haupt-Chat-Pfad nicht erreichbar ist, kein Fund. (2) `cartTotals.ts`
+(`calculateCartTotal`/`groupCartItems`) auf Rundungs-/Floating-Point-
+Fehler geprüft — reine Summe von Demo-Ganzzahlen, kein beobachtbarer
+Fehler. (3) `useChat.ts` komplett erneut gelesen (Generation-Counter,
+Timeout-Cleanup, `beforeunload`-Handler, `selectFlight()`s Fallback ohne
+Flugsegment) — keine neue Lücke, alle Edge Cases bereits mit Kommentaren
+begründet behandelt. (4) `speech.ts`/`KiChat.tsx`: `stopSpeaking()` wird
+bereits bei Unmount, Toggle-Aus und Reset aufgerufen — kein offenes
+Leck. (5) `tripStorage.ts` (`loadStoredChat`/`saveStoredChat`/
+`updateStoredTrip`) erneut gegen korrupte/fehlende Felder geprüft — alle
+vier Container-Felder bereits defensiv mit Fallbacks versehen. (6)
+`Aktivitaeten.tsx` (separate `/aktivitaeten`-Seite) auf dieselbe
+Namensdopplungs-Lücke wie `EditMode.tsx`/`Reiseentwuerfe.tsx` geprüft —
+kein Fund, da diese Seite nur eine feste Demo-Liste mit bereits
+eindeutigen Namen anzeigt und kein Hinzufügen-Formular hat (anders als
+`EditMode.tsx`), die Dopplungs-Lücke ist dort also nicht erreichbar. (7)
+`index.html`/Favicon: Default-Vite-Icon statt Travix-Branding auffällig,
+aber keine Vorgabe dafür in `MARKENDESIGN.md` — laut Skill-Regel nicht
+selbst erfinden, sondern nur vermerken (hier vermerkt, keine Umsetzung).
+(8) `npx vitest run --coverage` als mechanischer Weg zu ungetesteten
+Codepfaden versucht — scheitert an fehlender Dev-Dependency
+(`@vitest/coverage-v8`); eine neue Abhängigkeit autonom zu installieren
+wäre kein eng umrissener Einzelpunkt, daher nicht verfolgt.
+
+**Ergebnis:** Kein Punkt heute (fünfundsiebzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund", analog zu
+den vorherigen "kein Fund"-Läufen. Regressionsschutz-Baseline frisch
+durchlaufen (siehe oben), unverändert gegenüber dem 74. Lauf. Einzige
+offene Beobachtung für einen künftigen Lauf oder für Ni: Favicon/Tab-Icon
+ist weiterhin das Vite-Standardicon statt eines Travix-Icons — das ist
+aber eine Marketing-Chef-Design-Entscheidung (`MARKENDESIGN.md`), keine
+autonome IT-Chef-Aufgabe.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
