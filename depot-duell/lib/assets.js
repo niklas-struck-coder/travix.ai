@@ -1618,7 +1618,7 @@ const RAW = [
   ["0868.HK","0868.HK","Xinyi Glass","aktie","Aktie · Hongkong"],
   ["STLD","STLD","Steel Dynamics","aktie","Aktie · USA"],
   ["ILMN","ILMN","Illumina","aktie","Aktie · USA"],
-  ["TTWO","TTWO","Take-Two Interactive Softwar","aktie","Aktie · USA"],
+  ["TTWO","TTWO","Take-Two Interactive (GTA)","aktie","Aktie · USA"],
   ["9698.HK","9698.HK","Gds-Sw","aktie","Aktie · Hongkong"],
   ["GMAB","GMAB","Genmab A/S","aktie","Aktie · USA"],
   ["RKLB","RKLB","Rocket Lab","aktie","Aktie · USA"],

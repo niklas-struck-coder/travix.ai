@@ -308,7 +308,9 @@ function viewUebersicht() {
 function viewMarkt() {
   if (!S.assets.length) return `<div class="card empty">Lade Kurse …</div>`;
   const q = S.q.trim().toLowerCase();
-  let list = S.assets.filter((a) => S.quotes[a.id] && (S.filter === "alle" || a.cls === S.filter) && (!q || a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q) || a.sector.toLowerCase().includes(q)));
+  const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, ""); // "Take 2" findet "Take-Two"
+  const qn = norm(q);
+  let list = S.assets.filter((a) => S.quotes[a.id] && (S.filter === "alle" || a.cls === S.filter) && (!q || a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q) || a.sector.toLowerCase().includes(q) || norm(a.name).includes(qn) || norm(a.id).includes(qn)));
   const c = (a) => S.quotes[a.id]?.chg ?? 0;
   if (S.sort === "up") list.sort((a, b) => c(b) - c(a));
   else if (S.sort === "down") list.sort((a, b) => c(a) - c(b));
