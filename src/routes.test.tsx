@@ -1,9 +1,31 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from './routes'
+import { CHAT_STORAGE_KEY } from '@/lib/trip/tripStorage'
+import { emptyTrip } from '@/lib/ai/mockAdvisor'
+import type { StoredChatState } from '@/lib/trip/tripStorage'
+
+function seedStoredTrip(destination: string) {
+  const state: StoredChatState = {
+    messages: [],
+    trip: { ...emptyTrip, destination },
+    quickReplies: [],
+    editingField: null,
+    awaitingFlightOrigin: false,
+  }
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(state))
+}
 
 describe('AppRoutes', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
   it('shows an honest not-found page instead of a blank screen for an unknown URL', () => {
     render(
       <MemoryRouter initialEntries={['/does-not-exist']}>
@@ -66,5 +88,27 @@ describe('AppRoutes', () => {
     )
 
     expect(document.title).toBe('Seite nicht gefunden – Travix')
+  })
+
+  it('uses the trip destination as the /buchung tab title, matching its own <h1>, instead of the generic "Reiseplan" label', () => {
+    seedStoredTrip('Lissabon')
+    render(
+      <MemoryRouter initialEntries={['/buchung']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Lissabon' })).toBeInTheDocument()
+    expect(document.title).toBe('Lissabon – Travix')
+  })
+
+  it('falls back to the generic /buchung tab title when there is no stored trip yet', () => {
+    render(
+      <MemoryRouter initialEntries={['/buchung']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    )
+
+    expect(document.title).toBe('Reiseplan – Travix')
   })
 })

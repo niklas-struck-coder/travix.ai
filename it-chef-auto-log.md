@@ -25105,3 +25105,82 @@ durchlaufen (siehe oben), unverändert gegenüber dem 71. Lauf.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-03, 02:08 UTC (dreiundsiebzigster Lauf — neuer sicherer Punkt umgesetzt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, dritter des 23.10./neunzehnter
+seither, direkt im Anschluss an den zweiundsiebzigsten Lauf (`415d577`,
+01:14 UTC, kein Fund). `it-chef/auto` unverändert übernommen, 54 Commits
+vor `main` (`fe1300e`, 2026-10-23 — Freigabe-Chef hat seit dem 23.10.
+noch nicht gemergt), kein frischer `main`-Merge nötig. `reports/*.md`
+unverändert vom 23.10. (keine neuen Funde der plattform-verwalteten
+Kanäle). Regressionsschutz-Baseline zuerst frisch durchlaufen (`npm ci`
+fehlerfrei, `npx tsc -b` 0 Fehler, `npm run lint` 0 Fehler, `npx vitest
+run` 75 Testdateien/565 Tests grün) — identisch zum 72. Lauf, bevor mit
+der eigenen Punktesuche begonnen wurde.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+unverändert gegenüber allen Vorläufen blockiert (siehe Läufe 11-72).
+Da 72 Vorläufe bereits sehr viele Fehlerklassen geprüft haben, diesmal
+gezielt mit einem separaten Such-Agenten nach bisher nicht explizit
+abgedeckten Winkeln gesucht (gemischte Englisch-/Deutsch-UI-Texte,
+fehlerhafte `useEffect`-Dependency-Arrays, deutsche Singular-/Plural-
+Fehler, Off-by-One in Datums-/Tage-Berechnungen, rohe statt über
+`format.ts` laufende Preis-/Zahlenformatierung, totes/duplikates Sibling-
+Code). Fund: **Browser-Tab-Titel auf `/buchung` folgt nicht dem
+tatsächlichen Reiseziel.** `getPageTitle()` (`src/routes.tsx`) setzt den
+Tab-Titel anhand des statischen `nav-config.ts`-Labels — für `/buchung`
+immer das Literal `"Reiseplan"`. Die Seite selbst zeigt in ihrer eigenen
+`<h1>` (`PageHeader`, `Buchung.tsx` Zeile 187) aber `trip.destination ??
+'Deine Reise'`, also z. B. `"Lissabon"`, sobald eine Reise existiert. Der
+genau in `routes.tsx` direkt über `getPageTitle` dokumentierte Zweck
+dieses Features ("Mirrors the same label each page already shows as its
+own `<h1>`[...] so a multi-tab or screen-reader user had no way to tell
+pages apart") ist damit für `/buchung` mit aktiver Reise durchbrochen:
+zwei Reisen in zwei Tabs (oder ein Screenreader, der den Tab-Titel
+vorliest) zeigen beide weiterhin "Reiseplan", obwohl jede andere Seite
+der App korrekt differenziert. Alle anderen `PageHeader`-Aufrufstellen
+in `src/pages/*.tsx` wurden geprüft — `Buchung.tsx` ist die einzige mit
+einem reise-abhängigen statt wörtlich mit dem nav-config-Label
+identischen Titel.
+
+Erfüllt alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlung/
+echten Nutzerdaten/Rechtstexten; keine offene Produkt-/Architektur-
+entscheidung (reine Bugfix-Konsistenz, kein neues Feature); exakt
+beschrieben (aktuelles vs. korrektes Verhalten eindeutig aus dem Code
+selbst ablesbar, keine Interpretation nötig); objektiv prüfbar über
+einen neuen, gezielten Test in `routes.test.tsx`.
+
+**Umsetzung:** `getPageTitle()` in `src/routes.tsx` liest für den Pfad
+`/buchung` jetzt zusätzlich `loadStoredChat()?.trip.destination`
+(`src/lib/trip/tripStorage.ts`, bereits bestehende, reine
+localStorage-Lesefunktion) und verwendet bei vorhandenem Reiseziel
+`"<Ziel> – Travix"` statt des generischen `"Reiseplan – Travix"` —
+genau dieselbe Formatierung, nur mit dem tatsächlichen `<h1>`-Text statt
+dem statischen Label. Ohne gespeicherte Reise (z. B. Direktaufruf von
+`/buchung` ohne vorherige Planung) bleibt der generische Titel
+unverändert als Fallback. Zwei neue Tests in `src/routes.test.tsx`
+(nach demselben Seed-Muster wie `Buchung.test.tsx`): einer bestätigt
+`document.title === 'Lissabon – Travix'` bei einer gespeicherten Reise
+mit diesem Ziel (und dass die sichtbare `<h1>` denselben Text zeigt),
+der andere bestätigt den unveränderten Fallback `'Reiseplan – Travix'`
+ohne gespeicherte Reise.
+
+Bewusst nicht mitgelöst: Ändert sich `trip.destination` während die
+Seite bereits offen ist (z. B. über einen Edit-Dialog, ohne erneute
+Navigation), aktualisiert sich der Tab-Titel nicht automatisch — der
+bestehende Titel-Effekt in `routes.tsx` hängt wie bisher nur von
+`location.pathname` ab, nicht von den Trip-Daten selbst. Das volle
+Nachziehen bei jeder Live-Änderung wäre ein größerer, über diesen
+einzelnen, eng umrissenen Fund hinausgehender Eingriff (eigener Hook/
+Context für den Titel) und bleibt daher offen für einen künftigen Lauf,
+falls gewünscht.
+
+**Prüfung:** `npx vitest run src/routes.test.tsx` (7/7 grün, inkl. der
+beiden neuen Tests), danach komplette Baseline erneut: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75 Testdateien,
+**567** Tests — zwei mehr als im 72. Lauf, alle grün), `npm run build`
+(0 Typfehler, unveränderte 814-KB-Chunk-Size-Warnung, kein neuer Fund).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

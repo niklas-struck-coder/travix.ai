@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion'
 import { AppShell } from '@/components/layout/AppShell'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { focusPageHeading } from '@/lib/utils'
+import { loadStoredChat } from '@/lib/trip/tripStorage'
 import { Home } from '@/pages/Home'
 import { KiChat } from '@/pages/KiChat'
 import { Flugsuche } from '@/pages/Flugsuche'
@@ -60,6 +61,15 @@ const NOT_FOUND_TITLE = 'Seite nicht gefunden – Travix'
 
 function getPageTitle(pathname: string): string {
   if (pathname === '/') return BASE_TITLE
+  // Buchung.tsx's own <h1> (via PageHeader) shows the trip's destination
+  // once one exists, not the generic nav-config label "Reiseplan" — so the
+  // tab title has to follow suit, or a user with two trips open in two
+  // tabs (or a screen reader announcing the tab) can no longer tell them
+  // apart, defeating the exact point of this per-page-title feature.
+  if (pathname === '/buchung') {
+    const destination = loadStoredChat()?.trip.destination
+    if (destination) return `${destination} – Travix`
+  }
   const route = allRoutes.find((item) => item.path === pathname)
   if (!route) return NOT_FOUND_TITLE
   return `${route.label} – Travix`
