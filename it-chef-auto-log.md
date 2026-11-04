@@ -25476,3 +25476,68 @@ Absatz unter 7.2 in beiden Dateien.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-04, 02:18 UTC (achtundsiebzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, dritter Lauf
+heute (nach dem 77. Lauf, `ed083c7`, 2026-11-04 01:09 UTC). `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`), 58
+Commits vor `origin/main` (weiterhin unverändert auf `fe1300e`,
+2026-10-23 — Freigabe-Chef hat seit dem 23.10. noch nicht gemergt). Kein
+frischer `main`-Merge nötig, `main` bleibt unberührt.
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 570 Tests, alle grün) — identisch zum Endstand des 77.
+Laufs.
+
+**Punktesuche:** Per separatem Explore-Agenten mit expliziter
+Ausschlussliste aller bisher über 77 Läufe abgedeckten Muster (u.a.
+target="_blank", htmlFor/id-Paare, Invalid-Date-Schutz,
+aria-describedby/role=status/alert, Lösch-Dialoge,
+Duplikat-Disambiguierung, Timeout-Cleanup, npm audit, Tab-Titel,
+shadcn-ui-Testabdeckung, Progress-Accessible-Names,
+isTripComplete-Divergenz) beauftragt, gezielt auf noch nicht geprüfte
+Winkel zu suchen: fehlende key-Props, Typos in Nutzertexten, doppelter
+Code, Grenzfälle in Datums-/Budget-Berechnungen, ungeschützte
+leere/null-Zustände bei `.map()`/`.filter()`, JSON.parse/
+localStorage-Lücken. Vollständig gelesen (nicht nur gegrept): alle
+Seiten unter `src/pages/*.tsx`, alle Komponenten unter
+`src/components/**`, beide Hooks, alle Lib-Module, alle Types,
+`routes.tsx`/`App.tsx`/`main.tsx`. Eigene Typecheck/Lint/Test-Baseline
+im Agenten unabhängig gegengeprüft (0/0/570 grün).
+
+**Geprüfte, aber verworfene Kandidaten** (jeweils Kriterium 2 oder 4
+nicht erfüllt): doppelte `getTodayIso()`/`getNextDayIso()` in
+`FlightWizard.tsx`/`HotelWizard.tsx` statt `calendarUtils.ts#toIsoDate`
+— reine Duplikation, funktional identisch, kein vorher-falsch/
+nachher-korrekt-Verhalten; `Dashboard.tsx`s hartcodierte
+`upcomingTripsCount`/`favoritesCount` (bewusst manuell synchron mit den
+Demo-Arrays, im Code kommentiert) — Fix bräuchte gemeinsamen State,
+also eine Architekturentscheidung; `clampPassengerCount`/
+`clampGuestCount`: `Number('')` ergibt `0` statt `NaN`, Feld springt
+beim Leeren auf `1` zurück — reine UX-Marotte ohne falsche
+Buchung/Berechnung, keine klare Bug-vs-Geschmacksfrage.
+
+**Eigene Zusatzprüfung** (Dateien außerhalb `src/`, da der Code-Stand
+nach 77 Läufen ungewöhnlich sauber ist): `vite-plugins/duffel-proxy.ts`
+gelesen — Fehlerbehandlung (fehlender API-Key, Upstream-Fehler) bereits
+vollständig, kein Fund. `reports/it-chef.md` und `status.md` auf
+bereits dokumentierte, aber noch offene Vorschläge geprüft — beide
+bekannten Punkte (`recharts` ungenutzte Abhängigkeit, `npm audit
+fix`-Tooling-Bug) sind für diesen Kanal laut Skill-Regel ausdrücklich
+ausgeschlossen (Abhängigkeitsänderung = Kriterium 2), keine neuen
+Punkte darin gefunden. `tasks/tasks-prd-travix-platform.md` auf offene
+Checkboxen durchsucht — alle offenen Punkte (Base44/Auth-Setup,
+KI-Engine-Integration, Train/Bus/Ferry-Suche, CostBreakdown,
+Premium/DealFinder etc.) sind entweder an echte Produkt-/
+Architekturentscheidungen oder an fehlende Zugangsdaten gebunden, also
+nach Kriterium 2 nicht autonom umsetzbar.
+
+**Ergebnis:** Kein Punkt heute (achtundsiebzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert gegenüber dem 77. Lauf (570 Tests, 0 Typ-/Lint-Fehler).
+Keine neuen offenen Beobachtungen über die bereits in
+`reports/it-chef.md` dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
