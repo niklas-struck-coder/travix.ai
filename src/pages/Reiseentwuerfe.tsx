@@ -257,7 +257,7 @@ export function Reiseentwuerfe() {
                     <span>Fortschritt</span>
                     <span>{progress}%</span>
                   </div>
-                  <Progress value={progress} />
+                  <Progress value={progress} aria-label={`${draftLabel} Fortschritt`} />
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">

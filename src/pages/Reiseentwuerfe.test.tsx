@@ -21,6 +21,31 @@ describe('Reiseentwuerfe', () => {
     expect(screen.getByText('20%')).toBeInTheDocument()
   })
 
+  it('gives each draft\'s progress bar an accessible name so screen reader users can tell them apart', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('progressbar', { name: 'Lissabon Fortschritt' })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Kyoto Fortschritt' })).toBeInTheDocument()
+  })
+
+  it('disambiguates the progress bar accessible name for duplicated drafts, like the other aria-labels', () => {
+    render(
+      <MemoryRouter>
+        <Reiseentwuerfe />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Lissabon duplizieren' }))
+
+    expect(screen.getByRole('progressbar', { name: 'Lissabon (Eintrag 1) Fortschritt' })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Lissabon (Eintrag 2) Fortschritt' })).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Kyoto Fortschritt' })).toBeInTheDocument()
+  })
+
   it('shows a hint that "Planung fortsetzen" opens the same chat for every draft while there are multiple', () => {
     render(
       <MemoryRouter>

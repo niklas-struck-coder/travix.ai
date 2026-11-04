@@ -25397,3 +25397,82 @@ betrifft.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-04, 01:09 UTC (siebenundsiebzigster Lauf — neuer sicherer Punkt gefunden und umgesetzt)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, zweiter Lauf
+heute (nach dem 76. Lauf, `02031ea`, 2026-11-04 00:19 UTC). `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`).
+`origin/main` weiterhin unverändert auf `fe1300e` (2026-10-23) —
+Freigabe-Chef hat seit dem 23.10. noch nicht gemergt, kein frischer
+`main`-Merge nötig, `main` bleibt unberührt. Regressionsschutz-Baseline
+zuerst frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler),
+`npm run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 568 Tests,
+alle grün) — identisch zum Endstand des 76. Laufs.
+
+**Punktesuche:** Nach 76 vorherigen Läufen ist der Code bereits sehr
+gründlich durchgearbeitet. Deshalb per separatem Explore-Agenten
+gezielt auf bisher nicht explizit geprüfte Winkel gesucht, mit
+expliziter Liste bereits abgedeckter Muster (target="_blank", htmlFor/
+id-Paare, verwaiste Dateien, Invalid-Date-Schutz, aria-describedby bei
+Formularfehlern, role=status/alert, Lösch-Bestätigungsdialoge,
+Duplikat-Disambiguierung, Timeout-Cleanup, npm audit, Tab-Titel,
+shadcn-ui-Testabdeckung, SheetDescription/Fokus, formatEuro-Duplikate),
+um Doppelarbeit zu vermeiden. Breite Durchsicht von `Kartenansicht.tsx`,
+`Reisekalender.tsx`/`calendarUtils.ts`, `Urlaubsmodus.tsx`,
+`useChat.ts`/`useConcierge.ts`, `mockAdvisor.ts`/`mockConcierge.ts`,
+`lib/duffel/client.ts`, allen Platzhalter-/Demo-Seiten und Layout/
+Routing.
+
+**Fund:** `src/pages/Reiseentwuerfe.tsx` (Zeile 260) — der
+`Progress`-Fortschrittsbalken jeder Entwurfskarte hatte keinen
+Accessible Name (`aria-label`/`aria-labelledby`). Radix' `Progress.Root`
+setzt automatisch `role="progressbar"` + `aria-valuenow`, aber ohne
+Namen liest ein Screenreader bei zwei oder mehr Entwürfen auf derselben
+Seite nur "73 %, Fortschrittsbalken" / "20 %, Fortschrittsbalken" vor,
+ohne erkennbar zu machen, zu welchem Entwurf der jeweilige Balken
+gehört. Echte Inkonsistenz im selben Repo, keine Theorie: Dieselbe
+`Progress`-Komponente hat an zwei später gebauten Stellen bereits ein
+`aria-label` — `ChecklistPanel.tsx` (`"Checklisten-Fortschritt"`) und
+`Dashboard.tsx` (`"Durchschnittlicher Planungsfortschritt"`). Nur die
+ursprüngliche, früheste Verwendung in `Reiseentwuerfe.tsx` (fünfter Lauf,
+10.08., noch vor diesem Muster gebaut) wurde nie nachgezogen.
+`Reiseentwuerfe.tsx` berechnet im selben Render bereits `draftLabel`
+(die vorhandene Duplikat-Namen-Disambiguierung für die Button-
+`aria-label`s direkt darunter) — dieselbe Variable lässt sich direkt für
+den Progress-Balken wiederverwenden, inklusive korrekter Unterscheidung
+bei zwei gleichnamigen Entwürfen.
+
+**Sicherheitskriterien:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (rein client-seitige Demo-Entwürfe-UI); keine offene
+Produkt-/Architekturentscheidung — mechanische Übertragung eines im
+selben Repo an zwei Stellen bereits etablierten, getesteten Musters,
+kombiniert mit der ebenfalls schon vorhandenen `draftLabel`-
+Hilfsfunktion in genau dieser Datei; klar beschrieben (Datei, Zeile,
+fehlendes Attribut, Vergleich mit den zwei konformen Gegenstellen);
+objektiv prüfbar über einen neuen Test mit
+`getByRole('progressbar', { name: ... })`, der vor dem Fix (kein
+Accessible Name) fehlschlägt und danach durchläuft.
+
+**Umsetzung:** `aria-label={`${draftLabel} Fortschritt`}` auf die
+`<Progress>`-Instanz in `Reiseentwuerfe.tsx` ergänzt — gleiches
+Benennungsschema wie bei den Button-`aria-label`s direkt darunter, die
+bereits `draftLabel` nutzen. Kein Verhaltensunterschied für Entwürfe
+ohne Namensduplikat. Zwei neue Tests in `Reiseentwuerfe.test.tsx`: einer
+prüft den Accessible Name beider Fortschrittsbalken im Normalfall
+("Lissabon Fortschritt"/"Kyoto Fortschritt"), einer prüft die
+Disambiguierung nach dem Duplizieren eines Entwurfs ("Lissabon
+(Eintrag 1) Fortschritt"/"Lissabon (Eintrag 2) Fortschritt"), analog zu
+den bestehenden Duplikat-Tests für die Aktions-Buttons.
+
+**Prüfung:** `npx vitest run src/pages/Reiseentwuerfe.test.tsx` (21/21
+grün, inkl. beider neuer Tests), danach komplette Baseline erneut:
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, **570** Tests — zwei neue, alle grün), `npm run build` (0
+Typfehler, unveränderte 814-KB-Chunk-Size-Warnung, kein neuer Fund).
+
+**ZEITPLAN.md / tasks-prd-travix-platform.md aktualisiert:** Neuer
+Absatz unter 7.2 in beiden Dateien.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

@@ -3655,7 +3655,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Demo-Daten (analog `MeineReisen.tsx`), echtem Fortschrittsbalken über
   `calculateProgress` (7.1); 7.4 (echte Wiederaufnahme mit Chat-Historie)
   bleibt eigener offener Punkt, "Planung fortsetzen" verlinkt vorerst nur
-  auf `/ki-chat`
+  auf `/ki-chat`.
+  Vom autonomen IT-Chef-Lauf am 04.11. (siebenundsiebzigster Lauf) eine
+  Accessibility-Lücke geschlossen: Der `Progress`-Fortschrittsbalken
+  jeder Entwurfskarte hatte anders als die gleiche Komponente in
+  `ChecklistPanel.tsx` (`aria-label="Checklisten-Fortschritt"`) und
+  `Dashboard.tsx` (`aria-label="Durchschnittlicher
+  Planungsfortschritt"`) keinen Accessible Name — ein Screenreader las
+  bei mehreren Entwürfen nur "73 %, Fortschrittsbalken" vor, ohne
+  erkennbar zu machen, zu welchem Entwurf der Balken gehört. Fix:
+  `aria-label={`${draftLabel} Fortschritt`}` ergänzt, unter Wiederver-
+  wendung der schon vorhandenen `draftLabel`-Hilfsvariable (dieselbe
+  Disambiguierung "(Eintrag N)" wie bei den Aktions-Buttons direkt
+  darunter). Zwei neue Regressionstests in `Reiseentwuerfe.test.tsx`.
 - [x] 7.10 `Preisalarme.tsx` (`/preisalarme`) — Kartenliste mit
   Demo-Preisalarmen (analog `Favoriten.tsx`), Zielpreis-Badge und
   sachlicher Preisänderungs-Hinweis statt künstlicher Dringlichkeit,
