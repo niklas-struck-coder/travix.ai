@@ -25298,3 +25298,102 @@ autonome IT-Chef-Aufgabe.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-04, 00:19 UTC (sechsundsiebzigster Lauf — neuer sicherer Punkt gefunden und umgesetzt)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, erster Lauf seit
+dem 75. Lauf (`052dc4f`, 2026-11-03 23:13 UTC). `it-chef/auto` direkt
+übernommen (0 Commits Rückstand zu `origin/it-chef/auto`). `origin/main`
+weiterhin unverändert auf `fe1300e` (2026-10-23) — Freigabe-Chef hat seit
+dem 23.10. noch nicht gemergt, `it-chef/auto` liegt jetzt 57 Commits vor
+`main`; kein frischer `main`-Merge nötig, `main` bleibt unberührt.
+Regressionsschutz-Baseline zuerst frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 567 Tests, alle grün) — identisch zum Endstand des 75. Laufs.
+
+**Eigene Prüfungen vor der eigentlichen Punktesuche:**
+- `npm audit`: 24 Schwachstellen (2 niedrig, 19 mittel, 3 hoch), ein
+  Teil davon (`@ts-morph/common`, `@vitest/mocker`, `body-parser`,
+  `fast-uri`, `systeminformation`, `ts-morph`, `undici`, `vite`,
+  `vitest`) laut `npm audit --json` ohne `--force`/Major-Sprung behebbar.
+  `npm audit fix --dry-run` zweimal versucht — beide Male reproduzierbar
+  mit demselben, bereits in den Läufen neun/elf/zwölf/dreizehn
+  dokumentierten `npm`/Arborist-Tooling-Fehler abgebrochen (`TypeError:
+  Cannot read properties of null (reading 'edgesOut')`), vor jeder
+  Dateiänderung, `git status` danach sauber. Kein Workaround versucht
+  (gleiche Begründung wie in den Vorläufen: Interpretationsspielraum
+  bei einem Workaround verletzt Kriterium 3). Weiterhin eher ein Hinweis
+  für Ni (npm selbst aktualisieren?) als ein autonom lösbarer Punkt.
+- Gezielt auf bisher nicht abgedeckte Fehlerklassen geprüft: `target=
+  "_blank"` kommt im ganzen `src`-Baum nicht vor (kein Reverse-
+  Tabnabbing-Risiko), alle 16 `htmlFor=`/`id=`-Label-Paare
+  (`EditMode.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+  `Einstellungen.tsx`, `Profil.tsx`) passen exakt zusammen, keine
+  verwaisten/nie importierten Dateien in `src` (jede `.ts`/`.tsx`-Datei
+  hat einen echten Importpfad in die App).
+
+**Punktesuche (per separatem Explore-Agenten, gezielt auf bisher nicht
+explizit geprüfte Winkel):** Volles Lesen von `calculateProgress.ts`,
+`cartTotals.ts`, `calendarUtils.ts`, `checklistRules.ts`,
+`FlightWizard.tsx`/`HotelWizard.tsx` im Vergleich, `useChat.ts`/
+`useConcierge.ts`, `duffel/client.ts`, `mockAdvisor.ts`/
+`mockConcierge.ts` und weiterer Komponenten. Fund: **`isTripComplete()`
+(`src/lib/trip/tripStorage.ts`) widersprach ihrem eigenen Kommentar.**
+Der Kommentar direkt darüber sagt "Same field catalog as
+calculateProgress.ts / checklistRules.ts" — aber die Funktion verlangte
+zusätzlich `trip.destination`, während `calculateProgress.ts`
+(`PROGRESS_COMPONENTS`) und `checklistRules.ts`
+(`AUTO_CHECKLIST_ITEMS`/`isAutoItemChecked`) `destination` laut eigenem
+Kommentar in `calculateProgress.ts` bewusst nicht zählen ("Destination
+isn't counted — it's shown as the page title there, not a separate
+section to complete"). Dadurch konnte genau die Divergenz entstehen, vor
+der der `isTripComplete`-Kommentar selbst warnt (nur über `destination`
+statt wie ursprünglich gemeint über `activities`): `Buchung.tsx`s Badge
+(Zeile 204) zeigt "In Planung" statt "Reiseplan vollständig", während
+Fortschrittsbalken und Checkliste direkt darunter bereits 100 % bzw.
+alle Punkte abgehakt zeigen. Real erreichbar, nicht nur theoretisch: `
+destination` wird ausschließlich über die erste Chat-Frage gesetzt,
+während `transportMode`/`accommodation` auch direkt über die
+Standalone-Seiten `/flugsuche`/`/hotelsuche` (`updateStoredTrip`) und
+`dates`/`budget`/`activities` über die `?edit=`-Deep-Links bzw.
+`EditMode` auf der Buchungsseite gesetzt werden können — keiner dieser
+Pfade verlangt vorher eine Zielort-Antwort im Chat.
+
+**Sicherheitskriterien:** Kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Rechtstexten (reine Trip-Zustandslogik); keine offene Produkt-/
+Architekturentscheidung — der Fix stellt nur her, was die Funktion laut
+ihrem eigenen Kommentar schon immer tun sollte, kein neues Verhalten;
+klar beschrieben (Soll-Verhalten steht explizit im Code selbst, keine
+Interpretation nötig); objektiv prüfbar über einen neuen Test, der
+`calculateProgress`/`isAutoItemChecked`/`isTripComplete` direkt
+gegeneinander prüft.
+
+**Umsetzung:** Die `trip.destination &&`-Bedingung aus
+`isTripComplete()` entfernt, Funktion verlangt jetzt nur noch
+`transportMode`/`dates`/`budget`/`accommodation`/`activities.length >
+0` — exakt derselbe Feldkatalog wie in den beiden anderen Dateien. Der
+bestehende Kommentar über der Funktion bleibt unverändert korrekt (er
+beschreibt bereits das jetzt tatsächlich umgesetzte Verhalten). Neuer
+Test in `tripStorage.test.ts` (`isTripComplete`-Block): eine Trip-
+Fixture ohne `destination`, aber mit allen anderen Feldern gefüllt,
+prüft `calculateProgress(trip) === 100`,
+`AUTO_CHECKLIST_ITEMS.every(isAutoItemChecked) === true` und
+`isTripComplete(trip) === true` in einem Test — vor dem Fix schlug nur
+die letzte Assertion fehl, jetzt stimmen alle drei überein. Die drei
+bestehenden `isTripComplete`-Tests (die `destination` immer mitgesetzt
+hatten und den Bug deshalb nie gefangen hätten) bleiben unverändert
+grün, da `destination: 'Lissabon'` weiterhin eine erfüllte, nur nicht
+mehr erforderliche Bedingung ist.
+
+**Prüfung:** `npx vitest run src/lib/trip/tripStorage.test.ts` (27/27
+grün, inkl. neuem Test), danach komplette Baseline erneut: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75 Testdateien,
+**568** Tests — ein neuer, alle grün), `npm run build` (0 Typfehler,
+unveränderte 814-KB-Chunk-Size-Warnung, kein neuer Fund).
+
+**ZEITPLAN.md aktualisiert:** Neuer Absatz unter 6.8/6.9 (Checkliste),
+da der Fund genau die dort beschriebene Buchung-vs-Checkliste-Divergenz
+betrifft.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

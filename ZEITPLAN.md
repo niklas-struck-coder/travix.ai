@@ -3525,6 +3525,33 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `Buchung.tsx` für "Bearbeiten"-Links nutzt, plus einen `sr-only`-Zusatz
   ", bearbeiten" im Linktext für Screenreader — genau der in
   `reports/support-chef.md` vorgeschlagene kurzfristige Fix.
+  Vom autonomen IT-Chef-Lauf am 04.11. (sechsundsiebzigster Lauf) ein
+  Bug in `isTripComplete()` (`src/lib/trip/tripStorage.ts`) behoben, der
+  genau die oben beschriebene Buchung-vs-Checkliste-Divergenz wieder
+  einführte, nur über `destination` statt `activities`: die Funktion
+  verlangte zusätzlich zum dokumentierten Feldkatalog ("Same field
+  catalog as calculateProgress.ts / checklistRules.ts") auch noch
+  `trip.destination`, obwohl `calculateProgress.ts` und
+  `checklistRules.ts` (`AUTO_CHECKLIST_ITEMS`) `destination` bewusst
+  nicht zählen (eigener Kommentar in `calculateProgress.ts`: "Destination
+  isn't counted — it's shown as the page title there"). Dadurch konnte
+  `Buchung.tsx`s Badge weiterhin "In Planung" zeigen, während der
+  Fortschrittsbalken 100 % und alle Checklistenpunkte abgehakt anzeigten
+  — real erreichbar, da `destination` ausschließlich über die erste
+  Chat-Frage gesetzt wird, während `transportMode`/`accommodation` auch
+  direkt über `/flugsuche`/`/hotelsuche` und `dates`/`budget`/
+  `activities` über die `?edit=`-Deep-Links bzw. `EditMode` gesetzt
+  werden können, ganz ohne je eine Zielort-Frage zu beantworten. Fix:
+  die `trip.destination &&`-Bedingung aus `isTripComplete()` entfernt,
+  jetzt exakt derselbe Feldkatalog wie in den beiden anderen Dateien.
+  Neuer Regressionstest in `tripStorage.test.ts` (`isTripComplete`-Block),
+  der `calculateProgress`/`isAutoItemChecked`/`isTripComplete` direkt
+  gegen dieselbe Trip-Fixture ohne `destination` prüft — vorher schlug
+  nur die letzte der drei Assertionen fehl, jetzt stimmen alle drei
+  überein. `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+  vitest run` (75 Testdateien, 568 Tests — ein neuer, alle grün), `npm
+  run build` (0 Typfehler, unveränderte 814-KB-Chunk-Warnung) bestätigen
+  die Regressionsschutz-Baseline.
 - [x] 6.1/6.3 `TripSection.tsx`/`EmptySection.tsx` — vom autonomen IT-Chef-Lauf
   am 18.08. (dritter Lauf) als stale Checkboxen erkannt: beides ist bereits
   als die inline `Section`-Komponente in `Buchung.tsx` vorhanden (Titel/Icon/

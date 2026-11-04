@@ -105,12 +105,7 @@ export function updateStoredTrip(patch: Partial<TripDraft>): (StoredChatState & 
 // shows "Aktivitäten geplant" as an open item.
 export function isTripComplete(trip: TripDraft): boolean {
   return Boolean(
-    trip.destination &&
-      trip.transportMode &&
-      trip.dates &&
-      trip.budget &&
-      trip.accommodation &&
-      trip.activities.length > 0,
+    trip.transportMode && trip.dates && trip.budget && trip.accommodation && trip.activities.length > 0,
   )
 }
 

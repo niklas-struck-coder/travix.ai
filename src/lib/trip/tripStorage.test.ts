@@ -9,6 +9,8 @@ import {
   updateStoredTrip,
 } from '@/lib/trip/tripStorage'
 import { emptyTrip } from '@/lib/ai/mockAdvisor'
+import { calculateProgress } from '@/lib/trip/calculateProgress'
+import { AUTO_CHECKLIST_ITEMS, isAutoItemChecked } from '@/lib/trip/checklistRules'
 import type { StoredChatState } from '@/lib/trip/tripStorage'
 
 function seedStoredChat(overrides: Partial<StoredChatState> = {}) {
@@ -341,5 +343,21 @@ describe('isTripComplete', () => {
     const trip = { ...filledExceptActivities, activities: [{ id: '1', name: 'Museum', price: '10 €' }], budget: '' }
 
     expect(isTripComplete(trip)).toBe(false)
+  })
+
+  it('agrees with calculateProgress/checklistRules when destination is unset but every other slot is filled', () => {
+    const trip = {
+      ...emptyTrip,
+      destination: null,
+      transportMode: 'flight' as const,
+      dates: '12.–19. Sept.',
+      budget: '1.500 €',
+      accommodation: 'Hotel Lissabon',
+      activities: [{ id: '1', name: 'Museum', price: null }],
+    }
+
+    expect(calculateProgress(trip)).toBe(100)
+    expect(AUTO_CHECKLIST_ITEMS.every((item) => isAutoItemChecked(trip, item.id))).toBe(true)
+    expect(isTripComplete(trip)).toBe(true)
   })
 })
