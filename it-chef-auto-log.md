@@ -25597,3 +25597,69 @@ Keine neuen offenen Beobachtungen über die bereits in
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-04, 23:16 UTC (achtzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, fünfter Lauf
+heute (nach dem 79. Lauf, `83ac3b6`, 2026-11-04 22:13 UTC). `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`), 60
+Commits vor `origin/main` (weiterhin unverändert auf `fe1300e`,
+2026-10-23 — Freigabe-Chef hat seit dem 23.10. noch nicht gemergt). Kein
+frischer `main`-Merge nötig, `main` bleibt unberührt.
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 570 Tests, alle grün) — identisch zum Endstand des 79.
+Laufs.
+
+**Punktesuche:** Per separatem Explore-Agenten mit vollständiger, aus
+den 79 Vorläufen zusammengestellter Ausschlussliste (alle bisher
+gefundenen-und-gefixten Muster sowie alle bereits geprüft-und-
+verworfenen Kandidaten) beauftragt, praktisch den gesamten `src`-Baum
+erneut vollständig zu lesen (nicht nur grep) und gezielt auf neue
+Winkel zu achten (Logik-Inkonsistenzen zwischen Dateien mit derselben
+Regel, Datums-/Budget-Grenzfälle, fehlende Null-/Leer-Array-Schutz-
+schilde, inkonsistente JSON.parse/localStorage-Fehlerbehandlung,
+Typos, einzeln fehlende Accessibility-Muster, Race Conditions/
+Hook-Cleanup, Pluralisierung, Listen-Sortierung/-Filterung,
+Formular-Edge-Cases).
+
+**Geprüfte, aber verworfene Kandidaten** (jeweils Kriterium 2, 3 oder 4
+nicht erfüllt):
+- `Dashboard.tsx` (Zeile 78-80): `draftTrips.reduce(...) /
+  draftTrips.length` könnte bei leerem Array `NaN` ergeben — aber
+  `draftTrips` ist eine hartcodierte Konstante mit fest 2 Einträgen,
+  der Fall ist im Code aktuell nicht erreichbar.
+- `Angebote.tsx` (Zeile 51-53): eigene `formatPrice()`-Funktion statt
+  `formatEuro()` — keine echte Duplikation, da sie zusätzlich
+  Nicht-EUR-Währungen behandelt, anderes Verhalten, kein Bug.
+- `Sidebar.tsx` (Zeile 38): eingeklappte Icon-only-NavLinks haben nur
+  `title`, kein explizites `aria-label` — `title` zählt nach dem
+  HTML-AAM-Algorithmus als gültiger Fallback-Accessible-Name bei
+  fehlendem Textinhalt, kein klar nachweisbarer Defekt.
+- `FlightWizard.tsx`: `returnDate` wird bei späterer
+  `departureDate`-Änderung nicht automatisch zurückgesetzt — aber
+  `isValid`/natives `min`-Attribut fangen den Zwischenzustand bereits
+  korrekt ab, kein fehlerhaftes Verhalten.
+- `TrainCard.tsx`/`TrainResults.tsx` weiterhin nirgends eingebunden —
+  seit Dutzenden Läufen bekannt, hängt an der noch offenen
+  Produktentscheidung zur Verbindungssuche-Datenquelle.
+- `HotelWizard.tsx`: keine Validierung `guests` vs. `rooms` — keine im
+  Code dokumentierte Regel dagegen, würde eine Produktentscheidung
+  brauchen.
+
+Vollständig durchgesehen ohne weiteren Befund: `tripStorage.ts`,
+`calculateProgress.ts`, `checklistRules.ts`, `cartTotals.ts`,
+`calendarUtils.ts`, `format.ts`, `mockAdvisor.ts`, `mockConcierge.ts`,
+`duffel/client.ts`, `useChat.ts`, `useConcierge.ts`, alle Seiten unter
+`src/pages/*.tsx`, alle Such-/Ergebnis-Komponenten, Chat-Komponenten,
+Layout/Routing und Typdefinitionen.
+
+**Ergebnis:** Kein Punkt heute (achtzigster Lauf) autonom umgesetzt,
+kein Produktcode geändert — ehrlich "kein Fund". Baseline unverändert
+gegenüber dem 79. Lauf (570 Tests, 0 Typ-/Lint-Fehler). Keine neuen
+offenen Beobachtungen über die bereits in `reports/it-chef.md`
+dokumentierten hinaus. Angesichts der extremen Reife des Codes nach 79
+Vorläufen ist "kein Fund" diesmal die ehrliche Einschätzung.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
