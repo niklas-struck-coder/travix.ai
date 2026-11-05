@@ -305,6 +305,7 @@ function viewUebersicht() {
       <div class="stat"><span class="lbl">Spielende</span><span class="v">${ended(g) ? "vorbei" : `${days} ${days === 1 ? "Tag" : "Tage"}`}</span><span class="small muted">${fmtDate(g.endAt)}</span></div>
     </div>
   </div>
+  <div class="section card"><h3>Verlauf deines Depots</h3><canvas id="dashchart" height="200" style="height:200px"></canvas><p class="small muted chartnote" style="margin:4px 0 0">Dein gesamter Depotwert über die Zeit. Gestrichelt: dein Startguthaben.</p></div>
   <div class="section card"><h3>Aufteilung</h3><div class="alloc" style="height:14px">${alloc}</div><div class="legend">${leg}</div></div>
   ${(p.pending || []).length ? `<div class="section card"><h3>Vorgemerkte Aufträge</h3><p class="small muted" style="margin:0 0 8px">Werden automatisch beim nächsten Börsenstart zum dann gültigen Kurs ausgeführt.</p><div class="pendlist">${(p.pending || []).map((o) => `<div class="pend"><span><b>${o.side === "buy" ? "Kauf" : "Verkauf"}</b> ${esc(S.by[o.id]?.name || o.id)} <span class="muted">· ${o.all ? "alles" : o.eur != null ? EUR.format(o.eur) : fmtQty(o.qty) + " Stück"}</span></span><button class="btn" data-cancelpending="${o.t}">Stornieren</button></div>`).join("")}</div></div>` : ""}
   <div class="section"><h2>Alles, was du besitzt</h2>
@@ -392,6 +393,39 @@ function viewRang() {
   <div class="section card"><h3>Verlauf</h3><canvas id="histchart" height="220" style="height:220px"></canvas><div class="legend2">${lb.map((r) => `<span><i style="background:${colorOf[r.pid]}"></i>${esc(r.p.name)}</span>`).join("")}</div><p class="small muted" style="margin:4px 0 0">Ein Punkt pro Tag (Stand abends), dazu der Wert von jetzt.</p></div>
   <div class="section card"><h3>Letzte Orders aller Spieler</h3><div class="feed" style="margin-top:6px">${(g.feed || []).slice(0, 25).map(feedRow).join("") || `<p class="muted">Noch keine Orders.</p>`}</div></div>`;
 }
+// Liniendiagramm: Entwicklung des gesamten Depotwerts (nur du)
+function drawDashChart() {
+  const c = document.getElementById("dashchart");
+  if (!c || !S.game) return;
+  const g = S.game, pid = me()?.pid, p = g.players[pid];
+  if (!p) return;
+  const pts = (g.history || []).filter((h) => h.v[pid] != null).map((h) => ({ t: new Date(h.d + "T21:00:00").getTime(), v: h.v[pid] }));
+  pts.push({ t: Math.min(Date.now(), g.endAt), v: valueOf(p) });
+  const note = c.parentElement.querySelector(".chartnote");
+  if (pts.length < 2) { if (note) note.textContent = "Die Linie wächst mit jedem Tag — ab morgen siehst du hier den Verlauf."; return; }
+  const dpr = devicePixelRatio || 1, W = c.clientWidth, H = 200;
+  c.width = W * dpr; c.height = H * dpr;
+  const x = c.getContext("2d"); x.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement), col = (n) => cs.getPropertyValue(n).trim();
+  const vals = pts.map((s) => s.v).concat(g.startCash);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.12 || g.startCash * 0.02; lo -= pad; hi += pad;
+  const t0 = Math.min(g.createdAt, pts[0].t), t1 = Math.max(pts[pts.length - 1].t, t0 + DAY);
+  const L = 8, R = W - 72, T = 8, B = H - 22;
+  const X = (t) => L + ((t - t0) / (t1 - t0)) * (R - L), Y = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
+  const up = pts[pts.length - 1].v >= g.startCash, line = col(up ? "--gain" : "--loss");
+  x.font = "11px " + col("--f-mono"); x.fillStyle = col("--muted"); x.strokeStyle = col("--line"); x.lineWidth = 1;
+  for (let j = 0; j <= 3; j++) { const v = lo + ((hi - lo) * j) / 3, yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(R, yy); x.stroke(); x.fillText(Math.round(v).toLocaleString("de-DE"), R + 6, yy + 4); }
+  x.setLineDash([4, 4]); x.beginPath(); x.moveTo(L, Y(g.startCash)); x.lineTo(R, Y(g.startCash)); x.strokeStyle = col("--muted"); x.stroke(); x.setLineDash([]);
+  x.fillStyle = col("--muted");
+  for (let j = 0; j <= 2; j++) { const t = t0 + ((t1 - t0) * j) / 2; x.fillText(new Date(t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), Math.min(X(t), R - 32), H - 5); }
+  const xy = pts.map((s) => [X(s.t), Y(s.v)]);
+  x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 2; x.stroke();
+  x.lineTo(X(pts[pts.length - 1].t), B); x.lineTo(X(pts[0].t), B); x.closePath(); x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
+  const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3.5, 0, 7); x.fillStyle = line; x.fill();
+  if (note) note.textContent = "Dein gesamter Depotwert über die Zeit. Gestrichelt: dein Startguthaben.";
+}
+
 function drawHistory() {
   const c = document.getElementById("histchart");
   if (!c || !S.game) return;
@@ -507,6 +541,7 @@ function render() {
     }
   }
   if (S.tab === "rangliste") drawHistory();
+  if (S.tab === "uebersicht") drawDashChart();
   updateModalLive();
 }
 
@@ -781,7 +816,7 @@ document.addEventListener("submit", (e) => {
   if (e.target.id === "joinform") joinGame();
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && S.modal) closeModal(); });
-addEventListener("resize", () => { if (S.modal) drawChart(); if (S.tab === "rangliste") drawHistory(); });
+addEventListener("resize", () => { if (S.modal) drawChart(); if (S.tab === "rangliste") drawHistory(); if (S.tab === "uebersicht") drawDashChart(); });
 
 /* ---------- Start ---------- */
 render();
