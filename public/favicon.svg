@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
+  <!-- Travix-Browser-Icon: exakt dasselbe Markenzeichen wie in Sidebar.tsx
+       (rounded-xl-Kachel in bg-sidebar-primary mit lucide-react "Compass"-
+       Icon in sidebar-primary-foreground) statt des Vite-Default-Icons.
+       Farben 1:1 aus src/lib/design-tokens.ts (teal/navy), Icon-Pfad 1:1
+       aus node_modules/lucide-react/dist/esm/icons/compass.mjs — bewusst
+       kein neu entworfenes Icon, nur dieselbe bereits etablierte Marke in
+       einem zweiten Ausgabeformat. -->
+  <rect width="36" height="36" rx="10" fill="#00C2A8"/>
+  <g transform="translate(8 8) scale(0.8333)" fill="none" stroke="#0A2342" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>
+  </g>
+</svg>

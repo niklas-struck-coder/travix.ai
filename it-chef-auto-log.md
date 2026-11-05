@@ -25725,3 +25725,86 @@ Keine neuen offenen Beobachtungen über die bereits in
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-05, 01:17 UTC (zweiundachtzigster Lauf — Favicon-Link zeigt jetzt auf ein tatsächlich existierendes Travix-Icon)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`, Stand
+`705c3d7`, 81. Lauf), weiterhin 63 Commits vor `origin/main` (unverändert
+auf `fe1300e`, 2026-10-23 — Freigabe-Chef hat seit dem 23.10. noch nicht
+gemergt). Kein frischer `main`-Merge nötig, `main` bleibt unberührt.
+`reports/it-chef.md`, `reports/support-chef.md` und
+`reports/marketing-chef.md` gelesen (alle zuletzt 2026-10-23) — keine
+neuen, noch nicht umgesetzten Funde darin; die beiden offenen Punkte
+(Lösch-Warnungen uneinheitlich dramatisch, Checkliste ohne Persistenz)
+sind bereits in `tasks-prd-travix-platform.md`/früheren Log-Einträgen als
+Produktentscheidung bzw. Backend-abhängig eingestuft, nicht neu.
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 570 Tests, alle grün) — identisch zum Endstand des 81.
+Laufs.
+
+**Punktesuche:** Bewusst andere Fehlerklassen als die letzten Läufe
+geprüft (Favicon/statische Assets, Routing/404-Seite, Event-Listener-
+Cleanup außerhalb der bekannten Stellen, `.sort()`-Mutationsrisiken,
+React-`key`-Nutzung mit Index, Keyword-Matching in `mockAdvisor.ts`/
+`mockConcierge.ts`, `parseInt`/`Number()`-Aufrufe, div-`onClick` ohne
+Tastatur-Alternative, fehlende Test-Dateien je Komponente):
+- `index.html` zeigte als Favicon weiterhin auf `/vite.svg` — bereits in
+  Lauf 34 (07.10.) und Lauf 60 gefunden, aber beide Male zurückgestellt,
+  weil ein eigenes Icon eine Design-Entscheidung von Marketing-Chef/Ni
+  wäre (Kriterium 2). Diesmal zusätzlich verifiziert, dass `/vite.svg`
+  nicht nur "der falsche Vite-Standard" ist, sondern in diesem Repo
+  **nie existiert hat** — kein `public/`-Ordner, keine `vite.svg` in der
+  gesamten Git-Historie (`git log --all -- "**/vite.svg" "public/*"` ist
+  leer). Der Link war seit dem allerersten Scaffolding-Commit schlicht
+  kaputt: jeder Seitenaufruf löst einen 404 auf das Tab-Icon aus, es gibt
+  gar kein funktionierendes Favicon, nicht einmal ein falsches.
+  Das ändert die Einschätzung zu Kriterium 2: Es musste kein neues Icon
+  *entworfen* werden — die App hat längst ein etabliertes Marken-Icon,
+  dieselbe teal Kachel mit dem `Compass`-Icon aus `Sidebar.tsx` (Zeile
+  17-21: `bg-sidebar-primary`-Kachel mit `Compass` in
+  `text-sidebar-primary-foreground`), die auf jeder Seite links oben
+  sichtbar ist. Reuse statt Neuentwurf fällt unter die Eskalationsregel
+  aus `.claude/skills/it-chef-eigen/SKILL.md` ("bei den bestehenden
+  Design-Tokens … und der bisherigen Tonalität im Code bleiben, nicht neu
+  erfinden") statt unter die Design-Entscheidungs-Sperre — damit erfüllt
+  der Fix jetzt alle vier Kriterien.
+
+**Umsetzung:** Neue `public/favicon.svg` (36×36, `rx="10"`) mit exakt
+denselben Werten wie die bestehende Sidebar-Kachel: Hintergrund
+`#00C2A8` (teal) und Icon-Strich `#0A2342` (navy), beide 1:1 aus
+`src/lib/design-tokens.ts` übernommen, kein neuer Farbwert. Der
+Icon-Pfad selbst ist 1:1 aus
+`node_modules/lucide-react/dist/esm/icons/compass.mjs` kopiert (Kreis +
+Nadel-Pfad), skaliert auf die 20px-Größe, die `Sidebar.tsx` für dasselbe
+Icon verwendet (`size-5` in einer `size-9`-Kachel) — keine einzige
+Design-Entscheidung selbst getroffen, nur ein bestehendes Icon in ein
+zweites Ausgabeformat übertragen. `index.html`s
+`<link rel="icon" type="image/svg+xml">` zeigt jetzt auf `/favicon.svg`
+statt auf das nie existierende `/vite.svg`. Entsprechenden Eintrag in
+`ZEITPLAN.md` (Phase 1 Ist-Stand) ergänzt; keine Checkbox in
+`tasks-prd-travix-platform.md` zu aktualisieren, da 1.0 Scaffolding
+bereits als erledigt markiert ist und es keine eigene Favicon-Teilaufgabe
+gibt (gleiches Muster wie bei den reinen Bugfix-Läufen 73/76/77, die
+ebenfalls ohne Checkbox-Änderung blieben).
+
+**Geprüft:** `npm ci` erneut fehlerfrei, `npx tsc -b` weiterhin 0 Fehler,
+`npm run lint` weiterhin 0 Fehler, `npx vitest run` weiterhin 570/570
+Tests grün (reine Asset-/HTML-Änderung ohne Testbezug, keine neuen Tests
+nötig oder sinnvoll — ein Favicon-Pfad lässt sich nicht sinnvoll per
+Vitest/jsdom prüfen). `npm run build` lief fehlerfrei durch und wurde
+zusätzlich konkret verifiziert: `dist/favicon.svg` liegt jetzt tatsächlich
+im Build-Output, `dist/index.html` verlinkt korrekt darauf — zur
+Gegenprobe vorher geprüft, dass `dist/vite.svg` nie existiert hätte.
+`dist/` danach wieder entfernt (per `.gitignore` ausgeschlossen).
+
+**Ergebnis:** Ein Punkt heute (zweiundachtzigster Lauf) autonom
+umgesetzt und verifiziert — Favicon-Link zeigt jetzt auf ein tatsächlich
+vorhandenes, zur Marke passendes Icon statt auf eine nie existierende
+Datei. Baseline unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Keine
+neuen offenen Beobachtungen über die bereits in `reports/it-chef.md`
+dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

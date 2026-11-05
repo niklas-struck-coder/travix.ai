@@ -399,6 +399,30 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   damit der Fokus-Ring der Kartenform folgt statt eckig über die
   abgerundete `Card` zu laufen. Neuer Regressionstest in `Home.test.tsx`
   (prüft die beiden neuen Klassen auf dem Link).
+  Vom autonomen IT-Chef-Lauf am 05.11. (zweiundachtzigster Lauf) einen
+  seit Lauf 34 (07.10.) und erneut Lauf 60 bekannten, aber beide Male
+  bewusst zurückgestellten Fund tatsächlich behoben: `index.html` verlinkte
+  als Favicon `/vite.svg` — eine Datei, die in diesem Repo nie existiert
+  hat (kein `public/`-Ordner, kein `vite.svg` irgendwo in der Git-Historie),
+  also ein seit dem allerersten Scaffolding-Commit kaputter Link, der bei
+  jedem Seitenaufruf einen 404 auf das Icon auslöst — kein Travix-Icon,
+  kein funktionierendes Icon überhaupt. Beide Vorläufe hatten das als
+  Design-/Content-Entscheidung eingestuft, die Marketing-Chef/Ni zusteht
+  (Kriterium 2), weil ein eigenes Icon hätte erfunden werden müssen. Das
+  trifft so aber nicht mehr zu: Die App hat längst ein etabliertes
+  Marken-Icon — dieselbe teal Kachel mit dem `Compass`-Icon aus
+  `Sidebar.tsx` (Zeile 18-20, `bg-sidebar-primary`/
+  `text-sidebar-primary-foreground`), die der Nutzer auf jeder Seite
+  sieht. Fix: `public/favicon.svg` neu angelegt — exakt dieselbe Kachel
+  (teal `#00C2A8` Hintergrund, navy `#0A2342` Icon-Farbe, beide 1:1 aus
+  `src/lib/design-tokens.ts`) mit demselben `Compass`-Pfad wie
+  `node_modules/lucide-react/dist/esm/icons/compass.mjs`, keine neue
+  Design-Entscheidung, nur dieselbe bereits bestehende Marke in einem
+  zweiten Ausgabeformat. `index.html`s `<link rel="icon">` zeigt jetzt auf
+  `/favicon.svg` statt auf das nie existierende `/vite.svg`. Geprüft per
+  `npm run build`: `dist/favicon.svg` liegt jetzt tatsächlich im
+  Build-Output, `dist/index.html` verlinkt korrekt darauf — vorher war
+  `dist/vite.svg` nie vorhanden gewesen.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein
