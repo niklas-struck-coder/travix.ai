@@ -284,7 +284,9 @@ function viewUebersicht() {
         <div><span class="lbl">Seit Kauf</span><span class="num ${ud(x.gl)}">${fmtSigned(x.gl)} (${fmtPct(x.glp)})</span></div>
         <div><span class="lbl">Heute</span><span class="num ${ud(x.today)}">${fmtSigned(x.today)}${x.q.chg != null ? ` (${fmtPct(x.q.chg)})` : ""}</span></div>
       </div>
-      <div class="hd-chartwrap"><canvas class="hd-chart" data-hdchart="${x.id}" data-buy="${firstBuy[x.id] || g.createdAt || Date.now()}" data-avg="${x.h.cost / x.h.qty}" height="130"></canvas><span class="small muted hd-note">Lade Verlauf seit Kauf …</span></div>
+      <div class="hd-chartwrap">
+        <div class="hd-ranges">${[["kauf", "Seit Kauf"], ["1mo", "1M"], ["6mo", "6M"], ["1y", "1J"], ["5y", "Max"]].map(([r, l]) => `<button data-hdrange="${x.id}:${r}" aria-pressed="${(S.posRange?.[x.id] || "kauf") === r}">${l}</button>`).join("")}</div>
+        <canvas class="hd-chart" data-hdchart="${x.id}" data-buy="${firstBuy[x.id] || g.createdAt || Date.now()}" data-avg="${x.h.cost / x.h.qty}" height="130"></canvas><span class="small muted hd-note">Lade Verlauf …</span></div>
       <button class="btn primary" data-asset="${x.id}">Kaufen / Verkaufen</button>
     </div>`;
   const rows = pos.map((x) => `<button class="hold ${exp[x.id] ? "open" : ""}" data-hold="${x.id}" aria-expanded="${!!exp[x.id]}">
@@ -411,22 +413,61 @@ function viewRang() {
   <div class="section card"><h3>Verlauf</h3><canvas id="histchart" height="220" style="height:220px"></canvas><div class="legend2">${lb.map((r) => `<span><i style="background:${colorOf[r.pid]}"></i>${esc(r.p.name)}</span>`).join("")}</div><p class="small muted" style="margin:4px 0 0">Ein Punkt pro Tag (Stand abends), dazu der Wert von jetzt.</p></div>
   <div class="section card"><h3>Letzte Orders aller Spieler</h3><div class="feed" style="margin-top:6px">${(g.feed || []).slice(0, 25).map(feedRow).join("") || `<p class="muted">Noch keine Orders.</p>`}</div></div>`;
 }
+/* ---------- Fadenkreuz/Scrubber für alle Diagramme ---------- */
+function roundRectPath(x, bx, by, w, h, r) {
+  if (x.roundRect) { x.beginPath(); x.roundRect(bx, by, w, h, r); }
+  else { x.beginPath(); x.rect(bx, by, w, h); }
+}
+// zeichnet senkrechte Linie, Punkt und eine Infobox mit Textzeilen
+function drawCrosshair(x, col, sx, sy, topY, botY, W, lines, dotCol) {
+  x.save();
+  x.strokeStyle = col("--muted"); x.globalAlpha = 0.55; x.lineWidth = 1;
+  x.beginPath(); x.moveTo(sx, topY); x.lineTo(sx, botY); x.stroke(); x.globalAlpha = 1;
+  x.beginPath(); x.arc(sx, sy, 3.6, 0, 7); x.fillStyle = dotCol; x.fill();
+  x.font = "11px " + (col("--f-body") || "sans-serif");
+  const tw = Math.max(...lines.map((l) => x.measureText(l).width)) + 14, th = lines.length * 15 + 8;
+  let bx = sx + 10; if (bx + tw > W - 2) bx = sx - 10 - tw; if (bx < 2) bx = 2;
+  const by = topY + 2;
+  roundRectPath(x, bx, by, tw, th, 6); x.fillStyle = col("--ink"); x.globalAlpha = 0.92; x.fill(); x.globalAlpha = 1;
+  x.fillStyle = col("--bg"); x.textAlign = "left";
+  lines.forEach((l, i) => x.fillText(l, bx + 7, by + 16 + i * 15));
+  x.restore();
+}
+function chartHover(e) {
+  const cv = e.target;
+  if (!cv || cv.tagName !== "CANVAS" || !cv._redraw || !cv._xs || !cv._xs.length) return;
+  const px = e.clientX - cv.getBoundingClientRect().left;
+  let idx = 0, best = Infinity;
+  cv._xs.forEach((sx, i) => { const dd = Math.abs(sx - px); if (dd < best) { best = dd; idx = i; } });
+  if (cv._hoverIdx === idx) return;
+  cv._hoverIdx = idx; cv._redraw();
+}
+function chartOut(e) {
+  const cv = e.target;
+  if (cv && cv.tagName === "CANVAS" && cv._redraw && cv._hoverIdx != null) { cv._hoverIdx = null; cv._redraw(); }
+}
+document.addEventListener("pointermove", chartHover);
+document.addEventListener("pointerdown", chartHover);
+document.addEventListener("pointerout", chartOut);
+
 // Mini-Diagramm je Position: Kursverlauf seit Kauf, mit Kaufkurs-Linie
 function rangeForAge(buyT) {
   const d = (Date.now() - buyT) / DAY;
   return d < 25 ? "1mo" : d < 170 ? "6mo" : d < 350 ? "1y" : "5y";
 }
-async function ensurePosCharts() {
+function ensurePosCharts() {
   S.posChart = S.posChart || {};
+  S.posRange = S.posRange || {};
   const canvases = document.querySelectorAll("#view canvas.hd-chart");
   for (const cv of canvases) {
     const id = cv.dataset.hdchart;
-    if (S.posChart[id]) continue;
-    const range = rangeForAge(Number(cv.dataset.buy));
-    S.posChart[id] = { range, points: "loading" };
-    api(`/api/chart?id=${encodeURIComponent(id)}&range=${range}`)
-      .then((d) => { S.posChart[id] = { range, points: d.points || [] }; })
-      .catch(() => { S.posChart[id] = { range, points: "error" }; })
+    const sel = S.posRange[id] || "kauf";
+    const reqRange = sel === "kauf" ? rangeForAge(Number(cv.dataset.buy)) : sel;
+    if (S.posChart[id] && S.posChart[id].reqRange === reqRange) continue;
+    S.posChart[id] = { reqRange, points: "loading" };
+    api(`/api/chart?id=${encodeURIComponent(id)}&range=${reqRange}`)
+      .then((d) => { S.posChart[id] = { reqRange, points: d.points || [] }; })
+      .catch(() => { S.posChart[id] = { reqRange, points: "error" }; })
       .finally(() => drawHoldCharts());
   }
   drawHoldCharts();
@@ -434,13 +475,14 @@ async function ensurePosCharts() {
 function drawHoldCharts() {
   document.querySelectorAll("#view canvas.hd-chart").forEach((cv) => {
     const id = cv.dataset.hdchart, buyT = Number(cv.dataset.buy), avg = Number(cv.dataset.avg);
+    const sel = (S.posRange || {})[id] || "kauf";
     const entry = S.posChart?.[id];
     const note = cv.parentElement.querySelector(".hd-note");
-    if (!entry || entry.points === "loading") return;
-    if (entry.points === "error" || !Array.isArray(entry.points) || entry.points.length < 2) { if (note) note.textContent = "Für diesen Wert gibt es gerade keinen Verlauf."; cv.style.display = "none"; return; }
+    if (!entry || entry.points === "loading") { if (note) note.textContent = "Lade Verlauf …"; return; }
+    if (entry.points === "error" || !Array.isArray(entry.points) || entry.points.length < 2) { if (note) note.textContent = "Für diesen Zeitraum gibt es keinen Verlauf."; cv.style.display = "none"; return; }
     cv.style.display = "block";
-    let pts = entry.points.filter((p) => p[0] >= buyT - 2 * DAY);
-    if (pts.length < 2) pts = entry.points;
+    let pts = entry.points;
+    if (sel === "kauf") { const f = pts.filter((p) => p[0] >= buyT - 2 * DAY); if (f.length >= 2) pts = f; }
     const cs = getComputedStyle(document.documentElement), col = (n) => cs.getPropertyValue(n).trim();
     const dpr = devicePixelRatio || 1, W = cv.clientWidth || 300, H = 130;
     cv.width = W * dpr; cv.height = H * dpr;
@@ -454,16 +496,20 @@ function drawHoldCharts() {
     const end = pts[pts.length - 1][1], line = col(end >= avg ? "--gain" : "--loss");
     x.font = "10px " + col("--f-mono"); x.fillStyle = col("--muted"); x.strokeStyle = col("--line"); x.lineWidth = 1;
     for (let j = 0; j <= 2; j++) { const v = lo + ((hi - lo) * j) / 2, yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(R, yy); x.stroke(); x.fillText(fmtPx(v).replace(" €", ""), R + 5, yy + 3); }
-    // Kaufkurs-Linie
     x.setLineDash([4, 3]); x.beginPath(); x.moveTo(L, Y(avg)); x.lineTo(R, Y(avg)); x.strokeStyle = col("--muted"); x.stroke(); x.setLineDash([]);
     x.fillStyle = col("--muted"); x.fillText("Kauf", R + 5, Y(avg) + 3);
-    x.fillText(new Date(t0).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), L, H - 4);
-    x.fillText(new Date(t1).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), R - 30, H - 4);
+    const yr = sel === "5y" || sel === "1y";
+    x.fillText(new Date(t0).toLocaleDateString("de-DE", yr ? { month: "2-digit", year: "2-digit" } : { day: "2-digit", month: "2-digit" }), L, H - 4);
+    x.fillText(new Date(t1).toLocaleDateString("de-DE", yr ? { month: "2-digit", year: "2-digit" } : { day: "2-digit", month: "2-digit" }), R - 34, H - 4);
     const xy = pts.map((p) => [X(p[0]), Y(p[1])]);
     x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 1.8; x.stroke();
     x.lineTo(X(t1), Y(avg)); x.lineTo(X(t0), Y(avg)); x.closePath(); x.globalAlpha = 0.1; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
     const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3, 0, 7); x.fillStyle = line; x.fill();
-    if (note) note.textContent = `Kurs seit Kauf. Linie über der gestrichelten Kauf-Linie = im Plus.`;
+    cv._xs = pts.map((p) => X(p[0])); cv._redraw = drawHoldCharts;
+    if (cv._hoverIdx != null && cv._hoverIdx < pts.length) {
+      const pp = pts[cv._hoverIdx], diff = pp[1] / avg - 1;
+      drawCrosshair(x, col, X(pp[0]), Y(pp[1]), T, B, W, [new Date(pp[0]).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }), fmtPx(pp[1]) + "  " + fmtPct(diff)], line);
+    } else if (note) note.textContent = "Fahre über die Linie für Datum und Kurs. Über der Kauf-Linie = im Plus.";
   });
 }
 
@@ -499,6 +545,11 @@ function drawDashChart() {
   x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 2; x.stroke();
   x.lineTo(X(pts[pts.length - 1].t), Y(0)); x.lineTo(X(pts[0].t), Y(0)); x.closePath(); x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
   const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3.5, 0, 7); x.fillStyle = line; x.fill();
+  c._xs = pts.map((s) => X(s.t)); c._redraw = drawDashChart;
+  if (c._hoverIdx != null && c._hoverIdx < pts.length) {
+    const s = pts[c._hoverIdx];
+    drawCrosshair(x, col, X(s.t), Y(s.v), T, B, W, [new Date(s.t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }), (s.v >= 0 ? "+" : "−") + EUR.format(Math.abs(s.v))], line);
+  }
   if (note) note.textContent = `Gewinn/Verlust deines Depots gegenüber dem Start (${EUR.format(g.startCash)}). Linie über null = im Plus.`;
 }
 
@@ -547,6 +598,15 @@ function drawHistory() {
     const [ex, ey] = pts[pts.length - 1];
     x.beginPath(); x.arc(ex, ey, 3, 0, 7); x.fillStyle = LINE_COLORS[i % LINE_COLORS.length]; x.fill();
   });
+  c._xs = series.map((s) => X(s.t)); c._redraw = drawHistory;
+  if (c._hoverIdx != null && c._hoverIdx < series.length) {
+    const s = series[c._hoverIdx];
+    const lead = [...pids].filter((pid) => s.v[pid] != null).sort((a, b) => s.v[b] - s.v[a]);
+    const lines = [new Date(s.t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })];
+    lead.slice(0, 4).forEach((pid) => lines.push(`${g.players[pid].name}: ${EUR.format(s.v[pid])}`));
+    const myv = s.v[me()?.pid] != null ? s.v[me()?.pid] : s.v[lead[0]];
+    drawCrosshair(x, col, X(s.t), Y(myv), T, B, W, lines, col("--accent"));
+  }
 }
 
 /* ---------- Einladen ---------- */
@@ -747,6 +807,12 @@ function drawChart() {
   x.lineTo(X(t1), B); x.lineTo(X(t0), B); x.closePath();
   x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
   x.beginPath(); x.arc(X(t1), Y(pts[pts.length - 1][1]), 3.5, 0, 7); x.fillStyle = line; x.fill();
+  c._xs = pts.map((pp) => X(pp[0])); c._redraw = drawChart;
+  if (c._hoverIdx != null && c._hoverIdx < pts.length) {
+    const [t, v] = pts[c._hoverIdx], d = new Date(t);
+    const dl = short ? d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    drawCrosshair(x, col, X(t), Y(v), T, B, W, [dl, fmtPx(v)], line);
+  }
 }
 
 async function submitTrade() {
@@ -837,6 +903,7 @@ document.addEventListener("click", (e) => {
   const d = t.dataset;
   if (d.tab) { S.tab = d.tab; closeModal(); render(); scrollTo(0, 0); return; }
   if (d.hold) { S.expanded = S.expanded || {}; S.expanded[d.hold] = !S.expanded[d.hold]; render(); return; }
+  if (d.hdrange) { const [id, r] = d.hdrange.split(":"); S.posRange = S.posRange || {}; S.posRange[id] = r; render(); return; }
   if (d.asset && !t.closest("#modal")) return openAsset(d.asset);
   if (d.filter) { S.filter = d.filter; render(); return; }
   if (d.start) { S.startMode = d.start; render(); document.querySelector("#createform,#joinform,.hero")?.scrollIntoView({ behavior: "smooth" }); return; }
