@@ -108,7 +108,9 @@ export function Dashboard() {
               {/* Mittelwert über mehrere unterschiedlich weit fortgeschrittene
                   Entwürfe kann sonst wie ein falsch erfasster Fortschritt
                   wirken — Support-Chef-Bericht 2026-08-28. */}
-              <span className="text-xs text-muted-foreground">Ø über {draftTrips.length} Entwürfe</span>
+              <span className="text-xs text-muted-foreground">
+                Ø über {draftTrips.length} {draftTrips.length === 1 ? 'Entwurf' : 'Entwürfe'}
+              </span>
               <Progress value={avgDraftProgress} aria-label="Durchschnittlicher Planungsfortschritt" />
             </div>
             <Link to="/entwuerfe" aria-label="Alle Reiseentwürfe ansehen" className="text-xs font-medium text-teal hover:underline">

@@ -25859,3 +25859,76 @@ Keine neuen offenen Beobachtungen über die bereits in
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-05, 23:13 UTC (vierundachtzigster Lauf — Dashboard-Entwürfe-Zähler jetzt mit korrektem Singular/Plural)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`, Stand
+`32479be`, 83. Lauf), 65 Commits vor `origin/main` (weiterhin
+unverändert auf `fe1300e`, 2026-10-23 — Freigabe-Chef hat seit dem
+23.10. noch nicht gemergt). Kein frischer `main`-Merge nötig, `main`
+bleibt unberührt. Regressionsschutz-Baseline frisch durchlaufen:
+`npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (75 Testdateien, 570 Tests, alle grün) — identisch zum
+Endstand des 83. Laufs.
+
+**Punktesuche:** `tasks/tasks-prd-travix-platform.md`, `ZEITPLAN.md` und
+`reports/it-chef.md` (Stand 23.10.) erneut durchgesehen — alle
+verbleibenden offenen Checkboxen weiterhin blockiert auf Backend-/API-
+Zugangsdaten oder echte Produkt-/Architekturentscheidungen von Ni
+(Kriterium 1/2 nicht erfüllt), die beiden offenen Funde im Bericht
+weiterhin bewusst zurückgestellte Produktentscheidungen. Gezielt neue
+Bereiche gelesen (nicht nur gegrept): `lib/trip/cartTotals.ts`,
+`lib/trip/calendarUtils.ts`, `lib/ai/mockConcierge.ts`,
+`hooks/useConcierge.ts`, `components/search/HotelWizard.tsx`,
+`components/search/FlightWizard.tsx`, `lib/utils.ts`,
+`lib/trip/tripStorage.ts`, `pages/Preisalarme.tsx`, `pages/Warenkorb.tsx`,
+`pages/Kalender.tsx` — keine neuen Funde darin. Dazu codeweite Suche nach
+doppelten Wörtern in sichtbarem JSX-Text (Tippfehler-Muster wie "das
+das") — keine Treffer — und nach `{wert.length} Substantiv`-Interpolationen
+ohne Singular/Plural-Unterscheidung, um das bereits an zwei Stellen
+(`Buchung.tsx`, `Reiseentwuerfe.tsx`: "Aktivität"/"Aktivitäten") behobene
+Muster systematisch auf fehlende weitere Stellen zu prüfen.
+
+**Fund:** `Dashboard.tsx` (Zeile 111, Reiseentwürfe-Kachel) zeigte
+`Ø über {draftTrips.length} Entwürfe` ohne die an genau dieser Stelle im
+Code bereits etablierte Singular/Plural-Unterscheidung — bei genau einem
+Entwurf wäre das grammatisch falsche "1 Entwürfe" erschienen, statt "1
+Entwurf". Einziger Treffer dieses Musters im gesamten `src/`-Baum (gezielt
+nach `{...\.length} [A-ZÄÖÜ][a-zäöüß]*` durchsucht). Erfüllt alle vier
+Kriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/Recht, keine offene
+Produktentscheidung, eindeutig beschrieben (identisches Muster bereits
+zweimal im selben Code vorhanden, keine eigene Interpretation nötig),
+Ergebnis objektiv prüfbar (Typecheck/Lint/bestehender Test bleiben grün).
+
+**Umsetzung:** `{draftTrips.length} {draftTrips.length === 1 ? 'Entwurf' : 'Entwürfe'}`
+statt des reinen `{draftTrips.length} Entwürfe` — 1:1 dieselbe Ternary-
+Form wie in `Buchung.tsx`/`Reiseentwuerfe.tsx` für "Aktivität(en) geplant".
+Mit den aktuell fest codierten zwei Demo-Entwürfen bleibt der Singular-
+Zweig unverändert unsichtbar (Anzeige weiterhin "2 Entwürfe") — wird erst
+sichtbar, sobald echte, möglicherweise auf einen einzigen Entwurf
+reduzierte Trip-Daten existieren (hängt an der noch offenen Backend-
+Entscheidung). Bewusst kein künstlicher neuer Test für den Singular-Fall
+ergänzt, da `draftTrips` eine Modul-Konstante mit fest zwei Einträgen ist
+und sich ohne Architekturänderung (Mock/Prop) nicht auf einen Eintrag
+reduzieren lässt — dieselbe Zurückhaltung wie bei anderen, mit der
+aktuellen Demo-Datenlage nicht erreichbaren Zweigen. `ZEITPLAN.md`
+(Phase 1 Ist-Stand, 7.7-Eintrag) entsprechend ergänzt; keine Checkbox in
+`tasks-prd-travix-platform.md` zu ändern, da 7.7 bereits erledigt markiert
+ist (gleiches Muster wie beim Favicon-Fix im 82. Lauf).
+
+**Geprüft:** `npx tsc -b` weiterhin 0 Fehler, `npm run lint` weiterhin 0
+Fehler, `npx vitest run` weiterhin 570/570 Tests grün (bestehender Test
+`"Ø über 2 Entwürfe"` in `Dashboard.test.tsx` bestätigt, dass sich die
+sichtbare Ausgabe für den aktuellen Zwei-Entwürfe-Fall nicht geändert
+hat).
+
+**Ergebnis:** Ein Punkt heute (vierundachtzigster Lauf) autonom
+umgesetzt und verifiziert — die Reiseentwürfe-Kachel im Dashboard zeigt
+jetzt korrektes Deutsch für jede mögliche Entwurfsanzahl statt nur für
+die aktuelle Demo-Zahl Zwei. Baseline unverändert bei 570 Tests, 0 Typ-/
+Lint-Fehler. Keine neuen offenen Beobachtungen über die bereits in
+`reports/it-chef.md` dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

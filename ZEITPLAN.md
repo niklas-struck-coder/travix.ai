@@ -3978,7 +3978,16 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   (enthält jetzt nur noch echte Kontext-Links plus die drei noch nicht
   gebauten Seiten Deal Finder/Reisebudget/Premium). `nav-config.test.ts`
   um eine entsprechende Regressionsprüfung für alle sechs Pfade
-  erweitert.
+  erweitert. Vom autonomen IT-Chef-Lauf am 05.11. (vierundachtzigster
+  Lauf) eine Grammatik-Inkonsistenz behoben: "Ø über {Anzahl} Entwürfe"
+  zeigte bei genau einem Entwurf fälschlich den Plural ("1 Entwürfe")
+  statt des Singulars — dieselbe Singular/Plural-Unterscheidung, die
+  `Buchung.tsx`/`Reiseentwuerfe.tsx` für "Aktivität(en) geplant" bereits
+  nutzen, jetzt auch hier übernommen. Mit den aktuell fest codierten zwei
+  Demo-Entwürfen bleibt dieser Zweig unverändert unsichtbar (zeigt
+  weiterhin "2 Entwürfe", bestehender Test dafür bleibt unverändert grün)
+  — wird erst beim ersten echten Einzel-Entwurf sichtbar, sobald die noch
+  offene Backend-Speicherung kommt.
 - [x] 7.8 `Angebote.tsx` (`/angebote`) — Kartenliste mit Demo-Angeboten
   (analog `Favoriten.tsx`/`Preisalarme.tsx`), Typ-Badge (Flug/Unterkunft),
   Ziel, kurze Zusammenfassung statt vollem erfundenem Angebotsdatensatz
