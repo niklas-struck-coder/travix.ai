@@ -273,6 +273,8 @@ function viewUebersicht() {
   const alloc = Object.entries(byCls).map(([c, v]) => `<span style="width:${(v / total) * 100}%;background:${CLS[c].c}"></span>`).join("") + `<span style="width:${(p.cash / total) * 100}%;background:var(--line)"></span>`;
   const leg = Object.entries(byCls).map(([c, v]) => `<span><i style="background:${CLS[c].c}"></i>${CLS[c].n} ${EUR.format(v)} · ${((v / total) * 100).toFixed(0)} %</span>`).join("") + `<span><i style="background:var(--line)"></i>Bargeld ${EUR.format(p.cash)} · ${((p.cash / total) * 100).toFixed(0)} %</span>`;
   const exp = S.expanded || {};
+  const firstBuy = {};
+  p.trades.forEach((t) => { if (t.side === "buy") firstBuy[t.id] = Math.min(firstBuy[t.id] ?? Infinity, t.t); });
   const detail = (x) => `<div class="holddetail">
       <div class="ddgrid">
         <div><span class="lbl">Menge</span><span class="num">${fmtQty(x.h.qty)} Stück</span></div>
@@ -282,6 +284,7 @@ function viewUebersicht() {
         <div><span class="lbl">Seit Kauf</span><span class="num ${ud(x.gl)}">${fmtSigned(x.gl)} (${fmtPct(x.glp)})</span></div>
         <div><span class="lbl">Heute</span><span class="num ${ud(x.today)}">${fmtSigned(x.today)}${x.q.chg != null ? ` (${fmtPct(x.q.chg)})` : ""}</span></div>
       </div>
+      <div class="hd-chartwrap"><canvas class="hd-chart" data-hdchart="${x.id}" data-buy="${firstBuy[x.id] || g.createdAt || Date.now()}" data-avg="${x.h.cost / x.h.qty}" height="130"></canvas><span class="small muted hd-note">Lade Verlauf seit Kauf …</span></div>
       <button class="btn primary" data-asset="${x.id}">Kaufen / Verkaufen</button>
     </div>`;
   const rows = pos.map((x) => `<button class="hold ${exp[x.id] ? "open" : ""}" data-hold="${x.id}" aria-expanded="${!!exp[x.id]}">
@@ -408,6 +411,62 @@ function viewRang() {
   <div class="section card"><h3>Verlauf</h3><canvas id="histchart" height="220" style="height:220px"></canvas><div class="legend2">${lb.map((r) => `<span><i style="background:${colorOf[r.pid]}"></i>${esc(r.p.name)}</span>`).join("")}</div><p class="small muted" style="margin:4px 0 0">Ein Punkt pro Tag (Stand abends), dazu der Wert von jetzt.</p></div>
   <div class="section card"><h3>Letzte Orders aller Spieler</h3><div class="feed" style="margin-top:6px">${(g.feed || []).slice(0, 25).map(feedRow).join("") || `<p class="muted">Noch keine Orders.</p>`}</div></div>`;
 }
+// Mini-Diagramm je Position: Kursverlauf seit Kauf, mit Kaufkurs-Linie
+function rangeForAge(buyT) {
+  const d = (Date.now() - buyT) / DAY;
+  return d < 25 ? "1mo" : d < 170 ? "6mo" : d < 350 ? "1y" : "5y";
+}
+async function ensurePosCharts() {
+  S.posChart = S.posChart || {};
+  const canvases = document.querySelectorAll("#view canvas.hd-chart");
+  for (const cv of canvases) {
+    const id = cv.dataset.hdchart;
+    if (S.posChart[id]) continue;
+    const range = rangeForAge(Number(cv.dataset.buy));
+    S.posChart[id] = { range, points: "loading" };
+    api(`/api/chart?id=${encodeURIComponent(id)}&range=${range}`)
+      .then((d) => { S.posChart[id] = { range, points: d.points || [] }; })
+      .catch(() => { S.posChart[id] = { range, points: "error" }; })
+      .finally(() => drawHoldCharts());
+  }
+  drawHoldCharts();
+}
+function drawHoldCharts() {
+  document.querySelectorAll("#view canvas.hd-chart").forEach((cv) => {
+    const id = cv.dataset.hdchart, buyT = Number(cv.dataset.buy), avg = Number(cv.dataset.avg);
+    const entry = S.posChart?.[id];
+    const note = cv.parentElement.querySelector(".hd-note");
+    if (!entry || entry.points === "loading") return;
+    if (entry.points === "error" || !Array.isArray(entry.points) || entry.points.length < 2) { if (note) note.textContent = "Für diesen Wert gibt es gerade keinen Verlauf."; cv.style.display = "none"; return; }
+    cv.style.display = "block";
+    let pts = entry.points.filter((p) => p[0] >= buyT - 2 * DAY);
+    if (pts.length < 2) pts = entry.points;
+    const cs = getComputedStyle(document.documentElement), col = (n) => cs.getPropertyValue(n).trim();
+    const dpr = devicePixelRatio || 1, W = cv.clientWidth || 300, H = 130;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const x = cv.getContext("2d"); x.scale(dpr, dpr);
+    const t0 = pts[0][0], t1 = pts[pts.length - 1][0];
+    const vs = pts.map((p) => p[1]).concat(avg);
+    let lo = Math.min(...vs), hi = Math.max(...vs);
+    const pad = (hi - lo) * 0.12 || hi * 0.01; lo -= pad; hi += pad;
+    const L = 6, R = W - 64, T = 8, B = H - 20;
+    const X = (t) => L + ((t - t0) / (t1 - t0 || 1)) * (R - L), Y = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
+    const end = pts[pts.length - 1][1], line = col(end >= avg ? "--gain" : "--loss");
+    x.font = "10px " + col("--f-mono"); x.fillStyle = col("--muted"); x.strokeStyle = col("--line"); x.lineWidth = 1;
+    for (let j = 0; j <= 2; j++) { const v = lo + ((hi - lo) * j) / 2, yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(R, yy); x.stroke(); x.fillText(fmtPx(v).replace(" €", ""), R + 5, yy + 3); }
+    // Kaufkurs-Linie
+    x.setLineDash([4, 3]); x.beginPath(); x.moveTo(L, Y(avg)); x.lineTo(R, Y(avg)); x.strokeStyle = col("--muted"); x.stroke(); x.setLineDash([]);
+    x.fillStyle = col("--muted"); x.fillText("Kauf", R + 5, Y(avg) + 3);
+    x.fillText(new Date(t0).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), L, H - 4);
+    x.fillText(new Date(t1).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), R - 30, H - 4);
+    const xy = pts.map((p) => [X(p[0]), Y(p[1])]);
+    x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 1.8; x.stroke();
+    x.lineTo(X(t1), Y(avg)); x.lineTo(X(t0), Y(avg)); x.closePath(); x.globalAlpha = 0.1; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
+    const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3, 0, 7); x.fillStyle = line; x.fill();
+    if (note) note.textContent = `Kurs seit Kauf. Linie über der gestrichelten Kauf-Linie = im Plus.`;
+  });
+}
+
 // Liniendiagramm: Gewinn/Verlust des gesamten Depots über die Zeit (Null = Start)
 function drawDashChart() {
   const c = document.getElementById("dashchart");
@@ -558,7 +617,7 @@ function render() {
     }
   }
   if (S.tab === "rangliste") drawHistory();
-  if (S.tab === "uebersicht") drawDashChart();
+  if (S.tab === "uebersicht") { drawDashChart(); ensurePosCharts(); }
   updateModalLive();
 }
 
@@ -833,7 +892,7 @@ document.addEventListener("submit", (e) => {
   if (e.target.id === "joinform") joinGame();
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && S.modal) closeModal(); });
-addEventListener("resize", () => { if (S.modal) drawChart(); if (S.tab === "rangliste") drawHistory(); if (S.tab === "uebersicht") drawDashChart(); });
+addEventListener("resize", () => { if (S.modal) drawChart(); if (S.tab === "rangliste") drawHistory(); if (S.tab === "uebersicht") { drawDashChart(); drawHoldCharts(); } });
 
 /* ---------- Start ---------- */
 render();
