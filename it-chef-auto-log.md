@@ -25663,3 +25663,65 @@ Vorläufen ist "kein Fund" diesmal die ehrliche Einschätzung.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-05, 00:13 UTC (einundachtzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`), 62
+Commits vor `origin/main` (weiterhin unverändert auf `fe1300e`,
+2026-10-23 — Freigabe-Chef hat seit dem 23.10. noch nicht gemergt). Kein
+frischer `main`-Merge nötig, `main` bleibt unberührt.
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
+Testdateien, 570 Tests, alle grün) — identisch zum Endstand des 80.
+Laufs.
+
+**Punktesuche:** Per separatem, read-only beauftragtem Explore-Agenten
+mit vollständiger, aus den 80 Vorläufen zusammengestellter
+Ausschlussliste (alle bisher gefundenen-und-gefixten Muster sowie alle
+bereits geprüft-und-verworfenen Kandidaten, u.a. Accessibility-Muster,
+Stale-Search-Schutz, setTimeout-Cleanup, Label-Disambiguierung,
+Lösch-Dialog-Wortlaut, `formatEuro`-Dedup, `recharts`/`npm audit`,
+Clamp-Leerfeld-Verhalten) beauftragt, gezielt bisher weniger gründlich
+geprüfte bzw. seither unveränderte Bereiche erneut zu lesen:
+`vite-plugins/duffel-proxy.ts`, `tripStorage.ts`/`cartTotals.ts`/
+`calendarUtils.ts` (Datums-/Monatsgrenzfälle), `duffel/client.ts`,
+`format.ts`, alle 29 Seiten unter `src/pages/*.tsx` (Pluralisierung,
+fehlende `key`-Props in `.map()`), `useConcierge.ts` (Timeout-/
+Cleanup-Logik), Formular-Validierung (`FlightWizard.tsx`/
+`HotelWizard.tsx`), `EditMode.tsx`, sowie `git diff HEAD~3..HEAD` auf
+`it-chef/auto` (letzte drei Commits sind reine Log-Einträge der Läufe
+78-80, keine Code-Änderung, also kein frischer Bereich).
+
+**Geprüfte, aber verworfene Kandidaten** (Kriterium 3 oder 4 nicht
+erfüllt):
+- `SearchErrorAlert.tsx`: `.map()` über die Fehlerliste nutzt `index`
+  statt eines stabilen Schlüssels als `key` — aber die Liste wird nur
+  angehängt, nie umsortiert/gefiltert, objektiv unkritisch.
+- `EditMode.tsx`: Lösch-Bestätigungsdialog für eine Aktivität ist nicht
+  explizit an das Schließen des Hauptdialogs gekoppelt (Radix-
+  Fokus-Stacking) — kein klar reproduzierbarer, objektiv nachweisbarer
+  Fehlerfall, erfüllt Kriterium 3 nicht sauber.
+- `tripStorage.ts`/`cartTotals.ts`/`calendarUtils.ts`: alle bekannten
+  Edge Cases (leere Arrays, Monats-/Jahresrollover, korrupte
+  localStorage-Felder) bereits in früheren Läufen abgesichert, keine
+  neue Lücke gefunden.
+
+Vollständig durchgesehen ohne weiteren Befund: `duffel-proxy.ts`
+(Fehlerbehandlung für fehlenden API-Key/Upstream-/Netzwerkfehler
+bereits vollständig), `format.ts` (`formatOfferPrice` fängt ungültige
+Währungscodes bereits per try/catch ab), alle Seiten unter
+`src/pages/*.tsx` (Pluralisierung korrekt, kein fehlender `key`),
+`useConcierge.ts` (Timeout-Ref wird bei Unmount und erneutem
+`sendMessage()` korrekt gecleart), `FlightWizard.tsx`/`HotelWizard.tsx`
+(IATA-Pattern, Datumsgrenzen, Passagier-/Gästeclamp bereits als
+UX-Marotte statt Bug eingestuft).
+
+**Ergebnis:** Kein Punkt heute (einundachtzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert gegenüber dem 80. Lauf (570 Tests, 0 Typ-/Lint-Fehler).
+Keine neuen offenen Beobachtungen über die bereits in
+`reports/it-chef.md` dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
