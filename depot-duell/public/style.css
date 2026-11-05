@@ -219,3 +219,12 @@ button.hold:hover{background:var(--sunk)}
 .holddetail .ddgrid .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .holddetail .ddgrid .num{font-size:1.02rem}
 .holddetail .btn{width:auto}
+
+/* Performance nach Anlageart */
+.prow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 64px;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.prow .pname{display:flex;align-items:center;gap:8px;min-width:0}
+.prow .pname i{width:10px;height:10px;border-radius:2px;flex:0 0 auto}
+.prow .num{text-align:right}
+.phead{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-top:0}
+.ptotal{border-top:2px solid var(--line);font-weight:600}

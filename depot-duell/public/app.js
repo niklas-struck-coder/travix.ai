@@ -289,6 +289,20 @@ function viewUebersicht() {
       <span class="hv"><b class="num">${EUR.format(x.v)}</b><span class="small muted">${((x.v / total) * 100).toFixed(1)} % vom Depot</span></span>
       <span class="hv"><b class="num ${ud(x.gl)}">${fmtSigned(x.gl)}</b><span class="small num ${ud(x.glp)}">${fmtPct(x.glp)}</span></span>
       <span class="hv hide-s"><span class="num ${ud(x.today)}">${fmtSigned(x.today)}</span><span class="small muted">heute</span></span></button>${exp[x.id] ? detail(x) : ""}`).join("");
+  // Performance nach Anlageart (seit Kauf)
+  const byPerf = {};
+  pos.forEach((x) => { const c = (byPerf[x.a.cls] = byPerf[x.a.cls] || { v: 0, cost: 0 }); c.v += x.v; c.cost += x.h.cost; });
+  const perfRows = Object.entries(byPerf).sort((a, b) => (b[1].v / b[1].cost - 1) - (a[1].v / a[1].cost - 1)).map(([cls, c]) => {
+    const gl = c.v - c.cost, glp = c.cost ? c.v / c.cost - 1 : 0;
+    return `<div class="prow"><span class="pname"><i style="background:${CLS[cls].c}"></i>${CLS[cls].n}</span><span class="num">${EUR.format(c.v)}</span><span class="num ${ud(gl)}">${fmtSigned(gl)}</span><span class="num ${ud(glp)}" style="text-align:right">${fmtPct(glp)}</span></div>`;
+  }).join("");
+  const best = [...pos].filter((x) => x.h.cost).sort((a, b) => b.glp - a.glp);
+  const bw = best.length ? `<p class="small muted" style="margin:10px 0 0">Bester Wert: <b class="up">${esc(best[0].a.name)} ${fmtPct(best[0].glp)}</b>${best.length > 1 ? ` · Schwächster: <b class="down">${esc(best[best.length - 1].a.name)} ${fmtPct(best[best.length - 1].glp)}</b>` : ""}</p>` : "";
+  const perfCard = pos.length ? `<div class="section card"><h3>Performance nach Anlageart</h3>
+    <div class="prow phead"><span>Art</span><span class="num">Wert</span><span class="num">G/V</span><span class="num" style="text-align:right">%</span></div>
+    ${perfRows}
+    <div class="prow ptotal"><span class="pname">Gesamt investiert</span><span class="num">${EUR.format(inv)}</span><span class="num ${ud(inv - pos.reduce((t, x) => t + x.h.cost, 0))}">${fmtSigned(inv - pos.reduce((t, x) => t + x.h.cost, 0))}</span><span class="num ${ud(perf)}" style="text-align:right">${fmtPct(pos.reduce((t, x) => t + x.h.cost, 0) ? inv / pos.reduce((t, x) => t + x.h.cost, 0) - 1 : 0)}</span></div>
+    ${bw}</div>` : "";
   const mini = lb.slice(0, 5).map((r, i) => `<div class="mrow ${r.me ? "me" : ""}"><span class="num">${i + 1}.</span><span>${esc(r.p.name)}${r.me ? " (du)" : ""}</span><span class="num">${EUR.format(r.v)}</span><span class="num small ${ud(r.perf)}">${fmtPct(r.perf)}</span></div>`).join("");
   const last = p.trades.slice(0, 5).map((t) => `<div><span>${t.side === "buy" ? `<span class="up">Kauf</span>` : `<span class="down">Verkauf</span>`} ${esc(S.by[t.id]?.name || t.id)} <span class="muted">${EUR.format(t.qty * t.p)}</span></span><time>${fmtTime(t.t)}</time></div>`).join("");
   return `<div class="dash">
@@ -305,7 +319,8 @@ function viewUebersicht() {
       <div class="stat"><span class="lbl">Spielende</span><span class="v">${ended(g) ? "vorbei" : `${days} ${days === 1 ? "Tag" : "Tage"}`}</span><span class="small muted">${fmtDate(g.endAt)}</span></div>
     </div>
   </div>
-  <div class="section card"><h3>Verlauf deines Depots</h3><canvas id="dashchart" height="200" style="height:200px"></canvas><p class="small muted chartnote" style="margin:4px 0 0">Dein gesamter Depotwert über die Zeit. Gestrichelt: dein Startguthaben.</p></div>
+  <div class="section card"><h3>Gewinn / Verlust deines Depots</h3><canvas id="dashchart" height="200" style="height:200px"></canvas><p class="small muted chartnote" style="margin:4px 0 0">Gewinn/Verlust deines Depots gegenüber dem Start. Linie über null = im Plus.</p></div>
+  ${perfCard}
   <div class="section card"><h3>Aufteilung</h3><div class="alloc" style="height:14px">${alloc}</div><div class="legend">${leg}</div></div>
   ${(p.pending || []).length ? `<div class="section card"><h3>Vorgemerkte Aufträge</h3><p class="small muted" style="margin:0 0 8px">Werden automatisch beim nächsten Börsenstart zum dann gültigen Kurs ausgeführt.</p><div class="pendlist">${(p.pending || []).map((o) => `<div class="pend"><span><b>${o.side === "buy" ? "Kauf" : "Verkauf"}</b> ${esc(S.by[o.id]?.name || o.id)} <span class="muted">· ${o.all ? "alles" : o.eur != null ? EUR.format(o.eur) : fmtQty(o.qty) + " Stück"}</span></span><button class="btn" data-cancelpending="${o.t}">Stornieren</button></div>`).join("")}</div></div>` : ""}
   <div class="section"><h2>Alles, was du besitzt</h2>
@@ -393,37 +408,39 @@ function viewRang() {
   <div class="section card"><h3>Verlauf</h3><canvas id="histchart" height="220" style="height:220px"></canvas><div class="legend2">${lb.map((r) => `<span><i style="background:${colorOf[r.pid]}"></i>${esc(r.p.name)}</span>`).join("")}</div><p class="small muted" style="margin:4px 0 0">Ein Punkt pro Tag (Stand abends), dazu der Wert von jetzt.</p></div>
   <div class="section card"><h3>Letzte Orders aller Spieler</h3><div class="feed" style="margin-top:6px">${(g.feed || []).slice(0, 25).map(feedRow).join("") || `<p class="muted">Noch keine Orders.</p>`}</div></div>`;
 }
-// Liniendiagramm: Entwicklung des gesamten Depotwerts (nur du)
+// Liniendiagramm: Gewinn/Verlust des gesamten Depots über die Zeit (Null = Start)
 function drawDashChart() {
   const c = document.getElementById("dashchart");
   if (!c || !S.game) return;
   const g = S.game, pid = me()?.pid, p = g.players[pid];
   if (!p) return;
-  const pts = (g.history || []).filter((h) => h.v[pid] != null).map((h) => ({ t: new Date(h.d + "T21:00:00").getTime(), v: h.v[pid] }));
-  pts.push({ t: Math.min(Date.now(), g.endAt), v: valueOf(p) });
+  // Werte als Gewinn/Verlust gegenüber dem Startguthaben
+  const pts = [{ t: g.createdAt || (g.history?.[0] ? new Date(g.history[0].d + "T21:00:00").getTime() : Date.now()), v: 0 }];
+  (g.history || []).forEach((h) => { if (h.v[pid] != null) pts.push({ t: new Date(h.d + "T21:00:00").getTime(), v: h.v[pid] - g.startCash }); });
+  pts.push({ t: Math.min(Date.now(), g.endAt), v: valueOf(p) - g.startCash });
   const note = c.parentElement.querySelector(".chartnote");
-  if (pts.length < 2) { if (note) note.textContent = "Die Linie wächst mit jedem Tag — ab morgen siehst du hier den Verlauf."; return; }
   const dpr = devicePixelRatio || 1, W = c.clientWidth, H = 200;
   c.width = W * dpr; c.height = H * dpr;
   const x = c.getContext("2d"); x.scale(dpr, dpr);
   const cs = getComputedStyle(document.documentElement), col = (n) => cs.getPropertyValue(n).trim();
-  const vals = pts.map((s) => s.v).concat(g.startCash);
+  const vals = pts.map((s) => s.v).concat(0);
   let lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = (hi - lo) * 0.12 || g.startCash * 0.02; lo -= pad; hi += pad;
-  const t0 = Math.min(g.createdAt, pts[0].t), t1 = Math.max(pts[pts.length - 1].t, t0 + DAY);
-  const L = 8, R = W - 72, T = 8, B = H - 22;
+  const span = Math.max(hi - lo, g.startCash * 0.01), padv = span * 0.15; lo -= padv; hi += padv;
+  const t0 = pts[0].t, t1 = Math.max(pts[pts.length - 1].t, t0 + DAY);
+  const L = 8, R = W - 78, T = 8, B = H - 22;
   const X = (t) => L + ((t - t0) / (t1 - t0)) * (R - L), Y = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
-  const up = pts[pts.length - 1].v >= g.startCash, line = col(up ? "--gain" : "--loss");
+  const end = pts[pts.length - 1].v, line = col(end >= 0 ? "--gain" : "--loss");
   x.font = "11px " + col("--f-mono"); x.fillStyle = col("--muted"); x.strokeStyle = col("--line"); x.lineWidth = 1;
-  for (let j = 0; j <= 3; j++) { const v = lo + ((hi - lo) * j) / 3, yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(R, yy); x.stroke(); x.fillText(Math.round(v).toLocaleString("de-DE"), R + 6, yy + 4); }
-  x.setLineDash([4, 4]); x.beginPath(); x.moveTo(L, Y(g.startCash)); x.lineTo(R, Y(g.startCash)); x.strokeStyle = col("--muted"); x.stroke(); x.setLineDash([]);
+  for (let j = 0; j <= 3; j++) { const v = lo + ((hi - lo) * j) / 3, yy = Y(v); x.beginPath(); x.moveTo(L, yy); x.lineTo(R, yy); x.stroke(); x.fillText((v >= 0 ? "+" : "−") + Math.round(Math.abs(v)).toLocaleString("de-DE"), R + 6, yy + 4); }
+  // Null-Linie (Einstand) betonen
+  x.beginPath(); x.moveTo(L, Y(0)); x.lineTo(R, Y(0)); x.strokeStyle = col("--muted"); x.lineWidth = 1.2; x.stroke(); x.lineWidth = 1;
   x.fillStyle = col("--muted");
   for (let j = 0; j <= 2; j++) { const t = t0 + ((t1 - t0) * j) / 2; x.fillText(new Date(t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), Math.min(X(t), R - 32), H - 5); }
   const xy = pts.map((s) => [X(s.t), Y(s.v)]);
   x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 2; x.stroke();
-  x.lineTo(X(pts[pts.length - 1].t), B); x.lineTo(X(pts[0].t), B); x.closePath(); x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
+  x.lineTo(X(pts[pts.length - 1].t), Y(0)); x.lineTo(X(pts[0].t), Y(0)); x.closePath(); x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
   const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3.5, 0, 7); x.fillStyle = line; x.fill();
-  if (note) note.textContent = "Dein gesamter Depotwert über die Zeit. Gestrichelt: dein Startguthaben.";
+  if (note) note.textContent = `Gewinn/Verlust deines Depots gegenüber dem Start (${EUR.format(g.startCash)}). Linie über null = im Plus.`;
 }
 
 function drawHistory() {
