@@ -272,11 +272,23 @@ function viewUebersicht() {
   pos.forEach((x) => (byCls[x.a.cls] = (byCls[x.a.cls] || 0) + x.v));
   const alloc = Object.entries(byCls).map(([c, v]) => `<span style="width:${(v / total) * 100}%;background:${CLS[c].c}"></span>`).join("") + `<span style="width:${(p.cash / total) * 100}%;background:var(--line)"></span>`;
   const leg = Object.entries(byCls).map(([c, v]) => `<span><i style="background:${CLS[c].c}"></i>${CLS[c].n} ${EUR.format(v)} · ${((v / total) * 100).toFixed(0)} %</span>`).join("") + `<span><i style="background:var(--line)"></i>Bargeld ${EUR.format(p.cash)} · ${((p.cash / total) * 100).toFixed(0)} %</span>`;
-  const rows = pos.map((x) => `<button class="hold" data-asset="${x.id}">
-      <span class="nm"><b>${esc(x.a.name)}</b><span class="small muted"><i class="dot ${x.q.open ? "" : "closed"}"></i>${fmtQty(x.h.qty)} Stück · Kurs ${fmtPx(x.px)}</span></span>
+  const exp = S.expanded || {};
+  const detail = (x) => `<div class="holddetail">
+      <div class="ddgrid">
+        <div><span class="lbl">Menge</span><span class="num">${fmtQty(x.h.qty)} Stück</span></div>
+        <div><span class="lbl">Ø Kaufkurs</span><span class="num">${fmtPx(x.h.cost / x.h.qty)}</span></div>
+        <div><span class="lbl">Aktueller Kurs</span><span class="num">${fmtPx(x.px)} <i class="dot ${x.q.open ? "" : "closed"}"></i></span></div>
+        <div><span class="lbl">Aktueller Wert</span><span class="num">${EUR.format(x.v)}</span></div>
+        <div><span class="lbl">Seit Kauf</span><span class="num ${ud(x.gl)}">${fmtSigned(x.gl)} (${fmtPct(x.glp)})</span></div>
+        <div><span class="lbl">Heute</span><span class="num ${ud(x.today)}">${fmtSigned(x.today)}${x.q.chg != null ? ` (${fmtPct(x.q.chg)})` : ""}</span></div>
+      </div>
+      <button class="btn primary" data-asset="${x.id}">Kaufen / Verkaufen</button>
+    </div>`;
+  const rows = pos.map((x) => `<button class="hold ${exp[x.id] ? "open" : ""}" data-hold="${x.id}" aria-expanded="${!!exp[x.id]}">
+      <span class="nm"><b><span class="chev">${exp[x.id] ? "▾" : "▸"}</span>${esc(x.a.name)}</b><span class="small muted"><i class="dot ${x.q.open ? "" : "closed"}"></i>${fmtQty(x.h.qty)} Stück · Kurs ${fmtPx(x.px)}</span></span>
       <span class="hv"><b class="num">${EUR.format(x.v)}</b><span class="small muted">${((x.v / total) * 100).toFixed(1)} % vom Depot</span></span>
       <span class="hv"><b class="num ${ud(x.gl)}">${fmtSigned(x.gl)}</b><span class="small num ${ud(x.glp)}">${fmtPct(x.glp)}</span></span>
-      <span class="hv hide-s"><span class="num ${ud(x.today)}">${fmtSigned(x.today)}</span><span class="small muted">heute</span></span></button>`).join("");
+      <span class="hv hide-s"><span class="num ${ud(x.today)}">${fmtSigned(x.today)}</span><span class="small muted">heute</span></span></button>${exp[x.id] ? detail(x) : ""}`).join("");
   const mini = lb.slice(0, 5).map((r, i) => `<div class="mrow ${r.me ? "me" : ""}"><span class="num">${i + 1}.</span><span>${esc(r.p.name)}${r.me ? " (du)" : ""}</span><span class="num">${EUR.format(r.v)}</span><span class="num small ${ud(r.perf)}">${fmtPct(r.perf)}</span></div>`).join("");
   const last = p.trades.slice(0, 5).map((t) => `<div><span>${t.side === "buy" ? `<span class="up">Kauf</span>` : `<span class="down">Verkauf</span>`} ${esc(S.by[t.id]?.name || t.id)} <span class="muted">${EUR.format(t.qty * t.p)}</span></span><time>${fmtTime(t.t)}</time></div>`).join("");
   return `<div class="dash">
@@ -713,6 +725,7 @@ document.addEventListener("click", (e) => {
   if (!t) return;
   const d = t.dataset;
   if (d.tab) { S.tab = d.tab; closeModal(); render(); scrollTo(0, 0); return; }
+  if (d.hold) { S.expanded = S.expanded || {}; S.expanded[d.hold] = !S.expanded[d.hold]; render(); return; }
   if (d.asset && !t.closest("#modal")) return openAsset(d.asset);
   if (d.filter) { S.filter = d.filter; render(); return; }
   if (d.start) { S.startMode = d.start; render(); document.querySelector("#createform,#joinform,.hero")?.scrollIntoView({ behavior: "smooth" }); return; }

@@ -209,3 +209,13 @@ button.hold:hover{background:var(--sunk)}
 .pend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--sunk);border-radius:8px;padding:8px 12px}
 .pend .btn{padding:4px 10px;font-size:.82rem}
 .linkbtn{border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+
+/* Aufklappbare Positionen in der Übersicht */
+.hold{cursor:pointer}
+.hold .chev{display:inline-block;width:1em;color:var(--muted);font-size:.8em}
+.holddetail{background:var(--sunk);border-top:1px solid var(--line);padding:14px}
+.holddetail .ddgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 18px;margin-bottom:12px}
+.holddetail .ddgrid > div{display:grid;gap:2px}
+.holddetail .ddgrid .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.holddetail .ddgrid .num{font-size:1.02rem}
+.holddetail .btn{width:auto}
