@@ -324,7 +324,7 @@ function viewUebersicht() {
       <div class="stat"><span class="lbl">Spielende</span><span class="v">${ended(g) ? "vorbei" : `${days} ${days === 1 ? "Tag" : "Tage"}`}</span><span class="small muted">${fmtDate(g.endAt)}</span></div>
     </div>
   </div>
-  <div class="section card"><h3>Gewinn / Verlust deines Depots</h3><canvas id="dashchart" height="200" style="height:200px"></canvas><p class="small muted chartnote" style="margin:4px 0 0">Gewinn/Verlust deines Depots gegenüber dem Start. Linie über null = im Plus.</p></div>
+  <div class="section card"><h3>Gewinn / Verlust deines Depots</h3><div class="hd-ranges">${DASH_RANGES.map(([r, l]) => `<button data-dashrange="${r}" aria-pressed="${(S.dashRange || "start") === r}">${l}</button>`).join("")}</div><canvas id="dashchart" height="200" style="height:200px"></canvas><p class="small muted chartnote" style="margin:4px 0 0">Gewinn/Verlust deines Depots gegenüber dem Start. Fahre über die Linie für Datum und Wert.</p></div>
   ${perfCard}
   <div class="section card"><h3>Aufteilung</h3><div class="alloc" style="height:14px">${alloc}</div><div class="legend">${leg}</div></div>
   ${(p.pending || []).length ? `<div class="section card"><h3>Vorgemerkte Aufträge</h3><p class="small muted" style="margin:0 0 8px">Werden automatisch beim nächsten Börsenstart zum dann gültigen Kurs ausgeführt.</p><div class="pendlist">${(p.pending || []).map((o) => `<div class="pend"><span><b>${o.side === "buy" ? "Kauf" : "Verkauf"}</b> ${esc(S.by[o.id]?.name || o.id)} <span class="muted">· ${o.all ? "alles" : o.eur != null ? EUR.format(o.eur) : fmtQty(o.qty) + " Stück"}</span></span><button class="btn" data-cancelpending="${o.t}">Stornieren</button></div>`).join("")}</div></div>` : ""}
@@ -513,17 +513,81 @@ function drawHoldCharts() {
   });
 }
 
+// Detaillierten Depotverlauf aus den Kursverläufen der Positionen + Trades rekonstruieren
+const DASH_RANGES = [["start", "Seit Start"], ["5d", "1W"], ["1mo", "1M"], ["6mo", "6M"], ["1y", "Max"]];
+function dashReqRange(g) {
+  const sel = S.dashRange || "start";
+  if (sel !== "start") return sel;
+  const age = (Date.now() - (g.createdAt || Date.now())) / DAY;
+  return age < 6 ? "5d" : age < 25 ? "1mo" : age < 170 ? "6mo" : "1y";
+}
+async function ensureDashData() {
+  const g = S.game, p = myPlayer();
+  if (!g || !p) return;
+  const range = dashReqRange(g);
+  // Schlüssel: Spiel + Zeitraum + Trade-Anzahl (ändert sich bei neuer Order)
+  const key = `${g.code}|${range}|${p.trades.length}`;
+  if (S.dashData && S.dashData.key === key) return;
+  S.dashData = { key, series: "loading" };
+  drawDashChart();
+  try {
+    const ids = [...new Set((p.trades || []).map((t) => t.id).filter((id) => S.by[id]))];
+    const results = await Promise.all(ids.map((id) => api(`/api/chart?id=${encodeURIComponent(id)}&range=${range}`).then((d) => [id, d.points || []]).catch(() => [id, []])));
+    if (!S.dashData || S.dashData.key !== key) return; // Zeitraum wurde gewechselt
+    const seriesById = Object.fromEntries(results);
+    const windowDays = { "5d": 7, "1mo": 31, "6mo": 184, "1y": 366 }[range] || 31;
+    const t0 = (S.dashRange || "start") === "start" ? (g.createdAt || Date.now()) : Math.max(g.createdAt || 0, Date.now() - windowDays * DAY);
+    S.dashData = { key, series: computePortfolioSeries(g, p, seriesById, t0) };
+  } catch {
+    S.dashData = { key, series: "error" };
+  }
+  drawDashChart();
+}
+function computePortfolioSeries(g, p, seriesById, t0) {
+  const trades = [...(p.trades || [])].sort((a, b) => a.t - b.t);
+  const tset = new Set([t0, Math.min(Date.now(), g.endAt)]);
+  for (const s of Object.values(seriesById)) for (const pt of s) if (pt[0] >= t0) tset.add(pt[0]);
+  for (const tr of trades) if (tr.t >= t0) tset.add(tr.t);
+  const times = [...tset].sort((a, b) => a - b);
+  const idxById = {}; for (const id in seriesById) idxById[id] = 0;
+  const priceAt = (id, t) => {
+    const s = seriesById[id]; if (!s || !s.length) return null;
+    let i = idxById[id]; while (i + 1 < s.length && s[i + 1][0] <= t) i++; idxById[id] = i;
+    return s[i][0] <= t ? s[i][1] : s[0][1];
+  };
+  let cash = g.startCash, hold = {}, tp = 0;
+  // Trades vor dem Fenster schon einrechnen
+  while (tp < trades.length && trades[tp].t < t0) { const tr = trades[tp++]; if (tr.side === "buy") { cash -= tr.qty * tr.p + (tr.fee || 0); hold[tr.id] = (hold[tr.id] || 0) + tr.qty; } else { cash += tr.qty * tr.p - (tr.fee || 0); hold[tr.id] = (hold[tr.id] || 0) - tr.qty; if (hold[tr.id] < 1e-9) delete hold[tr.id]; } }
+  const out = [];
+  for (const t of times) {
+    while (tp < trades.length && trades[tp].t <= t) { const tr = trades[tp++]; if (tr.side === "buy") { cash -= tr.qty * tr.p + (tr.fee || 0); hold[tr.id] = (hold[tr.id] || 0) + tr.qty; } else { cash += tr.qty * tr.p - (tr.fee || 0); hold[tr.id] = (hold[tr.id] || 0) - tr.qty; if (hold[tr.id] < 1e-9) delete hold[tr.id]; } }
+    let v = cash;
+    for (const id in hold) { const px = priceAt(id, t) ?? S.quotes[id]?.p; if (px != null) v += hold[id] * px; }
+    out.push({ t, v: v - g.startCash });
+  }
+  // letzten Punkt auf den exakten aktuellen Wert setzen
+  if (out.length) out[out.length - 1] = { t: Math.min(Date.now(), g.endAt), v: valueOf(p) - g.startCash };
+  return out;
+}
+
 // Liniendiagramm: Gewinn/Verlust des gesamten Depots über die Zeit (Null = Start)
 function drawDashChart() {
   const c = document.getElementById("dashchart");
   if (!c || !S.game) return;
   const g = S.game, pid = me()?.pid, p = g.players[pid];
   if (!p) return;
-  // Werte als Gewinn/Verlust gegenüber dem Startguthaben
-  const pts = [{ t: g.createdAt || (g.history?.[0] ? new Date(g.history[0].d + "T21:00:00").getTime() : Date.now()), v: 0 }];
-  (g.history || []).forEach((h) => { if (h.v[pid] != null) pts.push({ t: new Date(h.d + "T21:00:00").getTime(), v: h.v[pid] - g.startCash }); });
-  pts.push({ t: Math.min(Date.now(), g.endAt), v: valueOf(p) - g.startCash });
   const note = c.parentElement.querySelector(".chartnote");
+  // Detaillierter Verlauf (aus Kursen rekonstruiert), sonst Tagespunkte als Rückfall
+  let pts, loading = false;
+  const dd = S.dashData;
+  if (dd && dd.series === "loading") loading = true;
+  if (dd && Array.isArray(dd.series) && dd.series.length >= 2) {
+    pts = dd.series;
+  } else {
+    pts = [{ t: g.createdAt || (g.history?.[0] ? new Date(g.history[0].d + "T21:00:00").getTime() : Date.now()), v: 0 }];
+    (g.history || []).forEach((h) => { if (h.v[pid] != null) pts.push({ t: new Date(h.d + "T21:00:00").getTime(), v: h.v[pid] - g.startCash }); });
+    pts.push({ t: Math.min(Date.now(), g.endAt), v: valueOf(p) - g.startCash });
+  }
   const dpr = devicePixelRatio || 1, W = c.clientWidth, H = 200;
   c.width = W * dpr; c.height = H * dpr;
   const x = c.getContext("2d"); x.scale(dpr, dpr);
@@ -540,17 +604,20 @@ function drawDashChart() {
   // Null-Linie (Einstand) betonen
   x.beginPath(); x.moveTo(L, Y(0)); x.lineTo(R, Y(0)); x.strokeStyle = col("--muted"); x.lineWidth = 1.2; x.stroke(); x.lineWidth = 1;
   x.fillStyle = col("--muted");
-  for (let j = 0; j <= 2; j++) { const t = t0 + ((t1 - t0) * j) / 2; x.fillText(new Date(t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }), Math.min(X(t), R - 32), H - 5); }
+  const tspan = t1 - t0;
+  const axisLbl = (t) => { const d = new Date(t); return tspan < 2 * DAY ? fmtClock(t) : tspan < 330 * DAY ? d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : d.toLocaleDateString("de-DE", { month: "2-digit", year: "2-digit" }); };
+  for (let j = 0; j <= 2; j++) { const t = t0 + (tspan * j) / 2; x.fillText(axisLbl(t), Math.min(X(t), R - 34), H - 5); }
   const xy = pts.map((s) => [X(s.t), Y(s.v)]);
   x.beginPath(); xy.forEach(([a, b], j) => (j ? x.lineTo(a, b) : x.moveTo(a, b))); x.strokeStyle = line; x.lineWidth = 2; x.stroke();
   x.lineTo(X(pts[pts.length - 1].t), Y(0)); x.lineTo(X(pts[0].t), Y(0)); x.closePath(); x.globalAlpha = 0.12; x.fillStyle = line; x.fill(); x.globalAlpha = 1;
   const [ex, ey] = xy[xy.length - 1]; x.beginPath(); x.arc(ex, ey, 3.5, 0, 7); x.fillStyle = line; x.fill();
   c._xs = pts.map((s) => X(s.t)); c._redraw = drawDashChart;
   if (c._hoverIdx != null && c._hoverIdx < pts.length) {
-    const s = pts[c._hoverIdx];
-    drawCrosshair(x, col, X(s.t), Y(s.v), T, B, W, [new Date(s.t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }), (s.v >= 0 ? "+" : "−") + EUR.format(Math.abs(s.v))], line);
+    const s = pts[c._hoverIdx], d = new Date(s.t);
+    const dl = tspan < 2 * DAY ? d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    drawCrosshair(x, col, X(s.t), Y(s.v), T, B, W, [dl, (s.v >= 0 ? "+" : "−") + EUR.format(Math.abs(s.v))], line);
   }
-  if (note) note.textContent = `Gewinn/Verlust deines Depots gegenüber dem Start (${EUR.format(g.startCash)}). Linie über null = im Plus.`;
+  if (note) note.textContent = loading ? "Lade detaillierten Verlauf …" : `Gewinn/Verlust deines Depots gegenüber dem Start (${EUR.format(g.startCash)}). Fahre über die Linie für Datum und Wert.`;
 }
 
 function drawHistory() {
@@ -677,7 +744,7 @@ function render() {
     }
   }
   if (S.tab === "rangliste") drawHistory();
-  if (S.tab === "uebersicht") { drawDashChart(); ensurePosCharts(); }
+  if (S.tab === "uebersicht") { drawDashChart(); ensureDashData(); ensurePosCharts(); }
   updateModalLive();
 }
 
@@ -904,6 +971,7 @@ document.addEventListener("click", (e) => {
   if (d.tab) { S.tab = d.tab; closeModal(); render(); scrollTo(0, 0); return; }
   if (d.hold) { S.expanded = S.expanded || {}; S.expanded[d.hold] = !S.expanded[d.hold]; render(); return; }
   if (d.hdrange) { const [id, r] = d.hdrange.split(":"); S.posRange = S.posRange || {}; S.posRange[id] = r; render(); return; }
+  if (d.dashrange) { S.dashRange = d.dashrange; S.dashData = null; render(); return; }
   if (d.asset && !t.closest("#modal")) return openAsset(d.asset);
   if (d.filter) { S.filter = d.filter; render(); return; }
   if (d.start) { S.startMode = d.start; render(); document.querySelector("#createform,#joinform,.hero")?.scrollIntoView({ behavior: "smooth" }); return; }
