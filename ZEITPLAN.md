@@ -4119,8 +4119,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 - [ ] Entscheidung + Umsetzung: eigener Zahlungsprozess ODER weiterhin
   Verlinkung "Beim Anbieter buchen" — **Produktentscheidung**, hat
   direkte rechtliche Folgen (Widerrufsrecht etc.), siehe Support-Track
-- [ ] 8.13 Unit-Tests für calculateProgress, calculateCosts,
-  checklistRules, Schema-Validierung
+- [x] 8.13 Unit-Tests für calculateProgress, calculateCosts,
+  checklistRules, Schema-Validierung — vom autonomen IT-Chef-Lauf am
+  06.11. (siebenundachtzigster Lauf) als stale Checkbox erkannt: alle
+  vier bereits abgedeckt, über frühere Läufe hinweg entstanden, ohne
+  dass diese Checkbox mitgepflegt wurde. `calculateProgress.ts` →
+  `calculateProgress.test.ts` (5 Tests); `calculateCosts` entspricht in
+  diesem Code `cartTotals.ts` (`calculateCartTotal`/`groupCartItems`) →
+  `cartTotals.test.ts` (7 Tests); `checklistRules.ts` →
+  `checklistRules.test.ts` (8 Tests); Schema-Validierung entspricht der
+  defensiven Normalisierung in `tripStorage.ts`s `loadStoredChat()` für
+  fehlende/korrupte gespeicherte Felder → `tripStorage.test.ts`
+  (29 Tests, u. a. eigene `describe('loadStoredChat')`-Gruppe genau
+  dafür). Keine Code-Änderung, nur die Checkbox korrigiert —
+  Regressionsschutz-Baseline frisch durchlaufen und grün: `npm ci`
+  fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+  vitest run` (75 Testdateien, 570 Tests), `npm run build` (0 Typfehler,
+  unveränderte Chunk-Size-Warnung).
 
 ### Sprint 6 — Testing, Politur, Launch-Vorbereitung (KW45-47, 3.-23. Nov)
 - [ ] End-to-End-Testing aller Flows (Chat → Buchungsseite → Urlaubsmodus)

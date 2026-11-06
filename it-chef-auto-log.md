@@ -26083,3 +26083,64 @@ bereits in `reports/it-chef.md` und im 85. Lauf dokumentierten hinaus.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-06, siebenundachtzigster Lauf (stale Checkbox 8.13 korrigiert)
+
+**Ausgangslage:** Geplanter täglicher Cloud-Lauf, dritter des 06.11.,
+nach dem sechsundachtzigsten Lauf (`decf517`, 01:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand),
+weiterhin deutlich vor `origin/main` (Freigabe-Chef hat seit dem 23.10.
+noch nicht gemergt — nicht mein Zuständigkeitsbereich, `main` bleibt
+unberührt). Kein frischer `main`-Merge nötig. Regressionsschutz-Baseline
+frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 570 Tests, alle
+grün), `npm run build` (0 Typfehler) — identisch zum Endstand des 86.
+Laufs.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+nach dem nächsten offenen, eindeutig umsetzbaren Punkt im
+Programmierungs-Bereich durchsucht. Alle übrigen offenen Checkboxen
+verfehlen weiterhin mindestens eines der vier Sicherheitskriterien
+(8.2-8.4 KI-Kontext/Vision, Deal Finder, Premium/Rewards — offene
+Architektur-/Backend-Entscheidungen bzw. unspezifiziert ohne objektiv
+prüfbare Abnahme; Duffel Stays — externe Abhängigkeit; Zahlungsprozess
+— explizite Produktentscheidung mit rechtlichen Folgen; Sprint 6 — zu
+grob für einen einzelnen Punkt). Einzige noch offene, klar abgegrenzte
+Checkbox: 8.13 "Unit-Tests für calculateProgress, calculateCosts,
+checklistRules, Schema-Validierung".
+
+**Befund:** Die vier dort genannten Stellen (`calculateProgress.ts`,
+`cartTotals.ts` als tatsächliche `calculateCosts`-Logik,
+`checklistRules.ts`, sowie die defensive Normalisierung/"Schema-
+Validierung" in `tripStorage.ts`s `loadStoredChat()`) sind bereits
+vollständig durch Tests abgedeckt — entstanden über frühere, auf andere
+Punkte fokussierte Läufe hinweg, ohne dass diese Checkbox dabei
+mitgepflegt wurde (gleiches Muster wie die am 20.08. von Marketing-Chef
+korrigierten Sprint-3-Checkboxen). Einzeln verifiziert (Dateien
+byte-identisch zum zuletzt bekannten Stand, per `git diff` gegen den
+vorherigen Commit bestätigt):
+- `calculateProgress.test.ts` (5 Tests: leere Reise, einzelne gefüllte
+  Komponenten, Aktivitäten als eigene Komponente, Destination bewusst
+  ausgeschlossen, Vollständigkeit).
+- `cartTotals.test.ts` (7 Tests: leerer Warenkorb, Summenbildung,
+  Gruppierung nach Typ inkl. fester Anzeigereihenfolge, Weglassen
+  leerer Gruppen, mehrere Items desselben Typs).
+- `checklistRules.test.ts` (8 Tests: Gesamtzahl Items, eindeutige IDs,
+  leere Reise, jedes Auto-Item einzeln, unbekannte ID, Label-Wortlaut
+  "ausgewählt" statt "gebucht").
+- `tripStorage.test.ts`, eigene `describe('loadStoredChat')`-Gruppe
+  (6 Tests genau für die Normalisierung fehlender/korrupter Felder;
+  Datei insgesamt 29 Tests inkl. `updateStoredTrip`/`saveStoredChat`/
+  `clearStoredChat`/`hasTripData`/`isTripComplete`).
+
+Keine Lücke, kein neuer Test nötig, kein Produktcode geändert — reine
+Checkbox-Korrektur in `ZEITPLAN.md` und
+`tasks/tasks-prd-travix-platform.md` (8.13 von `[ ]` auf `[x]`, jeweils
+mit Begründung/Fundstellen).
+
+**Geprüft:** Regressionsschutz-Baseline unverändert grün (s.o.,
+75 Testdateien, 570 Tests, 0 Typ-/Lint-Fehler, Build ohne neue
+Warnungen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
