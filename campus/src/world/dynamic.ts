@@ -58,6 +58,7 @@ export class Elevator {
   }
 
   call(i: number) {
+    if (i < 0 || i >= this.stops.length) return
     if (this.state === 'moving' || this.state === 'closing') {
       this.target = i
       return

@@ -62,11 +62,13 @@ export function buildSite(b: WorldBuilder) {
   b.chunk('site', { maxDist: 5000 }, true)
   // ground collider: one big slab with holes for the garage ramp and lift shaft
   const r = GARAGE.ramp
-  slab(b, -W, W, -W, W, 0, 1.0, [
-    [r.x0, r.x1, r.z0, r.z1],
-    [GARAGE.liftX - 1.45, GARAGE.liftX + 1.45, GARAGE.liftZ - 1.4, GARAGE.liftZ + 1.4],
-  ], C.grass, 'matte', true)
-  // (the visual ground is a separate textured mesh; remove the instanced slab colour by making it invisible)
+  // (collision only – the visible ground is a separate textured mesh)
+  b.inChunk('__collision', { maxDist: 0 }, false, () => {
+    slab(b, -W, W, -W, W, 0, 1.0, [
+      [r.x0, r.x1, r.z0, r.z1],
+      [GARAGE.liftX - 1.45, GARAGE.liftX + 1.45, GARAGE.liftZ - 1.4, GARAGE.liftZ + 1.4],
+    ], C.grass, 'matte', true)
+  })
   // world boundary
   for (const [x, z, w, d] of [[0, -L.canalZ + 140, 2 * W, 1], [-W, 0, 1, 2 * W], [W, 0, 1, 2 * W], [0, W, 2 * W, 1]] as const) b.colBox(x, 0, z === -L.canalZ + 140 ? W : z, w, 20, d)
   b.colBox(0, 0, L.canalZ + 15.5, 2 * W, 1.2, 0.4, 0, true) // canal quay railing (north boundary)
