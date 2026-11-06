@@ -25932,3 +25932,74 @@ Lint-Fehler. Keine neuen offenen Beobachtungen über die bereits in
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-06, 00:12 UTC (fünfundachtzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout. `it-chef/auto`
+direkt übernommen (0 Commits Rückstand zu `origin/it-chef/auto`, Stand
+`79f85ce`, 84. Lauf), weiterhin 65 Commits vor `origin/main`
+(unverändert auf `fe1300e`, 2026-10-23 — Freigabe-Chef hat seit dem
+23.10. noch nicht gemergt). Kein frischer `main`-Merge nötig, `main`
+bleibt unberührt. Regressionsschutz-Baseline frisch durchlaufen:
+`npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (75 Testdateien, 570 Tests, alle grün) — identisch zum
+Endstand des 84. Laufs.
+
+**Punktesuche:** `tasks/tasks-prd-travix-platform.md` erneut durchgesehen
+— alle verbleibenden offenen Checkboxen (2.0 Base44-Setup, 4.1-4.3
+InvokeLLM/Schema/Prompts, Teile von 5.0/6.0/7.0/8.0) weiterhin blockiert
+auf Backend-/API-Zugangsdaten (Base44, Gemini, Duffel) oder echte
+Produkt-/Architekturentscheidungen von Ni — Kriterium 1/2 nicht erfüllt.
+`reports/it-chef.md` (Stand 23.10.) erneut geprüft — beide dort
+dokumentierten offenen Funde weiterhin bewusst zurückgestellte
+Produktentscheidungen (uneinheitliche Lösch-Warnungen, fehlende
+Checklisten-Persistenz). `reports/support-chef.md` (Stand 23.10.)
+gegengelesen — die beiden dort erwähnten offenen PRs (#34 `formatTime()`,
+#38 "+ Suchen"-Edit-Shortcut) sind auf `it-chef/auto` inhaltlich längst
+umgesetzt (Läufe im Umfeld 26.10. bzw. 29.10.), nur auf `main` noch
+nicht gemergt — nichts, was dieser Kanal zusätzlich tun könnte.
+
+Zusätzlich eine gezielte, auf bisher seltener im Detail gelesene Bereiche
+fokussierte Suche durchgeführt: `Profil.tsx`, `Einstellungen.tsx`,
+`Angebote.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`, `Warenkorb.tsx`,
+`Aktivitaeten.tsx`, `MeineReisen.tsx`, `Dashboard.tsx`, `Buchung.tsx`,
+`EditMode.tsx`, `ChecklistPanel.tsx`, `HotelWizard.tsx`, `HotelCard.tsx`,
+`SearchErrorAlert.tsx`, `cartTotals.ts`, `calculateProgress.ts`,
+`checklistRules.ts`, `format.ts` komplett gelesen (nicht nur gegrept).
+Gezielt gesucht nach: `.reduce()` ohne Initialwert (zwei Treffer,
+`Dashboard.tsx`/`cartTotals.ts`, beide mit explizitem `0`-Startwert —
+kein Bug), Division durch `.length` bei potenziell leeren Arrays (zwei
+Treffer, beide über feste, nicht-leere Konstanten-Arrays, Leerfall
+aktuell unerreichbar), `.toFixed()` bei Preisen/Bewertungen (ein Treffer
+in `HotelCard.tsx`, durch vorhandenen Null-Guard abgesichert; alle
+übrigen Zahlenformatierungen laufen über `toLocaleString('de-DE')`/
+`Intl.NumberFormat`), optionale Felder ohne Fallback direkt im JSX
+gerendert (keine neuen Treffer), Buttons ohne Disabled-Handling während
+laufender async-Vorgänge außerhalb bereits gefixter Flows (keine neuen
+Treffer, z. B. `HotelWizard.tsx` hat bereits korrektes
+`disabled={!isValid || loading}`).
+
+**Beobachtung (bewusst zurückgestellt, kein Fund):** `MeineReisen.tsx`
+(Zeile 19-22) trägt den `status` ('upcoming'/'past') der beiden
+Demo-Reisen fest eingetragen statt ihn aus dem freien Datums-Text gegen
+das aktuelle Datum zu berechnen. Heute (06.11.2026) stimmt das noch
+zufällig (Lissabon 15.-22.11. liegt in der Zukunft, Kyoto März 2026 in
+der Vergangenheit), würde aber nach dem 22.11.2026 falsch, wenn die Datei
+bis dahin nicht durch echte Buchungsdaten (Base44) ersetzt ist. Kein
+tauglicher autonomer Fund: ein echter Fix bräuchte einen Parser für den
+frei getippten deutschen Datums-Range-Text samt Entscheidung, ob "past"
+schon ab Abreise- oder erst ab Rückkehrdatum gilt — Interpretation statt
+Ein-Zeiler (Kriterium 3 nicht erfüllt), zusätzlich ausdrücklich als
+Demo-Platzhalter bis zur Backend-Entscheidung markiert (Kriterium 2
+grenzwertig). Für spätere Läufe vorgemerkt, falls bis dahin die
+Base44-Anbindung steht.
+
+**Ergebnis:** Kein Punkt heute (fünfundachtzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Eine neue, bewusst
+zurückgestellte Beobachtung (`MeineReisen.tsx`-Statusfeld) oben
+dokumentiert, keine der bereits in `reports/it-chef.md` dokumentierten
+Beobachtungen hat sich verändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
