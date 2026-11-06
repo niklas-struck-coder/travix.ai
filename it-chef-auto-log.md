@@ -26003,3 +26003,83 @@ Beobachtungen hat sich verändert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-06, 01:11 UTC (sechsundachtzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Frischer, isolierter Cloud-Checkout, zweiter Lauf des
+06.11., rund eine Stunde nach dem fünfundachtzigsten Lauf (`b71ddc5`,
+00:12 UTC). `it-chef/auto` direkt übernommen (0 Commits Rückstand zu
+`origin/it-chef/auto`), weiterhin 65 Commits vor `origin/main`
+(unverändert auf `fe1300e`, 2026-10-23 — Freigabe-Chef hat seit dem
+23.10. noch nicht gemergt; nicht mein Zuständigkeitsbereich, `main`
+bleibt unberührt). Kein frischer `main`-Merge nötig. Regressionsschutz-
+Baseline frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0
+Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75 Testdateien,
+570 Tests, alle grün) — identisch zum Endstand des 85. Laufs.
+`reports/it-chef.md`/`reports/marketing-chef.md`/`reports/support-chef.md`
+weiterhin alle auf Stand 23.10., keine neuen Funde der
+plattform-verwalteten Kanäle seit dem letzten Check.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut durchgesehen — alle verbleibenden offenen Checkboxen weiterhin
+blockiert auf Backend-/API-Zugangsdaten (Base44, Gemini, Duffel) oder
+echte Produkt-/Architekturentscheidungen von Ni, Kriterium 1/2 damit
+unverändert nicht erfüllt. Die im 85. Lauf zurückgestellte Beobachtung
+(`MeineReisen.tsx`, fest codierter `status` statt Berechnung aus dem
+Datums-Text) bewusst nicht angegangen — die dort dokumentierte
+Begründung (Interpretationsbedarf beim Datums-Parsing, Kriterium 3) ist
+unverändert gültig, keine neue Information seit gestern.
+
+Mit anderem Fokus als die Vorläufe gesucht:
+- `npm audit` erneut laufen lassen: **19 Schwachstellen (2 niedrig, 14
+  mittel, 3 hoch)** — ein deutlich anderes Bild als beim letzten
+  bestätigten Stand (sechster/neunter Lauf, damals 7-12 Schwachstellen
+  über `shadcn`/`braces`/`micromatch`). Gegenprüft, woher die drei neuen
+  Pakete kommen (`npm ls systeminformation undici vite`): ausschließlich
+  transitiv über reine Dev-Tooling-Pfade — `systeminformation`/ein Teil
+  der `undici`-Treffer über `shadcn`s `@dotenvx/dotenvx`-Abhängigkeit
+  (CLI, nicht im Produktionsbuild), ein weiterer `undici`-Treffer über
+  `jsdom` (nur Testumgebung), `vite` selbst (Dev-Server/Build-Tool).
+  Keiner davon landet im ausgelieferten `dist/`-Bundle. `npm audit
+  fix`-Dry-Run (ohne `--force`) erneut versucht: bricht reproduzierbar
+  mit demselben internen Arborist-Fehler ab wie bereits in Lauf
+  neun/elf/zwölf/dreizehn dokumentiert (`TypeError: Cannot read
+  properties of null (reading 'edgesOut')`) — derselbe bekannte
+  `npm`-Tooling-Bug, jetzt zum fünften Mal reproduziert, diesmal mit
+  einem anderen, seitdem gewachsenen Satz betroffener Pakete. Kein
+  Dateizustand verändert (`git status` vor und nach dem Versuch
+  identisch sauber). Weiterhin kein autonom umsetzbarer Punkt — ein
+  Workaround (z. B. manuelles `package-lock.json`-Patchen) würde die
+  gesamte Abhängigkeitsauflösung berühren und ließe sich nicht mit
+  vertretbarem Aufwand objektiv als unschädlich verifizieren (Kriterium
+  3 nicht erfüllt). Weiterhin eher ein Hinweis für Ni (`npm` selbst
+  aktualisieren) als ein autonom lösbarer Punkt.
+- Testabdeckungs-Sweep frisch wiederholt (alle `.ts`/`.tsx`-Dateien ohne
+  zugehörige `.test.*`-Datei, nicht nur die letzte bekannte Liste
+  übernommen): `src/types/*.ts` (fünf Dateien, reine Typ-/Interface-
+  Definitionen ohne Laufzeitcode — kein Testbedarf), `label.tsx`/
+  `input.tsx` (unverändert reine Styling-Wrapper, siehe 19.10.-Eintrag),
+  `vite-env.d.ts` (Deklarationsdatei), `main.tsx` (Einstiegspunkt) —
+  identisch zur zuletzt bekannten Liste, kein neuer Kandidat.
+- Alle `<Label htmlFor="...">`-Stellen im `src`-Baum (16 Treffer) gegen
+  das zugehörige `id="..."`-Attribut der jeweiligen Eingabe/des
+  `SelectTrigger` abgeglichen — jede einzelne Zuordnung stimmt exakt
+  überein (`EditMode.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`,
+  `Einstellungen.tsx`, `Profil.tsx`), kein verwaistes `htmlFor`, kein
+  Fehlfund. `index.html` komplett gelesen (`lang="de"` korrekt gesetzt,
+  Favicon-Link stimmt mit dem im 82. Lauf gefixten Pfad überein,
+  Google-Fonts-Preconnect korrekt) — keine fehlende `<meta
+  name="description">` als Code-Bug gewertet, das ist SEO-/Marketing-
+  Texterstellung (Marketing-Chef-Bereich), kein IT-Chef-Bugfund.
+
+**Ergebnis:** Kein Punkt heute (sechsundachtzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. `npm audit`-Bild hat sich
+zwar verschoben (19 statt zuletzt 7-12 Schwachstellen, aber weiterhin
+ausschließlich Dev-Tooling ohne Produktionsrelevanz und weiterhin durch
+denselben `npm`-Tooling-Bug blockiert) — reine Beobachtung, kein neuer
+autonom umsetzbarer Punkt. Keine neuen offenen Beobachtungen über die
+bereits in `reports/it-chef.md` und im 85. Lauf dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
