@@ -26211,3 +26211,63 @@ dokumentierten hinaus.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-06, neunundachtzigster Lauf (kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter täglicher Cloud-Lauf, fünfter des 06.11.,
+nach dem achtundachtzigsten Lauf (`f951d0e`). `it-chef/auto` direkt von
+`origin/it-chef/auto` übernommen (0 Commits Rückstand), weiterhin
+deutlich vor `origin/main` (70 Commits, Freigabe-Chef hat seit dem
+23.10. noch nicht gemergt — nicht mein Zuständigkeitsbereich, `main`
+bleibt unberührt, 0 Commits von `main` fehlen auf `it-chef/auto`). Kein
+frischer `main`-Merge nötig. Regressionsschutz-Baseline frisch
+durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run
+lint` (0 Fehler), `npx vitest run` (75 Testdateien, 570 Tests, alle
+grün), identisch zum Endstand des 88. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut komplett nach offenen Checkboxen durchsucht (Sprint-Bereiche
+Zeilen 3302-4150 in `ZEITPLAN.md`, parallel die sechs noch offenen
+Elternpunkte in `tasks/tasks-prd-travix-platform.md`). Alle verfehlen
+unverändert mindestens eines der vier Sicherheitskriterien — Backend-
+Entscheidung (2.0), InvokeLLM/Schema/Prompts (4.1-4.3, brauchen Gemini-
+Zugangsdaten + Prompt-Design), Zug/Bus/Fähre-Anbindung (5.7, Anbieter-
+wahl offen), TripItem-Anbieter-URL (6.2) und CostBreakdown (6.6/6.7,
+keine Komponente vorhanden, Preis-pro-Posten-Datenfeld fehlt in
+`TripDraft`), Planung-fortsetzen-Volltext (7.4) und Reisebudget-Charts
+(7.12, beide auf fehlende Datenfelder bzw. Architekturentscheidung
+blockiert), Urlaubsmodus/Vision/Deal-Finder/Premium/Rewards (8.1-8.9,
+8.12, unspezifiziert bzw. Backend-abhängig), Duffel Stays live (externe
+Freigabe), Zahlungsprozess-Entscheidung (explizite Produktentscheidung
+mit rechtlichen Folgen) und Sprint 6 Testing/Politur (zu grob für einen
+einzelnen abgegrenzten Punkt). `ZEITPLAN.md`s eigene Liste "Offene
+Entscheidungen, die Ni treffen muss" bestätigt dieselben drei Blocker
+unverändert.
+
+**Zusätzliche gezielte Bug-Suche heute** (anderer Fokus als die
+Vorläufe, um Wiederholung zu vermeiden): Alle `<img>`-Tags in
+`src/components` und `src/pages` auf fehlendes `alt`-Attribut geprüft —
+kein Treffer. Alle `to="..."`-Ziele aller `Link`-Komponenten gegen die
+in `src/routes.tsx` tatsächlich registrierten Pfade abgeglichen — jedes
+Ziel (`/`, `/buchung`, `/entwuerfe`, `/ki-chat`, `/reise-planen`,
+`/urlaubsmodus`) existiert, kein kaputter interner Link, keine
+`navigate()`-Aufrufe mit String-Pfaden im Code. `useChat.ts` (einzige
+Datei mit `.then(`-Ketten) Zeile für Zeile gegen zugehörige `.catch(`
+geprüft — alle drei `.then()`-Aufrufe (Zeilen 112, 228, 419) haben ein
+passendes `.catch()` direkt im Anschluss, keine unbehandelte Promise.
+Die vom 85. Lauf zurückgestellte Beobachtung zu `MeineReisen.tsx`
+(`Lissabon`-Reise fest als `status: 'upcoming'` codiert statt über das
+Datum berechnet) erneut geprüft: Rückflugdatum weiterhin 22.11.2026,
+heute 06.11.2026 — Status zufällig noch korrekt, Begründung zum
+Zurückstellen (Interpretationsbedarf beim Datums-Parsing, reine Mock-
+Daten einer noch nicht an echte Buchungsdaten angebundenen Seite)
+unverändert gültig, noch nicht überschritten.
+
+**Ergebnis:** Kein Punkt heute (neunundachtzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen
+Beobachtungen über die bereits in `reports/it-chef.md` dokumentierten
+hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
