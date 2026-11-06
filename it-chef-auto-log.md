@@ -26144,3 +26144,70 @@ Warnungen).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-06, 22:10 UTC (achtundachtzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter täglicher Cloud-Lauf, vierter des 06.11.,
+nach dem siebenundachtzigsten Lauf (`ce5b4fa`, 02:14 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand),
+weiterhin deutlich vor `origin/main` (Freigabe-Chef hat seit dem 23.10.
+noch nicht gemergt — nicht mein Zuständigkeitsbereich, `main` bleibt
+unberührt). Kein frischer `main`-Merge nötig. Regressionsschutz-Baseline
+frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 570 Tests, alle
+grün), `npm run build` (0 Typfehler, keine neuen Warnungen) — identisch
+zum Endstand des 87. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+komplett erneut durchgesehen. Alle verbleibenden offenen Checkboxen
+(2.0 Base44-Setup, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre-
+Anbindung, 6.2 TripItem mit Anbieter-URL, 6.6/6.7 CostBreakdown/
+calculateCosts, 7.4 Planung-fortsetzen-Volltext, 7.12 Reisebudget-Charts,
+8.1 Urlaubsmodus-Tagesitinerar, 8.2-8.7 Vision/Deal-Finder/Messenger,
+8.9 Premium, 8.12 Rewards) verfehlen unverändert mindestens eines der
+vier Sicherheitskriterien — durchweg blockiert auf Backend-/API-
+Zugangsdaten (Base44, Gemini, Duffel-Erweiterungen), fehlende
+Datenfelder in `TripDraft` (Preis pro Posten) oder echte Produkt-/
+Architekturentscheidungen von Ni (Anbieterwahl Zug/Bus/Fähre,
+Zahlungsprozess, Premium-Tarife, Mehrfach-Chat-Historien). `ZEITPLAN.md`s
+eigene Liste "Offene Entscheidungen, die Ni treffen muss" bestätigt
+dieselben drei Blocker (Backend-Anbieter, Zahlungsprozess,
+Wochenstunden-Annahme). `reports/it-chef.md`/`reports/marketing-chef.md`/
+`reports/support-chef.md` weiterhin auf Stand 23.10., keine neuen Funde
+der plattform-verwalteten Kanäle seit dem letzten Check. Die im 85. Lauf
+zurückgestellte Beobachtung (`MeineReisen.tsx`, fest codierter `status`
+statt Datums-Berechnung) bewusst nicht angegangen — Begründung
+unverändert gültig (Interpretationsbedarf beim Datums-Parsing,
+Kriterium 3), noch nicht überschritten (Lissabon-Rückflug erst 22.11.).
+
+Mit anderem Fokus als die Vorläufe gezielt nach Sicherheits-/
+Robustheitsmustern gesucht, die noch nie Thema eines Log-Eintrags waren:
+`dangerouslySetInnerHTML`/`eval(`/`new Function(` (kein Treffer im
+gesamten `src`-Baum), leere `catch`-Blöcke (kein Treffer), `console.log`/
+`console.warn`/`console.error` (nur zwei Treffer, `tripStorage.ts` und
+`duffel/client.ts`, beide bewusst als Fehlerprotokollierung bei
+localStorage- bzw. Netzwerkfehlern, kein stiller Fehlschlag). Zusätzlich
+React-Listen auf `key={index}` statt stabiler ID geprüft: zwei Treffer
+(`FlightCard.tsx` Zeile 33, `SearchErrorAlert.tsx` Zeile 17). Beide
+bewusst **nicht** als Fund gewertet: In beiden Fällen ist das Array
+(`offer.slices`, `errors`) für die gesamte Lebensdauer der jeweiligen
+Komponenteninstanz fix — es wird nie nachträglich umsortiert, ergänzt
+oder einzeln entfernt, genau der Fall, in dem React selbst den
+Index als Key ausdrücklich erlaubt. Ein "Fix" wäre reine Umbenennung
+ohne Verhaltensänderung und ohne objektiv prüfbaren Vorteil (Kriterium 4
+nicht sinnvoll erfüllbar) — hätte außerdem denselben Charakter wie
+Busywork, das die Rolle ausdrücklich ausschließt. Letzte 10 Commits auf
+`it-chef/auto` (betroffene Dateien: `TravixAvatar.tsx`, `MobileNav.tsx`,
+`FlightCard.tsx`, `FlightWizard.tsx`, `tripStorage.ts`, `Buchung.tsx`,
+`Dashboard.tsx`, `Reiseentwuerfe.tsx`, `routes.tsx`) stichprobenhaft
+gegen ihre jeweiligen Tests gelesen — keine Regression, keine
+unvollständige Umsetzung gefunden.
+
+**Ergebnis:** Kein Punkt heute (achtundachtzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen
+Beobachtungen über die bereits in `reports/it-chef.md` und im 85. Lauf
+dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
