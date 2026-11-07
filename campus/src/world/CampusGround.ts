@@ -121,7 +121,7 @@ function plaza(b: WorldBuilder) {
   })
   infoPoint(b, 3, 1.2, 64, 'Big Apple Global Campus Amsterdam', [
     'Internationaler Hauptsitz der Big Apple Groups.',
-    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, Visitor Center, Media Center, Big Apple Hotel und zwei Business Center; am HQ-Platz Racing, Fitness HQ, Hotels HQ und Foundation.',
+    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, Visitor Center, Media Center, Big Apple Hotel und zwei Business Center; am HQ-Platz Racing, Café, Hotels HQ und Foundation; Health & Recovery Center und Fitness HQ nebeneinander im Westen.',
     'Unterirdisch: Campus-Promenade (Ebene –1) mit zentralem Ring, vier Achsen und äußerem Ring zu allen Gebäuden · Tiefgarage (Ebene –2) mit Einfahrten Ost und Süd · Glaslifte auf dem HQ-Platz.',
   ], { label: 'Campus-Info lesen' })
   // covered walkway from HQ entrance to the monorail station

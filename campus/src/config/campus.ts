@@ -116,14 +116,14 @@ const raw: Raw[] = [
     angle: 208, radius: 206, w: 34, d: 44, floors: 7, floorH: 3.4,
   },
   {
-    id: 'health', name: 'Big Apple Health & Recovery', suffix: 'Health & Recovery', kind: 'subsidiary', style: 'health',
-    description: 'Gesundheits-, Fitness- und Regenerationszentrum für alle Mitarbeitenden: Fitnessstudio (Kraft, Cardio, Functional, Freihantel, Geräte, Personal Training, Gruppenkurse), Health-Bereich mit Physiotherapie und Recovery mit Massage, Mobility und Ruhebereich.',
-    angle: 256, radius: 178, w: 56, d: 36, floors: 3, floorH: 4.6,
+    id: 'health', name: 'Big Apple Health & Recovery Center', suffix: 'Health & Recovery', kind: 'subsidiary', style: 'health',
+    description: 'Gesundheitszentrum für alle Mitarbeitenden des Campus: das Fitnessstudio (Kraft, Cardio, Functional, Freihantel, Geräte, Personal Training, Gruppenkurse), Health-Bereich mit Gesundheitsberatung, Körperanalyse und Physiotherapie sowie Recovery mit Massage, Mobility und Ruhebereich.',
+    angle: 251, radius: 178, w: 56, d: 36, floors: 3, floorH: 4.6,
   },
   {
     id: 'logistics', name: 'Big Apple Logistics', suffix: 'Logistics', kind: 'subsidiary', style: 'logistics',
     description: 'Verwaltungs- und Steuerungszentrale: Leitstelle, Transport- und Supply-Chain-Planung, Flottenmanagement, Disposition, Datenanalyse. Keine Lagerhalle auf dem Campus.',
-    angle: 290, radius: 180, w: 52, d: 34, floors: 3, floorH: 4.6,
+    angle: 295, radius: 180, w: 52, d: 34, floors: 3, floorH: 4.6,
   },
   {
     id: 'entertainment', name: 'Big Apple Entertainment', suffix: 'Entertainment', kind: 'subsidiary', style: 'entertainment',
@@ -174,8 +174,8 @@ const raw: Raw[] = [
   },
   {
     id: 'fitness', name: 'Big Apple Fitness', suffix: 'Fitness', kind: 'subsidiary', style: 'fitness',
-    description: 'Unternehmens-Headquarter der internationalen Fitnesskette – reines Bürogebäude ohne Fitnessstudio: Club Operations, Standortentwicklung, Trainer- und Personalverwaltung, Marketing, Qualitätsmanagement, Franchise & Expansion.',
-    angle: 124, radius: 90, w: 36, d: 24, floors: 3, floorH: 4.2,
+    description: 'Büro-Headquarter der internationalen Fitnesskette – ohne Gym: Club Operations, Standortentwicklung, Trainer- und Personalverwaltung, Marketing, Qualitätsmanagement, Franchise & Expansion. Das Training für Mitarbeitende findet nebenan im Health & Recovery Center statt.',
+    angle: 273, radius: 180, w: 38, d: 26, floors: 4, floorH: 4.2,
   },
   {
     id: 'hotels', name: 'Big Apple Hotels Headquarters', suffix: 'Hotels', kind: 'subsidiary', style: 'hotels',
@@ -208,7 +208,7 @@ export const STATIONS = [
   { id: 's-fin', name: 'Finance · Mobility', angle: 122 },
   { id: 's-tech', name: 'Tech · Trains', angle: 52 },
   { id: 's-hol', name: 'Holidays · Media Center · Entertainment', angle: 338 },
-  { id: 's-log', name: 'Logistics · Health & Recovery · Hotel', angle: 262 },
+  { id: 's-log', name: 'Health & Recovery · Fitness · Logistics', angle: 262 },
 ]
 
 /** campus lake (Campussee) */

@@ -434,7 +434,7 @@ app.innerHTML = `
 <main>
   <section id="lageplan"><h2><span>1</span>Gesamt-Lageplan</h2>
     <div class="figure two"><div>${sitePlan()}</div><div class="side">
-      <p>Das runde Holding-HQ (1) steht im Zentrum auf dem HQ-Platz. Die Unternehmensgebäude liegen auf einem äußeren Ring (≈ 178 m) zwischen Feuerwehrzufahrt und Ringstraße; kleinere Häuser (Racing, Fitness, Hotels HQ, Foundation) stehen frei am HQ-Platz. Das Big Apple Hotel (${NUM.get('hotel')}) liegt am Rand nahe der Haupteinfahrt.</p>
+      <p>Das runde Holding-HQ (1) steht im Zentrum auf dem HQ-Platz. Die Unternehmensgebäude liegen auf einem äußeren Ring (≈ 178 m) zwischen Feuerwehrzufahrt und Ringstraße; kleinere Häuser (Racing, Café, Hotels HQ, Foundation) stehen frei am HQ-Platz. Health & Recovery Center (${NUM.get('health')}) und Fitness HQ (${NUM.get('fitness')}) liegen nebeneinander auf dem äußeren Ring. Das Big Apple Hotel (${NUM.get('hotel')}) liegt am Rand nahe der Haupteinfahrt.</p>
       ${legend([['l-bld', 'Gebäude'], ['l-hq', 'Holding-HQ'], ['l-mono', 'Monorail & Stationen'], ['l-road', 'Ringstraße'], ['l-fire', 'Feuerwehrzufahrt'], ['l-bike', 'Radweg'], ['l-ramp', 'Garagenrampen'], ['l-water', 'Campussee']])}
     </div></div>
   </section>

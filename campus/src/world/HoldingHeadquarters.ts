@@ -377,10 +377,10 @@ function roof(b: WorldBuilder) {
       label: () => 'Panorama-Fernrohr benutzen',
       action: () => {
         ui().set({ info: { title: 'Panorama vom HQ-Dach (≈ 100 m)', subtitle: 'Big Apple Global Campus · Amsterdam', body: [
-          'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern. Nordwesten: Media Center und Entertainment. Am HQ-Platz: Racing, Fitness HQ, Hotels HQ, Foundation.',
+          'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern. Nordwesten: Media Center und Entertainment. Am HQ-Platz: Racing, Café, Hotels HQ, Foundation.',
           'Nordosten: Big Apple Trains · Osten: Big Apple Tech und Finance.',
           'Süden: Big Apple Visitor Center, Big Apple Hotel, Business Center, Haupteinfahrt.',
-          'Westen: Health & Recovery, Logistics, Campussee mit der Big Apple Foundation.',
+          'Westen: Health & Recovery Center und Fitness HQ nebeneinander, Logistics, Campussee mit der Big Apple Foundation.',
           'Die Monorail umrundet das HQ auf 6,8 m Höhe mit fünf Stationen.',
         ] } })
         toast('Tipp: Kameramodus 3 (Vogelperspektive) zeigt den ganzen Campus.')

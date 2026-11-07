@@ -48,7 +48,7 @@ Raumlisten) erzeugt.
   Business Development / M&A, 18. OG Chairman Office / Group Management / Vorstand,
   21. OG Executive Lounge / Vorstandskonferenzraum, Dachterrasse.
 - **Unternehmens-HQs**: Tech, Finance, Mobility, Holidays, Logistics, Trains, Entertainment
-  (äußerer Ring) sowie Racing, Fitness, Hotels HQ und Foundation (am HQ-Platz).
+  und Fitness (äußerer Ring, Fitness direkt neben Health & Recovery) sowie Racing, Café, Hotels HQ und Foundation (am HQ-Platz).
   **Fitness ist reines Bürogebäude ohne Studio** (nur Musterflächen); das Fitnessstudio
   gehört zu **Big Apple Health & Recovery** (Training, Health, Recovery, Umkleiden).
 - **Big Apple Hotel**: eigenständiges, mittelgroßes Hotel am Rand (Lobby, Restaurant mit
