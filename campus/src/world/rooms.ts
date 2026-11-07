@@ -719,14 +719,15 @@ export function furnish(b: B, kind: RoomKind, w: number, d: number, ctx: RoomCtx
       break
     }
     case 'cinema': {
-      const rows = Math.max(3, Math.floor((d - 5) / 1.0))
+      const rows = Math.max(2, Math.floor((d - 5) / 1.0))
       const per = Math.max(6, Math.floor((w - 3) / 0.62))
-      K.cinemaSeats(b, 0, 0, hd - 1, rows, per, P, 0.32, '#7a1f2a')
+      const z0 = -hd + 3.5 // first row in front of the screen, the rows rise towards the back wall
+      K.cinemaSeats(b, 0, 0, z0, rows, per, P, 0.32, '#7a1f2a')
       b.screen({ id: 'scr-cin-' + rand(), lx: 0, ly: 0.9, lz: -hd + 0.15, w: Math.min(w - 1.5, 9), h: Math.min(w - 1.5, 9) * 0.42, rot: 0, slides: [
         { title: 'BIG APPLE ENTERTAINMENT', lines: ['Präsentationskino', 'Jetzt: „Canals of Amsterdam“ – Trailer'], kind: 'event' },
         { title: 'Serien-Premiere', lines: ['„Campus Nights“ · Staffel 1', 'Exklusive Vorpremiere für Mitarbeitende'], kind: 'event' },
       ], suffix: 'Entertainment' })
-      for (let i = 0; i < rows * per * 0.2; i++) b.npc({ kind: 'sit', x: (Math.floor(rand() * per) - (per - 1) / 2) * 0.62, y: Math.floor(rand() * rows) * 0.32, z: hd - 1 - Math.floor(rand() * rows) * 1.0, yaw: P })
+      for (let i = 0; i < rows * per * 0.2; i++) b.npc({ kind: 'sit', x: (Math.floor(rand() * per) - (per - 1) / 2) * 0.62, y: Math.floor(rand() * rows) * 0.32, z: z0 + Math.floor(rand() * rows) * 1.0, yaw: P })
       break
     }
     case 'studio': {

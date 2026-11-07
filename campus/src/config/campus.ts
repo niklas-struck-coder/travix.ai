@@ -402,4 +402,7 @@ export function monorailControlPoints(): [number, number][] {
   return pts
 }
 
+/** campus ring road (inner road along the former fire lane) and its links to the outer ring road */
+export const INNER_ROAD = { radius: LAYOUT.fireLaneRadius, width: 7, links: [17, 125, 220, 308] }
+
 export const START = { x: 0, z: 96, yaw: 0 } // in front of the HQ plaza, looking north at the tower

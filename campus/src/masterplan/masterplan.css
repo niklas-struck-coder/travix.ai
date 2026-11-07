@@ -83,6 +83,8 @@ svg text { font-family: var(--font-body); fill: var(--ink); }
 .road circle { fill: none; stroke: var(--road); stroke-width: 13; }
 .road-fill { fill: var(--road); }
 .fire circle { fill: none; stroke: var(--plaza); stroke-width: 6; }
+.inner-road circle { fill: none; stroke: var(--road); stroke-width: 7; }
+.road-link { stroke: var(--road); stroke-width: 7; }
 .bike circle { fill: none; stroke: #c98a7e; stroke-width: 3; opacity: 0.8; }
 .walk { stroke: var(--plaza); stroke-width: 5; }
 .ramp { fill: #6f8fb8; stroke: var(--bld-line); stroke-width: 0.4; }
@@ -146,7 +148,7 @@ i.sw.z-staff { background: #8fa6c4; } i.sw.z-visitor { background: #e8c650; } i.
 .legend li { display: flex; align-items: center; gap: 8px; }
 .legend i, .sw { width: 22px; height: 10px; display: inline-block; flex: none; border: 1px solid var(--line); margin-right: 6px; vertical-align: middle; }
 .l-bld { background: var(--bld); border-color: var(--bld-line) !important; } .l-hq { background: var(--bld); border: 2px solid var(--green) !important; }
-.l-mono { background: var(--green); } .l-road { background: var(--road); } .l-fire { background: var(--plaza); } .l-bike { background: #c98a7e; }
+.l-mono { background: var(--green); } .l-road { background: var(--road); } .l-fire { background: var(--road); } .l-bike { background: #c98a7e; }
 .l-ramp { background: #6f8fb8; } .l-water { background: var(--water); } .l-corr { background: var(--corr); border-color: var(--corr-line) !important; }
 .l-spur { background: var(--spur); border-color: var(--corr-line) !important; } .l-foyer { background: var(--foyer); } .l-belt { background: #3b403d; }
 .l-coffee { background: var(--green); } .l-lounge { background: #e6dcc4; } .l-elev { background: #1f5fa8; } .l-stair { background: #c9a96f; }

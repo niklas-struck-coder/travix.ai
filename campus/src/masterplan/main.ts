@@ -4,7 +4,7 @@
  */
 import './masterplan.css'
 import {
-  BUILDINGS, LAKE, LAYOUT, LEVELS, STATIONS, UG, DEG, polar, rampCorners, shortName, undergroundPlan, monorailControlPoints,
+  BUILDINGS, INNER_ROAD, LAKE, LAYOUT, LEVELS, STATIONS, UG, DEG, polar, rampCorners, shortName, undergroundPlan, monorailControlPoints,
   type BuildingInfo, type Corridor,
 } from '../config/campus'
 import { PROGRAMS, HQ_FLOORS, FURNITURE, CONCEPTS, businessProgram } from '../config/programs'
@@ -81,7 +81,12 @@ function sitePlan() {
   let g = ''
   g += `<rect class="grass" x="-270" y="-270" width="540" height="540"/>`
   g += `<g class="road">${arcPath(R)}</g>`
-  g += `<g class="fire">${arcPath(LAYOUT.fireLaneRadius)}</g>`
+  g += `<g class="inner-road">${arcPath(INNER_ROAD.radius)}</g>`
+  for (const ang of INNER_ROAD.links) {
+    const [x0, z0] = polar(ang, INNER_ROAD.radius)
+    const [x1, z1] = polar(ang, LAYOUT.ringRoadRadius)
+    g += `<line class="road-link" x1="${x0}" y1="${z0}" x2="${x1}" y2="${z1}"/>`
+  }
   g += `<g class="bike">${arcPath(LAYOUT.bikeRingRadius)}</g>`
   g += `<circle class="plaza" cx="0" cy="0" r="${LAYOUT.plazaRadius}"/>`
   g += `<circle class="water" cx="${LAKE.x}" cy="${LAKE.z}" r="${LAKE.r}"/>`
@@ -435,7 +440,7 @@ app.innerHTML = `
   <section id="lageplan"><h2><span>1</span>Gesamt-Lageplan</h2>
     <div class="figure two"><div>${sitePlan()}</div><div class="side">
       <p>Das runde Holding-HQ (1) steht im Zentrum auf dem HQ-Platz. Die Unternehmensgebäude liegen auf einem äußeren Ring (≈ 178 m) zwischen Feuerwehrzufahrt und Ringstraße; kleinere Häuser (Racing, Café, Hotels HQ, Foundation) stehen frei am HQ-Platz. Health & Recovery Center (${NUM.get('health')}) und Fitness HQ (${NUM.get('fitness')}) liegen nebeneinander auf dem äußeren Ring. Das Big Apple Hotel (${NUM.get('hotel')}) liegt am Rand nahe der Haupteinfahrt.</p>
-      ${legend([['l-bld', 'Gebäude'], ['l-hq', 'Holding-HQ'], ['l-mono', 'Monorail & Stationen'], ['l-road', 'Ringstraße'], ['l-fire', 'Feuerwehrzufahrt'], ['l-bike', 'Radweg'], ['l-ramp', 'Garagenrampen'], ['l-water', 'Campussee']])}
+      ${legend([['l-bld', 'Gebäude'], ['l-hq', 'Holding-HQ'], ['l-mono', 'Monorail & Stationen'], ['l-road', 'Ringstraße'], ['l-fire', 'Campusring (Liefer- & Feuerwehrweg)'], ['l-bike', 'Radweg'], ['l-ramp', 'Garagenrampen'], ['l-water', 'Campussee']])}
     </div></div>
   </section>
   <section id="anordnung"><h2><span>2</span>Gebäudeanordnung</h2>${arrangementTable()}</section>

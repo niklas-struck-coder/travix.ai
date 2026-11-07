@@ -6,7 +6,7 @@
 import * as THREE from 'three'
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture, textures } from '../engine/materials'
-import { BUILDINGS, DEG, LAKE, LAYOUT, STATIONS, UG, polar, rampCorners, shortName } from '../config/campus'
+import { BUILDINGS, DEG, INNER_ROAD, LAKE, LAYOUT, STATIONS, UG, polar, rampCorners, shortName } from '../config/campus'
 import { infoPoint } from './dynamic'
 import { world } from '../engine/registry'
 import { groundOpenings } from './GenericBuilding'
@@ -47,6 +47,11 @@ function onPath(x: number, z: number) {
   if (Math.abs(r - L.bikeRingRadius) < 4) return true
   if (Math.abs(r - L.fireLaneRadius) < 5) return true
   if (Math.abs(r - L.ringRoadRadius) < 12) return true
+  for (const ang of INNER_ROAD.links) {
+    let da = Math.abs(((Math.atan2(x, -z) / DEG) % 360 + 360) % 360 - ang)
+    da = Math.min(da, 360 - da)
+    if (r > L.fireLaneRadius && r < L.ringRoadRadius && da * DEG * r < 7) return true
+  }
   if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 3) return true
   if (Math.abs(x) < 14 && z > 30 && z < 130) return true // HQ axis
   if (z > L.ringRoadRadius - 20 && Math.abs(x) < 80) return true // boulevard & parking
@@ -152,6 +157,41 @@ function ringsAndRoads(b: WorldBuilder) {
     K.streetLamp(b, Math.cos(a) * (R - 8.5), Math.sin(a) * (R - 8.5), -a - Math.PI / 2, 0, 7)
     K.tree(b, Math.cos(a + 0.03) * (R + 11), Math.sin(a + 0.03) * (R + 11), 1.0, 0, i)
     K.tree(b, Math.cos(a + 0.06) * (R - 11.5), Math.sin(a + 0.06) * (R - 11.5), 0.9, 0, i + 1)
+  }
+  // campus ring road (inner road): centre dashes, pedestrian crossings at the walkways, links to the ring road
+  {
+    const RI = INNER_ROAD.radius
+    const nd = Math.floor((2 * Math.PI * RI) / 7)
+    for (let i = 0; i < nd; i++) {
+      const a = (i / nd) * Math.PI * 2
+      const deg = ((90 + a / DEG) % 360 + 360) % 360
+      if (BUILDINGS.some((bd) => bd.kind !== 'hq' && bd.radius > RI && Math.min(Math.abs(bd.angle - deg), 360 - Math.abs(bd.angle - deg)) * DEG * RI < 5)) continue
+      b.box(Math.cos(a) * RI, 0.035, Math.sin(a) * RI, 0.12, 0.01, 2.8, '#ecece6', 'matte', { rot: -a })
+    }
+    // zebra crossings where the footpaths to the outer buildings cross the road
+    for (const bd of BUILDINGS) {
+      if (bd.kind === 'hq' || bd.radius < RI) continue
+      b.at(...((): [number, number, number, number] => { const [x, z] = polar(bd.angle, RI); return [x, 0.036, z, bd.rot] })(), () => {
+        for (let k = -3; k <= 3; k++) b.box(k * 0.8, 0, 0, 0.45, 0.01, INNER_ROAD.width - 0.6, '#f4f4ee', 'matte')
+      })
+    }
+    // links from the campus ring road to the outer ring road
+    for (const ang of INNER_ROAD.links) {
+      const r0 = RI + INNER_ROAD.width / 2
+      const r1 = L.ringRoadRadius - L.ringRoadWidth / 2
+      const len = r1 - r0
+      const [x, z] = polar(ang, r0 + len / 2)
+      b.box(x, 0.02, z, INNER_ROAD.width, 0.02, len + 0.4, '#45484a', 'satin', { rot: -ang * DEG })
+      for (let t = 2; t < len - 2; t += 6) {
+        const [dx, dz] = polar(ang, r0 + t)
+        b.box(dx, 0.036, dz, 0.12, 0.01, 2.8, '#ecece6', 'matte', { rot: -ang * DEG })
+      }
+      const [sx, sz] = polar(ang + 2.2, r0 + 4)
+      b.at(sx, 0, sz, -ang * DEG, () => {
+        b.box(0, 0, 0, 0.08, 2.3, 0.08, C.anthracite, 'metal', { col: true })
+        b.sign(0, 2.3, 0.05, 0.9, 0.9, textTexture(['20', 'km/h'], { w: 256, h: 256, bg: '#ffffff' }), 0, 0.3, true)
+      })
+    }
   }
   // fire lane signs
   for (let i = 0; i < 8; i++) {
@@ -520,9 +560,10 @@ export function buildGroundMeshes(): THREE.Object3D[] {
   // rings: monorail service path, bike path, fire lane, ring road + sidewalks
   const ringMesh = (r0: number, r1: number, mat: THREE.Material, y: number) => flat(new THREE.RingGeometry(r0, r1, 256, 1), mat, y)
   ringMesh(L.bikeRingRadius - 1.8, L.bikeRingRadius + 1.8, new THREE.MeshStandardMaterial({ map: tex(t.bike, 40), roughness: 0.85 }), 0.008)
-  ringMesh(L.fireLaneRadius - 3, L.fireLaneRadius + 3, new THREE.MeshStandardMaterial({ map: tex(t.paving, 60), roughness: 0.8, color: '#d8d2c6' }), 0.007)
-  ringMesh(L.fireLaneRadius - 3.2, L.fireLaneRadius - 3.0, new THREE.MeshBasicMaterial({ color: '#b3261e' }), 0.012)
-  ringMesh(L.fireLaneRadius + 3.0, L.fireLaneRadius + 3.2, new THREE.MeshBasicMaterial({ color: '#b3261e' }), 0.012)
+  // campus ring road (asphalt) with white edge lines
+  ringMesh(INNER_ROAD.radius - INNER_ROAD.width / 2, INNER_ROAD.radius + INNER_ROAD.width / 2, new THREE.MeshStandardMaterial({ map: tex(t.asphalt, 80), roughness: 0.9 }), 0.007)
+  ringMesh(INNER_ROAD.radius - INNER_ROAD.width / 2 + 0.2, INNER_ROAD.radius - INNER_ROAD.width / 2 + 0.35, new THREE.MeshBasicMaterial({ color: '#e8e8e2' }), 0.012)
+  ringMesh(INNER_ROAD.radius + INNER_ROAD.width / 2 - 0.35, INNER_ROAD.radius + INNER_ROAD.width / 2 - 0.2, new THREE.MeshBasicMaterial({ color: '#e8e8e2' }), 0.012)
   const R = L.ringRoadRadius
   const hw = L.ringRoadWidth / 2
   ringMesh(R - hw, R + hw, new THREE.MeshStandardMaterial({ map: tex(t.asphalt, 120), roughness: 0.9 }), 0.01)

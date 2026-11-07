@@ -6,7 +6,7 @@
 import { useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { LAYOUT, DEG } from '../config/campus'
+import { LAYOUT, DEG, INNER_ROAD } from '../config/campus'
 import { C } from '../engine/materials'
 import { player } from '../state/store'
 
@@ -40,6 +40,8 @@ export function TrafficSystem() {
     for (let i = 0; i < 18; i++) {
       out.push({ lane: i % 2, a: (i / 18) * Math.PI * 2 + (i % 2) * 0.1, v: 10, vmax: 11 + (i % 4), bus: false, wait: 0, color: new THREE.Color(COLORS[i % COLORS.length]), stopped: false })
     }
+    // slow service vehicles on the campus ring road (lanes 2 and 3)
+    for (let i = 0; i < 6; i++) out.push({ lane: 2 + (i % 2), a: (i / 6) * Math.PI * 2 + 0.4, v: 5, vmax: 5.5 + (i % 3) * 0.5, bus: false, wait: 0, color: new THREE.Color([C.white, C.green, '#d9d4c8'][i % 3]), stopped: false })
     out.push({ lane: 0, a: 1.0, v: 8, vmax: 10, bus: true, wait: 0, color: new THREE.Color(C.white), stopped: false })
     out.push({ lane: 1, a: 4.0, v: 8, vmax: 10, bus: true, wait: 0, color: new THREE.Color(C.white), stopped: false })
     return out
@@ -69,8 +71,8 @@ export function TrafficSystem() {
     const p = new THREE.Vector3()
     const s = new THREE.Vector3()
     vehs.forEach((v, i) => {
-      const r = v.lane === 0 ? R - 3.2 : R + 3.2
-      const dir = v.lane === 0 ? 1 : -1
+      const r = [R - 3.2, R + 3.2, INNER_ROAD.radius - 1.75, INNER_ROAD.radius + 1.75][v.lane]
+      const dir = v.lane % 2 === 0 ? 1 : -1
       // distance to vehicle ahead in the same lane
       let gap = Infinity
       for (const o of vehs) {

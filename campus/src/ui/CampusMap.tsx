@@ -3,11 +3,12 @@
  * Both share one static map drawing.
  */
 import { useEffect, useRef, useState } from 'react'
-import { BUILDINGS, LAKE, LAYOUT, STATIONS, UG, polar, buildingById, shortName, undergroundPlan, type BuildingInfo } from '../config/campus'
+import { BUILDINGS, INNER_ROAD, LAKE, LAYOUT, STATIONS, UG, polar, buildingById, shortName, undergroundPlan, type BuildingInfo } from '../config/campus'
 import { C } from '../engine/materials'
 import { track } from '../systems/MonorailSystem'
 import { player, ui, useUI, toast } from '../state/store'
 import { archCam, setCameraMode, teleport } from '../systems/PlayerController'
+import { train, platformOf } from '../systems/MonorailSystem'
 import { Logo } from './Logo'
 
 const W = LAYOUT.worldHalf
@@ -45,7 +46,17 @@ function drawStatic(g: CanvasRenderingContext2D, size: number) {
   g.fillRect(-78, LAYOUT.ringRoadRadius + 18, 64, 60)
   g.fillRect(14, LAYOUT.ringRoadRadius + 18, 64, 60)
   ring(LAYOUT.ringRoadRadius, LAYOUT.ringRoadWidth, '#55585a')
-  ring(LAYOUT.fireLaneRadius, 6, '#d8d2c6')
+  ring(LAYOUT.fireLaneRadius, 7, '#55585a')
+  g.strokeStyle = '#55585a'
+  g.lineWidth = 7
+  for (const ang of INNER_ROAD.links) {
+    const [x0, z0] = polar(ang, LAYOUT.fireLaneRadius)
+    const [x1, z1] = polar(ang, LAYOUT.ringRoadRadius)
+    g.beginPath()
+    g.moveTo(x0, z0)
+    g.lineTo(x1, z1)
+    g.stroke()
+  }
   ring(LAYOUT.bikeRingRadius, 3.6, '#a5564a')
   // plaza
   g.fillStyle = '#d9d3c7'
@@ -320,10 +331,20 @@ export function CampusMap() {
         best = b.id
       }
     }
+    // monorail stations win when clicked close to them
+    for (const st of STATIONS) {
+      const [sx, sz] = polar(st.angle, LAYOUT.monorailRadius + 3)
+      const d = Math.hypot(sx - x, sz - z)
+      if (d < 16 && d < bd + 6) {
+        bd = d
+        best = st.id
+      }
+    }
     setSel(best)
   }
 
-  const b = sel ? buildingById(sel) : null
+  const st = sel ? STATIONS.find((s) => s.id === sel) : undefined
+  const b = sel && !st ? buildingById(sel) : null
   const dist = b ? Math.round(Math.hypot(entranceOf(b)[0] - player.pos.x, entranceOf(b)[1] - player.pos.z)) : 0
   const close = () => ui().set({ screen: started ? 'playing' : 'menu' })
   return (
@@ -337,12 +358,29 @@ export function CampusMap() {
       <div className="map-legend">
         <span><i style={{ background: C.green }} /> Monorail & Stationen</span>
         <span><i style={{ background: '#a5564a' }} /> Radweg</span>
-        <span><i style={{ background: '#d8d2c6' }} /> Feuerwehrzufahrt</span>
-        <span><i style={{ background: '#55585a' }} /> Ringstraße</span>
+        <span><i style={{ background: '#55585a' }} /> Straßen & Campusring</span>
         <span><i style={{ border: '2px dashed #1f5fa8' }} /> Tiefgarage (Ebene –2)</span>
         <span><i style={{ border: '2px dashed #7cc242' }} /> Promenade (Ebene –1)</span>
         <span>Gebäude anklicken für Details</span>
       </div>
+      {st && (
+        <div className="panel map-panel">
+          <div className="small muted">Monorail-Station</div>
+          <h2>{st.name}</h2>
+          <p>Rundkurs mit 5 Stationen. Der Zug hält ca. 24 s, die Türen öffnen zur Bahnsteigseite. Auf dem Bahnsteig <b>E</b> drücken zum Einsteigen, an der nächsten Station <b>E</b> zum Aussteigen.</p>
+          <p className="muted">Nächster Zug in ca. {Math.max(0, Math.round(train.eta(platformOf(st.id).i)))} s</p>
+          <div className="row">
+            <button className="btn" onClick={() => {
+              const p = platformOf(st.id)
+              teleport(p.x, p.z)
+              player.pos.set(p.x, p.y, p.z)
+              if (ui().cameraMode === 'bird' || ui().cameraMode === 'architect') ui().set({ cameraMode: 'first' })
+              ui().set({ screen: 'playing', started: true })
+              toast('Du stehst auf dem Bahnsteig – warte auf den Zug und drücke E.')
+            }}>Zum Bahnsteig teleportieren</button>
+          </div>
+        </div>
+      )}
       {b && (
         <div className="panel map-panel">
           <Logo size={18} suffix={b.suffix} />

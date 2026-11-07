@@ -85,7 +85,7 @@ export const train = {
   target: 0, // index into ordered (current / next station)
   doors: 0,
   update(dt: number) {
-    const DWELL = 16
+    const DWELL = 24
     if (this.state === 'dwell') {
       this.dwell -= dt
       const t = DWELL - this.dwell
@@ -122,7 +122,7 @@ export const train = {
       const d = (track.stationS[idx] - s + track.length) % track.length
       t += d / 11 + 4
       if (idx === i) return t
-      t += 16
+      t += 24
       s = track.stationS[idx]
       idx = (idx + 1) % ordered.length
     }
@@ -230,9 +230,17 @@ function station(b: WorldBuilder, i: number, name: string) {
     x: wx, y: wy, z: wz,
     radius: 22,
     priority: 0,
-    enabled: () => train.dwellingAt(i) && player.mode === 'walk' && Math.abs(player.pos.y - Y) < 1.2,
-    label: () => `Monorail einsteigen (nächster Halt: ${ordered[(i + 1) % ordered.length].name})`,
+    enabled: () => player.mode === 'walk' && Math.abs(player.pos.y - Y) < 1.2,
+    label: () => {
+      if (train.dwellingAt(i)) return `Monorail einsteigen (nächster Halt: ${ordered[(i + 1) % ordered.length].name})`
+      const eta = Math.max(1, Math.round(train.eta(i)))
+      return eta <= 3 ? 'Monorail fährt ein …' : `Monorail: nächster Zug in ${eta} s – hier warten`
+    },
     action: () => {
+      if (!train.dwellingAt(i)) {
+        toast(`Der Zug kommt in ca. ${Math.max(1, Math.round(train.eta(i)))} s. Bleib auf dem Bahnsteig und drücke dann E.`)
+        return
+      }
       player.mode = 'riding'
       player.ride = { car: 1, lx: 2.0, lz: 0.6 }
       ui().set({ ride: { next: ordered[(i + 1) % ordered.length].name, status: 'Türen schließen…' } })
@@ -245,6 +253,12 @@ function station(b: WorldBuilder, i: number, name: string) {
 }
 
 const stationExits: { x: number; z: number }[] = []
+
+/** platform point (world) and station index for a station id – used by the campus map */
+export function platformOf(id: string) {
+  const i = ordered.findIndex((s) => s.id === id)
+  return { i, x: stationExits[i]?.x ?? 0, z: stationExits[i]?.z ?? 0, y: PLATFORM_Y + 0.05 }
+}
 
 /** leave the train at the current station */
 export function exitTrain() {

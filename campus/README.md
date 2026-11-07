@@ -67,7 +67,8 @@ Raumlisten) erzeugt.
   Mitarbeitende, Besucher, E-Laden, Barrierefrei, Motorräder und Fahrräder; nur über vier
   Aufzugskerne (zwei als Glaslift bis zum HQ-Platz) und ein Treppenhaus mit Ebene –1
   verbunden.
-- **Monorail**: Rundkurs mit 5 Stationen, keine weiteren Brücken oder Stege.
+- **Monorail**: Rundkurs mit 5 Stationen (Halt ca. 24 s, Ankunftszeit am Bahnsteig; über die Campuskarte kann man direkt zum Bahnsteig springen), keine weiteren Brücken oder Stege.
+- **Campusring**: Straße innerhalb des Rings (Liefer- und Feuerwehrweg, 20 km/h) mit Zebrastreifen und vier Verbindungen zur Ringstraße.
 - Weiterhin: Ringstraße mit Verkehr, Busse, Boulevard, Besucherparkplätze, Radweg,
   Feuerwehrzufahrt, Energiezentrale, Campussee, Gracht, NPCs, Tageszeiten, Wetter.
 

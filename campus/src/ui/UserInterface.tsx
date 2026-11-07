@@ -158,7 +158,7 @@ export function ElevatorPanel() {
     if (!el.playerInside()) {
       // step into the cab first, then the doors close
       player.autoWalk = { x: el.cx, z: el.cz, t: 2 }
-      setTimeout(() => el.call(i), 1300)
+      setTimeout(() => el.call(i), 800)
     } else el.call(i)
   }
   return (

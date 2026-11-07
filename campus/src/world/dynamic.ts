@@ -82,20 +82,20 @@ export class Elevator {
         }
         break
       case 'opening':
-        this.door = Math.min(1, this.door + dt * 1.1)
+        this.door = Math.min(1, this.door + dt * 2.4)
         if (this.door >= 1) {
           this.state = 'idle'
           this.holdOpen = 7
         }
         break
       case 'closing':
-        this.door = Math.max(0, this.door - dt * 1.1)
+        this.door = Math.max(0, this.door - dt * 2.4)
         if (this.door <= 0) this.state = 'moving'
         break
       case 'moving': {
         const ty = this.stops[this.target].y
         const dist = ty - this.y
-        const speed = Math.min(4.5, 0.6 + Math.abs(dist) * 0.9)
+        const speed = Math.min(10, 1.4 + Math.abs(dist) * 1.8)
         const step = Math.sign(dist) * Math.min(Math.abs(dist), speed * dt)
         this.y += step
         if (inside) {
