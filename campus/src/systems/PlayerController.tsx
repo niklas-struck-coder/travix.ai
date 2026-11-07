@@ -46,7 +46,15 @@ export function setupInput(canvas: HTMLCanvasElement) {
   const up = (e: KeyboardEvent) => input.keys.delete(e.code)
   let skip = 0
   const move = (e: MouseEvent) => {
-    if (document.pointerLockElement !== canvas) return
+    if (document.pointerLockElement !== canvas) {
+      // fallback when pointer lock is unavailable (e.g. embedded pages): drag to look
+      const u = ui()
+      if ((e.buttons & 1) && u.screen === 'playing' && u.cameraMode !== 'bird' && !u.elevatorPanel && !u.info && e.target === canvas) {
+        input.lookDX += e.movementX * 1.6
+        input.lookDY += e.movementY * 1.6
+      }
+      return
+    }
     // browsers sometimes report a large jump right after the pointer gets locked
     if (skip > 0) {
       skip--

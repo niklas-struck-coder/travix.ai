@@ -84,7 +84,7 @@ function ClickToPlay() {
     return () => document.removeEventListener('pointerlockchange', f)
   }, [])
   if (locked || input.touch || mode === 'bird' || panel) return null
-  return <div className="click-hint">Klicken, um die Maussteuerung zu aktivieren</div>
+  return <div className="click-hint">Klicken für Maussteuerung – oder bei gedrückter Maustaste ziehen, um dich umzusehen</div>
 }
 
 function BuildingCard({ id, dist, k }: { id: string; dist: number; k: string }) {
