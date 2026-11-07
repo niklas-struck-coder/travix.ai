@@ -1,14 +1,14 @@
 /**
- * In-world HUD (logo, clock, weather, minimap, location, prompts, building
- * card, navigation arrow, monorail ride status) and modal panels (info,
+ * In-world HUD (logo, clock, weather, minimap, location, prompts,
+ * navigation arrow, monorail ride status) and modal panels (info,
  * elevator floor selection).
  */
 import { useEffect, useRef, useState } from 'react'
 import { useUI, ui, player, input, toast } from '../state/store'
-import { buildingById, BUILDINGS } from '../config/campus'
+import { BUILDINGS } from '../config/campus'
 import { elevatorById } from '../world/dynamic'
 import { Logo } from './Logo'
-import { Minimap, entranceOf } from './CampusMap'
+import { Minimap } from './CampusMap'
 
 const WEATHER = { sun: '☀ Sonnig', cloudy: '☁ Bewölkt', rain: '🌧 Leichter Regen' }
 
@@ -22,7 +22,6 @@ export function HUD() {
   const s = useUI()
   if (s.screen !== 'playing') return null
   const touch = input.touch
-  const key = touch ? '' : '[E] '
   return (
     <div className="hud">
       <div className="hud-tl panel slim">
@@ -49,7 +48,6 @@ export function HUD() {
           {touch ? <b>Aktion: </b> : <kbd>E</kbd>} {s.prompt}
         </div>
       )}
-      {s.buildingCard && !s.prompt && s.cameraMode !== 'architect' && <BuildingCard id={s.buildingCard.id} dist={s.buildingCard.dist} k={key} />}
       {s.showHints && !touch && (
         <div className="hints">
           {s.cameraMode === 'architect' ? (
@@ -85,25 +83,6 @@ function ClickToPlay() {
   }, [])
   if (locked || input.touch || mode === 'bird' || panel) return null
   return <div className="click-hint">Klicken für Maussteuerung – oder bei gedrückter Maustaste ziehen, um dich umzusehen</div>
-}
-
-function BuildingCard({ id, dist, k }: { id: string; dist: number; k: string }) {
-  const b = buildingById(id)
-  return (
-    <div className="panel building-card">
-      <Logo size={15} suffix={b.suffix} />
-      <h3>{b.name.toUpperCase()}</h3>
-      <p>{b.description}</p>
-      <div className="row">
-        <span className="muted">{dist} m entfernt</span>
-        <button className="btn small" onClick={() => {
-          const [x, z] = entranceOf(b)
-          ui().set({ navTarget: { id: b.id, name: b.name, x, z } })
-        }}>Zum Eingang navigieren</button>
-      </div>
-      <p className="muted small">{k ? 'Am Eingang [E] „Gebäude betreten“ – Türen öffnen sich automatisch.' : 'Zum Eingang gehen – Türen öffnen sich automatisch.'}</p>
-    </div>
-  )
 }
 
 function NavArrow() {
