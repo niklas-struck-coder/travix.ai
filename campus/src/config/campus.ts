@@ -41,8 +41,10 @@ export type FacadeStyle =
   | 'entertainment'
   | 'trains'
   | 'foundation'
-  | 'conference'
   | 'campushotel'
+  | 'racing'
+  | 'health'
+  | 'staffhotel'
 
 export interface BuildingInfo {
   id: string
@@ -56,7 +58,7 @@ export interface BuildingInfo {
   floors: number // total floors (visual)
   floorH: number
   style?: FacadeStyle
-  kind: 'hq' | 'subsidiary' | 'conference' | 'hotel' | 'service'
+  kind: 'hq' | 'subsidiary' | 'hotel' | 'service'
   // computed
   x: number
   z: number
@@ -72,9 +74,19 @@ const raw: Raw[] = [
     angle: 0, radius: 0, w: 48, d: 48, floors: 22, floorH: 4.5,
   },
   {
-    id: 'conference', name: 'Big Apple Besucher- & Konferenzzentrum', suffix: 'Groups', kind: 'conference',
-    description: 'Besucherempfang, Unternehmensausstellung, Auditorium für über 400 Gäste (Big Apple Innovation Week), Konferenz- und Presseräume.',
-    angle: 180, radius: 165, w: 96, d: 46, floors: 2, floorH: 7, style: 'conference',
+    id: 'racing', name: 'Big Apple Groups Racing', suffix: 'Groups Racing', kind: 'subsidiary', style: 'racing',
+    description: 'Formel-1-Team der Big Apple Groups: F1-Showroom mit Rennwagen, Rennsimulatoren, Race Control & Telemetrie, Aerodynamik/Windkanal und Engineering.',
+    angle: 180, radius: 178, w: 58, d: 34, floors: 4, floorH: 4.6,
+  },
+  {
+    id: 'health', name: 'Big Apple Health & Recovery Center', suffix: 'Health', kind: 'subsidiary', style: 'health',
+    description: 'Gesundheits- und Erholungszentrum für alle Mitarbeitenden: Physiotherapie, betriebsärztlicher Dienst, Recovery & Sauna, Massage, Meditation und Ernährungsberatung.',
+    angle: 124, radius: 92, w: 36, d: 24, floors: 2, floorH: 4.2,
+  },
+  {
+    id: 'staffhotel', name: 'Big Apple Hotels – Mitarbeiter-Residenz', suffix: 'Hotels', kind: 'hotel', style: 'staffhotel',
+    description: 'Hotel für Mitarbeitende, die aus aller Welt zum Campus reisen: Apartments, Gemeinschaftsküche & Lounge, Co-Working, Waschsalon und Dachterrasse.',
+    angle: 200, radius: 186, w: 28, d: 44, floors: 10, floorH: 3.4,
   },
   {
     id: 'hotel', name: 'Big Apple Hotels – Campus Hotel', suffix: 'Hotels', kind: 'hotel',
@@ -138,11 +150,17 @@ export const BUILDINGS: BuildingInfo[] = raw.map((b) => {
   return { ...b, x, z, rot: faceCentre(b.angle) }
 })
 
+const SHORT: Record<string, string> = {
+  hq: 'HQ', hotel: 'Campus Hotel', staffhotel: 'Mitarbeiter-Hotel', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery',
+}
+/** short label for maps, signs and the location display */
+export const shortName = (b: { id: string; suffix: string }) => SHORT[b.id] ?? b.suffix
+
 export const buildingById = (id: string) => BUILDINGS.find((b) => b.id === id)!
 
 /** Monorail stations (compass angle on the monorail ring) */
 export const STATIONS = [
-  { id: 's-hq', name: 'Holding HQ / Besucherzentrum', angle: 180 },
+  { id: 's-hq', name: 'Holding HQ / Racing', angle: 180 },
   { id: 's-fin', name: 'Finance · Mobility', angle: 122 },
   { id: 's-tech', name: 'Tech · Trains', angle: 52 },
   { id: 's-hol', name: 'Holidays · Entertainment', angle: 338 },

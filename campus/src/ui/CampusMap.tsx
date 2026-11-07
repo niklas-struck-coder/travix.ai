@@ -3,7 +3,7 @@
  * Both share one static map drawing.
  */
 import { useEffect, useRef, useState } from 'react'
-import { BUILDINGS, GARAGE, LAKE, LAYOUT, STATIONS, polar, buildingById, type BuildingInfo } from '../config/campus'
+import { BUILDINGS, GARAGE, LAKE, LAYOUT, STATIONS, polar, buildingById, shortName, type BuildingInfo } from '../config/campus'
 import { C } from '../engine/materials'
 import { track } from '../systems/MonorailSystem'
 import { player, ui, useUI, toast } from '../state/store'
@@ -232,12 +232,19 @@ export function CampusMap() {
       const P = (x: number, z: number) => [ox + (x + W) * k, oy + (z + W) * k] as const
       g.textAlign = 'center'
       g.font = `600 ${Math.max(10, 11 * devicePixelRatio)}px "Helvetica Neue", Arial, sans-serif`
-      for (const b of BUILDINGS) {
-        const [x, y] = P(b.x, b.z)
-        const label = b.kind === 'hq' ? 'HQ' : b.kind === 'conference' ? 'Besucherzentrum' : b.kind === 'hotel' ? 'Campus Hotel' : b.suffix === 'Hotels' ? 'Hotels (Mgmt.)' : b.suffix
+      // labels: shift vertically until they no longer overlap already placed labels
+      const placed: [number, number, number, number][] = []
+      const lh = 18 * devicePixelRatio
+      for (const b of [...BUILDINGS].sort((p, q) => p.radius - q.radius)) {
+        const [x, y0] = P(b.x, b.z)
+        const label = shortName(b)
         const tw = g.measureText(label).width + 10
+        let y = y0
+        const hits = (yy: number) => placed.some(([px, py, pw, ph]) => Math.abs(px - x) < (pw + tw) / 2 + 2 && Math.abs(py - yy) < (ph + lh) / 2 + 1)
+        for (let k = 1; k < 12 && hits(y); k++) y = y0 + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (lh + 2)
+        placed.push([x, y, tw, lh])
         g.fillStyle = sel === b.id ? C.green : 'rgba(20,22,21,0.82)'
-        g.fillRect(x - tw / 2, y - 9 * devicePixelRatio, tw, 18 * devicePixelRatio)
+        g.fillRect(x - tw / 2, y - lh / 2, tw, lh)
         g.fillStyle = '#fff'
         g.fillText(label, x, y + 4 * devicePixelRatio)
       }

@@ -3,7 +3,7 @@
  * origin is on the floor; "front" is local +z.
  */
 import { WorldBuilder } from '../engine/builder'
-import { C } from '../engine/materials'
+import { C, logoTexture } from '../engine/materials'
 import { seat } from './dynamic'
 
 type B = WorldBuilder
@@ -404,4 +404,91 @@ export function modelTrain(b: B, x: number, y: number, z: number, rot = 0, len =
     for (let i = 0; i < 8; i++) b.ico(-len / 2 + 0.3 + i * 0.8, 1.0, 0.7, 0.12, '#3f6e2f', 'matte')
   })
   b.colBox(x, y, z, len + 0.6, 1.1, 2.0, rot)
+}
+
+/**
+ * Formula 1 car in Big Apple Groups Racing livery (black / apple green / white).
+ * Local frame: nose towards +z, ~5.6 m long, 2.0 m wide.
+ */
+export function formulaCar(b: B, x: number, y: number, z: number, rot = 0, collide = true) {
+  const black = '#111312'
+  b.at(x, y, z, rot, () => {
+    // floor / plank
+    b.box(0, 0.04, -0.1, 1.45, 0.05, 3.7, black, 'satin')
+    // survival cell (tub) and nose
+    b.box(0, 0.12, 0.3, 0.72, 0.5, 2.5, black, 'gloss')
+    b.boxTilt(0, 0.16, 2.05, 0.34, 0.2, 1.5, 0, 0.09, black, 'gloss')
+    b.box(0, 0.25, 2.2, 0.08, 0.06, 1.2, C.green, 'gloss') // nose stripe
+    // front wing: main plane, flap, endplates
+    b.box(0, 0.06, 2.78, 1.95, 0.035, 0.42, C.green, 'gloss')
+    b.box(0, 0.11, 2.66, 1.85, 0.03, 0.2, black, 'gloss')
+    for (const s of [-1, 1]) b.box(s * 0.97, 0.04, 2.76, 0.03, 0.24, 0.52, black, 'gloss')
+    // sidepods with green stripe and white accent
+    for (const s of [-1, 1]) {
+      b.box(s * 0.6, 0.1, 0.15, 0.48, 0.42, 1.7, black, 'gloss')
+      b.box(s * 0.845, 0.3, 0.15, 0.012, 0.07, 1.7, C.green, 'gloss')
+      b.box(s * 0.845, 0.2, 0.15, 0.012, 0.02, 1.7, C.white, 'gloss')
+    }
+    // engine cover + airbox
+    b.boxTilt(0, 0.5, -0.65, 0.5, 0.32, 1.7, 0, -0.14, black, 'gloss')
+    b.box(0, 0.55, -0.02, 0.32, 0.36, 0.38, black, 'gloss')
+    b.box(0, 0.86, -0.02, 0.2, 0.06, 0.3, C.green, 'gloss')
+    b.box(0, 0.52, -1.25, 0.03, 0.42, 0.9, C.green, 'gloss') // shark fin stripe
+    // cockpit, driver helmet, halo
+    b.box(0, 0.6, 0.55, 0.42, 0.03, 0.62, '#050505', 'satin')
+    b.sphere(0, 0.7, 0.38, 0.13, C.green, 'gloss', 1, 14)
+    b.box(0, 0.68, 0.43, 0.2, 0.05, 0.08, '#1e2a33', 'gloss') // visor
+    b.box(0, 0.79, 0.5, 0.6, 0.04, 0.05, black, 'metal')
+    b.box(0, 0.79, 0.62, 0.05, 0.04, 0.3, black, 'metal')
+    b.box(0, 0.62, 0.8, 0.05, 0.2, 0.05, black, 'metal')
+    // rear wing: endplates, main plane, DRS flap, beam wing
+    for (const s of [-1, 1]) b.box(s * 0.5, 0.32, -1.98, 0.03, 0.66, 0.55, black, 'gloss')
+    b.box(0, 0.78, -1.98, 1.0, 0.05, 0.36, black, 'gloss')
+    b.box(0, 0.88, -2.05, 1.0, 0.04, 0.24, C.green, 'gloss')
+    b.box(0, 0.45, -2.0, 0.96, 0.03, 0.2, black, 'gloss')
+    b.boxTilt(0, 0.04, -1.9, 1.0, 0.12, 0.55, 0, 0.3, black, 'satin') // diffuser
+    b.box(0, 0.25, -2.25, 0.08, 0.06, 0.04, '#d0201c', 'emissive') // rain light
+    // wheels (Pirelli style: black tyre, green sidewall marking, dark rim)
+    for (const [wz, r, wdt] of [[1.62, 0.33, 0.36], [-1.45, 0.36, 0.44]] as const) {
+      for (const s of [-1, 1]) {
+        const wx = s * (wz > 0 ? 0.8 : 0.78)
+        b.cylX(wx, r, wz, r, wdt, '#151515', 'satin', 0, 18)
+        b.cylX(wx + s * (wdt / 2 + 0.002), r, wz, r * 0.82, 0.01, C.green, 'satin', 0, 18)
+        b.cylX(wx + s * (wdt / 2 + 0.004), r, wz, r * 0.6, 0.01, '#2a2d2c', 'metal', 0, 18)
+        // suspension arms
+        b.box(s * 0.49, r + 0.02, wz, 0.3, 0.03, 0.05, black, 'metal')
+        b.box(s * 0.49, r - 0.12, wz, 0.3, 0.03, 0.05, black, 'metal')
+      }
+    }
+    // livery: team logo on the sidepods and the engine cover
+    for (const s of [-1, 1]) b.sign(s * 0.852, 0.36, 0.15, 1.05, 0.17, logoTexture('Groups Racing', { bg: '#111312', onDark: true, w: 768, h: 128 }), (s * Math.PI) / 2, 0.5)
+  })
+  if (collide) b.colBox(x, y, z, 2.0, 1.0, 5.8, rot)
+}
+
+/** stack of racing tyres */
+export function tyreStack(b: B, x: number, y: number, z: number, n = 4, color = C.green) {
+  for (let i = 0; i < n; i++) {
+    b.cyl(x, y + i * 0.34, z, 0.33, 0.33, '#151515', 'satin', { segs: 18 })
+    b.cyl(x, y + i * 0.34 + 0.12, z, 0.335, 0.08, color, 'satin', { segs: 18 })
+  }
+  b.colCyl(x, y, z, 0.35, n * 0.34)
+}
+
+/** racing simulator rig: seat, wheel and three curved screens */
+export function simRig(b: B, x: number, y: number, z: number, rot = 0) {
+  b.at(x, y, z, rot, () => {
+    b.box(0, 0, 0, 0.9, 0.12, 1.9, '#1d1f1e', 'metal')
+    b.box(0, 0.12, -0.45, 0.55, 0.25, 0.6, C.black, 'satin')
+    b.boxTilt(0, 0.35, -0.75, 0.55, 0.65, 0.12, 0, -0.35, C.black, 'satin')
+    b.box(0, 0.12, 0.55, 0.1, 0.55, 0.1, C.anthracite, 'metal')
+    b.cylX(0, 0.72, 0.5, 0.15, 0.05, C.black, 'satin', Math.PI / 2, 14)
+    b.box(0, 0.12, 0.85, 0.4, 0.12, 0.25, C.anthracite, 'metal')
+    for (const [sx, a] of [[-0.75, 0.6], [0, 0], [0.75, -0.6]] as const) {
+      b.box(sx, 0.75, 1.05 - Math.abs(sx) * 0.3, 0.75, 0.45, 0.04, C.black, 'gloss', { rot: a })
+      b.box(sx, 0.78, 1.03 - Math.abs(sx) * 0.3, 0.7, 0.4, 0.005, '#2c5a4b', 'emissive', { rot: a })
+    }
+    b.box(0, 0.72, 1.12, 0.12, 0.03, 0.12, C.green, 'emissive')
+  })
+  b.colBox(x, y, z, 1.6, 1.0, 2.2, rot)
 }

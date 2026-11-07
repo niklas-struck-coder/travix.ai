@@ -3,7 +3,7 @@
  * features and an interior program (2–3 visitable floors).
  */
 import { WorldBuilder } from '../engine/builder'
-import { C, textTexture } from '../engine/materials'
+import { C, canvasTex, textTexture } from '../engine/materials'
 import { BUILDINGS, type BuildingInfo, type FacadeStyle } from '../config/campus'
 import { buildGeneric, ring, type FloorSpec, type GenericCtx } from './GenericBuilding'
 import * as K from './kits'
@@ -12,6 +12,39 @@ import { infoPoint } from './dynamic'
 const MARKET = { kind: 'market' as const }
 
 const PROGRAMS: Record<string, FloorSpec[]> = {
+  racing: [
+    { label: 'EG', rooms: [
+      { name: 'Empfang & Fan-Bereich', kind: 'reception', wing: 'C' },
+      { name: 'F1-Showroom', kind: 'f1showroom', wing: 'L', open: true },
+      { name: 'Rennsimulatoren', kind: 'simulators', wing: 'R', f0: 0.45, f1: 1 },
+      { name: 'Trophäen & Teamgeschichte', kind: 'exhibition', wing: 'R', f0: 0, f1: 0.45, open: true, ctx: { screens: [{ title: 'Big Apple Groups Racing', lines: ['Formel-1-Team · Gegründet in Amsterdam', 'Heimrennen: Zandvoort'], kind: 'event' }] } },
+    ] },
+    { label: '1. OG', rooms: [
+      { name: 'Race Control & Telemetrie', kind: 'control', wing: 'L', open: true, ctx: { screens: [{ title: 'Telemetrie live', lines: ['Runde 42/72 · P2 · Abstand +1,8 s', 'Reifen: Medium, 18 Runden alt · Boxenstopp in 3 Runden'], kind: 'trains' }] } },
+      { name: 'Aerodynamik & Windkanal', kind: 'aero', wing: 'R', f0: 0.4, f1: 1 },
+      { name: 'Strategieraum', kind: 'strategy', wing: 'R', f0: 0, f1: 0.4 },
+      { name: 'Fahrer-Lounge', kind: 'clientlounge', wing: 'C' },
+    ] },
+    { label: '2. OG', rooms: [
+      { name: 'Engineering & Konstruktion', kind: 'tech', wing: 'L', open: true },
+      { name: 'Fahrer-Performance', kind: 'strength', wing: 'R', f0: 0.5, f1: 1, open: true },
+      { name: 'Besprechungsraum „Zandvoort“', kind: 'conference', wing: 'R', f0: 0, f1: 0.5 },
+    ] },
+  ],
+  health: [
+    { label: 'EG', rooms: [
+      { name: 'Empfang Health & Recovery', kind: 'reception', wing: 'C' },
+      { name: 'Physiotherapie', kind: 'physio', wing: 'L', f0: 0.5, f1: 1 },
+      { name: 'Betriebsärztlicher Dienst', kind: 'medical', wing: 'L', f0: 0, f1: 0.5 },
+      { name: 'Recovery & Sauna', kind: 'recovery', wing: 'R' },
+    ] },
+    { label: '1. OG', rooms: [
+      { name: 'Ruhe- & Meditationsraum', kind: 'meditation', wing: 'L' },
+      { name: 'Massage', kind: 'physio', wing: 'R', f0: 0.5, f1: 1 },
+      { name: 'Ernährungsberatung & Health-Café', kind: 'cafe', wing: 'R', f0: 0, f1: 0.5, open: true },
+      { name: 'Lounge', kind: 'lounge', wing: 'C' },
+    ] },
+  ],
   tech: [
     { label: 'EG', rooms: [
       { name: 'Empfang & Demo-Lobby', kind: 'reception', wing: 'C' },
@@ -178,6 +211,38 @@ function extras(style: FacadeStyle) {
   return (b: WorldBuilder, c: GenericCtx) => {
     const { w, d, H, fh } = c
     switch (style) {
+      case 'racing': {
+        // F1 car on a lit plinth right next to the entrance
+        b.cyl(-10, 0, d / 2 + 8, 4.2, 0.35, C.black, 'gloss', { segs: 40, col: true })
+        b.arc(-10, 0.3, d / 2 + 8, 4.22, 0.06, 0, Math.PI * 2, C.green, 'emissive', true, 40)
+        K.formulaCar(b, -10, 0.35, d / 2 + 8, 0.95)
+        b.floorSign(-10, 0.4, d / 2 + 11.4, 4, 0.45, textTexture(['BAR-01 · Big Apple Groups Racing'], { w: 768, h: 86, bg: '#111312' }), 0)
+        infoPoint(b, -10, 1.2, d / 2 + 12.8, 'BAR-01 – das Formel-1-Auto von Big Apple Groups Racing', [
+          'Originalgroßes Showcar am Haupteingang des Racing-Headquarters.',
+          '1,6-l-V6-Turbo-Hybrid · über 1.000 PS · 0–100 km/h in ca. 2,6 s',
+          'Lackierung: Schwarz mit Apple Green und weißen Akzenten.',
+          'Drinnen: F1-Showroom, Rennsimulatoren, Race Control und Windkanal.',
+        ], { label: 'F1-Auto ansehen', suffix: 'Groups Racing', radius: 4.5 })
+        b.npc({ kind: 'stand', x: -6.5, y: 0, z: d / 2 + 12, yaw: Math.PI + 0.8 })
+        b.npc({ kind: 'stand', x: -13, y: 0, z: d / 2 + 13, yaw: Math.PI - 0.6 })
+        // tyre stacks, checkered start line, team flags
+        for (let i = 0; i < 3; i++) K.tyreStack(b, 8 + i * 0.75, 0, d / 2 + 6, 4 - (i % 2), [C.green, '#f2d24b', '#e05d4b'][i])
+        b.floorSign(0, 0.02, d / 2 + 4.9, 6, 0.6, checker(), 0)
+        for (let i = 0; i < 4; i++) K.flagPole(b, 12 + i * 3, d / 2 + 12, i % 2 ? C.green : C.black, 9)
+        // racing stripe across the façade
+        b.box(0, H - fh * 1.5, d / 2 + 0.2, w + 0.4, 0.5, 0.1, C.green, 'satin')
+        break
+      }
+      case 'health': {
+        // garden with recovery pool, Kneipp path and benches
+        b.box(w / 2 + 7, 0, 0, 8, 0.5, 14, C.stone, 'satin', { col: true, noSupport: true })
+        b.box(w / 2 + 7, 0.5, 0, 7.2, 0.02, 13.2, '#6fb3c2', 'gloss')
+        b.sign(w / 2 + 7, 0.9, -7.05, 3, 0.4, textTexture(['Kneipp-Becken'], { w: 384, h: 64, accent: C.green }), Math.PI)
+        for (let i = 0; i < 4; i++) K.bench(b, -w / 2 - 3, 0, -6 + i * 4, Math.PI / 2)
+        for (let i = 0; i < 5; i++) K.tree(b, -w / 2 - 8, -8 + i * 4.5, 0.75, 0, i)
+        b.box(0, H + 0.5, 0, w - 1, 0.25, d - 1, '#5e8a3a', 'matte') // green roof
+        break
+      }
       case 'tech': {
         // LED crown + solar roof
         ring(b, w + 0.6, d + 0.6, H + 1.4, 0.18, 0.1, C.green, 'emissive')
@@ -308,6 +373,19 @@ function extras(style: FacadeStyle) {
       }
     }
   }
+}
+
+let _checker: ReturnType<typeof canvasTex> | null = null
+function checker() {
+  if (!_checker) {
+    _checker = canvasTex(512, 52, (g) => {
+      for (let x = 0; x < 20; x++) for (let y = 0; y < 2; y++) {
+        g.fillStyle = (x + y) % 2 ? '#111312' : '#f4f5f2'
+        g.fillRect(x * 26, y * 26, 26, 26)
+      }
+    })
+  }
+  return _checker
 }
 
 function truck(b: WorldBuilder, x: number, z: number, rot: number) {

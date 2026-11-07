@@ -8,7 +8,7 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { world } from '../engine/registry'
 import { input, player, ui, useUI, toast, type CameraMode } from '../state/store'
-import { BUILDINGS } from '../config/campus'
+import { BUILDINGS, shortName } from '../config/campus'
 import { exitTrain } from './MonorailSystem'
 import { Avatar } from './NPCSystem'
 
@@ -197,7 +197,7 @@ function updateInteraction(dt: number) {
     }
     const bInfo = room?.building ? BUILDINGS.find((b) => b.id === room!.building) : null
     let loc = room ? room.name : 'Campusgelände'
-    if (bInfo && room && room.name !== bInfo.name && !room.name.includes(bInfo.suffix)) loc = `${bInfo.suffix === 'Groups' ? bInfo.kind === 'hq' ? 'HQ' : 'Besucherzentrum' : 'Big Apple ' + bInfo.suffix} · ${room.name}`
+    if (bInfo && room && room.name !== bInfo.name && !room.name.includes(bInfo.suffix)) loc = `${bInfo.kind === 'hq' ? 'HQ' : bInfo.kind === 'hotel' ? shortName(bInfo) : 'Big Apple ' + bInfo.suffix} · ${room.name}`
     if (player.mode === 'riding') loc = 'Monorail'
     if (loc !== u.location) u.set({ location: loc })
     // building card when approaching a building from outside

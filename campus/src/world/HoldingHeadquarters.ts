@@ -223,7 +223,7 @@ function lobby(b: WorldBuilder) {
       action: () => {
         visitorNo++
         ui().set({ info: { title: 'Besucherausweis erstellt', subtitle: `Gast Nr. ${visitorNo}`, body: [
-          `Gültig heute bis 20:00 Uhr · Zugang: Lobby, Galerie, Besucher- & Konferenzzentrum.`,
+          `Gültig heute bis 20:00 Uhr · Zugang: Lobby, Galerie und alle Showrooms auf dem Campus.`,
           'Ihr Gastgeber wurde benachrichtigt (Simulation).',
           'Tipp: Mit „M“ öffnen Sie die Campuskarte und können zu jedem Gebäude navigieren.',
         ] } })
@@ -246,20 +246,21 @@ function lobby(b: WorldBuilder) {
       b.box(1.9, 0, 0, 0.15, 3.6, 0.3, C.anthracite, 'metal', { col: true })
       b.box(0, 0.95, -0.05, 3.9, 2.3, 0.1, C.black, 'gloss')
       b.screen({ id: 'hq-welcome', lx: 0, ly: 1.0, lz: 0.02, w: 3.6, h: 2.1, slides: [
-        { title: 'Willkommen', lines: ['Big Apple Groups · Global Campus Amsterdam', 'Heute: Big Apple Innovation Week – Auditorium 10:00'], kind: 'event' },
+        { title: 'Willkommen', lines: ['Big Apple Groups · Global Campus Amsterdam', 'Neu: Big Apple Groups Racing – F1-Showroom geöffnet'], kind: 'event' },
         { title: 'Monorail', lines: ['Nächste Abfahrt Station „Holding HQ“', 'Rundkurs über 5 Stationen · alle 2 Minuten'], kind: 'info' },
-        { title: 'Unternehmen', lines: ['Tech · Finance · Fitness · Logistics · Mobility', 'Hotels · Holidays · Entertainment · Trains · Foundation'], kind: 'info' },
+        { title: 'Unternehmen', lines: ['Tech · Finance · Fitness · Logistics · Mobility', 'Hotels · Holidays · Entertainment · Trains · Racing · Health · Foundation'], kind: 'info' },
       ] })
     })
     infoPoint(b, 13.5 + 1.5, 1.4, 17.5 + 1.5, 'Digitaler Informationsbildschirm', [
       'Aktuelle Campus-Informationen: Veranstaltungen, Monorail-Abfahrten und Unternehmen.',
-      'Big Apple Innovation Week: Keynote im Auditorium des Besucher- & Konferenzzentrums.',
+      'Neu im Showroom von Big Apple Groups Racing: der Formel-1-Rennwagen BAR-01.',
     ], { label: 'Informationsbildschirm ansehen' })
 
     // brand exhibition under the gallery (north half)
-    const subs = BUILDINGS.filter((x) => x.kind === 'subsidiary' && x.id !== 'hotels').slice(0, 9)
+    const subs = BUILDINGS.filter((x) => x.kind === 'subsidiary' && x.id !== 'hotels')
+    const step = 148 / Math.max(1, subs.length - 1)
     subs.forEach((s, i) => {
-      const a = (200 + i * 17.5) * D
+      const a = (196 + i * step) * D
       const r = 18.5
       const x = Math.cos(a) * r
       const z = Math.sin(a) * r
@@ -435,7 +436,7 @@ function roof(b: WorldBuilder) {
         ui().set({ info: { title: 'Panorama vom HQ-Dach (≈ 100 m)', subtitle: 'Big Apple Global Campus · Amsterdam', body: [
           'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern.',
           'Nordosten: Big Apple Trains · Osten: Big Apple Tech und Finance.',
-          'Süden: Besucher- & Konferenzzentrum, Campus Hotel, Haupteinfahrt.',
+          'Süden: Big Apple Groups Racing mit F1-Auto am Eingang, Campus Hotel, Mitarbeiter-Residenz, Haupteinfahrt.',
           'Westen: Fitness, Logistics, Campussee mit der Big Apple Foundation.',
           'Die Monorail umrundet das HQ auf 6,8 m Höhe mit fünf Stationen.',
         ] } })

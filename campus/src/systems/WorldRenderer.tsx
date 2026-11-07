@@ -11,7 +11,7 @@ import { world } from '../engine/registry'
 import { buildSite, buildGroundMeshes } from '../world/CampusGround'
 import { buildHQ } from '../world/HoldingHeadquarters'
 import { buildSubsidiaries } from '../world/SubsidiaryBuildings'
-import { buildConferenceAndHotel } from '../world/ConferenceAndHotel'
+import { buildHotels } from '../world/Hotels'
 import { buildMonorail } from './MonorailSystem'
 import { player, ui } from '../state/store'
 
@@ -23,7 +23,7 @@ export function getWorld() {
   buildSite(b)
   buildHQ(b)
   buildSubsidiaries(b)
-  buildConferenceAndHotel(b)
+  buildHotels(b)
   buildMonorail(b)
   const chunks = [...b.chunks.values()].filter((c) => !c.key.startsWith('__'))
   let parts = 0

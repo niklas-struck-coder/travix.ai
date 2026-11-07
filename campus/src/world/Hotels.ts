@@ -1,5 +1,6 @@
 /**
- * Besucher- & Konferenzzentrum and the Big Apple Hotels campus hotel.
+ * Big Apple Hotels on campus: the Campus Hotel (guests) and the
+ * Mitarbeiter-Residenz (hotel for travelling employees).
  * Both reuse the generic building generator with their own programs.
  */
 import { WorldBuilder } from '../engine/builder'
@@ -7,22 +8,6 @@ import { C, textTexture } from '../engine/materials'
 import { buildingById } from '../config/campus'
 import { buildGeneric, type FloorSpec, type GenericCtx } from './GenericBuilding'
 import * as K from './kits'
-
-const CONFERENCE: FloorSpec[] = [
-  { label: 'EG', rooms: [
-    { name: 'Besucherempfang & Lobby', kind: 'reception', wing: 'C' },
-    { name: 'Auditorium', kind: 'auditorium', wing: 'L' },
-    { name: 'Unternehmensausstellung', kind: 'exhibition', wing: 'R', f0: 0.45, f1: 1, open: true, ctx: { screens: [{ title: 'Big Apple Groups', lines: ['10 Unternehmen · 1 Markenfamilie', 'Gegründet in Amsterdam'], kind: 'info' }] } },
-    { name: 'Pressebereich', kind: 'press', wing: 'R', f0: 0, f1: 0.45, flip: true, ctx: { screens: [{ title: 'Pressekonferenz', lines: ['Big Apple Innovation Week 2026', 'Q&A mit der Geschäftsführung'], kind: 'event' }] } },
-  ] },
-  { label: '1. OG', rooms: [
-    { name: 'Foyer Obergeschoss', kind: 'lounge', wing: 'C' },
-    { name: 'Internationale Veranstaltungsfläche', kind: 'event', wing: 'L', flip: true, ctx: { screens: [{ title: 'Global Partner Summit', lines: ['Amsterdam · Dubai · Singapur · New York'], kind: 'event' }] } },
-    { name: 'Konferenzraum „Europa“', kind: 'conference', wing: 'R', f0: 0.66, f1: 1 },
-    { name: 'Konferenzraum „Asien“', kind: 'conference', wing: 'R', f0: 0.33, f1: 0.66 },
-    { name: 'Präsentationsraum', kind: 'presentation', wing: 'R', f0: 0, f1: 0.33, flip: true, ctx: { screens: [{ title: 'Innovation Showcase', lines: ['Start-ups aus dem Big Apple Accelerator'], kind: 'event' }] } },
-  ] },
-]
 
 const HOTEL: FloorSpec[] = [
   { label: 'EG', rooms: [
@@ -46,26 +31,26 @@ const HOTEL: FloorSpec[] = [
   ] },
 ]
 
-export function buildConferenceAndHotel(b: WorldBuilder) {
-  const conf = buildingById('conference')
-  buildGeneric(b, {
-    info: conf, style: 'conference', visit: CONFERENCE, logoSuffix: 'Groups', entranceWidth: 4.0,
-    extras: (b: WorldBuilder, c: GenericCtx) => {
-      const { w, d, H } = c
-      // large cantilevered roof over the forecourt
-      b.box(0, H - 0.6, d / 2 + 6, w * 0.7, 0.6, 12, C.white, 'satin')
-      b.box(0, H - 0.65, d / 2 + 12, w * 0.7, 0.08, 0.1, C.green, 'emissive')
-      for (let i = 0; i < 6; i++) b.cyl(-w * 0.33 + i * ((w * 0.66) / 5), 0, d / 2 + 11, 0.22, H - 0.6, C.white, 'satin', { col: true, segs: 12 })
-      // banner Innovation Week
-      b.box(w / 4, 4.5, d / 2 + 0.35, 16, 6, 0.1, C.black, 'gloss')
-      b.sign(w / 4, 4.6, d / 2 + 0.42, 15.6, 5.8, textTexture(['INNOVATION WEEK 2026', 'Big Apple Groups · Auditorium · Amsterdam'], { w: 1024, h: 384, accent: C.green, size: 90 }), 0, 0.7)
-      // flags
-      for (let i = 0; i < 6; i++) K.flagPole(b, -w / 2 + 6 + i * 3, d / 2 + 16, i % 2 ? C.green : C.white, 10)
-      // second (rear) entrance sign towards the drop-off
-      b.sign(0, 4.0, -d / 2 - 0.4, 10, 1.1, textTexture(['Besucher- & Konferenzzentrum', 'Vorfahrt · Taxi · Parkhaus'], { w: 768, h: 128, accent: C.green }), Math.PI)
-    },
-  })
+const STAFF: FloorSpec[] = [
+  { label: 'EG', rooms: [
+    { name: 'Lobby & Rezeption', kind: 'reception', wing: 'C' },
+    { name: 'Gemeinschaftsküche & Lounge', kind: 'canteen', wing: 'L', open: true },
+    { name: 'Co-Working', kind: 'openoffice', wing: 'R', f0: 0.5, f1: 1, open: true },
+    { name: 'Waschsalon & Fitnessraum', kind: 'cardio', wing: 'R', f0: 0, f1: 0.5 },
+  ] },
+  { label: '1. OG Apartments', rooms: [
+    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${101 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 5, f1: (i + 1) / 5 })),
+    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${106 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 5, f1: (i + 1) / 5 })),
+    { name: 'Flur', kind: 'empty' as const, wing: 'C' as const },
+  ] },
+  { label: '2. OG Apartments', rooms: [
+    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${201 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 5, f1: (i + 1) / 5 })),
+    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${206 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 5, f1: (i + 1) / 5 })),
+    { name: 'Gemeinschaftsraum', kind: 'lounge' as const, wing: 'C' as const },
+  ] },
+]
 
+export function buildHotels(b: WorldBuilder) {
   const hotel = buildingById('hotel')
   buildGeneric(b, {
     info: hotel, style: 'campushotel', visit: HOTEL, logoSuffix: 'Hotels', roofDeck: true,
@@ -99,6 +84,25 @@ export function buildConferenceAndHotel(b: WorldBuilder) {
       b.box(w / 2 + 6, 0.005, 0, 6, 0.02, d, '#4a4c4e', 'matte')
       K.car(b, w / 2 + 6, 0, 2, 0, '#f2c12e')
       b.zone('Hotelterrasse', -w / 2 - 8, 0, d / 4, 12, 4, 18, { building: 'hotel' })
+    },
+  })
+
+  const staff = buildingById('staffhotel')
+  buildGeneric(b, {
+    info: staff, style: 'staffhotel', visit: STAFF, logoSuffix: 'Hotels', roofDeck: true,
+    extras: (b: WorldBuilder, c: GenericCtx) => {
+      const { w, d, fh, H } = c
+      // wooden balcony bands on the sides
+      for (let k = 3; k < Math.round(H / fh); k++) {
+        for (const s of [-1, 1]) {
+          b.box(s * (w / 2 + 0.7), k * fh - 0.2, 0, 1.4, 0.2, d - 4, C.woodLight, 'satin')
+          b.box(s * (w / 2 + 1.38), k * fh, 0, 0.05, 1.0, d - 4, C.glassTint, 'glass')
+        }
+      }
+      b.sign(0, 2.9, d / 2 + 4.43, 5, 0.5, textTexture(['Mitarbeiter-Residenz · Staff Hotel'], { w: 768, h: 80, accent: C.green }), 0, 0.5)
+      K.bikeRack(b, w / 2 + 4, d / 2 + 2, Math.PI / 2, 8)
+      for (let i = 0; i < 3; i++) K.bench(b, -w / 2 - 3, 0, d / 2 - 4 - i * 4, Math.PI / 2)
+      b.npc({ kind: 'walk', path: [[0, 0, d / 2 + 10], [0, 0, d / 2 + 30]], loop: false })
     },
   })
 }

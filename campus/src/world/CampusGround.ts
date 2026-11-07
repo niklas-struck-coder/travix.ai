@@ -6,7 +6,7 @@
 import * as THREE from 'three'
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture, textures } from '../engine/materials'
-import { BUILDINGS, DEG, GARAGE, LAKE, LAYOUT, STATIONS, polar } from '../config/campus'
+import { BUILDINGS, DEG, GARAGE, LAKE, LAYOUT, STATIONS, polar, shortName } from '../config/campus'
 import { slab } from './GenericBuilding'
 import { buildElevator, infoPoint } from './dynamic'
 import * as K from './kits'
@@ -122,8 +122,8 @@ function plaza(b: WorldBuilder) {
   })
   infoPoint(b, 3, 1.2, 64, 'Big Apple Global Campus Amsterdam', [
     'Internationaler Hauptsitz der Big Apple Groups.',
-    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Umgeben von 10 Unternehmenszentralen, Besucher- & Konferenzzentrum und Campus-Hotel.',
-    'Monorail-Rundkurs mit 5 Stationen · Parkhaus unter dem Besucherzentrum · Campussee mit Foundation.',
+    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Umgeben von den Unternehmenszentralen inkl. Big Apple Groups Racing, dem Health & Recovery Center, dem Campus-Hotel und der Mitarbeiter-Residenz.',
+    'Monorail-Rundkurs mit 5 Stationen · Tiefgarage hinter Big Apple Groups Racing · Campussee mit Foundation.',
   ], { label: 'Campus-Info lesen' })
   // covered walkway from HQ entrance to the monorail station
   for (let z = 42; z <= 104; z += 6) {
@@ -189,7 +189,7 @@ function ringsAndRoads(b: WorldBuilder) {
   }
   // delivery spurs to the buildings' backs
   for (const bd of BUILDINGS) {
-    if (bd.kind === 'hq' || bd.radius < 120) continue
+    if (bd.kind === 'hq' || bd.radius < 120 || bd.id === 'staffhotel') continue
     const rBack = bd.radius + bd.d / 2
     const len = R - 6 - rBack
     const [x, z] = polar(bd.angle, rBack + len / 2)
@@ -197,7 +197,7 @@ function ringsAndRoads(b: WorldBuilder) {
     const [sx, sz] = polar(bd.angle + 3, R - 9)
     b.at(sx, 0, sz, bd.rot + Math.PI, () => {
       b.box(0, 0, 0, 0.08, 2.4, 0.08, C.anthracite, 'metal', { col: true })
-      b.sign(0, 2.4, 0.05, 1.6, 0.5, textTexture(['Anlieferung', bd.suffix === 'Groups' ? 'Besucherzentrum' : 'Big Apple ' + bd.suffix], { w: 384, h: 120, accent: C.green }), 0, 0.3, true)
+      b.sign(0, 2.4, 0.05, 1.6, 0.5, textTexture(['Anlieferung', bd.kind === 'hotel' ? shortName(bd) : 'Big Apple ' + bd.suffix], { w: 384, h: 120, accent: C.green }), 0, 0.3, true)
     })
   }
 }
@@ -237,7 +237,7 @@ function walkways(b: WorldBuilder) {
     const [wx, wz] = polar(bd.angle + 3.5 / (L.plazaRadius * DEG) * 1.2, L.plazaRadius + 2)
     b.at(wx, 0, wz, bd.rot + Math.PI, () => {
       b.box(0, 0, 0, 1.0, 2.6, 0.25, C.white, 'gloss', { col: true })
-      b.sign(0, 1.6, 0.13, 0.95, 0.95, textTexture(['↑ ' + (bd.suffix === 'Groups' ? 'Besucherzentrum' : bd.suffix), `${Math.round(rFront - L.plazaRadius)} m`], { w: 256, h: 256, size: 40, accent: C.green }), 0, 0.4)
+      b.sign(0, 1.6, 0.13, 0.95, 0.95, textTexture(['↑ ' + shortName(bd), `${Math.round(rFront - L.plazaRadius)} m`], { w: 256, h: 256, size: 40, accent: C.green }), 0, 0.4)
       b.sign(0, 1.6, -0.13, 0.95, 0.95, textTexture(['↓ HQ', 'Plaza'], { w: 256, h: 256, size: 40, accent: C.green }), Math.PI, 0.4)
       b.box(0, 2.6, 0, 1.0, 0.06, 0.25, C.green, 'emissive')
     })
@@ -273,9 +273,9 @@ function walkways(b: WorldBuilder) {
     }
     b.npc({ kind: 'bike', path: pts, loop: true, speed: 4.5 + rand() * 1.5 })
   }
-  // visitors walking from the bus stop / parking towards the conference centre
-  b.npc({ kind: 'walk', path: [[-6, 0, L.ringRoadRadius + 20], [-6, 0, 236], [-30, 0, 200], [-20, 0, 150]], loop: false })
-  b.npc({ kind: 'walk', path: [[6, 0, L.ringRoadRadius + 40], [6, 0, 236], [30, 0, 196], [12, 0, 142]], loop: false })
+  // visitors walking from the bus stop / parking towards the campus
+  b.npc({ kind: 'walk', path: [[-6, 0, L.ringRoadRadius + 20], [-6, 0, 236], [-38, 0, 206], [-38, 0, 158], [-14, 0, 150]], loop: false })
+  b.npc({ kind: 'walk', path: [[6, 0, L.ringRoadRadius + 40], [6, 0, 236], [38, 0, 204], [38, 0, 158], [12, 0, 150]], loop: false })
   // seated people on plaza benches
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + 0.4

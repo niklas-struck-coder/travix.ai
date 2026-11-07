@@ -32,7 +32,7 @@ export type RoomKind =
   | 'recovery' | 'lockers' | 'control' | 'showroom' | 'devlab' | 'hotelmodel' | 'sampleroom'
   | 'travel' | 'digitaltravel' | 'tavium' | 'cinema' | 'studio' | 'editing' | 'traindesign'
   | 'trainmodel' | 'exhibition' | 'event' | 'projects' | 'restaurant' | 'bar' | 'hotelroom'
-  | 'press' | 'reception' | 'empty' | 'auditorium'
+  | 'press' | 'reception' | 'empty' | 'auditorium' | 'f1showroom' | 'simulators' | 'aero' | 'physio' | 'medical' | 'meditation'
 
 export interface RoomCtx {
   suffix?: string
@@ -66,6 +66,105 @@ export function furnish(b: B, kind: RoomKind, w: number, d: number, ctx: RoomCtx
   switch (kind) {
     case 'empty':
       break
+    case 'f1showroom': {
+      // the race car on a turntable plinth, tyre stacks, trophy cabinet, helmet display
+      b.cyl(0, 0, 0.5, 3.6, 0.25, C.black, 'gloss', { segs: 40, col: true })
+      b.arc(0, 0.2, 0.5, 3.62, 0.06, 0, Math.PI * 2, C.green, 'emissive', true, 40)
+      K.formulaCar(b, 0, 0.25, 0.5, 0.6)
+      K.tyreStack(b, -hw + 0.6, 0, hd - 0.6, 5)
+      K.tyreStack(b, -hw + 1.4, 0, hd - 0.6, 4, '#f2d24b')
+      K.tyreStack(b, hw - 0.6, 0, hd - 0.6, 5, '#e05d4b')
+      // trophy cabinet
+      b.box(0, 0, -hd + 0.3, Math.min(w - 4, 6), 2.2, 0.5, C.black, 'gloss', { col: true })
+      for (let i = 0; i < 9; i++) {
+        const tx = -2.4 + (i % 5) * 1.2 + (i > 4 ? 0.6 : 0)
+        const ty = i > 4 ? 1.35 : 0.55
+        b.cyl(tx, ty, -hd + 0.38, 0.12, 0.08, '#c7a14a', 'metal', { segs: 10 })
+        b.cyl(tx, ty + 0.08, -hd + 0.38, 0.05, 0.22, '#c7a14a', 'metal', { segs: 8 })
+        b.cyl(tx, ty + 0.3, -hd + 0.38, 0.14, 0.18, '#d9b85a', 'metal', { segs: 12 })
+      }
+      // helmets on stands
+      for (let i = 0; i < 3; i++) {
+        const hx = hw - 1.2
+        const hz = -1.5 + i * 1.6
+        b.box(hx, 0, hz, 0.5, 1.1, 0.5, C.white, 'gloss', { col: true })
+        b.sphere(hx, 1.3, hz, 0.17, i === 1 ? C.green : C.black, 'gloss', 1, 14)
+      }
+      b.sign(0, 2.5, -hd + 0.06, Math.min(w - 3, 7), 0.8, logoTexture('Groups Racing', { bg: '#111312', onDark: true, w: 1024, h: 120 }), 0, 0.6)
+      infoPoint(b, 2.6, 1.2, 2.8, 'BAR-01 – Formel-1-Rennwagen', [
+        'Big Apple Groups Racing · Saison 2026',
+        '1,6-l-V6-Turbo-Hybrid · über 1.000 PS · Mindestgewicht 798 kg',
+        'Lackierung: Schwarz mit Apple Green und weißen Akzenten',
+        'Heimrennen: Großer Preis der Niederlande in Zandvoort',
+      ], { label: 'Rennwagen ansehen', suffix: 'Groups Racing', radius: 3 })
+      stander(b, 2.4, 0, 3.4, Math.PI, 1)
+      stander(b, -3, 0, -1.5, 0.8, 0.8)
+      break
+    }
+    case 'simulators': {
+      grid(2.4, 3.0, (x, z, i) => {
+        K.simRig(b, x, 0, z, Math.PI)
+        sitter(b, x, 0.25, z + 0.45, Math.PI, i % 2 ? 0.4 : 0.8)
+      }, 0.6, 0.8)
+      infoPoint(b, 0, 1.2, -hd + 1.2, 'Rennsimulatoren', ['Profi-Simulatoren mit Streckenmodellen von Zandvoort, Spa und Monza.', 'Hier trainieren Fahrer und Ingenieure Setups vor jedem Rennwochenende.', 'In dieser Campus-Version zum Anschauen – eine fahrbare Sim-Runde gibt es noch nicht.'], { label: 'Simulator-Info lesen', suffix: 'Groups Racing' })
+      break
+    }
+    case 'aero': {
+      // wind tunnel: glass test section with a 60 % model, fan housing
+      b.box(0, 0, 0, Math.min(w - 3, 9), 0.5, 2.6, C.anthracite, 'metal', { col: true })
+      b.box(0, 0.5, 0, Math.min(w - 3, 9), 2.0, 2.6, C.glassTint, 'glass', { col: true })
+      b.at(0, 0.5, 0, Math.PI / 2, () => {
+        b.at(0, 0, 0, 0, () => {
+          // scaled-down model
+          b.box(0, 0.05, 0, 0.45, 0.25, 1.8, '#111312', 'gloss')
+          b.box(0, 0.05, 1.05, 1.1, 0.03, 0.25, C.green, 'gloss')
+          b.box(0, 0.45, -1.0, 0.6, 0.04, 0.2, C.green, 'gloss')
+        })
+      })
+      b.cylX(Math.min(w - 3, 9) / 2 + 0.8, 1.4, 0, 1.3, 1.4, C.anthracite, 'metal', 0, 20)
+      b.cylX(Math.min(w - 3, 9) / 2 + 1.52, 1.4, 0, 1.0, 0.04, '#222', 'metal', 0, 20)
+      K.desk(b, -1.5, 0, -hd + 1.5, 0)
+      K.desk(b, 1.5, 0, -hd + 1.5, 0)
+      sitter(b, -1.5, 0, -hd + 2.15, Math.PI, 0.9)
+      screenWall(-hd + 0.2, 'Aerodynamik', ['Windkanal-Lauf 1.284 · 50 m/s', 'Abtrieb +3,2 % · Luftwiderstand −1,1 %'], Math.min(w - 2, 4), 'info')
+      break
+    }
+    case 'physio': {
+      grid(3.0, 3.2, (x, z, i) => {
+        b.box(x, 0, z, 0.75, 0.7, 2.0, C.white, 'satin', { col: true })
+        b.box(x, 0.7, z - 0.75, 0.6, 0.08, 0.35, C.fabricGreen, 'matte')
+        b.box(x, 0.7, z + 0.15, 0.7, 0.02, 1.3, '#d9e2e6', 'matte')
+        if (i % 2 === 0) stander(b, x + 0.75, 0, z, -Math.PI / 2, 0.8)
+        seat(b, x, 0.3, z, 0, 'Auf die Liege legen')
+      }, 0.8, 1.2)
+      K.yogaMat(b, hw - 1, 0, -hd + 1.5, 0)
+      b.cyl(hw - 1, 0, -hd + 3, 0.3, 0.6, C.green, 'satin', { segs: 16, col: true })
+      K.shelf(b, -hw + 0.3, 0, -hd + 1.5, Math.PI / 2, 2, 1.8)
+      K.plant(b, hw - 0.4, 0, hd - 0.4, 1.1)
+      break
+    }
+    case 'medical': {
+      b.box(-w / 4, 0, 0.5, 0.75, 0.75, 2.0, C.white, 'satin', { col: true })
+      b.box(-w / 4, 0.75, -0.3, 0.7, 0.25, 0.4, C.white, 'satin')
+      K.desk(b, w / 4, 0, -0.5, Math.PI)
+      sitter(b, w / 4, 0, -1.15, 0, 0.9)
+      b.box(-hw + 0.3, 0, -hd + 1.2, 0.6, 1.9, 1.6, C.offwhite, 'gloss', { col: true })
+      b.box(-hw + 0.62, 1.2, -hd + 1.2, 0.02, 0.15, 0.15, C.green, 'emissive')
+      K.chair(b, w / 4 - 0.6, 0, -1.6, 0)
+      infoPoint(b, 0, 1.2, -hd + 1.5, 'Betriebsärztlicher Dienst', ['Sprechstunde Mo–Fr 8–16 Uhr · Vorsorge, Impfungen, Ergonomie-Beratung.', 'Termine über das Big Apple Mitarbeiterportal (in dieser Simulation nicht buchbar).'], { label: 'Sprechzeiten lesen', suffix: 'Health' })
+      break
+    }
+    case 'meditation': {
+      K.rug(b, 0, 0, 0, w - 2.5, d - 2.5, '#7a8a6e')
+      grid(1.6, 1.6, (x, z, i) => {
+        K.yogaMat(b, x, 0, z, 0, i % 3 ? '#8aa07a' : C.green)
+        b.cyl(x, 0, z - 0.6, 0.25, 0.15, '#4a4d49', 'matte', { segs: 12 })
+        if (i % 4 === 0) b.npc({ kind: 'sit', x, y: -0.3, z: z - 0.6, yaw: Math.PI })
+      }, 1, 1)
+      for (let i = 0; i < 4; i++) K.plant(b, (i % 2 ? 1 : -1) * hw, 0, (i < 2 ? 1 : -1) * hd, 1.3)
+      b.box(0, 0.4, -hd + 0.1, Math.min(w - 2, 5), 2.0, 0.06, '#3f6e2f', 'matte') // moss wall
+      break
+    }
     case 'auditorium': {
       // stage at +z (façade side), raked seating rising towards the door side
       const sw = Math.min(w - 4, 22)
