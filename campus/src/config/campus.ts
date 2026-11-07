@@ -61,6 +61,8 @@ export interface BuildingInfo {
   floorH: number
   style?: FacadeStyle
   kind: 'hq' | 'subsidiary' | 'hotel' | 'service'
+  /** reached only at ground level (no access corridor on Ebene –1) */
+  surfaceOnly?: boolean
   /** small companies housed in a business center: [floor, name, field] */
   tenants?: [string, string, string][]
   // computed
@@ -166,6 +168,11 @@ const raw: Raw[] = [
     angle: 50, radius: 90, w: 44, d: 26, floors: 3, floorH: 4.6,
   },
   {
+    id: 'cafe', name: 'Big Apple Café', suffix: 'Café', kind: 'service', style: 'foundation', surfaceOnly: true,
+    description: 'Kleines, zweigeschossiges Café am HQ-Platz: Barista-Theke mit Snacks und Essen, Sitzplätze und kleine Holzhütten im Erdgeschoss, freistehende Treppe ins Obergeschoss mit Arbeitsplätzen, Gemeinschaftstisch und Lounge.',
+    angle: 87, radius: 90, w: 26, d: 18, floors: 2, floorH: 4.2,
+  },
+  {
     id: 'fitness', name: 'Big Apple Fitness', suffix: 'Fitness', kind: 'subsidiary', style: 'fitness',
     description: 'Unternehmens-Headquarter der internationalen Fitnesskette – reines Bürogebäude ohne Fitnessstudio: Club Operations, Standortentwicklung, Trainer- und Personalverwaltung, Marketing, Qualitätsmanagement, Franchise & Expansion.',
     angle: 124, radius: 90, w: 36, d: 24, floors: 3, floorH: 4.2,
@@ -188,7 +195,7 @@ export const BUILDINGS: BuildingInfo[] = raw.map((b) => {
 })
 
 const SHORT: Record<string, string> = {
-  hq: 'HQ', hotel: 'Big Apple Hotel', bc1: 'Business Center I', bc2: 'Business Center II', hotels: 'Hotels HQ', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center', media: 'Media Center',
+  hq: 'HQ', hotel: 'Big Apple Hotel', bc1: 'Business Center I', bc2: 'Business Center II', hotels: 'Hotels HQ', racing: 'Racing (F1)', cafe: 'Café', health: 'Health & Recovery', visitor: 'Visitor Center', media: 'Media Center',
 }
 /** short label for maps, signs and the location display */
 export const shortName = (b: { id: string; suffix: string }) => SHORT[b.id] ?? b.suffix
@@ -309,7 +316,7 @@ function makePlan() {
   }
   // access corridors ("Zugänge") from every building elevator to the nearest ring
   for (const b of BUILDINGS) {
-    if (b.kind === 'hq') continue
+    if (b.kind === 'hq' || b.surfaceOnly) continue
     const [sx, sz] = elevatorDoor(b)
     const dx = Math.sin(b.rot)
     const dz = Math.cos(b.rot)

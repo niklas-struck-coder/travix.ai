@@ -292,6 +292,22 @@ export const PROGRAMS: Record<string, FloorSpec[]> = {
       room('Lounge & Gemeinschaftstische', 'lounge', 'C'),
     ] },
   ],
+  // the café is built by world/Cafe.ts; this list is used for the masterplan room lists
+  cafe: [
+    { label: 'EG', rooms: [
+      room('Barista-Theke mit Speisenvitrine', 'barista', 'C'),
+      room('Café-Sitzbereich & Fensterbar', 'cafe', 'L'),
+      room('Holzhütten (Sitznischen für 2–4 Personen)', 'hut', 'L'),
+      room('Lounge-Ecke', 'lounge', 'R'),
+      room('Freistehende Treppe ins Obergeschoss', 'empty', 'R'),
+    ] },
+    { label: '1. OG', rooms: [
+      room('Arbeitsbereich mit Gemeinschaftstisch', 'workcafe', 'C'),
+      room('Fensterplätze mit Steckdosen', 'workcafe', 'L'),
+      room('Holzhütten zum konzentrierten Arbeiten', 'hut', 'L'),
+      room('Lounge mit Sesseln', 'lounge', 'R'),
+    ] },
+  ],
   visitor: [
     { label: 'EG', rooms: [
       room('Besucherempfang · Registrierung · Information', 'reception', 'C'),
@@ -429,6 +445,9 @@ export const FURNITURE: Partial<Record<RoomKind, string>> = {
   makeup: 'Schminkplätze mit Spiegeln und Licht, Garderobe',
   newsstudio: 'Nachrichtentisch, Studiokameras, Leuchten, LED-Hintergrund',
   laundry: 'Industriewaschmaschinen, Trockner, Wäscheregale',
+  barista: 'Theke aus Holz und Stein, Siebträgermaschinen, Speisenvitrine mit Gebäck, Sandwiches und Salaten, Kasse, Menütafel',
+  hut: 'Kleine Holzhütten mit Satteldach, Sitzbänken, Tisch und Pendelleuchte',
+  workcafe: 'Gemeinschaftstisch und Fensterbar mit Steckdosen, Leselampen, Barhocker, WLAN'
 }
 
 /** interior concepts per building */
@@ -451,6 +470,7 @@ export const CONCEPTS: Record<string, string> = {
   racing: 'Motorsport-Atmosphäre in Schwarz und Apple Green: Showroom mit F1-Wagen, Simulatoren, Race Control.',
   bc1: 'Flexible Büroflächen für kleinere Unternehmen der Gruppe, gemeinsame Besprechungsräume.',
   bc2: 'Flexible Büroflächen und Coworking für neue Unternehmen der Gruppe.',
+  cafe: 'Wie die Foundation: Klinker, Holzlamellen, viel Glas und Gründach. Innen warmes Holz, Pflanzen, Pendelleuchten – ein Ort zum Kaffeetrinken, Essen und Arbeiten wie in einem Coffeeshop.',
 }
 
 /** office type per tenant, so the spaces look different */

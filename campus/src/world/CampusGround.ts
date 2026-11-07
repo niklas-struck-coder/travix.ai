@@ -485,7 +485,7 @@ export function buildGroundMeshes(): THREE.Object3D[] {
   }
   for (const r of UG.ramps) polyHole(s, rampCorners(r.angle))
   // openings of the building stairs / elevators to Ebene –1 and of the plaza lifts
-  for (const bd of BUILDINGS) if (bd.kind !== 'hq') for (const poly of groundOpenings(bd)) polyHole(s, poly)
+  for (const bd of BUILDINGS) if (bd.kind !== 'hq' && !bd.surfaceOnly) for (const poly of groundOpenings(bd)) polyHole(s, poly)
   const liftPolys = UG.cores.filter((c) => c.plaza).map((c) => {
     const [cx, cz] = polar(c.angle, UG.coreR)
     const rot = Math.PI - c.angle * DEG

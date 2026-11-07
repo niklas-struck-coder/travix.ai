@@ -59,6 +59,7 @@ Raumlisten) erzeugt.
 - **Visitor Center**: Besucher- und Lernzentrum mit Museum, Learning Center, Bibliothek,
   Café und Campusmodell (kein Konferenzzentrum mehr).
 - **Business Center I & II** für kleinere Unternehmen mit Mieterverzeichnis.
+- **Big Apple Café** am HQ-Platz (Stil wie die Foundation): Barista-Theke mit Speisen, Sitzplätze, Holzhütten, freistehende Treppe, Obergeschoss zum Sitzen und Arbeiten.
 - **Ebene –1 Campus-Promenade**: zentraler Ring um das HQ, vier Achsen (Kreuz) mit
   Fahrsteigen, äußerer Ring; jedes Gebäude mit Zugang, Foyer, Aufzug, Treppe und
   Zugangskontrolle; Coffee Points, Sitznischen, Bänke, Pflanzen, digitale Wegweiser.
@@ -96,6 +97,7 @@ src/
   world/GenericBuilding.ts    Gebäudegenerator (Fassadenstile, Etagen, Kern, Treppen, Räume)
   world/SubsidiaryBuildings.ts  Programme + Außenelemente der 10 Tochtergebäude
   world/BusinessCenters.ts    Business Center mit Mieterverzeichnis
+  world/Cafe.ts               Big Apple Café (2 Geschosse, Barista-Theke, Hütten, Arbeitsplätze)
   world/Underground.ts        Ebene –1 Promenade, Ebene –2 Tiefgarage, Rampen
   config/programs.ts          Raumprogramme, Einrichtung, Innenraumkonzepte
   masterplan/                 Masterplan-Seite (Pläne werden aus den Daten erzeugt)

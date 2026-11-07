@@ -340,7 +340,7 @@ const floorsOf = (b: BuildingInfo) => {
   return PROGRAMS[b.id] ?? null
 }
 function useLabel(b: BuildingInfo) {
-  return b.kind === 'hq' ? 'Holding' : b.kind === 'hotel' ? 'Hotel' : b.id === 'visitor' ? 'Besucher & Lernen' : b.id === 'media' ? 'Produktion' : b.tenants ? 'Mietflächen' : 'Unternehmens-HQ'
+  return b.kind === 'hq' ? 'Holding' : b.kind === 'hotel' ? 'Hotel' : b.id === 'cafe' ? 'Café' : b.id === 'visitor' ? 'Besucher & Lernen' : b.id === 'media' ? 'Produktion' : b.tenants ? 'Mietflächen' : 'Unternehmens-HQ'
 }
 function arrangementTable() {
   const rows = ORDER.map((b) => {
@@ -356,12 +356,12 @@ function functionCards() {
 function accessTable() {
   const spurs = plan.corridors.filter((c) => c.kind === 'spur' || c.kind === 'hq')
   const rows = ORDER.map((b) => {
-    const c = spurs.find((s) => s.building === b.id)!
+    const c = spurs.find((s) => s.building === b.id)
     const fl = floorsOf(b)
-    const stops = b.kind === 'hq' ? ['UG', 'EG', ...HQ_FLOORS.map((f) => `${f.level}. OG`), 'Dach'] : ['UG', ...(fl ?? []).map((f) => f.label.split(' ').slice(0, f.label.startsWith('EG') ? 1 : 2).join(' '))]
-    const ring = b.kind === 'hq' ? 'Zentraler Ring (Süd)' : b.radius > 140 ? 'Äußerer Ring' : 'Zentraler Ring'
+    const stops = b.surfaceOnly ? ['EG', '1. OG (Treppe)'] : b.kind === 'hq' ? ['UG', 'EG', ...HQ_FLOORS.map((f) => `${f.level}. OG`), 'Dach'] : ['UG', ...(fl ?? []).map((f) => f.label.split(' ').slice(0, f.label.startsWith('EG') ? 1 : 2).join(' '))]
+    const ring = b.surfaceOnly ? 'nur oberirdisch (HQ-Platz)' : b.kind === 'hq' ? 'Zentraler Ring (Süd)' : b.radius > 140 ? 'Äußerer Ring' : 'Zentraler Ring'
     const control = b.kind === 'subsidiary' || b.kind === 'hq' ? 'Drehsperren · Mitarbeiterausweis / Besucherausweis' : b.kind === 'hotel' ? 'Hotelgäste & Mitarbeitende' : 'Öffentlich zugänglich'
-    return `<tr><td class="num">${NUM.get(b.id)}</td><td>${esc(shortName(b) === b.suffix ? 'Big Apple ' + b.suffix : shortName(b))}</td><td>${ring}</td><td class="mono r">${f1(c.len)} m</td><td class="mono">${stops.join(' · ')}</td><td>${b.kind === 'hq' ? 'Aufzug (Treppe Lobby ↔ Galerie)' : 'Aufzug + Treppenhaus'}</td><td>${control}</td></tr>`
+    return `<tr><td class="num">${NUM.get(b.id)}</td><td>${esc(shortName(b) === b.suffix ? 'Big Apple ' + b.suffix : shortName(b))}</td><td>${ring}</td><td class="mono r">${c ? f1(c.len) + ' m' : '–'}</td><td class="mono">${stops.join(' · ')}</td><td>${b.surfaceOnly ? 'Freistehende Treppe' : b.kind === 'hq' ? 'Aufzug (Treppe Lobby ↔ Galerie)' : 'Aufzug + Treppenhaus'}</td><td>${control}</td></tr>`
   }).join('')
   const cores = UG.cores.map((c) => `<tr><td class="num">K${UG.cores.indexOf(c) + 1}</td><td>Aufzugskern ${f1(c.angle)}°</td><td>Zentraler Ring</td><td class="mono r">–</td><td class="mono">${c.plaza ? '–2 · –1 · HQ-Platz' : '–2 · –1'}</td><td>${c.plaza ? 'Glaslift' : 'Aufzug'}</td><td>Öffentlich</td></tr>`).join('')
   const stair = `<tr><td class="num">T</td><td>Treppenhaus ${UG.stair.angle}°</td><td>Zentraler Ring</td><td class="mono r">–</td><td class="mono">–2 · –1</td><td>Treppe</td><td>Öffentlich</td></tr>`
@@ -391,7 +391,7 @@ function roomLists() {
     } else {
       const fl = floorsOf(b) ?? []
       floors = fl.map((f) => `<div class="floor"><h4>${esc(f.label)}</h4><ul>${f.rooms.filter((r) => r.kind !== 'empty').map((r) => `<li><span>${esc(r.name)}</span><em>${esc(FURNITURE[r.kind] ?? '')}</em></li>`).join('')}</ul></div>`).join('')
-      floors += `<div class="floor ug"><h4>Ebene –1</h4><ul><li><span>Foyer mit Aufzug, Treppe und Zugangskontrolle</span><em>Anschluss an die Campus-Promenade</em></li></ul></div>`
+      if (!b.surfaceOnly) floors += `<div class="floor ug"><h4>Ebene –1</h4><ul><li><span>Foyer mit Aufzug, Treppe und Zugangskontrolle</span><em>Anschluss an die Campus-Promenade</em></li></ul></div>`
       if (b.floors > fl.length) floors += `<p class="note">Weitere ${b.floors - fl.length} Obergeschosse: Büroflächen (in der 3D-Welt nur von außen sichtbar).</p>`
     }
     return `<details class="bld-rooms" ${b.kind === 'hq' ? 'open' : ''}><summary><span class="badge">${NUM.get(b.id)}</span>${esc(nameOf(b))}</summary><p class="concept">${esc(CONCEPTS[b.id] ?? '')}</p><div class="floors">${floors}</div></details>`

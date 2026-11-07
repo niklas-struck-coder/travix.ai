@@ -35,7 +35,7 @@ export type RoomKind =
   | 'trainmodel' | 'exhibition' | 'event' | 'projects' | 'restaurant' | 'bar' | 'hotelroom'
   | 'press' | 'reception' | 'empty' | 'auditorium' | 'f1showroom' | 'simulators' | 'aero' | 'physio' | 'medical' | 'meditation'
   | 'fitshowroom' | 'museum' | 'learning' | 'library' | 'campusmodel' | 'podcast' | 'sound' | 'photo' | 'makeup'
-  | 'newsstudio' | 'laundry' | 'suite'
+  | 'newsstudio' | 'laundry' | 'suite' | 'barista' | 'hut' | 'workcafe'
 
 export interface RoomCtx {
   suffix?: string

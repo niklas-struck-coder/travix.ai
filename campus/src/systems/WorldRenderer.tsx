@@ -13,6 +13,7 @@ import { buildHQ } from '../world/HoldingHeadquarters'
 import { buildSubsidiaries } from '../world/SubsidiaryBuildings'
 import { buildUnderground } from '../world/Underground'
 import { buildBusinessCenters } from '../world/BusinessCenters'
+import { buildCafe } from '../world/Cafe'
 import { buildMonorail } from './MonorailSystem'
 import { player, ui } from '../state/store'
 
@@ -25,6 +26,7 @@ export function getWorld() {
   buildHQ(b)
   buildSubsidiaries(b)
   buildBusinessCenters(b)
+  buildCafe(b)
   buildUnderground(b)
   buildMonorail(b)
   const chunks = [...b.chunks.values()].filter((c) => !c.key.startsWith('__'))

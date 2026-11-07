@@ -243,7 +243,7 @@ const EXTRAS: Record<string, (b: WorldBuilder, c: GenericCtx) => void> = {
 export function buildSubsidiaries(b: WorldBuilder) {
   for (const info of BUILDINGS) {
     const visit = PROGRAMS[info.id]
-    if (!visit || !info.style) continue
+    if (!visit || !info.style || info.surfaceOnly) continue
     buildGeneric(b, {
       info: info as BuildingInfo,
       style: info.style,
