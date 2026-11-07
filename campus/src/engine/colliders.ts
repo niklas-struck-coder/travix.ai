@@ -29,6 +29,8 @@ export type Collider = ColliderShape & {
   dynamicY?: () => number // if set, the shape is shifted by this vertical offset
   /** Only blocks, never supports (e.g. invisible boundaries / railings) */
   noSupport?: boolean
+  /** the collider does not exist at these points (openings, e.g. elevator shafts in the ground) */
+  except?: (x: number, z: number) => boolean
 }
 
 const CELL = 24
@@ -183,6 +185,7 @@ export class CollisionWorld {
     let best = -Infinity
     for (const c of this.query(x, z, r + 0.1)) {
       if (c.noSupport) continue
+      if (c.except && c.except(x, z)) continue
       const [, y1] = this.ys(c)
       if (y1 > maxY || y1 <= best) continue
       if (overlapsCircle(c, x, z, r)) best = y1
@@ -194,6 +197,7 @@ export class CollisionWorld {
   ceiling(x: number, z: number, minY: number, r = 0.25): number {
     let best = Infinity
     for (const c of this.query(x, z, r + 0.1)) {
+      if (c.except && c.except(x, z)) continue
       const [y0] = this.ys(c)
       if (y0 < minY || y0 >= best) continue
       if (overlapsCircle(c, x, z, r)) best = y0
@@ -209,6 +213,7 @@ export class CollisionWorld {
     for (let iter = 0; iter < 3; iter++) {
       let moved = false
       for (const c of this.query(x, z, r + 0.2)) {
+        if (c.except && c.except(x, z)) continue
         const [y0, y1] = this.ys(c)
         if (y1 <= yLow || y0 >= yHigh) continue
         const [px, pz, inside] = closest(c, x, z)
@@ -240,6 +245,7 @@ export class CollisionWorld {
   /** Is the point inside any solid? (used for camera ray marching) */
   solidAt(x: number, y: number, z: number, r = 0.15): boolean {
     for (const c of this.query(x, z, r + 0.1)) {
+      if (c.except && c.except(x, z)) continue
       const [y0, y1] = this.ys(c)
       if (y < y0 - r || y > y1 + r) continue
       if (overlapsCircle(c, x, z, r)) return true

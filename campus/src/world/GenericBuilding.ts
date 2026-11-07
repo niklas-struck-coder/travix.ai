@@ -56,7 +56,7 @@ const STYLE: Record<FacadeStyle, StyleSpec> = {
   conference: { frame: C.white, glass: '#a9c6cf', band: C.white, bandFam: 'satin', accent: C.green },
   racing: { frame: '#111312', glass: '#4f5f66', band: '#111312', bandFam: 'gloss', accent: C.green },
   health: { frame: C.woodLight, glass: '#c3dde3', band: C.white, bandFam: 'satin', accent: C.green },
-  staffhotel: { frame: C.woodLight, glass: '#a7c0c8', band: C.white, bandFam: 'satin', accent: C.green },
+  business: { frame: '#ecebe6', glass: '#a9c6cf', band: C.white, bandFam: 'satin', accent: C.green },
   campushotel: { frame: C.offwhite, glass: '#9fb8c1', band: '#d9d3c6', bandFam: 'satin', accent: C.green },
 }
 
@@ -220,9 +220,9 @@ export function buildGeneric(b: WorldBuilder, o: GenericOpts) {
     })
     // elevator
     b.inChunk(`${id}-core`, { maxDist: 160 }, false, () => {
-      const stops = o.visit.map((f, k) => ({ label: f.label, y: k * fh }))
+      const stops = [{ label: 'UG · Tunnel & Tiefgarage', y: -5 }, ...o.visit.map((f, k) => ({ label: f.label, y: k * fh }))]
       if (o.roofDeck) stops.push({ label: 'Dachterrasse', y: H + 0.5 })
-      buildElevator(b, { x: elev.x, z: elev.z, rot: 0, name: `Aufzug ${info.suffix === 'Groups' ? info.name : 'Big Apple ' + info.suffix}`, stops })
+      buildElevator(b, { x: elev.x, z: elev.z, rot: 0, name: `Aufzug ${info.kind === 'subsidiary' ? 'Big Apple ' + info.suffix : info.name}`, stops, start: 1 })
       if (o.roofDeck) roofDeck(b, ctx)
     })
     b.zone(info.name, 0, 0, 0, w, H, d, { building: id })
@@ -295,11 +295,11 @@ function envelope(b: WorldBuilder, o: GenericOpts, ctx: GenericCtx, ew: number) 
   ring(b, w, d, 0, 0.45, 0.15, s === 'foundation' ? C.brick : C.stoneDark, 'satin') // plinth
 
   // style specific vertical elements
-  const pitch = s === 'finance' ? 3.0 : s === 'tech' ? 1.8 : s === 'hotels' || s === 'campushotel' ? 2.4 : s === 'conference' ? 4.0 : s === 'racing' ? 2.2 : s === 'health' || s === 'staffhotel' ? 1.5 : s === 'foundation' ? 1.2 : 3.0
-  const depth = s === 'tech' ? 0.7 : s === 'finance' ? 0.6 : s === 'foundation' ? 0.35 : s === 'hotels' || s === 'campushotel' ? 0.45 : s === 'conference' ? 1.2 : s === 'racing' ? 0.8 : s === 'health' || s === 'staffhotel' ? 0.35 : 0.18
-  const fw = s === 'finance' ? 0.9 : s === 'tech' ? 0.18 : s === 'foundation' ? 0.12 : s === 'hotels' || s === 'campushotel' ? 0.35 : s === 'conference' ? 0.3 : s === 'racing' ? 0.25 : s === 'health' || s === 'staffhotel' ? 0.12 : 0.12
-  const fam: Family = s === 'finance' ? 'gloss' : s === 'tech' || s === 'hotels' || s === 'campushotel' || s === 'conference' || s === 'health' || s === 'staffhotel' ? 'satin' : s === 'racing' ? 'gloss' : s === 'foundation' ? 'satin' : 'metal'
-  const col = s === 'finance' ? '#2c2f2e' : s === 'foundation' || s === 'health' || s === 'staffhotel' ? C.wood : st.frame
+  const pitch = s === 'finance' ? 3.0 : s === 'tech' ? 1.8 : s === 'hotels' || s === 'campushotel' ? 2.4 : s === 'conference' ? 4.0 : s === 'racing' ? 2.2 : s === 'health' || s === 'business' ? 1.5 : s === 'foundation' ? 1.2 : 3.0
+  const depth = s === 'tech' ? 0.7 : s === 'finance' ? 0.6 : s === 'foundation' ? 0.35 : s === 'hotels' || s === 'campushotel' ? 0.45 : s === 'conference' ? 1.2 : s === 'racing' ? 0.8 : s === 'health' || s === 'business' ? 0.35 : 0.18
+  const fw = s === 'finance' ? 0.9 : s === 'tech' ? 0.18 : s === 'foundation' ? 0.12 : s === 'hotels' || s === 'campushotel' ? 0.35 : s === 'conference' ? 0.3 : s === 'racing' ? 0.25 : s === 'health' || s === 'business' ? 0.12 : 0.12
+  const fam: Family = s === 'finance' ? 'gloss' : s === 'tech' || s === 'hotels' || s === 'campushotel' || s === 'conference' || s === 'health' || s === 'business' ? 'satin' : s === 'racing' ? 'gloss' : s === 'foundation' ? 'satin' : 'metal'
+  const col = s === 'finance' ? '#2c2f2e' : s === 'foundation' || s === 'health' ? C.wood : st.frame
   if (s !== 'logistics' && s !== 'entertainment') {
     for (const [len, fz, dir] of [[w, d / 2, 1], [w, -d / 2, -1]] as const) {
       const n = Math.floor(len / pitch)

@@ -7,8 +7,9 @@ import * as THREE from 'three'
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture, textures } from '../engine/materials'
 import { BUILDINGS, DEG, GARAGE, LAKE, LAYOUT, STATIONS, polar, shortName } from '../config/campus'
-import { slab } from './GenericBuilding'
-import { buildElevator, infoPoint } from './dynamic'
+import { infoPoint } from './dynamic'
+import { world } from '../engine/registry'
+import { rampCorners } from './Underground'
 import * as K from './kits'
 import { rand } from './rooms'
 
@@ -49,7 +50,11 @@ function onPath(x: number, z: number) {
   if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 3) return true
   if (Math.abs(x) < 14 && z > 30 && z < 130) return true // HQ axis
   if (z > L.ringRoadRadius - 20 && Math.abs(x) < 80) return true // boulevard & parking
-  if (x > GARAGE.x0 - 4 && x < GARAGE.x1 + 4 && z > GARAGE.z0 - 4 && z < GARAGE.z1 + 4) return true
+  {
+    const [rx, rz] = polar(GARAGE.ramp.angle, GARAGE.ramp.rBottom + GARAGE.ramp.len / 2)
+    if (Math.hypot(x - rx, z - rz) < 26) return true
+  }
+  if (Math.hypot(x - GARAGE.liftX, z - GARAGE.liftZ) < 6) return true
   for (const s of STATIONS) {
     const [sx, sz] = polar(s.angle, L.monorailRadius + 5)
     if (Math.hypot(x - sx, z - sz) < 32) return true
@@ -60,15 +65,9 @@ function onPath(x: number, z: number) {
 // ---------------------------------------------------------------------------
 export function buildSite(b: WorldBuilder) {
   b.chunk('site', { maxDist: 5000 }, true)
-  // ground collider: one big slab with holes for the garage ramp and lift shaft
-  const r = GARAGE.ramp
-  // (collision only – the visible ground is a separate textured mesh)
-  b.inChunk('__collision', { maxDist: 0 }, false, () => {
-    slab(b, -W, W, -W, W, 0, 1.0, [
-      [r.x0, r.x1, r.z0, r.z1],
-      [GARAGE.liftX - 1.45, GARAGE.liftX + 1.45, GARAGE.liftZ - 1.4, GARAGE.liftZ + 1.4],
-    ], C.grass, 'matte', true)
-  })
+  // ground collider (collision only – the visible ground is a separate textured mesh);
+  // elevator shafts and the car ramp register openings in world.groundHoles
+  b.colBox(0, -1, 0, 2 * W, 1, 2 * W, 0, false, { except: (x, z) => world.groundHoles.some((h) => h(x, z)) })
   // world boundary
   for (const [x, z, w, d] of [[0, -L.canalZ + 140, 2 * W, 1], [-W, 0, 1, 2 * W], [W, 0, 1, 2 * W], [0, W, 2 * W, 1]] as const) b.colBox(x, 0, z === -L.canalZ + 140 ? W : z, w, 20, d)
   b.colBox(0, 0, L.canalZ + 15.5, 2 * W, 1.2, 0.4, 0, true) // canal quay railing (north boundary)
@@ -81,7 +80,6 @@ export function buildSite(b: WorldBuilder) {
   canal(b)
   parking(b)
   utility(b)
-  garage(b)
 }
 
 // ---------------------------------------------------------------------------
@@ -122,8 +120,8 @@ function plaza(b: WorldBuilder) {
   })
   infoPoint(b, 3, 1.2, 64, 'Big Apple Global Campus Amsterdam', [
     'Internationaler Hauptsitz der Big Apple Groups.',
-    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, das Big Apple Visitor Center, Big Apple Groups Racing und Health & Recovery Center am HQ-Platz, Campus-Hotel und Mitarbeiter-Residenz.',
-    'Monorail-Rundkurs mit 5 Stationen · Tiefgarage hinter dem Visitor Center · Campussee mit Foundation.',
+    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, das Big Apple Visitor Center, Big Apple Groups Racing und Health & Recovery Center am HQ-Platz, Campus Hotel mit Mitarbeiter-Residenz und zwei Business Center für kleinere Unternehmen.',
+    'Tiefgarage unter dem HQ-Platz, von dort führen grün beleuchtete Tunnel mit Fahrsteigen zu jedem Gebäude · Monorail mit 5 Stationen · Campussee mit Foundation.',
   ], { label: 'Campus-Info lesen' })
   // covered walkway from HQ entrance to the monorail station
   for (let z = 42; z <= 104; z += 6) {
@@ -438,77 +436,6 @@ function utility(b: WorldBuilder) {
 }
 
 // ---------------------------------------------------------------------------
-function garage(b: WorldBuilder) {
-  const G = GARAGE
-  const y0 = G.floorY
-  const cx = (G.x0 + G.x1) / 2
-  const cz = (G.z0 + G.z1) / 2
-  const gw = G.x1 - G.x0
-  const gd = G.z1 - G.z0
-  b.inChunk('garage', { maxDist: 120, yMin: -30, yMax: 60 }, false, () => {
-    // floor, ceiling, walls
-    b.box(cx, y0 - 0.3, cz, gw, 0.3, gd, '#6d6e6c', 'satin', { col: true })
-    b.box(cx, -1.05, cz, gw, 0.05, gd, '#b9b8b3', 'matte')
-    const wallH = -1 - y0
-    b.box(cx, y0, G.z0, gw, wallH, 0.3, '#a8a7a2', 'matte', { col: true })
-    b.box(cx, y0, G.z1, gw, wallH, 0.3, '#a8a7a2', 'matte', { col: true })
-    b.box(G.x0, y0, cz, 0.3, wallH, gd, '#a8a7a2', 'matte', { col: true })
-    b.box(G.x1, y0, cz, 0.3, wallH, gd, '#a8a7a2', 'matte', { col: true })
-    b.box(cx, y0 + 0.9, G.z0 + 0.16, gw, 0.25, 0.02, C.green, 'satin')
-    // ramp (visual slope + step colliders)
-    const r = G.ramp
-    const rl = r.z1 - r.z0
-    const ang = Math.atan2(-y0, rl)
-    b.boxTilt((r.x0 + r.x1) / 2, y0 / 2 - 0.15, (r.z0 + r.z1) / 2, r.x1 - r.x0, 0.3, Math.hypot(rl, y0), 0, ang, '#5c5d5b', 'satin')
-    const steps = 40
-    for (let i = 0; i < steps; i++) {
-      const zA = r.z0 + (i / steps) * rl
-      const top = y0 + ((i + 0.5) / steps) * -y0
-      b.colBox((r.x0 + r.x1) / 2, y0, zA + rl / steps / 2, r.x1 - r.x0, top - y0, rl / steps)
-    }
-    // ramp side walls (below ground: inner wall; above ground: low walls)
-    b.box(r.x1 + 0.15, y0, (r.z0 + r.z1) / 2, 0.3, -y0, rl, '#a8a7a2', 'matte', { col: true })
-    for (const x of [r.x0 - 0.15, r.x1 + 0.15]) b.box(x, 0, (r.z0 + r.z1) / 2, 0.3, 1.1, rl, C.concrete, 'satin', { col: true, noSupport: true })
-    b.box((r.x0 + r.x1) / 2, 0, r.z0 - 0.15, r.x1 - r.x0 + 0.6, 1.1, 0.3, C.concrete, 'satin', { col: true, noSupport: true })
-    b.box((r.x0 + r.x1) / 2, 3.6, r.z1 - 1, r.x1 - r.x0 + 1, 0.25, 2, C.black, 'satin')
-    b.sign((r.x0 + r.x1) / 2, 3.95, r.z1 + 0.02, 6.5, 0.8, textTexture(['P  Parkhaus · Einfahrt'], { w: 768, h: 96, bg: '#1f5fa8' }), 0, 0.5)
-    // access road from the ring road to the ramp
-    b.box((r.x0 + r.x1) / 2, 0.01, r.z1 + 7, r.x1 - r.x0, 0.02, 14, '#4a4c4e', 'satin')
-    // columns grid + parked cars + lights
-    for (let x = G.x0 + 8; x < G.x1 - 2; x += 8) {
-      for (let z = G.z0 + 9; z < G.z1 - 4; z += 10) {
-        if (x < r.x1 + 2) continue
-        b.box(x, y0, z, 0.5, wallH, 0.5, '#b4b3ae', 'matte', { col: true })
-        b.box(x, y0 + 0.4, z, 0.52, 0.3, 0.52, C.green, 'satin')
-      }
-    }
-    for (let x = r.x1 + 3; x < G.x1 - 2; x += 2.6) {
-      for (const [z, rot] of [[G.z0 + 3, 0], [G.z1 - 3, Math.PI], [cz - 2.6, Math.PI], [cz + 2.6, 0]] as const) {
-        b.box(x - 1.3, y0 + 0.002, z, 0.1, 0.01, 5, '#e8e8e8', 'matte')
-        if (Math.abs(x - G.liftX) < 4 && z < cz) continue
-        if (rand() < 0.62) K.car(b, x, y0, z, rot, ['#f4f5f2', '#1d1f1e', '#7c8a92', '#3b5f8a', C.green][Math.floor(rand() * 5)])
-      }
-    }
-    for (let i = 0; i < 8; i++) K.chargingStation(b, r.x1 + 4 + i * 2.6, G.z1 - 0.4, Math.PI, y0)
-    b.sign(r.x1 + 13, y0 + 2.3, G.z1 - 0.17, 6, 0.6, textTexture(['E-Ladestationen · Big Apple Mobility'], { w: 768, h: 80, accent: C.green }), Math.PI)
-    for (let z = G.z0 + 4; z < G.z1; z += 6) b.box(cx, -1.12, z, gw - 4, 0.06, 0.2, '#f6fbff', 'emissive')
-    b.sign(G.liftX, y0 + 2.9, G.liftZ - 1.62, 3, 0.5, textTexture(['↑ Aufzug zum Campus'], { w: 512, h: 80, accent: C.green }), Math.PI, 0.5, true)
-    b.sign(cx, y0 + 2.4, G.z0 + 0.2, 6, 0.9, textTexture(['P –1', 'Parkhaus Big Apple Campus'], { w: 512, h: 128, bg: '#1f5fa8' }), 0, 0.5)
-    b.zone('Tiefgarage (P –1)', cx, y0, cz, gw, 3.6, gd)
-    b.npc({ kind: 'walk', path: [[r.x1 + 6, y0, cz], [G.liftX - 3, y0, cz], [G.liftX - 3, y0, G.liftZ - 3]], loop: false })
-  })
-  // lift (two stops) with a glass pavilion at ground level
-  b.inChunk('garage-lift', { maxDist: 300 }, true, () => {
-    buildElevator(b, { x: G.liftX, z: G.liftZ, rot: Math.PI, name: 'Parkhaus-Aufzug', glass: true, stops: [{ label: 'P –1 Parkhaus', y: y0 }, { label: 'Campus (EG)', y: 0 }], start: 1 })
-    b.at(G.liftX, 0, G.liftZ, Math.PI, () => {
-      b.box(0, 3.4, 0.6, 4.2, 0.2, 4.6, C.white, 'satin')
-      b.box(0, 3.35, 2.9, 4.2, 0.05, 0.06, C.green, 'emissive')
-      b.sign(0, 3.85, 2.92, 3.6, 0.5, textTexture(['P  Parkhaus –1'], { w: 512, h: 72, bg: '#1f5fa8' }), 0, 0.5)
-    })
-  })
-}
-
-// ---------------------------------------------------------------------------
 // Textured big surfaces (not instanced)
 export function buildGroundMeshes(): THREE.Object3D[] {
   const t = textures()
@@ -549,8 +476,14 @@ export function buildGroundMeshes(): THREE.Object3D[] {
   const lh = new THREE.Path()
   lh.absarc(LAKE.x, -LAKE.z, LAKE.r + 0.5, 0, Math.PI * 2, false)
   s.holes.push(lh)
-  hole(GARAGE.ramp.x0, GARAGE.ramp.x1, GARAGE.ramp.z0, GARAGE.ramp.z1)
-  hole(GARAGE.liftX - 1.45, GARAGE.liftX + 1.45, GARAGE.liftZ - 1.4, GARAGE.liftZ + 1.4)
+  {
+    const rc = rampCorners()
+    const h = new THREE.Path()
+    rc.forEach(([x, z], i) => (i ? h.lineTo(x, -z) : h.moveTo(x, -z)))
+    h.lineTo(rc[0][0], -rc[0][1])
+    s.holes.push(h)
+  }
+  void hole
   // the canal is cut by shrinking the ground on the north side instead
   const gs = new THREE.Shape()
   void gs
@@ -559,7 +492,25 @@ export function buildGroundMeshes(): THREE.Object3D[] {
   flat(grassGeo, new THREE.MeshStandardMaterial({ map: grassTex, roughness: 0.95, color: '#c9dbb8' }), -0.01)
 
   // plaza
-  flat(new THREE.CircleGeometry(L.plazaRadius, 96), new THREE.MeshStandardMaterial({ map: tex(t.paving, 22), roughness: 0.75 }), 0.004)
+  {
+    // plaza with an opening for the glass lift to the car park
+    const ps = new THREE.Shape()
+    ps.absarc(0, 0, L.plazaRadius, 0, Math.PI * 2, false)
+    const lh = new THREE.Path()
+    const lx0 = GARAGE.liftX - 1.5
+    const lx1 = GARAGE.liftX + 1.5
+    const lz0 = GARAGE.liftZ - 1.45
+    const lz1 = GARAGE.liftZ + 1.45
+    lh.moveTo(lx0, -lz0)
+    lh.lineTo(lx1, -lz0)
+    lh.lineTo(lx1, -lz1)
+    lh.lineTo(lx0, -lz1)
+    lh.lineTo(lx0, -lz0)
+    ps.holes.push(lh)
+    const pg = new THREE.ShapeGeometry(ps, 48)
+    const ptex = tex(t.paving, 1 / 6.5)
+    flat(pg, new THREE.MeshStandardMaterial({ map: ptex, roughness: 0.75 }), 0.004)
+  }
   // HQ axis to the station
   const axis = new THREE.PlaneGeometry(16, 60)
   const ax = flat(axis, new THREE.MeshStandardMaterial({ map: tex(t.paving, 6), roughness: 0.75 }), 0.006)

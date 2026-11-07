@@ -52,12 +52,24 @@ export interface ScreenDef {
   suffix?: string
 }
 
+/** moving walkway: carries the player along (dx, dz) while standing on it */
+export interface Conveyor {
+  test: (x: number, z: number) => boolean
+  y: number
+  dx: number
+  dz: number
+  speed: number
+}
+
 export const world = {
   collision: new CollisionWorld(),
   interactables: [] as Interactable[],
   zones: [] as Zone[],
   npcs: [] as NpcSpawn[],
   screens: [] as ScreenDef[],
+  conveyors: [] as Conveyor[],
+  /** openings in the ground slab (elevator shafts, ramps) */
+  groundHoles: [] as ((x: number, z: number) => boolean)[],
 }
 
 let idc = 0

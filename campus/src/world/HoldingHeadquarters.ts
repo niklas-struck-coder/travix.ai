@@ -99,14 +99,16 @@ export function buildHQ(b: WorldBuilder) {
     b.inChunk('hq-core', { maxDist: 900 }, false, () => {
       buildElevator(b, {
         x: 0, z: 5.55, rot: 0, name: 'HQ-Aufzug',
+        start: 1,
         stops: [
+          { label: 'UG – Tiefgarage & Tunnel', y: -5 },
           { label: 'EG – Lobby', y: 0 },
           ...FLOORS_DEF.map((f) => ({ label: f.short, y: f.level * FH })),
           { label: 'Dachterrasse', y: ROOF },
         ],
       })
       // fillers between shaft and core wedge
-      for (const s of [-1, 1]) b.box(s * 1.85, 0, 5.6, 0.9, ROOF + 4, 2.8, C.white, 'satin', { col: true })
+      for (const s of [-1, 1]) b.box(s * 1.85, -5.3, 5.6, 0.9, ROOF + 9.3, 2.8, C.white, 'satin', { col: true })
     })
     b.zoneSector('Big Apple Groups HQ', 0, R, 0, TAU, 0, ROOF + 4, { building: 'hq' })
   })
@@ -436,7 +438,7 @@ function roof(b: WorldBuilder) {
         ui().set({ info: { title: 'Panorama vom HQ-Dach (≈ 100 m)', subtitle: 'Big Apple Global Campus · Amsterdam', body: [
           'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern. Nordosten am Platz: Big Apple Groups Racing mit F1-Auto.',
           'Nordosten: Big Apple Trains · Osten: Big Apple Tech und Finance.',
-          'Süden: Big Apple Visitor Center, Campus Hotel, Mitarbeiter-Residenz, Haupteinfahrt.',
+          'Süden: Big Apple Visitor Center, Campus Hotel mit Mitarbeiter-Residenz, Business Center, Haupteinfahrt.',
           'Westen: Fitness, Logistics, Campussee mit der Big Apple Foundation.',
           'Die Monorail umrundet das HQ auf 6,8 m Höhe mit fünf Stationen.',
         ] } })

@@ -290,6 +290,26 @@ export class WorldBuilder {
     this.addCol({ kind: 'arc', cx: wx, cz: wz, r0, r1, a0: a0 - this.yaw, a1: a1 - this.yaw }, wy, wy + h, extra)
   }
 
+  /** world-space test for a local rectangle (centre x,z, size w×d) – used for openings & conveyors */
+  rectTest(x: number, z: number, w: number, d: number): (px: number, pz: number) => boolean {
+    const [cx, , cz] = this.w(x, 0, z)
+    const c = Math.cos(this.yaw)
+    const s = Math.sin(this.yaw)
+    return (px, pz) => {
+      const dx = px - cx
+      const dz = pz - cz
+      const lx = dx * c - dz * s
+      const lz = dx * s + dz * c
+      return Math.abs(lx) <= w / 2 && Math.abs(lz) <= d / 2
+    }
+  }
+  /** local direction → world direction (unit) */
+  dirW(lx: number, lz: number): [number, number] {
+    const c = Math.cos(this.yaw)
+    const s = Math.sin(this.yaw)
+    return [lx * c + lz * s, -lx * s + lz * c]
+  }
+
   // ---------------------------------------------------------------- registries
   zone(name: string, x: number, y0: number, z: number, w: number, h: number, d: number, meta: { building?: string; floor?: string } = {}) {
     const [cx, cy, cz] = this.w(x, y0, z)

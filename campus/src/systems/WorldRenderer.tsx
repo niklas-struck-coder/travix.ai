@@ -13,6 +13,8 @@ import { buildHQ } from '../world/HoldingHeadquarters'
 import { buildSubsidiaries } from '../world/SubsidiaryBuildings'
 import { buildHotels } from '../world/Hotels'
 import { buildVisitorCenter } from '../world/VisitorCenter'
+import { buildUnderground } from '../world/Underground'
+import { buildBusinessCenters } from '../world/BusinessCenters'
 import { buildMonorail } from './MonorailSystem'
 import { player, ui } from '../state/store'
 
@@ -26,6 +28,8 @@ export function getWorld() {
   buildSubsidiaries(b)
   buildHotels(b)
   buildVisitorCenter(b)
+  buildBusinessCenters(b)
+  buildUnderground(b)
   buildMonorail(b)
   const chunks = [...b.chunks.values()].filter((c) => !c.key.startsWith('__'))
   let parts = 0
@@ -106,6 +110,9 @@ export function WorldRenderer() {
     }
   }, [groups, w])
   useFrame((_, dt) => {
+    // moving walkway stripes (2.2 m/s, one stripe tile per metre)
+    const belt = (families.belt as THREE.MeshStandardMaterial).map
+    if (belt) belt.offset.y += dt * 2.2
     // animate water textures
     for (const m of w.ground) {
       const mat = (m as THREE.Mesh).material as THREE.MeshStandardMaterial

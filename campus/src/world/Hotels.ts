@@ -1,7 +1,6 @@
 /**
- * Big Apple Hotels on campus: the Campus Hotel (guests) and the
- * Mitarbeiter-Residenz (hotel for travelling employees).
- * Both reuse the generic building generator with their own programs.
+ * Big Apple Hotels on campus: one building for guests (Campus Hotel) and
+ * travelling employees (Mitarbeiter-Residenz), generic building generator.
  */
 import { WorldBuilder } from '../engine/builder'
 import { C, textTexture } from '../engine/materials'
@@ -11,42 +10,28 @@ import * as K from './kits'
 
 const HOTEL: FloorSpec[] = [
   { label: 'EG', rooms: [
-    { name: 'Lobby & Rezeption', kind: 'reception', wing: 'C' },
+    { name: 'Lobby & Rezeption (Gäste & Mitarbeitende)', kind: 'reception', wing: 'C' },
     { name: 'Restaurant „De Appel“', kind: 'restaurant', wing: 'L', f0: 0.45, f1: 1, open: true },
     { name: 'Bar „Green Leaf“', kind: 'bar', wing: 'L', f0: 0, f1: 0.45 },
     { name: 'Hotel-Lounge', kind: 'lounge', wing: 'R', f0: 0.5, f1: 1, open: true },
     { name: 'Konferenzraum „Keizersgracht“', kind: 'conference', wing: 'R', f0: 0, f1: 0.5 },
   ] },
   { label: '1. OG', rooms: [
-    { name: 'Hotel-Fitness Cardio', kind: 'cardio', wing: 'L', f0: 0.5, f1: 1, open: true },
-    { name: 'Hotel-Fitness Kraft', kind: 'strength', wing: 'L', f0: 0, f1: 0.5, open: true },
-    { name: 'Konferenzraum „Herengracht“', kind: 'conference', wing: 'R', f0: 0.5, f1: 1 },
-    { name: 'Konferenzraum „Prinsengracht“', kind: 'conference', wing: 'R', f0: 0, f1: 0.5 },
+    { name: 'Hotel-Fitness', kind: 'cardio', wing: 'L', f0: 0.5, f1: 1, open: true },
+    { name: 'Konferenzraum „Herengracht“', kind: 'conference', wing: 'L', f0: 0, f1: 0.5 },
+    { name: 'Gemeinschaftsküche Mitarbeitende', kind: 'canteen', wing: 'R', f0: 0.45, f1: 1, open: true },
+    { name: 'Co-Working', kind: 'openoffice', wing: 'R', f0: 0, f1: 0.45, open: true },
     { name: 'Business-Lounge', kind: 'lounge', wing: 'C' },
   ] },
-  { label: '2. OG Zimmer', rooms: [
+  { label: '2. OG Gästezimmer', rooms: [
     ...Array.from({ length: 6 }, (_, i) => ({ name: `Gästezimmer ${201 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 6, f1: (i + 1) / 6 })),
     ...Array.from({ length: 6 }, (_, i) => ({ name: `Gästezimmer ${207 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 6, f1: (i + 1) / 6 })),
     { name: 'Hotelflur', kind: 'empty' as const, wing: 'C' as const },
   ] },
-]
-
-const STAFF: FloorSpec[] = [
-  { label: 'EG', rooms: [
-    { name: 'Lobby & Rezeption', kind: 'reception', wing: 'C' },
-    { name: 'Gemeinschaftsküche & Lounge', kind: 'canteen', wing: 'L', open: true },
-    { name: 'Co-Working', kind: 'openoffice', wing: 'R', f0: 0.5, f1: 1, open: true },
-    { name: 'Waschsalon & Fitnessraum', kind: 'cardio', wing: 'R', f0: 0, f1: 0.5 },
-  ] },
-  { label: '1. OG Apartments', rooms: [
-    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${101 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 5, f1: (i + 1) / 5 })),
-    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${106 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 5, f1: (i + 1) / 5 })),
-    { name: 'Flur', kind: 'empty' as const, wing: 'C' as const },
-  ] },
-  { label: '2. OG Apartments', rooms: [
-    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${201 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 5, f1: (i + 1) / 5 })),
-    ...Array.from({ length: 5 }, (_, i) => ({ name: `Apartment ${206 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 5, f1: (i + 1) / 5 })),
-    { name: 'Gemeinschaftsraum', kind: 'lounge' as const, wing: 'C' as const },
+  { label: '3. OG Mitarbeiter-Apartments', rooms: [
+    ...Array.from({ length: 6 }, (_, i) => ({ name: `Apartment ${301 + i}`, kind: 'hotelroom' as const, wing: 'L' as const, f0: i / 6, f1: (i + 1) / 6 })),
+    ...Array.from({ length: 6 }, (_, i) => ({ name: `Apartment ${307 + i}`, kind: 'hotelroom' as const, wing: 'R' as const, f0: i / 6, f1: (i + 1) / 6 })),
+    { name: 'Gemeinschaftsraum Mitarbeitende', kind: 'lounge' as const, wing: 'C' as const },
   ] },
 ]
 
@@ -57,7 +42,7 @@ export function buildHotels(b: WorldBuilder) {
     extras: (b: WorldBuilder, c: GenericCtx) => {
       const { w, d } = c
       // balconies on upper floors (sides)
-      for (let k = 3; k < 9; k++) {
+      for (let k = 3; k < 10; k++) {
         const y = k * 3.6
         for (const s of [-1, 1]) {
           for (let i = 0; i < 5; i++) {
@@ -83,26 +68,8 @@ export function buildHotels(b: WorldBuilder) {
       // taxi drop-off
       b.box(w / 2 + 6, 0.005, 0, 6, 0.02, d, '#4a4c4e', 'matte')
       K.car(b, w / 2 + 6, 0, 2, 0, '#f2c12e')
+      b.sign(0, 2.9, d / 2 + 4.43, 6, 0.5, textTexture(['Campus Hotel · Mitarbeiter-Residenz'], { w: 768, h: 80, accent: C.green }), 0, 0.5)
       b.zone('Hotelterrasse', -w / 2 - 8, 0, d / 4, 12, 4, 18, { building: 'hotel' })
-    },
-  })
-
-  const staff = buildingById('staffhotel')
-  buildGeneric(b, {
-    info: staff, style: 'staffhotel', visit: STAFF, logoSuffix: 'Hotels', roofDeck: true,
-    extras: (b: WorldBuilder, c: GenericCtx) => {
-      const { w, d, fh, H } = c
-      // wooden balcony bands on the sides
-      for (let k = 3; k < Math.round(H / fh); k++) {
-        for (const s of [-1, 1]) {
-          b.box(s * (w / 2 + 0.7), k * fh - 0.2, 0, 1.4, 0.2, d - 4, C.woodLight, 'satin')
-          b.box(s * (w / 2 + 1.38), k * fh, 0, 0.05, 1.0, d - 4, C.glassTint, 'glass')
-        }
-      }
-      b.sign(0, 2.9, d / 2 + 4.43, 5, 0.5, textTexture(['Mitarbeiter-Residenz · Staff Hotel'], { w: 768, h: 80, accent: C.green }), 0, 0.5)
-      K.bikeRack(b, w / 2 + 4, d / 2 + 2, Math.PI / 2, 8)
-      for (let i = 0; i < 3; i++) K.bench(b, -w / 2 - 3, 0, d / 2 - 4 - i * 4, Math.PI / 2)
-      b.npc({ kind: 'walk', path: [[0, 0, d / 2 + 10], [0, 0, d / 2 + 30]], loop: false })
     },
   })
 }

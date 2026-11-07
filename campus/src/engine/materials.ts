@@ -14,6 +14,26 @@ export type Family =
   | 'emissive'
   | 'nightglow'
   | 'lightpool'
+  | 'belt'
+
+function beltTexture() {
+  const cv = document.createElement('canvas')
+  cv.width = 64
+  cv.height = 64
+  const g = cv.getContext('2d')!
+  g.fillStyle = '#2a2c2b'
+  g.fillRect(0, 0, 64, 64)
+  g.fillStyle = '#4a4d4b'
+  for (let y = 0; y < 64; y += 8) g.fillRect(0, y, 64, 3)
+  g.fillStyle = 'rgba(124,194,66,0.55)'
+  g.fillRect(0, 0, 4, 64)
+  g.fillRect(60, 0, 4, 64)
+  const t = new THREE.CanvasTexture(cv)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(1, 24)
+  return t
+}
 
 export const families: Record<Family, THREE.Material> = {
   matte: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.88, metalness: 0 }),
@@ -42,6 +62,7 @@ export const families: Record<Family, THREE.Material> = {
   }),
   emissive: new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
   nightglow: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false, depthWrite: false }),
+  belt: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7, map: typeof document !== 'undefined' ? beltTexture() : null }),
   lightpool: new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -316,6 +337,44 @@ export function textTexture(
       const total = lines.length
       const y = h / 2 + (i - (total - 1) / 2) * size * 1.05
       g.fillText(ln, x, y)
+    })
+  })
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping
+  signCache.set(key, t)
+  return t
+}
+
+/** tenant directory board: title + rows [floor, company, field] */
+export function directoryTexture(title: string, rows: [string, string, string][], w = 512, h = 720) {
+  const key = `dir|${title}|${rows.map((r) => r.join('/')).join('|')}`
+  const hit = signCache.get(key)
+  if (hit) return hit
+  const t = canvasTex(w, h, (g) => {
+    g.fillStyle = '#141615'
+    g.fillRect(0, 0, w, h)
+    g.fillStyle = '#ffffff'
+    g.fillRect(0, 0, w, h * 0.16)
+    drawLogo(g, w / 2, h * 0.08, h * 0.045, 'Business Center')
+    g.fillStyle = C.green
+    g.fillRect(0, h * 0.16, w, h * 0.008)
+    g.fillStyle = '#ffffff'
+    g.font = `700 ${h * 0.04}px ${FONT}`
+    g.textAlign = 'left'
+    g.fillText(title, w * 0.07, h * 0.235)
+    const rowH = (h * 0.72) / Math.max(rows.length, 6)
+    rows.forEach(([fl, name, field], i) => {
+      const y = h * 0.29 + i * rowH
+      g.fillStyle = C.green
+      g.font = `700 ${rowH * 0.26}px ${FONT}`
+      g.fillText(fl, w * 0.07, y + rowH * 0.35)
+      g.fillStyle = '#ffffff'
+      g.font = `700 ${rowH * 0.3}px ${FONT}`
+      g.fillText(name, w * 0.27, y + rowH * 0.35)
+      g.fillStyle = 'rgba(255,255,255,0.65)'
+      g.font = `400 ${rowH * 0.22}px ${FONT}`
+      g.fillText(field, w * 0.27, y + rowH * 0.68)
+      g.fillStyle = 'rgba(255,255,255,0.12)'
+      g.fillRect(w * 0.07, y + rowH * 0.9, w * 0.86, 1)
     })
   })
   t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping

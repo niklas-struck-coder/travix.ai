@@ -136,6 +136,8 @@ export function buildElevator(
     const [cx, , cz] = b.w(0, 0, 0)
     el = new Elevator(id, o.name, cx, cz, b.yaw, o.stops, o.start ?? 0, o.glass)
     const y0 = el.baseY - 0.3
+    // shafts reaching below ground punch a hole into the ground slab
+    if (el.baseY < -0.5) world.groundHoles.push(b.rectTest(0, 0, el.w + 0.8, el.d + 0.9))
     const y1 = Math.max(...o.stops.map((s) => s.y)) + 3.6
     const H = y1 - y0
     const W = el.w + 0.3

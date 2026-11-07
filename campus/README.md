@@ -55,9 +55,15 @@ automatisch die Grafikqualität „Niedrig“ gewählt.
 - **Big Apple Health & Recovery Center** für Mitarbeitende: Physiotherapie,
   betriebsärztlicher Dienst, Recovery & Sauna, Massage, Meditation, Health-Café,
   Kneipp-Becken im Garten.
-- **Campus Hotel** (Lobby, Rezeption, Restaurant, Bar, Fitness, Konferenzräume,
-  Gästezimmer, Terrasse, Dachterrasse) und **Mitarbeiter-Residenz** (Hotel für anreisende
-  Mitarbeitende: Apartments, Gemeinschaftsküche, Co-Working, Waschsalon, Dachterrasse).
+- **Campus Hotel & Mitarbeiter-Residenz** in einem Gebäude: Lobby, Rezeption, Restaurant,
+  Bar, Fitness, Konferenzräume, Gästezimmer (2. OG), Mitarbeiter-Apartments (3. OG),
+  Gemeinschaftsküche und Co-Working für Mitarbeitende, Dachterrasse.
+- **Business Center I & II** für Big-Apple-Unternehmen ohne eigenes Gebäude, mit
+  Mieterverzeichnis (Tafel) am Eingang und in der Lobby. Die Mieter stehen in
+  `src/config/campus.ts` (`tenants`) und sind Platzhalter, die beliebig umbenannt werden können.
+- **Untergeschoss**: runde Tiefgarage unter dem HQ-Platz (HQ-Aufzug, Glas-Lift auf dem
+  Platz, Autorampe mit Zufahrtstunnel von der Ringstraße) und grün beleuchtete Tunnel mit
+  funktionierenden Fahrsteigen zu jedem Gebäude; jeder Gebäude-Aufzug hält im „UG“.
 - **Big Apple Visitor Center** (Besucherzentrum, gegenüber dem HQ-Haupteingang):
   Besucherempfang, Unternehmensausstellung, Auditorium (Big Apple Innovation Week),
   Pressebereich, Konferenz- und Präsentationsräume. Das runde Holding-HQ ist das einzige
@@ -67,8 +73,7 @@ automatisch die Grafikqualität „Niedrig“ gewählt.
   Kabine, Aussteigen mit E an der nächsten Station.
 - **Infrastruktur**: Ringstraße mit Verkehr und Bussen, Haltestellen, Boulevard,
   Besucherparkplätze mit Ladestationen, Radwegring, Feuerwehrzufahrt, Anlieferungen,
-  Energiezentrale, unterirdisches Parkhaus (Rampe + Glas-Aufzug), Campussee, Gracht mit
-  Amsterdamer Grachtenhäusern.
+  Energiezentrale, Campussee, Gracht mit Amsterdamer Grachtenhäusern.
 - **Lebendige Welt**: Fußgänger, Radfahrer, sitzende Personen in Kantine, Meetings und
   Auditorium, Passagiere an den Stationen, automatische Schiebetüren, wechselnde
   Bildschirminhalte, Tageszeit mit Nachtbeleuchtung, Wetter (Sonne, Bewölkt, Regen).
@@ -102,6 +107,8 @@ src/
   world/SubsidiaryBuildings.ts  Programme + Außenelemente der 10 Tochtergebäude
   world/Hotels.ts             Campus Hotel und Mitarbeiter-Residenz
   world/VisitorCenter.ts      Big Apple Visitor Center (Besucherzentrum)
+  world/BusinessCenters.ts    Business Center mit Mieterverzeichnis
+  world/Underground.ts        Tiefgarage, Tunnel mit Fahrsteigen, Autorampe
   world/rooms.ts, kits.ts     Raumprogramme und Möbel-Kits
   world/dynamic.ts            Aufzüge, Schiebetüren, Treppen, Sitzplätze, Infopunkte
   systems/                    PlayerController, Monorail, NPCs, Verkehr, Licht/Wetter, Renderer

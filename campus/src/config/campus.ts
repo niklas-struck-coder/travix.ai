@@ -45,7 +45,7 @@ export type FacadeStyle =
   | 'conference'
   | 'racing'
   | 'health'
-  | 'staffhotel'
+  | 'business'
 
 export interface BuildingInfo {
   id: string
@@ -60,6 +60,8 @@ export interface BuildingInfo {
   floorH: number
   style?: FacadeStyle
   kind: 'hq' | 'subsidiary' | 'hotel' | 'service'
+  /** small companies housed in a business center: [floor, name, field] */
+  tenants?: [string, string, string][]
   // computed
   x: number
   z: number
@@ -90,14 +92,35 @@ const raw: Raw[] = [
     angle: 124, radius: 92, w: 36, d: 24, floors: 2, floorH: 4.2,
   },
   {
-    id: 'staffhotel', name: 'Big Apple Hotels – Mitarbeiter-Residenz', suffix: 'Hotels', kind: 'hotel', style: 'staffhotel',
-    description: 'Hotel für Mitarbeitende, die aus aller Welt zum Campus reisen: Apartments, Gemeinschaftsküche & Lounge, Co-Working, Waschsalon und Dachterrasse.',
-    angle: 204, radius: 186, w: 28, d: 44, floors: 10, floorH: 3.4,
+    id: 'hotel', name: 'Big Apple Hotels – Campus Hotel & Mitarbeiter-Residenz', suffix: 'Hotels', kind: 'hotel', style: 'campushotel',
+    description: 'Ein Haus für Gäste und Mitarbeitende: Lobby, Rezeption, Restaurant, Bar, Fitness, Konferenzräume, Gästezimmer (2. OG) und Mitarbeiter-Apartments mit Gemeinschaftsküche und Co-Working (1./3. OG), Dachterrasse.',
+    angle: 213, radius: 184, w: 40, d: 56, floors: 10, floorH: 3.6,
   },
   {
-    id: 'hotel', name: 'Big Apple Hotels – Campus Hotel', suffix: 'Hotels', kind: 'hotel',
-    description: 'Campus-Hotel mit Lobby, Rezeption, Restaurant, Bar, Fitness, Konferenzräumen, Gästezimmern und Dachterrasse.',
-    angle: 218, radius: 182, w: 30, d: 52, floors: 9, floorH: 3.6, style: 'campushotel',
+    id: 'bc1', name: 'Big Apple Business Center I', suffix: 'Business Center', kind: 'service', style: 'business',
+    description: 'Haus für Big-Apple-Unternehmen, die (noch) kein eigenes Gebäude haben. Mieterverzeichnis am Eingang und in der Lobby.',
+    angle: 233, radius: 178, w: 34, d: 28, floors: 4, floorH: 4.2,
+    tenants: [
+      ['EG', 'Big Apple Pay', 'Bezahldienste & Wallet'],
+      ['EG', 'Big Apple Insurance', 'Versicherungen'],
+      ['1. OG', 'Big Apple Energy', 'Grüne Energie & Ladeinfrastruktur'],
+      ['1. OG', 'Big Apple Real Estate', 'Immobilien & Campus-Entwicklung'],
+      ['1. OG', 'Big Apple Ventures', 'Beteiligungen & Start-ups'],
+      ['2. OG', 'Big Apple Academy', 'Weiterbildung & Trainee-Programme'],
+      ['2. OG', 'Big Apple Food & Catering', 'Gastronomie & Kantinen'],
+    ],
+  },
+  {
+    id: 'bc2', name: 'Big Apple Business Center II', suffix: 'Business Center', kind: 'service', style: 'business',
+    description: 'Zweites Haus für kleinere Big-Apple-Unternehmen und neue Gründungen, mit Coworking-Fläche. Mieterverzeichnis am Eingang und in der Lobby.',
+    angle: 160, radius: 180, w: 28, d: 26, floors: 3, floorH: 4.2,
+    tenants: [
+      ['EG', 'Big Apple Security', 'Sicherheit & Gebäudetechnik'],
+      ['EG', 'Big Apple Consulting', 'Beratung'],
+      ['EG', 'Coworking', 'Fläche für neue Unternehmen'],
+      ['1. OG', 'Big Apple Sports', 'Sport & Events'],
+      ['1. OG', 'Big Apple Media Lab', 'Content & Social Media'],
+    ],
   },
   {
     id: 'tech', name: 'Big Apple Tech', suffix: 'Tech', kind: 'subsidiary', style: 'tech',
@@ -157,7 +180,7 @@ export const BUILDINGS: BuildingInfo[] = raw.map((b) => {
 })
 
 const SHORT: Record<string, string> = {
-  hq: 'HQ', hotel: 'Campus Hotel', staffhotel: 'Mitarbeiter-Hotel', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center',
+  hq: 'HQ', hotel: 'Campus Hotel', bc1: 'Business Center I', bc2: 'Business Center II', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center',
 }
 /** short label for maps, signs and the location display */
 export const shortName = (b: { id: string; suffix: string }) => SHORT[b.id] ?? b.suffix
@@ -179,12 +202,73 @@ export const LAKE = (() => {
   return { x, z, r: 22 }
 })()
 
-/** underground garage (local rect in world coords) */
+/** underground car park below the HQ plaza (round) + car ramp & access tunnel from the ring road */
 export const GARAGE = {
-  x0: -78, x1: -18, z0: 194, z1: 232,
-  floorY: -4.6,
-  ramp: { x0: -76, x1: -68, z0: 202, z1: 232 }, // ramp goes down from z1 (ground) to z0
-  liftX: -24, liftZ: 200,
+  radius: 58,
+  floorY: -5,
+  ceilY: -1.4,
+  /** car ramp: radial at this compass angle, bottom at rBottom, rising outwards over len metres */
+  ramp: { angle: 197, rBottom: 208, len: 30, width: 8.4 },
+  liftX: -40, liftZ: -30, // glass lift garage ↔ plaza
+}
+
+export interface TunnelPath {
+  id: string
+  name: string
+  /** start (world) at the building's elevator, direction towards the garage, length */
+  sx: number
+  sz: number
+  rot: number
+  len: number
+  width: number
+  /** angles (atan2 convention) where the tunnel cuts the garage wall */
+  gap: [number, number]
+}
+
+/** circle entry of a line p + t·d (|d| = 1) with radius R: smallest t ≥ 0 */
+function enter(px: number, pz: number, dx: number, dz: number, R: number) {
+  const b = px * dx + pz * dz
+  const c = px * px + pz * pz - R * R
+  const disc = b * b - c
+  if (disc < 0) return 0
+  return -b - Math.sqrt(disc)
+}
+
+/** pedestrian tunnels from the garage to every building (except the HQ) and the car access tunnel */
+export function tunnelPaths(): TunnelPath[] {
+  const R = GARAGE.radius
+  const out: TunnelPath[] = []
+  const mk = (id: string, name: string, sx: number, sz: number, rot: number, width: number) => {
+    const dx = Math.sin(rot)
+    const dz = Math.cos(rot)
+    const len = enter(sx, sz, dx, dz, R) + 1.5
+    // side lines → gap angles
+    const ang: number[] = []
+    for (const off of [-width / 2 - 0.3, width / 2 + 0.3]) {
+      const ox = sx + off * Math.cos(rot)
+      const oz = sz - off * Math.sin(rot)
+      const t = enter(ox, oz, dx, dz, R)
+      ang.push(Math.atan2(oz + dz * t, ox + dx * t))
+    }
+    let [a0, a1] = ang
+    if (a1 < a0) [a0, a1] = [a1, a0]
+    if (a1 - a0 > Math.PI) [a0, a1] = [a1, a0 + Math.PI * 2]
+    out.push({ id, name, sx, sz, rot, len, width, gap: [a0, a1] })
+  }
+  for (const b of BUILDINGS) {
+    if (b.kind === 'hq') continue
+    // elevator door of the generic building: local (-2.6, -d/2 + 3.0)
+    const lx = -2.6
+    const lz = -b.d / 2 + 3.0
+    const sx = b.x + lx * Math.cos(b.rot) + lz * Math.sin(b.rot)
+    const sz = b.z - lx * Math.sin(b.rot) + lz * Math.cos(b.rot)
+    mk('t-' + b.id, b.name, sx, sz, b.rot, 6)
+  }
+  // car tunnel from the ramp bottom northwards (rot π → local +z = world -z)
+  const r = GARAGE.ramp
+  const [rx, rz] = polar(r.angle, r.rBottom)
+  mk('t-cars', 'Zufahrt Tiefgarage', rx, rz, faceCentre(r.angle), r.width)
+  return out
 }
 
 export const START = { x: 0, z: 96, yaw: 0 } // in front of the HQ plaza, looking north at the tower

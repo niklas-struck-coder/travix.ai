@@ -290,13 +290,25 @@ function stepPlayer(dt: number) {
   }
   input.jump = false
 
+  // moving walkways
+  let cvx = 0
+  let cvz = 0
+  if (player.grounded) {
+    for (const c of world.conveyors) {
+      if (Math.abs(player.pos.y - c.y) < 0.3 && c.test(player.pos.x, player.pos.z)) {
+        cvx = c.dx * c.speed
+        cvz = c.dz * c.speed
+        break
+      }
+    }
+  }
   // integrate horizontal movement in sub-steps
   const stepUp = player.grounded ? STEP : 0.12
-  const total = Math.hypot(player.vel.x, player.vel.z) * dt
+  const total = Math.hypot(player.vel.x + cvx, player.vel.z + cvz) * dt
   const n = Math.max(1, Math.ceil(total / 0.2))
   for (let i = 0; i < n; i++) {
-    let x = player.pos.x + (player.vel.x * dt) / n
-    let z = player.pos.z + (player.vel.z * dt) / n
+    let x = player.pos.x + ((player.vel.x + cvx) * dt) / n
+    let z = player.pos.z + ((player.vel.z + cvz) * dt) / n
     ;[x, z] = col.resolve(x, z, player.radius, player.pos.y + stepUp, player.pos.y + player.height)
     player.pos.x = x
     player.pos.z = z
