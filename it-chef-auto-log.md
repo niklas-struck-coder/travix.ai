@@ -26365,3 +26365,61 @@ bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen Beobachtungen
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-07 (einundneunzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, zweiter des 07.11. (gut eine
+Stunde nach dem neunzigsten Lauf, `2eaa473`, 00:13 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand),
+`origin/main` unverändert bei `fe1300e` (23.10.) — Freigabe-Chef hat
+seit dem 23.10. weiterhin nicht gemergt, nicht mein Zuständigkeitsbereich,
+`main` bleibt unberührt, `main` ist weiterhin lupenreiner Vorfahre von
+`it-chef/auto` (kein Merge nötig). Regressionsschutz-Baseline frisch
+durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (75 Testdateien, 570 Tests, alle grün) —
+identisch zum Endstand des 90. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+erneut komplett nach offenen Checkboxen durchsucht. Keine Veränderung
+seit dem 90. Lauf — alle offenen Punkte (2.0 Base44-Setup, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre-Anbindung, 6.2
+TripItem-Anbieter-URL, 6.6/6.7 CostBreakdown/calculateCosts, 7.4
+Planung-fortsetzen-Volltext, 7.12 Reisebudget-Charts, 8.1-8.9/8.12
+Urlaubsmodus-Tagesitinerar/Vision/Deal-Finder/Messenger/Premium/Rewards)
+verfehlen unverändert mindestens eines der vier Sicherheitskriterien.
+`reports/it-chef.md`/`reports/support-chef.md`/`reports/
+marketing-chef.md` weiterhin auf Stand 23.10., keine neuen Funde der
+plattform-verwalteten Kanäle.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+der 90. Lauf vor einer Stunde, um keine bereits geprüften Bereiche zu
+wiederholen):
+- Gesamtes `src/` nach `dangerouslySetInnerHTML`, rohem `innerHTML`-Zugriff
+  außerhalb von Tests und `eval(` durchsucht — kein Treffer (die einzigen
+  `innerHTML`-Stellen sind Testsetup in `src/lib/utils.test.ts`).
+- Alle `setInterval`/`setTimeout`-Aufrufe in Produktcode (`useConcierge.ts`,
+  `useChat.ts`, drei Stellen) erneut gegen zugehöriges `clearTimeout` beim
+  Unmount/Cleanup geprüft — weiterhin korrekt abgesichert (seit dem
+  dreiundzwanzigsten Lauf gefixt), kein neuer Fund.
+- Alle `.map(`-Aufrufe mit `key={index}`/`key={i}`/`key={idx}` statt einer
+  stabilen ID gesucht: zwei Treffer (`FlightCard.tsx:33`,
+  `SearchErrorAlert.tsx:17`). Beide Listen sind reines Anzeige-Rendering
+  aus einem einmalig gesetzten, nie nachträglich umsortierten oder
+  gefilterten Array (Segmente eines Flugs bzw. Fehlermeldungen eines
+  einzelnen Suchaufrufs) — kein objektiv prüfbarer Bug, nur ein
+  theoretisches Anti-Pattern ohne erreichbaren Fehlerfall.
+- `src/` nach `TODO`/`FIXME`/`XXX`-Markern durchsucht (außerhalb von
+  Tests) — kein Treffer.
+- Alle `<Label htmlFor="...">` in `EditMode.tsx`, `FlightWizard.tsx`,
+  `HotelWizard.tsx`, `Einstellungen.tsx`, `Profil.tsx` einzeln gegen das
+  zugehörige `id`/`SelectTrigger id`-Attribut im selben File abgeglichen —
+  jedes `htmlFor` hat ein passendes Ziel, kein verwaistes Label.
+
+**Ergebnis:** Kein Punkt heute (einundneunzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen
+Beobachtungen über die bereits in `reports/it-chef.md` dokumentierten
+hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
