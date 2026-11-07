@@ -42,6 +42,7 @@ export type FacadeStyle =
   | 'trains'
   | 'foundation'
   | 'campushotel'
+  | 'conference'
   | 'racing'
   | 'health'
   | 'staffhotel'
@@ -76,7 +77,12 @@ const raw: Raw[] = [
   {
     id: 'racing', name: 'Big Apple Groups Racing', suffix: 'Groups Racing', kind: 'subsidiary', style: 'racing',
     description: 'Formel-1-Team der Big Apple Groups: F1-Showroom mit Rennwagen, Rennsimulatoren, Race Control & Telemetrie, Aerodynamik/Windkanal und Engineering.',
-    angle: 180, radius: 178, w: 58, d: 34, floors: 4, floorH: 4.6,
+    angle: 50, radius: 92, w: 44, d: 26, floors: 3, floorH: 4.6,
+  },
+  {
+    id: 'visitor', name: 'Big Apple Visitor Center', suffix: 'Visitor Center', kind: 'service', style: 'conference',
+    description: 'Besucherzentrum des Campus: Besucherempfang, Unternehmensausstellung, Auditorium für über 400 Gäste (Big Apple Innovation Week), Konferenz- und Presseräume.',
+    angle: 180, radius: 165, w: 84, d: 46, floors: 2, floorH: 7,
   },
   {
     id: 'health', name: 'Big Apple Health & Recovery Center', suffix: 'Health', kind: 'subsidiary', style: 'health',
@@ -86,7 +92,7 @@ const raw: Raw[] = [
   {
     id: 'staffhotel', name: 'Big Apple Hotels – Mitarbeiter-Residenz', suffix: 'Hotels', kind: 'hotel', style: 'staffhotel',
     description: 'Hotel für Mitarbeitende, die aus aller Welt zum Campus reisen: Apartments, Gemeinschaftsküche & Lounge, Co-Working, Waschsalon und Dachterrasse.',
-    angle: 200, radius: 186, w: 28, d: 44, floors: 10, floorH: 3.4,
+    angle: 204, radius: 186, w: 28, d: 44, floors: 10, floorH: 3.4,
   },
   {
     id: 'hotel', name: 'Big Apple Hotels – Campus Hotel', suffix: 'Hotels', kind: 'hotel',
@@ -151,7 +157,7 @@ export const BUILDINGS: BuildingInfo[] = raw.map((b) => {
 })
 
 const SHORT: Record<string, string> = {
-  hq: 'HQ', hotel: 'Campus Hotel', staffhotel: 'Mitarbeiter-Hotel', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery',
+  hq: 'HQ', hotel: 'Campus Hotel', staffhotel: 'Mitarbeiter-Hotel', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center',
 }
 /** short label for maps, signs and the location display */
 export const shortName = (b: { id: string; suffix: string }) => SHORT[b.id] ?? b.suffix
@@ -160,7 +166,7 @@ export const buildingById = (id: string) => BUILDINGS.find((b) => b.id === id)!
 
 /** Monorail stations (compass angle on the monorail ring) */
 export const STATIONS = [
-  { id: 's-hq', name: 'Holding HQ / Racing', angle: 180 },
+  { id: 's-hq', name: 'Holding HQ / Visitor Center', angle: 180 },
   { id: 's-fin', name: 'Finance · Mobility', angle: 122 },
   { id: 's-tech', name: 'Tech · Trains', angle: 52 },
   { id: 's-hol', name: 'Holidays · Entertainment', angle: 338 },

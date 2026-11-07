@@ -171,7 +171,7 @@ export function furnish(b: B, kind: RoomKind, w: number, d: number, ctx: RoomCtx
       b.box(0, 0, hd - 2, sw, 1.0, 4.5, C.anthracite, 'satin', { col: true })
       b.box(0, 1.0, hd - 4.2, sw, 0.04, 0.06, C.green, 'emissive')
       b.box(-sw / 4, 1.0, hd - 2.5, 0.7, 1.15, 0.5, C.white, 'gloss', { col: true, rot: Math.PI })
-      b.sign(-sw / 4, 1.8, hd - 2.77, 0.65, 0.16, logoTexture('Groups', { bg: '#ffffff', w: 512, h: 128 }), Math.PI)
+      b.sign(-sw / 4, 1.8, hd - 2.77, 0.65, 0.16, logoTexture(ctx.suffix ?? 'Groups', { bg: '#ffffff', w: 512, h: 128 }), Math.PI)
       b.box(0, 1.0, hd + 0.1, sw + 0.4, 5.4, 0.1, C.black, 'gloss')
       b.screen({ id: 'aud-main', lx: 0, ly: 1.4, lz: hd - 0.02, w: sw - 1, h: 4.6, rot: Math.PI, slides: [
         { title: 'BIG APPLE INNOVATION WEEK 2026', lines: ['Keynote: „Connected Journeys“', 'Auditorium · Amsterdam · 10:00 Uhr'], kind: 'event' },

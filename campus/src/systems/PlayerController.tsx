@@ -197,7 +197,7 @@ function updateInteraction(dt: number) {
     }
     const bInfo = room?.building ? BUILDINGS.find((b) => b.id === room!.building) : null
     let loc = room ? room.name : 'Campusgelände'
-    if (bInfo && room && room.name !== bInfo.name && !room.name.includes(bInfo.suffix)) loc = `${bInfo.kind === 'hq' ? 'HQ' : bInfo.kind === 'hotel' ? shortName(bInfo) : 'Big Apple ' + bInfo.suffix} · ${room.name}`
+    if (bInfo && room && room.name !== bInfo.name && !room.name.includes(bInfo.suffix)) loc = `${bInfo.kind === 'hq' ? 'HQ' : bInfo.kind === 'subsidiary' ? 'Big Apple ' + bInfo.suffix : shortName(bInfo)} · ${room.name}`
     if (player.mode === 'riding') loc = 'Monorail'
     if (loc !== u.location) u.set({ location: loc })
     // building card when approaching a building from outside

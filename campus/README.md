@@ -48,7 +48,7 @@ automatisch die Grafikqualität „Niedrig“ gewählt.
 - **Unternehmensgebäude** (Tech, Finance, Fitness, Logistics, Mobility, Hotels, Holidays,
   Entertainment, Trains, Foundation, **Groups Racing**) mit eigener Fassade, Außenelementen
   und 2–3 begehbaren Etagen (Aufzug + echtes Treppenhaus) mit den geforderten Räumen.
-- **Big Apple Groups Racing** (Formel-1-Team, gegenüber dem HQ-Haupteingang): F1-Auto auf
+- **Big Apple Groups Racing** (Formel-1-Team, frei stehend am HQ-Platz wie die Foundation): F1-Auto auf
   einem beleuchteten Podest am Eingang, F1-Showroom mit Rennwagen, Trophäen und Helmen,
   Rennsimulatoren, Race Control & Telemetrie, Aerodynamik/Windkanal, Strategieraum,
   Engineering, Fahrer-Performance.
@@ -58,8 +58,10 @@ automatisch die Grafikqualität „Niedrig“ gewählt.
 - **Campus Hotel** (Lobby, Rezeption, Restaurant, Bar, Fitness, Konferenzräume,
   Gästezimmer, Terrasse, Dachterrasse) und **Mitarbeiter-Residenz** (Hotel für anreisende
   Mitarbeitende: Apartments, Gemeinschaftsküche, Co-Working, Waschsalon, Dachterrasse).
-- Das runde Holding-HQ ist das einzige Gebäude der Big Apple Groups selbst; das frühere
-  Besucher- & Konferenzzentrum wurde auf Wunsch entfernt.
+- **Big Apple Visitor Center** (Besucherzentrum, gegenüber dem HQ-Haupteingang):
+  Besucherempfang, Unternehmensausstellung, Auditorium (Big Apple Innovation Week),
+  Pressebereich, Konferenz- und Präsentationsräume. Das runde Holding-HQ ist das einzige
+  Gebäude mit dem Logo „Big Apple Groups“.
 - **Monorail**: erhöhter Rundkurs, 5 Stationen mit Treppe und Lift, ein 3-Wagen-Zug mit
   automatischem Halt, öffnenden Türen und Abfahrtsanzeigen. Einsteigen mit E, Fahrt aus der
   Kabine, Aussteigen mit E an der nächsten Station.
@@ -99,6 +101,7 @@ src/
   world/GenericBuilding.ts    Gebäudegenerator (Fassadenstile, Etagen, Kern, Treppen, Räume)
   world/SubsidiaryBuildings.ts  Programme + Außenelemente der 10 Tochtergebäude
   world/Hotels.ts             Campus Hotel und Mitarbeiter-Residenz
+  world/VisitorCenter.ts      Big Apple Visitor Center (Besucherzentrum)
   world/rooms.ts, kits.ts     Raumprogramme und Möbel-Kits
   world/dynamic.ts            Aufzüge, Schiebetüren, Treppen, Sitzplätze, Infopunkte
   systems/                    PlayerController, Monorail, NPCs, Verkehr, Licht/Wetter, Renderer

@@ -122,8 +122,8 @@ function plaza(b: WorldBuilder) {
   })
   infoPoint(b, 3, 1.2, 64, 'Big Apple Global Campus Amsterdam', [
     'Internationaler Hauptsitz der Big Apple Groups.',
-    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Umgeben von den Unternehmenszentralen inkl. Big Apple Groups Racing, dem Health & Recovery Center, dem Campus-Hotel und der Mitarbeiter-Residenz.',
-    'Monorail-Rundkurs mit 5 Stationen · Tiefgarage hinter Big Apple Groups Racing · Campussee mit Foundation.',
+    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, das Big Apple Visitor Center, Big Apple Groups Racing und Health & Recovery Center am HQ-Platz, Campus-Hotel und Mitarbeiter-Residenz.',
+    'Monorail-Rundkurs mit 5 Stationen · Tiefgarage hinter dem Visitor Center · Campussee mit Foundation.',
   ], { label: 'Campus-Info lesen' })
   // covered walkway from HQ entrance to the monorail station
   for (let z = 42; z <= 104; z += 6) {
@@ -274,8 +274,8 @@ function walkways(b: WorldBuilder) {
     b.npc({ kind: 'bike', path: pts, loop: true, speed: 4.5 + rand() * 1.5 })
   }
   // visitors walking from the bus stop / parking towards the campus
-  b.npc({ kind: 'walk', path: [[-6, 0, L.ringRoadRadius + 20], [-6, 0, 236], [-38, 0, 206], [-38, 0, 158], [-14, 0, 150]], loop: false })
-  b.npc({ kind: 'walk', path: [[6, 0, L.ringRoadRadius + 40], [6, 0, 236], [38, 0, 204], [38, 0, 158], [12, 0, 150]], loop: false })
+  b.npc({ kind: 'walk', path: [[-6, 0, L.ringRoadRadius + 20], [-6, 0, 236], [-48, 0, 204], [-48, 0, 136], [-14, 0, 132]], loop: false })
+  b.npc({ kind: 'walk', path: [[6, 0, L.ringRoadRadius + 40], [6, 0, 236], [48, 0, 204], [48, 0, 136], [12, 0, 132]], loop: false })
   // seated people on plaza benches
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + 0.4

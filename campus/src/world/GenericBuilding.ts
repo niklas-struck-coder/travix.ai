@@ -53,6 +53,7 @@ const STYLE: Record<FacadeStyle, StyleSpec> = {
   entertainment: { frame: C.black, glass: '#56666e', band: C.black, bandFam: 'gloss', accent: C.green },
   trains: { frame: C.white, glass: '#a3c3cd', band: C.white, bandFam: 'satin', accent: C.green },
   foundation: { frame: C.brick, glass: '#b4cbd1', band: '#b9a58d', bandFam: 'matte', accent: C.green },
+  conference: { frame: C.white, glass: '#a9c6cf', band: C.white, bandFam: 'satin', accent: C.green },
   racing: { frame: '#111312', glass: '#4f5f66', band: '#111312', bandFam: 'gloss', accent: C.green },
   health: { frame: C.woodLight, glass: '#c3dde3', band: C.white, bandFam: 'satin', accent: C.green },
   staffhotel: { frame: C.woodLight, glass: '#a7c0c8', band: C.white, bandFam: 'satin', accent: C.green },
@@ -294,10 +295,10 @@ function envelope(b: WorldBuilder, o: GenericOpts, ctx: GenericCtx, ew: number) 
   ring(b, w, d, 0, 0.45, 0.15, s === 'foundation' ? C.brick : C.stoneDark, 'satin') // plinth
 
   // style specific vertical elements
-  const pitch = s === 'finance' ? 3.0 : s === 'tech' ? 1.8 : s === 'hotels' || s === 'campushotel' ? 2.4 : s === 'racing' ? 2.2 : s === 'health' || s === 'staffhotel' ? 1.5 : s === 'foundation' ? 1.2 : 3.0
-  const depth = s === 'tech' ? 0.7 : s === 'finance' ? 0.6 : s === 'foundation' ? 0.35 : s === 'hotels' || s === 'campushotel' ? 0.45 : s === 'racing' ? 0.8 : s === 'health' || s === 'staffhotel' ? 0.35 : 0.18
-  const fw = s === 'finance' ? 0.9 : s === 'tech' ? 0.18 : s === 'foundation' ? 0.12 : s === 'hotels' || s === 'campushotel' ? 0.35 : s === 'racing' ? 0.25 : s === 'health' || s === 'staffhotel' ? 0.12 : 0.12
-  const fam: Family = s === 'finance' ? 'gloss' : s === 'tech' || s === 'hotels' || s === 'campushotel' || s === 'health' || s === 'staffhotel' ? 'satin' : s === 'racing' ? 'gloss' : s === 'foundation' ? 'satin' : 'metal'
+  const pitch = s === 'finance' ? 3.0 : s === 'tech' ? 1.8 : s === 'hotels' || s === 'campushotel' ? 2.4 : s === 'conference' ? 4.0 : s === 'racing' ? 2.2 : s === 'health' || s === 'staffhotel' ? 1.5 : s === 'foundation' ? 1.2 : 3.0
+  const depth = s === 'tech' ? 0.7 : s === 'finance' ? 0.6 : s === 'foundation' ? 0.35 : s === 'hotels' || s === 'campushotel' ? 0.45 : s === 'conference' ? 1.2 : s === 'racing' ? 0.8 : s === 'health' || s === 'staffhotel' ? 0.35 : 0.18
+  const fw = s === 'finance' ? 0.9 : s === 'tech' ? 0.18 : s === 'foundation' ? 0.12 : s === 'hotels' || s === 'campushotel' ? 0.35 : s === 'conference' ? 0.3 : s === 'racing' ? 0.25 : s === 'health' || s === 'staffhotel' ? 0.12 : 0.12
+  const fam: Family = s === 'finance' ? 'gloss' : s === 'tech' || s === 'hotels' || s === 'campushotel' || s === 'conference' || s === 'health' || s === 'staffhotel' ? 'satin' : s === 'racing' ? 'gloss' : s === 'foundation' ? 'satin' : 'metal'
   const col = s === 'finance' ? '#2c2f2e' : s === 'foundation' || s === 'health' || s === 'staffhotel' ? C.wood : st.frame
   if (s !== 'logistics' && s !== 'entertainment') {
     for (const [len, fz, dir] of [[w, d / 2, 1], [w, -d / 2, -1]] as const) {
