@@ -26271,3 +26271,97 @@ hinaus.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-07 (neunzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter täglicher Cloud-Lauf, erster des 07.11.,
+nach dem neunundachtzigsten Lauf (`0a0496e`, 06.11., 23:11 UTC).
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand), `origin/main` unverändert bei `fe1300e` (23.10.) —
+Freigabe-Chef hat seit dem 23.10. weiterhin nicht gemergt, nicht mein
+Zuständigkeitsbereich, `main` bleibt unberührt, `main` ist weiterhin
+lupenreiner Vorfahre von `it-chef/auto` (kein Merge nötig).
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(75 Testdateien, 570 Tests, alle grün) — identisch zum Endstand des
+89. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+erneut komplett nach offenen Checkboxen durchsucht. Alle verbleibenden
+offenen Punkte (2.0 Base44-Setup, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre-Anbindung, 6.2 TripItem-Anbieter-URL, 6.6/6.7
+CostBreakdown/calculateCosts, 7.4 Planung-fortsetzen-Volltext, 7.12
+Reisebudget-Charts, 8.1-8.9/8.12 Urlaubsmodus-Tagesitinerar/Vision/
+Deal-Finder/Messenger/Premium/Rewards) verfehlen unverändert mindestens
+eines der vier Sicherheitskriterien — durchweg blockiert auf Backend-/
+API-Zugangsdaten (Base44, Gemini, Duffel-Erweiterungen), fehlende
+Datenfelder in `TripDraft` (Preis/Anbieter-URL pro Posten, mehrere
+parallele Chat-Historien) oder echte Produkt-/Architekturentscheidungen
+von Ni (Anbieterwahl Zug/Bus/Fähre, Zahlungsprozess, Premium-Tarife).
+`reports/it-chef.md`/`reports/support-chef.md`/`reports/
+marketing-chef.md` weiterhin auf Stand 23.10., keine neuen Funde der
+plattform-verwalteten Kanäle seit dem letzten Check. Die beiden darin
+offen gemeldeten Punkte (unterschiedlich dramatische Lösch-Warnungen;
+fehlende Persistenz der Reise-Checkliste in `ChecklistPanel.tsx`) sind
+weiterhin bewusst zurückgestellt — beide erfordern laut diesen Berichten
+selbst eine echte Produktabwägung bzw. eine Architekturentscheidung
+(Nutzerkonten/Backend), keinen Ein-Zeiler. Die vom 85. Lauf
+zurückgestellte Beobachtung zu `MeineReisen.tsx` (`Lissabon`-Reise fest
+als `status: 'upcoming'` codiert) erneut geprüft: Rückflugdatum weiterhin
+22.11.2026, heute 07.11.2026 — Status weiterhin zufällig korrekt,
+Zurückstellung weiterhin gültig.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+die Vorläufe, um keine bereits geprüften Bereiche zu wiederholen):
+- Alle `size="icon"`-Buttons in `EditMode.tsx`, `KiChat.tsx`,
+  `ChatInput.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`, `Buchung.tsx`, `Reiseentwuerfe.tsx`,
+  `Warenkorb.tsx`, `Kalender.tsx` einzeln gegen ein zugehöriges
+  `aria-label` geprüft (auch dort, wo es per `asChild` auf einem
+  verschachtelten `Link`/Element statt direkt auf dem `Button` sitzt,
+  z.B. `Buchung.tsx:116`) — jeder einzelne hat einen Namen für
+  Screenreader, kein Treffer ohne.
+- Alle Zähler-Anzeigen mit `.length}` in Nutzer-sichtbarem Text
+  durchsucht (`Dashboard.tsx:112`, `Buchung.tsx:271`,
+  `Reiseentwuerfe.tsx:407`) — alle drei unterscheiden bereits korrekt
+  Singular/Plural (`Entwurf`/`Entwürfe`, `Aktivität geplant`/
+  `Aktivitäten geplant`), kein weiterer ungeprüfter Zähler mit
+  fehlendem Singular/Plural gefunden.
+- `formatEuro()` (`src/lib/format.ts:4`) auf einen möglichen
+  `NaN`-Fall geprüft (kein Schutz vor `NaN`, anders als
+  `formatOfferPrice`/`formatTime`): alle sieben Aufrufstellen
+  (`Dashboard.tsx`, `Preisalarme.tsx`, `Warenkorb.tsx`) übergeben
+  ausschließlich feste Zahlenliterale aus lokalen Mock-Daten-Arrays,
+  kein Pfad zu nutzereingegebenen oder sonst dynamisch erzeugten Werten
+  — kein erreichbarer `NaN`-Fall, daher kein Fund (reine Spekulation
+  über eine noch nicht existierende Datenquelle wäre kein objektiv
+  prüfbarer Punkt).
+- Den einzigen frei editierbaren Preis-Eintrag im Code,
+  `EditMode.tsx:61-65` (`updatePrice()`, Aktivitäten-Preis), gegen
+  seinen Typ geprüft: `Activity.price` ist `string | null`
+  (`src/types/chat.ts:15`), wird nirgends in eine Zahl umgewandelt oder
+  an `formatEuro`/`calculateCosts` übergeben (6.6/6.7 noch nicht
+  gebaut) — kein Typkonflikt, kein `NaN`-Risiko.
+- `loadStoredChat()`/`saveStoredChat()`/`clearStoredChat()`
+  (`tripStorage.ts`) sowie die einzige weitere `localStorage`-Fundstelle
+  (`Urlaubsmodus.tsx:19`, nur ein Kommentar, kein echter Zugriff) erneut
+  gegen Normalisierung/Fehlerbehandlung gelesen — unverändert
+  vollständig abgesichert (`try`/`catch` an allen drei Stellen, alle vier
+  potenziell fehlenden Felder defaultet), keine neue Lücke seit dem
+  letzten Log-Eintrag zu dieser Datei.
+- `src/lib/trip/calendarUtils.ts` komplett gegen Kalenderwochen-
+  Berechnung (`getMonthGridDays`, Montag-Start, Monatswechsel über
+  Jahresgrenze) durchgelesen — keine Off-by-one- oder Zeitzonen-
+  Auffälligkeit gefunden.
+- Alle `.map(`-Aufrufe mit `key=`-Vergabe in `src/pages`/
+  `src/components` stichprobenhaft gegen doppelte `id`/`htmlFor`-Paare
+  innerhalb derselben Datei geprüft (Formular-Label-Zuordnung) — kein
+  Treffer.
+
+**Ergebnis:** Kein Punkt heute (neunzigster Lauf) autonom umgesetzt,
+kein Produktcode geändert — ehrlich "kein Fund". Baseline unverändert
+bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen Beobachtungen
+über die bereits in `reports/it-chef.md` dokumentierten hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
