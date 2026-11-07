@@ -137,7 +137,7 @@ export function buildElevator(
     el = new Elevator(id, o.name, cx, cz, b.yaw, o.stops, o.start ?? 0, o.glass)
     const y0 = el.baseY - 0.3
     // shafts reaching below ground punch a hole into the ground slab
-    if (el.baseY < -0.5) world.groundHoles.push(b.rectTest(0, 0, el.w + 0.8, el.d + 0.9))
+    if (el.baseY < -0.5 && Math.max(...o.stops.map((s) => s.y)) > -0.5) world.groundHoles.push(b.rectTest(0, 0, el.w + 0.8, el.d + 0.9))
     const y1 = Math.max(...o.stops.map((s) => s.y)) + 3.6
     const H = y1 - y0
     const W = el.w + 0.3
@@ -297,9 +297,9 @@ export function buildStair(
   z: number,
   width: number,
   rise: number,
-  o: { color?: string; rot?: number; railing?: 'both' | 'left' | 'right' | 'none'; glassRail?: boolean } = {},
+  o: { color?: string; rot?: number; railing?: 'both' | 'left' | 'right' | 'none'; glassRail?: boolean; steps?: number } = {},
 ) {
-  const n = Math.max(2, Math.round(rise / 0.175))
+  const n = o.steps ?? Math.max(2, Math.round(rise / 0.175))
   const h = rise / n
   const depth = 0.3
   b.at(x, y, z, o.rot ?? 0, () => {

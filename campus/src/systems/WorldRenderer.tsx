@@ -11,8 +11,6 @@ import { world } from '../engine/registry'
 import { buildSite, buildGroundMeshes } from '../world/CampusGround'
 import { buildHQ } from '../world/HoldingHeadquarters'
 import { buildSubsidiaries } from '../world/SubsidiaryBuildings'
-import { buildHotels } from '../world/Hotels'
-import { buildVisitorCenter } from '../world/VisitorCenter'
 import { buildUnderground } from '../world/Underground'
 import { buildBusinessCenters } from '../world/BusinessCenters'
 import { buildMonorail } from './MonorailSystem'
@@ -26,8 +24,6 @@ export function getWorld() {
   buildSite(b)
   buildHQ(b)
   buildSubsidiaries(b)
-  buildHotels(b)
-  buildVisitorCenter(b)
   buildBusinessCenters(b)
   buildUnderground(b)
   buildMonorail(b)

@@ -35,56 +35,46 @@ Smartphone/Tablet: Joystick links (voll ausgelenkt = rennen), rechte Bildschirmh
 Umsehen, Buttons für Aktion, Springen, Karte, Kamera und Menü. Auf Touch-Geräten wird
 automatisch die Grafikqualität „Niedrig“ gewählt.
 
-## Inhalt (Stand dieser Version)
+## Inhalt (Masterplan 2.0)
 
-- **Holding-Headquarter**: runder Turm, 22 Etagen (~101 m), Glasfassade mit weißen/dunklen
-  Bändern und dezenten apfelgrünen Akzenten, Logo am Turm, keine Kuppel/Spitze. Lobby mit
-  Empfang, Besucherregistrierung (funktioniert), Logo-Wand, Sitzbereichen, digitalen Screens,
-  Markenwelt-Ausstellung; Wendeltreppe zur Galerie (Mitarbeiterrestaurant, Lounge,
-  Besprechungsboxen); Aufzug zu 4. OG (Finance, Legal & Compliance), 7. OG (Technology, HR),
-  10. OG (Internationale Unternehmensentwicklung, Strategie, Besprechungsräume),
-  18. OG (Geschäftsführung, Chairman-Büro, Vorstandskonferenzraum), 21. OG (Executive
-  Lounge, großer Konferenzraum) und Dachterrasse mit Panorama-Fernrohr.
-- **Unternehmensgebäude** (Tech, Finance, Fitness, Logistics, Mobility, Hotels, Holidays,
-  Entertainment, Trains, Foundation, **Groups Racing**) mit eigener Fassade, Außenelementen
-  und 2–3 begehbaren Etagen (Aufzug + echtes Treppenhaus) mit den geforderten Räumen.
-- **Big Apple Groups Racing** (Formel-1-Team, frei stehend am HQ-Platz wie die Foundation): F1-Auto auf
-  einem beleuchteten Podest am Eingang, F1-Showroom mit Rennwagen, Trophäen und Helmen,
-  Rennsimulatoren, Race Control & Telemetrie, Aerodynamik/Windkanal, Strategieraum,
-  Engineering, Fahrer-Performance.
-- **Big Apple Health & Recovery Center** für Mitarbeitende: Physiotherapie,
-  betriebsärztlicher Dienst, Recovery & Sauna, Massage, Meditation, Health-Café,
-  Kneipp-Becken im Garten.
-- **Campus Hotel & Mitarbeiter-Residenz** in einem Gebäude: Lobby, Rezeption, Restaurant,
-  Bar, Fitness, Konferenzräume, Gästezimmer (2. OG), Mitarbeiter-Apartments (3. OG),
-  Gemeinschaftsküche und Co-Working für Mitarbeitende, Dachterrasse.
-- **Business Center I & II** für Big-Apple-Unternehmen ohne eigenes Gebäude, mit
-  Mieterverzeichnis (Tafel) am Eingang und in der Lobby. Die Mieter stehen in
-  `src/config/campus.ts` (`tenants`) und sind Platzhalter, die beliebig umbenannt werden können.
-- **Untergeschoss**: runde Tiefgarage unter dem HQ-Platz (HQ-Aufzug, Glas-Lift auf dem
-  Platz, Autorampe mit Zufahrtstunnel von der Ringstraße) und grün beleuchtete Tunnel mit
-  funktionierenden Fahrsteigen zu jedem Gebäude; jeder Gebäude-Aufzug hält im „UG“.
-- **Big Apple Visitor Center** (Besucherzentrum, gegenüber dem HQ-Haupteingang):
-  Besucherempfang, Unternehmensausstellung, Auditorium (Big Apple Innovation Week),
-  Pressebereich, Konferenz- und Präsentationsräume. Das runde Holding-HQ ist das einzige
-  Gebäude mit dem Logo „Big Apple Groups“.
-- **Monorail**: erhöhter Rundkurs, 5 Stationen mit Treppe und Lift, ein 3-Wagen-Zug mit
-  automatischem Halt, öffnenden Türen und Abfahrtsanzeigen. Einsteigen mit E, Fahrt aus der
-  Kabine, Aussteigen mit E an der nächsten Station.
-- **Infrastruktur**: Ringstraße mit Verkehr und Bussen, Haltestellen, Boulevard,
-  Besucherparkplätze mit Ladestationen, Radwegring, Feuerwehrzufahrt, Anlieferungen,
-  Energiezentrale, Campussee, Gracht mit Amsterdamer Grachtenhäusern.
-- **Lebendige Welt**: Fußgänger, Radfahrer, sitzende Personen in Kantine, Meetings und
-  Auditorium, Passagiere an den Stationen, automatische Schiebetüren, wechselnde
-  Bildschirminhalte, Tageszeit mit Nachtbeleuchtung, Wetter (Sonne, Bewölkt, Regen).
-- **UI**: Hauptmenü, HUD (Logo, Uhrzeit, Wetter, Minikarte, Standort), Gebäude-Infokarten,
-  interaktive Campuskarte (Name, Beschreibung, Entfernung, Navigation, Teleport,
-  Architekturansicht), Einstellungen.
+Die Gebäudeliste, Lage, Größen und Raumprogramme stehen in `src/config/campus.ts` und
+`src/config/programs.ts`. Daraus werden sowohl die 3D-Welt als auch die Masterplan-Seite
+(`masterplan.html`: Lageplan, Grundrisse Ebene –1 und –2, Schnitt, Monorail, Zugänge,
+Raumlisten) erzeugt.
+
+- **Holding-HQ** (rund, 22 Etagen, ≈ 101 m): nur Unternehmensführung und Konzernverwaltung –
+  Lobby, Galerie (Mitarbeiter-Café), 4. OG Finance & Controlling / Legal & Compliance,
+  7. OG HR / IT & Konzernverwaltung / Communications, 10. OG Strategy / International
+  Business Development / M&A, 18. OG Chairman Office / Group Management / Vorstand,
+  21. OG Executive Lounge / Vorstandskonferenzraum, Dachterrasse.
+- **Unternehmens-HQs**: Tech, Finance, Mobility, Holidays, Logistics, Trains, Entertainment
+  (äußerer Ring) sowie Racing, Fitness, Hotels HQ und Foundation (am HQ-Platz).
+  **Fitness ist reines Bürogebäude ohne Studio** (nur Musterflächen); das Fitnessstudio
+  gehört zu **Big Apple Health & Recovery** (Training, Health, Recovery, Umkleiden).
+- **Big Apple Hotel**: eigenständiges, mittelgroßes Hotel am Rand (Lobby, Restaurant mit
+  Frühstück, Bar, Terrasse, Fitness, Besprechung, Standard-/Superiorzimmer, Suiten,
+  Backoffice, Housekeeping & Wäscherei). **Big Apple Hotels HQ** ist davon getrennt.
+- **Media Center**: Film-/TV-Studio, Nachrichtenstudio, Podcast, Ton, Regie, Schnitt,
+  Foto, Make-up, Technik, Vorführraum.
+- **Visitor Center**: Besucher- und Lernzentrum mit Museum, Learning Center, Bibliothek,
+  Café und Campusmodell (kein Konferenzzentrum mehr).
+- **Business Center I & II** für kleinere Unternehmen mit Mieterverzeichnis.
+- **Ebene –1 Campus-Promenade**: zentraler Ring um das HQ, vier Achsen (Kreuz) mit
+  Fahrsteigen, äußerer Ring; jedes Gebäude mit Zugang, Foyer, Aufzug, Treppe und
+  Zugangskontrolle; Coffee Points, Sitznischen, Bänke, Pflanzen, digitale Wegweiser.
+- **Ebene –2 Tiefgarage**: baulich getrennt, Ein-/Ausfahrten Ost und Süd, Bereiche für
+  Mitarbeitende, Besucher, E-Laden, Barrierefrei, Motorräder und Fahrräder; nur über vier
+  Aufzugskerne (zwei als Glaslift bis zum HQ-Platz) und ein Treppenhaus mit Ebene –1
+  verbunden.
+- **Monorail**: Rundkurs mit 5 Stationen, keine weiteren Brücken oder Stege.
+- Weiterhin: Ringstraße mit Verkehr, Busse, Boulevard, Besucherparkplätze, Radweg,
+  Feuerwehrzufahrt, Energiezentrale, Campussee, Gracht, NPCs, Tageszeiten, Wetter.
 
 ## Ehrliche Grenzen
 
 - Im HQ hält der Aufzug nur auf den ausgestalteten Etagen; die übrigen Etagen sind von außen
-  sichtbar, aber nicht begehbar. Treppen gibt es im HQ zwischen Lobby und Galerie.
+  sichtbar, aber nicht begehbar. Treppen gibt es im HQ zwischen Lobby und Galerie (Ebene –1
+  über den Aufzug). In den anderen Gebäuden sind 2–4 Geschosse begehbar.
 - Navigation zeigt Richtung und Entfernung in Luftlinie, keine Wegberechnung.
 - Das Logo ist typografisch nach der Beschreibung nachgebaut (Big schwarz, Apple grün,
   Blatt, Suffix schwarz). Sobald die offizielle Logodatei vorliegt, kann sie in
@@ -105,10 +95,10 @@ src/
   world/HoldingHeadquarters.ts  rundes HQ inkl. Etagen und Dachterrasse
   world/GenericBuilding.ts    Gebäudegenerator (Fassadenstile, Etagen, Kern, Treppen, Räume)
   world/SubsidiaryBuildings.ts  Programme + Außenelemente der 10 Tochtergebäude
-  world/Hotels.ts             Campus Hotel und Mitarbeiter-Residenz
-  world/VisitorCenter.ts      Big Apple Visitor Center (Besucherzentrum)
   world/BusinessCenters.ts    Business Center mit Mieterverzeichnis
-  world/Underground.ts        Tiefgarage, Tunnel mit Fahrsteigen, Autorampe
+  world/Underground.ts        Ebene –1 Promenade, Ebene –2 Tiefgarage, Rampen
+  config/programs.ts          Raumprogramme, Einrichtung, Innenraumkonzepte
+  masterplan/                 Masterplan-Seite (Pläne werden aus den Daten erzeugt)
   world/rooms.ts, kits.ts     Raumprogramme und Möbel-Kits
   world/dynamic.ts            Aufzüge, Schiebetüren, Treppen, Sitzplätze, Infopunkte
   systems/                    PlayerController, Monorail, NPCs, Verkehr, Licht/Wetter, Renderer

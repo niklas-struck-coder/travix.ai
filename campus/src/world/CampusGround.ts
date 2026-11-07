@@ -6,10 +6,10 @@
 import * as THREE from 'three'
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture, textures } from '../engine/materials'
-import { BUILDINGS, DEG, GARAGE, LAKE, LAYOUT, STATIONS, polar, shortName } from '../config/campus'
+import { BUILDINGS, DEG, LAKE, LAYOUT, STATIONS, UG, polar, rampCorners, shortName } from '../config/campus'
 import { infoPoint } from './dynamic'
 import { world } from '../engine/registry'
-import { rampCorners } from './Underground'
+import { groundOpenings } from './GenericBuilding'
 import * as K from './kits'
 import { rand } from './rooms'
 
@@ -51,10 +51,11 @@ function onPath(x: number, z: number) {
   if (Math.abs(x) < 14 && z > 30 && z < 130) return true // HQ axis
   if (z > L.ringRoadRadius - 20 && Math.abs(x) < 80) return true // boulevard & parking
   {
-    const [rx, rz] = polar(GARAGE.ramp.angle, GARAGE.ramp.rBottom + GARAGE.ramp.len / 2)
-    if (Math.hypot(x - rx, z - rz) < 26) return true
+    for (const r of UG.ramps) {
+      const [rx, rz] = polar(r.angle, UG.rampBottomR + UG.rampLen / 2)
+      if (Math.hypot(x - rx, z - rz) < 38) return true
+    }
   }
-  if (Math.hypot(x - GARAGE.liftX, z - GARAGE.liftZ) < 6) return true
   for (const s of STATIONS) {
     const [sx, sz] = polar(s.angle, L.monorailRadius + 5)
     if (Math.hypot(x - sx, z - sz) < 32) return true
@@ -120,8 +121,8 @@ function plaza(b: WorldBuilder) {
   })
   infoPoint(b, 3, 1.2, 64, 'Big Apple Global Campus Amsterdam', [
     'Internationaler Hauptsitz der Big Apple Groups.',
-    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, das Big Apple Visitor Center, Big Apple Groups Racing und Health & Recovery Center am HQ-Platz, Campus Hotel mit Mitarbeiter-Residenz und zwei Business Center für kleinere Unternehmen.',
-    'Tiefgarage unter dem HQ-Platz, von dort führen grün beleuchtete Tunnel mit Fahrsteigen zu jedem Gebäude · Monorail mit 5 Stationen · Campussee mit Foundation.',
+    'Zentrum: Holding-Headquarter (rund, 22 Etagen). Rundherum die Unternehmenszentralen, Visitor Center, Media Center, Big Apple Hotel und zwei Business Center; am HQ-Platz Racing, Fitness HQ, Hotels HQ und Foundation.',
+    'Unterirdisch: Campus-Promenade (Ebene –1) mit zentralem Ring, vier Achsen und äußerem Ring zu allen Gebäuden · Tiefgarage (Ebene –2) mit Einfahrten Ost und Süd · Glaslifte auf dem HQ-Platz.',
   ], { label: 'Campus-Info lesen' })
   // covered walkway from HQ entrance to the monorail station
   for (let z = 42; z <= 104; z += 6) {
@@ -476,13 +477,23 @@ export function buildGroundMeshes(): THREE.Object3D[] {
   const lh = new THREE.Path()
   lh.absarc(LAKE.x, -LAKE.z, LAKE.r + 0.5, 0, Math.PI * 2, false)
   s.holes.push(lh)
-  {
-    const rc = rampCorners()
+  const polyHole = (shape: THREE.Shape, rc: [number, number][]) => {
     const h = new THREE.Path()
     rc.forEach(([x, z], i) => (i ? h.lineTo(x, -z) : h.moveTo(x, -z)))
     h.lineTo(rc[0][0], -rc[0][1])
-    s.holes.push(h)
+    shape.holes.push(h)
   }
+  for (const r of UG.ramps) polyHole(s, rampCorners(r.angle))
+  // openings of the building stairs / elevators to Ebene –1 and of the plaza lifts
+  for (const bd of BUILDINGS) if (bd.kind !== 'hq') for (const poly of groundOpenings(bd)) polyHole(s, poly)
+  const liftPolys = UG.cores.filter((c) => c.plaza).map((c) => {
+    const [cx, cz] = polar(c.angle, UG.coreR)
+    const rot = Math.PI - c.angle * DEG
+    const cs = Math.cos(rot)
+    const sn = Math.sin(rot)
+    return [[-1.5, -1.45], [1.5, -1.45], [1.5, 1.45], [-1.5, 1.45]].map(([lx, lz]) => [cx + lx * cs + lz * sn, cz - lx * sn + lz * cs] as [number, number])
+  })
+  for (const lp of liftPolys) polyHole(s, lp)
   void hole
   // the canal is cut by shrinking the ground on the north side instead
   const gs = new THREE.Shape()
@@ -496,17 +507,7 @@ export function buildGroundMeshes(): THREE.Object3D[] {
     // plaza with an opening for the glass lift to the car park
     const ps = new THREE.Shape()
     ps.absarc(0, 0, L.plazaRadius, 0, Math.PI * 2, false)
-    const lh = new THREE.Path()
-    const lx0 = GARAGE.liftX - 1.5
-    const lx1 = GARAGE.liftX + 1.5
-    const lz0 = GARAGE.liftZ - 1.45
-    const lz1 = GARAGE.liftZ + 1.45
-    lh.moveTo(lx0, -lz0)
-    lh.lineTo(lx1, -lz0)
-    lh.lineTo(lx1, -lz1)
-    lh.lineTo(lx0, -lz1)
-    lh.lineTo(lx0, -lz0)
-    ps.holes.push(lh)
+    for (const lp of liftPolys) polyHole(ps, lp)
     const pg = new THREE.ShapeGeometry(ps, 48)
     const ptex = tex(t.paving, 1 / 6.5)
     flat(pg, new THREE.MeshStandardMaterial({ map: ptex, roughness: 0.75 }), 0.004)

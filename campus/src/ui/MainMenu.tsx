@@ -23,7 +23,7 @@ export function MainMenu() {
       <div className="menu-card panel">
         <div className="menu-logo"><Logo size={40} /></div>
         <div className="menu-title">GLOBAL CAMPUS · AMSTERDAM</div>
-        <p className="muted">Interaktive 3D-Welt des internationalen Hauptsitzes. Erkunde das runde Holding-Headquarter, die Unternehmenszentralen inklusive Big Apple Groups Racing, das Visitor Center, das Health & Recovery Center, Campus Hotel mit Mitarbeiter-Residenz, Business Center, Monorail sowie Tiefgarage und Tunnel unter dem Campus.</p>
+        <p className="muted">Interaktive 3D-Welt des internationalen Hauptsitzes. Erkunde das runde Holding-Headquarter, die Unternehmenszentralen, Visitor Center mit Museum, Media Center, Health & Recovery, das Big Apple Hotel, die Monorail und die unterirdische Campus-Promenade mit Tiefgarage.</p>
         <div className="menu-buttons">
           <button className="btn big" onClick={enter}>{s.started ? 'Weiter erkunden' : 'Campus betreten'}</button>
           <button className="btn big ghost" onClick={free}>Freie Erkundung (Architekturmodus)</button>
@@ -93,7 +93,7 @@ export function Help() {
           <li>HQ: Lobby mit Empfang, Besucherregistrierung, Markenwelt, Wendeltreppe zur Galerie (Kantine/Lounge), Aufzug zu 4./7./10./18./21. OG und zur Dachterrasse.</li>
           <li>Alle Unternehmensgebäude sind betretbar: Aufzug + Treppenhaus zwischen den Etagen, thematische Räume.</li>
           <li>Monorail: an einer Station auf den Bahnsteig (Treppe oder Lift), bei offenen Türen <b>E</b> zum Einsteigen, an der nächsten Station <b>E</b> zum Aussteigen.</li>
-          <li>Tiefgarage unter dem HQ-Platz: mit dem HQ-Aufzug oder dem Glas-Lift auf dem Platz nach „UG“. Von dort führen Tunnel mit Fahrsteigen zu jedem Gebäude; in jedem Gebäude fährt der Aufzug ins UG. Autos kommen über die Rampe an der Ringstraße.</li>
+          <li>Unterirdisch: Jeder Aufzug fährt ins „UG“ zur Campus-Promenade (Ebene –1): zentraler Ring um das HQ, vier Achsen mit Fahrsteigen, äußerer Ring zu allen Gebäuden. Die Tiefgarage (Ebene –2) erreichst du über die Aufzugskerne am zentralen Ring oder die Glaslifte auf dem HQ-Platz.</li>
           <li>Bänke, Sofas und Liegen: <b>E</b> zum Hinsetzen. Bildschirme und Infopunkte: <b>E</b> zum Lesen.</li>
         </ul>
         <h3>Ehrliche Grenzen dieser Version</h3>

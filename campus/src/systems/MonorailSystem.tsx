@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture } from '../engine/materials'
 import { world } from '../engine/registry'
-import { DEG, LAYOUT, STATIONS, polar } from '../config/campus'
+import { DEG, LAYOUT, STATIONS, monorailControlPoints, polar } from '../config/campus'
 import { buildElevator, buildStair } from '../world/dynamic'
 import * as K from '../world/kits'
 import { player, toast, ui } from '../state/store'
@@ -24,22 +24,7 @@ const N_CARS = 3
 const ordered = [...STATIONS].sort((a, b) => a.angle - b.angle)
 
 function buildCurve() {
-  const R = LAYOUT.monorailRadius
-  const pts: THREE.Vector3[] = []
-  ordered.forEach((st, i) => {
-    const a = st.angle * DEG
-    const [cx, cz] = polar(st.angle, R)
-    const tx = Math.cos(a)
-    const tz = Math.sin(a)
-    for (const off of [-26, 0, 26]) pts.push(new THREE.Vector3(cx + tx * off, 0, cz + tz * off))
-    // a gentle outward swing between stations
-    const next = ordered[(i + 1) % ordered.length]
-    let span = next.angle - st.angle
-    if (span <= 0) span += 360
-    const mid = st.angle + span / 2
-    const [mx, mz] = polar(mid, R + (i % 2 ? 9 : -4))
-    pts.push(new THREE.Vector3(mx, 0, mz))
-  })
+  const pts = monorailControlPoints().map(([x, z]) => new THREE.Vector3(x, 0, z))
   return new THREE.CatmullRomCurve3(pts, true, 'centripetal')
 }
 

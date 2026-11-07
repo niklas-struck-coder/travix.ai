@@ -3,7 +3,7 @@
  * Both share one static map drawing.
  */
 import { useEffect, useRef, useState } from 'react'
-import { BUILDINGS, GARAGE, LAKE, LAYOUT, STATIONS, polar, buildingById, shortName, tunnelPaths, type BuildingInfo } from '../config/campus'
+import { BUILDINGS, LAKE, LAYOUT, STATIONS, UG, polar, buildingById, shortName, undergroundPlan, type BuildingInfo } from '../config/campus'
 import { C } from '../engine/materials'
 import { track } from '../systems/MonorailSystem'
 import { player, ui, useUI, toast } from '../state/store'
@@ -74,16 +74,23 @@ function drawStatic(g: CanvasRenderingContext2D, size: number) {
   g.strokeStyle = '#1f5fa8'
   g.lineWidth = 2
   g.beginPath()
-  g.arc(0, 0, GARAGE.radius, 0, Math.PI * 2)
+  g.arc(0, 0, UG.parkingRadius, 0, Math.PI * 2)
   g.stroke()
-  // underground tunnels
-  g.strokeStyle = 'rgba(124,194,66,0.85)'
-  g.lineWidth = 2.5
+  // underground promenade (Ebene –1): rings, axes and access corridors
+  g.strokeStyle = 'rgba(124,194,66,0.9)'
   g.setLineDash([3, 3])
-  for (const t of tunnelPaths()) {
+  for (const ring of [UG.centralRing, UG.outerRing]) {
+    g.lineWidth = 3
     g.beginPath()
-    g.moveTo(t.sx, t.sz)
-    g.lineTo(t.sx + Math.sin(t.rot) * t.len, t.sz + Math.cos(t.rot) * t.len)
+    g.arc(0, 0, ring.r, 0, Math.PI * 2)
+    g.stroke()
+  }
+  for (const c of undergroundPlan().corridors) {
+    if (c.level !== 'promenade' || c.kind === 'core' || c.kind === 'stair') continue
+    g.lineWidth = c.kind === 'axis' ? 3.5 : 2
+    g.beginPath()
+    g.moveTo(c.sx, c.sz)
+    g.lineTo(c.sx + Math.sin(c.rot) * c.len, c.sz + Math.cos(c.rot) * c.len)
     g.stroke()
   }
   g.setLineDash([])
@@ -332,8 +339,8 @@ export function CampusMap() {
         <span><i style={{ background: '#a5564a' }} /> Radweg</span>
         <span><i style={{ background: '#d8d2c6' }} /> Feuerwehrzufahrt</span>
         <span><i style={{ background: '#55585a' }} /> Ringstraße</span>
-        <span><i style={{ border: '2px dashed #1f5fa8' }} /> Tiefgarage (unter dem HQ)</span>
-        <span><i style={{ border: '2px dashed #7cc242' }} /> Tunnel mit Fahrsteigen</span>
+        <span><i style={{ border: '2px dashed #1f5fa8' }} /> Tiefgarage (Ebene –2)</span>
+        <span><i style={{ border: '2px dashed #7cc242' }} /> Promenade (Ebene –1)</span>
         <span>Gebäude anklicken für Details</span>
       </div>
       {b && (

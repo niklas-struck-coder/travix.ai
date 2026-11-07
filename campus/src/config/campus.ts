@@ -46,6 +46,7 @@ export type FacadeStyle =
   | 'racing'
   | 'health'
   | 'business'
+  | 'media'
 
 export interface BuildingInfo {
   id: string
@@ -73,33 +74,69 @@ type Raw = Omit<BuildingInfo, 'x' | 'z' | 'rot'>
 const raw: Raw[] = [
   {
     id: 'hq', name: 'Big Apple Groups Headquarters', suffix: 'Groups', kind: 'hq',
-    description: 'Holding-Zentrale der Big Apple Groups: Geschäftsführung, Vorstand, Group Finance, Legal & Compliance, Technology, HR und internationale Unternehmensentwicklung. 22 Etagen, Dachterrasse mit Blick über den Campus.',
+    description: 'Holding-Zentrale: ausschließlich Unternehmensführung und gruppenweite Verwaltung – Chairman Office, Group Management, Vorstand, Strategy, Finance & Controlling, Legal & Compliance, HR, International Business Development, M&A, Communications, IT- und Konzernverwaltung. 22 Etagen, Dachterrasse.',
     angle: 0, radius: 0, w: 48, d: 48, floors: 22, floorH: 4.5,
   },
+  // ---- outer building ring (r ≈ 178)
   {
-    id: 'racing', name: 'Big Apple Groups Racing', suffix: 'Groups Racing', kind: 'subsidiary', style: 'racing',
-    description: 'Formel-1-Team der Big Apple Groups: F1-Showroom mit Rennwagen, Rennsimulatoren, Race Control & Telemetrie, Aerodynamik/Windkanal und Engineering.',
-    angle: 50, radius: 92, w: 44, d: 26, floors: 3, floorH: 4.6,
+    id: 'holidays', name: 'Big Apple Holidays', suffix: 'Holidays', kind: 'subsidiary', style: 'holidays',
+    description: 'Zentrale des Reisegeschäfts: Reiseproduktentwicklung, Destination Management, Partnerschaften, Marketing, Kundenservice-Management, Reiseplanung, Tavium-KI-Projektteam und digitale Produktentwicklung.',
+    angle: 2, radius: 178, w: 46, d: 30, floors: 5, floorH: 4.2,
+  },
+  {
+    id: 'trains', name: 'Big Apple Trains', suffix: 'Trains', kind: 'subsidiary', style: 'trains',
+    description: 'Verwaltungs- und Betriebszentrale des Eisenbahnunternehmens: Betriebsleitstelle, Betriebs- und Fahrplanplanung, Streckenplanung, Zugdesign. Keine Werkstatt, kein Bahnhof.',
+    angle: 32, radius: 178, w: 54, d: 28, floors: 3, floorH: 4.6,
+  },
+  {
+    id: 'tech', name: 'Big Apple Tech', suffix: 'Tech', kind: 'subsidiary', style: 'tech',
+    description: 'Technologie- und Entwicklungszentrale der Gruppe: Software-, KI-, Produkt- und Plattformentwicklung, UX/UI-Design, IT-Infrastruktur, Cybersecurity, Testlabore.',
+    angle: 68, radius: 178, w: 62, d: 36, floors: 6, floorH: 4.2,
+  },
+  {
+    id: 'finance', name: 'Big Apple Finance', suffix: 'Finance', kind: 'subsidiary', style: 'finance',
+    description: 'Unternehmenszentrale von Big Apple Finance (keine Bankfiliale): Finanzstrategie, Fintech, Zahlungsverkehr, Investment- und Marktanalyse, Risikomanagement, Compliance.',
+    angle: 106, radius: 178, w: 46, d: 32, floors: 7, floorH: 4.2,
+  },
+  {
+    id: 'mobility', name: 'Big Apple Mobility', suffix: 'Mobility', kind: 'subsidiary', style: 'mobility',
+    description: 'Verwaltungs- und Produktzentrale der Mobilitätssparte: Flottenmanagement, Produkt- und App-Entwicklung, Wartungsmanagement, Standortplanung. Kleine Fahrzeugpräsentation, keine Werkstatt.',
+    angle: 143, radius: 178, w: 44, d: 30, floors: 4, floorH: 4.2,
   },
   {
     id: 'visitor', name: 'Big Apple Visitor Center', suffix: 'Visitor Center', kind: 'service', style: 'conference',
-    description: 'Besucherzentrum des Campus: Besucherempfang, Unternehmensausstellung, Auditorium für über 400 Gäste (Big Apple Innovation Week), Konferenz- und Presseräume.',
-    angle: 180, radius: 165, w: 84, d: 46, floors: 2, floorH: 7,
+    description: 'Besucher- und Lernzentrum: Besucherempfang, Big Apple Museum, Learning Center mit Lern- und Schulungsräumen, Bibliothek, Café und Campusausstellung. Nur wenige kleine Besprechungsräume.',
+    angle: 180, radius: 170, w: 70, d: 40, floors: 2, floorH: 5,
   },
   {
-    id: 'health', name: 'Big Apple Health & Recovery Center', suffix: 'Health', kind: 'subsidiary', style: 'health',
-    description: 'Gesundheits- und Erholungszentrum für alle Mitarbeitenden: Physiotherapie, betriebsärztlicher Dienst, Recovery & Sauna, Massage, Meditation und Ernährungsberatung.',
-    angle: 124, radius: 92, w: 36, d: 24, floors: 2, floorH: 4.2,
+    id: 'hotel', name: 'Big Apple Hotel', suffix: 'Hotel', kind: 'hotel', style: 'campushotel',
+    description: 'Eigenständiges, mittelgroßes Hotel am Rand des Campus: Lobby mit Rezeption, Restaurant mit Frühstücksbereich, Bar, Terrasse, Fitness, Besprechungsräume, Standard- und Superiorzimmer, wenige Suiten.',
+    angle: 208, radius: 206, w: 34, d: 44, floors: 7, floorH: 3.4,
   },
   {
-    id: 'hotel', name: 'Big Apple Hotels – Campus Hotel & Mitarbeiter-Residenz', suffix: 'Hotels', kind: 'hotel', style: 'campushotel',
-    description: 'Ein Haus für Gäste und Mitarbeitende: Lobby, Rezeption, Restaurant, Bar, Fitness, Konferenzräume, Gästezimmer (2. OG) und Mitarbeiter-Apartments mit Gemeinschaftsküche und Co-Working (1./3. OG), Dachterrasse.',
-    angle: 213, radius: 184, w: 40, d: 56, floors: 10, floorH: 3.6,
+    id: 'health', name: 'Big Apple Health & Recovery', suffix: 'Health & Recovery', kind: 'subsidiary', style: 'health',
+    description: 'Gesundheits-, Fitness- und Regenerationszentrum für alle Mitarbeitenden: Fitnessstudio (Kraft, Cardio, Functional, Freihantel, Geräte, Personal Training, Gruppenkurse), Health-Bereich mit Physiotherapie und Recovery mit Massage, Mobility und Ruhebereich.',
+    angle: 256, radius: 178, w: 56, d: 36, floors: 3, floorH: 4.6,
+  },
+  {
+    id: 'logistics', name: 'Big Apple Logistics', suffix: 'Logistics', kind: 'subsidiary', style: 'logistics',
+    description: 'Verwaltungs- und Steuerungszentrale: Leitstelle, Transport- und Supply-Chain-Planung, Flottenmanagement, Disposition, Datenanalyse. Keine Lagerhalle auf dem Campus.',
+    angle: 290, radius: 180, w: 52, d: 34, floors: 3, floorH: 4.6,
+  },
+  {
+    id: 'entertainment', name: 'Big Apple Entertainment', suffix: 'Entertainment', kind: 'subsidiary', style: 'entertainment',
+    description: 'Zentrale für Film, Serien und Unterhaltung: Film- und Serienentwicklung, Produktionsplanung, Redaktion, Marketing, Schnittplätze, kleine Studios, Vorführraum.',
+    angle: 320, radius: 178, w: 44, d: 32, floors: 4, floorH: 4.6,
+  },
+  {
+    id: 'media', name: 'Big Apple Media Center', suffix: 'Media Center', kind: 'service', style: 'media',
+    description: 'Professionelles Medien- und Produktionszentrum: Film- und TV-Studio, Nachrichtenstudio, Podcast- und Tonstudios, Regieräume, Schnittplätze, Fotostudio, Make-up, Technik und kleine Vorführräume.',
+    angle: 341, radius: 180, w: 44, d: 30, floors: 2, floorH: 6,
   },
   {
     id: 'bc1', name: 'Big Apple Business Center I', suffix: 'Business Center', kind: 'service', style: 'business',
     description: 'Haus für Big-Apple-Unternehmen, die (noch) kein eigenes Gebäude haben. Mieterverzeichnis am Eingang und in der Lobby.',
-    angle: 233, radius: 178, w: 34, d: 28, floors: 4, floorH: 4.2,
+    angle: 232, radius: 178, w: 34, d: 28, floors: 4, floorH: 4.2,
     tenants: [
       ['EG', 'Big Apple Pay', 'Bezahldienste & Wallet'],
       ['EG', 'Big Apple Insurance', 'Versicherungen'],
@@ -122,54 +159,25 @@ const raw: Raw[] = [
       ['1. OG', 'Big Apple Media Lab', 'Content & Social Media'],
     ],
   },
+  // ---- inner ring around the HQ plaza (r ≈ 90)
   {
-    id: 'tech', name: 'Big Apple Tech', suffix: 'Tech', kind: 'subsidiary', style: 'tech',
-    description: 'Technologie-Headquarter: Softwareentwicklung, KI-Labore, Kreativbereiche und Demo-Räume.',
-    angle: 68, radius: 178, w: 54, d: 34, floors: 6, floorH: 4.2,
-  },
-  {
-    id: 'finance', name: 'Big Apple Finance', suffix: 'Finance', kind: 'subsidiary', style: 'finance',
-    description: 'Internationaler Finanz- und Technologiebereich von Big Apple Groups: Marktanalyse, Kundenempfang, Finanzprodukte.',
-    angle: 106, radius: 178, w: 46, d: 32, floors: 7, floorH: 4.2,
-  },
-  {
-    id: 'mobility', name: 'Big Apple Mobility', suffix: 'Mobility', kind: 'subsidiary', style: 'mobility',
-    description: 'Mobilitäts-Headquarter mit Fahrzeugpräsentation, Mobilitätsleitstelle und E-Bike/E-Scooter-Station.',
-    angle: 143, radius: 178, w: 46, d: 32, floors: 4, floorH: 4.2,
+    id: 'racing', name: 'Big Apple Groups Racing', suffix: 'Groups Racing', kind: 'subsidiary', style: 'racing',
+    description: 'Formel-1-Team der Big Apple Groups: F1-Showroom mit Rennwagen, Rennsimulatoren, Race Control & Telemetrie, Aerodynamik und Engineering.',
+    angle: 50, radius: 90, w: 44, d: 26, floors: 3, floorH: 4.6,
   },
   {
     id: 'fitness', name: 'Big Apple Fitness', suffix: 'Fitness', kind: 'subsidiary', style: 'fitness',
-    description: 'Fitness- und Gesundheitszentrum: Cardio, Kraft, Gruppentraining, Personal Training, Recovery.',
-    angle: 252, radius: 178, w: 44, d: 32, floors: 3, floorH: 4.6,
+    description: 'Unternehmens-Headquarter der internationalen Fitnesskette – reines Bürogebäude ohne Fitnessstudio: Club Operations, Standortentwicklung, Trainer- und Personalverwaltung, Marketing, Qualitätsmanagement, Franchise & Expansion.',
+    angle: 124, radius: 90, w: 36, d: 24, floors: 3, floorH: 4.2,
   },
   {
-    id: 'logistics', name: 'Big Apple Logistics', suffix: 'Logistics', kind: 'subsidiary', style: 'logistics',
-    description: 'Logistik-Leitstelle für die Planung und Steuerung internationaler Lieferketten.',
-    angle: 288, radius: 182, w: 58, d: 36, floors: 3, floorH: 4.6,
-  },
-  {
-    id: 'entertainment', name: 'Big Apple Entertainment', suffix: 'Entertainment', kind: 'subsidiary', style: 'entertainment',
-    description: 'Medien- und Entertainment-Headquarter mit Präsentationskino, Studios und Schnittplätzen.',
-    angle: 322, radius: 178, w: 48, d: 34, floors: 4, floorH: 4.6,
-  },
-  {
-    id: 'holidays', name: 'Big Apple Holidays', suffix: 'Holidays', kind: 'subsidiary', style: 'holidays',
-    description: 'Reiseunternehmen: Reiseplanung, digitale Reisewelt und Tavium-KI-Demonstrationsbereich.',
-    angle: 356, radius: 178, w: 46, d: 32, floors: 5, floorH: 4.2,
-  },
-  {
-    id: 'trains', name: 'Big Apple Trains', suffix: 'Trains', kind: 'subsidiary', style: 'trains',
-    description: 'Eisenbahn-Headquarter: Betriebsleitstelle, Streckenplanung, Zugdesign-Ausstellung mit maßstabsgetreuem Zugmodell.',
-    angle: 32, radius: 180, w: 60, d: 30, floors: 3, floorH: 4.6,
-  },
-  {
-    id: 'hotels', name: 'Big Apple Hotels (Management)', suffix: 'Hotels', kind: 'subsidiary', style: 'hotels',
-    description: 'Hotelmanagement-Headquarter mit Hotelmodell-Ausstellung, Musterzimmer und Management-Büros.',
-    angle: 236, radius: 90, w: 34, d: 24, floors: 4, floorH: 4.2,
+    id: 'hotels', name: 'Big Apple Hotels Headquarters', suffix: 'Hotels', kind: 'subsidiary', style: 'hotels',
+    description: 'Verwaltungszentrale der Hotelkette (nicht das Hotel): Hotelmanagement, Operations, Revenue Management, Standort- und Konzeptentwicklung, Musterzimmer und Material- & Designausstellung.',
+    angle: 222, radius: 90, w: 34, d: 24, floors: 4, floorH: 4.2,
   },
   {
     id: 'foundation', name: 'Big Apple Foundation', suffix: 'Foundation', kind: 'subsidiary', style: 'foundation',
-    description: 'Gemeinnützige Stiftung der Big Apple Groups: Ausstellungen, Projekträume und Veranstaltungsbereich – ruhig am Campussee gelegen.',
+    description: 'Ruhiges, offenes Stiftungsgebäude am Campussee: Stiftungsmanagement, Projektbüros, Fördermittelverwaltung, Beratung, kleiner Veranstaltungsraum und Projektausstellung.',
     angle: 308, radius: 90, w: 34, d: 24, floors: 2, floorH: 4.4,
   },
 ]
@@ -180,7 +188,7 @@ export const BUILDINGS: BuildingInfo[] = raw.map((b) => {
 })
 
 const SHORT: Record<string, string> = {
-  hq: 'HQ', hotel: 'Campus Hotel', bc1: 'Business Center I', bc2: 'Business Center II', hotels: 'Hotels (Mgmt.)', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center',
+  hq: 'HQ', hotel: 'Big Apple Hotel', bc1: 'Business Center I', bc2: 'Business Center II', hotels: 'Hotels HQ', racing: 'Racing (F1)', health: 'Health & Recovery', visitor: 'Visitor Center', media: 'Media Center',
 }
 /** short label for maps, signs and the location display */
 export const shortName = (b: { id: string; suffix: string }) => SHORT[b.id] ?? b.suffix
@@ -192,8 +200,8 @@ export const STATIONS = [
   { id: 's-hq', name: 'Holding HQ / Visitor Center', angle: 180 },
   { id: 's-fin', name: 'Finance · Mobility', angle: 122 },
   { id: 's-tech', name: 'Tech · Trains', angle: 52 },
-  { id: 's-hol', name: 'Holidays · Entertainment', angle: 338 },
-  { id: 's-log', name: 'Logistics · Fitness · Hotel', angle: 262 },
+  { id: 's-hol', name: 'Holidays · Media Center · Entertainment', angle: 338 },
+  { id: 's-log', name: 'Logistics · Health & Recovery · Hotel', angle: 262 },
 ]
 
 /** campus lake (Campussee) */
@@ -202,73 +210,189 @@ export const LAKE = (() => {
   return { x, z, r: 22 }
 })()
 
-/** underground car park below the HQ plaza (round) + car ramp & access tunnel from the ring road */
-export const GARAGE = {
-  radius: 58,
-  floorY: -5,
-  ceilY: -1.4,
-  /** car ramp: radial at this compass angle, bottom at rBottom, rising outwards over len metres */
-  ramp: { angle: 197, rBottom: 208, len: 30, width: 8.4 },
-  liftX: -40, liftZ: -30, // glass lift garage ↔ plaza
+/* ===========================================================================
+ * Underground (two separated levels)
+ *   Ebene –1  Campus-Promenade (pedestrians): central ring around the HQ, four
+ *             straight axes in a cross (N/E/S/W), outer ring; every building has
+ *             a short access corridor ("Zugang") to one of the rings.
+ *   Ebene –2  Tiefgarage (cars) below the central area, two ramps; connected to
+ *             Ebene –1 only by elevator cores and one stair – no mixing.
+ * ======================================================================== */
+
+export const LEVELS = {
+  promenade: { floorY: -5, ceilY: -1.4, label: 'Ebene –1 · Campus-Promenade' },
+  parking: { floorY: -9.5, ceilY: -5.8, label: 'Ebene –2 · Tiefgarage' },
 }
 
-export interface TunnelPath {
+export const UG = {
+  centralRing: { r: 40, w: 8 }, // walls at r 36 / 44
+  outerRing: { r: 140, w: 8 }, // walls at r 136 / 144
+  axes: [0, 90, 180, 270],
+  axisNames: ['Achse Nord', 'Achse Ost', 'Achse Süd', 'Achse West'],
+  axisWidth: 10,
+  spurWidth: 6,
+  parkingRadius: 68,
+  coreR: 31.5,
+  cores: [
+    { angle: 45, plaza: true },
+    { angle: 135, plaza: false },
+    { angle: 225, plaza: true },
+    { angle: 315, plaza: false },
+  ],
+  stair: { angle: 330, rBottom: 12 },
+  ramps: [
+    { id: 'east', name: 'Ein-/Ausfahrt Ost', angle: 88 },
+    { id: 'south', name: 'Ein-/Ausfahrt Süd', angle: 197 },
+  ],
+  rampBottomR: 186,
+  rampLen: 60,
+  rampWidth: 8.4,
+}
+
+export type CorridorKind = 'axis' | 'spur' | 'hq' | 'core' | 'stair' | 'car'
+export interface Corridor {
   id: string
   name: string
-  /** start (world) at the building's elevator, direction towards the garage, length */
+  kind: CorridorKind
+  /** start point (world), direction = (sin rot, cos rot), length */
   sx: number
   sz: number
   rot: number
   len: number
   width: number
-  /** angles (atan2 convention) where the tunnel cuts the garage wall */
-  gap: [number, number]
+  level: 'promenade' | 'parking'
+  /** building id for access corridors */
+  building?: string
 }
 
-/** circle entry of a line p + t·d (|d| = 1) with radius R: smallest t ≥ 0 */
-function enter(px: number, pz: number, dx: number, dz: number, R: number) {
+/** largest t with |p + t·d| = R (leaving the circle) or smallest (entering) */
+function circleT(px: number, pz: number, dx: number, dz: number, R: number): [number, number] | null {
   const b = px * dx + pz * dz
   const c = px * px + pz * pz - R * R
   const disc = b * b - c
-  if (disc < 0) return 0
-  return -b - Math.sqrt(disc)
+  if (disc < 0) return null
+  const s = Math.sqrt(disc)
+  return [-b - s, -b + s]
 }
 
-/** pedestrian tunnels from the garage to every building (except the HQ) and the car access tunnel */
-export function tunnelPaths(): TunnelPath[] {
-  const R = GARAGE.radius
-  const out: TunnelPath[] = []
-  const mk = (id: string, name: string, sx: number, sz: number, rot: number, width: number) => {
-    const dx = Math.sin(rot)
-    const dz = Math.cos(rot)
-    const len = enter(sx, sz, dx, dz, R) + 1.5
-    // side lines → gap angles
+/** door of the generic building elevator (local -2.6, -d/2 + 3) in world coordinates */
+export function elevatorDoor(b: BuildingInfo): [number, number] {
+  const lx = -2.6
+  const lz = -b.d / 2 + 3.0
+  return [b.x + lx * Math.cos(b.rot) + lz * Math.sin(b.rot), b.z - lx * Math.sin(b.rot) + lz * Math.cos(b.rot)]
+}
+
+let _plan: ReturnType<typeof makePlan> | null = null
+export function undergroundPlan() {
+  if (!_plan) _plan = makePlan()
+  return _plan
+}
+
+function makePlan() {
+  const C = UG.centralRing
+  const O = UG.outerRing
+  const out: Corridor[] = []
+  const outward = (a: number) => Math.PI - a * DEG // rot whose direction points away from the centre
+  // cross axes from the central ring to the outer ring
+  UG.axes.forEach((a, i) => {
+    const r0 = C.r + C.w / 2 - 0.5
+    const r1 = O.r - O.w / 2 + 0.5
+    const [sx, sz] = polar(a, r0)
+    out.push({ id: `axis-${a}`, name: UG.axisNames[i], kind: 'axis', sx, sz, rot: outward(a), len: r1 - r0, width: UG.axisWidth, level: 'promenade' })
+  })
+  // HQ connector: from the HQ elevator door southwards to the central ring
+  {
+    const sx = 0
+    const sz = 6.85
+    const t = circleT(sx, sz, 0, 1, C.r - C.w / 2)!
+    out.push({ id: 'hq', name: 'Zugang Big Apple Groups HQ', kind: 'hq', sx, sz, rot: 0, len: t[1] + 0.6, width: 7, level: 'promenade', building: 'hq' })
+  }
+  // access corridors ("Zugänge") from every building elevator to the nearest ring
+  for (const b of BUILDINGS) {
+    if (b.kind === 'hq') continue
+    const [sx, sz] = elevatorDoor(b)
+    const dx = Math.sin(b.rot)
+    const dz = Math.cos(b.rot)
+    const wallR = b.radius > O.r ? O.r + O.w / 2 : C.r + C.w / 2
+    const t = circleT(sx, sz, dx, dz, wallR)!
+    out.push({ id: `spur-${b.id}`, name: `Zugang ${b.name}`, kind: 'spur', sx, sz, rot: b.rot, len: t[0] + 0.6, width: UG.spurWidth, level: 'promenade', building: b.id })
+  }
+  // vestibules of the elevator cores (Ebene –2 ↔ –1, two of them also to the plaza)
+  for (const c of UG.cores) {
+    const [sx, sz] = polar(c.angle, UG.coreR + 1.3)
+    out.push({ id: `core-${c.angle}`, name: 'Aufzugskern', kind: 'core', sx, sz, rot: outward(c.angle), len: C.r - C.w / 2 - (UG.coreR + 1.3) + 0.6, width: 3.6, level: 'promenade' })
+  }
+  // stair landing (stair rises outwards from rBottom, 26 steps á 0.3 m)
+  {
+    const rTop = UG.stair.rBottom + Math.round((LEVELS.promenade.floorY - LEVELS.parking.floorY) / 0.175) * 0.3
+    const [sx, sz] = polar(UG.stair.angle, rTop)
+    out.push({ id: 'stair', name: 'Treppenhaus Tiefgarage', kind: 'stair', sx, sz, rot: outward(UG.stair.angle), len: C.r - C.w / 2 - rTop + 0.6, width: 3.2, level: 'promenade' })
+  }
+  // car tunnels on Ebene –2 from the ramp bottoms to the car park
+  for (const r of UG.ramps) {
+    const [sx, sz] = polar(r.angle, UG.rampBottomR)
+    out.push({ id: `car-${r.id}`, name: r.name, kind: 'car', sx, sz, rot: faceCentre(r.angle), len: UG.rampBottomR - UG.parkingRadius + 1, width: UG.rampWidth, level: 'parking' })
+  }
+
+  // openings in the ring walls where corridors join
+  const walls = [C.r - C.w / 2, C.r + C.w / 2, O.r - O.w / 2, O.r + O.w / 2]
+  const gaps: Record<number, [number, number][]> = {}
+  const parkingGaps: [number, number][] = []
+  const addGap = (list: [number, number][], c: Corridor, R: number) => {
+    const dx = Math.sin(c.rot)
+    const dz = Math.cos(c.rot)
     const ang: number[] = []
-    for (const off of [-width / 2 - 0.3, width / 2 + 0.3]) {
-      const ox = sx + off * Math.cos(rot)
-      const oz = sz - off * Math.sin(rot)
-      const t = enter(ox, oz, dx, dz, R)
+    for (const off of [-c.width / 2 - 0.2, c.width / 2 + 0.2]) {
+      const ox = c.sx + off * Math.cos(c.rot)
+      const oz = c.sz - off * Math.sin(c.rot)
+      const ts = circleT(ox, oz, dx, dz, R)
+      if (!ts) return
+      const t = ts.find((v) => v > -1 && v < c.len + 1)
+      if (t === undefined) return
       ang.push(Math.atan2(oz + dz * t, ox + dx * t))
     }
     let [a0, a1] = ang
     if (a1 < a0) [a0, a1] = [a1, a0]
     if (a1 - a0 > Math.PI) [a0, a1] = [a1, a0 + Math.PI * 2]
-    out.push({ id, name, sx, sz, rot, len, width, gap: [a0, a1] })
+    list.push([a0, a1])
   }
-  for (const b of BUILDINGS) {
-    if (b.kind === 'hq') continue
-    // elevator door of the generic building: local (-2.6, -d/2 + 3.0)
-    const lx = -2.6
-    const lz = -b.d / 2 + 3.0
-    const sx = b.x + lx * Math.cos(b.rot) + lz * Math.sin(b.rot)
-    const sz = b.z - lx * Math.sin(b.rot) + lz * Math.cos(b.rot)
-    mk('t-' + b.id, b.name, sx, sz, b.rot, 6)
+  for (const R of walls) {
+    gaps[R] = []
+    for (const c of out) if (c.level === 'promenade') addGap(gaps[R], c, R)
   }
-  // car tunnel from the ramp bottom northwards (rot π → local +z = world -z)
-  const r = GARAGE.ramp
-  const [rx, rz] = polar(r.angle, r.rBottom)
-  mk('t-cars', 'Zufahrt Tiefgarage', rx, rz, faceCentre(r.angle), r.width)
-  return out
+  for (const c of out) if (c.level === 'parking') addGap(parkingGaps, c, UG.parkingRadius)
+  return { corridors: out, walls, gaps, parkingGaps }
+}
+
+/** ramp rectangle (world corners) of a car ramp, rising outwards from rampBottomR */
+export function rampCorners(angle: number): [number, number][] {
+  const rot = faceCentre(angle)
+  const [sx, sz] = polar(angle, UG.rampBottomR)
+  const c = Math.cos(rot)
+  const s = Math.sin(rot)
+  const W = UG.rampWidth
+  const L = UG.rampLen
+  return [[-W / 2, -L], [W / 2, -L], [W / 2, 0], [-W / 2, 0]].map(([lx, lz]) => [sx + lx * c + lz * s, sz - lx * s + lz * c])
+}
+
+/** control points of the monorail loop (closed, centripetal Catmull-Rom through them) */
+export function monorailControlPoints(): [number, number][] {
+  const R = LAYOUT.monorailRadius
+  const ordered = [...STATIONS].sort((a, b) => a.angle - b.angle)
+  const pts: [number, number][] = []
+  ordered.forEach((st, i) => {
+    const a = st.angle * DEG
+    const [cx, cz] = polar(st.angle, R)
+    const tx = Math.cos(a)
+    const tz = Math.sin(a)
+    for (const off of [-26, 0, 26]) pts.push([cx + tx * off, cz + tz * off])
+    const next = ordered[(i + 1) % ordered.length]
+    let span = next.angle - st.angle
+    if (span <= 0) span += 360
+    const mid = st.angle + span / 2
+    pts.push(polar(mid, R + (i % 2 ? 9 : -4)))
+  })
+  return pts
 }
 
 export const START = { x: 0, z: 96, yaw: 0 } // in front of the HQ plaza, looking north at the tower

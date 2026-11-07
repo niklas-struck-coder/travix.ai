@@ -6,6 +6,7 @@ import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture } from '../engine/materials'
 import * as K from './kits'
 import { infoPoint, seat } from './dynamic'
+import { BUILDINGS } from '../config/campus'
 
 type B = WorldBuilder
 
@@ -33,6 +34,8 @@ export type RoomKind =
   | 'travel' | 'digitaltravel' | 'tavium' | 'cinema' | 'studio' | 'editing' | 'traindesign'
   | 'trainmodel' | 'exhibition' | 'event' | 'projects' | 'restaurant' | 'bar' | 'hotelroom'
   | 'press' | 'reception' | 'empty' | 'auditorium' | 'f1showroom' | 'simulators' | 'aero' | 'physio' | 'medical' | 'meditation'
+  | 'fitshowroom' | 'museum' | 'learning' | 'library' | 'campusmodel' | 'podcast' | 'sound' | 'photo' | 'makeup'
+  | 'newsstudio' | 'laundry' | 'suite'
 
 export interface RoomCtx {
   suffix?: string
@@ -66,6 +69,169 @@ export function furnish(b: B, kind: RoomKind, w: number, d: number, ctx: RoomCtx
   switch (kind) {
     case 'empty':
       break
+    case 'fitshowroom': {
+      // sample areas: equipment on plinths (display only), studio design boards, location models
+      const items = [K.treadmill, K.spinBike, K.weightRack]
+      items.forEach((fn, i) => {
+        const x = (i - 1) * (w / 3.5)
+        K.displayPlinth(b, x, 0, 1.2, 0, 2.6, 3.0, 0.15)
+        fn(b, x, 0.15, 1.2, Math.PI)
+      })
+      for (let i = 0; i < 3; i++) {
+        const x = (i - 1) * 2.4
+        b.box(x, 0.4, -hd + 0.2, 2.0, 1.4, 0.05, [C.green, C.anthracite, '#d9d4c8'][i], 'satin')
+        b.box(x, 0.55, -hd + 0.24, 1.6, 1.0, 0.01, '#f4f5f2', 'matte')
+      }
+      K.displayPlinth(b, hw - 1.4, 0, -1.2, 0, 1.6, 1.6, 0.9)
+      b.box(hw - 1.4, 0.9, -1.2, 1.2, 0.3, 1.2, C.white, 'satin')
+      infoPoint(b, 0, 1.2, -1.0, 'Musterflächen & Studiodesign', ['Ausgestellte Geräte und Designkonzepte für neue Big Apple Fitness Clubs.', 'Nur Präsentation – hier wird nicht trainiert. Training: Big Apple Health & Recovery.'], { label: 'Musterflächen ansehen', suffix: 'Fitness' })
+      break
+    }
+    case 'museum': {
+      // timeline wall + one showcase per company
+      b.box(0, 0.3, hd - 0.2, Math.min(w - 2, 14), 2.6, 0.1, C.black, 'gloss')
+      const years = ['Gründung', 'Tech', 'Finance', 'Travel', 'Mobility', 'Trains', 'Heute']
+      years.forEach((y, i) => {
+        const x = (i - (years.length - 1) / 2) * (Math.min(w - 3, 13) / years.length)
+        b.box(x, 1.5, hd - 0.26, 0.08, 0.08, 0.02, C.green, 'emissive')
+        b.sign(x, 1.9, hd - 0.27, 1.5, 0.45, textTexture([y], { w: 256, h: 76, size: 30 }), Math.PI)
+      })
+      b.box(0, 1.5, hd - 0.27, Math.min(w - 3, 13), 0.03, 0.01, C.green, 'emissive')
+      const subs = BUILDINGS.filter((x) => x.kind === 'subsidiary')
+      subs.slice(0, 10).forEach((sb, i) => {
+        const col = i % 5
+        const row = Math.floor(i / 5)
+        const x = (col - 2) * Math.min(3, (w - 2) / 5)
+        const z = -hd + 2.2 + row * 3.2
+        K.displayPlinth(b, x, 0, z, 0, 1.2, 1.2, 1.0)
+        b.box(x, 1.0, z, 1.0, 0.7, 1.0, C.glassTint, 'glass')
+        b.sign(x, 1.35, z + 0.51, 1.0, 0.25, logoTexture(sb.suffix, { bg: '#ffffff', w: 512, h: 128 }))
+        if (rand() < 0.35) stander(b, x + 0.4, 0, z + 1.3, Math.PI)
+      })
+      screenWall(-hd + 0.2, 'Big Apple Museum', ['Geschichte · Marke · Unternehmen · Innovationen · Vision'], Math.min(w - 2, 4.5), 'info')
+      infoPoint(b, 0, 1.2, 0, 'Big Apple Museum', ['Geschichte von Big Apple Groups, Entwicklung der Marke (Big · Apple · Blatt).', 'Vitrinen zu allen Tochterunternehmen, Produkte und Innovationen.', 'Zukunftsprojekte und Unternehmensvision 2035.'], { label: 'Museum: Rundgang-Info' })
+      break
+    }
+    case 'learning': {
+      grid(3.2, 3.0, (x, z, i) => {
+        b.box(x, 0, z, 2.4, 0.74, 1.0, C.woodLight, 'satin', { col: true })
+        for (const s of [-0.6, 0.6]) {
+          K.chair(b, x + s, 0, z + 0.75, Math.PI, C.fabricGreen)
+          b.box(x + s, 0.74, z - 0.15, 0.5, 0.03, 0.35, C.black, 'gloss')
+        }
+        if (i % 2 === 0) sitter(b, x - 0.6, 0, z + 0.75, Math.PI, 0.7)
+      }, 0.6, 1.2)
+      for (let i = 0; i < 3; i++) {
+        b.box(-hw + 0.4, 0, -hd + 1.5 + i * 1.4, 0.5, 1.1, 0.5, C.white, 'gloss', { col: true })
+        b.boxTilt(-hw + 0.4, 1.1, -hd + 1.5 + i * 1.4, 0.06, 0.42, 0.55, Math.PI / 2, -0.4, '#2a6a4c', 'emissive')
+      }
+      screenWall(-hd + 0.2, 'Learning Center', ['Workshops für Schulen, Studierende und Bewerber', 'Digitale Lernstationen'], Math.min(w - 2, 4), 'info')
+      break
+    }
+    case 'library': {
+      for (let i = 0; i < 4; i++) K.shelf(b, -hw + 1.4 + i * ((w - 3) / 4), 0, hd - 0.3, Math.PI, 2.2, 2.2)
+      for (let i = 0; i < 3; i++) K.shelf(b, -hw + 0.3, 0, -hd + 1.5 + i * 2.4, Math.PI / 2, 2.2, 2.2)
+      K.meetingTable(b, 0, 0, 0, 0, { len: 3.4, wid: 1.2, seats: 4, top: C.woodLight })
+      sitter(b, -0.6, 0, 0.95, Math.PI, 0.7)
+      K.sofa(b, hw - 1, 0, -1, -Math.PI / 2, 1.8, C.fabricGreen)
+      break
+    }
+    case 'campusmodel': {
+      b.box(0, 0, 0, Math.min(w - 4, 6), 0.9, Math.min(d - 4, 5), C.white, 'gloss', { col: true })
+      b.box(0, 0.9, 0, Math.min(w - 4, 6) - 0.2, 0.02, Math.min(d - 4, 5) - 0.2, '#6f9450', 'matte')
+      b.cyl(0, 0.92, 0, 0.35, 1.2, '#cfe1e6', 'satin', { segs: 20 })
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2
+        b.box(Math.cos(a) * 1.9, 0.92, Math.sin(a) * 1.6, 0.4, 0.15 + (i % 3) * 0.12, 0.3, i % 4 === 0 ? '#2a2e2c' : C.white, 'satin', { rot: -a })
+      }
+      b.arc(0, 0.93, 0, 1.3, 0.02, 0, Math.PI * 2, C.green, 'emissive', true, 32)
+      infoPoint(b, 0, 1.2, Math.min(d - 4, 5) / 2 + 0.8, 'Campusmodell', ['Maßstab 1:1000: HQ, alle Unternehmensgebäude, Monorail und die unterirdische Promenade (Ebene –1) mit Tiefgarage (Ebene –2).', 'Tipp: Taste M öffnet die Campuskarte mit Navigation.'], { label: 'Campusmodell ansehen' })
+      stander(b, 1.6, 0, Math.min(d - 4, 5) / 2 + 0.9, Math.PI, 1)
+      break
+    }
+    case 'podcast': {
+      for (let i = 0; i < 2; i++) {
+        const x = (i - 0.5) * (w / 2.2)
+        b.box(x, 0, 0, 2.6, 2.6, 0.1, '#3b403d', 'matte') // acoustic partition
+        K.meetingTable(b, x, 0, 1.4, 0, { len: 1.6, wid: 1.0, seats: 2, top: C.wood })
+        for (const s of [-0.5, 0.5]) {
+          b.cyl(x + s, 0.77, 1.4 + s * 0.4, 0.02, 0.3, C.black, 'metal', { segs: 6 })
+          b.sphere(x + s, 1.1, 1.4 + s * 0.4, 0.05, C.anthracite, 'metal')
+        }
+        sitter(b, x - 0.5, 0, 1.4 + 0.85, Math.PI, 0.7)
+      }
+      for (let i = 0; i < 6; i++) b.box(-hw + 0.06, 0.6 + (i % 2) * 1.0, -hd + 1 + Math.floor(i / 2) * 1.4, 0.06, 0.9, 1.2, '#4a4f4c', 'matte')
+      b.sign(0, 2.6, -hd + 0.1, 1.6, 0.4, textTexture(['ON AIR'], { w: 256, h: 64, bg: '#b3261e' }), 0, 0.8)
+      break
+    }
+    case 'sound': {
+      b.box(0, 0, hd - 2, Math.min(w - 2, 4), 2.6, 3, '#3b403d', 'matte', { col: true })
+      b.box(0, 0.9, hd - 3.51, 1.6, 1.0, 0.03, C.glassTint, 'glass')
+      b.box(0, 0, -1, 2.4, 0.9, 1.0, C.black, 'satin', { col: true })
+      b.boxTilt(0, 0.9, -1, 2.3, 0.05, 0.9, 0, 0.2, '#1d1f1e', 'satin')
+      for (let i = 0; i < 16; i++) b.box(-1 + (i % 8) * 0.28, 0.98, -1.2 + Math.floor(i / 8) * 0.3, 0.05, 0.02, 0.2, i % 5 ? '#888' : C.green, 'emissive')
+      K.officeChair(b, 0, 0, -0.2, Math.PI)
+      sitter(b, 0, 0, -0.2, Math.PI, 0.8)
+      break
+    }
+    case 'photo': {
+      b.box(0, 0, -hd + 0.4, Math.min(w - 2, 5), 3, 0.05, '#f4f5f2', 'matte')
+      b.boxTilt(0, 0, -hd + 1.0, Math.min(w - 2, 5), 0.05, 1.4, 0, -0.6, '#f4f5f2', 'matte')
+      for (const s of [-1, 1]) {
+        b.cyl(s * 2, 0, 0.6, 0.04, 1.8, C.black, 'metal', { segs: 6 })
+        b.box(s * 2, 1.8, 0.6, 0.9, 0.9, 0.1, '#fff6dc', 'emissive', { rot: s * 0.5 })
+      }
+      b.cyl(0, 0, 2.2, 0.04, 1.4, C.black, 'metal', { segs: 6 })
+      b.box(0, 1.4, 2.2, 0.2, 0.15, 0.25, C.black, 'metal')
+      stander(b, 0, 0, -hd + 1.6, 0, 1)
+      break
+    }
+    case 'makeup': {
+      for (let i = 0; i < Math.max(2, Math.floor((w - 2) / 1.4)); i++) {
+        const x = -hw + 0.8 + i * 1.4
+        b.box(x, 0, hd - 0.4, 1.2, 0.75, 0.6, C.white, 'satin', { col: true })
+        b.box(x, 1.0, hd - 0.12, 1.0, 1.0, 0.03, '#d9e2e6', 'gloss')
+        for (let k = 0; k < 4; k++) b.sphere(x - 0.5 + k * 0.33, 1.95, hd - 0.12, 0.04, '#fff6dc', 'emissive')
+        K.chair(b, x, 0, hd - 1.1, Math.PI, C.leather)
+        if (i % 2 === 0) sitter(b, x, 0, hd - 1.1, 0, 0.5)
+      }
+      b.box(-hw + 0.3, 0, -hd + 1.2, 0.4, 1.8, 2.0, C.anthracite, 'metal', { col: true })
+      break
+    }
+    case 'newsstudio': {
+      b.box(0, 0, -hd + 0.3, Math.min(w - 2, 6), 3, 0.2, C.black, 'gloss')
+      b.screen({ id: 'news-' + rand().toFixed(5), lx: 0, ly: 0.6, lz: -hd + 0.42, w: Math.min(w - 2.5, 5.5), h: 2.2, rot: 0, slides: [{ title: 'BIG APPLE NEWS', lines: ['Campus Amsterdam · live aus dem Media Center'], kind: 'event' }] })
+      b.box(0, 0, -hd + 2.4, 2.8, 1.0, 0.9, C.white, 'gloss', { col: true })
+      b.box(0, 0.98, -hd + 2.4, 2.9, 0.04, 1.0, C.green, 'emissive')
+      for (let i = 0; i < 3; i++) {
+        const x = (i - 1) * 2
+        b.box(x, 0, 1.6, 0.4, 1.2, 0.4, C.black, 'metal', { col: true })
+        b.box(x, 1.2, 1.6, 0.35, 0.3, 0.6, C.black, 'metal')
+      }
+      for (const s of [-1, 1]) b.box(s * 2.6, 2.6, -1, 0.5, 0.35, 0.3, '#fff6dc', 'emissive')
+      stander(b, 0, 0, -hd + 1.6, 0, 1)
+      break
+    }
+    case 'laundry': {
+      for (let i = 0; i < Math.max(2, Math.floor((w - 2) / 1.0)); i++) {
+        const x = -hw + 0.7 + i * 1.0
+        b.box(x, 0, hd - 0.5, 0.9, 1.2, 0.8, C.white, 'satin', { col: true })
+        b.cylX(x, 0.6, hd - 0.09, 0.28, 0.02, '#2e3a40', 'gloss', Math.PI / 2, 16)
+      }
+      K.shelf(b, 0, 0, -hd + 0.3, 0, Math.min(w - 2, 4), 2.0)
+      b.box(0, 0, 0, 2, 0.9, 1, C.offwhite, 'satin', { col: true })
+      stander(b, 0.6, 0, 0.8, Math.PI, 1)
+      break
+    }
+    case 'suite': {
+      K.bed(b, -w / 4, 0, hd - 1.3, Math.PI, 2.0)
+      K.loungeSet(b, w / 4, 0, 0.5, Math.PI, C.fabricGreen)
+      K.meetingTable(b, -w / 4, 0, -0.8, 0, { len: 1.6, wid: 1.0, seats: 2, top: C.wood })
+      b.box(-hw + 1.2, 0, -hd + 1.2, 2.4, 2.6, 2.4, C.offwhite, 'satin', { col: true })
+      b.box(w / 4, 1.3, -hd + 0.1, 1.6, 0.9, 0.04, C.black, 'gloss')
+      K.plant(b, hw - 0.4, 0, hd - 0.4, 1.2)
+      break
+    }
     case 'f1showroom': {
       // the race car on a turntable plinth, tyre stacks, trophy cabinet, helmet display
       b.cyl(0, 0, 0.5, 3.6, 0.25, C.black, 'gloss', { segs: 40, col: true })

@@ -6,7 +6,8 @@
 import { WorldBuilder } from '../engine/builder'
 import { C, logoTexture, textTexture } from '../engine/materials'
 import { buildElevator, buildEntrance, buildSpiralStair, infoPoint } from './dynamic'
-import { furnish, type RoomKind } from './rooms'
+import { furnish } from './rooms'
+import { HQ_FLOORS, type HqFloor } from '../config/programs'
 import * as K from './kits'
 import { BUILDINGS } from '../config/campus'
 import { ui, toast } from '../state/store'
@@ -22,68 +23,8 @@ const RING = 10.6 // corridor ring wall radius
 const DOOR_GAP = 0.14 // rad (~1.5 m at RING)
 const ELEV_GAP = 0.3 // rad: wedge of the core used by the elevator
 
-interface RoomDef {
-  name: string
-  a0: number // degrees (atan2 convention: 90 = south / entrance side)
-  a1: number
-  kind: RoomKind
-  open?: boolean // no walls
-}
-interface FloorDef {
-  level: number
-  label: string
-  short: string
-  rooms: RoomDef[]
-}
-
-const FLOORS_DEF: FloorDef[] = [
-  {
-    level: 4, label: '4. OG – Group Finance · Legal & Compliance', short: '4. OG Finance/Legal',
-    rooms: [
-      { name: 'Group Finance – Open Space', a0: 115, a1: 200, kind: 'openoffice', open: true },
-      { name: 'Group Finance – Controlling', a0: 200, a1: 245, kind: 'conference' },
-      { name: 'Group Legal – Bibliothek', a0: 245, a1: 300, kind: 'legal' },
-      { name: 'Compliance Office', a0: 300, a1: 345, kind: 'office' },
-      { name: 'Group Legal & Compliance – Open Space', a0: 345, a1: 425, kind: 'openoffice', open: true },
-    ],
-  },
-  {
-    level: 7, label: '7. OG – Group Technology · Personalabteilung', short: '7. OG Technology/HR',
-    rooms: [
-      { name: 'Group Technology – Engineering', a0: 115, a1: 205, kind: 'tech', open: true },
-      { name: 'Group Technology – NOC & Serverraum', a0: 205, a1: 250, kind: 'servers' },
-      { name: 'Personalabteilung (HR)', a0: 250, a1: 300, kind: 'openoffice' },
-      { name: 'HR – Interviewraum', a0: 300, a1: 345, kind: 'conference' },
-      { name: 'Mitarbeiter-Lounge', a0: 345, a1: 425, kind: 'lounge', open: true },
-    ],
-  },
-  {
-    level: 10, label: '10. OG – Internationale Unternehmensentwicklung · Strategie', short: '10. OG Strategie',
-    rooms: [
-      { name: 'Internationale Unternehmensentwicklung', a0: 115, a1: 195, kind: 'openoffice', open: true },
-      { name: 'Strategiebereich', a0: 195, a1: 245, kind: 'strategy' },
-      { name: 'Besprechungsraum „Amsterdam“', a0: 245, a1: 290, kind: 'conference' },
-      { name: 'Besprechungsraum „New York“', a0: 290, a1: 335, kind: 'conference' },
-      { name: 'Kaffeebar & Lounge', a0: 335, a1: 425, kind: 'lounge', open: true },
-    ],
-  },
-  {
-    level: 18, label: '18. OG – Geschäftsführung · Chairman · Vorstand', short: '18. OG Geschäftsführung',
-    rooms: [
-      { name: 'Büro Geschäftsführung (CEO)', a0: 115, a1: 175, kind: 'exec' },
-      { name: 'Büro Geschäftsführung (CFO)', a0: 175, a1: 235, kind: 'exec' },
-      { name: 'Vorstandskonferenzraum', a0: 235, a1: 325, kind: 'board' },
-      { name: 'Chairman-Büro', a0: 325, a1: 425, kind: 'chairman' },
-    ],
-  },
-  {
-    level: 21, label: '21. OG – Executive Lounge · Großer Konferenzraum', short: '21. OG Executive',
-    rooms: [
-      { name: 'Großer Konferenzraum', a0: 115, a1: 270, kind: 'bigconference' },
-      { name: 'Executive Lounge', a0: 270, a1: 425, kind: 'clientlounge', open: true },
-    ],
-  },
-]
+type FloorDef = HqFloor
+const FLOORS_DEF = HQ_FLOORS
 
 export const HQ_INFO = { radius: R, roof: ROOF }
 
@@ -194,7 +135,7 @@ function lobby(b: WorldBuilder) {
     b.curvedSign(0, 3.2, 0, CORE + 0.05, 2.6, (90 + 22) * D, (90 + 80) * D, logoTexture('Groups', { bg: '#ffffff', w: 1600, h: 320 }), 0.45)
     b.curvedSign(0, 3.2, 0, CORE + 0.05, 2.6, (90 - 80) * D, (90 - 22) * D, logoTexture('Groups', { bg: '#ffffff', w: 1600, h: 320 }), 0.45)
     // elevator sign
-    b.sign(0, 3.0, CORE + 0.05, 2.4, 0.5, textTexture(['Aufzüge · Elevators', 'Etagen 4 · 7 · 10 · 18 · 21 · Dach'], { w: 512, h: 110, accent: C.green }))
+    b.sign(0, 3.0, CORE + 0.05, 2.4, 0.5, textTexture(['Aufzüge · Elevators', 'UG Promenade · 4 · 7 · 10 · 18 · 21 · Dach'], { w: 512, h: 110, accent: C.green }))
 
     // reception
     K.receptionDesk(b, 8.5, 0, 13.5, -0.45, 6)
@@ -248,7 +189,7 @@ function lobby(b: WorldBuilder) {
       b.box(1.9, 0, 0, 0.15, 3.6, 0.3, C.anthracite, 'metal', { col: true })
       b.box(0, 0.95, -0.05, 3.9, 2.3, 0.1, C.black, 'gloss')
       b.screen({ id: 'hq-welcome', lx: 0, ly: 1.0, lz: 0.02, w: 3.6, h: 2.1, slides: [
-        { title: 'Willkommen', lines: ['Big Apple Groups · Global Campus Amsterdam', 'Heute: Big Apple Innovation Week – Auditorium im Visitor Center'], kind: 'event' },
+        { title: 'Willkommen', lines: ['Big Apple Groups · Global Campus Amsterdam', 'Neu im Visitor Center: Big Apple Museum & Learning Center'], kind: 'event' },
         { title: 'Monorail', lines: ['Nächste Abfahrt Station „Holding HQ“', 'Rundkurs über 5 Stationen · alle 2 Minuten'], kind: 'info' },
         { title: 'Unternehmen', lines: ['Tech · Finance · Fitness · Logistics · Mobility', 'Hotels · Holidays · Entertainment · Trains · Racing · Health · Foundation'], kind: 'info' },
       ] })
@@ -436,10 +377,10 @@ function roof(b: WorldBuilder) {
       label: () => 'Panorama-Fernrohr benutzen',
       action: () => {
         ui().set({ info: { title: 'Panorama vom HQ-Dach (≈ 100 m)', subtitle: 'Big Apple Global Campus · Amsterdam', body: [
-          'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern. Nordosten am Platz: Big Apple Groups Racing mit F1-Auto.',
+          'Norden: Big Apple Holidays, dahinter die Gracht mit Amsterdamer Grachtenhäusern. Nordwesten: Media Center und Entertainment. Am HQ-Platz: Racing, Fitness HQ, Hotels HQ, Foundation.',
           'Nordosten: Big Apple Trains · Osten: Big Apple Tech und Finance.',
-          'Süden: Big Apple Visitor Center, Campus Hotel mit Mitarbeiter-Residenz, Business Center, Haupteinfahrt.',
-          'Westen: Fitness, Logistics, Campussee mit der Big Apple Foundation.',
+          'Süden: Big Apple Visitor Center, Big Apple Hotel, Business Center, Haupteinfahrt.',
+          'Westen: Health & Recovery, Logistics, Campussee mit der Big Apple Foundation.',
           'Die Monorail umrundet das HQ auf 6,8 m Höhe mit fünf Stationen.',
         ] } })
         toast('Tipp: Kameramodus 3 (Vogelperspektive) zeigt den ganzen Campus.')

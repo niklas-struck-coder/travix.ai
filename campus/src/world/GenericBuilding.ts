@@ -9,6 +9,7 @@
  * Rooms are placed in wings by fractions along z ([f0, f1], 0 = back, 1 = front).
  */
 import { WorldBuilder } from '../engine/builder'
+import { world } from '../engine/registry'
 import { C, logoTexture, textTexture, type Family } from '../engine/materials'
 import { buildElevator, buildEntrance, buildStair } from './dynamic'
 import { furnish, type RoomCtx, type RoomKind } from './rooms'
@@ -56,6 +57,7 @@ const STYLE: Record<FacadeStyle, StyleSpec> = {
   conference: { frame: C.white, glass: '#a9c6cf', band: C.white, bandFam: 'satin', accent: C.green },
   racing: { frame: '#111312', glass: '#4f5f66', band: '#111312', bandFam: 'gloss', accent: C.green },
   health: { frame: C.woodLight, glass: '#c3dde3', band: C.white, bandFam: 'satin', accent: C.green },
+  media: { frame: '#2a2e2c', glass: '#5f6f76', band: '#2a2e2c', bandFam: 'satin', accent: C.green },
   business: { frame: '#ecebe6', glass: '#a9c6cf', band: C.white, bandFam: 'satin', accent: C.green },
   campushotel: { frame: C.offwhite, glass: '#9fb8c1', band: '#d9d3c6', bandFam: 'satin', accent: C.green },
 }
@@ -183,7 +185,20 @@ export function buildGeneric(b: WorldBuilder, o: GenericOpts) {
           holes.push([xL[0], xL[1], -d / 2 + 0.3, d / 2 - 0.3])
         }
         if (k > 0) slab(b, -w / 2 + 0.3, w / 2 - 0.3, -d / 2 + 0.3, d / 2 - 0.3, y, 0.35, holes, '#d8d4cc', 'satin')
-        else b.box(0, 0, 0, w - 0.6, 0.02, d - 0.6, o.style === 'finance' ? '#3a3a38' : '#d8d4cc', 'gloss')
+        else {
+          // ground floor finish with openings for the stair and elevator to Ebene –1
+          slab(b, -w / 2 + 0.3, w / 2 - 0.3, -d / 2 + 0.3, d / 2 - 0.3, 0.02, 0.02, [elevHole, stairHole], o.style === 'finance' ? '#3a3a38' : '#d8d4cc', 'gloss', false)
+          world.groundHoles.push(b.rectTest((stairHole[0] + stairHole[1]) / 2, (stairHole[2] + stairHole[3]) / 2, stairHole[1] - stairHole[0], stairHole[3] - stairHole[2]))
+          // basement stair: same switchback as the upper floors, from Ebene –1 (−5 m) to the ground floor
+          const bRise = 2.5
+          buildStair(b, laneA, -5, zf, laneW, bRise, { rot: Math.PI, railing: 'right', color: C.stone, steps: nHalf })
+          b.box(sx0 + laneW + 0.075, -bRise - 0.3, zr + landD / 2, 2 * laneW + 0.15, 0.3, landD, C.stone, 'satin', { col: true })
+          buildStair(b, laneB, -bRise, zr + landD, laneW, bRise, { railing: 'left', color: C.stone, steps: nHalf })
+          b.box(sx0 + laneW + 0.075, -5, (zr + landD + zf) / 2, 0.1, bRise + 0.9, zf - zr - landD, C.offwhite, 'satin', { col: true })
+          b.box(sx0 + 2 * laneW + 0.3, -5, (zr + zf) / 2 - 0.1, 0.15, 5, zf - zr + 0.2, C.offwhite, 'satin', { col: true })
+          b.box(sx0 - 0.15, -5, (zr + zf) / 2 - 0.1, 0.15, 5, zf - zr + 0.2, C.offwhite, 'satin', { col: true })
+          b.sign(laneB, 2.6, zf + 0.05, 1.6, 0.4, textTexture(['↓ Ebene –1 · Promenade'], { w: 384, h: 64, accent: C.green }), 0, 0.4, true)
+        }
         // ceiling (underside of the next slab) with light panels
         const ceilY = y + fh - 0.36
         b.box(0, ceilY, 0, w - 0.6, 0.01, d - 0.6, '#f4f3ef', 'matte')
@@ -404,4 +419,24 @@ function room(b: WorldBuilder, ctx: GenericCtx, r: RoomSpec, y: number, info: Bu
   const rot = sgn < 0 ? -Math.PI / 2 : Math.PI / 2
   b.at(xc, y, zc, rot + (r.flip ? Math.PI : 0), () => furnish(b, r.kind, len - 0.4, depth - 0.4, { suffix: info.suffix, name: r.name, ...r.ctx }))
   b.zone(r.name, xc, y, zc, depth, h, len, { building: info.id })
+}
+
+/** world polygons of the ground-floor openings (stair + elevator) of a generic building */
+export function groundOpenings(info: BuildingInfo): [number, number][][] {
+  const d = info.d
+  const zBack = -d / 2
+  const laneW = 1.45
+  const sx0 = 0.5
+  const nHalf = Math.max(2, Math.round(info.floorH / 2 / 0.175))
+  const zr = zBack + 0.35
+  const zf = zr + 1.5 + nHalf * 0.3
+  const rects: [number, number, number, number][] = [
+    [-4.05, -1.15, zBack + 0.2, zBack + 3.1],
+    [sx0 - 0.1, sx0 + 2 * laneW + 0.25, zr - 0.1, zf],
+  ]
+  const c = Math.cos(info.rot)
+  const s = Math.sin(info.rot)
+  return rects.map(([x0, x1, z0, z1]) =>
+    [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].map(([lx, lz]) => [info.x + lx * c + lz * s, info.z - lx * s + lz * c] as [number, number]),
+  )
 }

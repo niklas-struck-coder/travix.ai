@@ -6,50 +6,16 @@
 import { WorldBuilder } from '../engine/builder'
 import { C, directoryTexture, textTexture } from '../engine/materials'
 import { BUILDINGS } from '../config/campus'
-import { buildGeneric, type FloorSpec, type GenericCtx, type RoomSpec } from './GenericBuilding'
+import { buildGeneric, type GenericCtx } from './GenericBuilding'
+import { businessProgram } from '../config/programs'
 import { infoPoint } from './dynamic'
 import * as K from './kits'
-import type { RoomKind } from './rooms'
-
-/** office type per tenant, so the spaces look different */
-const KIND: Record<string, RoomKind> = {
-  'Big Apple Pay': 'market',
-  'Big Apple Insurance': 'office',
-  'Big Apple Energy': 'openoffice',
-  'Big Apple Real Estate': 'hotelmodel',
-  'Big Apple Ventures': 'projects',
-  'Big Apple Academy': 'presentation',
-  'Big Apple Food & Catering': 'cafe',
-  'Big Apple Security': 'control',
-  'Big Apple Consulting': 'office',
-  Coworking: 'openoffice',
-  'Big Apple Sports': 'creative',
-  'Big Apple Media Lab': 'studio',
-}
-
-function program(tenants: [string, string, string][]): FloorSpec[] {
-  const floors = [...new Set(tenants.map((t) => t[0]))]
-  return floors.map((fl, k) => {
-    const here = tenants.filter((t) => t[0] === fl)
-    const rooms: RoomSpec[] = []
-    if (k === 0) rooms.push({ name: 'Empfang & Mieterverzeichnis', kind: 'reception', wing: 'C' })
-    else rooms.push({ name: 'Gemeinsame Lounge', kind: 'lounge', wing: 'C' })
-    // first tenant gets the left wing, the others share the right wing
-    const [first, ...rest] = here
-    rooms.push({ name: first[1], kind: KIND[first[1]] ?? 'openoffice', wing: 'L', open: KIND[first[1]] === 'openoffice' })
-    if (rest.length === 0) rooms.push({ name: 'Gemeinsamer Besprechungsraum', kind: 'conference', wing: 'R' })
-    rest.forEach((t, i) => {
-      rooms.push({ name: t[1], kind: KIND[t[1]] ?? 'office', wing: 'R', f0: 1 - (i + 1) / rest.length, f1: 1 - i / rest.length })
-    })
-    return { label: fl, rooms }
-  })
-}
 
 export function buildBusinessCenters(b: WorldBuilder) {
   for (const info of BUILDINGS.filter((x) => x.tenants)) {
     const tenants = info.tenants!
     buildGeneric(b, {
-      info, style: 'business', visit: program(tenants), logoSuffix: 'Business Center',
+      info, style: 'business', visit: businessProgram(tenants), logoSuffix: 'Business Center',
       extras: (b: WorldBuilder, c: GenericCtx) => {
         const { d } = c
         const title = info.name.replace('Big Apple ', '')
