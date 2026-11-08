@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "build:lokal": "ENTRY=index.html vite build --config vite.single.config.ts && ENTRY=masterplan.html vite build --config vite.single.config.ts && mkdir -p lokal && node scripts-inline.mjs dist-single/index lokal/Big-Apple-Campus.html && node scripts-inline.mjs dist-single/masterplan lokal/Big-Apple-Masterplan.html"
   },
   "dependencies": {
     "@react-three/drei": "10.7.7",

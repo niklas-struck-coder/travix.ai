@@ -15,6 +15,16 @@ npm run build      # Produktions-Build nach campus/dist (statisch hostbar, relat
 npm run preview    # Build lokal ansehen
 ```
 
+## Lokal ohne Server (Doppelklick)
+
+```bash
+npm run build:lokal
+```
+
+erzeugt im Ordner `lokal/` zwei eigenständige Dateien, die sich per Doppelklick im Browser
+öffnen lassen (kein Server, keine Installation): `Big-Apple-Campus.html` (die 3D-Welt) und
+`Big-Apple-Masterplan.html` (die Pläne; Schriften werden online nachgeladen, sonst Ersatzschrift).
+
 ## Steuerung
 
 | PC | Funktion |
