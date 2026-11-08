@@ -26495,3 +26495,66 @@ hinaus.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-08 (dreiundneunzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, erster des 08.11. (gut einen Tag
+nach dem zweiundneunzigsten Lauf, `5c3c12d`, 07.11. 02:11 UTC).
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand), `origin/main` unverändert bei `fe1300e` (23.10.) —
+Freigabe-Chef hat weiterhin nicht gemergt, nicht mein Zuständigkeitsbereich,
+`main` bleibt unberührt und weiterhin lupenreiner Vorfahre von
+`it-chef/auto` (kein Merge nötig, per `git merge-base --is-ancestor`
+bestätigt). Regressionsschutz-Baseline frisch durchlaufen: `npm ci`
+fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (75 Testdateien, 570 Tests, alle grün) — identisch zum
+Endstand des 92. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` (Status-Symbole ⚪/🟡/🔴) und
+`tasks/tasks-prd-travix-platform.md` (offene Checkboxen) erneut
+durchsucht. Keine Veränderung seit dem 92. Lauf — die sechs offenen
+Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts,
+5.0 Zug/Bus/Fähre-Anbindung, 6.0 TripItem-Anbieter-URL/
+CostBreakdown/calculateCosts, 7.0 Reisebudget-Charts/Planung-fortsetzen-
+Volltext, 8.0 Urlaubsmodus-Tagesitinerar/Vision/Deal-Finder/Messenger/
+Premium/Rewards) hängen weiterhin an Base44-/Gemini-/Duffel-
+Backend-Zugang bzw. an Produktentscheidungen, die Ni treffen muss —
+verfehlen damit unverändert mindestens eines der vier
+Sicherheitskriterien. `reports/it-chef.md`, `reports/support-chef.md`
+und `reports/marketing-chef.md` laut `git log` auf den jeweiligen Dateien
+weiterhin auf dem Stand vom 23.10. — keine neuen Funde der
+plattform-verwalteten Kanäle, die hier aufzugreifen wären.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+die letzten Läufe, um keine bereits geprüften Bereiche zu wiederholen):
+- Alle `Number(...)`-basierten Eingabefelder (`FlightWizard.tsx`s
+  `clampPassengerCount`, `HotelWizard.tsx`s `clampGuestCount`) gegen
+  NaN/negative/Dezimal-Eingaben geprüft — beide klammern korrekt auf
+  1-9 und runden, kein Bug.
+- Alle `addEventListener`-Aufrufe in Produktcode gesucht (zwei Treffer:
+  `useChat.ts`s `beforeunload`-Listener, `utils.ts`s `focusPageHeading()`-
+  `blur`-Listener) — der erste hat ein korrektes `useEffect`-Cleanup, der
+  zweite nutzt bereits `{ once: true }` zum Selbstentfernen. Kein Leck.
+- Alle `array[0]`-Zugriffe in Produktcode (`FlightCard.tsx`,
+  `useChat.ts`, `format.ts`, `speech.ts`, `duffel/client.ts`) einzeln
+  gegen fehlende Optional-Chaining-Absicherung bei leerem Array
+  geprüft — jede Stelle hat bereits `?.`/Fallback-Wert, kein neuer Fund.
+- `src/` nach `console.log`/`console.debug`-Resten in Produktcode
+  durchsucht — kein Treffer.
+- `src/` nach dem Non-Null-Assertion-Operator (`!.`) in Produktcode
+  durchsucht — kein Treffer, durchgängig saubere Optional-Chaining-
+  Absicherung statt erzwungener Annahmen.
+- Alle internen `<Link to="...">`-Ziele in `src/pages`/`src/components`
+  gegen `routes.tsx` abgeglichen (sechs eindeutige Pfade: `/`, `/buchung`,
+  `/entwuerfe`, `/ki-chat`, `/reise-planen`, `/urlaubsmodus`) — alle
+  existieren, kein toter Link. Keine `navigate()`-Aufrufe im Code
+  gefunden, die separat zu prüfen gewesen wären.
+
+**Ergebnis:** Kein Punkt heute (dreiundneunzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler. Keine neuen offenen
+Beobachtungen über die bereits in `reports/it-chef.md` dokumentierten
+hinaus.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
