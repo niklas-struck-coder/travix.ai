@@ -423,6 +423,19 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   `npm run build`: `dist/favicon.svg` liegt jetzt tatsächlich im
   Build-Output, `dist/index.html` verlinkt korrekt darauf — vorher war
   `dist/vite.svg` nie vorhanden gewesen.
+  Vom autonomen IT-Chef-Lauf am 09.11. (neunundneunzigster Lauf) einen
+  eigenständig gefundenen Fund behoben: Die App hatte keine React Error
+  Boundary — ein unbehandelter Fehler in irgendeiner Komponente hätte die
+  komplette Seite auf einen weißen Bildschirm ohne jede Nutzerführung
+  abstürzen lassen, statt wenigstens eine ehrliche Fehlermeldung mit
+  nächstem Schritt zu zeigen (Prinzip aus `MARKENDESIGN.md`). Fix: neue
+  `src/components/layout/ErrorBoundary.tsx`, um `<BrowserRouter>` in
+  `App.tsx` gelegt, Fallback im selben Muster wie die bestehenden Empty
+  States (`Buchung.tsx`/`Kalender.tsx`) und `SearchErrorAlert.tsx`
+  (rotes `AlertTriangle`, `role="alert"`), mit Reload-Button und
+  routerunabhängigem `<a href="/">`-Link zur Startseite. Neue
+  `ErrorBoundary.test.tsx` (4 Tests). Keine neue Design-Entscheidung,
+  reine Absicherung gegen einen bisher ungefangenen Absturz.
 - 🟡 Phase 4 KI-Chat — UI komplett fertig (4.4-4.14), läuft aber noch auf
   lokalem Mock-Advisor statt echter KI (4.1-4.3 offen, s.u.). Vom
   autonomen IT-Chef-Lauf am 02.09. (einundzwanzigster Lauf) ein

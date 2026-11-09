@@ -26871,3 +26871,75 @@ unverändert bei 570 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-09, 23:12 UTC (neunundneunzigster Lauf — fehlende ErrorBoundary ergänzt)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der achtundneunzigste Lauf von vor rund
+einer Stunde). `origin/main` unverändert bei `fe1300e` (23.10.) — per
+`git merge-base --is-ancestor origin/main HEAD` weiterhin lupenreiner
+Vorfahre von `it-chef/auto` (0 Commits Rückstand/80 Commits voraus),
+`main` bleibt unberührt, kein Merge nötig. Regressionsschutz-Baseline
+frisch durchlaufen: `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 570 Tests, alle
+grün) — identisch zum Stand des 98. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+erneut durchgesehen — unverändert seit dem 87. Lauf, dieselben sechs
+offenen Hauptpunkte bleiben aus denselben, seit Lauf elf dokumentierten
+Gründen blockiert (Backend-/Architekturentscheidung oder fehlende
+Inhalte, die Ni liefern muss). `reports/it-chef.md`,
+`reports/support-chef.md`, `reports/marketing-chef.md`,
+`support-chef/auto` und `marketing-chef/auto` laut `git log` weiterhin
+auf dem Stand vom 23.10. — keine neuen Funde anderer Kanäle.
+
+**Zusätzliche gezielte Bug-Suche** (bewusst anderer Schwerpunkt als die
+letzten Läufe, die bereits TODO/FIXME, console.log, leere catch-Blöcke,
+`as any`, ungeschütztes `JSON.parse`, `dangerouslySetInnerHTML`,
+Locale-Argumente, fehlende `alt`/`aria-label`, `useEffect`-Cleanups,
+tote Links, `key={index}`, `target="_blank"` und Testabdeckungslücken
+abgedeckt hatten): geprüft, ob die Anwendung überhaupt gegen einen
+Absturz in der Render-Phase abgesichert ist. Fund: `src/main.tsx`
+rendert `<App />` ohne jede React Error Boundary — kein
+`componentDidCatch`/`getDerivedStateFromError` im ganzen `src`-Baum
+(per codeweiter Suche bestätigt). Ein einzelner unbehandelter Fehler in
+irgendeiner Komponente (z.B. ein künftiger Laufzeitfehler in einer der
+noch nicht umgesetzten Phasen) hätte bisher die komplette Seite auf
+einen weißen Bildschirm ohne jede Nutzerführung abstürzen lassen. Erfüllt
+alle vier Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+Recht, keine offene Produktentscheidung (React-Standardmuster, keine
+Abwägung nötig), klar umsetzbar ohne Annahmen über das Verhalten hinaus,
+und objektiv prüfbar (Komponente fängt einen Wurf im Kind ab und zeigt
+den Fallback, sonst reicht sie die Kinder normal durch — per Test
+verifizierbar).
+
+**Fix:** Neue `src/components/layout/ErrorBoundary.tsx` (Class-Komponente,
+da React Error Boundaries zwingend `componentDidCatch`/
+`getDerivedStateFromError` brauchen, wofür es keinen Hook gibt). Fallback
+folgt der Tonalität aus `MARKENDESIGN.md` ("Fehlermeldungen: ehrlich und
+konkret statt generisch, sag was schiefging und was als Nächstes zu tun
+ist") und optisch demselben Muster wie die bestehenden Empty States
+(z.B. `Buchung.tsx`/`Kalender.tsx`: zentrierter Block, Icon, Überschrift,
+Beschreibungstext, Button in `bg-teal text-navy`) sowie der bereits
+bestehenden `SearchErrorAlert.tsx` (rotes `AlertTriangle`-Icon,
+`role="alert"`, `text-destructive` — dort bereits für echte Fehler
+etabliert, bewusst nicht die für Budget-Warnungen reservierte
+"kein Rot"-Regel aus `MARKENDESIGN.md`, die nur für Budget-Überschreitung
+gilt, nicht für einen tatsächlichen Absturz). Zwei Aktionen: "Seite neu
+laden" (`window.location.reload()`) und ein Link "Zur Startseite" als
+reines `<a href="/">` statt `<Link>` — bewusst ohne Abhängigkeit vom
+`react-router`-Kontext, falls der Fehler selbst im Routing-Baum
+aufgetreten ist. In `App.tsx` um `<BrowserRouter>` herum eingebunden
+(fängt damit auch Fehler, die beim Routing selbst auftreten). Neue
+`ErrorBoundary.test.tsx` (4 Tests): normales Durchreichen der Kinder
+ohne Fehler, Fallback-Anzeige inkl. verschwundenem Originalinhalt bei
+einem Wurf im Kind, Reload-Button ruft `location.reload()` auf (per
+`vi.stubGlobal('location', ...)` isoliert), Home-Link zeigt auf `/`.
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) und `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung — bekannt, kein neuer Fund)
+laufen nach dem Fix durch.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
