@@ -26733,3 +26733,75 @@ unverändert bei 570 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-09, 02:12 UTC (siebenundneunzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der sechsundneunzigste Lauf von vor einer
+Stunde). `origin/main` unverändert bei `fe1300e` (23.10.) und per
+`git rev-list --left-right --count origin/main...it-chef/auto` weiterhin
+0 Commits Rückstand/78 Commits voraus — `main` bleibt unberührt, kein
+Merge nötig. Regressionsschutz-Baseline frisch durchlaufen: `npm ci`
+fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (75 Testdateien, 570 Tests, alle grün) — identisch zum
+Stand des 96. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+erneut durchsucht — unverändert seit dem 87. Lauf, dieselben sechs
+offenen Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre-Anbindung, 6.2/6.6/6.7
+TripItem-Anbieter-URL/CostBreakdown/calculateCosts, 7.4
+Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts, 8.1-8.7/8.9/8.12
+Urlaubsmodus-Tagesitinerar/Vision/Deal-Finder/Premium/Rewards) hängen
+weiterhin an fehlendem Base44-/Gemini-/Duffel-Backend-Zugang bzw. an
+Produktentscheidungen, die Ni treffen muss. `reports/it-chef.md`,
+`reports/support-chef.md` und `reports/marketing-chef.md` laut `git log`
+weiterhin auf dem Stand vom 23.10., ebenso `support-chef/auto` und
+`marketing-chef/auto` (letzter Commit jeweils 23.10.) — keine neuen Funde
+anderer Kanäle.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+die letzten Läufe):
+- Offene `it-chef-autofix/*`-PRs auf GitHub gegen den tatsächlichen
+  Code-Stand gegengeprüft, statt nur die (seit 23.10. unveränderte)
+  Report-Zeile "PR #34/#38 weiterhin offen" zu wiederholen: `formatTime()`
+  (PR #34) hat bereits den `Number.isNaN(date.getTime())`-Guard
+  (`src/lib/format.ts:23-27`), die "+ Suchen"-Edit-Shortcut-Logik (PR #38)
+  ist laut Commit `c1a94d1` (29.10.) bereits in `it-chef/auto` übernommen
+  — beide PRs bleiben auf GitHub nur formal offen (nicht geschlossen, was
+  ohnehin nicht in den Aufgabenbereich dieses Skills fällt), ihr
+  Codeinhalt ist kein offener Punkt mehr. Kein neuer Fund, nur
+  Bestätigung des bekannten Stands.
+- Alle `new Date(...)`-Aufrufe codeweit gesammelt (13 Fundstellen) und
+  einzeln gegen fehlende Invalid-Date-Absicherung geprüft:
+  `FlightCard.tsx`s eigene `formatDate()` hat bereits den Guard (48.
+  Lauf), `ChatMessage.tsx`s `formatTime(timestamp: number)` bekommt den
+  Wert ausschließlich aus intern per `Date.now()` erzeugten
+  `ChatMessage`-Objekten (`useChat.ts:68`, `useConcierge.ts:7`), nie aus
+  Nutzereingabe oder Legacy-Daten — kein erreichbarer Invalid-Date-Fall,
+  also kein Fund (ein Guard dafür wäre Absicherung gegen einen Zustand,
+  der nicht eintreten kann). `calendarUtils.ts`/`Kalender.tsx`/
+  `FlightWizard.tsx`/`HotelWizard.tsx` nutzen `new Date()` ausschließlich
+  mit intern erzeugten, bereits validierten Werten — kein Fund.
+- Alle `size="icon"`-Buttons codeweit gesammelt (shadcn/ui-Konvention für
+  reine Icon-Buttons ohne sichtbaren Text) und einzeln gegen fehlendes
+  `aria-label` geprüft (`Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`, `ChatInput.tsx`, `Buchung.tsx`, `Reiseentwuerfe.tsx`,
+  `Warenkorb.tsx`, `Kalender.tsx`, `KiChat.tsx`, `EditMode.tsx`) — jeder
+  einzelne hat bereits ein eigenes, kontextbezogenes `aria-label`, kein
+  Fund.
+- Testabdeckungslücken erneut geprüft (alle `.ts`/`.tsx`-Dateien ohne
+  eigene `.test.`-Datei gesammelt): einzige Fundstellen sind
+  `input.tsx`/`label.tsx` (bewusst ohne Testdatei seit 19.10., reine
+  Wrapper ohne Verzweigung), `main.tsx`/`vite-env.d.ts` (kein
+  sinnvoller Testkandidat, Einstiegspunkt/Typdeklaration) und die reinen
+  Typ-Dateien unter `src/types/*.ts` (keine Laufzeitlogik) — keine neue
+  Lücke.
+
+**Ergebnis:** Kein Punkt heute (siebenundneunzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
