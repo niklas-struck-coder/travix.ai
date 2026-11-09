@@ -26805,3 +26805,69 @@ unverändert bei 570 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-09, 03:14 UTC (achtundneunzigster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der siebenundneunzigste Lauf von vor
+einer Stunde). `origin/main` unverändert bei `fe1300e` (23.10.) — per
+`git rev-list --left-right --count origin/main...it-chef/auto` weiterhin
+0 Commits Rückstand/79 Commits voraus, `main` bleibt unberührt, kein
+Merge nötig. Regressionsschutz-Baseline frisch durchlaufen: `npm ci`
+fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (75 Testdateien, 570 Tests, alle grün) — identisch zum
+Stand des 97. Laufs.
+
+**Punktesuche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+(alle `- [ ]`-Zeilen einzeln durchgesehen) erneut abgeglichen —
+unverändert seit dem 87. Lauf, dieselben sechs offenen Hauptpunkte
+(2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre-Anbindung, 6.2/6.6/6.7 TripItem-Anbieter-URL/
+CostBreakdown/calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12
+Reisebudget-Charts, 8.1-8.7/8.9/8.12 Urlaubsmodus-Tagesitinerar/Vision/
+Deal-Finder/Premium/Rewards) hängen laut ihren eigenen
+Begründungstexten weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Backend-Zugang bzw. an Produktentscheidungen, die Ni treffen
+muss — verfehlen damit unverändert mindestens eines der vier
+Sicherheitskriterien. `8.9` (Premium-Seite mit Abo-Stufen) bewusst
+noch mal einzeln geprüft, weil sie rein als UI-Seite wie `Profil.tsx`/
+`Einstellungen.tsx` umsetzbar wirken könnte — aber "Premium"/
+Abo-Stufen sind inhaltlich Zahlungs-/Monetarisierungs-Inhalt, fällt
+damit unter das Zahlungs-Ausschlusskriterium, auch ohne echte
+Zahlungsabwicklung. `reports/it-chef.md`, `reports/support-chef.md`
+und `reports/marketing-chef.md` laut `git log` weiterhin auf dem Stand
+vom 23.10., ebenso `support-chef/auto` und `marketing-chef/auto`
+(letzter Commit jeweils 23.10.) — keine neuen Funde anderer Kanäle.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als die letzten Läufe):
+- Alle `target="_blank"`-Stellen codeweit gesucht — kein Treffer (die
+  App öffnet keine externen Links in einem neuen Tab, Bestätigung des
+  96.-Lauf-Fundes, kein Regressions-Risiko durch fehlendes
+  `rel="noopener"`).
+- Alle `href="..."` außerhalb von Tests codeweit gesucht: drei Treffer
+  in `Dashboard.tsx` sind nur der Prop-Name der internen `StatTile`-
+  Komponente (rendert selbst `<Link to={href}>`, kein echtes `<a>`),
+  ein vierter in `Kartenansicht.tsx` ist die statische Leaflet-
+  Attribution (OpenStreetMap/CARTO-Pflichtlinks) — kein Fund.
+- `index.html` gegen fehlende Basis-Metadaten geprüft: `lang="de"`,
+  Viewport, Favicon, Titel alle vorhanden (Favicon seit 82. Lauf
+  korrekt verlinkt). Fehlende `<meta name="description">` wäre reiner
+  SEO-/Marketing-Text — gehört laut `MARKENDESIGN.md`-Arbeitsteilung in
+  den Zuständigkeitsbereich von Marketing-Chef, nicht eigenständig vom
+  IT-Chef zu formulieren.
+- `TODO`/`FIXME`/`XXX`/`HACK`-Marker codeweit gesucht (außerhalb von
+  Tests) — kein Treffer.
+- `npx eslint` mit zusätzlicher `no-unused-vars`-Prüfung versucht, um
+  ungenutzten Code über die Standard-Lint-Regeln hinaus aufzuspüren —
+  Plugin in diesem Projekt nicht separat verfügbar, Standard-`npm run
+  lint` deckt `no-unused-vars` aber bereits ab (0 Fehler) und fängt
+  damit denselben Fall ab.
+
+**Ergebnis:** Kein Punkt heute (achtundneunzigster Lauf) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 570 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
