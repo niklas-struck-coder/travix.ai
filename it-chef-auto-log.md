@@ -26944,7 +26944,47 @@ laufen nach dem Fix durch.
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
 
-## 2026-11-10, 00:10 UTC (hundertster Lauf — kein neuer sicherer Punkt gefunden)
+## 2026-11-10, 01:09 UTC (hunderterster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, erneut frischer
+Checkout. `it-chef/auto` direkt von `origin/it-chef/auto` übernommen
+(0 Commits Rückstand, letzter Commit war der hundertste Lauf von vor
+knapp einer Stunde, 00:11 UTC). `origin/main` seitdem unverändert bei
+`fe1300e` — per `git merge-base --is-ancestor origin/main HEAD`
+weiterhin lupenreiner Vorfahre, `main` bleibt unberührt. Da seit dem
+100. Lauf weder `main` noch `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md`
+sich geändert haben, ist die dort bereits dokumentierte Punktesuche
+(sechs offene Hauptpunkte, alle weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Zugang bzw. an Ni-Produktentscheidungen hängend) unverändert
+gültig — keine erneute Zeile-für-Zeile-Durchsicht nötig, da keine neue
+Information seit vor einer Stunde vorliegt.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 100.
+Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst eine neue Richtung,
+die die letzten Läufe noch nicht abgedeckt hatten): alle `setInterval(`-
+und `setTimeout(`-Aufrufe im `src`-Baum durchsucht (potenzielle
+Memory-Leaks/`setState`-nach-Unmount durch fehlendes Clearing). Kein
+`setInterval`-Aufruf im gesamten Code. Alle drei `setTimeout`-Stellen in
+`useChat.ts` (Zeilen 287, 342, 395) schreiben korrekt in
+`replyTimeoutRef.current` und werden sowohl beim Unmount (Zeile 98-102)
+als auch vor jedem neuen `sendMessage()`-Aufruf (Zeile 263-266) per
+`window.clearTimeout()` aufgeräumt — kein Fund. Zusätzlich alle
+`addEventListener`-Aufrufe gegen fehlende `removeEventListener`-
+Gegenstücke geprüft: einziger Treffer mit Zählerabweichung ist
+`scrollToAndFocusHeading()` (`src/lib/utils.ts:28-32`), dort aber bewusst
+mit `{ once: true }` registriert — entfernt sich nach dem ersten
+`blur`-Event selbst, kein Leak, kein Fund.
+
+**Ergebnis:** Kein Punkt heute (zweiter Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
 
 **Ausgangslage:** Erster geplanter Cloud-Lauf heute, frischer Checkout.
 `it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
