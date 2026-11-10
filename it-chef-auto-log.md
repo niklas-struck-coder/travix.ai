@@ -27056,3 +27056,60 @@ bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-10, 02:11 UTC (102. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der 101. Lauf von vor gut einer Stunde,
+01:09 UTC). `origin/main` seitdem unverändert bei `fe1300e` — per
+`git log it-chef/auto..origin/main` kein einziger neuer Commit, `main`
+bleibt also weiterhin unberührter Vorfahre, kein Merge nötig. Da sich
+seit dem 101. Lauf weder `main` noch `ZEITPLAN.md` noch
+`tasks/tasks-prd-travix-platform.md` geändert haben (alle `- [ ]`-Zeilen
+erneut einzeln durchgesehen), ist die dort bereits wiederholt
+dokumentierte Punktesuche unverändert gültig: dieselben sechs offenen
+Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts,
+5.7 Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/CostBreakdown/
+calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts,
+8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/Rewards) hängen laut ihren
+eigenen Begründungstexten weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Backend-Zugang bzw. an Produktentscheidungen, die Ni treffen
+muss — verfehlen damit weiterhin mindestens eines der vier
+Sicherheitskriterien.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+101. Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als die letzten Läufe):
+- Zähler-Inputs erneut geprüft, dieses Mal die Clamp-Funktionen selbst
+  statt nur die `min`/`max`-Attribute: `clampGuestCount()`
+  (`HotelWizard.tsx:11-14`) und `clampPassengerCount()`
+  (`FlightWizard.tsx:23-26`) fangen beide `NaN` ab (Fallback `1`) und
+  runden/clampen danach korrekt auf `[1, 9]` — kein Fund.
+- IATA-Code-Validierung in `FlightWizard.tsx` (Zeilen 46-55) gezielt auf
+  fehlenden "Start = Ziel"-Check geprüft, wie er bei Hotel-Check-in/
+  -out schon länger existiert: `sameAirport`-Prüfung ist bereits
+  vorhanden und Teil von `isValid` — kein Fund.
+- `routes.tsx` (Titel-Mapping, Catch-all-Route, `builtRoutes`-Set gegen
+  `allRoutes` aus `nav-config.ts`) auf fehlende oder doppelte Routen
+  geprüft — jede Route in `allRoutes` ist entweder in `builtRoutes`
+  oder fällt korrekt auf `PlaceholderPage`, der Catch-all `path="*"`
+  zeigt korrekt auf `NichtGefunden` — kein Fund.
+- Ganzen `src`-Baum nach `@ts-ignore`/`@ts-expect-error`/
+  `eslint-disable` durchsucht (verstecktes Umschiffen von Typ-/
+  Lint-Prüfungen) — kein einziger Treffer im gesamten Code, kein Fund.
+- `ReiseSuche.tsx` (kombinierte Such-Einstiegsseite) auf doppelte
+  `key`/`id`-Kollisionen zwischen den drei Optionen geprüft — `key`
+  nutzt den eindeutigen `option.path`, kein Fund.
+
+**Ergebnis:** Kein Punkt heute (102. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
