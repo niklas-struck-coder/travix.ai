@@ -26943,3 +26943,76 @@ laufen nach dem Fix durch.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-10, 00:10 UTC (hundertster Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Erster geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der neunundneunzigste Lauf vom 09.11.,
+23:14 UTC). `origin/main` unverändert bei `fe1300e` (23.10.) — per
+`git merge-base --is-ancestor origin/main HEAD` weiterhin lupenreiner
+Vorfahre von `it-chef/auto` (0 Commits Rückstand/81 Commits voraus),
+`main` bleibt unberührt, kein Merge nötig (Freigabe-Chef hat seit dem
+23.10. weiterhin nicht gemergt — nicht mein Zuständigkeitsbereich).
+Regressionsschutz-Baseline frisch durchlaufen: `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 99.
+Laufs (inkl. neuer `ErrorBoundary`).
+
+**Punktesuche:** `ZEITPLAN.md` (alle 35 offenen `- [ ]`-Zeilen einzeln
+durchgesehen) und `tasks/tasks-prd-travix-platform.md` (alle offenen
+Checkboxen) erneut komplett durchsucht. Unverändert seit dem 87. Lauf —
+dieselben sechs offenen Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre-Anbindung, 6.2/6.6/6.7
+TripItem-Anbieter-URL/CostBreakdown/calculateCosts, 7.4
+Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts, 8.1-8.7/8.9/8.12
+Urlaubsmodus-Tagesitinerar/Vision/Deal-Finder/Premium/Rewards) hängen
+laut ihren eigenen Begründungstexten weiterhin an fehlendem Base44-/
+Gemini-/Duffel-Backend-Zugang bzw. an Produktentscheidungen, die Ni
+treffen muss — verfehlen damit unverändert mindestens eines der vier
+Sicherheitskriterien. `reports/it-chef.md`, `reports/support-chef.md`
+und `reports/marketing-chef.md` laut `git log` weiterhin auf dem Stand
+vom 23.10., ebenso `support-chef/auto` und `marketing-chef/auto`
+(letzter Commit jeweils 23.10.) — keine neuen Funde anderer Kanäle.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als die letzten Läufe, die bereits TODO/FIXME, console.log, leere
+catch-Blöcke, `as any`, ungeschütztes `JSON.parse`,
+`dangerouslySetInnerHTML`, Locale-Argumente, fehlende `alt`/
+`aria-label`, `useEffect`-Cleanups, tote Links, `key={index}`,
+`target="_blank"`, Testabdeckungslücken und die fehlende ErrorBoundary
+abgedeckt hatten):
+- Alle `{wert && <...>}`-Conditional-Renderings codeweit gesammelt (38
+  Fundstellen) und einzeln geprüft, ob die linke Seite eine Zahl sein
+  könnte, die bei `0` ein sichtbares "0" statt gar nichts rendern würde
+  (klassischer React-Fallstrick) — keine Stelle verwendet eine
+  zahlenwertige Bedingung direkt; die einzige inhaltlich ähnliche
+  Stelle (`draft.trip.budget &&` in `Reiseentwuerfe.tsx:234`) ist laut
+  `src/types/chat.ts:23` vom Typ `string | null`, kein `number`, kein
+  Fund.
+- Alle `.sort(`-Aufrufe im gesamten `src`-Baum gesucht (potenzielle
+  In-Place-Mutation eines geteilten State-/Props-Arrays) — kein
+  einziger Treffer, nirgends wird sortiert, kein Fund.
+- Start-/End-Datum-Validierung in `FlightWizard.tsx` (Rückflug ≥
+  Hinflug, zusätzlich per `min`-Attribut auf dem Datumsfeld) und
+  `HotelWizard.tsx` (Check-out > Check-in, ebenfalls per `min`-Attribut)
+  erneut gegen Logikfehler geprüft — beide vergleichen korrekt
+  (String-Vergleich funktioniert für ISO-`yyyy-mm-dd`-Werte
+  lexikographisch korrekt), beide verhindern zusätzlich in der Vergangenheit
+  liegende Hinflug-/Check-in-Daten über `min={getTodayIso()}` — kein Fund.
+- `formatEuro()` (`src/lib/format.ts:4`) erneut geprüft, dieses Mal
+  gezielt auf Gleitkomma-Darstellungsfehler bei Summenbildung (z. B.
+  `0.1 + 0.2` → `0.30000000000000004`) statt nur auf `NaN`: alle
+  aktuellen Preis-Mockdaten in `Warenkorb.tsx`/`Dashboard.tsx` (249, 480,
+  32, 58, 24) sind glatte ganze Zahlen, `calculateCartTotal()`
+  (`cartTotals.ts:28-30`) summiert ausschließlich diese — kein
+  erreichbarer Gleitkomma-Darstellungsfall mit den aktuellen Daten, daher
+  kein objektiv prüfbarer Bug (ein Fix gegen eine noch nicht existierende
+  Datenquelle mit Nachkommastellen wäre reine Spekulation).
+
+**Ergebnis:** Kein Punkt heute (hundertster Lauf) autonom umgesetzt,
+kein Produktcode geändert — ehrlich "kein Fund". Baseline unverändert
+bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
