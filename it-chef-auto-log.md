@@ -27057,6 +27057,85 @@ bei 574 Tests, 0 Typ-/Lint-Fehler.
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
 
+## 2026-11-10, 22:10 UTC (103. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der 102. Lauf von knapp 20 Stunden zuvor,
+02:11 UTC). `origin/main` seitdem unverändert bei `fe1300e` (`git log
+it-chef/auto..origin/main` liefert keinen einzigen neuen Commit) — `main`
+bleibt also weiterhin unberührter Vorfahre, kein Merge nötig. `ZEITPLAN.md`
+und `tasks/tasks-prd-travix-platform.md` ebenfalls unverändert seit dem
+102. Lauf (kein Diff gegenüber `origin/main` außer den bereits
+dokumentierten 309 Zeilen aus früheren Läufen) — die wiederholt
+dokumentierte Punktesuche bleibt also gültig: dieselben sechs offenen
+Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/CostBreakdown/
+calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts,
+8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/Rewards) hängen laut ihren
+eigenen Begründungstexten weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Backend-Zugang bzw. an Produktentscheidungen, die Ni treffen muss —
+verfehlen damit weiterhin mindestens eines der vier Sicherheitskriterien.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+102. Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+die letzten Läufe):
+- Alle `.find(`-Aufrufe im gesamten `src`-Baum (ohne Tests) gesammelt (4
+  Fundstellen: `types/stays.ts`, `routes.tsx`, `mockConcierge.ts`,
+  `Reiseentwuerfe.tsx`) und einzeln geprüft, ob das Ergebnis ungeschützt
+  (ohne `undefined`-Check) weiterverwendet wird — alle vier prüfen das
+  Ergebnis vor Gebrauch oder haben einen sauberen Early-Return (z. B.
+  `duplicateDraft()` in `Reiseentwuerfe.tsx:149` mit `if (!source) return
+  current`), kein Fund.
+- `localStorage`-Zugriffe erneut geprüft (`tripStorage.ts`), dieses Mal
+  gezielt gegen `updateStoredTrip()`/`isTripComplete()`/`hasTripData()`
+  statt nur `loadStoredChat()`/`saveStoredChat()` wie in früheren Läufen —
+  alle drei behandeln einen fehlenden/korrupten gespeicherten Trip korrekt
+  (kein Trip vorhanden → `null`/`false`, `activities` immer als Array
+  behandelt), kein Fund.
+- `format.ts` gezielt auf die `Number(...)`-Aufrufe in `formatDuration()`
+  (Zeilen 46-47) geprüft, dieses Mal auf das Regex selbst statt nur auf
+  Rundungsfehler (dritter Lauf, 02:11 UTC) — das Regex verlangt ein
+  literales `P` an beliebiger Stelle im String, alle Untergruppen danach
+  sind optional; mit den tatsächlich von `mockAdvisor.ts`/Duffel
+  erzeugten ISO-8601-Werten (immer mit führendem `P`, nie mit
+  Fremdtext davor) kein erreichbarer Fehlfall, daher kein objektiv
+  prüfbarer Bug mit den aktuellen Datenquellen.
+- Alle `onClick`-Handler im `src`-Baum gesammelt und geprüft, ob einer auf
+  einem nicht-interaktiven Element (`div`/`span` ohne `role="button"`/
+  `tabIndex`/`onKeyDown`) statt auf `<Button>`/`<button>`/`<Link>`/`<a>`
+  sitzt (klassische Tastatur-Zugänglichkeitslücke) — alle 24 Fundstellen
+  sitzen auf einem dieser vier interaktiven Elemente, kein Fund.
+- Die Toggle-Buttons in `Profil.tsx` (Reisestile/Ernährungsweise) und
+  `Einstellungen.tsx` (Benachrichtigungen) auf konsistentes
+  `aria-pressed` geprüft — alle drei Stellen setzen es korrekt anhand des
+  jeweiligen aktiven Zustands, kein Fund.
+- `cartTotals.ts`, `calculateProgress.ts` und `checklistRules.ts`
+  (Preissummen/Fortschrittsberechnung/Checklisten-Status) erneut auf
+  Logikfehler geprüft (Rundung, Division durch Null, abweichende
+  Feldlisten zwischen den drei Dateien) — `calculateProgress.ts` und
+  `checklistRules.ts` verwenden exakt dieselben fünf Felder (per
+  Seitenvergleich bestätigt), `calculateCartTotal()` ist eine reine
+  Summe ohne Rundungsschritt, kein Fund.
+- `speech.ts` (Web Speech API-Wrapper für Diktat/Vorlesen) auf fehlende
+  Fehlerbehandlung bei nicht unterstützten/blockierten Browsern geprüft —
+  `isSpeechRecognitionSupported()`/`isSpeechSynthesisSupported()` werden
+  vor jedem Zugriff geprüft, `recognition.start()` ist zusätzlich in
+  `try/catch` gegen z. B. Mikrofon-Berechtigungsfehler abgesichert, kein
+  Fund.
+
+**Ergebnis:** Kein Punkt heute (103. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
+
 ## 2026-11-10, 02:11 UTC (102. Lauf — kein neuer sicherer Punkt gefunden)
 
 **Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer Checkout.
