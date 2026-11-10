@@ -27192,3 +27192,57 @@ Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-10, 23:16 UTC (104. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der 103. Lauf von vor rund einer Stunde,
+22:10 UTC). `origin/main` seitdem unverändert bei `fe1300e` — per
+`git rev-parse` bestätigt identisch zum vorherigen Fetch, `main` bleibt
+unberührter Vorfahre, kein Merge nötig. `MARKENDESIGN.md` unverändert
+seit 19.10., `reports/it-chef.md`/`reports/support-chef.md`/
+`reports/marketing-chef.md` unverändert seit 23.10. — keine neuen
+Vorgaben oder Funde anderer Kanäle.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 103.
+Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als die letzten Läufe):
+- `Favoriten.tsx`s `/ki-chat?destination=...`-Link gezielt dagegen
+  geprüft, ob `KiChat.tsx` den Query-Parameter überhaupt ausliest (sonst
+  wäre der Button wirkungslos) — `src/components/chat/KiChat.tsx:86-99`
+  liest `destinationParam` tatsächlich aus und schickt ihn als erste
+  Chat-Nachricht, exakt wie `Home.tsx`s gleichartiger Link, per
+  `KiChat.test.tsx` abgedeckt — kein Fund.
+- Alle `htmlFor`/`id`-Paare auf Formularfeldern codeweit gesammelt
+  (`FlightWizard.tsx`, `HotelWizard.tsx`, `EditMode.tsx`, `Profil.tsx`,
+  `Einstellungen.tsx`) auf doppelte IDs durch Mehrfach-Rendering in
+  einer Liste geprüft — jede dieser Komponenten wird immer nur einmal
+  gleichzeitig gerendert (kein Listen-Kontext), kein Fund.
+- Alle `onSubmit`-Formulare (`FlightWizard.tsx`, `HotelWizard.tsx`) auf
+  fehlendes `event.preventDefault()` geprüft — beide rufen es korrekt
+  als ersten Schritt im Handler auf, kein Fund.
+- `Favoriten.tsx`, `Preisalarme.tsx`, `Aktivitaeten.tsx`, `Profil.tsx`
+  und `Dashboard.tsx` (Demo-State-Seiten) erneut auf Logikfehler in
+  Lösch-Bestätigung, Preis-/Prozent-Berechnung und
+  Singular-/Plural-Texten geprüft — keine neue Abweichung, `Dashboard.tsx`
+  bestätigt weiterhin korrekt den vom Support-Chef-Bericht (28.08.)
+  geforderten Hinweistext bei gemitteltem Fortschritt über mehrere
+  Entwürfe.
+- Alle `crypto.randomUUID()`/`Date.now()`/`Math.random()`-Aufrufe
+  codeweit gesammelt (ID-Generierung) — jede tatsächliche ID-Erzeugung
+  nutzt `crypto.randomUUID()` (kein Kollisionsrisiko durch `Date.now()`
+  bei schnellen Mehrfachklicks), `Math.random()` kommt nur einmal in
+  `mockAdvisor.ts` für eine bewusst zufällige Zielvorschlag-Auswahl vor
+  (kein ID-Kontext) — kein Fund.
+
+**Ergebnis:** Kein Punkt heute (104. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
