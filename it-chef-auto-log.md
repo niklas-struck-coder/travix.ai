@@ -27377,3 +27377,83 @@ unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-11, dritter Lauf heute (107. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der 106. Lauf von heute früh). `origin/main`
+seitdem unverändert (`git log it-chef/auto..origin/main` liefert keinen
+neuen Commit) — `main` bleibt unberührter Vorfahre (`git log
+main..it-chef/auto` zeigt 88 Commits voraus), kein Merge nötig.
+`ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` erneut gegen alle
+vier Sicherheitskriterien durchgesehen: dieselben sechs offenen
+Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/CostBreakdown/
+calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts,
+8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/Rewards) hängen weiterhin an
+fehlendem Base44-/Gemini-/Duffel-Zugang bzw. an Produktentscheidungen, die
+Ni treffen muss — verfehlen damit weiterhin mindestens eines der vier
+Kriterien. Die beiden einzigen Marketing-/Support-Punkte, die auf den
+ersten Blick unabhängig wirken ("Landingpage/Warteliste live",
+"FAQ/Hilfe-Inhalte erarbeiten"), liegen laut ihren eigenen
+Sprint-Abschnitten in `ZEITPLAN.md` explizit im Zuständigkeitsbereich von
+Marketing-Chef bzw. Support-Chef, nicht im IT-Chef-Programmierungsbereich
+— nicht mein Zuständigkeitsbereich für den autonomen Lauf.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 106.
+Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte als
+die ersten beiden Läufe heute):
+- Pluralisierung in Nutzer-sichtbaren Zählertexten geprüft:
+  `TrainCard.tsx` ("Umstieg"/"Umstiege") und `FlightCard.tsx`
+  ("Zwischenstopp"/"-s") bilden beide den Singular/Plural korrekt ab
+  (`> 1` für die Plural-Endung) und werden beide nur bei `> 0` überhaupt
+  gerendert — der im Deutschen eigentlich plural-pflichtige Fall "0 x"
+  ist dadurch unerreichbar (kein Fund, da die UI diesen Fall bewusst
+  ausblendet statt ihn falsch zu beschriften).
+- Passagier-/Gäste-/Zimmer-Zähler in `FlightWizard.tsx`
+  (`clampPassengerCount`) und `HotelWizard.tsx` (`clampGuestCount`)
+  erneut auf Bounds/NaN-Handling geprüft — beide klammern identisch auf
+  1-9 und fangen `NaN` (leeres/ungültiges Eingabefeld) korrekt auf 1 ab,
+  kein Fund.
+- `findKnownDestination()` (`src/types/stays.ts:43`) und die analoge
+  Logik in `mockConcierge.ts` auf das `\bWort\b`-Regex-Muster geprüft,
+  dieses Mal gezielt auf Umlaute/Sonderzeichen in Zielnamen (bekannte
+  Schwachstelle von JS-Wortgrenzen bei Nicht-ASCII-Zeichen) — keiner der
+  acht kuratierten Zielnamen (`Lissabon`, `Kyoto`, `Kapstadt`,
+  `Reykjavik`, `Paris`, `Rom`, `Barcelona`, `New York`) enthält Umlaute
+  oder Sonderzeichen, Fall aktuell nicht erreichbar, daher kein objektiv
+  prüfbarer Bug mit den vorhandenen Daten.
+- Codeweite Suche nach `new RegExp(` mit dynamischem/ungeschütztem
+  Nutzereingabe-Anteil (ReDoS-/Crash-Risiko) — einziger echter Treffer
+  ist `findKnownDestination()`, dort aber bereits über `escapeRegExp()`
+  abgesichert; `escapeRegExp()` selbst erneut gegen die offizielle
+  MDN-Referenzimplementierung verglichen, korrekt, kein Fund.
+- Codeweite Suche nach `.skip(`/`xit(`/`it.todo`/`eslint-disable`/
+  `@ts-ignore`/`@ts-expect-error`/`@ts-nocheck` im `src`-Baum — keine
+  Treffer außer den neun erwarteten, bereits test-lokal kommentierten
+  `@ts-expect-error`-Stellen in `ChatInput.test.tsx` (globale
+  Test-Stubs/Cleanup, kein verstecktes Problem), kein Fund.
+- `ChatInput.tsx` (Mikrofon-/Spracheingabe-Button) erneut auf
+  Fehlerzustände geprüft: Button wird nur gerendert, wenn
+  `isSpeechRecognitionSupported()` zutrifft, `micError` wird bei
+  erfolgreichem Senden und bei neuem Aufnahmeversuch zurückgesetzt,
+  Recognition wird beim Unmount per `useEffect`-Cleanup gestoppt — kein
+  Fund.
+- Budget-Eingabe geprüft, ob eine Dezimalkomma-/Zahlenformat-Falle wie
+  bei `formatEuro()` (frühere Fundquelle) vorliegt — `trip.budget` ist
+  durchgehend ein freier Text-String aus dem Chat (`types/chat.ts:23`),
+  keine `Number()`/`parseFloat()`-Eingabe irgendwo im Budget-Pfad, daher
+  kein erreichbarer Parsing-Bug.
+
+**Ergebnis:** Kein Punkt heute (107. Lauf, dritter Lauf heute) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
