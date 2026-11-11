@@ -27457,3 +27457,71 @@ unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-11, vierter Lauf heute (108. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, letzter Commit war der 107. Lauf von heute). `origin/main`
+seitdem unverändert (`git log it-chef/auto..origin/main` liefert keinen
+neuen Commit) — `main` bleibt unberührter Vorfahre, kein Merge nötig.
+`ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` erneut gegen alle
+vier Sicherheitskriterien durchgesehen: dieselben sechs offenen
+Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/CostBreakdown/
+calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts,
+8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/Rewards) hängen weiterhin an
+fehlendem Base44-/Gemini-/Duffel-Zugang bzw. an Produktentscheidungen, die
+Ni treffen muss — verfehlen damit weiterhin mindestens eines der vier
+Kriterien.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 107.
+Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Dateien als die
+ersten drei Läufe heute):
+- `src/lib/ai/speech.ts` (Spracherkennung/-ausgabe) komplett durchgesehen:
+  `onerror`/`onend`-Reihenfolge, `try/catch` um `recognition.start()`,
+  `speechSynthesis.cancel()` vor jeder neuen Ausgabe — kein Fund.
+- `src/pages/Kartenansicht.tsx` erneut gegen `findKnownDestination()`/
+  `hasTripData()` geprüft (Leerzustand vs. "kenne keine Koordinaten"
+  vs. echte Karte) — Bedingungen decken sich korrekt ab, kein Fund.
+- `src/lib/duffel/client.ts` komplett durchgesehen: `dedupeByMessage()`,
+  Statuscode-Fallback bei nicht-JSON-Fehlerantworten, defensives Parsen
+  der (ungetesteten) Duffel-Stays-Antwortform — alles bereits
+  absichtlich defensiv kommentiert, kein Fund.
+- `src/components/trip/ChecklistPanel.tsx` und
+  `src/lib/trip/calculateProgress.ts` auf Rechenfehler bei
+  Fortschritt/Prozentanzeige geprüft (Rundung, Division durch die fest
+  codierte Feldanzahl) — kein Fund.
+- `src/hooks/useChat.ts` (`sendMessage`/`startEdit`/
+  `searchGenerationRef`-Generationszähler gegen veraltete, spät
+  eintreffende Duffel-Suchergebnisse) komplett erneut durchgesehen —
+  Generationsprüfungen vor jedem `setStayOffers`/`setFlightOffers`
+  konsistent vorhanden, `awaitingFlightOrigin`/`editingField` werden in
+  jedem Abbruchpfad zurückgesetzt, kein Fund.
+- `src/lib/trip/tripStorage.ts` (`loadStoredChat`/`updateStoredTrip`/
+  `isTripComplete`/`hasTripData`) gegen fehlende/korrupte
+  localStorage-Daten durchgespielt — alle Fallbacks greifen wie
+  dokumentiert, kein Fund.
+- Den in `reports/support-chef.md` (23.10.) offenen Vorschlag 3
+  ("Lösch-Warnungen je nach Reversibilität abstufen") an den fünf
+  genannten Stellen (`Favoriten.tsx`, `Warenkorb.tsx`,
+  `Preisalarme.tsx`, `Aktivitaeten.tsx`, `EditMode.tsx`) im aktuellen
+  Code nachgeprüft: alle fünf zeigen weiterhin denselben
+  "Das lässt sich nicht rückgängig machen"-Text mit `destructive`-Button
+  — technisch unverändert, aber der Vorschlag selbst bleibt eine
+  Produktentscheidung (welche Aktionen gelten als wie reversibel, wie
+  soll eine abgestufte Formulierung konkret lauten), nicht objektiv aus
+  der Aufgabenliste ableitbar — verfehlt Kriterium 3, daher nicht
+  eigenständig umgesetzt.
+
+**Ergebnis:** Kein Punkt heute (108. Lauf, vierter Lauf heute) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
