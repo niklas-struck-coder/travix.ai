@@ -27310,3 +27310,70 @@ Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-11, zweiter Lauf heute (106. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, frischer Checkout.
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand, bereits auf dem Stand des 105. Laufs von 00:10 UTC heute).
+`origin/main` seitdem unverändert (`git log it-chef/auto..main` liefert
+keinen neuen Commit) — `main` bleibt unberührter Vorfahre, kein Merge
+nötig. `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` erneut
+gegen alle vier Sicherheitskriterien durchgesehen: dieselben sechs
+offenen Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/
+CostBreakdown/calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12
+Reisebudget-Charts, 8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/
+Rewards) hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-Zugang
+bzw. an Produktentscheidungen, die Ni treffen muss — verfehlen damit
+weiterhin mindestens eines der vier Kriterien.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+105. Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als der 105. Lauf heute früh):
+- `lib/trip/calendarUtils.ts` (Monatsgitter-Mathematik, Montag-erste
+  Wochentag-Berechnung, `getTripsForDay()`-Bereichsvergleich) erneut von
+  Hand gegen Edge Cases durchgerechnet (Jahreswechsel Dezember→Januar
+  und zurück in `getPreviousMonth()`/`getNextMonth()`, Monatsanfang auf
+  einem Sonntag, Monatsende auf einem Montag) — alle Fälle liefern ein
+  korrektes 42-Zellen-Gitter, kein Fund. `Kalender.tsx`s Verwendung
+  davon (inkl. `todayIso`-Vergleich und Leerzustand) ebenfalls
+  durchgesehen, kein Fund.
+- `lib/trip/cartTotals.ts` (`groupCartItems`/`calculateCartTotal`) und
+  dessen einzige Verwendung in `Warenkorb.tsx` geprüft: feste
+  `TYPE_ORDER`-Reihenfolge, leere Gruppen werden korrekt herausgefiltert,
+  Summenbildung bei Entfernen eines Items bleibt konsistent (reine
+  Neuberechnung aus `items`, kein gecachter Zwischenstand) — kein Fund.
+- `lib/trip/checklistRules.ts`s `isAutoItemChecked()` gegen `TripDraft`
+  abgeglichen: alle fünf Fall-Zweige decken genau die Felder ab, die
+  `calculateProgress.ts` ebenfalls auswertet, `default`-Zweig ist
+  unerreichbar (nur über `AUTO_CHECKLIST_ITEMS`-IDs aufgerufen) — kein
+  Fund.
+- Erneut geprüft, ob `Angebote.tsx`s eigene `formatPrice()` (mit
+  Mehrwährungsunterstützung über `currency === 'EUR' ? '€' : currency`)
+  entgegen der früheren Einschätzung (02.10., dreifache
+  `formatEuro()`-Konsolidierung) doch ein verstecktes Duplikat von
+  `format.ts`s `formatEuro()`/`formatOfferPrice()` ist — nein: anders als
+  `formatOfferPrice()` nutzt sie bewusst kein `Intl.NumberFormat` mit
+  `style: "currency"` (das würde z. B. bei einer fehlenden/ungültigen
+  ISO-4217-Währung werfen), sondern einen simplen String-Fallback für
+  Nicht-EUR-Währungen — andere, absichtliche Logik, weiterhin kein
+  echtes Duplikat, bestätigt die Einschätzung vom 02.10.
+- `Preisalarme.tsx`s `targetReached`/`priceChanged`-Bedingungen erneut
+  gegen die beiden Demo-Datensätze durchgespielt (Alarm 1: Zielpreis
+  220 €, aktuell 249 € → nicht erreicht, vorher 279 € → Preis gesunken,
+  Hinweis korrekt sichtbar; Alarm 2: Zielpreis 650 €, aktuell 610 € →
+  erreicht, vorher ebenfalls 610 € → kein Hinweis) — beide Bedingungen
+  verhalten sich exakt wie in der UI sichtbar, kein Fund.
+
+**Ergebnis:** Kein Punkt heute (106. Lauf, zweiter Lauf heute) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
