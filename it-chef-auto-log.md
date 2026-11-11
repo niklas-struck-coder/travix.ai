@@ -27246,3 +27246,67 @@ Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-11, 00:10 UTC (105. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Fünfter geplanter Cloud-Lauf seit dem 104. Lauf
+(2026-11-10, 23:16 UTC), frischer Checkout. `it-chef/auto` direkt von
+`origin/it-chef/auto` übernommen (0 Commits Rückstand). `origin/main`
+seitdem unverändert bei `fe1300e` (`git log it-chef/auto..main` liefert
+keinen neuen Commit) — `main` bleibt unberührter Vorfahre, kein Merge
+nötig. `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` erneut
+Zeile für Zeile gegen alle `- [ ]`-Punkte durchgesehen: dieselben sechs
+offenen Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7 TripItem-Anbieter-URL/
+CostBreakdown/calculateCosts, 7.4 Planung-fortsetzen-Volltext/7.12
+Reisebudget-Charts, 8.1-8.9/8.12 Urlaubsmodus/Deal-Finder/Premium/
+Rewards) hängen laut ihren eigenen Begründungstexten weiterhin an
+fehlendem Base44-/Gemini-/Duffel-Backend-Zugang bzw. an
+Produktentscheidungen, die Ni treffen muss — verfehlen damit weiterhin
+mindestens eines der vier Sicherheitskriterien.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+104. Laufs.
+
+**Zusätzliche gezielte Bug-Suche heute** (bewusst andere Schwerpunkte
+als die letzten Läufe):
+- `ChatMessage.tsx`s `formatTime(message.timestamp)` gezielt gegen die
+  bereits mehrfach gefundenen "Invalid Date"-Muster (`format.ts`,
+  `FlightCard.tsx`) geprüft: anders als dort kommt `timestamp` nie aus
+  einem geparsten ISO-String, sondern wird ausschließlich über
+  `makeMessage()` (`useChat.ts:68`, `useConcierge.ts:7`) per
+  `Date.now()` erzeugt — immer eine valide Zahl, kein erreichbarer
+  Fehlfall, kein Fund.
+- Codeweite Suche nach `window.open(` und `target="_blank"` — kein
+  einziger Treffer; die App verlinkt aktuell nirgends auf externe
+  Anbieter-URLs (passt zu 6.2, das genau diese Anbieter-Links erst noch
+  bräuchte), daher kein "fehlendes `rel="noopener"`"-Risiko vorhanden.
+- Alle `setTimeout`/`addEventListener`-Aufrufe im `src`-Baum erneut
+  gesammelt und gegen Cleanup geprüft: `useChat.ts`s
+  `beforeunload`-Listener (Zeile 164) hat ein korrektes
+  `removeEventListener` im Effekt-Cleanup, `utils.ts`s
+  `focusPageHeading()`-`blur`-Listener (Zeile 28) ist bewusst
+  `{ once: true }` und damit selbst-aufräumend — kein Fund.
+- `ErrorBoundary.tsx` (vom 99. Lauf ergänzt) gegen `App.tsx` geprüft, ob
+  sie korrekt die ganze App umschließt und ihr Reload-Button tatsächlich
+  funktioniert — beides der Fall, kein Fund.
+- `mockAdvisor.ts`s `detectTransportMode()` erneut gegen
+  Wortgrenzen-Fehler geprüft (Quelle mehrerer früherer Funde, siehe
+  `it-chef-autofix/transportmode-word-boundary-*`/
+  `-compound-keywords-*`), dieses Mal mit expliziten Gegenbeispielen
+  durchgespielt (`bahn` in "Bahnhof", `auto` in "Autobahn", `bus` in
+  "Busch", `schiff` in "Schifffahrt") — der bereits vorhandene
+  `\b...\b`-Grenzen-Check verhindert in allen vier Fällen einen
+  Fehltreffer, kein Fund.
+- Keine TODO/FIXME/XXX-Kommentare im gesamten `src`-Baum (erneut
+  geprüft, codeweite Suche).
+
+**Ergebnis:** Kein Punkt heute (105. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
