@@ -27756,3 +27756,79 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-12, 23:12 UTC (113. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Vierter geplanter Cloud-Lauf heute, frischer Checkout.
+`origin/it-chef/auto` direkt übernommen (letzter Commit war der 112.
+Lauf, `936148b`, 02:14 UTC). `git log it-chef/auto..origin/main` liefert
+weiterhin keinen neuen Commit — `main` ist seit dem 23.10. unverändert
+(`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte
+im frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 112.
+Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** dieselben
+offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12) hängen weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Zugang, sind Produktentscheidungen Nis, oder zu unspezifisch
+(Sprint-6-Sammelpunkte) für Kriterium 3 — verfehlen weiterhin mindestens
+eines der vier Kriterien.
+
+**Eigene, von den letzten Läufen unabhängige Bug-/Lücken-Suche, mit
+bisher nicht genutzten Methoden:**
+- `console.log`/`console.debug`-Reste codeweit gesucht (`grep -rn`) —
+  kein Treffer.
+- Alle `addEventListener`-Aufrufe im gesamten `src`-Baum einzeln gegen
+  passendes Cleanup geprüft: `useChat.ts` (`beforeunload`) hat
+  passendes `removeEventListener` im `useEffect`-Cleanup;
+  `lib/utils.ts`s `focusPageHeading()` nutzt für seinen `blur`-Listener
+  bewusst `{ once: true }` (selbstentfernend) — beide unproblematisch.
+  Kein `setInterval`, kein `matchMedia`, kein `resize`-Listener im
+  Produktcode vorhanden (nur in Tests gemockt) — nichts zu prüfen.
+- Alle `Number(...)`/`parseInt(...)`-Konvertierungen aus Nutzereingaben
+  aufgelistet (`FlightWizard.tsx`, `HotelWizard.tsx`, `lib/format.ts`)
+  — jede hat bereits einen expliziten `Number.isNaN(...)`-Fallback;
+  kein ungeschütztes `NaN` findet seinen Weg in eine angezeigte
+  Zahl. `formatEuro()` selbst hat keinen NaN-Guard, aber alle vier
+  Aufrufstellen (`Dashboard.tsx`, `Preisalarme.tsx`, `Warenkorb.tsx`)
+  übergeben ausschließlich bereits typsichere, aus Literalen/Summen
+  stammende `number`-Werte — kein Fund.
+- Datums-/Kalenderrechnungen (`lib/trip/calendarUtils.ts`,
+  `FlightWizard.tsx`/`HotelWizard.tsx`s Tagesberechnung) auf
+  DST-/Zeitzonen-Fallstricke geprüft: alle nutzen durchgängig lokale
+  `Date`-Felder (`getFullYear`/`getMonth`/`getDate`/`setDate`), keine
+  Mischung mit UTC-Methoden oder Millisekunden-Differenzen — kein Fund.
+- `NavLink`-Aktiv-Markierung in `Sidebar.tsx`/`MobileNav.tsx` auf den
+  bekannten React-Router-Fallstrick geprüft (`to="/"` ohne `end` matcht
+  sonst jede Route als aktiv) — beide haben bereits `end={item.path ===
+  '/'}`, kein Fund.
+- `nav-config.ts` (`allRoutes`) gegen `routes.tsx` auf toten Links/
+  fehlende Routen abgeglichen — jeder Pfad ohne eigene `<Route>` wird
+  über den `allRoutes.filter(...).map(...)`-Mechanismus automatisch als
+  `PlaceholderPage` geroutet, kein toter Link, kein Fund.
+- Alle `crypto.randomUUID()`/Entity-ID-Erzeugungsstellen aufgelistet
+  (`useChat.ts`, `useConcierge.ts`, `EditMode.tsx`,
+  `Reiseentwuerfe.tsx`, `duffel/client.ts`) — durchgängig
+  `crypto.randomUUID()`, kein Kollisionsrisiko wie bei zeitbasierten IDs.
+- `<form>`-Elemente (`FlightWizard.tsx`, `HotelWizard.tsx`) auf fehlendes
+  `event.preventDefault()` geprüft — beide vorhanden, kein Fund.
+- `index.html` durchgesehen: keine `<meta name="description">`/Open-
+  Graph-Tags vorhanden. Bewusst **nicht** autonom ergänzt — betrifft
+  nach außen sichtbaren Werbetext (Teaser-Beschreibung für
+  Suchergebnisse/Link-Vorschauen), das ist Marketing-Chefs
+  Zuständigkeit (Tonalität/Copy), keine rein technische, objektiv ohne
+  Interpretation umsetzbare Aufgabe, und steht auch in keiner der beiden
+  Aufgabenlisten als offener Punkt — verfehlt Kriterium 3. Als
+  Beobachtung hier vermerkt, falls Marketing-Chef das aufgreifen will.
+
+**Ergebnis:** Kein Punkt heute (113. Lauf, vierter Lauf heute) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
