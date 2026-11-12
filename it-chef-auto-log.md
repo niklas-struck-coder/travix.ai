@@ -27586,3 +27586,67 @@ unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-12 (110. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter täglicher Cloud-Lauf, frischer Checkout.
+`origin/it-chef/auto` direkt übernommen (letzter Commit war der 109. Lauf
+vom 11.11.). `git log it-chef/auto..origin/main` liefert keinen neuen
+Commit — `main` ist weiterhin unberührter Vorfahre (letzter echter Merge
+durch Freigabe-Chef am 23.10.), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen:** `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+109. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md` durchgesehen — die
+verbleibenden offenen Hauptpunkte (2.0 Base44-Setup/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7
+TripItem-Anbieter-URL/CostBreakdown/calculateCosts, 7.4
+Planung-fortsetzen-Volltext/7.12 Reisebudget-Charts, 8.1-8.9/8.12
+Urlaubsmodus/Deal-Finder/Premium/Rewards, Sprint 6 "Mobile-Politur,
+Barrierefreiheit-Check" als Sammelpunkt ohne einzelne, objektiv prüfbare
+Teilaufgabe) hängen weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Zugang oder sind als Sprint-Sammelpunkt zu unspezifisch für
+Kriterium 3 (keine Interpretation nötig) — verfehlen damit mindestens
+eines der vier Kriterien.
+
+**Eigene, von den letzten fünf Läufen (11.11.) unabhängige Bug-/
+Lücken-Suche, bewusst mit anderer Methode als reines erneutes
+Code-Lesen:**
+- Testabdeckung systematisch per Datei-Abgleich geprüft (jede
+  `src/**/*.{ts,tsx}`-Datei ohne `.test.`-Gegenstück ermittelt): einzige
+  Lücken sind `src/types/{chat,duffel,trains}.ts` (reine
+  Interface-/Type-Deklarationen ohne Laufzeitcode, nicht sinnvoll
+  testbar) sowie `src/types/{profile,settings}.ts` (nur
+  Literal-Konstanten/Default-Objekte ohne Verzweigungslogik — ein Test
+  würde nur dieselben Literale gegen sich selbst behaupten, kein
+  echter Fund) und `src/components/ui/{input,label}.tsx`. Für Letztere
+  den bereits am 18.10. getroffenen Befund ("reine Wrapper ohne
+  Props-abhängiges `className`/`data-*`") am aktuellen Code erneut
+  verifiziert — weiterhin zutreffend, kein Fund.
+- Codebase auf `TODO`/`FIXME`/`HACK:`/`XXX:`-Kommentare sowie
+  `eslint-disable`-Kommentare durchsucht (`grep -rniE` über `src`) —
+  keine Treffer.
+- Alle `<img>`-Tags auf fehlendes `alt` geprüft (ein Treffer,
+  `HotelCard.tsx`, hat bereits `alt={offer.accommodationName}`) sowie
+  der gesamte Baum auf `dangerouslySetInnerHTML` — kein Treffer.
+- Alle `size="icon"`/`size="icon-sm"`-Buttons (icon-only, daher auf
+  zugänglichen Namen für Screenreader angewiesen) im gesamten `src`-Baum
+  aufgelistet und einzeln nachgeprüft: `Favoriten.tsx`,
+  `Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`, `Buchung.tsx`
+  (alle drei Stellen), `Warenkorb.tsx`, `Reiseentwuerfe.tsx` (alle fünf
+  Stellen), `EditMode.tsx`, `ChatInput.tsx`, `KiChat.tsx` — jede Stelle
+  hat ein konkretes `aria-label`. `dialog.tsx`/`sheet.tsx`
+  (Schließen-Button) haben stattdessen `<span className="sr-only">
+  Schließen</span>` — ebenfalls zugänglich. Kein Fund.
+
+**Ergebnis:** Kein Punkt heute (110. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
