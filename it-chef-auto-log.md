@@ -27650,3 +27650,63 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-12, zweiter Lauf heute (111. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Zweiter geplanter Cloud-Lauf heute, frischer Checkout.
+`origin/it-chef/auto` direkt übernommen (letzter Commit war der 110.
+Lauf von heute früher). `git log it-chef/auto..origin/main` liefert
+keinen neuen Commit — `main` ist weiterhin unberührter Vorfahre, kein
+Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte
+im frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün), `npm run build` (0 Typfehler,
+unveränderte 815-KB-Chunk-Size-Warnung) — identisch zum Endstand des
+110. Laufs.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Alle `target="_blank"`-Links auf fehlendes `rel="noopener noreferrer"`
+  geprüft (Reverse-Tabnabbing-Risiko) — kein einziger `target="_blank"`
+  im gesamten `src`-Baum vorhanden, daher kein Fund.
+- Alle `key={index}`/`key={i}`-Listenkeys aufgelistet (zwei Treffer:
+  `FlightCard.tsx` für Flugsegmente, `SearchErrorAlert.tsx` für
+  Fehlermeldungen) — beide Listen sind statisch pro Render und werden
+  nicht umsortiert/gefiltert, daher technisch unproblematisch, kein
+  Fund.
+- `<Label>`/`htmlFor`-Zuordnung in allen Formularen (`EditMode.tsx`,
+  `FlightWizard.tsx`, `HotelWizard.tsx`, `Einstellungen.tsx`,
+  `Profil.tsx`) einzeln gegen die zugehörige `id` auf Input/
+  SelectTrigger geprüft — jede `htmlFor`-Angabe hat eine passende `id`;
+  die drei `<Label>` ohne `htmlFor` (`Benachrichtigungen`,
+  `Reisestile`, `Ernährungsweise`) sind bewusst Gruppenüberschriften
+  für Button-Gruppen mit eigenem `role="group" aria-label`, kein
+  Formular-Label-Bug.
+- Bundle-Zusammensetzung für die seit vielen Läufen unveränderte
+  815-KB-Warnung geprüft: `recharts` ist zwar Dependency, aber in
+  `src` nirgends importiert (`grep -rl recharts src` liefert nichts) —
+  kein Bundle-Beitrag, bewusst für das weiterhin blockierte Reisebudget
+  (7.12) vorgehalten, daher keine Entfernung. `lucide-react`-Importe
+  sind überall benannte Imports (kein `import * as`), tree-shakebar.
+  `leaflet`/`react-leaflet` wird nur von `Kartenansicht.tsx` importiert,
+  landet aber über den statischen Import in `routes.tsx` trotzdem im
+  Hauptbundle — echter Hebel wäre Route-Level-Code-Splitting
+  (`React.lazy`/`Suspense`) in `src/routes.tsx`. Bewusst NICHT
+  autonom umgesetzt: diese Datei hat bereits dokumentiert fragile, auf
+  exaktes synchrones Mount-Timing angewiesene Fokus-Logik
+  (`onExitComplete` + `requestAnimationFrame(focusPageHeading)`, s.
+  Kommentar dort) im Zusammenspiel mit `AnimatePresence mode="wait"`.
+  Ein zusätzlicher Suspense-Fallback würde dieses Timing bei noch nicht
+  geladenem Chunk verändern (Überschrift kurzzeitig nicht
+  fokussierbar) — ein Verhalten, das die bestehende Testsuite (jsdom,
+  kein simuliertes Chunk-Ladeverzögern) nicht abdeckt und sich damit
+  nicht objektiv prüfen lässt. Verfehlt damit Kriterium 4, nicht
+  umgesetzt.
+
+**Ergebnis:** Kein Punkt heute (111. Lauf, zweiter Lauf heute) autonom
+umgesetzt, kein Produktcode geändert — ehrlich "kein Fund". Baseline
+unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
