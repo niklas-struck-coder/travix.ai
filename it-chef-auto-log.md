@@ -27710,3 +27710,49 @@ unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-12, 02:14 UTC (112. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Dritter geplanter Cloud-Lauf heute, frischer Checkout.
+`origin/it-chef/auto` direkt übernommen (letzter Commit war der 111.
+Lauf, `67f492c`, 01:12 UTC). `git log it-chef/auto..origin/main` liefert
+weiterhin keinen neuen Commit — `main` ist seit dem 23.10. unverändert
+(`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte
+im frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 111.
+Laufs.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Lockere Gleichheit (`==`/`!=` statt `===`/`!==`) codeweit gesucht
+  (`grep -rnE '[^=!<>]==[^=]'` über `src`) — kein Treffer.
+- `.sort(...)` auf Arrays gesucht (mögliche In-Place-Mutation von State/
+  Props ohne vorheriges Kopieren) — kein einziger Aufruf im gesamten
+  `src`-Baum vorhanden, daher kein Fund.
+- Alle `localStorage`-Zugriffe projektweit aufgelistet (`tripStorage.ts`,
+  `Urlaubsmodus.tsx`): `tripStorage.ts` kapselt `getItem`/`setItem`/
+  `removeItem` bereits vollständig in try/catch mit sinnvollem Fallback
+  (siehe Kommentare dort zu Kontingent-Überschreitung/privatem Modus);
+  `Urlaubsmodus.tsx` liest nur über die bereits abgesicherte
+  `loadStoredChat()` — kein ungeschützter Zugriff, kein Fund.
+- `src/lib/duffel/client.ts` komplett gelesen: `fetch`-Fehlerpfad prüft
+  `response.ok`, fängt einen nicht-JSON-Fehlerkörper separat ab und
+  deckt sowohl Netzwerk- als auch Parse-Fehler im `catch` ab, jeweils mit
+  deutscher Nutzer-Fehlermeldung plus Logging des Originalfehlers —
+  bereits vollständig abgesichert, kein Fund.
+- Alle `.map(...)`-Aufrufe in `.tsx`-Dateien (46 Stellen) per Skript auf
+  JSX-Listen ohne `key=`-Prop in den folgenden Zeilen geprüft; die drei
+  gemeldeten Kandidaten (`EditMode.tsx`, `Reiseentwuerfe.tsx` zweimal)
+  bei Einzelprüfung als falsch-positiv bestätigt — es sind reine
+  State-Transformationen (`activities.map(...)` für ein Preis-Update,
+  `drafts.map(...)` für Status-Toggle/Finalisierung), kein JSX-Rendering,
+  daher kein `key` nötig. Kein echter Fund.
+
+**Ergebnis:** Kein Punkt heute (dritter Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
