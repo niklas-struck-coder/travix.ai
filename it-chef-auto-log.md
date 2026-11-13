@@ -28000,3 +28000,62 @@ Baseline unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-13, 22:11 UTC (117. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 116. Lauf, `45a8d4b`, 02:13 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte im
+frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei, `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76 Testdateien,
+574 Tests, alle grün), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 116. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte) — hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind als
+Sammelpunkte zu unspezifisch für Kriterium 3. Gezielt 7.12
+(Reisebudget/Recharts) erneut gegengeprüft, da `recharts` bereits als
+Dependency vorhanden und `/budget` noch Platzhalter ist — weiterhin zu
+Recht blockiert: `TripDraft` hat keine Preisfelder je Kategorie
+(identische Begründung wie 6.6/6.7, s. Log 03.11.), ein Chart mit
+erfundenen Zahlen würde die eigene "nichts erfinden"-Regel brechen.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Alle `addEventListener`-Aufrufe im produktiven Code codeweit gesucht
+  (zwei Treffer): `useChat.ts`s `beforeunload`-Listener hat ein
+  korrektes `removeEventListener` im Cleanup; `utils.ts`s
+  `focusPageHeading()`-`blur`-Listener nutzt `{ once: true }` und
+  entfernt sich damit selbst. Kein Leak, kein Fund.
+- Alle `setTimeout`/`setInterval`-Aufrufe aufgelistet (`useChat.ts`,
+  `useConcierge.ts`) — ausschließlich bereits mehrfach geprüfte
+  `replyTimeoutRef`-Antwort-Timeouts mit vorhandenem Unmount-/
+  Re-Trigger-Cleanup (s. frühere Läufe), kein neuer Fund.
+- Nach dem Anti-Pattern "pro Render neu generierter `key`" gesucht
+  (`key={crypto.randomUUID()}`, `key={Math.random()}`,
+  `key={Date.now()}` o.ä.) — kein einziger Treffer im gesamten
+  `src`-Baum.
+- `npm outdated` erneut geprüft: mehrere Pakete haben jetzt ein `wanted`
+  über dem zuletzt installierten Stand (u. a. React 19.2.8→19.3.1,
+  Vite 6.4.4→6.4.6, Vitest 4.1.11→4.1.12, Tailwind 4.3.3→4.3.5) sowie
+  weiterhin den bekannten Major-Sprung bei `framer-motion`
+  (13.5.1→14.14.0). Bewusst nicht autonom umgesetzt — gleiche
+  Begründung wie im 59. Lauf (s. Log): ein Dependency-Update ohne
+  konkreten, in der Aufgabenliste verankerten Anlass ist keine klar
+  umrissene, objektiv geforderte Aufgabe, sondern eine Abwägung
+  (Breaking-Change-/Regressionsrisiko vs. Nutzen), die nicht allein über
+  "Tests laufen noch durch" abgedeckt ist.
+- `eslint-disable`-Kommentare codeweit gesucht — kein einziger Treffer,
+  also auch nichts, das nach einer zwischenzeitlichen Lint-Regel-
+  Verschärfung entfernt werden könnte.
+
+**Ergebnis:** Kein Punkt heute (117. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
