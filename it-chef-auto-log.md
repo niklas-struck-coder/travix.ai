@@ -27898,3 +27898,56 @@ Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-13, 01:11 UTC (115. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 114. Lauf, `1879ea8`, 00:12 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte
+im frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 114.
+Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** dieselben
+offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte "End-to-End-Testing", "Mobile-Politur",
+"Bugfixing-Durchgang", "Performance-Check") hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind
+als Sammelpunkte zu unspezifisch für Kriterium 3 (keine Interpretation
+nötig) — verfehlen weiterhin mindestens eines der vier Kriterien.
+
+**Eigene, von den letzten Läufen unabhängige Bug-/Lücken-Suche**, mit
+Fokus auf bisher im Log nicht genannte Bereiche:
+- Alle `<Label htmlFor=...>`-Zuordnungen codeweit gegen das passende
+  `id=`-Attribut geprüft (`EditMode.tsx`, `FlightWizard.tsx`,
+  `HotelWizard.tsx`, `Einstellungen.tsx`, `Profil.tsx`) — jede Zuordnung
+  stimmt; die drei `<Label>` ohne `htmlFor` (Reisestile, Ernährungsweise,
+  Benachrichtigungen) sind bewusst Gruppen-Überschriften für
+  Toggle-Chip-Gruppen mit eigenem `role="group"`/`aria-label` an der
+  Chip-Gruppe selbst, kein fehlendes Attribut. Kein Fund.
+- `clampPassengerCount()`/`clampGuestCount()` (Flug-/Hotel-Wizard) erneut
+  auf Edge Cases geprüft (leerer String, negative Zahl, Dezimalzahl,
+  Zahl über dem Maximum) — alle bereits über `Number.isNaN`-Fallback auf
+  1 plus `Math.min`/`Math.max`/`Math.round` korrekt abgefangen. Kein Fund.
+- Toggle-Chip-Gruppen auf echte Tastatur-Bedienbarkeit geprüft
+  (`QuickReplies.tsx`, `Profil.tsx`) — durchgängig echte `<button
+  type="button">`-Elemente mit `aria-pressed`, keine `<div onClick>`-
+  Konstruktion ohne Tastatur-Support. Kein Fund.
+- Projektweit nach `TODO`/`FIXME`/`XXX`-Markern und nach übersprungenen
+  Tests (`.skip(`, `xit(`, `xdescribe(`, `it.todo(`) gesucht — kein
+  einziger Treffer in `src/`.
+- `document.title`-Logik (`routes.tsx`) gegenprüft, ob jede Route einen
+  passenden, von "Travix" (Startwert in `index.html`) abweichenden Titel
+  setzt — ist bereits über `getPageTitle()` plus eigene Tests in
+  `routes.test.tsx` abgedeckt. Kein Fund.
+
+**Ergebnis:** Kein Punkt heute (115. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
