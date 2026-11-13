@@ -27832,3 +27832,69 @@ unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-13, 00:12 UTC (114. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 113. Lauf, `8a88ed7`, 23:12 UTC
+am 12.11.). `main` ist seit dem 23.10. unverändert (`fe1300e`), kein
+Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte
+im frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei,
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76
+Testdateien, 574 Tests, alle grün) — identisch zum Endstand des 113.
+Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** dieselben
+offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12) hängen weiterhin an fehlendem Base44-/Gemini-/
+Duffel-Zugang, sind Produktentscheidungen Nis, oder zu unspezifisch für
+Kriterium 3 — verfehlen weiterhin mindestens eines der vier Kriterien.
+
+**Eigene, von den letzten Läufen unabhängige Bug-/Lücken-Suche**, mit
+Fokus auf bisher im Log nicht genannte Bereiche:
+- Leere/schluckende `catch`-Blöcke in `src/` (`useChat.ts`,
+  `tripStorage.ts`, `duffel/client.ts`) einzeln geprüft — jede Stelle
+  loggt entweder bewusst nichts (dokumentierter Grund im Kommentar) oder
+  explizit mit `console.error` plus ehrlicher deutscher
+  Fallback-Meldung. Kein stilles Schlucken, kein Fund.
+- `localStorage`-Zugriffe außerhalb von `useChat.ts` durchsucht — einzige
+  weitere Stelle ist `tripStorage.ts`, bereits vollständig mit
+  try/catch und Quota-/Private-Mode-Fallback abgesichert. Alle anderen
+  Seiten (Favoriten, Preisalarme, Warenkorb, Angebote, MeineReisen,
+  Aktivitaeten) nutzen laut eigenem Kommentar bewusst In-Memory-Demo-Daten
+  bis zum echten Base44-Backend — bekannte Architekturentscheidung, kein
+  Bug.
+- Locale-Konsistenz bei `toLocaleDateString`/`toLocaleString`/
+  `Intl.NumberFormat` codeweit geprüft — durchgängig `'de-DE'`, keine
+  Ausnahme gefunden.
+- Fehlende `alt`-Attribute bei `<img>`-Tags gesucht — einziges Vorkommen
+  im Code (`HotelCard.tsx`) hat bereits eins.
+- Alle Icon-only-Buttons (`size="icon"`, 20 Fundstellen) auf fehlendes
+  `aria-label` geprüft — jede Stelle hat ein konkretes,
+  kontextbezogenes `aria-label`.
+- `routes.tsx` auf doppelte/widersprüchliche Pfade geprüft — keine
+  Duplikate, das `builtRoutes`-Set deckt sich exakt mit den
+  tatsächlichen `<Route>`-Einträgen.
+- `useConcierge.ts` (bisher nicht wie `useChat.ts` einzeln so gründlich
+  durchleuchtet) auf dasselbe Race-Condition-/Cleanup-Muster geprüft,
+  das in `useChat.ts` mehrfach Fixes brauchte — Timeout-Cleanup bei
+  Unmount und bei erneutem `sendMessage()` bereits vorhanden, kein Fund.
+- `cartTotals.ts`/`calendarUtils.ts` erneut gegen DST-/Summenfehler
+  geprüft — beide bereits mit eigener Testdatei abgedeckt, Logik
+  unauffällig.
+- Geprüft, ob die in `tasks-prd-travix-platform.md` erwarteten Hooks
+  `useFavorites.ts`/`usePriceAlerts.ts`/`useCart.ts`/`useDrafts.ts`/
+  `useTrip.ts` überhaupt existieren: tun sie nicht — die Logik liegt
+  direkt als Demo-State in den jeweiligen Pages, Folge der bekannten
+  Base44-Blockade (Kriterium 2 würde hier ohnehin greifen), keine
+  eigenständige Lücke.
+
+**Ergebnis:** Kein Punkt heute (114. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
+574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
