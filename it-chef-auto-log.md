@@ -27951,3 +27951,52 @@ Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-13, 02:13 UTC (116. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 115. Lauf, `d75ee5e`, 01:11 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte im
+frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei, `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76 Testdateien,
+574 Tests, alle grün) — identisch zum Endstand des 115. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte) — hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind als
+Sammelpunkte zu unspezifisch für Kriterium 3. `npm audit`: 21 Schwachstellen
+(2 niedrig, 16 mittel, 3 hoch), ausschließlich transitive Dev-Tooling-Pfade
+(`systeminformation`/`undici` über `shadcn`s `@dotenvx/dotenvx` bzw. `jsdom`,
+`vite` selbst) — kein Treffer im ausgelieferten `dist/`-Bundle. `npm audit
+fix --dry-run` (ohne `--force`) erneut versucht: bricht reproduzierbar mit
+demselben, seit Lauf neun bekannten Arborist-Fehler ab (`TypeError: Cannot
+read properties of null (reading 'edgesOut')`) — unverändert kein autonom
+umsetzbarer Punkt, `git status` vor/nach Versuch identisch sauber.
+
+**Punktesuche mit einer bisher im Log kaum genutzten Methode:** Statt
+erneut nur Code statisch zu lesen, die App tatsächlich gebaut und über einen
+Playwright-Crawl gegen `npm run preview` laufen lassen (Chromium ist in
+dieser Cloud-Umgebung vorinstalliert). Alle 21 Routen aus `nav-config.ts`
+plus `/kalender`, `/kartenansicht`, `/urlaubsmodus` sowie eine bewusst
+ungültige Route einzeln aufgerufen und dabei Konsole/`pageerror`/
+fehlgeschlagene Requests mitgeschnitten — durchgängig fehlerfrei, kein
+einziger Konsolenfehler oder Ladefehler. Zusätzlich gezielt interagiert:
+KI-Chat-Nachricht abgeschickt (kein Fehler), Passagierzahl im Flugsuche-
+Wizard auf `-5` gesetzt (klemmt korrekt auf `1`, bestätigt den bereits
+bekannten `clampPassengerCount()`-Fund), Zimmer-/Gästezahl im Hotelsuche-
+Wizard auf `9999` gesetzt (klemmt korrekt auf `9`, bestätigt
+`clampGuestCount()`). Diese Laufzeit-Prüfung ergänzt die bisherige rein
+statische Analyse, fand aber keinen neuen Fehler — eher eine zusätzliche
+Bestätigung der Baseline als ein neuer Fund.
+
+**Ergebnis:** Kein Punkt heute (116. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund", diesmal zusätzlich durch einen
+echten Browser-Durchlauf abgesichert statt nur durch erneutes Code-Lesen.
+Baseline unverändert bei 574 Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
