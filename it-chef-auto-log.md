@@ -28222,3 +28222,79 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-14, 02:10 UTC (121. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 120. Lauf, `4113059`, 01:10 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte im
+frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei, `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76 Testdateien,
+574 Tests, alle grün), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 120. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte) — hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind als
+Sammelpunkte zu unspezifisch für Kriterium 3. `reports/it-chef.md` und
+`reports/support-chef.md` (beide unverändert seit 23.10.) gegengeprüft:
+dieselben beiden offenen Funde (uneinheitlich dramatische Lösch-Warnungen;
+fehlende Checklisten-Persistenz) bleiben aus denselben, bereits mehrfach
+dokumentierten Gründen (echte Abwägung bzw. Backend-/Nutzerkonten-
+Entscheidung nötig) nicht autonom umsetzbar.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Route-Level-Code-Splitting (`React.lazy`/`Suspense` in `src/routes.tsx`)
+  für die 815-KB-Bundle-Warnung erneut erwogen, da sie als "echter Hebel"
+  bereits im 111. Lauf identifiziert wurde — dort aber bewusst nicht
+  umgesetzt, weil ein Suspense-Fallback die bestehende, auf exaktes
+  synchrones Mount-Timing angewiesene Fokus-Logik
+  (`onExitComplete` + `requestAnimationFrame(focusPageHeading)` im
+  Zusammenspiel mit `AnimatePresence mode="wait"`) verändern würde und die
+  Testsuite kein Chunk-Ladeverzögern simuliert (Kriterium 4 verfehlt).
+  Diese Begründung heute nachvollzogen und bestätigt — weiterhin nicht
+  autonom umsetzbar, kein neuer Lösungsweg gefunden, der daran etwas
+  ändert.
+- Alle `size="icon"`-Buttons (20 Treffer) gegen den WCAG-2.5.8-
+  Mindest-Touch-Target (24×24 CSS-Px) geprüft: Standardgröße ist
+  `size-8` (32×32px) in `button-variants.ts`, liegt also über der
+  Mindestanforderung. Eine Vergrößerung wäre eine globale Design-System-
+  Änderung (betrifft jeden Icon-Button der App) und keine klar
+  abgegrenzte Einzelstelle — verfehlt Kriterium 3, nicht umgesetzt.
+- Alle `target="_blank"`-Vorkommen erneut geprüft (Reverse-Tabnabbing) —
+  weiterhin kein einziges Vorkommen im `src`-Baum.
+- `src/routes.tsx`/`src/lib/nav-config.ts` auf Inkonsistenzen zwischen
+  `builtRoutes`, `allRoutes` und den tatsächlichen `<Route>`-Einträgen
+  geprüft (doppelte Pfade, fehlende Einträge) — alle 19 gebauten Seiten
+  sind in `builtRoutes` und haben eine eigene `<Route>`, alle
+  `extraRoutes` fallen korrekt auf `PlaceholderPage`, keine doppelten
+  Pfade. Kein Fund.
+- `index.html` und `public/` auf fehlende Grunddateien geprüft: kein
+  `robots.txt`/`sitemap.xml`, keine Open-Graph-Meta-Tags — bewusst nicht
+  autonom ergänzt, da Inhalt (Meta-Description, OG-Texte) erfundene
+  Marketing-Copy wäre und damit gegen die "nichts erfinden"-Regel
+  verstieße; zudem kein in `tasks-prd-travix-platform.md` verankerter
+  SEO-Punkt.
+- `.env.example` und `.gitignore` gegen versehentlich eingecheckte
+  Secrets geprüft (`git ls-files` nach `.env`/`secret`/`credential`-
+  Mustern, codeweiter Grep nach `api[_-]?key`/`secret`/`password`/`token`
+  mit Wertzuweisung) — nur die erwartete leere `.env.example`-Platzhalter-
+  Datei, kein echter Schlüssel im Repo.
+- Produktivcode (außerhalb von Testdateien) erneut auf `: any` durchsucht
+  — einziger Treffer ist ein Kommentar in `useChat.ts` ("any new user
+  turn"), kein echter `any`-Typ.
+- `reports/it-chef.md`-Vorschlag 3 (`recharts` ungenutzte Dependency)
+  gegengeprüft: weiterhin kein Import in `src/`, aber Abhängigkeits-
+  änderungen sind für diesen Kanal explizit ausgeschlossen (s. 59./117.
+  Lauf) — kein neuer Umsetzungsweg, bleibt Vorschlag an Ni.
+
+**Ergebnis:** Kein Punkt heute (121. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
