@@ -28298,3 +28298,77 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-14, 22:13 UTC (122. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 20 Stunden
+nach dem 121. Lauf (`1828eeb`, 02:10 UTC selben Tages — ungewöhnlich große
+Lücke gegenüber dem sonst meist stündlichen Takt, aber ohne Auswirkung auf
+den Code: `main` ist seit dem 23.10. weiterhin unverändert bei `fe1300e`,
+`origin/it-chef/auto` direkt übernommen, kein Merge nötig).
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün) —
+identisch zum Endstand des 121. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12) — hängen
+weiterhin an fehlendem Base44-/Gemini-/Duffel-Zugang oder sind
+Produktentscheidungen Nis. Zusätzlich gezielt zwei bisher nicht explizit
+geprüfte Kandidaten aus der Liste bewertet und verworfen:
+- **8.11 Hilfe-Seite (FAQ):** noch nicht gebaut (reine `PlaceholderPage`
+  über `nav-config.ts`). Verfehlt Kriterium 3 — welche FAQ-Themen/Texte
+  gezeigt werden, steht nirgends konkret in der Aufgabenliste, das wäre
+  erfundener Support-Inhalt statt eines klar vorgegebenen Punkts, und
+  inhaltlich näher an Support-/Marketing-Chefs Textrolle als an IT-Chefs
+  technischem Fokus.
+- **8.9 Premium-Seite:** noch nicht gebaut. Verfehlt Kriterium 1 — Inhalt
+  wären erfundene Abo-Tarif-Vorteile, zu nah an "Zahlungen"/Monetarisierung
+  für einen autonomen Lauf ohne Rücksprache.
+`reports/it-chef.md`/`reports/support-chef.md` (unverändert seit 23.10.)
+gegengeprüft: dieselben zwei offenen Funde (uneinheitlich dramatische
+Lösch-Warnungen; fehlende Checklisten-Persistenz) bleiben aus denselben,
+bereits mehrfach dokumentierten Gründen nicht autonom umsetzbar.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Testabdeckung erneut vollständig gegen den Quellbaum abgeglichen
+  (jede `.ts`/`.tsx`-Datei ohne passende `.test.ts(x)`-Datei aufgelistet):
+  einzige Lücken sind `input.tsx`/`label.tsx` (bewusst ohne Testdatei,
+  reine Wrapper ohne eigene Logik, siehe 19.10.-Eintrag), `main.tsx`
+  (reiner Einstiegspunkt) sowie fünf reine Typdeklarationsdateien
+  (`types/chat.ts`, `types/duffel.ts`, `types/profile.ts`,
+  `types/settings.ts`, `types/trains.ts` — gegengeprüft: keine einzige
+  Funktion/Laufzeitlogik in diesen fünf Dateien, nur `interface`/`type`,
+  nichts zu testen). Kein neuer Fund.
+- Alle `?destination=`/`?edit=`-Query-Param-Konstruktionen erneut gegen
+  fehlendes URL-Encoding geprüft (`Home.tsx`, `Favoriten.tsx`,
+  `MeineReisen.tsx`) — durchgehend über `encodeURIComponent()`, inkl. des
+  Mehrfeld-Falls in `MeineReisen.tsx` (`?destination=...&dates=...`).
+  `Urlaubsmodus.tsx`s `useSearchParams().get()` dekodiert automatisch
+  gegengeprüft. Kein Fund.
+- `Kartenansicht.tsx` (Leaflet-Karte, bisher in keinem Log-Eintrag
+  gezielt erwähnt) komplett gelesen: kein manuelles Event-Listener-/
+  Timer-Setup, das beim Unmount aufgeräumt werden müsste; Marker-Icon ist
+  ein reines, zustandsloses `DivIcon`-Objekt außerhalb der Komponente.
+  Kein Fund.
+- Produktivcode auf `Math.random()`/`new Date()`/`Date.now()` ohne
+  Mocking durchsucht (Kandidat für nicht-deterministische Tests/Bugs):
+  alle acht Treffer (`FlightWizard.tsx`/`HotelWizard.tsx` Datumsgrenzen,
+  `useConcierge.ts`/`useChat.ts` Message-IDs/Zeitstempel,
+  `mockAdvisor.ts` "Überrasch mich"-Zufallsziel, `Kalender.tsx`
+  "Heute"-Markierung) bereits aus früheren Läufen bekannt und mit eigenen
+  Regressionstests/Mocks abgesichert (u. a. die bereits gemergten
+  `past-date-departure-checkin`-/`ueberrasch-mich-zufallsziel`-Fixes).
+  Kein neuer Fund.
+- `src/lib/trip/tripStorage.ts` erneut gelesen (Lade-/Speicher-/
+  Merge-Pfade) — bestätigt weiterhin durchgängig mit try/catch und
+  Fallbacks für fehlende/korrupte Felder abgesichert, keine neue Lücke.
+
+**Ergebnis:** Kein Punkt heute (122. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
