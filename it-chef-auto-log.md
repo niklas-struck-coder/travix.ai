@@ -28372,3 +28372,59 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-14, 23:09 UTC (123. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 56 Minuten
+nach dem 122. Lauf (`e3dffbf`, 22:13 UTC selben Tages). `origin/it-chef/auto`
+direkt übernommen. `main` ist seit dem 23.10. weiterhin unverändert bei
+`fe1300e`, kein Merge nötig. Auch `origin/marketing-chef/auto` und
+`origin/support-chef/auto` sind seit dem 23.10. unverändert — es ist seitdem
+von keiner Seite neuer Input hinzugekommen, den IT-Chef aufgreifen könnte.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün) —
+identisch zum Endstand des 122. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12) — hängen
+weiterhin an fehlendem Base44-/Gemini-/Duffel-Zugang oder sind
+Produktentscheidungen Nis. `reports/it-chef.md`/`reports/support-chef.md`
+(unverändert seit 23.10.) gegengeprüft: dieselben zwei offenen Funde bleiben
+aus denselben, bereits mehrfach dokumentierten Gründen nicht autonom
+umsetzbar.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten Methoden:**
+- Produktivcode (außerhalb von Testdateien) auf `TODO`/`FIXME`-Kommentare
+  durchsucht — kein Treffer.
+- Auf leere `catch`-Blöcke (`catch (...) {}`) durchsucht — kein Treffer.
+- `npm audit` laufen lassen: 13 gemeldete Schwachstellen, aber ausschließlich
+  in Build-/Test-Tooling-Abhängigkeiten (`vite`, `undici`, `systeminformation`
+  als transitive Dev-Dependencies), nicht im Laufzeit-Code der App. Ein Fix
+  wäre eine Abhängigkeitsänderung ohne Verankerung in der Aufgabenliste und
+  mit möglichem Breaking-Change-Risiko (`npm audit fix --force` für einen
+  Teil nötig) — passt zur bereits in Lauf 59/117 dokumentierten Ausnahme
+  (Abhängigkeitsänderungen für diesen Kanal ausgeschlossen) und verfehlt
+  Kriterium 3 (keine klar abgegrenzte, in der Aufgabenliste stehende
+  Einzelstelle). Nicht umgesetzt, als Hinweis hier vermerkt statt in
+  `reports/it-chef.md`, da reine Tooling-Abhängigkeiten und kein
+  Nutzer-sichtbares Verhalten betroffen.
+- `Hilfe.tsx`/`ErrorBoundary.tsx` (neuere Ergänzungen dieses Branches, Läufe
+  46 bzw. 99) erneut überprüft, ob sich seitdem etwas an ihren Annahmen
+  geändert hat (z.B. neue Routen, die durch die ErrorBoundary nicht erfasst
+  wären) — kein Fund, beide weiterhin konsistent mit `routes.tsx`.
+- Alle `.map()`-Aufrufe in `.tsx`-Dateien (46 Treffer) überflogen, ob
+  ESLint's `react/jsx-key`-artige Prüfung (hier über `eslint-plugin-react`
+  im Lint-Lauf) tatsächlich aktiv greift und nicht nur zufällig keine
+  Treffer hat — Stichprobe in `Favoriten.tsx`/`MeineReisen.tsx` bestätigt,
+  dass fehlende `key`-Props sofort einen Lint-Fehler auslösen würden; da
+  `npm run lint` 0 Fehler meldet, ist das bereits durchgängig abgedeckt.
+
+**Ergebnis:** Kein Punkt heute (123. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
