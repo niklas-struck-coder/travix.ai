@@ -28171,3 +28171,54 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-14, 01:10 UTC (120. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 119. Lauf, `b511137`, 00:10 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte im
+frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei, `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76 Testdateien,
+574 Tests, alle grün) — identisch zum Endstand des 119. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte) — hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind als
+Sammelpunkte zu unspezifisch für Kriterium 3.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- `MARKENDESIGN.md` gegen den aktuellen UI-Code gegengeprüft (letzte
+  inhaltliche Änderung 19.10., seitdem unverändert): gezielt nach
+  Verstößen gegen die "keine künstliche Dringlichkeit"-Regel gesucht
+  (`grep -i` auf "steigt bald", "nur noch N", "jetzt buchen", "beeil",
+  "Achtung:", "Vorsicht:" im gesamten `src`-Baum) — kein Treffer, kein
+  Fund.
+- Codeweit nach `dangerouslySetInnerHTML` gesucht (XSS-Risiko) — kein
+  einziger Treffer im Projekt.
+- Alle `<img>`-Tags auf fehlendes `alt`-Attribut geprüft — kein Treffer,
+  alle Bilder haben ein `alt`.
+- Produktivcode (außerhalb von Testdateien) auf `@ts-ignore`,
+  `@ts-expect-error` und `as any` durchsucht — ausschließlich Treffer in
+  `ChatInput.test.tsx` (bewusste, test-only globale Stubs/Cleanups), kein
+  Treffer in echtem Anwendungscode.
+- `src/lib/trip/tripStorage.ts` (JSON.parse von `localStorage`) erneut
+  gegen Edge Cases geprüft: Lade-/Speicher-/Löschpfade sind bereits aus
+  früheren Läufen durchgängig mit try/catch und Fallbacks auf fehlende
+  Felder (`messages`, `quickReplies`, `trip.activities`, `editingField`,
+  `awaitingFlightOrigin`) abgesichert — kein neuer Fund, bestätigt nur die
+  Baseline.
+- Versucht, mit `npx --yes depcheck` nach ungenutzten Dependencies in
+  `package.json` zu suchen — dieser Aufruf wurde vom Auto-Mode-Classifier
+  dieser Sitzung selbst blockiert ("Undermining Oversight"), also nicht
+  durchgeführt; kein Ergebnis, weder positiv noch negativ.
+
+**Ergebnis:** Kein Punkt heute (120. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
