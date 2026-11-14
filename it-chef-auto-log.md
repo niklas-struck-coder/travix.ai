@@ -28116,3 +28116,58 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-14, 00:10 UTC (119. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout. `origin/it-chef/auto`
+direkt übernommen (letzter Commit war der 118. Lauf, `f9c8fbf`, 23:12 UTC).
+`main` ist seit dem 23.10. unverändert (`fe1300e`), kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`node_modules` fehlte im
+frischen Container, daher zunächst `npm ci`): `npm ci` fehlerfrei, `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (76 Testdateien,
+574 Tests, alle grün), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 118. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** unverändert
+dieselben offenen Hauptpunkte wie in den letzten Läufen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-6-Sammelpunkte) — hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind als
+Sammelpunkte zu unspezifisch für Kriterium 3.
+
+**Eigene, unabhängige Suche mit bisher nicht genutzten Methoden:**
+- Systematischer Abgleich aller `.ts`/`.tsx`-Dateien in `src/` gegen
+  vorhandene `.test.`-Dateien (per `comm` auf zwei sortierten Dateilisten,
+  nicht nur punktuell wie in früheren Läufen): einzige Dateien ohne eigene
+  Testdatei sind `input.tsx`/`label.tsx` (bereits im 19.10.-Lauf als reine,
+  verzweigungsfreie Radix-Wrapper bestätigt und gegengeprüft: weiterhin kein
+  `className`/`data-*`-abhängiger Zweig), `main.tsx` (reiner Render-
+  Einstiegspunkt, keine Testlogik), `test/setup.ts` (Testinfrastruktur
+  selbst) sowie `types/chat.ts`/`types/duffel.ts`/`types/profile.ts`/
+  `types/settings.ts`/`types/trains.ts` (reine TypeScript-Interfaces ohne
+  jede Laufzeit-Logik, per grep auf `function`/Pfeilfunktionen/`class`
+  bestätigt — nichts zu testen). `src/lib/ai`, `src/lib/duffel`,
+  `src/lib/trip` sowie alle `src/pages/*` und `src/components/*`-
+  Unterordner haben durchgängig passende Testdateien. Kein neuer Fund.
+- `grep` auf `TODO`/`FIXME`/`XXX` im gesamten `src`-Baum (außerhalb von
+  Testdateien): kein einziger Treffer.
+- `grep` auf `console.log`/`console.warn`/`console.error` im gesamten
+  `src`-Baum (außerhalb von Testdateien): nur die fünf bereits bekannten,
+  bewussten Fehlerprotokollierungen (`ErrorBoundary.tsx`, `tripStorage.ts`
+  ×2, `duffel/client.ts` ×2) — keine vergessenen Debug-Ausgaben.
+- `reports/it-chef.md` und `reports/support-chef.md` (beide unverändert
+  seit 23.10.) gegengeprüft: dieselben beiden offenen Funde (uneinheitlich
+  dramatische Lösch-Warnungen auf mehreren Seiten; fehlende Checklisten-
+  Persistenz) bleiben aus denselben, bereits mehrfach dokumentierten
+  Gründen (echte Abwägung der Reversibilität je Aktion bzw. Backend-/
+  Nutzerkonten-Entscheidung nötig) nicht autonom umsetzbar — beides
+  verletzt Kriterium 2 oder 3.
+
+**Ergebnis:** Kein Punkt heute (119. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
