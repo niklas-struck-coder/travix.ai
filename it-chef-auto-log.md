@@ -28428,3 +28428,57 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-15, 00:10 UTC (124. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 61 Minuten
+nach dem 123. Lauf (`8edfb20`, 23:09 UTC). `origin/it-chef/auto` direkt
+übernommen. `main` ist seit dem 23.10. weiterhin unverändert bei `fe1300e`,
+kein Merge nötig. Auch `origin/marketing-chef/auto` und
+`origin/support-chef/auto` sind seit dem 23.10. unverändert — weiterhin kein
+neuer Input von anderer Seite.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün) —
+identisch zum Endstand des 123. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** `ZEITPLAN.md`
+direkt nach offenen Checkboxen durchsucht (nicht nur den Log von gestern
+übernommen) — unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12, Sprint-5/6-Sammelpunkte wie "Mobile-Politur,
+Barrierefreiheit-Check" und "Performance-Check") — hängen weiterhin an
+fehlendem Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis,
+oder sind als Sammelpunkte zu unspezifisch für Kriterium 3.
+`reports/it-chef.md`/`reports/support-chef.md` (unverändert seit 23.10.)
+gegengeprüft: dieselben zwei offenen Funde (uneinheitlich dramatische
+Lösch-Warnungen; fehlende Checklisten-Persistenz) bleiben aus denselben,
+bereits mehrfach dokumentierten Gründen nicht autonom umsetzbar.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten Methoden:**
+- Alle `addEventListener`-Aufrufe im `src`-Baum einzeln geprüft (nur zwei
+  im Produktivcode: `useChat.ts` `beforeunload` mit korrektem
+  `removeEventListener` im `useEffect`-Cleanup; `utils.ts`
+  `focusPageHeading()` mit `{ once: true }`, also selbst-abräumend) — kein
+  Leak gefunden.
+- `useConcierge.ts` (bisher nicht im Log explizit gegen Race Conditions
+  geprüft, anders als `useChat.ts`) gelesen: `replyTimeoutRef` wird bei
+  jedem neuen `sendMessage()` vorher gecleart und beim Unmount im
+  `useEffect`-Cleanup abgeräumt — kein Fund.
+- Alle `htmlFor`/`id`-Paare in Formularen (`EditMode.tsx`, `FlightWizard.tsx`,
+  `HotelWizard.tsx`, `Einstellungen.tsx`, `Profil.tsx`) einzeln gegen
+  tatsächlich vorhandene `id`-Attribute abgeglichen — jedes `htmlFor` hat
+  ein passendes Gegenstück, keine verwaisten Label-Verknüpfungen.
+- Codeweit nach doppelt vorkommenden `id="..."`-Werten gesucht, die
+  gleichzeitig im DOM landen könnten (z.B. `FlightWizard`/`HotelWizard`
+  beide mit `id="destination"`) — beide liegen auf getrennten Routen
+  (`Flugsuche.tsx` bzw. `Hotelsuche.tsx`), werden nie gleichzeitig
+  gerendert, kein echter Konflikt.
+
+**Ergebnis:** Kein Punkt heute (124. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
