@@ -28557,3 +28557,64 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-15, 02:10 UTC (126. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, rund eine Stunde nach dem 125.
+Lauf (`fe70051`, 01:11 UTC). `origin/main` seit dem letzten Freigabe-Chef-
+Merge (23.10.) unverändert. `it-chef/auto` liegt unverändert 0 Commits
+hinter und (vor diesem Lauf) 107 Commits vor `main` — direkt auf dem
+bestehenden `it-chef/auto`-Stand weitergearbeitet, kein frischer
+`main`-Merge nötig. `reports/it-chef.md`/`reports/marketing-chef.md`/
+`reports/support-chef.md` inhaltlich unverändert seit 23.10. (Dateidatum
+neuer, aber nur vom Checkout — kein neuer Inhalt).
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün),
+`npm run build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung —
+bekannt, kein neuer Fund) — identisch zum Endstand des 125. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut direkt nach
+offenen Checkboxen durchsucht (nicht nur den gestrigen Log übernommen) —
+unverändert dieselben Hauptpunkte offen, hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen Nis, oder sind
+als Sammelpunkte (z.B. "Mobile-Politur, Barrierefreiheit-Check",
+"Performance-Check" in Sprint 6) zu unspezifisch für Kriterium 3.
+`reports/it-chef.md` gegengeprüft: dieselben zwei offenen Funde
+(uneinheitlich dramatische Lösch-Warnungen; fehlende Checklisten-
+Persistenz) bleiben aus denselben, bereits mehrfach dokumentierten
+Gründen nicht autonom umsetzbar (echte Produktabwägung bzw.
+Backend-Entscheidung Nis).
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten
+Methoden:**
+- Alle `<Link to="...">`-Ziele codeweit gesammelt und gegen die in
+  `routes.tsx` tatsächlich definierten Pfade abgeglichen — jedes
+  verwendete Ziel (`/`, `/buchung`, `/entwuerfe`, `/ki-chat`,
+  `/reise-planen`, `/urlaubsmodus`) hat eine passende `<Route>`, kein
+  toter interner Link gefunden.
+- Codeweit nach `useNavigate`/`navigate(...)`-Aufrufen mit Pfad-Literalen
+  gesucht — keine Treffer; programmatische Navigation läuft im
+  gesamten Code ausschließlich über `<Link>`, also kein zusätzliches
+  Ziel zu prüfen.
+- `eslint.config.js` geprüft: `eslint-plugin-react-hooks` mit
+  `recommended`-Regelsatz (inkl. `exhaustive-deps`) ist aktiv — ein
+  fehlendes `useEffect`-Dependency wäre bereits ein Lint-Fehler, lint
+  ist aber bei 0 Fehlern. Keine zusätzliche manuelle Prüfung nötig.
+- `src/lib/trip/tripStorage.ts` erneut vollständig gelesen (gezielt auf
+  den in der Branch-Historie erwähnten Fund "localstorage-write-
+  unprotected"): `saveStoredChat`/`clearStoredChat` auf `main`-Stand
+  bereits mit `try/catch` gegen volle Quota/Private-Browsing
+  abgesichert und geben `boolean` zurück, `loadStoredChat` validiert
+  Feld für Feld gegen fehlende/korrupte gespeicherte Daten — der
+  separate Autofix-Branch dafür ist inhaltlich bereits identisch
+  übernommen, kein neuer Fund, keine doppelte Arbeit nötig.
+
+**Ergebnis:** Kein Punkt heute (126. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
