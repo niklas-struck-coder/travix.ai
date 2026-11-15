@@ -28482,3 +28482,78 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-15, 01:11 UTC (125. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 61 Minuten
+nach dem 124. Lauf (`1d52bc1`, 00:10 UTC). `origin/it-chef/auto` direkt
+übernommen. `main` ist seit dem 23.10. weiterhin unverändert bei `fe1300e`,
+kein Merge nötig. Auch `origin/marketing-chef/auto` und
+`origin/support-chef/auto` sind seit dem 23.10. unverändert — weiterhin kein
+neuer Input von anderer Seite.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün) —
+identisch zum Endstand des 124. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:** `ZEITPLAN.md`
+und `tasks/tasks-prd-travix-platform.md` direkt nach offenen Checkboxen
+durchsucht (nicht nur den gestrigen Log übernommen) — unverändert dieselben
+Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7
+Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Sprint-Sammelpunkte wie
+"Mobile-Politur, Barrierefreiheit-Check" und "Performance-Check") — hängen
+weiterhin an fehlendem Base44-/Gemini-/Duffel-Zugang, sind
+Produktentscheidungen Nis, oder sind als Sammelpunkte zu unspezifisch für
+Kriterium 3. `reports/it-chef.md`/`reports/support-chef.md` (unverändert
+seit 23.10.) gegengeprüft: dieselben zwei offenen Funde (uneinheitlich
+dramatische Lösch-Warnungen; fehlende Checklisten-Persistenz) bleiben aus
+denselben, bereits mehrfach dokumentierten Gründen nicht autonom
+umsetzbar (echte Produktabwägung bzw. Backend-Entscheidung Nis).
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten Methoden:**
+- Alle externen Links codeweit auf `target="_blank"` ohne
+  `rel="noopener noreferrer"` durchsucht — kein einziger `target="_blank"`-
+  Link im gesamten `src`-Baum (Provider-Links in `TripItem.tsx`/`Buchung.tsx`
+  öffnen gezielt im selben Tab oder sind reine Platzhalter), also auch kein
+  Risiko einer fehlenden `rel`-Absicherung.
+- Codeweit nach `dangerouslySetInnerHTML` durchsucht — kein Treffer, kein
+  XSS-Risiko dieser Art vorhanden.
+- Alle `parseInt(...)`-Aufrufe auf fehlenden Radix-Parameter geprüft — kein
+  Treffer (keine Verwendung von `parseInt` ohne explizite Basis 10 im
+  Produktivcode).
+- Nach `window.confirm`/`window.alert`/blockierenden Browser-Dialogen
+  gesucht (würden z.B. mit Framer-Motion-Übergängen oder dem Avatar-State
+  kollidieren) — kein Treffer, alle Bestätigungen laufen über eigene
+  Dialog-Komponenten (`AlertDialog`/`Dialog`).
+- Array-Index als React-`key` durchsucht (`key={index}`/`key={i}`): zwei
+  Treffer (`FlightCard.tsx`, `SearchErrorAlert.tsx`), beide auf rein
+  anhängenden, nie umsortierten/entfernten Listen ohne eigenen internen
+  Zustand pro Element — kein echtes Korrektheitsrisiko, nur das übliche
+  Anti-Pattern ohne konkrete Auswirkung hier.
+- `JSON.parse`-Aufrufe codeweit gesucht: einziger Treffer in
+  `tripStorage.ts` (`loadStoredChat`), bereits mit `try/catch` sowie
+  Feld-für-Feld-Validierung gegen fehlende/korrupte gespeicherte Daten
+  abgesichert (inkl. ausführlicher Begründungskommentare) — kein Fund.
+- Produktivcode auf übrig gebliebene `console.log(...)`-Aufrufe,
+  `eslint-disable`-Kommentare und `@ts-ignore`/`@ts-expect-error` durchsucht
+  — kein Treffer in allen drei Kategorien.
+- Alle `size="icon"`-Buttons (reine Icon-Buttons ohne Text) codeweit auf
+  fehlendes `aria-label` geprüft (`EditMode.tsx`, `KiChat.tsx`,
+  `ChatInput.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`, `Buchung.tsx`, `Reiseentwuerfe.tsx`,
+  `Warenkorb.tsx`) — jeder einzelne hat ein passendes, sprechendes
+  `aria-label`, kein Fund.
+- `HotelWizard.tsx`/`FlightWizard.tsx`s Datums-Hilfsfunktionen
+  (`getTodayIso`/`getNextDayIso`) auf UTC-vs-lokale-Zeit-Fehler geprüft
+  (klassische Fehlerquelle bei Reise-Datumsfeldern) — beide bauen das Datum
+  bewusst aus lokalen `getFullYear()`/`getMonth()`/`getDate()`-Komponenten
+  zusammen statt über `toISOString()`, also kein UTC-Offset-Fehler nahe
+  Mitternacht.
+
+**Ergebnis:** Kein Punkt heute (125. Lauf) autonom umgesetzt, kein
+Produktcode geändert — ehrlich "kein Fund". Baseline unverändert bei 574
+Tests, 0 Typ-/Lint-Fehler.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
