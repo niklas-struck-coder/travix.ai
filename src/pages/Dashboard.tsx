@@ -20,7 +20,7 @@ const draftTrips: TripDraft[] = [
     transportMode: 'flight',
     transportDetail: null,
     budget: 'bis 1.200 €',
-    dates: '15. – 22. November 2026',
+    dates: '20. – 27. Dezember 2026',
     accommodation: null,
     activities: [],
   },

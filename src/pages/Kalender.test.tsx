@@ -4,12 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Kalender } from './Kalender'
 
 // Kalender.tsx starts on the current month, so the system clock is fixed to
-// a date outside both demo trips' ranges (Lissabon: 15.-22. Nov 2026,
+// a date outside both demo trips' ranges (Lissabon: 20.-27. Dez 2026,
 // Kyoto: 3.-10. März 2026) — keeps the initial render's grid free of trip
 // badges and the navigation assertions below deterministic.
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date(2026, 9, 20))
+  vi.setSystemTime(new Date(2026, 10, 20))
 })
 
 afterEach(() => {
@@ -24,9 +24,9 @@ describe('Kalender', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByText('Oktober 2026')).toBeInTheDocument()
+    expect(screen.getByText('November 2026')).toBeInTheDocument()
     expect(screen.getByText('Lissabon')).toBeInTheDocument()
-    expect(screen.getByText('15. – 22. November 2026')).toBeInTheDocument()
+    expect(screen.getByText('20. – 27. Dezember 2026')).toBeInTheDocument()
     expect(screen.getByText('Kyoto')).toBeInTheDocument()
     expect(screen.getByText('3. – 10. März 2026')).toBeInTheDocument()
   })
@@ -39,9 +39,9 @@ describe('Kalender', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Nächster Monat' }))
-    expect(screen.getByText('November 2026')).toBeInTheDocument()
+    expect(screen.getByText('Dezember 2026')).toBeInTheDocument()
 
-    // 15.-22. November is 8 days, each carrying a Lissabon day-cell badge,
+    // 20.-27. Dezember is 8 days, each carrying a Lissabon day-cell badge,
     // plus the one entry in the textual list below the grid.
     expect(screen.getAllByText('Lissabon')).toHaveLength(9)
   })
@@ -69,10 +69,10 @@ describe('Kalender', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Vorheriger Monat' }))
-    expect(screen.getByText('September 2026')).toBeInTheDocument()
+    expect(screen.getByText('Oktober 2026')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Heute' }))
-    expect(screen.getByText('Oktober 2026')).toBeInTheDocument()
+    expect(screen.getByText('November 2026')).toBeInTheDocument()
   })
 
   it('keeps the "today" marker in sync with the clock while mounted, instead of freezing it at mount time', () => {
@@ -87,7 +87,7 @@ describe('Kalender', () => {
     // Clock moves to the next day without the component unmounting (e.g. the
     // tab stays open past midnight). A re-render (navigating the month grid
     // and back) must pick up the new date instead of still showing day 20.
-    vi.setSystemTime(new Date(2026, 9, 21))
+    vi.setSystemTime(new Date(2026, 10, 21))
     fireEvent.click(screen.getByRole('button', { name: 'Nächster Monat' }))
     fireEvent.click(screen.getByRole('button', { name: 'Vorheriger Monat' }))
 

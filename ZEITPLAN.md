@@ -2397,6 +2397,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Verschiebung bei einem Zwischenwert (30 → `translateX(-70%)`), voll
   gefüllt bei 100, komplett leer bei 0, sowie der Fallback auf 0 (komplett
   leer), wenn gar kein `value` übergeben wird.
+  Vom autonomen IT-Chef-Lauf am 16.11. (128. Lauf) den bereits am 09.10.
+  behobenen Lissabon-Jahres-/Zeit-Drift (15.-22. September → 15.-22.
+  November 2026) erneut korrigiert, exakt wie dort vorausgesagt
+  ("das bleibt eine Datenkorrektur, die sich bei fortschreitender Zeit
+  wiederholen wird"): Realer Zeitstempel beim Lauf 16.11.2026 — die
+  hartcodierte Demo-Reise "Lissabon" hatte damit bereits seit dem 15.11.
+  begonnen, `MeineReisen.tsx` zeigte aber weiterhin den teal
+  "Bevorstehend"-Badge und einen aktiven "Urlaubsmodus aktivieren"-Button,
+  statt "Reise abgeschlossen" bzw. eines laufenden Zustands. Fix: Datum in
+  allen vier die Demo-Welt teilenden Dateien (`MeineReisen.tsx`,
+  `Dashboard.tsx`, `Kalender.tsx`, `Reiseentwuerfe.tsx`) auf 20.-27.
+  Dezember 2026 korrigiert (gleicher 8-Tage-Zeitraum, diesmal mit gut
+  einem Monat Vorlauf statt nur zwei Tagen), zugehörige Tests angepasst
+  (`MeineReisen.test.tsx`, `Kalender.test.tsx` inkl. der dort fest
+  gesetzten Systemzeit, `Reiseentwuerfe.test.tsx`) sowie zusätzlich
+  `Urlaubsmodus.test.tsx` (nutzte denselben Datums-String als
+  URL-Query-Beispiel, war beim 09.10.-Fix übersehen worden). Reine
+  Datumskorrektur, keine neue Logik — bleibt wie beim letzten Mal eine
+  Korrektur, die sich wiederholen wird, solange `TripDraft` keine echte
+  Buchungs-/Backend-Anbindung hat (Phase 2).
 - 🟡 Phase 8 Urlaubsmodus & Konto — Urlaubsmodus-Grundgerüst mit
   Concierge-Chat steht (Teil von 8.1, 8.3), Rest (8.2, 8.4-8.13) offen.
   Vom autonomen IT-Chef-Lauf am 02.09. (dreiundzwanzigster Lauf) einen

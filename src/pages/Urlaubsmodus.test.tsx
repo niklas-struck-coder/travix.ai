@@ -93,10 +93,10 @@ describe('Urlaubsmodus – Navigation von einer MeineReisen-Karte (?destination=
   })
 
   it('uses the destination and dates from the URL instead of an empty stored chat', () => {
-    renderUrlaubsmodus(['/urlaubsmodus?destination=Lissabon&dates=15.%20%E2%80%93%2022.%20November%202026'])
+    renderUrlaubsmodus(['/urlaubsmodus?destination=Lissabon&dates=20.%20%E2%80%93%2027.%20Dezember%202026'])
 
     expect(screen.getByText('Lissabon')).toBeInTheDocument()
-    expect(screen.getByText('15. – 22. November 2026')).toBeInTheDocument()
+    expect(screen.getByText('20. – 27. Dezember 2026')).toBeInTheDocument()
     expect(
       screen.getByText('Willkommen im Urlaubsmodus für deine Reise nach Lissabon! Frag mich zu Währung, Notrufnummern, Begrüßungsfloskeln oder anderen Fragen rund um deinen Trip.'),
     ).toBeInTheDocument()

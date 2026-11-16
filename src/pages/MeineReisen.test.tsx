@@ -12,7 +12,7 @@ describe('MeineReisen', () => {
     )
 
     expect(screen.getByText('Lissabon')).toBeInTheDocument()
-    expect(screen.getByText('15. – 22. November 2026')).toBeInTheDocument()
+    expect(screen.getByText('20. – 27. Dezember 2026')).toBeInTheDocument()
     expect(screen.getByText('Bevorstehend')).toBeInTheDocument()
 
     expect(screen.getByText('Kyoto')).toBeInTheDocument()
@@ -40,7 +40,7 @@ describe('MeineReisen', () => {
 
     expect(screen.getByRole('link', { name: /Urlaubsmodus aktivieren/i })).toHaveAttribute(
       'href',
-      '/urlaubsmodus?destination=Lissabon&dates=15.%20%E2%80%93%2022.%20November%202026',
+      '/urlaubsmodus?destination=Lissabon&dates=20.%20%E2%80%93%2027.%20Dezember%202026',
     )
   })
 })

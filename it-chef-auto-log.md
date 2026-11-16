@@ -28693,3 +28693,91 @@ Verhalten geändert. `ZEITPLAN.md` (Ist-Stand-Absatz) entsprechend ergänzt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-16, 02:16 UTC (128. Lauf — erneuter Lissabon-Zeit-Drift korrigiert)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund eine
+Stunde nach dem 127. Lauf (`5d59646`, 01:11 UTC). `origin/it-chef/auto`
+direkt übernommen, `origin/main` seit dem letzten Freigabe-Chef-Merge
+(23.10.) unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün) —
+identisch zum Endstand des 127. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut direkt nach
+offenen Checkboxen durchsucht — unverändert dieselben Hauptpunkte offen
+(2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Sprint-Sammelpunkte), hängen weiterhin
+an fehlendem Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen
+Nis, oder zu unspezifisch für Kriterium 3.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten
+Methoden:** `console.*`-Aufrufe im gesamten `src`-Baum gesammelt (nur die
+drei bereits bekannten, bewusst beibehaltenen Fehler-Logs in
+`tripStorage.ts`/`duffel/client.ts`/`ErrorBoundary.tsx` — kein Fund).
+`TODO`/`FIXME`/`XXX`-Suche im `src`-Baum (ein Treffer, aber nur ein
+Testwert in `format.test.ts`, kein echter offener Punkt). `key={index}`-
+Suche bei `.map()`-Aufrufen in JSX (zwei Treffer, beide auf statischen,
+nicht umsortierbaren Fehlerlisten — kein echtes Risiko, kein Fund).
+Duplizierte Berechnungs-/Formatierungsfunktionen codeweit gesammelt
+(`formatPrice`/`calculate*`) — die beiden seitenlokalen `formatPrice()`
+bleiben laut 127. Lauf bewusst getrennt (statische Demo-Daten, keine
+echten Duplikate); `cartTotals.ts` unauffällig. Empty-States aller Listen-
+Seiten gegen das etablierte Muster geprüft — durchgängig vorhanden, kein
+Fund.
+
+Dabei auf einen echten, reproduzierbaren Fund gestoßen: Die vier Dateien
+`MeineReisen.tsx`, `Dashboard.tsx`, `Kalender.tsx`, `Reiseentwuerfe.tsx`
+teilen laut eigenem Kommentar dieselbe hartcodierte Lissabon-Demo-Reise
+("15. – 22. November 2026"). Dieser exakte Datums-Drift-Bug wurde bereits
+am 09.10. einmal behoben (damals September → November) — mit der
+expliziten Vorhersage im Log, dass die Korrektur sich "bei fortschreitender
+Zeit wiederholen" wird, solange keine echte Backend-Anbindung existiert.
+Genau das ist jetzt eingetreten: realer Zeitstempel 16.11.2026, die Reise
+hatte laut ihrem eigenen Datum bereits am 15.11. begonnen, `MeineReisen.tsx`
+zeigte aber weiterhin unverändert den teal "Bevorstehend"-Badge und den
+aktiven "Urlaubsmodus aktivieren"-Button statt eines laufenden/
+abgeschlossenen Zustands.
+
+**Warum sicher genug:** Reine Datumskorrektur an eindeutig als Demo-/
+Platzhalterdaten gekennzeichneten, statischen Werten (kein Bezug zu Auth,
+Zahlungen, echten Nutzerdaten oder rechtlichen Texten). Keine offene
+Produkt-/Architekturentscheidung nötig — exakt dasselbe, bereits am 09.10.
+etablierte Korrekturmuster, nur erneut angewandt. Klar umsetzbar, keine
+Interpretation nötig (derselbe 8-Tage-Zeitraum, nur in die Zukunft
+verschoben). Ergebnis objektiv prüfbar (Tests/Typecheck/Lint/Build bleiben
+grün, Badge/Button-Zustand bleibt konsistent mit dem neuen Datum).
+
+**Umsetzung:** Datum in `MeineReisen.tsx`, `Dashboard.tsx`, `Kalender.tsx`
+(inkl. maschinenlesbarer `startDate`/`endDate`) und `Reiseentwuerfe.tsx`
+auf "20. – 27. Dezember 2026" korrigiert — diesmal mit gut einem Monat
+Vorlauf statt nur zwei Tagen wie beim letzten Mal, um die absehbare
+Wiederholung etwas hinauszuzögern. Zugehörige Tests angepasst:
+`MeineReisen.test.tsx` (Text- und URL-Assertion), `Kalender.test.tsx`
+(Datumstext plus die dort fest gesetzte Systemzeit von Oktober auf
+November 2026 verschoben, damit die Monats-Navigationstests weiterhin zum
+neuen Dezember-Datum passen), `Reiseentwuerfe.test.tsx` (Dialogtext).
+Zusätzlich `Urlaubsmodus.test.tsx` korrigiert — nutzte denselben
+Datums-String als URL-Query-Beispiel, war beim 09.10.-Fix übersehen
+worden (eigenständiger Fund, keine Verhaltensänderung an `Urlaubsmodus.tsx`
+selbst, nur Testdaten). Keine neue Logik, keine Produktcode-Verhaltens-
+änderung außerhalb der Datumswerte selbst.
+
+**Geprüft:** `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung — bekannt,
+kein neuer Fund), `npx vitest run` (78 Testdateien, 581 Tests, alle grün —
+unveränderte Anzahl, da nur bestehende Test-Assertions an die neuen
+Datumswerte angepasst wurden, keine neuen Tests nötig) liefen vor dem
+Commit grün.
+
+**Ergebnis:** Erneuter Lissabon-Zeit-Drift korrigiert (wie am 09.10.
+vorausgesagt). `ZEITPLAN.md` (Phase-7-Absatz) entsprechend ergänzt. Dieser
+Fund-Typ wird sich laut beiden bisherigen Vorfällen weiterhin wiederholen,
+bis `TripDraft`/die Demo-Trips eine echte, zeitunabhängige Backend-
+Anbindung haben (Phase 2, Base44-Entscheidung Nis).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
