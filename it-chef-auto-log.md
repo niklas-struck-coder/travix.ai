@@ -28781,3 +28781,71 @@ Anbindung haben (Phase 2, Base44-Entscheidung Nis).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-16, 22:12 UTC (129. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 20
+Stunden nach dem 128. Lauf (`787b55c`, 02:16 UTC). `origin/it-chef/auto`
+direkt übernommen, `origin/main` seit dem letzten Freigabe-Chef-Merge
+(23.10.) weiterhin unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün),
+`npm run build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) —
+identisch zum Endstand des 128. Laufs. Datums-Fix vom 128. Lauf (Lissabon-
+Demo-Trip auf 20.-27. Dezember 2026 verschoben) bleibt bei heutigem
+Zeitstempel (16.11.) gültig, keine erneute Korrektur nötig.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut direkt nach
+offenen Checkboxen durchsucht — unverändert dieselben Hauptpunkte offen
+(2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Sprint-Sammelpunkte), hängen weiterhin
+an fehlendem Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen
+Nis, oder zu unspezifisch für Kriterium 3. `reports/it-chef.md`
+gegengeprüft (Stand 23.10., seitdem unverändert): dieselben zwei offenen
+Funde (uneinheitlich dramatische Lösch-Warnungen; fehlende Checklisten-
+Persistenz) bleiben aus denselben Gründen (Produktabwägung bzw. Backend-
+Entscheidung) nicht autonom umsetzbar für diesen Kanal.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten
+Methoden:**
+- Singular/Plural-Zählertexte codeweit gesammelt (`.length}` vor
+  deutschen Substantiven in JSX) — alle drei Fundstellen
+  (`Reiseentwuerfe.tsx`, `Buchung.tsx`, `Dashboard.tsx`) haben bereits die
+  korrekte `=== 1 ? singular : plural`-Verzweigung (letztere erst im
+  84. Lauf ergänzt) — kein Fund.
+- Alle `Link to="..."`-Ziele codeweit gesammelt und gegen
+  `builtRoutes`/`allRoutes` (`routes.tsx`/`nav-config.ts`) abgeglichen —
+  jedes Ziel existiert als echte Route oder Placeholder-Route, kein
+  totes Linkziel.
+- `target="_blank"` codeweit gesucht (fehlendes `rel="noopener
+  noreferrer"` wäre ein Sicherheits-/Performance-Fund) — kein einziges
+  Vorkommen im Code, Prüfung entfällt.
+- Alle `toLocaleDateString`/`toLocaleTimeString`-Aufrufe gesammelt — durch-
+  gängig `'de-DE'`, keine fehlende/falsche Locale.
+- `lib/trip/calendarUtils.ts` (Monatsraster, Wochentags-/Monatsnamen-
+  Arrays, Vor-/Folgemonat-Rollover) Zeile für Zeile gelesen — Monatsnamen
+  korrekt geschrieben/indiziert, Rollover bei Januar/Dezember korrekt,
+  bereits vollständig testabgedeckt — kein Fund.
+- `Preisalarme.tsx` komplett gelesen (Zielpreis-Vergleich
+  `currentPrice <= targetPrice`, Preisänderungs-Anzeige
+  `previousPrice !== currentPrice`) — beide Bedingungen korrekt, kein
+  Fund.
+- `role="alert"`/`role="status"`/`aria-live`-Abdeckung codeweit gegen
+  alle Fehler-/Ergebnis-Komponenten (`SearchErrorAlert`,
+  `NoResultsMessage`, `FlightResults`, `HotelResults`, `TrainResults`,
+  `ErrorBoundary`, `ChatInput`) abgeglichen — durchgängig vorhanden, kein
+  Fund.
+- Nicht-semantische klickbare Elemente gesucht (`<div onClick`,
+  `cursor-pointer`-Klasse ohne `button`/`Link`) — kein Treffer, alle
+  interaktiven Flächen sind echte `button`/`Link`-Elemente.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
