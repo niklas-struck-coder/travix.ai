@@ -3311,6 +3311,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Containers, identisch zu den Vorläufen), `npx tsc -b` (0 Fehler), `npm
   run lint` (0 Fehler), `npx vitest run` (75 Testdateien, 565 Tests, alle
   grün — 563 + 2 neue Tests) liefen vor dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 16.11. (127. Lauf) eine weitere
+  Testabdeckungslücke bei den shadcn/ui-Primitiven geschlossen: Anders als
+  `Badge`/`Button`/`Card`/`Select`/`Tabs*` (s.o.) hatten `Input`
+  (`input.tsx`, u. a. in `FlightWizard.tsx`, `HotelWizard.tsx`,
+  `Einstellungen.tsx`, `Profil.tsx`) und `Label` (`label.tsx`, in
+  praktisch allen Formularen) bisher keine eigene Testdatei, sondern
+  wurden bisher nur indirekt über die jeweiligen Seiten-Tests mitgetestet.
+  Codeweit per `comm` zwischen allen `src`-Dateien und allen
+  `*.test.*`-Zieldateien gegengeprüft: das waren die einzigen beiden noch
+  fehlenden Primitive. Reine Testabdeckung für bestehendes, unverändertes
+  Verhalten, kein neuer Bug gefunden. Neue `input.test.tsx` (4 Tests,
+  Muster analog `card.test.tsx`): Rendering als `input` mit `data-slot`,
+  Übernahme des `type`-Props, `className`-Merge, Durchreichen weiterer
+  Props (`disabled`, `value`). Neue `label.test.tsx` (3 Tests): Rendering
+  mit `data-slot="label"`, `htmlFor`-Verknüpfung mit einem Formularfeld
+  (per `getByLabelText` verifiziert), `className`-Merge. `npm ci`
+  fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npm run
+  build` (0 Typfehler, unveränderte Chunk-Size-Warnung), `npx vitest run`
+  (78 Testdateien, 581 Tests, alle grün — 574 + 7 neue Tests) liefen vor
+  dem Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,

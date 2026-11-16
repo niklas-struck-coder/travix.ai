@@ -28618,3 +28618,78 @@ Tests, 0 Typ-/Lint-Fehler.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-16, 01:11 UTC (127. Lauf — Testabdeckungslücke Input/Label geschlossen)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer Checkout, rund 23 Stunden
+nach dem 126. Lauf (`5964a42`, 15.11. 02:10 UTC). `origin/it-chef/auto`
+direkt übernommen, `origin/main` seit dem letzten Freigabe-Chef-Merge
+(23.10.) unverändert — kein Merge nötig. `origin/marketing-chef/auto` und
+`origin/support-chef/auto` ebenfalls seit dem 23.10. unverändert.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (76 Testdateien, 574 Tests, alle grün) —
+identisch zum Endstand des 126. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut direkt nach
+offenen Checkboxen durchsucht — unverändert dieselben Hauptpunkte offen
+(2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Sprint-Sammelpunkte), hängen weiterhin
+an fehlendem Base44-/Gemini-/Duffel-Zugang, sind Produktentscheidungen
+Nis, oder zu unspezifisch für Kriterium 3. `reports/it-chef.md`
+gegengeprüft: dieselben zwei offenen Funde (uneinheitlich dramatische
+Lösch-Warnungen; fehlende Checklisten-Persistenz) bleiben aus denselben
+Gründen nicht autonom umsetzbar.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten
+Methoden:**
+- `<img>`-Tags codeweit auf fehlendes `alt`-Attribut durchsucht — kein
+  Treffer.
+- Alle `setInterval`/`setTimeout`-Aufrufe im `src`-Baum gesammelt (nicht
+  nur `useChat`/`useConcierge` wie in früheren Läufen) — keine weiteren
+  Vorkommen außerhalb der bereits geprüften beiden Hooks und zweier
+  Testdateien.
+- `toLocaleString`/`Intl.NumberFormat`-Verwendungen codeweit gesammelt und
+  gegen NaN/ungültige Eingaben geprüft (`format.ts`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`) — `formatOfferPrice` fängt `NaN` und ungültige
+  ISO-4217-Codes bereits ab; die beiden Seiten-lokalen `formatPrice`-
+  Funktionen laufen nur auf statischen, garantiert numerischen Demo-Daten
+  — kein Fund.
+- Testabdeckung strukturell geprüft: jede Datei unter `src` (ohne
+  `*.test.*`, ohne `types/`) gegen die Liste existierender Testdateien
+  abgeglichen (`comm` auf zwei sortierten Dateilisten). Treffer: `input.tsx`
+  und `label.tsx` (shadcn/ui-Primitive, in praktisch jedem Formular
+  verwendet — `FlightWizard.tsx`, `HotelWizard.tsx`, `Einstellungen.tsx`,
+  `Profil.tsx` u. a.) hatten als letzte der breit verwendeten UI-Primitive
+  keine eigene Testdatei, anders als `Badge`/`Button`/`Card`/`Select`/
+  `Tabs*` (in früheren Läufen ergänzt).
+
+**Warum sicher genug:** Reine Testabdeckung für bestehendes, unverändertes
+Verhalten (kein Bugfix, kein neues Feature) — kein Bezug zu Auth,
+Zahlungen, Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung nötig. Klar umsetzbar nach demselben, bereits
+etablierten Muster wie `card.test.tsx`/`select.test.tsx`. Ergebnis
+objektiv prüfbar (Tests laufen durch, Typecheck/Lint/Build bleiben grün).
+
+**Umsetzung:** Neue `src/components/ui/input.test.tsx` (4 Tests):
+Rendering als `<input>` mit `data-slot="input"`, Übernahme des `type`-
+Props, `className`-Merge mit den generierten Klassen, Durchreichen
+weiterer Props (`disabled`, `value`). Neue `src/components/ui/
+label.test.tsx` (3 Tests): Rendering mit `data-slot="label"`, `htmlFor`-
+Verknüpfung mit einem Formularfeld (per `getByLabelText` verifiziert),
+`className`-Merge. Kein Produktcode (`input.tsx`/`label.tsx` selbst)
+geändert — beide waren bereits korrekt, reine "pure wrapper"-Komponenten
+ohne eigene Logik jenseits von `cn()`.
+
+**Geprüft:** `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npm run build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-
+Warnung — bekannt, kein neuer Fund), `npx vitest run` (78 Testdateien,
+581 Tests, alle grün — 574 + 7 neue Tests) liefen vor dem Commit grün.
+
+**Ergebnis:** Testabdeckungslücke bei `Input`/`Label` geschlossen, kein
+Verhalten geändert. `ZEITPLAN.md` (Ist-Stand-Absatz) entsprechend ergänzt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
