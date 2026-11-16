@@ -28849,3 +28849,87 @@ dokumentieren war.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-16, 23:13 UTC (130. Lauf — Punkt gefunden, aber in dieser Umgebung nicht umsetzbar)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 129. Lauf (`bc62870`, 22:12 UTC).
+`origin/it-chef/auto` direkt übernommen, `origin/main` seit dem letzten
+Freigabe-Chef-Merge (23.10.) weiterhin unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün) —
+identisch zum Endstand des 129. Laufs. Lissabon-Demo-Datum (20.-27.
+Dezember 2026, seit 128. Lauf) bleibt bei heutigem Zeitstempel gültig,
+keine erneute Korrektur nötig.
+
+**Aufgabenliste/eigene Suche:** `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` erneut geprüft — dieselben
+Hauptpunkte (2.0 Base44/Auth, 4.1-4.3, 5.7, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12) bleiben an Backend-/Produktentscheidungen hängen. Eigene,
+vom 129. Lauf unabhängige Stichproben (Kalender-Demodaten gegen
+`MeineReisen.tsx` abgeglichen — die dort als `status: 'past'`
+gekennzeichnete Kyoto-Reise im März 2026 liegt absichtlich in der
+Vergangenheit, kein Fund; `Angebote.tsx`, `Kartenansicht.tsx`,
+`HotelWizard.tsx`-Gästezahl-Parsing, `tripStorage.ts`-JSON.parse-Fallback,
+`eslint-disable`/`@ts-ignore`/`TODO`/`FIXME`/leere `catch`-Blöcke/
+`<img>`-ohne-`alt` codeweit durchsucht) ohne neuen Code-Bug.
+
+**Ausgewählter Punkt:** `npm audit --omit=dev` zeigt 11 Schwachstellen (3
+hoch, 8 mittel). Davon 7 ohne Breaking-Change behebbar (`fixAvailable:
+true` laut `npm audit --json`): `undici`, `systeminformation`,
+`body-parser`, `fast-uri`, `hono`, `@hono/node-server` (alle über die
+`shadcn`-CLI/`@modelcontextprotocol/sdk`-Kette, reines Dev-Tooling) sowie
+`vite` (moderat, `GHSA-8g5g-mxqh-grgj`). Die restlichen 4
+(`minimatch`/`@ts-morph/common`/`ts-morph`/`shadcn` selbst) brauchen
+laut npm weiterhin ein Shadcn-Major-Upgrade (`isSemVerMajor: true`) und
+bleiben wie in früheren Läufen ausgeschlossen. Erfüllt alle vier
+Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug,
+keine Architekturentscheidung, klar abgegrenzt (nur Versionsnummern
+innerhalb bestehender Semver-Ranges, kein `--force`), objektiv prüfbar
+(`npm audit` vorher/nachher plus bestehende Testsuite).
+
+**Nicht umsetzbar in dieser Lauf-Umgebung:** Sowohl `npm audit fix`
+(mit und ohne `--package-lock-only`) als auch ein gezieltes `npm update
+vite …` (selbst im `--dry-run`) brechen reproduzierbar mit demselben
+internen npm-Fehler ab, der schon beim 03.10.-Lauf dokumentiert wurde
+(`Cannot read properties of null (reading 'edgesOut')`, in
+`@npmcli/arborist` beim Aufbau des Peer-Dependency-Baums für `vitest`s
+optionale Peer-Pakete wie `@vitest/browser-playwright`/`@vitest/ui`) —
+bestätigt per Debug-Log (`npm error` + Stacktrace in
+`build-ideal-tree.js`). Ein reiner `npm install --package-lock-only
+--dry-run` ohne Versionsänderung läuft dagegen fehlerfrei durch — der
+Absturz tritt deterministisch nur auf, sobald npm tatsächlich eine neue
+Version für irgendein Paket im Baum auflösen muss, unabhängig davon,
+welches. Der beim 03.10.-Lauf erfolgreiche Umweg (`npx -y npm@11 audit
+fix --package-lock-only`, eine neuere npm-Version transient nur für
+diesen einen Befehl) wurde in diesem Lauf von der Auto-Mode-
+Berechtigungsprüfung der Sandbox mit "Unauthorized Access" abgelehnt —
+anders als in früheren, nicht in dieser strikten Form geplanten Läufen.
+Bewusst nicht weiter versucht, diese Ablehnung zu umgehen (z. B. über
+`--legacy-peer-deps`, das beim 03.10.-Lauf bereits ein von `npm ci`
+abgelehntes, inkonsistentes Lockfile erzeugt hatte, oder eine
+händische Bearbeitung von `package-lock.json`, die ohne echte
+npm-Auflösung zu leicht ein stillschweigend falsches Lockfile erzeugen
+könnte) — beides hätte mehr Risiko als der Nutzen dieses einzelnen
+Dependency-Updates gerechtfertigt. `package-lock.json`/`package.json`
+nach jedem Versuch per `git status`/`diff` gegen eine Sicherungskopie
+geprüft: unverändert, Arbeitsbaum blieb durchgehend sauber.
+
+**Ergebnis:** Kein Code-/Lockfile-Commit in diesem Lauf. Der einzige
+identifizierte, alle vier Kriterien erfüllende Punkt (Dependency-Fix für
+7 der 11 `npm audit`-Funde) ließ sich in der heutigen Lauf-Umgebung
+technisch nicht abschließen, nicht weil er unsicher gewesen wäre. Für
+einen künftigen Lauf (oder Ni direkt) bleibt offen: entweder eine neuere
+npm-Version in der Lauf-Umgebung selbst verfügbar machen (kein
+transienter `npx`-Aufruf), oder die sieben Pakete gezielt händisch samt
+korrekter Integritäts-Hashes aktualisieren.
+
+**Geprüft:** `npm ci` (frischer Checkout), `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle
+grün), `git status`/`git diff` nach jedem Dependency-Versuch (stets
+sauber) liefen vor diesem Log-Eintrag grün bzw. bestätigt sauber.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
