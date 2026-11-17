@@ -29161,7 +29161,62 @@ grün bzw. bestätigt unverändert.
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
 
-## 2026-11-17, 22:11 UTC (134. Lauf — kein neuer sicherer Punkt gefunden)
+## 2026-11-17, 23:10 UTC (135. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+knapp eine Stunde nach dem 134. Lauf (`da9c409`, 22:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` und per `git log origin/main..HEAD`/
+`git log HEAD..origin/main` bestätigt lupenreiner Vorfahre von
+`it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 581 Tests, alle grün) — identisch zum
+Endstand des 134. Laufs. `npm audit --omit=dev` erneut genau die 12 Funde
+(2 moderate, 10 hoch) aus dem 134. Lauf, `npm audit fix --dry-run`
+bestätigt weiterhin: kein nicht-breaking Fix verfügbar, nur `--force`
+(Shadcn-/Vite-Major, Breaking Change) — unverändert eine
+Architekturentscheidung, kein Produktions-Risiko (reine Build-/
+Dev-Werkzeuge, kein von Endnutzern erreichbarer Pfad).
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche mit bisher nicht explizit abgedeckten
+Stellen:**
+- `addEventListener`/`removeEventListener`-Zählung codeweit abgeglichen:
+  einziger Ausreißer `src/lib/utils.ts` (`focusPageHeading()`) nutzt
+  `{ once: true }` für den Blur-Listener — entfernt sich selbst, kein
+  Leak, kein Fund.
+- `key={index}`/`key={i}` in `.map()`-Aufrufen codeweit gesucht
+  (`FlightCard.tsx`, `SearchErrorAlert.tsx`) — beide Listen sind
+  statische Render-Snapshots ohne Umordnen/Einfügen/Löschen einzelner
+  Einträge, kein funktionaler Fund.
+- `dangerouslySetInnerHTML` codeweit gesucht — kein einziges Vorkommen.
+- Alle `useEffect`-Hooks ohne `return () => ...)`-Cleanup-Zeile
+  durchgesehen (`Urlaubsmodus.tsx`, `KiChat.tsx`, `ChatInput.tsx`) —
+  Scroll-Effekte brauchen keinen Cleanup, `KiChat.tsx`/`ChatInput.tsx`
+  räumen Sprachausgabe/-erkennung bereits über die Kurzform
+  `useEffect(() => () => ..., [])` korrekt auf, kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün), `npm
+audit --omit=dev` (12 Funde, unverändert zum 134. Lauf, nur per
+Shadcn-/Vite-Major-Upgrade behebbar, kein Produktions-Risiko) liefen
+grün bzw. bestätigt unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
 
 **Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
 rund 20 Stunden nach dem 133. Lauf (`f8963b1`, 02:16 UTC). `it-chef/auto`
