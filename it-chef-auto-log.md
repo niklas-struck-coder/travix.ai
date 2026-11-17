@@ -28933,3 +28933,74 @@ sauber) liefen vor diesem Log-Eintrag grün bzw. bestätigt sauber.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-17, 00:14 UTC (131. Lauf — zuvor blockierter npm-audit-Fix doch abgeschlossen)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 130. Lauf (`30dd222`, 23:13 UTC).
+`origin/it-chef/auto` direkt übernommen, `origin/main` seit dem letzten
+Freigabe-Chef-Merge (23.10.) weiterhin unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container, vor jeder Änderung): `npm ci` fehlerfrei, `npx tsc -b` (0
+Fehler), `npm run lint` (0 Fehler), `npx vitest run` (78 Testdateien,
+581 Tests, alle grün) — identisch zum Endstand des 130. Laufs.
+Lissabon-Demo-Datum (20.-27. Dezember 2026) liegt bei heutigem
+Zeitstempel weiterhin in der Zukunft, kein Drift-Fix nötig.
+
+**Eigene, von den letzten Läufen unabhängige Suche nach einem neuen
+Punkt** (vor dem erneuten Versuch des bereits bekannten
+Dependency-Fixes): Formular-`htmlFor`/`id`-Paare in `EditMode.tsx`,
+`FlightWizard.tsx`, `HotelWizard.tsx`, `Einstellungen.tsx`, `Profil.tsx`
+codeweit gegen die zugehörigen Eingabeelemente abgeglichen — alle
+korrekt verknüpft. Mögliche doppelte `id`-Kollision zwischen
+`FlightWizard`/`HotelWizard` (beide nutzen u. a. `id="destination"`)
+geprüft — werden nie auf derselben Seite gleichzeitig gerendert, kein
+Fund. `index.html` (`lang="de"`, Viewport-Meta, Titel) geprüft —
+korrekt. `key={index}`-Verwendung in `.map()`-Aufrufen codeweit gesucht
+(`FlightCard.tsx`, `SearchErrorAlert.tsx`) — beide rendern stabile,
+nicht umsortierbare Listen innerhalb eines Renders, kein echter
+React-Key-Bug. Testabdeckung systematisch per Dateivergleich geprüft
+(jede `.ts`/`.tsx`-Datei ohne zugehörige `.test.*`-Datei aufgelistet):
+nur noch reine Typ-Dateien (`types/*.ts`, keine Laufzeitlogik) und
+`main.tsx` (Einstiegspunkt) ohne eigene Testdatei — keine echte Lücke
+mehr offen. Typo-Suche in nutzersichtbaren deutschen Texten (häufige
+Fehlschreibungen, doppelte Leerzeichen) — kein Treffer. Keine dieser
+Prüfungen ergab einen neuen Fund.
+
+**Erneuter Versuch des seit dem 03.10.- und 130.-Lauf bekannten,
+technisch blockierten `npm audit`-Fixes:** Derselbe Punkt wie im 130.
+Lauf identifiziert (7 von 11 `npm audit`-Funden ohne Breaking Change
+behebbar: `undici`, `systeminformation`, `body-parser`, `fast-uri`,
+`hono`, `@hono/node-server`, `vite`) — erfüllt weiterhin alle vier
+Sicherheitskriterien. Der reguläre `npm audit fix --package-lock-only`
+(mit npm 10.9.9) scheitert erneut reproduzierbar am bekannten
+`@npmcli/arborist`-Fehler (`Cannot read properties of null (reading
+'edgesOut')`) — bestätigt vor jedem weiteren Schritt. Anders als im
+130. Lauf wurde der transiente Umweg über eine neuere npm-Version (`npx
+-y npm@11 audit fix --package-lock-only`) in dieser Lauf-Umgebung
+diesmal **nicht** von der Sandbox-Berechtigungsprüfung abgelehnt —
+zuerst als `--dry-run` verifiziert (Arbeitsbaum danach laut `git
+status`/`git diff` unverändert), dann echt ausgeführt.
+
+**Ergebnis des Fixes:** `package.json` unverändert (keine
+Versionsbereiche geändert, `git diff package.json` leer), nur
+`package-lock.json` neu aufgelöst. `npm audit --omit=dev` zeigt danach
+nur noch 4 moderate Funde (`minimatch`/`@ts-morph/common`/`ts-morph`/
+`shadcn`, weiterhin nur über ein `shadcn`-Major-Upgrade behebbar,
+bewusst ausgeschlossen) statt zuvor 11 (3 hoch, 8 mittel).
+
+**Geprüft (nach dem Fix, mit dem regulären npm 10.9.9 und frisch
+installiertem `node_modules`):** `npm ci` (frischer `node_modules`-
+Ordner, 574 Pakete) fehlerfrei, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (weiterhin 78 Testdateien, 581 Tests, alle
+grün — keine Regression durch die aktualisierten Pakete, u. a.
+`vitest`-Patch-Bump 4.1.11 → 4.1.12 als Folge der `vite`-Aktualisierung),
+`npm run build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung)
+liefen vor dem Commit grün.
+
+**Aktualisiert:** `ZEITPLAN.md` (neue Bullet-Ergänzung im
+Programmierung-Ist-Stand, analog dem Muster früherer Läufe).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

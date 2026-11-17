@@ -3351,6 +3351,32 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   build` (0 Typfehler, unveränderte Chunk-Size-Warnung), `npx vitest run`
   (78 Testdateien, 581 Tests, alle grün — 574 + 7 neue Tests) liefen vor
   dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 17.11. (131. Lauf) den in den beiden
+  Vorläufen (03.10., 16.11./130. Lauf) als technisch blockiert
+  protokollierten `npm audit`-Fix doch noch abgeschlossen: in dieser
+  Lauf-Umgebung ließ sich `npx -y npm@11 audit fix --package-lock-only`
+  diesmal ohne Sandbox-Ablehnung ausführen (reine Lockfile-Auflösung mit
+  einer neueren, transienten npm-Version, `package.json` dabei
+  unverändert, keine Versionsbereiche geändert, kein `--force`). Behebt
+  7 der zuvor 11 `npm audit`-Funde (3 hoch, 8 mittel) ohne Breaking
+  Change: `undici`, `systeminformation`, `body-parser`, `fast-uri`,
+  `hono`, `@hono/node-server` (alle über die `shadcn`-CLI/
+  `@modelcontextprotocol/sdk`-Kette, reines Dev-Tooling) sowie `vite`
+  (moderat, `GHSA-8g5g-mxqh-grgj`). Die verbleibenden 4 moderaten Funde
+  (`minimatch`/`@ts-morph/common`/`ts-morph`/`shadcn` selbst) brauchen
+  weiterhin ein `shadcn`-Major-Upgrade (`isSemVerMajor: true`) und
+  bleiben wie in den Vorläufen bewusst ausgeschlossen. Erfüllt alle vier
+  Sicherheitskriterien: kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-
+  Bezug, keine Architekturentscheidung, klar abgegrenzt (nur
+  Lockfile-Auflösung innerhalb bestehender Semver-Ranges), objektiv
+  prüfbar (`npm audit` vorher/nachher, `npm ci` mit dem regulären
+  npm 10.9.9 danach fehlerfrei). Nach dem Fix: `npm ci` (frischer
+  `node_modules`-Ordner) fehlerfrei, `npx tsc -b` (0 Fehler), `npm run
+  lint` (0 Fehler), `npm run build` (0 Typfehler, unveränderte
+  815-KB-Chunk-Size-Warnung), `npx vitest run` (weiterhin 78
+  Testdateien, 581 Tests, alle grün) liefen vor dem Commit grün. `npm
+  audit --omit=dev` zeigt danach nur noch die 4 ausgeschlossenen
+  moderaten Funde statt zuvor 11.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
