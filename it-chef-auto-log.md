@@ -29160,3 +29160,93 @@ grün bzw. bestätigt unverändert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-17, 22:11 UTC (134. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund 20 Stunden nach dem 133. Lauf (`f8963b1`, 02:16 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` seit dem letzten Freigabe-Chef-Merge (23.10.) weiterhin
+unverändert bei `fe1300e` — per `git merge-base --is-ancestor` weiterhin
+lupenreiner Vorfahre von `it-chef/auto`, `main` bleibt unberührt, kein
+Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 581 Tests, alle grün) — identisch zum
+Endstand des 133. Laufs.
+
+**Neu seit heute Morgen (131. Lauf, 00:14 UTC): `npm audit --omit=dev`
+zeigt jetzt 12 Funde (2 moderate, 10 hoch) statt vorher 4 moderate.**
+Ursache geprüft: keine eigene Code-/Lockfile-Änderung zwischen den
+Läufen (`git diff` 131.→134. Lauf auf `package.json`/`package-lock.json`
+leer) — die npm-Advisory-Datenbank hat offenbar seit heute früh eine neue
+Advisory aufgenommen (`picomatch` ReDoS, GHSA-fc5q-39xc-vjpf), die über
+denselben bereits bekannten Pfad (`shadcn` → `@shadcn/registry` →
+`@dotenvx/dotenvx`/`fast-glob` → `fdir`/`micromatch`/`tinyglobby` →
+`picomatch`) zusätzlich auch `vite`/`vitest` erfasst, weil die lokal
+installierten Versionen denselben verwundbaren `picomatch` nutzen.
+Denselben nicht-breaking Workaround wie im 131. Lauf erneut versucht
+(`npx npm@11 audit fix --package-lock-only`) — anders als heute früh
+diesmal **kein Fortschritt**: Fundanzahl stieg sogar auf 19 (7 moderate,
+12 hoch, volle Zählung ohne `--omit=dev`), weil npm lediglich die
+Lockfile-Struktur umsortiert, ohne eine tatsächlich patched Version zu
+ziehen — `npm audit` selbst bietet für diese Funde nur `--force` an
+("Will install vite@6.2.7"/"shadcn@2.10.0", beide als Breaking Change
+markiert). Versuch verworfen (`git checkout -- package-lock.json`,
+danach `npm ci` zur Bestätigung: Baseline wieder identisch zu oben).
+Bleibt damit in derselben Kategorie wie die bisherigen 4 Shadcn-
+gebundenen Funde: nur per Shadcn-Major-Upgrade (und jetzt zusätzlich
+Vite-Major) behebbar — das ist eine Architekturentscheidung mit
+Breaking-Change-Risiko für das Build-Tooling/Design-System, nicht
+autonom entscheidbar (Kriterium 2), zumal alle betroffenen Pakete
+(`shadcn`-CLI, `vite`, `vitest`, `ts-morph`) reine Build-/Dev-Werkzeuge
+sind, kein von Endnutzern erreichbarer Angriffspfad in der
+ausgelieferten App. Für Ni vermerkt, falls er den Shadcn/Vite-Major-
+Sprung priorisieren will — keine Dringlichkeit, da kein Produktions-
+Risiko.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis (6.6/6.7/7.12
+weiterhin ohne Preisfelder je Kategorie in `TripDraft` — ein Chart mit
+erfundenen Zahlen würde die "nichts erfinden"-Regel brechen, s. Log
+03.11.).
+
+**Eigene, unabhängige Bug-Suche mit bisher nicht explizit abgedeckten
+Stellen:**
+- `routes.tsx` gegen `nav-config.ts`/`allRoutes` abgeglichen: das
+  `builtRoutes`-Set enthält exakt die 20 tatsächlich gebauten Pfade,
+  keine fehlende oder überflüssige Zuordnung, Placeholder-Fallback für
+  die restlichen drei (`/deal-finder`, `/budget`, `/premium`) korrekt.
+- Alle `.find()`-Aufrufe codeweit gesammelt und auf ungeschützten
+  Zugriff auf ein mögliches `undefined`-Ergebnis geprüft
+  (`Reiseentwuerfe.tsx` `duplicateDraft()`, `routes.tsx`
+  `getPageTitle()`, `mockConcierge.ts`, `stays.ts`) — durchgängig mit
+  Guard (`if (!source) return`) oder sicherem Fallback abgefangen, kein
+  Fund.
+- `parseInt`/`parseFloat` codeweit gesucht (fehlender Radix-Parameter
+  als klassischer Bug) — kein einziges Vorkommen im gesamten `src`-Baum.
+- `Preisalarme.tsx` (Zielpreis-/Vorpreisvergleich,
+  `targetReached`/`priceChanged`) und `Kalender.tsx` (Monatsnavigation,
+  `todayIso`-Vergleich, Grid-Rendering) im Detail durchgelesen — beide
+  logisch korrekt und bereits mit durchdachten Barrierefreiheits-
+  Kommentaren versehen, kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf (der versuchte
+npm-audit-Fix wurde verworfen, da er nichts löste). `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün), `npm
+audit --omit=dev` (12 Funde, 2 moderate/10 hoch, neu seit heute früh,
+nur per Shadcn-/Vite-Major-Upgrade behebbar, kein Produktions-Risiko)
+liefen grün bzw. wie dokumentiert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
