@@ -29089,3 +29089,74 @@ grün bzw. bestätigt unverändert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-17, 02:16 UTC (133. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 132. Lauf (`8419173`, 01:12 UTC).
+`origin/it-chef/auto` direkt übernommen, `origin/main` seit dem letzten
+Freigabe-Chef-Merge (23.10.) weiterhin unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container, 574 Pakete): `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün) —
+identisch zum Endstand des 132. Laufs. `npm audit --omit=dev` zeigt
+weiterhin nur die 4 bekannten, nur per Shadcn-Major-Upgrade behebbaren
+moderaten Funde (`minimatch`/`@ts-morph/common`/`ts-morph`/`shadcn`),
+keine neuen Advisories. Lissabon-Demo-Datum (20.-27. Dezember 2026)
+liegt bei heutigem Zeitstempel (17.11.) weiterhin in der Zukunft, kein
+Drift-Fix nötig.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut nach offenen
+Checkboxen durchsucht — unverändert dieselben Hauptpunkte offen (2.0
+Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12), hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang oder sind Produkt-/Architekturentscheidungen
+Nis.
+
+**Eigene, unabhängige Suche über einen dedizierten Explore-Agenten mit
+bisher nicht explizit erwähnten Kategorien** (Form-Input/Label-
+Verknüpfung, Tippfehler in sichtbaren deutschen UI-Texten,
+Berechnungslogik abseits der schon geprüften Dateien, Datumslogik/
+Zeitzonen, direkte State-Mutationen statt immutabler Updates, Code-
+Duplizierung, HTTP-Error-Handling in `duffel/client.ts`):
+- Form-Inputs/Labels (`FlightWizard.tsx`, `HotelWizard.tsx`,
+  `EditMode.tsx`, `Profil.tsx`, `Einstellungen.tsx`, `ChatInput.tsx`) —
+  alle Felder haben korrekt verknüpfte `<Label htmlFor>`/`id`-Paare oder
+  `aria-label`, kein Fund.
+- Deutsche UI-Texte (Tippfehler, Pluralbildung z. B. "Zwischenstopp(s)",
+  "Umstieg(e)") — kein Fund.
+- Berechnungslogik (`cartTotals.ts`, `calculateProgress.ts`,
+  `checklistRules.ts`, `Dashboard.tsx`) — konsistent und korrekt mit den
+  jeweiligen Demo-Datensätzen verdrahtet.
+- Datumslogik (`calendarUtils.ts`, `FlightWizard`/`HotelWizard`-
+  Datums-Constraints, `useChat.ts`-Default-Daten) — durchgängig lokale
+  Zeitkomponenten statt UTC-Parsing, keine Off-by-one-Fehler.
+- State-Mutationen — keine `.sort()`/`.push()`/`.splice()` direkt auf
+  React-State-Arrays gefunden; alle Updates nutzen `.filter()`/`.map()`/
+  Spread korrekt immutable.
+- Code-Duplizierung: `Angebote.tsx` hat eine eigene `formatPrice()`
+  statt `format.ts`s `formatEuro()`/`formatOfferPrice()` zu nutzen —
+  aber funktional nicht identisch (eigener Nicht-EUR-Fallback), daher
+  kein eindeutiger, risikofreier Fund (Kriterium 3/4 nicht sauber
+  erfüllt, eher Verbesserungsvorschlag als klarer Bug).
+- `duffel/client.ts`: HTTP-Error-/Netzwerkfehler-Handling bereits
+  sorgfältig mit Fallbacks abgedeckt, kein Fund.
+- Zusätzlich geprüft: alle Layout-/Chat-/Search-Komponenten, Hooks
+  (`useChat.ts`, `useConcierge.ts`), `mockAdvisor.ts`/`mockConcierge.ts`,
+  `tripStorage.ts`, `routes.tsx`, `nav-config.ts`, sämtliche
+  shadcn-ui-Primitives.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün), `npm
+audit --omit=dev` (nur die 4 bekannten Shadcn-gebundenen Funde) liefen
+grün bzw. bestätigt unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
