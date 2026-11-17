@@ -29004,3 +29004,88 @@ Programmierung-Ist-Stand, analog dem Muster früherer Läufe).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-17, 01:12 UTC (132. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 131. Lauf (`b08ab6f`, 00:14 UTC).
+`origin/it-chef/auto` direkt übernommen, `origin/main` seit dem letzten
+Freigabe-Chef-Merge (23.10.) weiterhin unverändert — kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci` im frischen
+Container): `npm ci` fehlerfrei (574 Pakete), `npx tsc -b` (0 Fehler),
+`npm run lint` (0 Fehler), `npx vitest run` (78 Testdateien, 581 Tests,
+alle grün) — identisch zum Endstand des 131. Laufs. `npm audit
+--omit=dev` zeigt weiterhin nur die 4 bekannten, nur per
+Shadcn-Major-Upgrade behebbaren moderaten Funde (`minimatch`/
+`@ts-morph/common`/`ts-morph`/`shadcn`), keine neuen Advisories seit dem
+131. Lauf. Lissabon-Demo-Datum (20.-27. Dezember 2026) liegt bei
+heutigem Zeitstempel (17.11.) weiterhin in der Zukunft, kein Drift-Fix
+nötig.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut nach offenen
+Checkboxen durchsucht — unverändert dieselben Hauptpunkte offen (2.0
+Base44/Auth, 4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre,
+6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12), hängen weiterhin an fehlendem
+Base44-/Gemini-/Duffel-Zugang oder sind Produkt-/Architekturentscheidungen
+Nis. `reports/support-chef.md` (Stand 23.10., seitdem unverändert)
+gegengeprüft: PR #34 (`formatTime()`) und PR #38 (Buchung-"+Suchen"-
+Edit-Shortcut) werden dort als "weiterhin nicht live" gemeldet — beide
+Fixes sind jedoch bereits auf `it-chef/auto` vorhanden (`formatTime()`
+in `src/lib/format.ts` gibt bei ungültigem Zeitstempel `—` statt
+"Invalid Date" zurück; `Buchung.tsx` verlinkt bereits über `editHref`
+statt fest auf `/ki-chat`) — das ist ein offener Merge nach `main`,
+Sache des Freigabe-Chef-Kanals, kein neuer IT-Chef-Punkt. Der dritte
+Support-Chef-Vorschlag (Lösch-Warnungen nach Reversibilität abstufen,
+betrifft `Favoriten.tsx`/`Warenkorb.tsx`/`Preisalarme.tsx`/
+`Aktivitaeten.tsx`/`EditMode.tsx`) bleibt bewusst offen: anders als beim
+bereits gefixten "Entwurf abschließen"-Button (eindeutig: eine
+unwiderrufliche Aktion wurde fälschlich als riskant dargestellt) müsste
+hier für fünf verschiedene Stellen neu bewertet werden, wie reversibel
+jede Aktion ist und welche Abstufung angemessen ist — `MARKENDESIGN.md`
+gibt dafür keine konkrete Vorgabe, nur das allgemeine Prinzip "ehrlich
+statt beschönigend". Das ist eine Interpretations-/Stilentscheidung über
+fünf Stellen hinweg, kein einzelner klar abgegrenzter Punkt (Kriterium
+3) — bleibt für Ni oder eine explizite Marketing-Chef-Vorgabe offen.
+
+**Eigene, unabhängige Suche mit bisher nicht explizit erwähnten
+Methoden:**
+- Lose Gleichheit (`==`/`!=` statt `===`/`!==`) codeweit gesucht — alle
+  Fundstellen waren bei genauer Prüfung bereits strikte Vergleiche
+  (`===`/`!==`), kein echter Fund.
+- `dangerouslySetInnerHTML` codeweit gesucht — kein einziges Vorkommen,
+  kein XSS-Risiko dieser Art vorhanden.
+- Verbleibende `console.*`-Aufrufe im Nicht-Test-Code gesammelt — alle
+  drei Stellen (`ErrorBoundary.tsx`, `tripStorage.ts`,
+  `duffel/client.ts`) sind bewusste Fehlerprotokollierung neben einer
+  bereits vorhandenen Nutzer-Fehlerbehandlung, keine vergessenen
+  Debug-Ausgaben.
+- Alle `size="icon"`-Buttons codeweit gesammelt und einzeln gegen
+  `aria-label` geprüft (auch bei mehrzeiligen JSX-Props) — durchgängig
+  vorhanden und inhaltlich konkret (z. B. `${item.label} aus dem
+  Warenkorb entfernen`), kein Fund.
+- Alle `Link to="/..."`-Ziele erneut gesammelt und gegen `routes.tsx`
+  abgeglichen — alle gültig, keine toten Links.
+- `cartTotals.ts`, `calculateProgress.ts`, `ChecklistPanel.tsx`,
+  `Dashboard.tsx` auf Division-durch-Null in Prozent-/Summenberechnungen
+  geprüft — Nenner sind überall feste Konstanten bzw. aktuell nie leere
+  Demo-Arrays; ein Guard dafür wäre Fehlerbehandlung für ein Szenario,
+  das mit dem heutigen Code nicht eintreten kann, deshalb kein Fix.
+- `index.html` erneut geprüft (Favicon-Datei existiert in `public/`,
+  `lang`/Viewport/Titel korrekt) — kein Fund; fehlende `meta
+  name="description"` wäre eine Marketing-Text-Entscheidung, nicht
+  autonom zu formulieren.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün), `npm
+audit --omit=dev` (nur die 4 bekannten Shadcn-gebundenen Funde) liefen
+grün bzw. bestätigt unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
