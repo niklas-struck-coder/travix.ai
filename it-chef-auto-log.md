@@ -29605,3 +29605,74 @@ Produktions-Risiko) liefen grün bzw. bestätigt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-18, ca. 23:11 UTC (140. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 139. Lauf (`7cfad89`, 22:12 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen), per `git log origin/main..HEAD` bestätigt lupenreiner Vorfahre
+von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün) — identisch zum
+Endstand des 139. Laufs. `npm audit --omit=dev` erneut dieselben 4
+moderaten Funde (minimatch → `@ts-morph/common` → `ts-morph` →
+`shadcn`-CLI-Kette), weiterhin nur per `--force`/Shadcn-Major-Upgrade
+behebbar, reine Dev-Tooling-Abhängigkeit, kein Produktions-Risiko.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe:**
+- Codeweite Suche nach `.sort(...)`-Aufrufen ohne Comparator (klassischer
+  Bug: Zahlen würden lexikografisch statt numerisch sortiert) — kein
+  einziges Vorkommen im gesamten `src`-Baum, keine Sortierlogik
+  vorhanden.
+- `MARKENDESIGN.md`s Vorgabe "niemals Rot für Budget-Warnungen" gezielt
+  gegen den aktuellen Code geprüft (`Dashboard.tsx`, `Buchung.tsx`,
+  `Reiseentwuerfe.tsx`): Es gibt aktuell gar keine Budget-Über-
+  schreitungs-Logik im Code (`Dashboard.tsx` hat dazu einen eigenen
+  Kommentar, da `TripDraft` keine echten Preisfelder für einen
+  Soll-Ist-Vergleich hat, identisch zur bekannten 6.6/6.7/7.12-Lücke) —
+  kein Verstoß, da die betroffene Funktion schlicht noch nicht existiert.
+- `src/pages/Hilfe.tsx` und `src/routes.tsx` (neuere Dateien, 29.10.
+  bzw. später ergänzt) gezielt gelesen und auf Testabdeckung geprüft —
+  beide haben bereits eine eigene Testdatei, Inhalt bzw. Routing-Logik
+  unverändert korrekt.
+- Kyoto-Entwurf (`3.–10. März 2026`, u. a. `Kalender.tsx`,
+  `Reiseentwuerfe.tsx`, `Dashboard.tsx`) gegen das heutige Datum (18.11.)
+  geprüft, da das Datum inzwischen in der Vergangenheit liegt: anders als
+  die wiederholt gefundene Lissabon-Zeit-Drift gibt es hier keinen
+  dynamisch berechneten "upcoming"/"past"-Zustand — `MeineReisen.tsx`
+  markiert Kyoto bereits fest als `status: 'past'`, `Dashboard.tsx`s
+  `upcomingTripsCount` ist ebenfalls hart auf Lissabon allein gesetzt
+  (siehe Kommentar dort) — konsistent, kein Drift-Bug.
+- `TrainCard.tsx`-Pluralisierung (`Umstieg`/`Umstiege`) gegen den
+  Null-Fall geprüft: Badge wird nur bei `transfers > 0` überhaupt
+  gerendert, kein "0 Umstieg"-Fall möglich — kein Fund.
+- Vorschlag "`recharts`-Abhängigkeit entfernen" aus `reports/it-chef.md`
+  erneut gegengeprüft (seit Lauf neun wiederholt dokumentiert): weiterhin
+  kein Import in `src/`, aber für diesen Kanal explizit als
+  Abhängigkeitsänderung ausgeschlossen und bewusst für die noch
+  blockierte Reisebudget-Seite (7.12) vorgehalten — keine Neubewertung
+  nötig, unverändert kein Umsetzungskandidat.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 584 Tests, alle grün), `npm
+audit --omit=dev` (4 moderate Funde, reine Dev-Tooling-Kette, kein
+Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
