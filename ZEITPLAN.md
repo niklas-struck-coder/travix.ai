@@ -3283,6 +3283,22 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (75
   Testdateien, 562 Tests, alle grün — 561 + 1 neuer Test) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 18.11. (138. Lauf) dieselbe Lücke für das
+  Start-Feld nachgezogen: Der 01.11.-Fix hatte `aria-invalid`/
+  `aria-describedby` nur auf das Ziel-Feld (`id="destination"`) gesetzt,
+  obwohl der Fehler "Start und Ziel dürfen nicht gleich sein" beide Felder
+  gleichermaßen betrifft — ein Screenreader-Nutzer, der beim Start-Feld
+  (`id="origin"`) ansetzt, bekam den Fehler weiterhin nicht vorgelesen.
+  Fix: `<Input id="origin">` bekommt dieselben `aria-invalid={sameAirport}`/
+  `aria-describedby`-Attribute, verweist auf dieselbe
+  `id="destination-same-airport-error"` (mehrere Felder dürfen laut
+  ARIA-Spezifikation dieselbe Beschreibung referenzieren). Keine
+  Verhaltensänderung für Sehende. Neuer Test in `FlightWizard.test.tsx`
+  ("links the same-airport error to the origin field for screen readers
+  too"), Muster analog dem bestehenden Test für das Ziel-Feld. `npx tsc -b`
+  (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (78 Testdateien,
+  584 Tests, alle grün — 583 + 1 neuer Test), `npm run build` (0
+  Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem Commit grün.
   Vom autonomen IT-Chef-Lauf am 01.11. (vierundsechzigster Lauf) eine
   weitere, bisher nicht geprüfte Accessibility-Lücke geschlossen:
   `MobileNav.tsx` (3.3) rendert sein `SheetContent` mit `SheetTitle`, aber

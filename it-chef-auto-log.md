@@ -29452,3 +29452,84 @@ Risiko, keine Code-Änderung dafür in diesem Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-18, ca. 02:1x UTC (138. Lauf — FlightWizard-Accessibility-Fix: Start-Feld nachgezogen)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 137. Lauf (`8b52cf1`, 01:19 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e`, per `git log origin/main..HEAD`
+bestätigt lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt
+unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 583 Tests, alle grün) — identisch zum
+Endstand des 137. Laufs. `npm audit --omit=dev` erneut dieselben 12
+Funde (2 moderate, 10 hoch), weiterhin nur per `--force` (Shadcn-/Vite-
+Major, Breaking Change) behebbar — unverändert eine
+Architekturentscheidung, kein Produktions-Risiko.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche über bisher nicht explizit abgedeckte
+Stellen:** `target="_blank"`/`rel`-Paare codeweit gesucht (kein einziges
+Vorkommen — die App verlinkt aktuell keine neuen Tabs), `dangerouslySetInnerHTML`
+und `href="#"` codeweit gesucht (kein Treffer), alle `addEventListener`-
+Aufrufe (`useChat.ts` beforeunload, `utils.ts` focusPageHeading blur) auf
+fehlende Cleanup-Funktion geprüft (beide bereits korrekt mit
+`removeEventListener`/`{ once: true }` abgeräumt), `console.log/warn/error`
+codeweit gesucht (drei Treffer, alle absichtliche Fehlerprotokollierung
+in `ErrorBoundary.tsx`/`duffel/client.ts`/`tripStorage.ts`, kein Debug-
+Rest), `HotelWizard.tsx`/`FlightWizard.tsx`/`Warenkorb.tsx` im Detail
+gegen Label/Input-Zuordnung und Mengen-Logik durchgelesen — bis auf den
+unten beschriebenen Fund kein weiterer. Lissabon-/Kyoto-Demo-Reisen
+(`MeineReisen.tsx`/`Dashboard.tsx`/`Kalender.tsx`) erneut gegen das
+heutige Datum (18.11.) geprüft — Status (`upcoming`/`past`) weiterhin
+korrekt, kein erneuter Zeit-Drift.
+
+**Gefundener und behobener Punkt:** `src/components/search/FlightWizard.tsx`
+— der 01.11.-Lauf (dreiundsechzigster Lauf) hatte die "Start und Ziel
+dürfen nicht gleich sein"-Fehlermeldung bereits per `aria-invalid`/
+`aria-describedby` mit dem Zielflughafen-Feld (`id="destination"`)
+verknüpft, aber nicht mit dem Startflughafen-Feld (`id="origin"`),
+obwohl der Fehler beide Felder gleichermaßen betrifft. Ein
+Screenreader-Nutzer, der beim Start-Feld statt beim Ziel-Feld ansetzt
+(z. B. weil er dort gerade einen anderen Flughafencode eintippt), bekam
+den Fehler nicht vorgelesen.
+
+**Warum sicher genug:** Reine Accessibility-Korrektur, exakt dieselbe
+bereits etablierte Verdrahtung (`aria-invalid={sameAirport}` +
+`aria-describedby` auf dieselbe Fehlermeldungs-`id`) wie beim
+Ziel-Feld, nur auf das symmetrische zweite Feld ausgedehnt — kein
+Bezug zu Auth, Zahlungen, Nutzerdaten oder rechtlichen Texten, keine
+offene Produkt-/Architekturentscheidung, keine Interpretation über das
+bestehende Muster hinaus nötig. Objektiv prüfbar (Testing-Library:
+`aria-invalid`/`aria-describedby` vor, während und nach dem Fehler).
+Mehrere Formularfelder dürfen laut ARIA-Spezifikation dieselbe
+`aria-describedby`-Ziel-`id` referenzieren.
+
+**Fix:** `<Input id="origin">` bekommt dieselben
+`aria-invalid={sameAirport}`/`aria-describedby`-Attribute wie
+`id="destination"`, verweist auf dieselbe
+`id="destination-same-airport-error"`. Keine Verhaltensänderung für
+Sehende. Neuer Test in `FlightWizard.test.tsx` ("links the
+same-airport error to the origin field for screen readers too"),
+Muster exakt analog dem bestehenden Test für das Ziel-Feld.
+`ZEITPLAN.md` (01.11.-Eintrag ergänzt) und `tasks/tasks-prd-travix-
+platform.md` (Checkbox 5.8) entsprechend nachgezogen.
+
+**Geprüft:** `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün — 583 + 1 neuer Test),
+`npm run build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen
+vor dem Commit grün. `npm audit --omit=dev` unverändert (12 Funde, nur
+per Shadcn-/Vite-Major-Upgrade behebbar, kein Produktions-Risiko, keine
+Code-Änderung dafür in diesem Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

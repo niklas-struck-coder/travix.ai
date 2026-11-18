@@ -87,6 +87,8 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
             maxLength={3}
             className="uppercase"
             required
+            aria-invalid={sameAirport}
+            aria-describedby={sameAirport ? 'destination-same-airport-error' : undefined}
           />
           <p className="text-xs text-muted-foreground">3-stelliger Flughafencode, z. B. BER</p>
         </div>
