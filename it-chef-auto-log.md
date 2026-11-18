@@ -29533,3 +29533,75 @@ Code-Änderung dafür in diesem Lauf).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-18, ca. 22:11 UTC (139. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund 20 Stunden nach dem 138. Lauf (`9bb5e52`, 02:14 UTC — deutlich
+größere Lücke als die vorherigen, teils stündlichen Läufe). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e`, per `git log main..HEAD`
+bestätigt lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt
+unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün) — identisch zum
+Endstand des 138. Laufs. `npm audit --omit=dev` zeigt diesmal nur noch
+4 moderate Funde (minimatch → `@ts-morph/common` → `ts-morph` →
+`shadcn`-CLI-Kette) statt der zuletzt protokollierten 12 (2 moderate, 10
+hoch) — reine Dev-Tooling-Abhängigkeit (Shadcn-CLI, kein Laufzeit-Code
+der App), weiterhin nur per `--force`/Shadcn-Major-Upgrade behebbar und
+weiterhin kein Produktions-Risiko. Keine Code-Änderung nötig, da der
+Lock-Datei-Stand außerhalb dieses Laufs entstanden ist und hier nicht
+angefasst wurde.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche über bisher seltener geprüfte,
+geschäftslogik-nahe Stellen:**
+- `src/lib/trip/cartTotals.ts` (`calculateCartTotal`/`groupCartItems`),
+  `src/lib/trip/calculateProgress.ts` und `src/lib/trip/checklistRules.ts`
+  (`isAutoItemChecked`) im Detail gegeneinander gelesen — alle drei
+  nutzen konsistent dieselben Felder/Bedingungen (`transportMode`,
+  `dates`, `accommodation`, `activities.length > 0`, `budget`), keine
+  Abweichung wie beim 76.-Lauf-Fund mehr vorhanden.
+- `src/lib/trip/calendarUtils.ts` (Monatsraster, Vorwoche/Folgewoche,
+  `getTripsForDay`) durchgelesen — Montag-Start, Rollover Jan/Dez,
+  Datumsvergleich per ISO-String-Grenzen korrekt.
+- `src/components/trip/EditMode.tsx`/`ChecklistPanel.tsx` gelesen,
+  inklusive der Gleichnamigkeits-Behandlung (`getActivityLabel()`,
+  Eintrag-Nummerierung) und des manuellen/automatischen Checklisten-
+  Fortschritts — konsistent, keine Doppelzählung.
+- `src/components/search/FlightWizard.tsx` vs. `HotelWizard.tsx`
+  gegenübergestellt: beide deaktivieren den Submit-Button bei
+  ungültigem Datumsbereich, statt das jeweils andere Datum automatisch
+  nachzuziehen — identisches, bereits etabliertes Verhalten in beiden
+  Formularen, keine Inkonsistenz.
+- `src/components/search/TrainCard.tsx`/`TrainResults.tsx` und
+  `src/lib/ai/speech.ts` (Web Speech API Wrapper) gelesen — Pluralisierung
+  ("Umstieg"/"Umstiege"), Fehler-/Cleanup-Pfade bereits korrekt.
+- `src/pages/Aktivitaeten.tsx` gegen `EditMode.tsx`/`TripActivity`
+  abgeglichen: eigener, bewusst getrennter Demo-Datentyp
+  (`PlannedActivity`), keine Typ-Verwechslung trotz ähnlicher
+  `formatPrice()`-Funktion.
+- Gezielt nach dynamischer Tage-/Nächte-Pluralisierung
+  (`` `${...}.length} Ergebnisse/Angebote/Treffer` ``-Muster) gesucht —
+  wie im 136. Lauf bereits festgestellt, kein Vorkommen im Code.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 584 Tests, alle grün), `npm
+audit --omit=dev` (4 moderate Funde, reine Dev-Tooling-Kette, kein
+Produktions-Risiko) liefen grün bzw. bestätigt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
