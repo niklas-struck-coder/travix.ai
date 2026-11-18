@@ -26,3 +26,27 @@ describe('Sidebar – Einklappen-Button hat einen erreichbaren Namen', () => {
     expect(screen.getByRole('button', { name: 'Seitenleiste ausklappen' })).toBeInTheDocument()
   })
 })
+
+describe('Sidebar – Navigationslinks behalten einen erreichbaren Namen', () => {
+  it('hat einen erreichbaren Namen, wenn ausgeklappt (über den sichtbaren Text)', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: 'Start' })).toBeInTheDocument()
+  })
+
+  it('behält einen erreichbaren Namen, wenn eingeklappt und der sichtbare Text verschwindet', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Seitenleiste einklappen' }))
+
+    expect(screen.getByRole('link', { name: 'Start' })).toBeInTheDocument()
+  })
+})

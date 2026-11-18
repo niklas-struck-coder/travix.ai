@@ -29376,3 +29376,79 @@ unverändert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-18, ca. 01:19 UTC (137. Lauf — Sidebar-Accessibility-Fix)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 136. Lauf (`8b1966f`, 00:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e`, per `git log origin/main..HEAD`
+bestätigt lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt
+unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 581 Tests, alle grün) — identisch zum
+Endstand des 136. Laufs. `npm audit --omit=dev` erneut genau die 12
+Funde (2 moderate, 10 hoch) aus den letzten Läufen, weiterhin nur per
+`--force` (Shadcn-/Vite-Major, Breaking Change) behebbar — unverändert
+eine Architekturentscheidung, kein Produktions-Risiko.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche über einen dafür beauftragten
+Explore-Agenten**, gezielt auf bisher nicht explizit abgedeckte Stellen
+(Formular-Regexe, ungeschützte Non-Null-Assertions/`as`-Casts,
+Datum-/Zeitzonen-Randfälle außerhalb der bisher geprüften, Fokus-
+Management in Dialogen/Sheets, ungeschützte localStorage/sessionStorage-
+Zugriffe app-weit, Off-by-One in Datumsbereichen/Pagination/Slicing,
+deutsche Tippfehler, kaputte interne Links): die meisten Kategorien ohne
+neuen Fund (App hat z.B. gar keine Formularfelder mit Email/Telefon/PLZ;
+alle Storage-Zugriffe bereits try/catch-geschützt; Fokus-Management in
+`dialog.tsx`/`sheet.tsx` bereits mit Opener-Tracking/Fallback). Ein
+Fund bestätigt und behoben (s.u.).
+
+**Gefundener und behobener Punkt:** `src/components/layout/Sidebar.tsx`
+— im eingeklappten Zustand der Desktop-Seitenleiste verlieren alle
+Navigations-`NavLink`s ihren sichtbaren Textlabel und hatten bisher nur
+ein `title`-Attribut als Namensquelle. `title`-Tooltips erscheinen bei
+reiner Tastatur-Navigation (Tab) in den meisten Browsern nicht, nur bei
+Maus-Hover — anders als beim direkt danebenliegenden
+"Seitenleiste einklappen"-Button, der schon ein explizites `aria-label`
+hat. Ein sehend-aber-tastaturgebundener Nutzer, der sich per Tab durch
+die eingeklappte Seitenleiste bewegt, landet damit auf einem Icon-only-
+Link ohne erkennbaren Namen.
+
+**Warum sicher genug:** Reine Accessibility-Korrektur an einer
+bestehenden Navigationskomponente, kein Bezug zu Auth, Zahlungen,
+Nutzerdaten oder rechtlichen Texten. Keine offene Produkt-/
+Architekturentscheidung — exakt dasselbe, im Code bereits etablierte
+Muster (`aria-label` parallel zu `title` bei Icon-only-Zustand) wie beim
+Einklappen-Button zwei Zeilen darunter. Klar abgegrenzt (ein Attribut an
+einer Stelle). Objektiv prüfbar (Testing-Library `getByRole('link',
+{ name: ... })` vor und nach dem Einklappen).
+
+**Fix:** `aria-label={collapsed ? item.label : undefined}` neben dem
+bestehenden `title` auf dem `NavLink` ergänzt — keine Verhaltens-
+änderung für Maus- oder Screenreader-Nutzer mit Maus, die den Namen
+vorher schon über `title` bzw. die akkumulierte Textalternative hatten.
+Zwei neue Tests in der bestehenden `Sidebar.test.tsx` (Muster analog den
+beiden schon vorhandenen Tests für den Einklappen-Button): erreichbarer
+Name "Start" über sichtbaren Text im ausgeklappten Zustand, erreichbarer
+Name "Start" weiterhin vorhanden nach dem Einklappen (eingeklappter
+Zustand, kein sichtbarer Text mehr). `ZEITPLAN.md` entsprechend
+ergänzt (Ist-Stand-Abschnitt, Programmierung/IT-Chef).
+
+**Geprüft:** `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 583 Tests, alle grün — 581 + 2 neue Tests)
+liefen vor dem Commit grün. `npm audit --omit=dev` unverändert (12
+Funde, nur per Shadcn-/Vite-Major-Upgrade behebbar, kein Produktions-
+Risiko, keine Code-Änderung dafür in diesem Lauf).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

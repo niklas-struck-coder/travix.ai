@@ -3377,6 +3377,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Testdateien, 581 Tests, alle grün) liefen vor dem Commit grün. `npm
   audit --omit=dev` zeigt danach nur noch die 4 ausgeschlossenen
   moderaten Funde statt zuvor 11.
+  Vom autonomen IT-Chef-Lauf am 18.11. (137. Lauf) eine Keyboard-
+  Accessibility-Lücke in `Sidebar.tsx` geschlossen: Im eingeklappten
+  Zustand der Desktop-Seitenleiste (Klick auf "Seitenleiste einklappen")
+  verlieren alle Navigations-Links ihren sichtbaren Textlabel und hatten
+  bisher nur ein `title`-Attribut als Namensquelle — `title`-Tooltips
+  erscheinen bei reiner Tastatur-Navigation (Tab) in den meisten Browsern
+  aber nicht, nur bei Maus-Hover, anders als beim direkt daneben
+  liegenden Einklappen-Button selbst, der schon ein explizites
+  `aria-label` hat. Ein sehend-aber-tastaturgebundener Nutzer, der sich
+  per Tab durch die eingeklappte Seitenleiste bewegt, landet damit auf
+  einem Icon-only-Link ohne erkennbaren Namen. Fix: jeder `NavLink`
+  bekommt zusätzlich zum bestehenden `title` ein `aria-label={collapsed
+  ? item.label : undefined}` (exakt dasselbe Muster wie beim
+  Einklappen-Button), keine Verhaltensänderung für Maus-/Screenreader-
+  Nutzer. Zwei neue Tests in der bestehenden `Sidebar.test.tsx`
+  (Muster analog den beiden schon vorhandenen Tests für den
+  Einklappen-Button): erreichbarer Name "Start" über sichtbaren Text im
+  ausgeklappten Zustand, erreichbarer Name "Start" weiterhin vorhanden
+  nach dem Einklappen. `npx tsc -b` (0 Fehler), `npm run lint` (0
+  Fehler), `npx vitest run` (78 Testdateien, 583 Tests, alle grün — 581
+  + 2 neue Tests) liefen vor dem Commit grün.
 
 ### Sprint 1 — Fundament (KW33-34, 11.-24. Aug)
 - [ ] Backend-Entscheidung treffen: Base44 vs. Alternative (Supabase,
