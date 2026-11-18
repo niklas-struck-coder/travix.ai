@@ -29305,3 +29305,74 @@ liefen grün bzw. wie dokumentiert.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-18, ca. 00:09 UTC (136. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 135. Lauf (`6080f00`, 23:10 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e`, per `git log origin/main..HEAD`
+bestätigt lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt
+unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 581 Tests, alle grün) — identisch zum
+Endstand des 135. Laufs. `npm audit --omit=dev` erneut genau die 12
+Funde (2 moderate, 10 hoch) aus dem 134./135. Lauf, weiterhin nur per
+`--force` (Shadcn-/Vite-Major, Breaking Change) behebbar — unverändert
+eine Architekturentscheidung, kein Produktions-Risiko.
+
+**Zusätzlich geprüft: Testabdeckung vollständig.** Codeweiter Abgleich
+jeder `.ts`/`.tsx`-Datei unter `src/` (inkl. `src/components/ui/`,
+`src/hooks/`, `src/pages/`) gegen eine gleichnamige `.test.*`-Datei —
+ausnahmslos jede Datei hat bereits eine eigene Testdatei. Reine
+Testabdeckungslücken (das bisher häufigste Fundmuster) sind damit als
+Quelle für diesen Lauf ausgeschlossen.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche mit bisher nicht explizit abgedeckten
+Stellen:**
+- Geld-Summierung (`src/lib/trip/cartTotals.ts` `calculateCartTotal()`/
+  `groupCartItems()`, `src/lib/trip/calculateProgress.ts`) gelesen und
+  auf Floating-Point-Rundungsfehler (`0.1 + 0.2`-Art) geprüft: codeweite
+  Suche nach `price:` mit Dezimalstellen ergab keinen einzigen Treffer —
+  alle Preise im Code sind ganze Euro-Beträge, das Fehlerbild kann mit
+  den aktuellen Daten nicht auftreten.
+- Dynamische Tage-/Nächte-Pluralisierung ("1 Tag" vs. "1 Tage") gezielt
+  gesucht (`` `${...} Tage` ``/`` `${...} Nächte` ``-Muster) — kein
+  einziges Vorkommen; es gibt aktuell keine Stelle im Code, die eine
+  Tages-/Nächteanzahl dynamisch in einen Text einsetzt.
+- Alle `.sort()`-Aufrufe im `src`-Baum codeweit gesucht (klassischer
+  Bug: Sortierung von Zahlen ohne Comparator) — kein einziges Vorkommen.
+- Alle `<img>`-Tags codeweit auf fehlendes `alt` geprüft — kein Treffer.
+- Doppeltes `id="destination"` in `FlightWizard.tsx`/`HotelWizard.tsx`
+  gegengeprüft: beide werden ausschließlich auf getrennten Routen
+  (`Flugsuche.tsx`/`Hotelsuche.tsx`) gerendert, nie gleichzeitig im DOM
+  — kein Accessibility-Bug.
+- Die hartcodierte Lissabon-Demo-Reise (`MeineReisen.tsx`/
+  `Dashboard.tsx`/`Kalender.tsx`/`Reiseentwuerfe.tsx`, 20.–27. Dezember
+  2026, zuletzt am 16.11. korrigiert) gegen das heutige Datum (18.11.)
+  geprüft — Reise liegt noch über einen Monat in der Zukunft, der
+  vorhergesagte Zeit-Drift tritt noch nicht erneut auf.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf. `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` unverändert, da kein Fortschritt zu
+dokumentieren war.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 581 Tests, alle grün), `npm
+audit --omit=dev` (12 Funde, unverändert, nur per Shadcn-/Vite-Major-
+Upgrade behebbar, kein Produktions-Risiko) liefen grün bzw. bestätigt
+unverändert.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
