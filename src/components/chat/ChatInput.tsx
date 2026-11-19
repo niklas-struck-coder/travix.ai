@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { Mic, MicOff, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +17,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
   const [listening, setListening] = useState(false)
   const [micError, setMicError] = useState<string | null>(null)
   const recognitionRef = useRef<ReturnType<typeof startListening>>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => () => recognitionRef.current?.stop(), [])
 
@@ -55,7 +57,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Beschreibe deine Tr
             className={cn(listening && 'border-teal text-teal')}
             aria-label={listening ? 'Aufnahme läuft' : 'Spracheingabe starten'}
           >
-            {listening ? <Mic className="animate-pulse" /> : <MicOff />}
+            {listening ? <Mic className={prefersReducedMotion ? undefined : 'animate-pulse'} /> : <MicOff />}
           </Button>
         )}
         <Input

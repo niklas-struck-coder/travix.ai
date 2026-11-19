@@ -29948,3 +29948,83 @@ grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-19, ca. 23:15 UTC (145. Lauf — ein sicherer Punkt umgesetzt)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 144. Lauf (`41dda8d`, 22:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen), per `git merge-base` bestätigt lupenreiner Vorfahre von
+`it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (u. a. `target="_blank"` ohne `rel="noopener"`, `role="button"`
+auf Nicht-Buttons, `key={index}` in `.map()`, `AbortController`/Race-
+Conditions in Fetch-Aufrufen, deutsche Pluralformen in dynamisch
+erzeugten Texten, Float-Summierung in `cartTotals.ts`, Icon-only-Buttons
+ohne `aria-label` — alles ohne neuen Fund, da bereits korrekt bzw. gar
+nicht im Code vorhanden): Beim gezielten Durchsuchen aller
+`animate-pulse`/`animate-spin`/`animate-bounce`/`animate-ping`-Stellen
+(Tailwinds CSS-Keyframe-Animationsklassen, anders als die bereits in
+früheren Läufen geprüften Framer-Motion-Animationen in `TravixAvatar.tsx`
+(4.4, 31.10.) und `PageTransition.tsx` (3.7)) fiel auf: drei Stellen
+nutzen `animate-pulse` auf einem Icon, das während eines laufenden
+Zustands (Suche bzw. Sprachaufnahme) endlos pulsiert, ohne die dort
+bereits etablierte `prefers-reduced-motion`-Rücksicht:
+- `FlightWizard.tsx` — `<Plane className="animate-pulse" />` während
+  `loading`
+- `HotelWizard.tsx` — `<BedDouble className="animate-pulse" />` während
+  `loading`
+- `ChatInput.tsx` — `<Mic className="animate-pulse" />` während
+  `listening`
+
+Alle drei erfüllen die vier Sicherheitskriterien: keine Berührung von
+Auth/Zahlungen/Nutzerdaten/Rechtstexten, keine offene Produkt-/
+Architekturentscheidung, eindeutig beschriebenes, objektiv prüfbares
+Verhalten (Klasse entfällt bei `prefers-reduced-motion: reduce`, exakt
+dasselbe bereits etablierte Muster), und keine Interpretation über das
+hinaus nötig, was der Code selbst schon an anderer Stelle vormacht.
+
+**Fix:** Alle drei Komponenten importieren jetzt `useReducedMotion` aus
+`framer-motion` (bereits Projekt-Abhängigkeit, identischer Import wie in
+`TravixAvatar.tsx`/`PageTransition.tsx`) und setzen die
+`animate-pulse`-Klasse nur noch, wenn `!prefersReducedMotion`. Der
+begleitende Text ("Suche läuft …") bzw. das `aria-label` ("Aufnahme
+läuft") bleibt in allen drei Fällen unverändert bestehen — die Animation
+ist rein dekorativ, ihr Entfernen nimmt keine Information weg.
+
+**Tests:** Je eine neue, eigenständige `*.reduced-motion.test.tsx`-Datei
+pro Komponente (`FlightWizard.reduced-motion.test.tsx`,
+`HotelWizard.reduced-motion.test.tsx`, `ChatInput.reduced-motion.test.tsx`),
+nicht in den bestehenden Haupttestdateien — derselbe, bereits in
+`TravixAvatar.reduced-motion.test.tsx` dokumentierte Grund: `framer-motion`
+prüft `prefers-reduced-motion` nur einmal pro Prozess und cacht das
+Ergebnis, vitest isoliert Module aber nur pro Testdatei, nicht pro Test.
+Jeder neue Test mockt `window.matchMedia` auf `matches: true` und prüft,
+dass das jeweilige Icon (`svg.lucide-plane`/`svg.lucide-bed-double`/
+`svg.lucide-mic`) im Lade- bzw. Aufnahme-Zustand nicht die Klasse
+`animate-pulse` trägt.
+
+**Dokumentation:** `ZEITPLAN.md` (Sprint 6, "Mobile-Politur,
+Barrierefreiheit-Check") sowie Querverweis-Notizen an den Checkboxen 5.8
+(`FlightWizard.tsx`) und 4.11 (Spracheingabe, `ChatInput.tsx`) in
+`tasks/tasks-prd-travix-platform.md` ergänzt; `HotelWizard.tsx` hat keine
+eigene Checkbox (dort nur der Querverweis in `ZEITPLAN.md`).
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (81 Testdateien, 587 Tests, alle grün — 584 +
+3 neue Tests, nur der bekannte harmlose jsdom-Hinweis "Not implemented:
+Window's scrollTo()"), `npm run build` (0 Typfehler, unveränderte
+Chunk-Size-Warnung) liefen grün vor dem Commit.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

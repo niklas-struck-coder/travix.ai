@@ -4255,7 +4255,27 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
 
 ### Sprint 6 — Testing, Politur, Launch-Vorbereitung (KW45-47, 3.-23. Nov)
 - [ ] End-to-End-Testing aller Flows (Chat → Buchungsseite → Urlaubsmodus)
-- [ ] Mobile-Politur, Barrierefreiheit-Check
+- [ ] Mobile-Politur, Barrierefreiheit-Check — vom autonomen IT-Chef-Lauf
+  am 19.11. (145. Lauf) eine eigenständig gefundene Lücke geschlossen:
+  drei Lade-/Status-Icons (`FlightWizard.tsx`s Flugzeug-Icon,
+  `HotelWizard.tsx`s Bett-Icon während der Suche, `ChatInput.tsx`s
+  Mikrofon-Icon während der Aufnahme) nutzten Tailwinds `animate-pulse`
+  ohne `prefers-reduced-motion`-Rücksicht — anders als `TravixAvatar.tsx`
+  (4.4, 31.10.) und `PageTransition.tsx` (3.7), die genau dafür bereits
+  `useReducedMotion()` aus `framer-motion` nutzen. Fix: dieselbe
+  `useReducedMotion()`-Hook in allen drei Komponenten ergänzt, die
+  `animate-pulse`-Klasse wird jetzt nur noch ohne reduzierte Bewegung
+  gesetzt; der Text-/aria-label-Hinweis ("Suche läuft …" bzw. "Aufnahme
+  läuft") bleibt unverändert, da er die Information ohnehin trägt — reine
+  Entfernung der dekorativen Dauer-Animation, kein Funktionsverlust. Je
+  eine neue `*.reduced-motion.test.tsx`-Datei pro Komponente (eigene
+  Datei pro Komponente nötig, da `useReducedMotion()` das
+  `matchMedia`-Ergebnis nur einmal pro Prozess/Testdatei cacht, exakt das
+  schon in `TravixAvatar.reduced-motion.test.tsx` dokumentierte Muster).
+  `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+  vitest run` (81 Testdateien, 587 Tests, alle grün — 584 + 3 neue
+  Tests), `npm run build` (0 Typfehler, unveränderte
+  Chunk-Size-Warnung) liefen vor dem Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

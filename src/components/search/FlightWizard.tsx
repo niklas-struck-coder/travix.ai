@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { Plane, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,6 +43,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
   const [returnDate, setReturnDate] = useState('')
   const [passengers, setPassengers] = useState(1)
   const [cabinClass, setCabinClass] = useState<CabinClass>('economy')
+  const prefersReducedMotion = useReducedMotion()
 
   const sameAirport =
     origin.trim().length === 3 &&
@@ -168,7 +170,7 @@ export function FlightWizard({ onSearch, loading }: FlightWizardProps) {
       </div>
 
       <Button type="submit" disabled={!isValid || loading} className="w-fit bg-teal text-navy hover:bg-teal/90">
-        {loading ? <Plane className="animate-pulse" /> : <Search />}
+        {loading ? <Plane className={prefersReducedMotion ? undefined : 'animate-pulse'} /> : <Search />}
         {loading ? 'Suche läuft …' : 'Flüge suchen'}
       </Button>
     </form>

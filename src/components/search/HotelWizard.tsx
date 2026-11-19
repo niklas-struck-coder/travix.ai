@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { BedDouble, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,6 +45,7 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
   const [checkOutDate, setCheckOutDate] = useState('')
   const [rooms, setRooms] = useState(1)
   const [guests, setGuests] = useState(1)
+  const prefersReducedMotion = useReducedMotion()
 
   const isValid = Boolean(destinationName && checkInDate && checkOutDate && checkOutDate > checkInDate)
 
@@ -129,7 +131,7 @@ export function HotelWizard({ onSearch, loading }: HotelWizardProps) {
       </div>
 
       <Button type="submit" disabled={!isValid || loading} className="w-fit bg-teal text-navy hover:bg-teal/90">
-        {loading ? <BedDouble className="animate-pulse" /> : <Search />}
+        {loading ? <BedDouble className={prefersReducedMotion ? undefined : 'animate-pulse'} /> : <Search />}
         {loading ? 'Suche läuft …' : 'Hotels suchen'}
       </Button>
     </form>
