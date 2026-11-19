@@ -29828,3 +29828,67 @@ Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
 
+
+## 2026-11-19, ca. 02:12 UTC (143. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 142. Lauf (`52a25d2`, 01:10 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen) — unberührt, kein Merge nötig. Hinweis: Dieser Lauf
+hatte zunächst versehentlich einen eigenen `it-chef/auto`-Branch von
+`main` aus neu angelegt (ein erster `git branch -a` vor dem `git
+fetch` der Feature-Branches zeigte keinen Treffer für `it-chef/auto`)
+und einen Log-Eintrag auf dieser falschen, veralteten Basis committet.
+Nach `git fetch origin` wurde der echte, 142 Läufe weiter
+fortgeschrittene `origin/it-chef/auto` sichtbar; der fehlerhafte lokale
+Branch wurde verworfen (kein Push erfolgt, `git reset --hard
+origin/it-chef/auto`) und stattdessen korrekt hier weitergearbeitet.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 142. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als der
+142. Lauf:**
+- `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `as any` im
+  gesamten `src`-Baum gesucht: kein Treffer — keine versteckten
+  Typ-/Lint-Umgehungen, die einen echten Fehler verdecken könnten.
+- Alle `setTimeout`/`setInterval`-Stellen (`useChat.ts`, `useConcierge.ts`)
+  gezielt gegen fehlendes `clearTimeout` beim Unmount bzw. vor dem
+  nächsten Aufruf geprüft: beide nutzen durchgehend `replyTimeoutRef`
+  mit Cleanup an jeder Stelle (Fund aus dem 23. Lauf, 24.10., hier
+  weiterhin korrekt wirksam), kein neuer Fund.
+- `useMemo(() => new Date(), ...)`/ähnliche einmalig gecachte
+  `Date`-Objekte (Muster des am 16.11., 128. Lauf, behobenen
+  Lissabon-Zeit-Drift-Bugs) im gesamten `src`-Baum gesucht: kein
+  Treffer mehr außerhalb von Tests — kein weiteres Vorkommen dieser
+  Fehlerklasse.
+- `npm audit`: unverändert 4 moderate Funde, ausschließlich in der
+  `shadcn`-CLI-Dev-Abhängigkeitskette (`minimatch` → `@ts-morph/common`
+  → `ts-morph` → `shadcn`), weiterhin nur per `npm audit fix --force`
+  (Breaking-Change-Major-Upgrade von `shadcn`) behebbar — reine
+  Dev-Tooling-Abhängigkeit, kein Produktionsrisiko, für diesen Kanal
+  ausgeschlossen (siehe 130./131. Lauf).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag (inklusive der Korrektur des versehentlich falsch
+gegründeten lokalen Branches, siehe oben).
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 584 Tests, alle grün), `npm
+audit` (4 moderate Funde, reine Dev-Tooling-Kette, kein
+Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
