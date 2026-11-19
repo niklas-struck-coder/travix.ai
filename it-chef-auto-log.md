@@ -29676,3 +29676,70 @@ Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-19, ca. 00:11 UTC (141. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 140. Lauf (`39c1481`, 23:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen), per `git log origin/main..HEAD` bestätigt lupenreiner Vorfahre
+von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün, keine React/Test-
+Warnungen außer dem bekannten, harmlosen jsdom-Hinweis "Not implemented:
+Window's scrollTo()") — identisch zum Endstand des 140. Laufs. `npm
+audit --omit=dev` erneut dieselben 4 moderaten Funde (minimatch →
+`@ts-morph/common` → `ts-morph` → `shadcn`-CLI-Kette), weiterhin nur per
+`npm audit fix --force` (Breaking-Change-Major-Upgrade von `shadcn`)
+behebbar — Abhängigkeitsänderungen sind für diesen Kanal ausgeschlossen,
+reine Dev-Tooling-Abhängigkeit, kein Produktions-Risiko.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe:**
+- `src/routes.tsx` gegen `src/lib/nav-config.ts` abgeglichen (Tab-Titel-
+  Logik, `builtRoutes`-Set vs. `allRoutes`-Fallback auf
+  `PlaceholderPage`): konsistent, kein verwaister/falsch verlinkter
+  Routeneintrag.
+- Hardcodierte Demo-Reisedaten (`MeineReisen.tsx`, `Kalender.tsx`) gegen
+  das heutige Datum (19.11.) geprüft, da hier wiederholt ein
+  "Lissabon-Zeit-Drift" aufgetreten war (zuletzt 16.11., 128. Lauf):
+  Lissabon (20.–27. Dezember 2026) ist weiterhin korrekt `'upcoming'`,
+  Kyoto (3.–10. März 2026) weiterhin korrekt `'past'` — noch kein neuer
+  Drift.
+- Codeweite Suche nach hartcodierten `id="..."`-Attributen
+  (`FlightWizard.tsx`, `HotelWizard.tsx`, `EditMode.tsx`, `Profil.tsx`,
+  `Einstellungen.tsx`) auf mögliche doppelte IDs bei Mehrfach-Rendering
+  geprüft: alle betroffenen Komponenten werden jeweils nur einmal pro
+  Seite gerendert (keine Listen-Instanzen), kein Kollisionsrisiko.
+- `Preisalarme.tsx`s Trigger-Bedingung (`currentPrice <= targetPrice`)
+  gegen die Demo-Daten gegengeprüft — korrekt in beide Richtungen
+  (erreicht/nicht erreicht).
+- `MARKENDESIGN.md`s "niemals Rot für Budget-Warnungen"-Vorgabe erneut
+  gegen den aktuellen Code geprüft: unverändert keine
+  Budget-Überschreitungs-Logik im Code vorhanden (`TripDraft` hat weiterhin
+  keine echten Preisfelder, 6.6/6.7/7.12), also kein Verstoß möglich.
+- `npm audit`/`npm audit --omit=dev` erneut gegeneinander verglichen
+  (identische 4 Funde in beiden) — kein zusätzlicher, nur-Dev-
+  betreffender Fund, der sich ohne `--force` beheben ließe.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 584 Tests, alle grün), `npm
+audit --omit=dev` (4 moderate Funde, reine Dev-Tooling-Kette, kein
+Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
