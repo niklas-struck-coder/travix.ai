@@ -12,6 +12,7 @@ const RAW = [
   ["AMD", "AMD", "AMD", "aktie", "Halbleiter · USA"],
   ["INTC", "INTC", "Intel", "aktie", "Halbleiter · USA"],
   ["PLTR", "PLTR", "Palantir", "aktie", "Software & KI · USA"],
+  ["ANT", "ANT", "Anthropic (Claude)", "aktie", "KI · USA"],
   ["ORCL", "ORCL", "Oracle", "aktie", "Software · USA"],
   ["CRM", "CRM", "Salesforce", "aktie", "Software · USA"],
   ["ADBE", "ADBE", "Adobe", "aktie", "Software · USA"],
