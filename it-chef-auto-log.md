@@ -29892,3 +29892,59 @@ Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-19, ca. 22:09 UTC (144. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund 20 Stunden nach dem 143. Lauf (`e9c0c8b`, 02:12 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen) — unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (78 Testdateien, 584 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 143. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+`reports/it-chef.md`/`reports/marketing-chef.md`/`reports/support-chef.md`
+per `git log` gegengeprüft: letzte echte Änderung weiterhin 23.10.
+(`fe1300e`) — nur die Datei-mtimes im frischen Checkout sind neuer
+(Checkout-Artefakt, keine inhaltliche Änderung).
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe:**
+- `dangerouslySetInnerHTML` codeweit gesucht: kein Treffer, kein
+  XSS-Risiko über diesen Pfad.
+- Jede `addEventListener`-Stelle im `src`-Baum gegen fehlendes
+  `removeEventListener` geprüft (Abgleich Anzahl add/remove pro Datei):
+  einzige Abweichung war `src/lib/utils.ts`s `focusPageHeading()` — dort
+  aber bewusst `{ once: true }` auf dem `blur`-Listener, entfernt sich
+  also selbst nach dem ersten Feuern, kein Leak.
+- Alle `<img>`-Tags im `src`-Baum auf fehlendes `alt`-Attribut geprüft:
+  kein Treffer ohne `alt`.
+- Alle `.map()`-Aufrufe in `.tsx`-Dateien gegen fehlenden `key`-Prop bei
+  JSX-Listen geprüft (Abgleich Anzahl `.map(`/`key=` pro Datei als
+  Vorfilter, dann die abweichenden Dateien `EditMode.tsx`/
+  `Reiseentwuerfe.tsx` einzeln gelesen): die zusätzlichen `.map()`-Aufrufe
+  dort sind reine Daten-Transformationen (State-Updates), keine
+  JSX-Listen ohne `key` — kein Fund, ohnehin würde ESLints
+  `react/jsx-key`-Regel das abfangen (Lint lief grün).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (78 Testdateien, 584 Tests, alle grün) liefen
+grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
