@@ -30028,3 +30028,86 @@ Chunk-Size-Warnung) liefen grün vor dem Commit.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-20, ca. 00:11 UTC (146. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 145. Lauf (`78cd4d6`, 23:15 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen), per `git merge-base --is-ancestor` bestätigt lupenreiner
+Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 145. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+unverändert dieselben Hauptpunkte offen (2.0 Base44/Auth, 4.1-4.3
+InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12,
+8.1-8.9/8.12), hängen weiterhin an fehlendem Base44-/Gemini-/Duffel-
+Zugang oder sind Produkt-/Architekturentscheidungen Nis.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund, da bereits korrekt bzw. gar nicht im
+Code vorhanden):
+- `console.log`/`console.debug`-Reste außerhalb von Tests: kein Treffer.
+- Alle `aria-describedby`-Referenzen (`FlightWizard.tsx`) gegen das
+  tatsächlich vorhandene Ziel-Element geprüft: beide Felder verweisen
+  absichtlich auf dieselbe, existierende Fehlermeldung — kein toter
+  Verweis.
+- Statische `id`-Attribute in Komponenten, die auch `.map()` nutzen
+  (`EditMode.tsx`, `FlightWizard.tsx`, `HotelWizard.tsx`), auf
+  versehentliche Duplikate durch Listen-Rendering geprüft: alle
+  betroffenen `id`s liegen außerhalb der jeweiligen `.map()`-Schleife
+  (einmaliges Formular, nicht pro Listenelement) — kein Duplikat.
+- Alle `localStorage`/`sessionStorage`-Zugriffe codeweit gesucht: nur
+  `tripStorage.ts` (alle drei Zugriffe bereits mit try/catch
+  abgesichert, siehe frühere Läufe) sowie ein reiner Kommentar in
+  `Urlaubsmodus.tsx` — keine neue, ungeschützte Stelle.
+- Alle `.then(`-Aufrufe (`useChat.ts`, 3 Stellen) gegen fehlendes
+  `.catch(` geprüft: alle drei haben ein eigenes `.catch(` mit
+  Generation-Check und Fehlerzustand — kein unbehandelter Promise-
+  Reject.
+- `Number(...)`-Parsing von Nutzereingaben (`FlightWizard.tsx`
+  `clampPassengerCount`, `HotelWizard.tsx` `clampGuestCount`,
+  `format.ts`) gegen fehlende `NaN`-Behandlung geprüft: alle vier
+  Stellen fangen `NaN` bereits ab bzw. haben einen sauberen Fallback.
+- `.sort()`-Aufrufe codeweit gesucht (potenzieller Default-
+  Lexikographie-Bug bei Zahlen): kein einziger Treffer im `src`-Baum.
+- Browser-Tab-Titel-Mapping (`routes.tsx` `getPageTitle`) gegen
+  `nav-config.ts` abgeglichen: jede dort gelistete Route hat eine
+  passende Titel-Behandlung, keine fehlende/falsche Zuordnung.
+- Alle `DialogContent`-Vorkommen (`EditMode.tsx`, `KiChat.tsx`,
+  `Buchung.tsx`, `Reiseentwuerfe.tsx`, u. a.) einzeln gegen eine
+  zugehörige `DialogDescription` geprüft (nicht nur per Zeilenzahl-
+  Vergleich, der durch Import-Zeilen in die Irre führt): jeder Dialog
+  hat seine eigene Beschreibung.
+- Singular/Plural bei Zähler-Texten (`Dashboard.tsx`, `Buchung.tsx`,
+  `Reiseentwuerfe.tsx`) sowie weitere `.length`-Anzeigen in
+  `Warenkorb.tsx`/`Favoriten.tsx`/`Preisalarme.tsx`/`Angebote.tsx`
+  geprüft: alle vorhandenen Zähler-Texte nutzen bereits einen
+  Singular/Plural-Ternary, keine neuen ungeschützten Zähler-Texte
+  gefunden.
+- `npm audit`: unverändert 4 moderate Funde, ausschließlich in der
+  `shadcn`-CLI-Dev-Abhängigkeitskette (`minimatch` → `@ts-morph/common`
+  → `ts-morph` → `shadcn`), weiterhin nur per `npm audit fix --force`
+  (Breaking-Change-Major-Upgrade von `shadcn`) behebbar — reine
+  Dev-Tooling-Abhängigkeit, kein Produktionsrisiko, für diesen Kanal
+  ausgeschlossen (siehe 130./131. Lauf).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm
+audit` (4 moderate Funde, reine Dev-Tooling-Kette, kein
+Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
