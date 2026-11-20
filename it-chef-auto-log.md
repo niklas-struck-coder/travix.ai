@@ -30111,3 +30111,69 @@ Produktions-Risiko, unverändert) liefen grün bzw. bestätigt.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-20, ca. 01:12 UTC (147. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 146. Lauf (`7f79107`, 00:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen), per `git merge-base --is-ancestor` bestätigt lupenreiner
+Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 146. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (Backend-/Auth-Entscheidung 2.0,
+4.1-4.3 InvokeLLM/Schema/Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7,
+7.4/7.12, 8.1-8.9/8.12, Duffel-Stays-Freischaltung, Zahlungsprozess,
+End-to-End-Testing/Mobile-Politur/Performance-Check als Sprint-6-
+Sammelpunkte) bleiben unverändert aus denselben, seit Lauf elf
+dokumentierten Gründen blockiert: offene Backend-/Architektur-
+entscheidung, fehlende Inhalte, fehlende Datenfelder, oder zu grob/
+vage beschrieben für einen einzelnen Ein-Zeiler (Kriterium 3). 8.13 im
+Detail erneut gegengeprüft: `calculateProgress.ts`/`checklistRules.ts`
+haben weiterhin vollständige Testdateien, `calculateCosts.ts`
+existiert weiterhin nicht, projektweit weiterhin keine
+Schema-Validierungs-Schicht — unverändert blockiert.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund):
+- `src/components/chat/ChatMessage.tsx`s `formatTime()` auf eine
+  mögliche "Invalid Date"-Lücke bei korrupten `localStorage`-Daten
+  geprüft (analog dem am 19.10. in `format.ts` behobenen Fund): `message.
+  timestamp` wird ausschließlich über `Date.now()` erzeugt
+  (`useChat.ts`/`useConcierge.ts`, per `grep` bestätigt) und ist über
+  `ChatMessage`/`StoredChatState` als `number` typisiert — kein Pfad, der
+  einen fremden/ungültigen Wert einschleust, kein echter Fund.
+- `HotelWizard.tsx`/`FlightWizard.tsx` komplett gelesen: Check-in/
+  Check-out- bzw. Hin-/Rückflugdatum-Konsistenz (inkl. dem Fall, dass ein
+  später geändertes früheres Datum das zuvor gültige spätere Datum
+  ungültig macht) wird in beiden Fällen bereits bei jedem Render über
+  `isValid` direkt aus dem aktuellen State neu berechnet, kein
+  zwischengespeicherter/stale Wert wie bei den in früheren Läufen
+  gefundenen Reset-Bugs (`Flugsuche.tsx`/`Hotelsuche.tsx`, 01.09.) — kein
+  neuer Fund.
+- `eslint-disable`, `@ts-ignore`, `@ts-expect-error` codeweit gesucht:
+  kein Treffer im gesamten `src`-Baum (unverändert saubere Typisierung).
+- `reports/it-chef.md`/`reports/marketing-chef.md`/`reports/support-chef.md`
+  sowie `support-chef-auto-log.md`/`marketing-chef-auto-log.md` auf neue,
+  seit dem 23.10. noch nicht übernommene IT-relevante Funde durchsucht
+  (per `git log`): letzte inhaltliche Änderung an allen fünf Dateien
+  weiterhin 23.10. — keine neue Information seit dem 146. Lauf.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen
+grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
