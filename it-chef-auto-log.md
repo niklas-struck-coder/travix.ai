@@ -30177,3 +30177,57 @@ grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-20, ca. 02:09 UTC (148. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 147. Lauf (`27c36ee`, 01:12 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38
+weiterhin offen), per `git merge-base --is-ancestor` bestätigt lupenreiner
+Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 147. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen unverändert aus denselben, seit Lauf elf
+dokumentierten Gründen blockiert (Base44/Gemini/Duffel-Zugang fehlt,
+bzw. offene Produkt-/Architekturentscheidung Nis, bzw. fehlende
+Datenfelder/Inhalte).
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund):
+- Alle `target="_blank"`-Links codeweit gesucht (fehlendes
+  `rel="noopener noreferrer"` wäre ein Tabnabbing-Risiko): kein einziges
+  Vorkommen von `_blank` im gesamten `src`-Baum — es gibt aktuell keine
+  Links, die in einem neuen Tab öffnen, also kein Fund möglich.
+- Alle `<img>`-Tags codeweit auf fehlendes `alt`-Attribut geprüft: kein
+  Treffer (keine ungeschützte Stelle, da keine `<img>`-Nutzung ohne
+  `alt` existiert).
+- `src/components/ui/`: jede Komponentendatei gegen eine zugehörige
+  Testdatei abgeglichen (Fortsetzung der Lücken-Schließung aus den
+  Läufen vom 18./19.10.) — alle zwölf Dateien (inkl. der drei
+  ausgelagerten `*-variants.ts`) haben inzwischen eine eigene Testdatei,
+  keine Lücke mehr offen.
+- `useChat.ts`s drei `window.setTimeout`-Aufrufe (`replyTimeoutRef`)
+  gegen fehlendes Abräumen beim Unmount geprüft (analog dem am 01.10.
+  in `useConcierge.ts` gefundenen Leak): alle drei sind bereits über
+  denselben `replyTimeoutRef` beim Unmount (erster `useEffect`,
+  Zeile 98-101) sowie vor jedem neuen Aufruf abgeräumt — kein Leck.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen
+grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
