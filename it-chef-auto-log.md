@@ -30231,3 +30231,68 @@ grün.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-20, ca. 22:10 UTC (149. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+20 Stunden nach dem 148. Lauf (`84a408e`, ca. 02:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen) — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") — identisch
+zum Endstand des 148. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`tasks/tasks-prd-travix-platform.md` erneut durchsucht — alle sechs
+offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.0 KI-Chat/InvokeLLM, 5.0
+Zug/Bus/Fähre & Duffel-Flugsuche, 6.0 interaktiver Reiseplan, 7.0
+Lifecycle-Seiten, 8.0 Urlaubsmodus/DealFinder/Account) bleiben unverändert
+aus denselben, seit früheren Läufen dokumentierten Gründen blockiert:
+offene Backend-/Architekturentscheidung bzw. fehlender Base44/Duffel/
+Gemini-Zugang (Kriterium 1/2), zu grob für einen einzelnen Ein-Zeiler
+(Kriterium 3).
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund):
+- Alle `animate-pulse`/`animate-spin`/`animate-bounce`/`animate-ping`-
+  Vorkommen codeweit gesucht, um zu prüfen, ob nach dem
+  `prefers-reduced-motion`-Fix vom 145. Lauf (`FlightWizard.tsx`,
+  `HotelWizard.tsx`, `ChatInput.tsx`) noch weitere, bisher übersehene
+  endlos-pulsierende Icons existieren: keine weiteren Treffer — alle drei
+  bekannten Stellen nutzen bereits `useReducedMotion()`. Die kurzen
+  Enter/Exit-Übergänge in `dialog.tsx`/`sheet.tsx`/`select.tsx`
+  (`data-open:animate-in` u. Ä., Radix-Primitiven) sind einmalige
+  100-200ms-Übergänge beim Öffnen/Schließen, keine endlosen
+  Hintergrundanimationen, und fallen nicht unter dieselbe Kategorie — kein
+  Fund.
+- `src/lib/trip/calendarUtils.ts` erneut gegen Jahreswechsel-Fehler
+  geprüft (`getPreviousMonth`/`getNextMonth` bei Januar/Dezember,
+  `getMonthGridDays` bei Monaten, deren Wochenraster über einen
+  Jahreswechsel reicht): Rollover-Logik korrekt, kein Fund.
+- `src/pages/Preisalarme.tsx` komplett gelesen (Zielpreis-Erreicht-Badge,
+  Preisänderungs-Hinweistext, Löschen-Bestätigungsdialog): Logik und
+  Texte unauffällig, kein Fund.
+- Codeweit nach `key={index}`/`key={i}` als potenziell fragilem
+  Listen-Key gesucht: zwei Treffer (`FlightCard.tsx`, Gepäck-Zeilen;
+  `SearchErrorAlert.tsx`, Fehlermeldungen) — beide auf rein statischen,
+  nie nachträglich sortierten/gefilterten Listen, kein echtes
+  Reorder-Risiko und damit kein klar abgegrenzter, objektiv prüfbarer
+  Bug (Kriterium 4 nicht erfüllt, keine Änderung vorgenommen).
+- Codeweit nach `TODO`/`FIXME`/`XXX`/`HACK`-Markierungen sowie
+  `console.log`/`console.debug` gesucht: kein Treffer (unverändert
+  saubere Codebasis).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
