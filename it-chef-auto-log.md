@@ -30296,3 +30296,68 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-20, ca. 23:10 UTC (150. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+eine Stunde nach dem 149. Lauf (`cd85a2b`, ca. 22:10 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen) — per `git merge-base` bestätigt lupenreiner Vorfahre von
+`it-chef/auto`, `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") — identisch
+zum Endstand des 149. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen unverändert aus denselben, seit früheren
+Läufen dokumentierten Gründen blockiert (Base44/Gemini/Duffel-Zugang
+fehlt, bzw. offene Produkt-/Architekturentscheidung Nis, bzw. zu grob für
+einen einzelnen abgegrenzten Punkt). `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md`,
+`support-chef-auto-log.md`, `marketing-chef-auto-log.md` per `git log`
+gegen neue, noch nicht übernommene IT-relevante Funde geprüft: letzte
+inhaltliche Änderung an allen fünf Dateien weiterhin 23.10. — keine neue
+Information seit dem 149. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund):
+- Alle `addEventListener`-Aufrufe codeweit gesucht (zwei Treffer:
+  `useChat.ts` beforeunload-Listener, `utils.ts` focusPageHeading()):
+  beide korrekt abgeräumt (`removeEventListener` im Cleanup bzw.
+  `{ once: true }`) — kein Leck.
+- Alle `localStorage`-Zugriffe codeweit gesucht: alle drei Aufrufe
+  (get/set/remove) auf `tripStorage.ts` konzentriert, jede Operation
+  bereits in try/catch mit sinnvollem Fallback — kein neuer Fund.
+- Codeweit nach `.sort(`-Aufrufen gesucht (In-place-Mutation eines
+  Props/State-Arrays wäre ein Bug): kein einziges Vorkommen im gesamten
+  `src`-Baum — keine Sortierlogik vorhanden, also kein Fund möglich.
+- Alle `<div>`/`<span>` mit direktem `onClick` codeweit gesucht (Risiko:
+  per Tastatur nicht erreichbares Klick-Ziel ohne `role="button"`/
+  `tabIndex`/`onKeyDown`): kein Treffer — jedes interaktive Element nutzt
+  bereits die `Button`-Komponente.
+- Hartkodierte `id="..."`-Attribute codeweit gesucht (Risiko: doppelte
+  IDs bei mehrfach gerendertem Formular, bricht `label[for]`-Zuordnung):
+  `EditMode.tsx`s `activity-name`/`activity-price` geprüft — `EditMode`
+  wird laut Suche nur einmal auf `Buchung.tsx` eingebunden, kein
+  Mehrfach-Render, kein Fund. Alle übrigen Treffer (`FlightWizard.tsx`,
+  `HotelWizard.tsx`, `Einstellungen.tsx`, `Profil.tsx`) sind je einmalige
+  Seiten-IDs.
+- Asynchrone Formular-Handler (`Flugsuche.tsx`/`Hotelsuche.tsx`) auf
+  Doppel-Submit-Schutz geprüft: `loading`-State wird bereits durchgereicht
+  und deaktiviert den Submit-Button in `FlightWizard.tsx`/
+  `HotelWizard.tsx` (`disabled={!isValid || loading}`) — kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
