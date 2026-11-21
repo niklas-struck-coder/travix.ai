@@ -30361,3 +30361,69 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-21, ca. 00:09 UTC (151. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund eine Stunde nach dem 150. Lauf (`d522828`, ca. 23:10 UTC).
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand). `origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/
+#38 weiterhin offen) — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 150. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.0 KI-Chat/InvokeLLM,
+5.0 Zug/Bus/Fähre & Duffel-Flugsuche, 6.0 interaktiver Reiseplan, 7.0
+Lifecycle-Seiten, 8.0 Urlaubsmodus/DealFinder/Account) bleiben
+unverändert aus denselben, seit früheren Läufen dokumentierten Gründen
+blockiert: fehlender Base44/Duffel/Gemini-Zugang bzw. offene Produkt-/
+Architekturentscheidung Nis (Kriterium 1/2), oder zu grob für einen
+einzelnen, klar abgegrenzten Punkt (Kriterium 3).
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen Fund):
+- Codeweit nach `target="_blank"` gesucht (Risiko: fehlendes
+  `rel="noopener noreferrer"`, `window.opener`-Tabnabbing): kein
+  Vorkommen im gesamten `src`-Baum — kein Fund möglich.
+- Codeweit nach `window.open(`, `dangerouslySetInnerHTML` und
+  `parseInt(` ohne Radix gesucht: kein Treffer.
+- Alle `.then(`-Aufrufe (3 Treffer, alle in `useChat.ts`:
+  `runFlightSearch`, `startEdit('accommodation')`,
+  `sendMessage`-Timeout-Zweig) geprüft: jeder hat ein passendes
+  `.catch()` mit Generation-Check, Fehlermeldung und Avatar-/
+  QuickReplies-Reset — kein unbehandeltes Promise.
+- `tripStorage.ts` (`loadStoredChat`/`saveStoredChat`/`clearStoredChat`/
+  `updateStoredTrip`) erneut gegen den einzigen `JSON.parse()`-Aufruf im
+  `src`-Baum geprüft: bereits in try/catch mit sinnvollem Array-Fallback
+  — kein Fund.
+- Alle `<img>`-Vorkommen codeweit gesucht (einziger Treffer:
+  `HotelCard.tsx`): hat bereits ein sinnvolles `alt`-Attribut — kein
+  Fund.
+- Alle `Link to="..."`-Ziele in `src/pages`/`src/components` gegen die
+  in `routes.tsx` registrierten Routen abgeglichen: alle 22 Ziele
+  existieren, kein toter Link.
+- Toggle-Buttons/Selects in `Profil.tsx`/`Einstellungen.tsx`
+  (Reisestile, Ernährungsweise, Benachrichtigungen, Budgetrahmen,
+  Maßeinheiten) erneut gegen fehlende `aria-pressed`/`role="group"`/
+  `Label htmlFor`-Zuordnung geprüft: alle bereits korrekt verdrahtet —
+  kein Fund.
+- `EditMode.tsx` (Aktivitäten hinzufügen/entfernen/Preis bearbeiten,
+  inkl. `getActivityLabel()`-Disambiguierung bei Namensgleichheit) und
+  `Warenkorb.tsx`/`cartTotals.ts` (Gruppierung, Summenbildung) komplett
+  gelesen: Logik und Texte unauffällig, kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
