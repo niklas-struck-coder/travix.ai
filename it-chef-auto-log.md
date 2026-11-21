@@ -30580,3 +30580,70 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-21, ca. 22:10 UTC (154. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund 20 Stunden nach dem 153. Lauf (`b756811`, ca. 02:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen), per `git merge-base --is-ancestor` bestätigt lupenreiner Vorfahre
+von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 153. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Duffel-
+Stays-Freischaltung, Zahlungsprozess, End-to-End-Testing/Mobile-Politur/
+Performance-Check als Sprint-6-Sammelpunkte) bleiben unverändert aus
+denselben, seit früheren Läufen dokumentierten Gründen blockiert: offene
+Backend-/Architekturentscheidung bzw. fehlender Base44/Duffel/Gemini-
+Zugang (Kriterium 1/2), oder zu grob für einen einzelnen, klar
+abgegrenzten Punkt (Kriterium 3/4). `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md` sowie
+`marketing-chef-auto-log.md`/`support-chef-auto-log.md` per `git log`
+gegen neue, noch nicht übernommene IT-relevante Funde geprüft: letzte
+inhaltliche Änderung an allen fünf Dateien weiterhin 23.10. — keine neue
+Information seit dem 153. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen, kriterienkonformen Fund):
+- `dangerouslySetInnerHTML` codeweit gesucht (XSS-Risiko): kein einziges
+  Vorkommen im gesamten `src`-Baum.
+- `ResizeObserver`/`IntersectionObserver`/`MutationObserver` codeweit
+  gesucht: keine Verwendung, also auch kein fehlendes `disconnect()`
+  möglich.
+- Alle `addEventListener`-Aufrufe (`useChat.ts` `beforeunload`,
+  `lib/utils.ts` `focusPageHeading()`-`blur`) gegen ihr jeweiliges
+  `removeEventListener`-Gegenstück geprüft: beide bereits korrekt
+  abgeräumt (Cleanup-Funktion im `useEffect` bzw. `{ once: true }`) —
+  kein Leck, bereits aus früheren Läufen bekannt.
+- Alle `htmlFor`/`id`-Paare bei `<Label>` codeweit geprüft, mit Fokus auf
+  die bisher im Log nicht einzeln genannten Stellen `Einstellungen.tsx`
+  (`units`) und `Profil.tsx` (`budget-range`, `home-airport`): jedes
+  `htmlFor` hat ein exakt passendes `id` auf dem zugehörigen
+  `SelectTrigger`/`Input` — kein verwaistes Label.
+- `npm audit`: unverändert 4 moderate Funde, ausschließlich in der
+  `shadcn`-CLI-Dev-Abhängigkeitskette (`minimatch` → `@ts-morph/common`
+  → `ts-morph` → `shadcn`), weiterhin nur per Breaking-Change-Major-
+  Upgrade behebbar — reine Dev-Tooling-Abhängigkeit, kein
+  Produktionsrisiko (siehe 130./131./146. Lauf).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
