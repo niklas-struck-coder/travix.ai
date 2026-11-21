@@ -30647,3 +30647,70 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-21, ca. 23:09 UTC (155. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+knapp eine Stunde nach dem 154. Lauf (`5d92cc8`, ca. 22:10 UTC).
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand). `origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR
+#34/#38 weiterhin offen), per `git merge-base --is-ancestor` bestätigt
+lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein
+Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 154. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Duffel-
+Stays-Freischaltung, Zahlungsprozess, End-to-End-Testing/Mobile-Politur/
+Performance-Check als Sprint-6-Sammelpunkte) bleiben unverändert aus
+denselben, seit früheren Läufen dokumentierten Gründen blockiert: offene
+Backend-/Architekturentscheidung bzw. fehlender Base44/Duffel/Gemini-
+Zugang (Kriterium 1/2), oder zu grob für einen einzelnen, klar
+abgegrenzten Punkt (Kriterium 3/4). `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md` sowie
+`marketing-chef-auto-log.md`/`support-chef-auto-log.md` per `git log`
+gegen neue, noch nicht übernommene IT-relevante Funde geprüft: letzte
+inhaltliche Änderung an allen fünf Dateien weiterhin 23.10. — keine neue
+Information seit dem 154. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen, kriterienkonformen Fund):
+- Codeweit nach übrig gebliebenen `console.log`/`console.debug`- sowie
+  `TODO`/`FIXME`/`XXX`-Markern außerhalb der Testdateien gesucht: keine
+  Treffer.
+- Codeweit nach `@ts-ignore`/`@ts-expect-error`/`eslint-disable` sowie
+  `: any`/`as any` außerhalb der Testdateien gesucht: kein einziges
+  Vorkommen (der einzige Textfund in `useChat.ts:267` ist ein
+  Kommentar-Wort, kein `any`-Typ).
+- Alle `size="icon"`-Buttons (reine Icon-Buttons ohne sichtbaren Text)
+  codeweit aufgelistet und einzeln gegen ein vorhandenes `aria-label`
+  geprüft (`EditMode.tsx`, `KiChat.tsx` ×2, `ChatInput.tsx` ×2,
+  `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`, `Aktivitaeten.tsx`,
+  `Buchung.tsx` ×2, `Reiseentwuerfe.tsx` ×5, `Warenkorb.tsx`,
+  `Kalender.tsx` ×2): jeder einzelne hat bereits ein konkretes,
+  kontextbezogenes `aria-label` — keine verwaiste Stelle gefunden.
+- Testabdeckung erneut geprüft: jede `.ts`/`.tsx`-Datei außerhalb
+  `src/components/ui/` ohne zugehörige Testdatei ist ausschließlich eine
+  reine Typdeklaration (`src/types/*.ts`) oder ein bereits aus früheren
+  Läufen (17.09./19.10.) bekannter, bewusst ungetesteter Einstiegspunkt
+  (`main.tsx`, `vite-env.d.ts`, `test/setup.ts`) — keine neue Lücke.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
