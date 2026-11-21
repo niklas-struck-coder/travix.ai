@@ -30512,3 +30512,71 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-21, ca. 02:09 UTC (153. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+eine Stunde nach dem 152. Lauf (`a9422a2`, ca. 01:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen) — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 152. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle sechs offenen Haupt-Checkboxen (2.0, 4.0, 5.0, 6.0, 7.0, 8.0) bleiben
+unverändert aus denselben, seit früheren Läufen dokumentierten Gründen
+blockiert: fehlender Base44/Duffel/Gemini-Zugang bzw. offene Produkt-/
+Architekturentscheidung Nis (Kriterium 1/2), oder zu grob für einen
+einzelnen, klar abgegrenzten Punkt (Kriterium 3). `reports/it-chef.md`,
+`reports/marketing-chef.md`, `reports/support-chef.md` sowie
+`marketing-chef-auto-log.md`/`support-chef-auto-log.md` per `git log`
+gegen neue, noch nicht übernommene IT-relevante Funde geprüft: letzte
+inhaltliche Änderung an allen fünf Dateien weiterhin 23.10. — keine neue
+Information seit dem 152. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen, kriterienkonformen Fund):
+- Codeweit nach `console.log`/`console.debug`/`console.warn` und nach
+  `TODO`/`FIXME`/`XXX:`-Kommentaren gesucht: kein Treffer im gesamten
+  `src`-Baum.
+- Alle `.map(...)`-Aufrufe in JSX codeweit gesucht und jedes gerenderte
+  Element gegen ein vorhandenes, stabiles `key`-Attribut geprüft (Risiko:
+  `eslint-plugin-react`/die `jsx-key`-Regel ist in `eslint.config.js`
+  nicht eingebunden — nur `react-hooks`/`react-refresh`/TS-Regeln sind
+  aktiv, ein fehlender `key` würde also nicht vom Lint-Lauf gefangen):
+  jede Liste hat einen expliziten `key` (meist `item.id`); einzige
+  Ausnahme ist der Index-Key in `SearchErrorAlert.tsx` für
+  `errors.map((error, index) => ...)`, was hier unproblematisch ist, da
+  die Fehlerliste pro Render statisch und nicht umsortierbar ist — kein
+  Fund.
+- `format.ts`, `Aktivitaeten.tsx` und `Angebote.tsx` erneut auf
+  Preis-/Zahlenformatierung geprüft (`toLocaleString('de-DE')`,
+  `Intl.NumberFormat`, `toFixed`): alle Aufrufstellen durchgängig
+  `'de-DE'`-Locale, `HotelCard.tsx`s `rating.toFixed(1)` korrekt für eine
+  Bewertungszahl. `Aktivitaeten.tsx`/`Angebote.tsx` definieren jeweils
+  eine eigene, zu `formatEuro()` praktisch identische lokale
+  Preisformatierungs-Funktion statt der gemeinsamen Funktion aus
+  `format.ts` — das ist Code-Duplizierung, aber kein Verhaltensfehler
+  (alle drei Implementierungen liefern für die aktuell verwendeten
+  Mock-Preise dasselbe Ergebnis) und eine reine Zusammenführung wäre ein
+  Refactoring ohne reproduzierbaren Fehlerfall, also nicht
+  kriterienkonform (Kriterium 4) — hier nur dokumentiert, kein Fund.
+- Cross-Check mit den anderen beiden Auto-Logs (`marketing-chef-auto-log.md`,
+  `support-chef-auto-log.md`) und deren Berichten: keine neuen, noch nicht
+  aufgenommenen UI-/UX-Hinweise seit dem 23.10. gefunden.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
