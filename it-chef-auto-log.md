@@ -30427,3 +30427,88 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-21, ca. 01:11 UTC (152. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+eine Stunde nach dem 151. Lauf (`e0d998a`, ca. 00:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen) — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()") —
+identisch zum Endstand des 151. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen bleiben unverändert aus denselben, seit
+früheren Läufen dokumentierten Gründen blockiert: fehlender Base44/
+Duffel/Gemini-Zugang bzw. offene Produkt-/Architekturentscheidung Nis
+(Kriterium 1/2), oder zu grob für einen einzelnen, klar abgegrenzten
+Punkt (Kriterium 3). Auch `reports/it-chef.md`, `reports/marketing-chef.md`,
+`reports/support-chef.md` sowie die beiden anderen Auto-Logs per `git log`
+gegen neue, noch nicht übernommene IT-relevante Funde geprüft: letzte
+inhaltliche Änderung weiterhin 23.10. — keine neue Information seit dem
+151. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen, kriterienkonformen Fund):
+- Geprüft, ob `<Button>` ohne explizites `type`-Attribut innerhalb eines
+  `<form>` (native HTML-Default wäre `type="submit"`, ungewollter
+  Form-Submit) vorkommt: Die einzigen zwei `<form>`-Elemente im Code
+  (`FlightWizard.tsx`, `HotelWizard.tsx`) haben je genau einen `Button`
+  mit explizitem `type="submit"`. Die `TabsTrigger`-Komponente in
+  `FlightWizard.tsx` (Hin-/Rückflug-Umschalter, ebenfalls im Formular)
+  rendert laut gezieltem Testrender (temporärer, nicht committeter Test)
+  bereits nativ `type="button"` (Radix-UI-Standardverhalten) — kein
+  versehentlicher Submit möglich, kein Fund.
+- `calendarUtils.ts` (Kalendergrid, Vor-/Folgemonat) erneut auf das
+  bereits zweimal behobene Zeitzonen-Drift-Muster (UTC-`toISOString()`
+  gemischt mit lokalem `Date`) geprüft: durchgängig lokale `Date`-Objekte
+  (`getFullYear`/`getMonth`/`getDate`/`setDate`), kein `toISOString()` im
+  gesamten Modul — kein Fund.
+- Testabdeckungslücken codeweit gesucht (jede `.tsx`/`.ts`-Datei ohne
+  zugehörige `.test.tsx`/`.test.ts`): nur `main.tsx` (Einstiegspunkt,
+  reines Mounting) und reine Typ-/Konstanten-Dateien (`src/types/*.ts`,
+  `src/test/setup.ts`) ohne eigene Testdatei — keine davon enthält
+  Verhalten, das eine eigene Testdatei rechtfertigen würde (kein Fund,
+  da Kriterium 4 sonst nicht erfüllbar wäre: es gäbe nichts objektiv zu
+  prüfendes außer der Tatsache, dass eine Konstante sich selbst gleicht).
+- `formatEuro()` (`format.ts`) gegen `formatOfferPrice()` auf
+  Dezimalstellen-Konsistenz verglichen: `formatEuro()` zeigt bei
+  Centbeträgen potenziell uneinheitlich viele Nachkommastellen (z. B.
+  "19,9 €" statt "19,90 €"), **aber** alle tatsächlichen Aufrufstellen
+  (`Dashboard.tsx`, `Warenkorb.tsx`, `Preisalarme.tsx`) verwenden aktuell
+  ausschließlich ganzzahlige Mock-Preise, und `EditMode.tsx`s
+  Aktivitäts-Preisfeld ist ein reiner String (`TripActivity.price:
+  string | null`), der gar nicht durch `formatEuro()` läuft — das
+  Verhalten ist mit dem bestehenden, bewusst getesteten
+  `formatEuro(249) === '249 €'` (keine Nachkommastellen bei ganzen
+  Beträgen) verzahnt. Eine Änderung wäre eine Design-Entscheidung
+  (einheitlich 2 Nachkommastellen erzwingen vs. aktuelles Verhalten
+  beibehalten) ohne aktuell reproduzierbaren Fehlerfall — nicht
+  kriterienkonform (Kriterium 3/4), kein Fund, nur hier dokumentiert
+  falls künftig echte Dezimalpreise (z. B. aus Duffel) in `formatEuro()`
+  landen.
+- `checklistRules.ts`s `isAutoItemChecked()` erneut gegen
+  `calculateProgress.ts`s `PROGRESS_COMPONENTS` abgeglichen (bekannte
+  Drift-Quelle, zuletzt im 76. Lauf synchronisiert): beide prüfen exakt
+  dieselben fünf Felder (`transportMode`, `dates`, `accommodation`,
+  `activities.length > 0`, `budget`) — weiterhin synchron, kein Fund.
+- `speech.ts` (Spracherkennung/-ausgabe, historischer Autofix-Branch
+  "Sprachausgabe stoppt nicht") erneut gelesen: `speak()` ruft bereits
+  `speechSynthesis.cancel()` vor jeder neuen Äußerung auf, `stopSpeaking()`
+  existiert und wird genutzt — bereits korrekt, kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
