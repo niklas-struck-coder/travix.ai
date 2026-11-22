@@ -30995,3 +30995,39 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-22, ca. 23:10 UTC (160. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (159., 22:10
+UTC) nicht neu zu `main` divergiert — kein Merge nötig.
+
+**Suche:** `ZEITPLAN.md` und `tasks/tasks-prd-travix-platform.md`
+durchsucht. Alle noch offenen Punkte unter 2.0/4.0 (Base44-Auth,
+`FULL_TRIP_SCHEMA`, `invokeLLM.ts`) bleiben auf Backend-Credentials/
+Architekturentscheidung blockiert. Die bekannten, bereits mehrfach als
+Produktentscheidung eingestuften Funde (Lösch-Warnungen vereinheitlichen,
+`ChecklistPanel.tsx`-Persistenz, IATA-Code statt Klarname, TrainCard/
+TrainResults verdrahten-oder-entfernen, `recharts` entfernen, npm-audit-
+Fix wegen Arborist-Bug) bleiben aus denselben, bereits dokumentierten
+Gründen ausgeschlossen.
+
+Zusätzlich gezielt nach bisher übersehenen Punkten gesucht: Icon-only-
+Buttons ohne `aria-label` (keiner gefunden — alle bereits versehen),
+Bilder ohne `alt` (einziges `<img>` in `HotelCard.tsx` hat bereits
+`alt`), kaputte interne Links/Routen zwischen `nav-config.ts` und
+`routes.tsx` (keine gefunden), fehlende Testdateien für nicht-triviale
+Module in `src/lib`/`src/hooks` (keine Lücke gefunden), riskante
+Muster (`toUpperCase`/`toLowerCase` ohne Guard, ungeschützte
+`[0]`-Array-Zugriffe) — alle Treffer entweder bereits abgesichert oder
+reine Test-Assertions ohne echten Bug.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm install`, `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npm run test` (vitest, 81 Testdateien, 587 Tests, alle
+grün) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
