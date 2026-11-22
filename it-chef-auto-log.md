@@ -30853,3 +30853,73 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-22, ca. 02:10 UTC (158. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+eine Stunde nach dem 157. Lauf (`386006b`, ca. 01:09 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` per `git merge-base --is-ancestor` bestätigt lupenreiner
+Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 157. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Duffel-
+Stays-Freischaltung, Zahlungsprozess, Sprint-6-Sammelpunkte) bleiben
+unverändert aus denselben, seit früheren Läufen dokumentierten Gründen
+blockiert: offene Backend-/Architekturentscheidung bzw. fehlender
+Base44/Duffel/Gemini-Zugang (Kriterium 1/2), oder zu grob für einen
+einzelnen, klar abgegrenzten Punkt (Kriterium 3/4). Keine neue
+Information seit dem 157. Lauf.
+
+**Gezielte, unabhängige Zweitsuche speziell in der einzigen Kategorie, die
+in den letzten Läufen (138, 145) tatsächlich neue, kriterienkonforme
+Funde geliefert hat — Barrierefreiheit/Mobile-Politur (Sprint 6,
+`ZEITPLAN.md` Zeile 4258):**
+- Alle Icon-only `<button>`-Elemente im `src`-Baum einzeln nachgelesen
+  (`ChatInput.tsx`, `KiChat.tsx`, `Sidebar.tsx`, `Kalender.tsx`,
+  `EditMode.tsx`, `Aktivitaeten.tsx`, `Angebote.tsx`, `Favoriten.tsx`,
+  `Preisalarme.tsx`, `Reiseentwuerfe.tsx`, `Warenkorb.tsx`,
+  `ChecklistPanel.tsx`): durchgehend bereits `aria-label`/`title`/
+  sichtbarer Text bzw. `aria-pressed` vorhanden — keine Lücke.
+- Einziges `<img>`-Vorkommen (`HotelCard.tsx:17`) hat bereits
+  `alt={offer.accommodationName}`.
+- Codeweit nach `<div ... onClick` ohne Tastatur-Erreichbarkeit gesucht:
+  0 Treffer — jeder Klick-Handler sitzt auf `<button>`/`<Button>`/`<Link>`.
+- Dialoge/Sheets laufen durchgehend über die Radix-basierten
+  `ui/dialog.tsx`/`ui/sheet.tsx`-Primitiven, die `role="dialog"`/
+  `aria-modal` bereits intern setzen — kein manuelles, lückenhaftes
+  Dialog-Markup gefunden.
+- Form-Felder in `FlightWizard.tsx`/`HotelWizard.tsx`/`EditMode.tsx`
+  durchgehend mit `<Label htmlFor>` oder `aria-label` verknüpft.
+- Codeweit nach hartcodierten Low-Contrast-Klassen (`text-gray-300/400`
+  u. ä.) gesucht: 0 Treffer — durchgehend Theme-Tokens
+  (`text-muted-foreground` etc.).
+- Jede Seite nutzt genau ein `<h1>` über `PageHeader.tsx` — korrekte
+  Heading-Hierarchie, kein Fund.
+- Codeweit nach `autoFocus` (möglicher Fokus-Diebstahl) gesucht: 0
+  Treffer.
+
+Alle geprüften Stellen erweisen sich bei genauer Lektüre (nicht nur
+grep-Treffer) als bereits korrekt umgesetzt. Die A11y/Mobile-Politur-
+Kategorie wirkt nach 158 Läufen zunehmend ausgeschöpft.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
