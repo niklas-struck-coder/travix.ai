@@ -30714,3 +30714,76 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-22, ca. 00:11 UTC (156. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout,
+rund 25 Stunden nach dem 155. Lauf (`326e6ff`, 23:09 UTC am 21.11.).
+`it-chef/auto` direkt von `origin/it-chef/auto` übernommen (0 Commits
+Rückstand). `origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR
+#34/#38 weiterhin offen), per `git merge-base --is-ancestor` bestätigt
+lupenreiner Vorfahre von `it-chef/auto` — `main` bleibt unberührt, kein
+Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 155. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+Sprint 6 (End-to-End-Testing, Bugfixing-Durchgang, Performance-Check)
+und alle übrigen offenen Haupt-Checkboxen bleiben unverändert aus
+denselben, seit früheren Läufen dokumentierten Gründen blockiert: offene
+Backend-/Architekturentscheidung bzw. fehlender Base44/Duffel/Gemini-
+Zugang (Kriterium 1/2), oder zu grob für einen einzelnen, klar
+abgegrenzten Punkt (Kriterium 3/4).
+
+**Eigene, unabhängige Bug-Suche heute** (Fokus auf sechs bisher im Log
+nicht einzeln durchsuchte Kategorien: fehlende Abbruch-/Unmount-Guards
+bei async `useEffect`-Aufrufen, Race Conditions bei schnellem
+Doppel-Klick auf Such-/Submit-Buttons, ungeklammerte Zahlen-Eingaben,
+fehlendes `lang`-Attribut/HTML-Validität, ungeprüftes `new Date(...)`
+bei Nutzereingaben, ungeschützte `localStorage`/`sessionStorage`-
+Zugriffe außerhalb von `tripStorage.ts`) — fünf der sechs Kategorien
+bereits vollständig abgedeckt (`clampPassengerCount`/`clampGuestCount`
+klammern alle Zahlen-Eingaben auf [1,9] und NaN→1; `index.html` hat
+korrekt `lang="de"`; alle Nutzereingabe-Datumswerte in `format.ts`
+prüfen explizit `Number.isNaN(date.getTime())`; alle übrigen
+`localStorage`-Treffer liegen nur in Testdateien; `setTimeout`-Refs in
+`useChat.ts`/`useConcierge.ts` werden im `useEffect`-Cleanup korrekt per
+`clearTimeout` entsorgt; Submit-Buttons in FlightWizard/HotelWizard/
+ChatInput sind während des Ladens bereits korrekt `disabled`).
+
+Einziger Rest-Verdacht: `src/lib/duffel/client.ts`s `callDuffelProxy`
+(genutzt von `searchFlights`/`searchStays`, konsumiert in `useChat.ts`,
+`Flugsuche.tsx`, `Hotelsuche.tsx`) hat kein `AbortController`/`signal` —
+der vorhandene `searchGenerationRef`-Zähler verhindert zwar, dass eine
+überholte Antwort innerhalb derselben Komponenten-Instanz noch
+angewendet wird, bricht die zugrunde liegende `fetch()` beim Verlassen
+der Seite aber nicht ab (unnötiger Netzwerk-Traffic läuft weiter). Bei
+genauer Prüfung erfüllt das nicht alle vier Kriterien für einen
+autonomen Fix: React 19 behandelt `setState` auf einer bereits
+unmounteten Komponente als stillen No-op (kein Crash, keine Konsolen-
+Warnung, kein für Nutzer sichtbares Fehlverhalten nachweisbar) — es gibt
+also kein klar definiertes, objektiv falsches Verhalten zu beheben
+(Kriterium 4), nur eine Performance-Optimierung ohne bestehenden Bug.
+Zusätzlich würde ein konsistenter Fix mehrere Aufrufstellen
+(`useChat.ts` an drei Stellen, `Flugsuche.tsx`, `Hotelsuche.tsx`, sowie
+`client.ts` selbst) gleichzeitig anfassen statt eines einzelnen, klar
+abgegrenzten Punkts (Kriterium 3) — daher bewusst nicht umgesetzt,
+sondern hier nur dokumentiert, falls Ni das als eigenständige
+Performance-Aufgabe aufnehmen möchte.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
