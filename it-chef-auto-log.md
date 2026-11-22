@@ -30923,3 +30923,75 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-22, ca. 22:10 UTC (159. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, mit
+deutlichem Abstand zum 158. Lauf (`4a5eea4`, ca. 02:10 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` per `git merge-base --is-ancestor` bestätigt unveränderter
+Vorfahre von `it-chef/auto` (weiterhin `fe1300e`, keine neuen Commits seit
+dem 158. Lauf) — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 158. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+keine neue Information seit dem 158. Lauf, alle offenen Haupt-Checkboxen
+bleiben aus denselben, seit früheren Läufen dokumentierten Gründen
+blockiert (offene Backend-/Architekturentscheidung bzw. fehlender
+Base44/Duffel/Gemini-Zugang, oder zu grob für einen einzelnen, klar
+abgegrenzten Punkt).
+
+**Gezielte, unabhängige Zweitsuche in bisher nicht im Detail geprüften
+Mustern:**
+- `src/components/ui/tabs.tsx:70` (`TabsContent`) hat als einzige
+  `outline-none`-Stelle im ganzen `src`-Baum kein begleitendes
+  `focus-visible:ring`/`outline`-Muster (anders als alle übrigen
+  `outline-none`-Stellen in `button-variants.ts`, `input.tsx`,
+  `select.tsx`, `dialog.tsx`, `Home.tsx`). Codeweit nachverfolgt, ob das
+  tatsächlich benutzt wird: `TabsContent` wird aktuell nirgends im
+  Produktcode gerendert (einzige Verwendung ist der eigene
+  `tabs.test.tsx`-Baustein-Test) — kein Nutzer kann je auf dieses
+  fokussierbare Panel tabben. Ein Fix wäre reine Vorsichtsmaßnahme für
+  nicht erreichbaren Code, kein echter Bug — verletzt damit die
+  Projektregel, keine Absicherung für Szenarien einzubauen, die nicht
+  eintreten können. Kein Fund.
+- Codeweit nach `.sort(` gesucht: 0 Treffer im ganzen `src`-Baum — keine
+  In-Place-Mutation von Props-/State-Arrays möglich, da gar nicht
+  sortiert wird.
+- Alle `<form onSubmit>`-Stellen (`FlightWizard.tsx`, `HotelWizard.tsx`)
+  Knopf für Knopf auf fehlendes `type="button"` bei Nicht-Submit-Buttons
+  geprüft, das bei Enter versehentlich das Formular abschicken könnte:
+  beide Formulare haben genau einen `<Button type="submit">`, alle
+  anderen interaktiven Elemente sind `TabsTrigger`/`SelectTrigger`
+  (Radix setzt dort intern bereits `type="button"`) — kein Fund.
+- `HotelWizard.tsx`: Szenario geprüft, in dem `checkInDate` nach dem
+  Setzen von `checkOutDate` auf ein späteres Datum geändert wird
+  (`checkOutDate` bliebe dann vor dem neuen `min`). `isValid` prüft
+  weiterhin explizit `checkOutDate > checkInDate`, der Submit-Button
+  bleibt in diesem Fall korrekt deaktiviert — kein Fund, Verhalten
+  bereits korrekt.
+- `.reduce(` codeweit gesucht (`cartTotals.ts`, `Dashboard.tsx`):
+  `Dashboard.tsx`s `draftTrips.reduce(...) / draftTrips.length` sähe bei
+  leerem Array wie ein `0/0`-NaN-Risiko aus, aber `draftTrips` ist eine
+  feste, im Modul hart codierte Demo-Liste mit immer genau zwei
+  Einträgen (keine dynamische Nutzereingabe) — ein Guard dafür wäre
+  wieder Absicherung gegen ein Szenario, das im aktuellen Code nicht
+  eintreten kann. Kein Fund.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
