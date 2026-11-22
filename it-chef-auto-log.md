@@ -30787,3 +30787,69 @@ Log-Eintrag.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+
+## 2026-11-22, ca. 01:09 UTC (157. Lauf — kein neuer sicherer Punkt gefunden)
+
+**Ausgangslage:** Geplanter Cloud-Lauf, frischer, isolierter Checkout, rund
+eine Stunde nach dem 156. Lauf (`3fd6b97`, ca. 00:11 UTC). `it-chef/auto`
+direkt von `origin/it-chef/auto` übernommen (0 Commits Rückstand).
+`origin/main` weiterhin bei `fe1300e` (Stand 23.10., PR #34/#38 weiterhin
+offen), per `git merge-base --is-ancestor` bestätigt lupenreiner Vorfahre
+von `it-chef/auto` — `main` bleibt unberührt, kein Merge nötig.
+
+**Regressionsschutz-Baseline frisch durchlaufen** (`npm ci`, frischer
+Container): `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (81 Testdateien, 587 Tests, alle grün, nur der bekannte
+harmlose jsdom-Hinweis "Not implemented: Window's scrollTo()"), `npm run
+build` (0 Typfehler, unveränderte 815-KB-Chunk-Size-Warnung) — identisch
+zum Endstand des 156. Laufs.
+
+**Aufgabenliste gegen die vier Sicherheitskriterien geprüft:**
+`ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut durchsucht —
+alle offenen Haupt-Checkboxen (2.0 Base44/Auth, 4.1-4.3 InvokeLLM/Schema/
+Prompts, 5.7 Zug/Bus/Fähre, 6.2/6.6/6.7, 7.4/7.12, 8.1-8.9/8.12, Duffel-
+Stays-Freischaltung, Zahlungsprozess, Sprint-6-Sammelpunkte) bleiben
+unverändert aus denselben, seit früheren Läufen dokumentierten Gründen
+blockiert: offene Backend-/Architekturentscheidung bzw. fehlender
+Base44/Duffel/Gemini-Zugang (Kriterium 1/2), oder zu grob für einen
+einzelnen, klar abgegrenzten Punkt (Kriterium 3/4). `reports/it-chef.md`
+gegengeprüft: die beiden dort offen gelisteten Funde (uneinheitlich
+dramatische Lösch-Warnungen; `ChecklistPanel.tsx` ohne Persistenz) sind
+beide ausdrücklich zurückgestellt — Ersteres erfordert eine Produkt-
+Abwägung pro Stelle statt eines Ein-Zeilers, Letzteres hängt bewusst an
+der noch offenen Nutzerkonten-/Backend-Entscheidung. Keine neue
+Information seit dem 156. Lauf.
+
+**Eigene, unabhängige Bug-Suche heute, mit anderem Fokus als die
+Vorläufe** (alles ohne neuen, kriterienkonformen Fund):
+- Codeweit nach `target="_blank"` gesucht (fehlendes `rel="noopener
+  noreferrer"` wäre ein Sicherheitsrisiko): kein einziges Vorkommen im
+  gesamten `src`-Baum — es gibt aktuell keine externen Links.
+- Statische Pluralisierungs-Stellen mit "Nacht"/"Nächte"/"Gäste"/"Zimmer"
+  geprüft (`Dashboard.tsx`, `Warenkorb.tsx`, `Angebote.tsx`,
+  `HotelWizard.tsx`): ausnahmslos feste Mock-Daten-Strings bzw. reine
+  Label-Texte, keine dynamische Singular/Plural-Logik mit Fehlerpotenzial.
+- `clampGuestCount`/`clampPassengerCount` (`HotelWizard.tsx`,
+  `FlightWizard.tsx`) erneut auf Rand- und Leerstring-Fälle durchgerechnet
+  (`''` → `Number('')` → `0` → korrekt auf 1 geklammert, kein `NaN`-Leck):
+  korrekt, kein Fund.
+- `index.html` auf fehlende/fehlerhafte Basis-Metadaten geprüft: `lang`,
+  `viewport`, `charset`, Favicon, Titel alle vorhanden und korrekt —
+  einzig eine `<meta name="description">` fehlt (SEO), das ist aber eine
+  inhaltliche Marketing-/Copy-Entscheidung (Beschreibungstext), keine
+  objektiv eindeutige Ein-Zeiler-Korrektur, daher nicht autonom ergänzt.
+- Codeweit nach doppelten statischen `id`-Attributen innerhalb derselben
+  Datei gesucht (Skript über alle `.tsx`-Dateien außerhalb der Tests):
+  keine Duplikate gefunden.
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier Sicherheits-
+kriterien erfüllt. Keine Code-Änderung in diesem Lauf, nur dieser
+Log-Eintrag.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+`npx vitest run` (81 Testdateien, 587 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte Chunk-Size-Warnung) liefen grün.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
