@@ -31284,3 +31284,56 @@ abgeschlossenen `useReducedMotion()`-Durchsicht).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-23, ca. 23:20 UTC (165. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (164., ca.
+22:10 UTC) nicht neu zu `main` divergiert — kein Merge nötig. `npm ci`
+fehlerfrei, Regressionsschutz-Baseline frisch durchlaufen: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88 Testdateien,
+595 Tests, alle grün), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung).
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` bleiben
+aus den seit Lauf elf dokumentierten Gründen blockiert (Backend-/
+Produktentscheidungen, fehlende Base44/Gemini-Zugangsdaten). Eigene,
+gezielte Durchsicht gegen mehrere Bug-Kategorien (jeweils Code wirklich
+gelesen, nicht nur gegrept): unvollständige/falsche
+useEffect/useCallback-Dependency-Arrays, Race Conditions bei async
+Operationen (Generation-Refs in `useChat.ts`/`Flugsuche.tsx`/
+`Hotelsuche.tsx` bereits konsequent gegen Stale-Promises abgesichert),
+Off-by-one-Fehler/falsche Vergleichsoperatoren (Kalender-Grid,
+Datumsvergleiche — korrekt), Formularvalidierung in FlightWizard/
+HotelWizard (IATA-Pattern, Passagier-/Zimmer-Clamp, Datum-`min`-
+Attribute — konsistent, bereits mehrfach gehärtet), deutsche
+Pluralisierung in dynamischem Text (Umstieg/Umstiege, Aktivität/
+Aktivitäten — korrekt), Error-Boundary-Einbindung in `App.tsx`,
+kaputte interne Links/Routen (alle `<Link to=...>` gegen `routes.tsx`/
+`nav-config.ts` abgeglichen — keine toten Links), Konsistenz
+FlightWizard vs. HotelWizard (strukturell identisch), Event-Listener-
+Cleanups (`beforeunload` in `useChat.ts`, Speech-Recognition in
+`ChatInput.tsx` — beide korrekt aufgeräumt), `<img>`/Link-Attribute
+(kein fehlendes `alt`, kein `target="_blank"` ohne `rel="noopener"`),
+Label-Zuordnung bei Formularfeldern (`Input`/`Textarea` codeweit
+durchsucht — überall `htmlFor`/`aria-label` vorhanden).
+
+**Zwei Kandidaten geprüft und verworfen:**
+1. `EditMode.tsx`-Preisfeld (Aktivitäten) hat keine numerische/Negativ-
+   Validierung — aber laut Log bereits bewusst als Freitextfeld
+   eingestuft, da der Wert nirgends als Zahl geparst/summiert wird
+   (kein objektiv falsches Verhalten).
+2. `useChat.ts`: `startEdit()` löscht — anders als `sendMessage()`/
+   `resetChat()` — den pending `replyTimeoutRef` nicht vor eigenen
+   State-Änderungen; strukturell eine Asymmetrie zum etablierten
+   Muster, aber über den einzigen Aufrufer (`KiChat.tsx`, gated durch
+   `editHandled.current`, feuert pro Mount nur einmal synchron beim
+   Laden) nicht real auslösbar — kein konkretes Szenario über die App,
+   damit nicht Kriterium-3-fest (keine Interpretation/Annahme nötig).
+
+**Ergebnis:** Kein neuer Punkt gefunden, der alle vier
+Sicherheitskriterien zuverlässig erfüllt. Kein Code geändert — die
+oben frisch durchlaufene Baseline bleibt der aktuelle, grüne Stand auf
+`it-chef/auto`.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
