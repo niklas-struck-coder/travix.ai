@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 interface QuickRepliesProps {
   options: string[]
@@ -6,6 +6,8 @@ interface QuickRepliesProps {
 }
 
 export function QuickReplies({ options, onSelect }: QuickRepliesProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (options.length === 0) return null
 
   return (
@@ -13,9 +15,9 @@ export function QuickReplies({ options, onSelect }: QuickRepliesProps) {
       {options.map((option, index) => (
         <motion.button
           key={option}
-          initial={{ opacity: 0, y: 6 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: index * 0.04 }}
+          transition={{ duration: 0.2, delay: prefersReducedMotion ? 0 : index * 0.04 }}
           onClick={() => onSelect(option)}
           className="rounded-full border border-teal/40 bg-teal/10 px-3.5 py-1.5 text-sm font-medium text-navy transition-colors hover:bg-teal/20"
         >

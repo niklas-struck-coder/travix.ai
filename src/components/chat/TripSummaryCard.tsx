@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { MapPin, Plane, Train, Bus, Ship, Car, Wallet, CalendarDays, BedDouble, ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,6 +23,7 @@ const transportLabels: Record<TransportMode, string> = {
 
 export function TripSummaryCard({ trip }: { trip: TripDraft }) {
   const TransportIcon = trip.transportMode ? transportIcons[trip.transportMode] : MapPin
+  const prefersReducedMotion = useReducedMotion()
 
   const rows = [
     trip.destination && { key: 'destination', icon: MapPin, label: trip.destination },
@@ -41,7 +42,11 @@ export function TripSummaryCard({ trip }: { trip: TripDraft }) {
   if (rows.length === 0) return null
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+    >
       <Card className="border-teal/30 bg-teal/5">
         <CardContent className="flex flex-col gap-3 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-navy">Deine Reise bisher</p>

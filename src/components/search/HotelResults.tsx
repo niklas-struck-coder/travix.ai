@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { HotelCard } from '@/components/search/HotelCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
 import { SearchErrorAlert } from '@/components/search/SearchErrorAlert'
@@ -14,6 +14,8 @@ interface HotelResultsProps {
 }
 
 export function HotelResults({ offers, errors, loading, onSelect }: HotelResultsProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (loading) {
     return (
       <div role="status" className="flex items-center gap-2 pl-1">
@@ -32,7 +34,7 @@ export function HotelResults({ offers, errors, loading, onSelect }: HotelResults
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="grid gap-3 sm:grid-cols-2"
     >

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { TrainCard } from '@/components/search/TrainCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
@@ -11,6 +11,8 @@ interface TrainResultsProps {
 }
 
 export function TrainResults({ offers, loading, onSelect }: TrainResultsProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (loading) {
     return (
       <div role="status" className="flex items-center gap-2 pl-1">
@@ -24,7 +26,11 @@ export function TrainResults({ offers, loading, onSelect }: TrainResultsProps) {
   if (offers.length === 0) return <NoResultsMessage title="Keine Verbindungen gefunden" />
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-3">
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-3"
+    >
       {offers.map((offer) => (
         <TrainCard key={offer.id} offer={offer} onSelect={onSelect} />
       ))}

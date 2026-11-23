@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { FlightCard } from '@/components/search/FlightCard'
 import { NoResultsMessage } from '@/components/search/NoResultsMessage'
 import { SearchErrorAlert } from '@/components/search/SearchErrorAlert'
@@ -13,6 +13,8 @@ interface FlightResultsProps {
 }
 
 export function FlightResults({ offers, errors, loading, onSelect }: FlightResultsProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (loading) {
     return (
       <div role="status" className="flex items-center gap-2 pl-1">
@@ -30,7 +32,11 @@ export function FlightResults({ offers, errors, loading, onSelect }: FlightResul
   if (offers.length === 0) return <NoResultsMessage title="Keine Flüge gefunden" />
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid gap-3 sm:grid-cols-2">
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="grid gap-3 sm:grid-cols-2"
+    >
       {offers.map((offer) => (
         <FlightCard key={offer.id} offer={offer} onSelect={onSelect} />
       ))}

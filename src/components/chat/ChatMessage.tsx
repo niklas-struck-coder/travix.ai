@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { TravixAvatar } from '@/components/chat/TravixAvatar'
 import { cn } from '@/lib/utils'
 import type { ChatMessage as ChatMessageType } from '@/types/chat'
@@ -9,10 +9,11 @@ function formatTime(timestamp: number) {
 
 export function ChatMessage({ message }: { message: ChatMessageType }) {
   const isUser = message.role === 'user'
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
       className={cn('flex items-end gap-2', isUser && 'flex-row-reverse')}

@@ -4276,6 +4276,34 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   vitest run` (81 Testdateien, 587 Tests, alle grün — 584 + 3 neue
   Tests), `npm run build` (0 Typfehler, unveränderte
   Chunk-Size-Warnung) liefen vor dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 23.11. (162. Lauf) dieselbe Lücke in den
+  verbleibenden sechs Komponenten geschlossen, die noch kein
+  `useReducedMotion()` nutzten: `ChatMessage.tsx` (Einblend-Animation
+  jeder einzelnen Chat-Nachricht), `QuickReplies.tsx`
+  (Schnellantwort-Buttons inkl. gestaffeltem `delay`),
+  `TripSummaryCard.tsx` sowie `HotelResults.tsx`/`FlightResults.tsx`/
+  `TrainResults.tsx` (Einblend-Animation der Ergebnislisten) setzten
+  `framer-motion`s `initial`/`animate` ungeschützt, anders als
+  `TravixAvatar.tsx`/`PageTransition.tsx`/`FlightWizard.tsx`/
+  `HotelWizard.tsx`/`ChatInput.tsx` (s.o., 145. Lauf), die bereits
+  `useReducedMotion()` nutzen. Besonders relevant bei `ChatMessage.tsx`,
+  da die Einblend-Bewegung bei jeder neuen Chat-Nachricht erneut
+  auftritt, nicht nur einmalig. Fix: `initial={prefersReducedMotion ?
+  false : {...}}` in allen sechs Komponenten (bei `false` überspringt
+  framer-motion die Animation vollständig und rendert direkt im
+  `animate`-Zielzustand, exakt das in `PageTransition.tsx`/
+  `PageTransition.test.tsx` bereits etablierte Prüfmuster); bei
+  `QuickReplies.tsx` zusätzlich den gestaffelten `transition.delay` auf
+  0 gesetzt. Keine Funktionsänderung, reine Entfernung der dekorativen
+  Bewegung. Je eine neue `*.reduced-motion.test.tsx`-Datei pro Komponente
+  (gleiches Muster wie beim 145. Lauf, eigene Datei pro Komponente nötig,
+  da `useReducedMotion()` das `matchMedia`-Ergebnis nur einmal pro
+  Prozess/Testdatei cacht), Prüfung über `toHaveStyle({ opacity: '1',
+  transform: 'none' })` analog `PageTransition.test.tsx`. `npm ci`, `npx
+  tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (87
+  Testdateien, 593 Tests, alle grün — 587 + 6 neue Tests), `npm run
+  build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
+  Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

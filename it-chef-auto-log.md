@@ -31080,3 +31080,76 @@ unverändert zum 160. Lauf, da sich seitdem nichts am Code geändert hat.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-23, ca. 01:15 UTC (162. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (161., ca.
+00:09 UTC) nicht neu zu `main` divergiert — kein Merge nötig (`main`
+unverändert seit dem Support-Chef-Bericht vom 23.10.). Regressionsschutz-
+Baseline frisch durchlaufen (`npm ci`, `npx tsc -b`, `npm run lint`,
+`npx vitest run`): 0 Fehler, 81 Testdateien, 587 Tests grün — identisch
+zum 161. Lauf.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+geprüft — alle offenen Haupt-Checkboxen bleiben aus den bereits
+dokumentierten Gründen blockiert (Base44/Duffel/Gemini-Zugang bzw.
+offene Produkt-/Architekturentscheidung). Eigenständige Zweitsuche
+unter anderem nach: Testabdeckungslücken (keine neue — die fünf reinen
+Typdefinitionsdateien ohne Testdatei bleiben kein echtes Testziel, s.
+161. Lauf), `target="_blank"` ohne `rel="noopener noreferrer"` (0
+Treffer im ganzen `src`-Baum), nicht-null-Assertions (`!.`, 0 Treffer),
+`parseInt`/`parseFloat` ohne Guard (0 Treffer), fehlende `key`-Props in
+`.map()`-Aufrufen (alle 16 Fundstellen einzeln geprüft, durchgehend
+vorhanden — kein `eslint-plugin-react`/`jsx-key` im Projekt, daher per
+Hand nachvollzogen statt dem Lint-Lauf vertraut).
+
+**Fund:** Beim gezielten Nachlesen aller `framer-motion`-Stellen
+(`grep -rl framer-motion src`) und Abgleich mit `grep -rl
+useReducedMotion src` fehlte die bereits etablierte
+`useReducedMotion()`-Rücksicht (`TravixAvatar.tsx`, `PageTransition.tsx`,
+und seit dem 145. Lauf auch `FlightWizard.tsx`/`HotelWizard.tsx`/
+`ChatInput.tsx`) in sechs weiteren Komponenten: `ChatMessage.tsx`
+(Einblend-Animation jeder einzelnen Chat-Nachricht — besonders
+relevant, da sie bei jeder neuen Nachricht erneut auftritt, nicht nur
+einmalig), `QuickReplies.tsx` (Schnellantwort-Buttons inkl. gestaffeltem
+`delay`), `TripSummaryCard.tsx` sowie `HotelResults.tsx`/
+`FlightResults.tsx`/`TrainResults.tsx` (Einblend-Animation der
+Ergebnislisten). Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-
+/Architekturentscheidung (reine Konsistenz mit bereits etabliertem
+Projektmuster), klar genug beschrieben (derselbe Fix wie beim 145. Lauf,
+nur auf weitere Komponenten angewendet), objektiv prüfbar
+(Typecheck/Lint/Tests).
+
+**Fix:** `initial={prefersReducedMotion ? false : {...}}` in allen
+sechs Komponenten ergänzt — bei `false` überspringt `framer-motion` die
+Einblend-Animation vollständig und rendert sofort im `animate`-
+Zielzustand (exakt das in `PageTransition.tsx`/`PageTransition.test.tsx`
+etablierte Muster), statt wie bisher immer von `opacity: 0`/versetzter
+Position aus einzublenden. Bei `QuickReplies.tsx` zusätzlich den
+gestaffelten `transition.delay` (`index * 0.04`) bei reduzierter
+Bewegung auf 0 gesetzt. Keine Funktionsänderung, reine Entfernung der
+dekorativen Bewegung für Nutzer:innen, die das in ihrem Betriebssystem
+so eingestellt haben.
+
+**Tests:** Je eine neue `*.reduced-motion.test.tsx`-Datei pro Komponente
+(`ChatMessage`, `QuickReplies`, `TripSummaryCard`, `HotelResults`,
+`FlightResults`, `TrainResults`) — eigene Datei pro Komponente nötig, da
+`useReducedMotion()` das `matchMedia`-Ergebnis nur einmal pro Prozess/
+Testdatei cacht (gleiches Vorgehen wie bei den bestehenden
+`*.reduced-motion.test.tsx`-Dateien). Jeweils `window.matchMedia` auf
+`matches: true` gemockt und per `toHaveStyle({ opacity: '1', transform:
+'none' })` geprüft, dass das jeweilige Element sofort im Endzustand
+steht — exakt die bereits in `PageTransition.test.tsx` etablierte
+Prüfmethode.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (87 Testdateien, 593 Tests, alle grün — 587 +
+6 neue Tests), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) liefen vor dem Commit grün.
+
+**Checkbox aktualisiert:** `ZEITPLAN.md`, Sprint 6 — "Mobile-Politur,
+Barrierefreiheit-Check" (Fortsetzung des 145.-Lauf-Eintrags).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
