@@ -31215,3 +31215,72 @@ Stellen im `src`-Baum abgeschlossen).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-23, ca. 22:10 UTC (164. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (163., ca.
+02:10 UTC) nicht neu zu `main` divergiert (`main` unverändert seit dem
+Support-Chef-Bericht vom 23.10.) — kein Merge nötig. `npm ci`
+fehlerfrei, Regressionsschutz-Baseline frisch durchlaufen: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88 Testdateien,
+594 Tests, alle grün).
+
+**Suche:** Die seit dem 163. Lauf dokumentierte `useReducedMotion()`-
+Durchsicht ist laut diesem Log abgeschlossen (alle `framer-motion`-
+Stellen im `src`-Baum abgedeckt). `ZEITPLAN.md`/
+`tasks/tasks-prd-travix-platform.md` bleiben aus den seit Lauf elf
+dokumentierten Gründen blockiert (Backend-/Produktentscheidungen,
+fehlende Base44/Gemini-Zugangsdaten). Stattdessen eigene, gezielte
+Durchsicht: `grep -rn "TODO|FIXME|XXX|HACK"` sowie
+`console\.(log|warn|error|debug)` und leere `catch`-Blöcke in `src/`
+(keine neuen Treffer — bestehende `console.error`-Aufrufe sind
+begründete Fehlerprotokollierung, kein Fund). `JSON.parse`-Aufrufe
+geprüft (`tripStorage.ts`) — bereits sorgfältig mit Try/Catch und
+Default-Werten abgesichert, kein Bug. Alle `size="icon"`-Buttons
+codeweit durchsucht (14 Fundstellen) — jeder hat bereits ein
+`aria-label`.
+
+**Fund:** Keine der oben geprüften Stellen ergab einen neuen Bug. Beim
+Durchgehen von `AppShell.tsx` (umschließt alle Routen) fiel aber auf:
+Die App hatte keinen "Skip to main content"-Link (WCAG 2.1 AA, 2.4.1
+Bypass Blocks) — `AppShell.tsx` rendert vor `<main>` direkt `<Sidebar>`
+und `<MobileNav>`, beide voller fokussierbarer Links/Buttons, sodass
+Tastatur-/Screenreader-Nutzer:innen auf jeder Seite erst durch die
+komplette Navigation tabben mussten, bevor der eigentliche Seiteninhalt
+erreichbar war. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (Standard-Barrierefreiheitsmuster, keine
+Design-Erfindung — bei fehlender Design-Vorgabe laut `MARKENDESIGN.md`
+auf bestehenden Tokens/Mustern aufgebaut, s.u.), klar genug beschrieben
+(etabliertes WCAG-Muster), objektiv prüfbar (Typecheck/Lint/Tests).
+
+**Design-Check:** `MARKENDESIGN.md` vor der UI-Änderung gelesen — kein
+Eintrag zu Skip-Links. Gemäß der dortigen Vorgabe für solche Fälle
+("bei bestehenden Design-Tokens und bisheriger Tonalität bleiben, nicht
+neu erfinden") bestehende Farben (`bg-teal`/`text-navy`) und das
+bereits in `Home.tsx` (11.10.) etablierte
+`focus-visible:ring-[3px] focus-visible:ring-ring/50`-Fokusmuster
+wiederverwendet — keine neue Stilentscheidung.
+
+**Fix:** Neuer, als erstes Kind von `AppShell.tsx` gerenderter Link
+(`href="#main-content"`, Text "Zum Hauptinhalt springen"), per Tailwinds
+`sr-only` standardmäßig visuell versteckt, über `focus:not-sr-only`
+erst bei Tastaturfokus sichtbar (fixiert oben links). `<main>` trägt
+jetzt `id="main-content"` sowie `tabIndex={-1}` — ohne das wäre das
+Element nicht fokussierbar, der Link hätte den Fokus nicht tatsächlich
+dorthin verschoben, nur den Scroll.
+
+**Tests:** Neuer Test in `AppShell.test.tsx`: prüft `href="#main-content"`
+auf dem Link sowie `id`/`tabindex` auf dem `main`-Element.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 595 Tests, alle grün — 594 +
+1 neuer Test), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) liefen vor dem Commit grün.
+
+**Checkbox aktualisiert:** `ZEITPLAN.md`, Sprint 6 — "Mobile-Politur,
+Barrierefreiheit-Check" (neuer Eintrag, unabhängig von der jetzt
+abgeschlossenen `useReducedMotion()`-Durchsicht).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).

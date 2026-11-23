@@ -4322,6 +4322,35 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Testdatei mit kombiniertem Assertion-Block für Hero + alle vier
   Karten), `npm run build` (0 Typfehler, unveränderte
   Chunk-Size-Warnung) liefen vor dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 23.11. (164. Lauf) eine eigenständig
+  gefundene, bisher nie behobene Lücke geschlossen: Die App hatte keinen
+  "Skip to main content"-Link (WCAG 2.1 AA, 2.4.1 Bypass Blocks) — wer
+  per Tastatur navigiert oder einen Screenreader nutzt, musste auf jeder
+  Seite erst durch die komplette Sidebar-Navigation tabben, bevor der
+  eigentliche Seiteninhalt erreichbar war, da `AppShell.tsx` (umschließt
+  alle Routen) vor `<main>` direkt `<Sidebar>` und `<MobileNav>` rendert,
+  beide voller fokussierbarer Links/Buttons. Erfüllt alle vier
+  Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+  rechtlichen Texten, keine offene Produkt-/Architekturentscheidung
+  (Standard-Barrierefreiheitsmuster, keine Design-Erfindung), klar genug
+  beschrieben (etabliertes WCAG-Muster), objektiv prüfbar (Typecheck/
+  Lint/Tests). Fix: neuer, als erstes Kind von `AppShell.tsx` gerenderter
+  Link `href="#main-content"` ("Zum Hauptinhalt springen"), standardmäßig
+  per Tailwinds `sr-only` visuell versteckt und erst bei Tastaturfokus
+  über `focus:not-sr-only` sichtbar (fixiert oben links, `bg-teal`/
+  `text-navy` sowie derselbe `focus-visible:ring-[3px]
+  focus-visible:ring-ring/50`-Fokusring wie bei den Destination-Karten in
+  `Home.tsx`, 11.10.) — keine neue Farb-/Stilentscheidung, reine
+  Wiederverwendung bestehender Design-Tokens/Fokusmuster. `<main>` trägt
+  jetzt `id="main-content"` sowie `tabIndex={-1}`, damit der Link den
+  Fokus (nicht nur den Scroll) tatsächlich dorthin verschiebt, da ein
+  `<main>`-Element ohne das von Natur aus nicht fokussierbar ist. Neuer
+  Test in `AppShell.test.tsx`: prüft `href="#main-content"` auf dem Link
+  sowie `id`/`tabindex` auf dem `main`-Element. `npm ci`, `npx tsc -b`
+  (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88
+  Testdateien, 595 Tests, alle grün — 594 + 1 neuer Test), `npm run
+  build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
+  Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 
