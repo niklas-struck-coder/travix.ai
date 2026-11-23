@@ -4304,6 +4304,24 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Testdateien, 593 Tests, alle grün — 587 + 6 neue Tests), `npm run
   build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 23.11. (163. Lauf) die letzte
+  verbliebene Lücke in diesem Muster geschlossen: `Home.tsx` (Hero-
+  Sektion sowie die vier "Beliebte Reiseziele"-Karten) nutzte
+  `framer-motion`s `initial`/`animate` ebenfalls ungeschützt — bei einer
+  codeweiten Suche (`grep -rl framer-motion` vs. `grep -rl
+  useReducedMotion`) als letzte verbleibende Komponente mit echter
+  Einblend-Animation identifiziert (`routes.tsx` nutzt `AnimatePresence`
+  nur als Wrapper um `PageTransition.tsx`, das selbst schon
+  `useReducedMotion()` berücksichtigt, daher kein eigener Fund). Fix:
+  identisches `initial={prefersReducedMotion ? false : {...}}`-Muster,
+  bei den Reiseziel-Karten zusätzlich den gestaffelten
+  `transition.delay` auf 0 gesetzt. Neue
+  `Home.reduced-motion.test.tsx` (gleiches Prüfmuster wie beim 162.
+  Lauf). `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler),
+  `npx vitest run` (88 Testdateien, 594 Tests, alle grün — 593 + 1 neue
+  Testdatei mit kombiniertem Assertion-Block für Hero + alle vier
+  Karten), `npm run build` (0 Typfehler, unveränderte
+  Chunk-Size-Warnung) liefen vor dem Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

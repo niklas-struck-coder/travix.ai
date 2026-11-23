@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, MessageCircle, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,10 +12,12 @@ const destinations = [
 ]
 
 export function Home() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="flex flex-col gap-12">
       <motion.section
-        initial={{ opacity: 0, y: 12 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="relative overflow-hidden rounded-3xl bg-navy px-6 py-14 text-white sm:px-10 sm:py-20"
@@ -63,9 +65,9 @@ export function Home() {
           {destinations.map((destination, index) => (
             <motion.div
               key={destination.name}
-              initial={{ opacity: 0, y: 12 }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.05, ease: 'easeOut' }}
+              transition={{ duration: 0.35, delay: prefersReducedMotion ? 0 : index * 0.05, ease: 'easeOut' }}
             >
               <Link
                 to={`/ki-chat?destination=${encodeURIComponent(destination.name)}`}

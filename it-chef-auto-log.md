@@ -31153,3 +31153,65 @@ Barrierefreiheit-Check" (Fortsetzung des 145.-Lauf-Eintrags).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
 Teil desselben Commits).
+
+## 2026-11-23, ca. 02:10 UTC (163. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (162., ca.
+01:15 UTC) nicht neu zu `main` divergiert (`main` unverändert seit dem
+Support-Chef-Bericht vom 23.10.) — kein Merge nötig. Regressionsschutz-
+Baseline frisch durchlaufen (`npm ci`, `npx tsc -b`, `npm run lint`, `npx
+vitest run`): 0 Fehler, 87 Testdateien, 593 Tests grün — identisch zum
+Endstand des 162. Laufs.
+
+**Suche:** Direkt an der im 162. Lauf begonnenen `useReducedMotion()`-
+Durchsicht weitergemacht statt neu bei `ZEITPLAN.md`/der Aufgabenliste
+anzusetzen (die bleibt unverändert aus den seit Lauf elf dokumentierten
+Gründen blockiert). Codeweiter Abgleich `grep -rl framer-motion src`
+gegen `grep -rl useReducedMotion src`: von den 13 Dateien mit
+`framer-motion`-Import fehlte die Rücksicht nur noch in zwei —
+`src/pages/Home.tsx` und `src/routes.tsx`. `routes.tsx` genau gelesen:
+Es nutzt `AnimatePresence` nur als Wrapper um `<PageTransition>`, das
+selbst schon seit früherem Lauf `useReducedMotion()` berücksichtigt —
+kein eigener Fund, kein doppelter Fix nötig.
+
+**Fund:** `src/pages/Home.tsx` (Startseite, einzige verbleibende Lücke)
+hatte zwei ungeschützte `motion`-Elemente: die Hero-Sektion
+(`motion.section`, Einblend-Animation beim ersten Laden) und die vier
+"Beliebte Reiseziele"-Karten (`motion.div`, gestaffeltes Einblenden über
+`index * 0.05`). Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (reine Konsistenz mit dem seit dem 145./162.
+Lauf etablierten Projektmuster), klar genug beschrieben (identischer
+Fix, nur auf eine weitere, bereits identifizierte Komponente
+angewendet), objektiv prüfbar (Typecheck/Lint/Tests).
+
+**Fix:** `useReducedMotion()` importiert und wie in allen bereits
+gefixten Komponenten `initial={prefersReducedMotion ? false : {...}}`
+gesetzt — bei `true` rendert `framer-motion` sofort im `animate`-
+Zielzustand statt von `opacity: 0`/versetzter Position aus
+einzublenden. Bei den vier Reiseziel-Karten zusätzlich den gestaffelten
+`transition.delay` (`index * 0.05`) bei reduzierter Bewegung auf 0
+gesetzt, analog `QuickReplies.tsx` im 162. Lauf. Keine Funktionsänderung,
+reine Entfernung der dekorativen Bewegung.
+
+**Tests:** Neue `src/pages/Home.reduced-motion.test.tsx` (eigene Datei
+nötig, da `useReducedMotion()` das `matchMedia`-Ergebnis nur einmal pro
+Prozess/Testdatei cacht, gleiches Vorgehen wie bei allen bisherigen
+`*.reduced-motion.test.tsx`-Dateien) — mockt `window.matchMedia` auf
+`matches: true` und prüft per `toHaveStyle({ opacity: '1', transform:
+'none' })`, dass sowohl die Hero-Sektion als auch alle vier
+Reiseziel-Karten sofort im Endzustand stehen (bestehende `Home.test.tsx`
+unverändert, deckt bereits Inhalt/Links/Fokus-Stil ab).
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 594 Tests, alle grün — 593 +
+1 neue Testdatei), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) liefen vor dem Commit grün.
+
+**Checkbox aktualisiert:** `ZEITPLAN.md`, Sprint 6 — "Mobile-Politur,
+Barrierefreiheit-Check" (Fortsetzung des 145./162.-Lauf-Eintrags; die
+`useReducedMotion()`-Durchsicht ist damit für alle `framer-motion`-
+Stellen im `src`-Baum abgeschlossen).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag ist
+Teil desselben Commits).
