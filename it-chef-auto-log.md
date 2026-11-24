@@ -31586,3 +31586,59 @@ wie oben — unverändert zum 168. Lauf, da keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-24, ca. 23:10 UTC (170. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 169. Lauf, `5c2c503`, ca. 22:09 UTC).
+`origin/main` unverändert seit dem 23.10. (`fe1300e`), vollständig in
+`it-chef/auto` enthalten (`git merge-base --is-ancestor origin/main
+it-chef/auto` bestätigt das) — kein Merge nötig. `npm ci` fehlerfrei,
+Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+identisch zum Endstand des 169. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gegen die
+vier Sicherheitskriterien durchgesehen — alle verbleibenden offenen
+Punkte bleiben aus denselben, seit vielen Läufen dokumentierten Gründen
+blockiert (Backend-/Produktentscheidung Base44 vs. Alternative, fehlende
+Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-Felder in
+`TripDraft` für 6.2/6.6/6.7, Auth-Abhängigkeit für 2.x/7.4, zu
+unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich eigene,
+unabhängige Code-Durchsicht (bewusst andere Stichproben als 168./169.
+Lauf, um keine blinden Flecken zu wiederholen): `key={index}`/`key={i}`
+in `.map()`-Listen (2 Treffer, `FlightCard.tsx`/`SearchErrorAlert.tsx`,
+beide statische, nicht umsortierbare Listen — kein echtes Bug-Risiko,
+anders als bei filter-/sortierbaren Listen), `JSON.parse`-Aufrufe (1
+Treffer außerhalb von Tests, `tripStorage.ts`, bereits mit
+try/catch+Normalisierung abgesichert), `@ts-ignore`/`@ts-expect-error`/
+`eslint-disable` (nur in Testdateien, unkritisch), übersprungene Tests
+(`.skip`/`.only`/`xit`/`xdescribe`, keine Treffer), interne Links
+(`to=`/`href=` in allen Seiten/Komponenten gegen `routes.tsx` geprüft,
+keine toten Ziele), Datumsvalidierung in `FlightWizard.tsx`
+(Rückflugdatum ≥ Hinflugdatum, korrekt per `min`-Attribut und
+Submit-Guard abgesichert), Pluralisierung in Nutzertexten
+(`Zwischenstopp(s)`, `Umstieg(e)`, `Aktivität(en)`, `Entwurf/Entwürfe`,
+jeweils korrekt), Logik in `calendarUtils.ts`/`cartTotals.ts`/
+`checklistRules.ts`/`Preisalarme.tsx` (Kalendergitter-Berechnung,
+Kategorien-Summen, Checklisten-Status, Zielpreis-Vergleich `currentPrice
+<= targetPrice`) — jeweils korrekt, kein neuer Fund.
+
+**Bereits dokumentierter, bewusst nicht umgesetzter Punkt erneut
+geprüft:** Die vom 168. Lauf gefundene `prefers-reduced-motion`-Lücke in
+den Radix-Primitives `dialog.tsx`/`sheet.tsx`/`select.tsx` besteht
+unverändert; Einschätzung (kein 1:1-Vorbild im Code, großer Blast-Radius
+über praktisch jeden Dialog/jedes Dropdown/jedes mobile Menü der App)
+bestätigt — weiterhin zu riskant für einen unüberwachten Lauf, bleibt
+Empfehlung für eine gezielte Zusammenarbeit mit Ni.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 169. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
