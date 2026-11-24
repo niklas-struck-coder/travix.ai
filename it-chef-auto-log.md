@@ -31536,3 +31536,53 @@ wie oben — unverändert zum 167. Lauf, da keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-24, ca. 22:09 UTC (169. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 168. Lauf, `cf9eed0`, ca. 02:10 UTC).
+`origin/main` unverändert seit dem 23.10. (`fe1300e`), vollständig in
+`it-chef/auto` enthalten — `git merge origin/main` ergab "Already up to
+date", kein neuer Merge nötig. `npm ci` fehlerfrei, Baseline frisch
+durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (88 Testdateien, 597 Tests, alle grün) — identisch zum
+Endstand des 168. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Punkte bleiben aus denselben, seit vielen Läufen dokumentierten
+Gründen blockiert (Backend-/Produktentscheidung Base44 vs. Alternative,
+fehlende Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-
+Felder in `TripDraft` für 6.2/6.6/6.7, Auth-Abhängigkeit für 2.x/7.4,
+zu unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Eigene unabhängige
+Gegenprüfung durchgeführt, unabhängig vom 168.-Lauf-Bericht: `<img>`
+ohne `alt` (1 Treffer, `HotelCard.tsx`, hat bereits `alt={offer.
+accommodationName}`), alle `size="icon"`-Buttons (`grep -rn
+'size="icon"' src` → 20 Treffer in 10 Dateien, jeder bereits mit
+`aria-label` versehen), `console.log`/`console.debug` (keine Treffer),
+TODO/FIXME/XXX (ein Treffer, `format.test.ts`, unverändert seit
+vorherigen Läufen, kein echter TODO-Marker im Code). Kein neuer Fund.
+
+**Bereits dokumentierter, bewusst nicht umgesetzter Punkt erneut
+geprüft:** Die vom 168. Lauf gefundene `prefers-reduced-motion`-Lücke in
+den Radix-Primitives `dialog.tsx`/`sheet.tsx`/`select.tsx`
+(Tailwind-`animate-in`/`animate-out`-Klassen ohne Rücksicht auf
+reduzierte Bewegung) besteht unverändert. Einschätzung bestätigt: kein
+bestehendes 1:1-Vorbild im Code (die 162/163/166/167-Fixes nutzen alle
+`useReducedMotion()` von framer-motion, nicht Tailwind-CSS-Varianten),
+und großer Blast-Radius, da diese drei Dateien Basis-Komponenten für
+praktisch jeden Dialog/jedes Dropdown/jedes mobile Menü der App sind.
+Bleibt daher für einen unüberwachten Lauf zu riskant (Kriterium 3
+verletzt) — weiterhin Empfehlung, das gezielt mit Ni zusammen
+anzugehen statt autonom.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung, kein Commit über den Log-Eintrag hinaus.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 168. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
