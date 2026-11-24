@@ -31406,3 +31406,76 @@ Barrierefreiheit-Check" (neuer Eintrag, unabhängig von der
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-24, ca. 01:15 UTC (167. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 166. Lauf, `86b5997`, ca. 00:10 UTC).
+`origin/main` unverändert seit dem 23.10. (`fe1300e`), vollständig in
+`it-chef/auto` enthalten — kein Merge nötig. `npm ci` fehlerfrei,
+Regressionsschutz-Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler),
+`npm run lint` (0 Fehler), `npx vitest run` (88 Testdateien, 596 Tests,
+alle grün), `npm run build` (0 Typfehler, unveränderte
+816-KB-Chunk-Size-Warnung) — identisch zum Endstand des 166. Laufs.
+
+**Hinweis zu einem eigenen Fehlstart:** Vor diesem Lauf irrtümlich lokal
+einen Branch `it-chef/auto` *von `main`* statt vom echten
+`origin/it-chef/auto` aufgesetzt (ein `git fetch origin main` hatte den
+tatsächlichen Remote-Branch mit den 166 vorherigen Läufen nicht geholt).
+Darauf Task 8.13 als "stale" bearbeitet — stellte sich aber heraus, dass
+genau das bereits im 87. Lauf (06.11.) auf dem echten `it-chef/auto`
+erledigt worden war. Fehlstart-Commit nie gepusht, lokal per `git reset
+--hard origin/it-chef/auto` verworfen, bevor irgendetwas an den
+tatsächlichen Branch ging — keine doppelte/widersprüchliche Historie
+entstanden.
+
+**Ausgewählter Punkt:** Beim Gegenprüfen der 8.13-Verwechslung ohnehin
+`tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` erneut gegen die vier
+Sicherheitskriterien durchgesehen — alle verbleibenden offenen
+Programmierungs-Punkte (7.12, 8.1-8.9/8.11/8.12, Sprint-5/6-Sammelpunkte)
+bleiben aus den seit vielen Läufen dokumentierten Gründen blockiert
+(Backend-/Produktentscheidungen, fehlende Zugangsdaten, zu unspezifische
+Sammelpunkte). Eigene, unabhängige Suche mit bisher nicht in diesem
+Umfang genutzter Methode: den gerade erst im 166. Lauf etablierten
+Accessibility-Fix (fehlende `aria-live`-Region im Chatverlauf von
+`KiChat.tsx`) gezielt auf andere Chat-Oberflächen im Projekt übertragen
+geprüft (`grep -rln "messages.map" src` → zwei Treffer:
+`KiChat.tsx`/Komponente bereits gefixt, `Urlaubsmodus.tsx` noch nicht).
+
+**Fund:** `Urlaubsmodus.tsx` (Concierge-Chat im Urlaubsmodus) hat
+strukturell exakt dieselbe Lücke, die der 166. Lauf in `KiChat.tsx`
+behoben hat: Die Nachrichtenliste (`messages.map(...)`) hat keine eigene
+Live-Region, nur der "Travix denkt nach …"-Hinweis trägt `role="status"`.
+Erfüllt alle vier Sicherheitskriterien aus demselben Grund wie der 166.
+Lauf: kein Bezug zu Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine
+offene Produkt-/Architekturentscheidung (identisches, bereits etabliertes
+Muster statt einer neuen Design-Entscheidung), klar genug beschrieben
+(1:1-Übertragung eines bestehenden Fixes), objektiv prüfbar
+(Typecheck/Lint/Tests).
+
+**Design-Check:** Betrifft nur Semantik (`role`/`aria-*`), keine
+visuelle Änderung — `MARKENDESIGN.md` nicht einschlägig, wie schon beim
+166. Lauf festgestellt.
+
+**Fix:** In `src/pages/Urlaubsmodus.tsx` die Nachrichtenliste in einen
+`<div role="log" aria-live="polite" aria-label="Chatverlauf">`-Wrapper
+gesetzt — identisches Muster wie in `KiChat.tsx`, der Denk-Indikator
+bleibt bewusst außerhalb (gleiche Begründung: keine verschachtelten
+Live-Regionen, da `role="status"` bereits implizit `aria-live="polite"`
+ist). Keine Funktions- oder Stiländerung.
+
+**Tests:** Neuer Test in `Urlaubsmodus.test.tsx` ("Urlaubsmodus –
+Chatverlauf"): prüft über `screen.getByRole('log', { name: 'Chatverlauf'
+})`, dass die Region existiert, `aria-live="polite"` trägt und den
+aktuellen Begrüßungstext enthält.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün — 596 +
+1 neuer Test), `npm run build` (0 Typfehler, unveränderte
+816-KB-Chunk-Size-Warnung) liefen vor dem Commit grün.
+
+**Checkbox aktualisiert:** `ZEITPLAN.md`, Sprint 6 — "Mobile-Politur,
+Barrierefreiheit-Check" (Ergänzung zum 166.-Lauf-Eintrag).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

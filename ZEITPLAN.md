@@ -4371,6 +4371,23 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Testdateien, 596 Tests, alle grün — 595 + 1 neuer Test), `npm run
   build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 24.11. (167. Lauf) dieselbe Lücke im
+  Schwester-Chat `Urlaubsmodus.tsx` geschlossen: Der Concierge-Chatverlauf
+  dort hatte strukturell exakt dieselbe fehlende `aria-live`-Region wie
+  `KiChat.tsx` vor dem 166. Lauf — nur der "Travix denkt nach …"-Hinweis
+  trug `role="status"`, die eigentliche Nachrichtenliste
+  (`messages.map(...)`) nicht. Beim gezielten Gegenprüfen des gerade
+  erst etablierten Musters auf andere Chat-Oberflächen gefunden (einzige
+  zweite Stelle im Projekt mit `messages.map`+Chat-Thinking-Indikator).
+  Erfüllt dieselben vier Sicherheitskriterien wie der 166. Lauf. Fix:
+  identischer `<div role="log" aria-live="polite" aria-label="Chatverlauf">`-
+  Wrapper um die Nachrichtenliste, Denk-Indikator bewusst außerhalb
+  gelassen (gleiche Begründung wie bei `KiChat.tsx`). Neuer Test in
+  `Urlaubsmodus.test.tsx` nach demselben Muster wie in `KiChat.test.tsx`.
+  `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+  vitest run` (88 Testdateien, 597 Tests, alle grün — 596 + 1 neuer
+  Test), `npm run build` (0 Typfehler, unveränderte Chunk-Size-Warnung)
+  liefen vor dem Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

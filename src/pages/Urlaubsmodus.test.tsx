@@ -112,6 +112,23 @@ describe('Urlaubsmodus – Navigation von einer MeineReisen-Karte (?destination=
   })
 })
 
+describe('Urlaubsmodus – Chatverlauf', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('announces new chat messages to assistive tech via an aria-live log region', () => {
+    seedStoredChat({ destination: 'Lissabon' })
+    renderUrlaubsmodus()
+
+    const log = screen.getByRole('log', { name: 'Chatverlauf' })
+    expect(log).toHaveAttribute('aria-live', 'polite')
+    expect(
+      log,
+    ).toHaveTextContent('Willkommen im Urlaubsmodus für deine Reise nach Lissabon!')
+  })
+})
+
 describe('Urlaubsmodus – Chat-Interaktion', () => {
   beforeEach(() => {
     localStorage.clear()
