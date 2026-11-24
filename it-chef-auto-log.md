@@ -31479,3 +31479,60 @@ Barrierefreiheit-Check" (Ergänzung zum 166.-Lauf-Eintrag).
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-24, ca. 02:10 UTC (168. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 167. Lauf, `43166e4`, ca. 01:15 UTC).
+`origin/main` unverändert seit dem 23.10. (`fe1300e`), vollständig in
+`it-chef/auto` enthalten — kein Merge nötig. `npm ci` fehlerfrei,
+Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+identisch zum Endstand des 167. Laufs.
+
+**Suche:** `tasks/tasks-prd-travix-platform.md`/`ZEITPLAN.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte (7.4, 7.12, 8.1-8.7/8.9/8.12,
+Sprint-5/6-Sammelpunkte) bleiben aus den seit vielen Läufen
+dokumentierten Gründen blockiert (Backend-/Produktentscheidungen,
+fehlende Zugangsdaten/Entity, zu unspezifische Sammelpunkte). Eigene,
+unabhängige Suche nach demselben Muster wie 166./167. Lauf (bestehenden
+Fix auf übersehene Stellen übertragen) sowie zusätzlich: `<img>` ohne
+`alt`, `size="icon"`-Buttons ohne `aria-label`, `<Progress>` ohne
+`aria-label`, TODO/FIXME/XXX-Marker, übrig gebliebene
+`console.log`/`console.debug` — keiner dieser Funde ergab einen neuen
+Treffer; alles bereits abgedeckt bzw. nicht vorhanden.
+
+**Ein Fund, bewusst nicht umgesetzt:** `src/components/ui/dialog.tsx`,
+`sheet.tsx` und `select.tsx` (Radix-Primitives) nutzen Tailwind-eigene
+`animate-in`/`animate-out`/`zoom-in`/`slide-in`/`fade-in`-Klassen für
+ihre Öffnen/Schließen-Übergänge, ohne `prefers-reduced-motion` zu
+berücksichtigen — strukturell dieselbe WCAG-2.3.3-Lücke wie die in den
+Läufen 162/163 geschlossenen framer-motion-Animationen. Trotzdem heute
+nicht als "sicher genug" eingestuft und nicht angefasst: Anders als bei
+162/163/166/167 gibt es im Repo kein etabliertes 1:1-Vorbild für
+CSS-basierte Radix-Animationen (dort überall `useReducedMotion()` von
+framer-motion, hier reines Tailwind/CSS — die Umsetzung würde eine neue
+Methode einführen, z.B. Tailwind `motion-reduce:`-Variante, statt einen
+bestehenden Fix zu kopieren). Vor allem aber ist der Blast-Radius
+ungewöhnlich groß: `dialog.tsx`/`sheet.tsx`/`select.tsx` sind
+Basis-Komponenten, die in praktisch jedem Bestätigungsdialog, jedem
+mobilen Menü und jedem Dropdown der ganzen App verwendet werden — ein
+Fehler dort wäre nicht auf eine Seite begrenzt. Das verletzt Kriterium 3
+(klar genug ohne Interpretation) und erhöht das Risiko über das hinaus,
+was für einen unüberwachten Lauf vertretbar ist. Empfehlung für Ni:
+falls gewünscht, gezielt mit ihm zusammen angehen (kurze, reduzierte
+Animation, 100ms Fade/Zoom — fraglich, ob das überhaupt eine
+WCAG-relevante Priorität gegenüber den bereits behobenen
+Seitenübergängen ist).
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung, kein Commit über den Log-Eintrag hinaus.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 167. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
