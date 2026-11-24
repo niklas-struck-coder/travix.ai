@@ -191,9 +191,11 @@ export function KiChat() {
       )}
 
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-        {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
+        <div role="log" aria-live="polite" aria-label="Chatverlauf" className="space-y-4">
+          {messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
+        </div>
 
         {isThinking && (
           <div role="status" className="flex items-center gap-2">

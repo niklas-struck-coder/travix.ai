@@ -31337,3 +31337,72 @@ oben frisch durchlaufene Baseline bleibt der aktuelle, grüne Stand auf
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-24, ca. 00:10 UTC (166. Lauf)
+
+**Vorbereitung:** `it-chef/auto` war seit dem letzten Lauf (165., ca.
+23:20 UTC am 23.11.) nicht neu zu `main` divergiert (`origin/main`
+unverändert seit dem Support-Chef-Bericht vom 23.10., `it-chef/auto`
+enthält bereits alle Commits von `main`) — kein Merge nötig. `npm ci`
+fehlerfrei, Regressionsschutz-Baseline frisch durchlaufen: `npx tsc -b`
+(0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88 Testdateien,
+595 Tests, alle grün), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) — identisch zum Endstand des 165. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` bleiben
+aus den seit Lauf elf dokumentierten Gründen blockiert (Backend-/
+Produktentscheidungen, fehlende Base44/Gemini-Zugangsdaten). Da die
+`useReducedMotion()`-Durchsicht (162./163. Lauf) und die Skip-Link-Lücke
+(164. Lauf) bereits geschlossen sind, mit neuem Fokus gesucht: gezielt
+nach `aria-live`/`role="status"`/`role="log"`-Abdeckung bei dynamisch
+nachgeladenen Inhalten gesucht (`grep -rn aria-live src` — 0 Treffer im
+ganzen `src`-Baum). `KiChat.tsx` gelesen: Der "Travix denkt nach …"-
+Status trägt bereits `role="status"` (163./frühere Läufe etabliert),
+aber die eigentliche Nachrichtenliste (`messages.map(...)`, die bei
+jeder neuen Antwort von Travix wächst) hatte keine eigene Live-Region —
+Screenreader-Nutzer:innen wurden also über den Denk-Zustand informiert,
+nicht aber über die tatsächlich neu eingetroffene Antwort selbst.
+
+**Fund:** Fehlende `aria-live`-Ansage für neue Chat-Nachrichten in
+`KiChat.tsx`. Erfüllt alle vier Sicherheitskriterien: kein Bezug zu
+Auth/Zahlungen/Nutzerdaten/rechtlichen Texten, keine offene Produkt-/
+Architekturentscheidung (Standard-Barrierefreiheitsmuster für
+Chat-Oberflächen, keine Design-Erfindung), klar genug beschrieben
+(etabliertes ARIA-Muster, keine Interpretation nötig), objektiv prüfbar
+(Typecheck/Lint/Tests).
+
+**Design-Check:** `MARKENDESIGN.md` vor der Änderung gelesen — kein
+Eintrag zu Live-Regionen/Chat-Ansagen, betrifft ohnehin nur Semantik
+(`role`/`aria-*`-Attribute), keine visuelle Änderung, also keine
+Design-Entscheidung nötig.
+
+**Fix:** Die Nachrichtenliste in `KiChat.tsx` in einen eigenen
+`<div role="log" aria-live="polite" aria-label="Chatverlauf">`-Wrapper
+gesetzt, der ausschließlich `messages.map((message) => <ChatMessage
+.../>)` umschließt — bewusst *nicht* der Denk-Indikator oder die Hotel-/
+Flugergebnisse darunter, um keine verschachtelten Live-Regionen zu
+erzeugen (der bestehende `role="status"` beim Denk-Indikator ist selbst
+schon implizit `aria-live="polite"`; eine äußere Live-Region darüber
+hinweg hätte zu doppelten/konkurrierenden Ansagen geführt). `role="log"`
+statt eines reinen `aria-live`-`div`s gewählt, da es semantisch exakt
+für Chat-/Konversationsverläufe vorgesehen ist und `aria-live="polite"`
+bereits impliziert — hier zusätzlich explizit gesetzt, um nicht von der
+Standardvorgabe der Rolle abhängig zu sein. Keine Funktions- oder
+Stiländerung, reine Ergänzung von Semantik für assistive Technologien.
+
+**Tests:** Neuer Test in `KiChat.test.tsx` ("KiChat message log"):
+prüft über `screen.getByRole('log', { name: 'Chatverlauf' })`, dass die
+Region existiert, `aria-live="polite"` trägt und den Nachrichtentext
+enthält.
+
+**Geprüft:** `npm ci`, `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 596 Tests, alle grün — 595 +
+1 neuer Test), `npm run build` (0 Typfehler, unveränderte
+815-KB-Chunk-Size-Warnung) liefen vor dem Commit grün.
+
+**Checkbox aktualisiert:** `ZEITPLAN.md`, Sprint 6 — "Mobile-Politur,
+Barrierefreiheit-Check" (neuer Eintrag, unabhängig von der
+`useReducedMotion()`-Durchsicht und der Skip-Link-Lücke).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).

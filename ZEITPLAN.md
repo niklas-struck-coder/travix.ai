@@ -4351,6 +4351,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   Testdateien, 595 Tests, alle grün — 594 + 1 neuer Test), `npm run
   build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
   Commit grün.
+  Vom autonomen IT-Chef-Lauf am 24.11. (166. Lauf) eine weitere
+  eigenständig gefundene Lücke geschlossen: Der Chatverlauf in
+  `KiChat.tsx` hatte keine `aria-live`-Region — neue Nachrichten von
+  Travix wurden Screenreader-Nutzer:innen nicht automatisch angesagt,
+  anders als der bereits bestehende `role="status"`-Hinweis für den
+  "Travix denkt nach …"-Zustand direkt darunter. Erfüllt alle vier
+  Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/Nutzerdaten/
+  rechtlichen Texten, keine offene Produkt-/Architekturentscheidung
+  (Standard-Barrierefreiheitsmuster für Chat-Oberflächen), klar genug
+  beschrieben, objektiv prüfbar (Typecheck/Lint/Tests). Fix: die
+  Nachrichtenliste (nur die `messages.map(...)`-Nachrichten, nicht der
+  Denk-Indikator/die Such-Ergebnisse darunter, um doppelte verschachtelte
+  Live-Regionen zu vermeiden) in einen eigenen `<div role="log"
+  aria-live="polite" aria-label="Chatverlauf">`-Wrapper gesetzt. Neuer
+  Test in `KiChat.test.tsx`: prüft `getByRole('log', { name:
+  'Chatverlauf' })` sowie das `aria-live`-Attribut. `npm ci`, `npx
+  tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88
+  Testdateien, 596 Tests, alle grün — 595 + 1 neuer Test), `npm run
+  build` (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem
+  Commit grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

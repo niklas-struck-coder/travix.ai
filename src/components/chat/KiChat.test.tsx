@@ -71,6 +71,17 @@ describe('KiChat storage warning', () => {
   })
 })
 
+describe('KiChat message log', () => {
+  it('announces new chat messages to assistive tech via an aria-live log region', () => {
+    const greetingMessage = { id: '1', role: 'assistant' as const, content: 'Hallo!', timestamp: 0 }
+    renderKiChat({ messages: [greetingMessage] })
+
+    const log = screen.getByRole('log', { name: 'Chatverlauf' })
+    expect(log).toHaveAttribute('aria-live', 'polite')
+    expect(log).toHaveTextContent('Hallo!')
+  })
+})
+
 describe('KiChat thinking indicator', () => {
   it('announces the thinking state to assistive tech via role="status"', () => {
     renderKiChat({ isThinking: true })
