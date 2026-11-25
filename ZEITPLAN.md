@@ -4388,6 +4388,26 @@ Status-Symbole: ✅ fertig · 🟢 läuft/gestartet · 🟡 teilweise fertig ·
   vitest run` (88 Testdateien, 597 Tests, alle grün — 596 + 1 neuer
   Test), `npm run build` (0 Typfehler, unveränderte Chunk-Size-Warnung)
   liefen vor dem Commit grün.
+  Vom autonomen IT-Chef-Lauf am 25.11. (174. Lauf) den seit dem 131.
+  Lauf (17.11.) als "braucht `shadcn`-Major-Upgrade" protokollierten Rest
+  der `npm audit`-Funde doch noch non-breaking behoben: `npm audit fix`
+  löst die 4 verbleibenden moderaten Funde (`minimatch`/
+  `@ts-morph/common`/`ts-morph`/`shadcn` selbst, `GHSA-g3hv-75wg-m249`)
+  jetzt auf, weil `shadcn` zwischenzeitlich Upstream ein Patch-Release
+  (4.23.0 → 4.23.1, mit aktualisiertem `ts-morph`/`minimatch`
+  darunter) veröffentlicht hat, das innerhalb des bereits in
+  `package.json` erlaubten Bereichs (`^4.16.2`) liegt — `package.json`
+  selbst unverändert, nur `package-lock.json` aktualisiert, kein
+  `--force`, kein `isSemVerMajor`. `npm audit` zeigt danach 0
+  Schwachstellen statt zuvor 4. Erfüllt alle vier Sicherheitskriterien:
+  kein Auth-/Zahlungs-/Nutzerdaten-/Rechtstext-Bezug, keine
+  Architekturentscheidung, klar abgegrenzt (reine Lockfile-Auflösung
+  innerhalb bestehender Semver-Ranges), objektiv prüfbar (`npm audit`
+  vorher/nachher). `npm ci` (frischer `node_modules`-Ordner) fehlerfrei,
+  `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+  (88 Testdateien, 597 Tests, alle grün, unverändert), `npm run build`
+  (0 Typfehler, unveränderte Chunk-Size-Warnung) liefen vor dem Commit
+  grün.
 - [ ] Bugfixing-Durchgang
 - [ ] Performance-Check (Ladezeiten, Bundle-Größe)
 

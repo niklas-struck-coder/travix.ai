@@ -31828,3 +31828,84 @@ wie oben — unverändert zum 172. Lauf, da keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-25, ca. 03:10 UTC (174. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 173. Lauf, `29c3fa5`, ca. 02:10 UTC).
+`git log it-chef/auto..origin/main` leer — `origin/main` vollständig in
+`it-chef/auto` enthalten, kein Merge nötig. `npm ci` fehlerfrei,
+Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+identisch zum Endstand des 173. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Punkte bleiben aus denselben, seit vielen Läufen dokumentierten
+Gründen blockiert (Backend-/Produktentscheidung Base44 vs. Alternative,
+fehlende Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-
+Felder in `TripDraft` für 6.2/6.6/6.7/7.12, Auth-Abhängigkeit für
+2.x/7.4, zu unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich
+eigene, unabhängige Code-Durchsicht mit bewusst anderen Stichproben als
+die letzten Läufe: `console.log`/`console.debug`/`console.warn` im
+gesamten `src`-Baum (0 Treffer), `TODO`/`FIXME`/`XXX`/`HACK`-Kommentare
+(0 echte Treffer), `dangerouslySetInnerHTML` (0 Treffer),
+`: any`-Typannotationen (0 echte Treffer, einziger Regex-Treffer war ein
+Kommentar), vorhandene 404-Seite/Catch-all-Route in `routes.tsx`
+geprüft (`NichtGefunden` über `path="*"`, vorhanden), `<img>`-Tags auf
+`alt`-Text geprüft (einziges Vorkommen in `HotelCard.tsx`, hat `alt`),
+alle `size="icon"`-Buttons im gesamten `src`-Baum per Skript auf
+fehlendes `aria-label` im unmittelbaren Umfeld geprüft (0 Treffer ohne
+`aria-label`), statische `id`-Attribute auf Duplikat-Risiko bei
+mehrfach gerenderten Komponenten geprüft (`EditMode.tsx` nutzt feste
+IDs, aber als Einzel-Dialog gerendert, kein Listen-Kontext, daher
+unkritisch), `autoComplete`-Attribute geprüft (im Projekt nirgends
+gesetzt, aber auch keine Formularfelder vorhanden, für die Browser-
+Autofill sinnvoll wäre — IATA-Code-Feld in `Profil.tsx` ist kein
+Standard-Autofill-Feld), alle `localStorage.setItem/getItem/removeItem`-
+Aufrufe aufgelistet (ausschließlich in `tripStorage.ts`, dort bereits
+mit Try/Catch und dedizierten Tests für volle/fehlende Storage
+abgedeckt), ESLint-`react-hooks`-Regelsatz (inkl.
+`exhaustive-deps`) lieferte 0 Warnungen bei `npm run lint`. Kein neuer
+Fund in diesen Bereichen, der alle vier Kriterien erfüllt.
+
+**Tatsächlicher Fund und Fix:** Der seit dem 131. Lauf (17.11.) als
+"braucht `shadcn`-Major-Upgrade, daher ausgeschlossen" protokollierte
+Rest von 4 moderaten `npm audit`-Funden (`minimatch`/
+`@ts-morph/common`/`ts-morph`/`shadcn` selbst, `GHSA-g3hv-75wg-m249`,
+DoS via Glob-Pattern-Amplifikation) ließ sich in diesem Lauf doch
+non-breaking beheben: `shadcn` hat zwischenzeitlich Upstream ein
+Patch-Release veröffentlicht (installiert war `4.23.0`, jetzt
+`4.23.1`, mit aktualisiertem `ts-morph` `26.0.0 → 28.0.0` und
+`@ts-morph/common`/`minimatch` darunter) — dieses Patch-Release liegt
+innerhalb des bereits in `package.json` deklarierten Bereichs
+(`"shadcn": "^4.16.2"`), `npm audit fix` (ohne `--force`) hat daher nur
+`package-lock.json` aktualisiert, `package.json` blieb unverändert.
+Vorher per `npm audit fix --dry-run` verifiziert, dass keine
+Major-Version-Sprünge enthalten sind. Erfüllt alle vier
+Sicherheitskriterien: kein Bezug zu Auth/Zahlungen/echten
+Nutzerdaten/rechtlichen Texten; keine offene Produkt- oder
+Architekturentscheidung (reine Dependency-Versionsauflösung innerhalb
+bestehender Semver-Ranges, keine neue Entscheidung nötig); klar genug
+beschrieben (Ziel ist eindeutig: `npm audit` auf 0 Funde bringen, ohne
+Breaking Change); objektiv prüfbar (`npm audit` vorher 4 moderate
+Funde, nachher 0; Typecheck/Lint/Tests/Build unverändert grün).
+
+**Geprüft:** Nach dem Fix frisches `npm ci` (neuer `node_modules`-
+Ordner) fehlerfrei, `npm audit` meldet 0 Schwachstellen (vorher 4
+moderate). `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (88 Testdateien, 597 Tests, alle grün, unverändert zum
+173. Lauf), `npm run build` (0 Typfehler, unveränderte
+Chunk-Size-Warnung für das Haupt-Bundle) liefen vor dem Commit grün.
+`git status` zeigt ausschließlich `package-lock.json` als geänderte
+Datei (plus `ZEITPLAN.md`/dieser Log-Eintrag) — keine unerwarteten
+Dateien.
+
+**Checkbox aktualisiert:** keine eigene Checkbox vorhanden (wie schon
+beim 131. Lauf ist der `npm audit`-Fix kein eigener Punkt in
+`tasks/tasks-prd-travix-platform.md`); in `ZEITPLAN.md` als neuer
+Absatz unter dem bestehenden "Mobile-Politur, Barrierefreiheit-Check"-
+Punkt dokumentiert, analog zum Eintrag des 131. Laufs dort.
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
