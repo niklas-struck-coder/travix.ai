@@ -31707,3 +31707,63 @@ wie oben — unverändert zum 170. Lauf, da keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-25, ca. 01:10 UTC (172. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 171. Lauf, `c774808`, ca. 00:20 UTC).
+`git merge-base --is-ancestor origin/main HEAD` bestätigt: `origin/main`
+(unverändert seit `fe1300e`, 2026-10-23) ist vollständig in
+`it-chef/auto` enthalten — kein Merge nötig. `npm ci` fehlerfrei,
+Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+identisch zum Endstand des 171. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Punkte bleiben aus denselben, seit vielen Läufen dokumentierten
+Gründen blockiert (Backend-/Produktentscheidung Base44 vs. Alternative,
+fehlende Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-
+Felder in `TripDraft` für 6.2/6.6/6.7/7.12, Auth-Abhängigkeit für
+2.x/7.4, zu unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich
+eigene, unabhängige Code-Durchsicht mit bewusst anderen Stichproben als
+die letzten Läufe: alle `<Input>`/`<Select>`-Nutzungen gegen ihr
+`<Label htmlFor>` geprüft (`EditMode.tsx`, `Profil.tsx`,
+`HotelWizard.tsx`, `FlightWizard.tsx`) — jede `id`/`htmlFor`-Paarung
+stimmt, keine Lücke; Schließen-Buttons von `dialog.tsx`/`sheet.tsx` auf
+Sprachkonsistenz geprüft (`sr-only`-Text "Schließen", nicht das
+shadcn-Standard-"Close") — bereits korrekt lokalisiert; `routes.tsx`
+Scroll-Reset/Fokus-Verschiebung/Tab-Titel-Logik beim Routenwechsel
+durchgesehen — korrekt implementiert; `format.ts` auf Rundungs-/
+Edge-Case-Fehler geprüft (ein theoretisches Edge Case gefunden, siehe
+unten, aber kein echter Bug); `cartTotals.ts`/`speech.ts` gelesen — beide
+korrekt. Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ein geprüftes Detail, bewusst nicht als Fund gewertet:**
+`formatDuration()` in `src/lib/format.ts` liefert bei einer
+Sekunden-only-ISO-8601-Dauer (z. B. "PT45S", ohne Stunden/Minuten) "—"
+statt der tatsächlichen Dauer, weil nur die Stunden-/Minuten-Gruppen des
+Regex ausgelesen werden. Kein echter Bug: `formatDuration()` wird laut
+Code-Suche ausschließlich für `FlightCard.tsx` (Flugsegment-Dauer) und
+`TrainCard.tsx` (Zug-/Bus-/Fähre-Verbindungsdauer) verwendet — beides
+Anbieter-Daten, die realistisch nie unterhalb einer Minute liegen. Ein
+Fix dafür wäre eine Lösung für ein Szenario, das in der Praxis nicht
+auftritt, und damit eher Spekulation als ein belegter Fund.
+
+**Bereits dokumentierter, bewusst nicht umgesetzter Punkt erneut
+geprüft:** Die `prefers-reduced-motion`-Lücke in den Radix-Primitives
+`dialog.tsx`/`sheet.tsx`/`select.tsx` besteht unverändert; Einschätzung
+(kein 1:1-Vorbild im Code, großer Blast-Radius über praktisch jeden
+Dialog/jedes Dropdown/jedes mobile Menü der App) bestätigt — weiterhin
+zu riskant für einen unüberwachten Lauf.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 171. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
