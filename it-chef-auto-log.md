@@ -31909,3 +31909,54 @@ Punkt dokumentiert, analog zum Eintrag des 131. Laufs dort.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-25, ca. 23:10 UTC (175. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 174. Lauf, `b1d81c9`, npm-audit-Fix).
+`git log main..it-chef/auto` zeigt 156 Commits, `git log it-chef/auto..main`
+ist leer — `main` ist exakt der Merge-Base, vollständig in `it-chef/auto`
+enthalten, kein Merge nötig. Frischer `node_modules`-Zustand im Checkout
+war unvollständig (`npm run lint`/`npx tsc -b` scheiterten an fehlenden
+Paketen wie `@eslint/js`, `vite`, `@types/node`); `npm ci` behoben.
+Baseline danach durchgehend grün: `npx tsc -b` (0 Fehler), `npm run lint`
+(0 Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+`npm audit` (0 Schwachstellen, unverändert zum 174. Lauf).
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` gegen die
+vier Sicherheitskriterien durchgesehen — alle verbleibenden offenen
+Punkte bleiben aus denselben, seit vielen Läufen dokumentierten Gründen
+blockiert (Backend-/Produktentscheidung Base44 vs. Alternative, fehlende
+Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-Felder in
+`TripDraft` für 6.2/6.6/6.7/7.12, Auth-Abhängigkeit für 2.x/7.4, zu
+unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich eigene,
+unabhängige Code-Durchsicht mit bewusst anderen Stichproben als die
+letzten Läufe: alle `.map()`-Aufrufe in JSX im gesamten `src/components`-
+und `src/pages`-Baum einzeln auf einen korrekten, stabilen `key`-Prop
+geprüft (45 Treffer, keine Lücke — auch `FlightCard.tsx`s `key={index}`
+über `offer.slices` ist unkritisch, da maximal zwei, nie umsortierte
+Elemente); alle `!.`-Non-Null-Assertions, `as any`-Casts und leeren
+`catch {}`-Blöcke im `src`-Baum gesucht (0 Treffer); `<html lang="de">`
+geprüft (vorhanden); alle `<Link to="...">`/`<NavLink to="...">`-Ziele
+gegen die in `routes.tsx` definierten Pfade abgeglichen (alle vorhanden,
+keine toten Links); Formular-Zugänglichkeit in `Einstellungen.tsx` und
+`Profil.tsx` geprüft (Gruppen ohne einzelnes `htmlFor` nutzen korrekt
+`role="group"`/`aria-label`, Einzel-Felder haben `htmlFor`/`id`-Paare);
+`src/lib/format.ts` und das lokale `formatDate()` in `FlightCard.tsx`
+erneut gegen ungültige/leere ISO-Strings durchgerechnet (beide mit
+`Number.isNaN`-Guard, wie seit Lauf 48 bzw. 29 behoben); Abgleich aller
+`.ts`-Dateien unter `src/lib`/`src/hooks` gegen vorhandene `.test.ts`-
+Pendants (lückenlos, jede Datei hat eine Testdatei). Kein neuer Fund,
+der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`) wie oben — unverändert zum 174. Lauf, da keine
+Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
