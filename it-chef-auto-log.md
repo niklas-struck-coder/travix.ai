@@ -31767,3 +31767,64 @@ wie oben — unverändert zum 171. Lauf, da keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-25, ca. 02:10 UTC (173. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 172. Lauf, `b5ee681`, ca. 01:10 UTC).
+`git log it-chef/auto..origin/main` leer — `origin/main` vollständig in
+`it-chef/auto` enthalten, kein Merge nötig. `npm ci` fehlerfrei,
+Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0
+Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle grün),
+identisch zum Endstand des 172. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Punkte bleiben aus denselben, seit vielen Läufen dokumentierten
+Gründen blockiert (Backend-/Produktentscheidung Base44 vs. Alternative,
+fehlende Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-
+Felder in `TripDraft` für 6.2/6.6/6.7/7.12, Auth-Abhängigkeit für
+2.x/7.4, zu unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich
+eigene, unabhängige Code-Durchsicht mit bewusst anderen Stichproben als
+die letzten Läufe: vollständiger Abgleich aller Routen in `routes.tsx`
+gegen `nav-config.ts` (`navGroups`/`extraRoutes`/`allRoutes`) sowie
+gegen jedes `<Link to="...">` im gesamten `src`-Baum — jeder Pfad
+existiert entweder als fest verdrahtete Route oder als generierte
+`PlaceholderPage`-Route über `allRoutes.filter(...)`, keine toten Links
+gefunden; `calendarUtils.ts` (Monatsraster-Berechnung,
+Wochentags-Offset, Vor-/Folgemonat-Rollover) Zeile für Zeile
+durchgerechnet — korrekt; `calculateProgress.ts`/`checklistRules.ts`
+gegen den `TripDraft`-Typ geprüft (insbesondere `dates`/`budget` als
+`string | null`, nicht als Objekt — `Boolean(...)` verhält sich daher
+wie erwartet, keine "leeres Objekt zählt als ausgefüllt"-Falle);
+`EditMode.tsx`/`ChecklistPanel.tsx` gelesen (Lösch-Bestätigung,
+Eindeutigkeits-Label bei gleichnamigen Aktivitäten, bewusst
+nicht-persistenter manueller Checklisten-State — alles schon wie
+dokumentiert korrekt); `ErrorBoundary.tsx` geprüft (fängt auf App-Ebene,
+beide Recovery-Aktionen sind echte Browser-Navigationen/Reloads, kein
+fehlendes Reset-on-route-change-Problem, da gar kein In-App-Reset
+versucht wird); `Dashboard.tsx` gegen die anderen Demo-Daten-Seiten
+(`MeineReisen.tsx`/`Reiseentwuerfe.tsx`/`Warenkorb.tsx`/`Favoriten.tsx`)
+abgeglichen — dieselben Werte, keine Abweichung; alle `Number(...)`-
+Aufrufe im Projekt aufgelistet und auf fehlende NaN-Behandlung geprüft
+(`FlightWizard.tsx`, `HotelWizard.tsx`, `format.ts` — je dreimal, alle
+mit anschließender `Number.isNaN`-Prüfung bzw. Fallback). Kein neuer
+Fund, der alle vier Kriterien erfüllt.
+
+**Bereits dokumentierter, bewusst nicht umgesetzter Punkt erneut
+geprüft:** Die `prefers-reduced-motion`-Lücke in den Radix-Primitives
+`dialog.tsx`/`sheet.tsx`/`select.tsx` besteht unverändert; Einschätzung
+(kein 1:1-Vorbild im Code, großer Blast-Radius über praktisch jeden
+Dialog/jedes Dropdown/jedes mobile Menü der App) bestätigt — weiterhin
+zu riskant für einen unüberwachten Lauf.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 172. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
