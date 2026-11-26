@@ -32065,3 +32065,72 @@ Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-26, ca. 22:11 UTC (178. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 177. Lauf, `5429b88`, ca. 02:10 UTC).
+`git log it-chef/auto..origin/main` leer — `origin/main` (unverändert
+seit `fe1300e`, 2026-10-23) vollständig in `it-chef/auto` enthalten,
+kein Merge nötig. `npm ci` fehlerfrei, Baseline frisch durchlaufen:
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(88 Testdateien, 597 Tests, alle grün), `npm audit` (0 Schwachstellen),
+`npm run build` (unveränderte 816-KB-Chunk-Warnung) — identisch zum
+Endstand des 177. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Punkte bleiben aus denselben, seit vielen Läufen dokumentierten
+Gründen blockiert (Backend-/Produktentscheidung Base44 vs. Alternative,
+fehlende Gemini-Zugangsdaten für 4.1-4.3, fehlende Item-/Provider-URL-
+Felder in `TripDraft` für 6.2/6.6/6.7/7.12, Auth-Abhängigkeit für
+2.x/7.4, zu unspezifische Sammelpunkte wie 8.x/Sprint 5-6). Zusätzlich
+eigene, unabhängige Stichproben mit bewusst anderen Schwerpunkten als
+die letzten Läufe:
+- `npm update --dry-run` erneut versucht (seit dem 174. Lauf hatte sich
+  der `npm audit fix`-Weg als funktionsfähig erwiesen, ein allgemeiner
+  `npm update` war beim 130. Lauf noch an einem internen npm/Arborist-
+  Fehler gescheitert): bricht weiterhin reproduzierbar mit demselben
+  Fehler ab (`Cannot read properties of null (reading 'edgesOut')`,
+  `@npmcli/arborist` beim Peer-Dependency-Tree für `vitest`s optionale
+  Peer-Pakete). `npm outdated` zeigt zwar mehrere Pakete mit `wanted`
+  über `current` (u. a. `react`, `framer-motion`, `tailwindcss`), aber
+  ohne funktionierenden `npm update`/`npm install` bleibt das in dieser
+  Umgebung technisch nicht abschließbar — derselbe, bereits beim 130.
+  Lauf dokumentierte Blocker, kein neuer Fund. `package.json`/
+  `package-lock.json` nach dem Versuch per `git status` als unverändert
+  bestätigt.
+- Alle `NavLink`-Verwendungen (`Sidebar.tsx`, `MobileNav.tsx`) auf
+  `aria-current` für den aktiven Navigationspunkt geprüft — React
+  Router setzt das bei `NavLink` standardmäßig selbst auf
+  `aria-current="page"`, sobald der Link aktiv ist (bestätigt im
+  Quellcode von `node_modules/react-router`), kein fehlendes Attribut.
+- Alle `package.json`-`dependencies` gegen tatsächliche Imports im
+  `src`-Baum abgeglichen (gezielt nach scheinbar ungenutzten Paketen
+  gesucht). `recharts` hat 0 Treffer im `src`-Baum — sieht auf den
+  ersten Blick wie eine entfernbare, ungenutzte Abhängigkeit aus, ist
+  aber laut `tasks/tasks-prd-travix-platform.md` (1.4, bereits erledigt)
+  bewusst vorab installiert für den weiterhin blockierten Punkt 7.12
+  ("Reisebudget (Recharts)", `ZEITPLAN.md`) — Entfernen wäre keine
+  Bugkorrektur, sondern eine Rücknahme einer bereits getroffenen
+  Vorbereitungs-Entscheidung für eine andere, noch offene Aufgabe, kein
+  Fund.
+- Überschriften-Hierarchie geprüft: Jede Seite bezieht ihr `<h1>`
+  einheitlich über `PageHeader.tsx` (eine einzige `<h1>` pro Seite,
+  keine Sprünge/Duplikate), keine Seite setzt ein eigenes `<h1>`/`<h2>`
+  daneben außer `Home.tsx` (dort bereits mit `<h2>` für die
+  "Beliebte Reiseziele"-Sektion korrekt verschachtelt). Kein Fund.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`, `npm run build`) wie oben — unverändert zum 177. Lauf, da
+keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
