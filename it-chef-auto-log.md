@@ -32134,3 +32134,59 @@ keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-26, ca. 23:09 UTC (179. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 178. Lauf, `97689c5`, ca. 22:11 UTC).
+`git log it-chef/auto..origin/main` leer — `origin/main` (unverändert
+seit `fe1300e`, 2026-10-23) vollständig in `it-chef/auto` enthalten,
+kein Merge nötig. `npm ci` fehlerfrei, Baseline frisch durchlaufen:
+`npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run`
+(88 Testdateien, 597 Tests, alle grün), `npm audit` (0 Schwachstellen),
+`npm run build` (unveränderte 816-KB-Chunk-Warnung) — identisch zum
+Endstand des 178. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte bleiben aus denselben, seit vielen
+Läufen dokumentierten Gründen blockiert (Backend-/Produktentscheidung
+Base44 vs. Alternative, fehlende Gemini-Zugangsdaten für 4.1-4.3,
+fehlende Item-/Provider-URL-Felder in `TripDraft` für 6.2/6.6/6.7/7.12,
+Auth-Abhängigkeit für 2.x/7.4, zu unspezifische Sammelpunkte wie
+8.x/Sprint 5-6); Abschnitt "Offene Entscheidungen, die Ni treffen
+muss" am Ende von `ZEITPLAN.md` bestätigt dieselben drei
+Ni-Entscheidungen weiterhin unbeantwortet. Zusätzlich eigene,
+unabhängige Stichproben mit bewusst anderen Schwerpunkten als die
+letzten Läufe:
+- Alle `target="_blank"`-Vorkommen im `src`-Baum gesucht (0 Treffer —
+  die App öffnet aktuell keine Links in neuen Tabs, also kein
+  fehlendes `rel="noopener noreferrer"` möglich).
+- Alle `setInterval`- und `dangerouslySetInnerHTML`-Vorkommen im
+  `src`-Baum gesucht (je 0 Treffer — kein wiederkehrender Timer ohne
+  Cleanup, keine ungefilterte HTML-Injektion).
+- Alle sieben `catch`-Blöcke im `src`-Baum einzeln gegen leeres/
+  verschlucktes Fehlerhandling geprüft (`useChat.ts` x3, `speech.ts`,
+  `tripStorage.ts` x2, `duffel/client.ts`) — jeder setzt entweder einen
+  ehrlichen Fehlerzustand, loggt mit `console.error`, oder hat einen
+  dokumentierten bewussten Fallback; keiner verschluckt den Fehler
+  stillschweigend.
+- `index.html` auf `lang`-Attribut geprüft (`lang="de"`, korrekt).
+- Alle `<Route path=.../>`-Einträge in `src/routes.tsx` gegen alle
+  `to="/..."`-Linkziele im `src`-Baum abgeglichen (Sidebar, MobileNav,
+  Seiten) — jedes verlinkte Ziel hat eine passende Route, inklusive
+  `*`-Catch-all auf `NichtGefunden`; keine toten internen Links.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`, `npm run build`) wie oben — unverändert zum 178. Lauf, da
+keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
