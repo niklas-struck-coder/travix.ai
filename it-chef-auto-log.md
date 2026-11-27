@@ -32421,3 +32421,66 @@ Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-27, ca. 22:10 UTC (183. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 182. Lauf, `5efa14f`, ca. 02:10 UTC am
+27.11.). `git log it-chef/auto..origin/main` leer — `origin/main`
+(unverändert seit `fe1300e`, 2026-10-23) vollständig in `it-chef/auto`
+enthalten, kein Merge nötig. `npm ci` fehlerfrei, Baseline frisch
+durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (88 Testdateien, 597 Tests, alle grün) — identisch zum
+Endstand des 182. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte bleiben aus denselben, seit vielen
+Läufen dokumentierten Gründen blockiert (Base44/Auth 2.x, Gemini-
+Zugangsdaten 4.1-4.3, fehlende Item-/Provider-URL-/Kostenfelder in
+`TripDraft` für 6.2/6.6/6.7/7.12, Zug/Bus/Fähre-Datenquelle 5.7,
+Produktentscheidungen Deal-Finder/Premium/Loyalty 8.5-8.9/8.12).
+
+Zusätzlich eigene, unabhängige Stichproben mit bewusst anderen
+Schwerpunkten als die letzten Läufe:
+- `src/routes.tsx` (Routen-Set `builtRoutes`, Seitentitel-Logik
+  `getPageTitle`) komplett gegen `src/lib/nav-config.ts` abgeglichen —
+  jede dort gelistete Route ist entweder in `builtRoutes` echt verdrahtet
+  oder fällt korrekt auf `PlaceholderPage`, keine verwaiste/doppelte
+  Route. Kein Fund.
+- Alle `key={index}`-artigen List-Keys codeweit gesucht: zwei Treffer
+  (`FlightCard.tsx`, `SearchErrorAlert.tsx`), beide auf statischen,
+  nicht umsortierbaren Listen aus Props — kein Reorder-Risiko, kein
+  Fund.
+- `eslint-disable`-Kommentare codeweit gesucht: 0 Treffer in `src`. Kein
+  Fund.
+- `formatEuro()` (`src/lib/format.ts:4`) erneut auf die fehlende
+  `minimumFractionDigits`-Absicherung geprüft (z. B. `19.5` →
+  `"19,5 €"` statt `"19,50 €"`, anders als `formatOfferPrice()`): wie
+  bereits am 100. Lauf und mehrfach danach dokumentiert, sind alle
+  aktuellen Aufrufstellen (`Dashboard.tsx`, `Warenkorb.tsx`,
+  `Preisalarme.tsx`) ausschließlich mit glatten Ganzzahlen aus
+  Mock-Daten befüllt — kein mit der aktuellen Datenlage erreichbarer
+  Fall, ein Fix wäre weiterhin Spekulation über noch nicht existierende
+  Eingabedaten statt ein objektiv prüfbarer Bug. Kein neuer Fund.
+- `vite-plugins/duffel-proxy.ts` komplett gelesen (Fehlerbehandlung bei
+  fehlendem API-Key, Body-Lesen bei GET/HEAD, Fehlerantwort bei
+  Netzwerkfehlern) — keine neue Lücke gegenüber dem bereits
+  dokumentierten Stand gefunden.
+- `Number(...)`/`parseInt`/`parseFloat`-Aufrufe codeweit gesucht: alle
+  vier Treffer außerhalb von `format.ts` (`FlightWizard.tsx`,
+  `HotelWizard.tsx`) bereits mit `Number.isNaN`-Guard abgesichert
+  (`clampPassengerCount`). Kein Fund.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`)
+wie oben — unverändert zum 182. Lauf, da keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
