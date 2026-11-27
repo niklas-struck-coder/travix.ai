@@ -32190,3 +32190,89 @@ keine Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-27, ca. 00:11 UTC (180. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 179. Lauf, `e3a95ee`, ca. 23:09 UTC am
+26.11.). `git log it-chef/auto..origin/main` leer — `origin/main`
+(unverändert seit `fe1300e`, 2026-10-23) vollständig in `it-chef/auto`
+enthalten, kein Merge nötig. `npm ci` fehlerfrei, Baseline frisch
+durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (88 Testdateien, 597 Tests, alle grün), `npm run build`
+(0 Typfehler, unveränderte 816-KB-Chunk-Size-Warnung), `npm audit`
+(0 Schwachstellen) — identisch zum Endstand des 179. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte bleiben aus denselben, seit vielen
+Läufen dokumentierten Gründen blockiert (Base44/Auth 2.x, Gemini-
+Zugangsdaten 4.1-4.3, fehlende Item-/Provider-URL-/Kostenfelder in
+`TripDraft` für 6.2/6.6/6.7/7.12, Zug/Bus/Fähre-Datenquelle 5.7,
+Produktentscheidungen Deal-Finder/Premium/Loyalty 8.5-8.9/8.12). Der
+„Performance-Check"-Punkt in Sprint 6 (`ZEITPLAN.md`) wurde gezielt
+gegen das bereits am 12.11. (111. Lauf) dokumentierte Route-Level-
+Code-Splitting (`React.lazy`/`Suspense` in `routes.tsx`) geprüft: die
+dort genannte Begründung (fragile, auf synchrones Mount-Timing
+angewiesene Fokus-Logik in `AppRoutes`/`PageTransition.tsx` im
+Zusammenspiel mit `AnimatePresence mode="wait"`, von der bestehenden
+jsdom-Testsuite nicht abdeckbar) besteht unverändert — kein neuer Fund,
+weiterhin Kriterium 4 verfehlt, bewusst nicht umgesetzt.
+
+Zusätzlich eigene, unabhängige Stichproben mit bewusst anderen
+Schwerpunkten als die letzten Läufe:
+- Alle `.map((...))`-Listen im `src`-Baum auf fehlende/unsichere
+  `key`-Props geprüft (ESLint react-Regeln liefen dabei ohnehin grün)
+  — jede Liste hat einen stabilen `key` (meist `.id`); die einzigen
+  zwei `key={index}`-Fälle (`FlightCard.tsx` Flugsegmente,
+  `SearchErrorAlert.tsx` Fehlermeldungen) sind bereits seit dem 111.
+  Lauf als unproblematisch dokumentiert (statische, nie umsortierte
+  Listen). Kein neuer Fund.
+- Alle Icon-only-Buttons (`size="icon"`/`variant="ghost"` ohne
+  sichtbaren Text) gezielt auf fehlenden Accessible Name geprüft:
+  `Kalender.tsx` (Monats-Pfeile) und `Buchung.tsx` (Bearbeiten-Stift)
+  haben `aria-label`; `dialog.tsx`/`sheet.tsx`s Schließen-Buttons haben
+  stattdessen sichtbar-verstecktes `sr-only`-Textkind ("Schließen"),
+  ebenfalls ein gültiger Accessible Name. `TripSummaryCard.tsx`s
+  `variant="ghost"`-Button hat sichtbaren Linktext, kein Icon-only-Fall
+  — falsch positiver Treffer der Grep-Heuristik. Kein Fund.
+- Demo-Reisedaten auf erneuten „Lissabon-Zeit-Drift" (zuletzt am 16.11.,
+  128. Lauf, auf „20. – 27. Dezember 2026" korrigiert) gegen das
+  heutige Datum (27.11.2026) geprüft: Lissabon-Trip liegt mit Beginn
+  20.12. weiterhin vollständig in der Zukunft (`status: 'upcoming'`
+  in `MeineReisen.tsx` weiterhin korrekt), Kyoto-Trip („3. – 10. März
+  2026", `status: 'past'`) ebenfalls weiterhin korrekt als
+  vergangen markiert. Kein Drift, keine Korrektur nötig — nächste
+  Fälligkeit absehbar erst nach dem 27.12.2026.
+- `formatDate()`/`formatTime()`/`formatDuration()`/Preis-Formatierung
+  codeweit erneut auf konsistente `'de-DE'`-Locale geprüft (`format.ts`,
+  `FlightCard.tsx`, `ChatMessage.tsx`, `Aktivitaeten.tsx`,
+  `Angebote.tsx`) — durchgängig konsistent, `FlightCard.tsx`s eigene
+  `formatDate()` hat (seit dem 29.10.-Fix) denselben
+  `Number.isNaN`-Schutz wie `format.ts`. Kein Fund.
+- `window.confirm`/`window.alert`/`window.prompt` codeweit gesucht (0
+  Treffer) — alle Lösch-/Abschließen-Bestätigungen laufen bereits über
+  die etablierten eigenen Dialog-Komponenten, kein nativer Browser-
+  Dialog als Lücke.
+- `<Label htmlFor>`/Input-`id`-Zuordnung in `HotelWizard.tsx` und
+  `Profil.tsx` stichprobenhaft erneut geprüft (bereits am 12.11., 111.
+  Lauf, vollständig durchgegangen) — weiterhin lückenlos, keine neue
+  Abweichung.
+- `HotelWizard.tsx`s `rooms`/`guests`-Zähler auf dasselbe NaN-Problem
+  geprüft, das am 25.08. bei `FlightWizard.tsx`s Passagierzahl behoben
+  wurde — `clampGuestCount()` fängt bereits `Number.isNaN` ab und
+  begrenzt auf 1-9, kein offenes Gegenstück dieses Bug-Musters.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm run build`, `npm audit`) wie oben — unverändert zum 179. Lauf, da
+keine Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
