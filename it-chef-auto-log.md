@@ -32673,3 +32673,68 @@ Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-28, ca. 02:10 UTC (187. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 186. Lauf, `66c66f7`, ca. 01:10 UTC).
+`git merge origin/main` meldet "Already up to date" — `origin/main`
+(unverändert seit `fe1300e`, 2026-10-23) vollständig in `it-chef/auto`
+enthalten, kein Merge nötig. `npm ci` fehlerfrei, Baseline frisch
+durchlaufen: `npx tsc -b` (0 Fehler), `npm run lint` (0 Fehler), `npx
+vitest run` (88 Testdateien, 597 Tests, alle grün), `npm audit` (0
+Schwachstellen) — identisch zum Endstand des 186. Laufs.
+
+**Suche:** `tasks/tasks-prd-travix-platform.md` erneut Zeile für Zeile
+gegen die vier Sicherheitskriterien geprüft — alle offenen Checkboxen
+(2.x Base44/Auth, 4.1-4.3 Gemini-Zugangsdaten, 5.7 Zug/Bus/Fähre-
+Datenquelle, 6.2/6.6/6.7/7.12 fehlende Item-/Provider-URL-/Kostenfelder
+in `TripDraft`, 7.4 Architekturentscheidung Mehrfach-Chat-Historie,
+8.1-8.9/8.12 Foto-Upload/DealFinder/Premium/Loyalty-Produktentscheidungen)
+bleiben aus denselben, seit vielen Läufen dokumentierten Gründen
+blockiert — keine Checkbox hat sich seit dem letzten Lauf verändert.
+
+Zusätzliche eigene Stichprobe mit bewusst anderen Schwerpunkten als die
+letzten Läufe:
+- `npm update --dry-run` erneut versucht: scheitert weiterhin
+  reproduzierbar mit demselben `@npmcli/arborist`-Fehler (`Cannot read
+  properties of null (reading 'edgesOut')`) wie seit dem 130. Lauf —
+  derselbe, bereits mehrfach dokumentierte Blocker in dieser
+  Lauf-Umgebung, kein neuer Fund. `npm outdated` zeigt weiterhin
+  mehrere Pakete mit `wanted` über `current` (u. a. `react`,
+  `framer-motion`, `tailwindcss`, `vite`, `vitest`), aber ohne
+  funktionierenden `npm update` bleibt das technisch nicht
+  abschließbar.
+- `dangerouslySetInnerHTML`/`innerHTML`-Zuweisungen codeweit gesucht:
+  0 Treffer außerhalb von Testdateien (dort nur `document.body.innerHTML`
+  zum Testaufbau). Kein Fund.
+- `parseInt(`/`parseFloat(` codeweit gesucht: 0 Treffer im
+  `src`-Baum — keine riskante Zahlkonvertierung ohne Basis/Guard
+  vorhanden, die zu beheben wäre.
+- `saveStoredChat`/`loadStoredChat`/`clearStoredChat` in
+  `tripStorage.ts` erneut einzeln gegen Quota-/Private-Browsing-Fehler
+  geprüft: alle drei bereits in `try`/`catch` mit sinnvollem Fallback
+  und (bei den beiden Schreibpfaden) einem für Aufrufer nutzbaren
+  Erfolgs-Rückgabewert. Kein Fund.
+- Demo-Reisedaten (`MeineReisen.tsx`, `Reiseentwuerfe.tsx`: "20. – 27.
+  Dezember 2026", seit dem 128. Lauf wiederholt auf Zeit-Drift
+  geprüft) gegen das heutige Datum (28.11.2026) geprüft: Zeitraum liegt
+  weiterhin vollständig in der Zukunft, kein erneuter Drift.
+- Alle `key={index}`-Stellen (`FlightCard.tsx`, `SearchErrorAlert.tsx`)
+  erneut gegengeprüft: unverändert unkritisch (siehe frühere Läufe,
+  z. B. 23. Lauf) — Listen werden nicht umsortiert/gefiltert, nur
+  komplett neu gerendert.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`) wie oben — unverändert zum 186. Lauf, da keine
+Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
