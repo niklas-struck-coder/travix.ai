@@ -32528,3 +32528,70 @@ Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-28, ca. 00:10 UTC (185. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 184. Lauf, `840eaac`, ca. 23:10 UTC am
+27.11.). `git log it-chef/auto..origin/main` leer — `origin/main`
+unverändert seit `fe1300e` (2026-10-23) vollständig enthalten, kein
+Merge nötig. `npm ci` fehlerfrei, Baseline frisch durchlaufen: `npx tsc
+-b` (0 Fehler), `npm run lint` (0 Fehler), `npx vitest run` (88
+Testdateien, 597 Tests, alle grün), `npm audit` (0 Vulnerabilities) —
+identisch zum Endstand des 184. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte bleiben aus denselben, seit vielen
+Läufen dokumentierten Gründen blockiert (Base44/Auth 2.x, Gemini-
+Zugangsdaten 4.1-4.3, fehlende Item-/Provider-URL-/Kostenfelder in
+`TripDraft` für 6.2/6.6/6.7/7.12, Zug/Bus/Fähre-Datenquelle 5.7,
+Produktentscheidungen Deal-Finder/Premium/Loyalty 8.5-8.9/8.12). Auch
+`ZEITPLAN.md`s "Offene Entscheidungen, die Ni treffen muss" und die
+Marketing-/Support-Sprints unverändert — nichts davon fällt in den
+Programmierungs-Bereich.
+
+Zusätzliche eigene Stichprobe mit bisher nicht dokumentierten
+Schwerpunkten:
+- `target="_blank"` codeweit gesucht (fehlendes `rel="noopener
+  noreferrer"` wäre ein Reverse-Tabnabbing-Risiko): 0 Treffer in `src`.
+  Kein Fund.
+- `console.log`/`console.debug`/`console.warn` codeweit gesucht
+  (versehentlich stehengelassene Debug-Ausgaben): 0 Treffer außerhalb
+  von Tests. Kein Fund.
+- `TODO`/`FIXME`/`XXX` codeweit gesucht: einziger Treffer ist der
+  String `'XXXX'` als Test-Fixture in `format.test.ts`, kein echter
+  Marker. Kein Fund.
+- Alle `<img>`-Tags codeweit gesucht: einziges Vorkommen
+  (`HotelCard.tsx:17`) hat bereits ein sinnvolles `alt`. Kein Fund.
+- Alle `size="icon"`-Buttons (reine Icon-Buttons ohne sichtbaren Text)
+  codeweit gesucht und einzeln gegen `aria-label` geprüft — alle 20
+  Treffer über `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`, `Warenkorb.tsx`, `Buchung.tsx`,
+  `Reiseentwuerfe.tsx`, `EditMode.tsx`, `KiChat.tsx`, `ChatInput.tsx`
+  sowie die rohen `<button>`-Elemente in `Sidebar.tsx`/`MobileNav.tsx`
+  haben bereits ein passendes `aria-label`. Kein Fund.
+- Statische `id="..."`-Attribute codeweit gesucht (Risiko doppelter
+  IDs bei mehrfach gerenderten Komponenten): alle Treffer gehören zu
+  Formularen/Wizards, die pro Seite nur einmal gerendert werden
+  (`FlightWizard.tsx`, `HotelWizard.tsx`, `EditMode.tsx`s
+  "neue Aktivität hinzufügen"-Formular, Einstellungsseiten) — kein
+  Kollisionsrisiko. Kein Fund.
+- `eslint.config.js` geprüft: `react-hooks/recommended`-Regeln
+  (inkl. `exhaustive-deps`) sind aktiv, `npm run lint` lief mit 0
+  Fehlern — kein zusätzlicher Hook-Dependency-Fund jenseits dessen,
+  was Lint bereits abdeckt.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`) wie oben — unverändert zum 184. Lauf, da keine
+Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
