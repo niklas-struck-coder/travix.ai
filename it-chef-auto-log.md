@@ -32595,3 +32595,81 @@ Code-Änderung erfolgte.
 
 **Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
 ist Teil desselben Commits).
+
+## 2026-11-28, ca. 01:10 UTC (186. Lauf)
+
+**Vorbereitung:** `it-chef/auto` direkt von `origin/it-chef/auto`
+übernommen (letzter Commit: 185. Lauf, `51472f2`, ca. 00:10 UTC am
+28.11.). `git log it-chef/auto..origin/main` leer — `origin/main`
+vollständig in `it-chef/auto` enthalten, kein Merge nötig. `npm ci`
+fehlerfrei, Baseline frisch durchlaufen: `npx tsc -b` (0 Fehler), `npm
+run lint` (0 Fehler), `npx vitest run` (88 Testdateien, 597 Tests, alle
+grün), `npm audit` (0 Vulnerabilities) — identisch zum Endstand des
+185. Laufs.
+
+**Suche:** `ZEITPLAN.md`/`tasks/tasks-prd-travix-platform.md` erneut
+gegen die vier Sicherheitskriterien durchgesehen — alle verbleibenden
+offenen Programmierungs-Punkte bleiben aus denselben, seit vielen
+Läufen dokumentierten Gründen blockiert (Base44/Auth 2.x, Gemini-
+Zugangsdaten 4.1-4.3, fehlende Item-/Provider-URL-/Kostenfelder in
+`TripDraft` für 6.2/6.6/6.7/7.12, Zug/Bus/Fähre-Datenquelle 5.7,
+Produktentscheidungen Deal-Finder/Premium/Loyalty 8.5-8.9/8.12).
+
+Zusätzliche eigene Stichprobe mit bisher nicht dokumentierten
+Schwerpunkten:
+- Alle `.then(...)`-Aufrufe codeweit gesucht (`useChat.ts`, drei
+  Treffer: `runFlightSearch`, `startEdit`-Unterkunftssuche,
+  `sendMessage`-Unterkunftssuche): jeder hat ein eigenes `.catch()`,
+  das zusätzlich auf eine veraltete `searchGenerationRef` prüft. Kein
+  Fund.
+- Alle `JSON.parse(...)`-Aufrufe codeweit gesucht: einziger Treffer
+  (`tripStorage.ts:17`) bereits in `try`/`catch` mit Fallback auf
+  `null` sowie Feld-für-Feld-Absicherung für fehlende/korrupte
+  Legacy-Daten. Kein Fund.
+- Alle drei Stellen mit eigener `toLocaleDateString`/
+  `toLocaleTimeString`-Formatierung (`format.ts`, `FlightCard.tsx`,
+  `ChatMessage.tsx`) einzeln erneut gegen ungültige/leere Eingaben
+  geprüft: `format.ts`/`FlightCard.tsx` haben bereits einen
+  `Number.isNaN`-Guard; `ChatMessage.tsx`s `formatTime(timestamp:
+  number)` bekommt ihren Wert ausschließlich von `makeMessage()`
+  (`Date.now()`), und `timestamp` ist laut `git log --follow` seit dem
+  allerersten Commit ein Pflichtfeld in `ChatMessage` — kein über die
+  App selbst erreichbarer Fall ohne gültigen Zeitstempel, also wie
+  `formatEuro()` in früheren Läufen reine Spekulation über nicht
+  existierende Eingabedaten statt ein objektiv prüfbarer Bug. Kein
+  neuer Fund.
+- Jedes `<DialogContent>`-Vorkommen (9 Stellen über `EditMode.tsx`,
+  `KiChat.tsx`, `Favoriten.tsx`, `Preisalarme.tsx`, `Angebote.tsx`,
+  `Aktivitaeten.tsx`, `Buchung.tsx`, `Reiseentwuerfe.tsx`,
+  `Warenkorb.tsx`) einzeln auf eine zugehörige `DialogDescription`
+  geprüft (Radix verlangt sie für eine korrekte `aria-describedby`-
+  Verknüpfung) — alle neun haben bereits eine. Kein Fund.
+- Alle `htmlFor="..."`-Werte gegen die passenden `id="..."`-Attribute
+  im selben File abgeglichen (16 Label/Input-Paare über
+  `FlightWizard.tsx`, `HotelWizard.tsx`, `EditMode.tsx`,
+  `Einstellungen.tsx`, `Profil.tsx`): keine Abweichung. Ebenso beide
+  `aria-describedby`-Referenzen in `FlightWizard.tsx` gegen das
+  referenzierte `id` geprüft: passt. Kein Fund.
+- Hex-Farbwerte codeweit gesucht: einzige Treffer sind die drei
+  Markenfarben in `src/lib/design-tokens.ts` selbst — keine an anderer
+  Stelle hartkodierte Farbe außerhalb der Tokens (siehe
+  `MARKENDESIGN.md`). Kein Fund.
+- `window.open`/`target="_blank"` sowie `autoComplete`-Attribute
+  codeweit gesucht: 0 Treffer in `src` — kein Tabnabbing-Risiko, keine
+  fehlende Autofill-Steuerung vorhanden, die zu beheben wäre.
+- `index.html`/`public/favicon.svg` gegeneinander geprüft: Icon-Pfad
+  stimmt, kein erneuter Fund wie am 82. Lauf.
+
+Kein neuer Fund, der alle vier Kriterien erfüllt.
+
+**Ergebnis:** Kein neuer sicherer Punkt für einen autonomen Lauf
+gefunden. Keine Code-Änderung außer diesem Log-Eintrag.
+
+**Geprüft:** Baseline (`npx tsc -b`, `npm run lint`, `npx vitest run`,
+`npm audit`) wie oben — unverändert zum 185. Lauf, da keine
+Code-Änderung erfolgte.
+
+**Checkbox aktualisiert:** keine (keine Code-Änderung).
+
+**Commit:** siehe Git-Historie auf `it-chef/auto` (dieser Log-Eintrag
+ist Teil desselben Commits).
